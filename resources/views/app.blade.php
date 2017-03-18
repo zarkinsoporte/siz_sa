@@ -11,13 +11,16 @@
     <title>{{ 'Fusion Confort' }}</title>
 
     <!-- Styles -->
-
+    <!-- Material Design fonts -->
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 {!! Html::style('assets/css/bootstrap.css') !!}
-{!! Html::style('assets/css/bootstrap-material-design.css') !!}
+{!! Html::style('assets/css/myMaterial-design.css') !!}
 {!! Html::style('assets/css/ripples.css') !!}
 {!! Html::style('assets/css/font-awesome.css') !!}
 {!! Html::style('assets/css/zarkin.css') !!}
+{!! Html::style('assets/css/palette.css') !!}
 
     <!-- Scripts -->
     <script>
