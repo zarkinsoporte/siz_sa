@@ -19,6 +19,19 @@ Route::get('orden/{code}', function ($code) {
     return $orden->U_DocEntry;
 });
 
+route::get('setpassword', function (){
+    try {
+        $password = Hash::make('1234');
+        DB::table('dbo.OHEM')
+            ->where('U_EmpGiro', 246 )
+            ->update(['U_CP_Password' => $password]);
+    } catch(\Exception $e) {
+        echo  $e->getMessage();
+    }
+
+    echo 'hecho';
+});
+
 Route::get('/home', 'HomeController@index');
 
 Route::get('auth/login', 'Auth\AuthController@getLogin');
@@ -27,5 +40,5 @@ Route::get('auth/logout', ['as' => 'auth/logout', 'uses' => 'Auth\AuthController
 
 Route::post('cambio.password',   'AdminController@cambiopassword');
 
-Route::get('Admin',['as' => 'Admin', 'uses' => 'AdminController@index']);
-Route::get('users',['as' => 'users', 'uses' => 'AdminController@allUsers']);
+Route::get('MOD00-ADMINISTRADOR',['as' => 'MOD00-ADMINISTRADOR', 'uses' => 'AdminController@index']);
+Route::get('USUARIOS',['as' => 'USUARIOS', 'uses' => 'AdminController@allUsers']);

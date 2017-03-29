@@ -1,10 +1,9 @@
-@extends('app')
+@extends('Sistemas.admin')
 
-@section('content')
-    <div class="container">
-        <div class="row">
+@section('subcontent-01')
 
-           <div class="col-md-10 col-md-offset-1">
+           <div class="row">
+
                @if (count($errors) > 0)
                    <div class="alert alert-danger text-center" role="alert">
                        @foreach($errors->getMessages() as $this_error)
@@ -19,7 +18,7 @@
                    </div>
                @endif
 
-               {!! Form::open(['route' => 'users', 'method' => 'GET', 'class' => 'navbar-form navbar-left pull-right', 'role' => 'search']) !!}
+               {!! Form::open(['route' => 'USUARIOS', 'method' => 'GET', 'class' => 'navbar-form navbar-left pull-right', 'role' => 'search']) !!}
 
                    <div class="form-group">
                        {!! Form::text('name', null, ['class' => 'form-control', 'placeholder' => 'Nombre de Usuario']) !!}
@@ -27,51 +26,44 @@
                    <button type="submit" class="btn btn-primary">Buscar</button>
                {!! Form::close() !!}
 
+
            </div>
 
-            <div class="col-md-10 col-md-offset-1">
-
-                    <div class="panel-body">
-                        <div class="panel panel-default">
-
-                            <!-- Default panel contents -->
-                            <div class="panel-heading">Usuarios Registrados
-
-                            </div>
-
+            <div class="row">
+                             <h4>Usuarios Activos</h4>
                             <!-- Table -->
-                            <table id="usuarios" class="table table-striped table-bordered">
+                            <table id="usuarios" class="table table-striped table-bordered  " style="overflow-x:auto">
                                 <thead>
                                 <tr>
+                                    <th>Reset</th>
                                     <th># Empleado</th>
                                     <th># Nómina</th>
                                     <th>Nombre</th>
                                     <th>Apellido</th>
                                     <th>Puesto</th>
                                     <th>Estaciones</th>
-                                    <th>Password</th>
                                 </tr>
                                 </thead>
                                 @foreach ($users as $o)
                                 <tr>
+                                    <td align="center">  <button type="button" class="btn btn-default" data-toggle="modal" data-target="#mymodal" data-whatever="{{$o->U_EmpGiro}}">
+                                            <i class="fa fa-unlock" aria-hidden="true"></i>
+                                        </button>
+                                    </td>
                                     <td> {{$o->empID}} </td>
                                     <td> {{$o->U_EmpGiro}} </td>
                                     <td> {{$o->firstName}} </td>
                                     <td> {{$o->lastName}} </td>
                                     <td> {{$o->jobTitle}} </td>
                                     <td> {{$o->U_CP_CT}} </td>
-                                    <td align="center">  <button type="button" class="btn btn-default" data-toggle="modal" data-target="#mymodal" data-whatever="{{$o->empID}}">
-                                            <i class="fa fa-unlock" aria-hidden="true"></i>
-                                        </button>
-                                    </td>
                                 </tr>
                                 @endforeach
 
                             </table>
-                </div>
 
-            </div>
-                <div align="center"> {!! $users->render() !!} </div>
+                        <div align="center"> {!! $users->render() !!} </div>
+
+
 
 
                 <!-- Modal -->
@@ -122,7 +114,7 @@
                 </script>
 
         </div>
-    </div>
+
 
 
 @endsection

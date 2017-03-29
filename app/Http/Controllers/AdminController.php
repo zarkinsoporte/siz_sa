@@ -33,7 +33,7 @@ class AdminController extends Controller
     {
         $users = User::name($request->get('name'))->where('jobTitle', '<>' , 'Z BAJA')->where('status', '1')
             ->orderBy('firstName', 'asc')
-            ->paginate(20);
+            ->paginate(10);
         return view('Sistemas.usuarios', ['users' => $users]);
     }
 
