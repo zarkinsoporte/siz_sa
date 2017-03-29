@@ -42,6 +42,13 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $e)
     {
+
+        if(get_class($e) == 'Illuminate\Session\TokenMismatchException'){
+            return redirect()
+                ->back()
+                ->withInput($request->except('_token'))
+                ->withMessage('Your explanation message depending on how much you want to dumb it down, lol! ');
+        }
         if ($e instanceof ModelNotFoundException) {
             $e = new NotFoundHttpException($e->getMessage(), $e);
         }

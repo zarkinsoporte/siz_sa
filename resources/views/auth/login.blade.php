@@ -7,8 +7,6 @@
 {!! Html::style('assets/css/myMaterial-design.css') !!}
 {!! Html::style('assets/css/ripples.css') !!}
 {!! Html::style('assets/css/font-awesome.css') !!}
-{!! Html::style('assets/css/zarkin.css') !!}
-{!! Html::style('assets/css/palette.css') !!}
 {!! Html::style('assets/css/site_global.css?crc=443350757.css') !!}
 {!! Html::style('assets/css/index.css?crc=3185328.css') !!}
 
@@ -44,8 +42,12 @@
     </div>
     <div class="row" ><!-- column -->
         <p align="center"  ><!-- svg -->
-            <img class="svg" id="u196" src="/siz/public/images/svg-pegado-150982x45.svg?crc=108988733" alt="" data-mu-svgfallback="/siz/public/images/svg%20pegado%20150982x45_poster_.png?crc=4279418901" width="200" height="200"/>
-        <p style="margin-top: 10%" align="center"><!-- none box -->
+            <img class="svg hidden-xs" id="u196" src="/siz/public/images/svg-pegado-150982x45.svg?crc=108988733" alt="" data-mu-svgfallback="/siz/public/images/svg%20pegado%20150982x45_poster_.png?crc=4279418901" width="200" height="200"
+           />
+            <img class="svg visible-xs" id="u196" src="/siz/public/images/svg-pegado-150982x45.svg?crc=108988733" alt="" data-mu-svgfallback="/siz/public/images/svg%20pegado%20150982x45_poster_.png?crc=4279418901" width="200" height="200"
+            style="margin-top: -30%"/>
+
+        <p style="margin-top: 5%" align="center"><!-- none box -->
             &nbsp;
 
             <img class="hidden-xs"  alt="Bienvenido" src="/siz/public/images/u343-4.png?crc=3974843000" style="height: 7%"/><!-- rasterized frame -->

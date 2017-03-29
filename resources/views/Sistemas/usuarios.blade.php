@@ -18,12 +18,16 @@
                    </div>
                @endif
 
-               {!! Form::open(['route' => 'USUARIOS', 'method' => 'GET', 'class' => 'navbar-form navbar-left pull-right', 'role' => 'search']) !!}
+               {!! Form::open(['route' => 'USUARIOS', 'method' => 'GET', 'class' => 'navbar-form navbar-left pull-right col-xs-12', 'role' => 'search']) !!}
 
                    <div class="form-group">
                        {!! Form::text('name', null, ['class' => 'form-control', 'placeholder' => 'Nombre de Usuario']) !!}
+
                    </div>
-                   <button type="submit" class="btn btn-primary">Buscar</button>
+                   <div class="form-group">
+                       <button type="submit" class="btn btn-primary col-xs-12">Buscar</button>
+                   </div>
+
                {!! Form::close() !!}
 
 
@@ -32,34 +36,35 @@
             <div class="row">
                              <h4>Usuarios Activos</h4>
                             <!-- Table -->
-                            <table id="usuarios" class="table table-striped table-bordered  " style="overflow-x:auto">
-                                <thead>
-                                <tr>
-                                    <th>Reset</th>
-                                    <th># Empleado</th>
-                                    <th># Nómina</th>
-                                    <th>Nombre</th>
-                                    <th>Apellido</th>
-                                    <th>Puesto</th>
-                                    <th>Estaciones</th>
-                                </tr>
-                                </thead>
-                                @foreach ($users as $o)
-                                <tr>
-                                    <td align="center">  <button type="button" class="btn btn-default" data-toggle="modal" data-target="#mymodal" data-whatever="{{$o->U_EmpGiro}}">
-                                            <i class="fa fa-unlock" aria-hidden="true"></i>
-                                        </button>
-                                    </td>
-                                    <td> {{$o->empID}} </td>
-                                    <td> {{$o->U_EmpGiro}} </td>
-                                    <td> {{$o->firstName}} </td>
-                                    <td> {{$o->lastName}} </td>
-                                    <td> {{$o->jobTitle}} </td>
-                                    <td> {{$o->U_CP_CT}} </td>
-                                </tr>
-                                @endforeach
+                <div style="overflow-x:auto"> <table id="usuarios" class="table table-striped table-bordered">
+                        <thead>
+                        <tr>
+                            <th>Reset</th>
+                            <th># Empleado</th>
+                            <th># Nómina</th>
+                            <th>Nombre</th>
+                            <th>Apellido</th>
+                            <th>Puesto</th>
+                            <th>Estaciones</th>
+                        </tr>
+                        </thead>
+                        @foreach ($users as $o)
+                            <tr>
+                                <td align="center">  <button type="button" class="btn btn-default" data-toggle="modal" data-target="#mymodal" data-whatever="{{$o->U_EmpGiro}}">
+                                        <i class="fa fa-unlock" aria-hidden="true"></i>
+                                    </button>
+                                </td>
+                                <td> {{$o->empID}} </td>
+                                <td> {{$o->U_EmpGiro}} </td>
+                                <td> {{$o->firstName}} </td>
+                                <td> {{$o->lastName}} </td>
+                                <td> {{$o->jobTitle}} </td>
+                                <td> {{$o->U_CP_CT}} </td>
+                            </tr>
+                        @endforeach
 
-                            </table>
+                    </table></div>
+
 
                         <div align="center"> {!! $users->render() !!} </div>
 

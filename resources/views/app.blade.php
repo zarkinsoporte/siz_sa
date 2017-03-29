@@ -16,12 +16,9 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 {!! Html::style('assets/css/bootstrap.css') !!}
-{!! Html::style('assets/css/myMaterial-design.css') !!}
-{!! Html::style('assets/css/ripples.css') !!}
 {!! Html::style('assets/css/font-awesome.css') !!}
+{!! Html::style('assets/css/sb-admin.css') !!}
 {!! Html::style('assets/css/zarkin.css') !!}
-{!! Html::style('assets/css/palette.css') !!}
-
     <!-- Scripts -->
     <script>
         window.Laravel = {!! json_encode([
@@ -31,72 +28,82 @@
 </head>
 <body>
     <div id="app">
-        <nav class="navbar navbar-default navbar-static-top">
-            <div class="container-fluid  col-md-offset-1 col-md-10">
-                <div class="navbar-header">
+        <div id="wrapper">
 
-                    <!-- Collapsed Hamburger -->
-                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#app-navbar-collapse">
-                        <span class="sr-only">Toggle Navigation</span>
+            <!-- Navigation -->
+            <nav class="navbar navbar-inverse navbar-fixed-top"  style="background-color: #3a3327;" role="navigation">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                        <span class="sr-only">Toggle navigation</span>
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
 
-                    <!-- Branding Image -->
-                    <a class="navbar-brand" href="{{ url('/') }}">
-
-                        <div >
-                            <img src="{{ asset('/images/zain.jpg') }}" width="25" height="25">
-                            {{'Fusion Confort'}}
-                        </div>
-
+                    <a class="navbar-brand" href="#" style="color: white">
+                      <div  style=" display: inline-block;
+    padding: 0px 8px;
+    height: 28px;
+    font-size: 18px;
+    line-height: 28px;
+    border-radius: 35px;
+    background-color: #f1f1f1;" ><img src="{{ asset('/images/zain_b.png') }}" width="12px" height="23px" ></div>
+                       &nbsp; SIZ
                     </a>
                 </div>
+                <!-- Top Menu Items -->
+                <ul class="nav navbar-right top-nav hidden-xs">
 
-                <div class="collapse navbar-collapse" id="app-navbar-collapse">
-                    <!-- Left Side Of Navbar -->
-                    <ul class="nav navbar-nav">
-                        &nbsp;
-                    </ul>
+                    <li class="dropdown">
 
-                    <!-- Right Side Of Navbar -->
-                    <ul class="nav navbar-nav navbar-right">
-                        <!-- Authentication Links -->
-                        @if (Auth::guest())
-                            <li><a href="{{ url('/auth/login') }}">Login</a></li>
-                         <!--  <li><a href="url('/register') ">Register</a></li>  -->
-                        @else
+                    @if (Auth::guest())
+                     <a href="{{ url('/auth/login') }}" style="color: white">Login</a>
+                        <!--  <li><a href="url('/register') ">Register</a></li>  -->
+                    @else
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="color: white"><i class="fa fa-user"></i>
+                                &nbsp;{{ Auth::user()->firstName.' '.Auth::user()->lastName }} &nbsp;
+                                <b class="caret"></b></a>
 
-                            <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Usuario: {{ Auth::user()->firstName }} &nbsp; <span class="caret"></span></a>
-                                <ul class="dropdown-menu" role="menu">
-                                    <li><a href="{!! url('/auth/logout') !!}">Cerrar Sesión</a></li>
-                                </ul>
+
+
+
+
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="#"><i class="fa fa-fw fa-gear"></i> Configuración</a>
                             </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a href="{!! url('/auth/logout') !!}"><i class="fa fa-fw fa-power-off"></i> Cerrar Sesión</a>
+                            </li>
+                        </ul>
+                    </li>
+                    @endif
+                </ul>
+            @yield('content')
 
-                        @endif
-                    </ul>
-                </div>
-            </div>
-        </nav>
+        <!-- jQuery -->
+        <script src="js/jquery.js"></script>
 
-        @yield('content')
-    </div>
-
-    <!-- Scripts -->
-    {!! Html::script('assets/js/jquery.min.js') !!}
-    {!! Html::script('assets/js/bootstrap.js') !!}
-    {!! Html::script('assets/js/material.js') !!}
-    {!! Html::script('assets/js/ripples.js') !!}
-    <script>
-        $(document).ready(function (event) {
-
-            $.material.init();
-        });
+        <!-- Bootstrap Core JavaScript -->
+        <script src="js/bootstrap.min.js"></script>
 
 
-    </script>
 
 </body>
+
+<!-- Scripts -->
+{!! Html::script('assets/js/jquery.min.js') !!}
+{!! Html::script('assets/js/bootstrap.js') !!}
+{!! Html::script('assets/js/material.js') !!}
+{!! Html::script('assets/js/ripples.js') !!}
+<script>
+    $(document).ready(function (event) {
+
+        $.material.init();
+    });
+
+
+</script>
 </html>

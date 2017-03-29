@@ -1,78 +1,59 @@
 @extends('app')
 
 @section('content')
-<div class="container-fluid col-md-offset-1 col-md-10">
-    <div>
+    <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
+    <div class="collapse navbar-collapse navbar-ex1-collapse">
+        <ul class="nav navbar-nav side-nav">
 
+            <li>
+                <a href="javascript:;" data-toggle="collapse" data-target="#demo">{{Route::current()->getName()}}<i class="fa fa-fw fa-caret-down"></i></a>
+                <ul id="demo" class="">
 
-        <div id="wrapper">
-
-            <!-- /. NAV TOP  -->
-            <nav class="navbar-default navbar-side" role="navigation">
-                <div class="sidebar-collapse">
-                    <ul class="nav" id="main-menu">
-
-                        <li class="active-link">
-                            <a href="{!! url('home') !!}"><i class="fa fa-circle-o-notch"></i>&nbsp; Administrador &nbsp;<span class="badge">1</span></a>
+                        <li>
+                            <a href="{!! url('USUARIOS') !!}"><i class="fa fa-fw fa-users"></i> Usuarios</a>
                         </li>
 
-                    </ul>
-                </div>
+                </ul>
+            </li>
+            @include('partials.section-navbar')
+        </ul>
+    </div>
+    <!-- /.navbar-collapse -->
+    </nav>
 
-            </nav>
-            <!-- /. NAV SIDE  -->
-            <div id="page-wrapper" >
-                <div id="page-inner">
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <h4>MODULO ADMINISTRADOR</h4>
-                        </div>
-                    </div>
-                    <!-- /. ROW
-                     <hr />
-                   <div class="row">
-                       <div class="col-lg-12 ">
-                           <div class="alert alert-info">
-                                <strong>Welcome Jhon Doe ! </strong> You Have No pending Task For Today.
-                           </div>
+    <div id="page-wrapper2">
 
-                       </div>
-                       </div>
-                     <!-- /. ROW  -->
-                    <div class="row text-center pad-top">
+        <div class="container-fluid" >
 
-
-
-
-
-                        <div class="col-xs-6 col-md-2">
-
-                            <a href="{!! url('users') !!}" class="thumbnail" style="color: darkgray">
-                                <i class="fa fa-users fa-3x" style="margin-top: 10px" ></i>
-                                <h4>Usuarios</h4>
-                            </a>
-
-                        </div>
-
-
-                    </div>
-                    <!-- /. ROW  -->
-
-
-                    <!-- /. PAGE INNER  -->
-                </div>
-                <!-- /. PAGE WRAPPER  -->
-            </div>
-            <div class="footer">
-
-
-                <div class="row">
-                    <div class="col-lg-12" >
-
-                    </div>
+            <!-- Page Heading -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <h3 class="page-header">
+                        {{Route::current()->getName()}}
+                    </h3>
+                    <ol class="breadcrumb">
+                        <li>
+                            <i class="fa fa-dashboard"></i>  <a href="{!! url('home') !!}">ACTIVIDADES</a>
+                        </li>
+                        <li class="active">
+                            <i class="fa fa-file"></i> {{Route::current()->getName()}}
+                        </li>
+                    </ol>
                 </div>
             </div>
+            <!-- /.row -->
+         <div class="container">
+             @yield('subcontent-01')
+         </div>
 
 
-</div> <!-- cierra row-->
+
+        </div>
+        <!-- /.container-fluid -->
+
+    </div>
+    <!-- /#page-wrapper -->
+    </div>
+    </div>
+    <!-- /#wrapper -->
 @endsection
