@@ -223,3 +223,26 @@ ul.alert-dropdown {
 .panel-yellow > a:hover {
     color: #df8a13;
 }
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.side-nav>li>ul>li>ul>li>a {
+    display: block;
+    color: #e8e8e8;
+    padding: 8px 26px 0% 25%;
+    text-decoration: none;
+}
+
+/* Change the link color on hover */
+.side-nav>li>ul>li>ul>li>a:hover {
+    background-color: #555;
+    color: white;
+}
+
+.modal-body {
+    
+}

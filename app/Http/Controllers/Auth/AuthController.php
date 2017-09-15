@@ -75,6 +75,7 @@ class AuthController extends Controller
         try {
             if (Auth::attempt(['U_EmpGiro' => $request->get('id'), 'password'   => $request->get('password'), 'status' => 1])) {
                 //dd($request->all());
+
                 return redirect()->intended('home');
 
             }else{

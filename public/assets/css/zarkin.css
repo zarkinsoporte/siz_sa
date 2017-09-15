@@ -25,3 +25,18 @@ body {
         padding-bottom: 40px;
     }}
 
+.dataTables_filter{
+    width: 50%;
+    float: right;
+    margin-bottom: 10px;
+}
+.dataTables_filter label{
+    float: right;
+}
+.dataTables_filter label input{
+    width: 300px;
+    display: inline;
+    margin-left: 10px;
+    background-color: #0000FF;
+    color: #0fb2fc;
+}

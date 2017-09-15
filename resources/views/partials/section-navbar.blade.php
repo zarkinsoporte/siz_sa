@@ -1,5 +1,13 @@
 <li class="hidden-md hidden-lg hidden-sm">
-    <a href="javascript:;" data-toggle="collapse" data-target="#usuario"><i class="fa fa-fw fa-user"></i> {{ Auth::user()->firstName.' '.Auth::user()->lastName }}<i class="fa fa-fw fa-caret-down"></i></a>
+    <a href="javascript:;" data-toggle="collapse" data-target="#usuario"><i class="fa fa-fw fa-user"></i>
+
+        @if ( Auth::check())
+            {{ Auth::user()->firstName.' '.Auth::user()->lastName }}
+        @else
+            Invitado
+        @endif
+        <i class="fa fa-fw fa-caret-down">
+       </i></a>
     <ul id="usuario" class="">
         <li>
             <a href="#"><i class="fa fa-fw fa-gear"></i> Configuración</a>

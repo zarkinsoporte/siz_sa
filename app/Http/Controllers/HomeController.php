@@ -8,6 +8,8 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use Auth;
 use DB;
+use App\User;
+
 class HomeController extends Controller
 {
     public function __construct()
@@ -22,13 +24,10 @@ class HomeController extends Controller
      */
     public function index()
     {
-            $actividades = DB::table('OHEM')
-                ->leftJoin('HEM6', 'OHEM.empID', '=', 'HEM6.empID')
-                ->join('OHTY', 'HEM6.roleID', '=', 'OHTY.typeID')
-                ->where('U_EmpGiro', Auth::user()->U_EmpGiro)
-                ->lists('name');
+        $user = Auth::user();
+        $actividades = $user->getTareas();
 
-            return view('home',  ['actividades' => $actividades]);
+            return view('homeIndex',  ['actividades' => $actividades, 'ultimo' => count($actividades)]);
     }
 
     /**
