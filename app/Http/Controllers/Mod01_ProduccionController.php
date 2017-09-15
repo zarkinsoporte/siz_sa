@@ -99,14 +99,20 @@ class Mod01_ProduccionController extends Controller
         return redirect()->back();
     }
 
-    public function traslados(){
-
+    public function traslados(Request $request)
+    {
+        $enviado = $request->input('send');
 
         if (Auth::check()){
             $user = Auth::user();
             $actividades = $user->getTareas();
 
-
+        if  ($enviado == 'send')
+        {
+            Session::flash('usertraslados', true);
+        }else{
+            Session::flash('usertraslados', false);
+        }
 
 
             return view('Mod01_Produccion.traslados', ['actividades' => $actividades, 'ultimo' => count($actividades)]);
@@ -116,8 +122,4 @@ class Mod01_ProduccionController extends Controller
 
     }
 
-    public function usuariotraslados(){
-
-      echo 'pass';
-
-    }}
+}

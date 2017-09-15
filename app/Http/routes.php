@@ -98,7 +98,7 @@ Route::get('switch', function (){
 });
 
 Route::post('nuevatarea', 'Mod00_AdministradorController@nuevatarea');
-Route::post('usuariotraslados', 'Mod01_ProduccionController@usuariotraslados');
+
 
 
 /*
@@ -107,3 +107,4 @@ Route::post('usuariotraslados', 'Mod01_ProduccionController@usuariotraslados');
 |--------------------------------------------------------------------------
 */
 Route::get('home/TRASLADO ÷ AREAS', 'Mod01_ProduccionController@traslados');
+Route::post('home/usuariotraslados', 'Mod01_ProduccionController@traslados');

@@ -25,7 +25,12 @@
                 <div class="col-md-12 ">
                     @include('partials.alertas')
 
+                    @if(Session::has('usertraslados'))
+                        <div id="login" data-field-id="{{Session::get('usertraslados') }}" >
+                            {{Session::get('usertraslados') }}
+                        </div>
 
+                    @endif
 
                 </div>
             </div>
@@ -40,13 +45,10 @@
 
                             <h4 class="modal-title" id="pwModalLabel">Login</h4>
                         </div>
-                        {!! Form::open(['url' => 'usuariotraslados', 'method' => 'POST']) !!}
+                        {!! Form::open(['url' => 'home/usuariotraslados', 'method' => 'POST']) !!}
                         <div class="modal-body image">
 
-
-
-                            <input type="text" hidden name="modulo" value="">
-
+                            <input type="text" hidden name="send" value="send">
 
                             <br>
                             <div class="row">
@@ -60,6 +62,7 @@
                                         <input id="miusuario" type="text" class="form-control" name="usuario" minlength="3" maxlength="5">
                                         <br>
                                     </div>
+
                                     <label for="name" class="control-label">Contraseña:</label>
                                     <input id="pass" type="password" class="form-control" name="pass" required minlength="3" maxlength="10">
                                 </div>
@@ -85,14 +88,19 @@
 @endsection
 
 @section('homescript')
-    $('#pass').modal(
-    {
-     show: true,
-     backdrop: 'static',
-     keyboard: false
-    }
-    );
 
+
+    var myuser = $('#login').data("field-id");
+
+    if(myuser == false){
+            $('#pass').modal(
+            {
+                    show: true,
+                    backdrop: 'static',
+                    keyboard: false
+            }
+            );
+    }
 
 
 @endsection
