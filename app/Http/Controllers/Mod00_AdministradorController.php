@@ -205,21 +205,35 @@ dd($user);
                 $tarea->id_tarea = $id_tarea;
                 $tarea->save();
             }else{
-                $modulo = new MODULOS_GRUPO_SIZ();
-                $modulo->id_grupo = $id_grupo;
-                $modulo->id_modulo = $id_modulo;
-                $modulo->id_menu = $id_menu;
-                $modulo->id_tarea = $id_tarea;
-                $modulo->save();
-            }
+                $nueva_tarea = MODULOS_GRUPO_SIZ::where('id_grupo',$id_grupo)
+                    ->where('id_modulo', $id_modulo)
+                    ->where('id_menu', $id_menu)
+                    ->where('id_tarea', $id_tarea)
+                    ->first();
+                  //dd(count($tarea));
+                if  (count($nueva_tarea) == 1){
+                    return redirect()->back()->withErrors(array('message' => 'La tarea ya existe.'));
+                }else{
+                    $modulo = new MODULOS_GRUPO_SIZ();
+                    $modulo->id_grupo = $id_grupo;
+                    $modulo->id_modulo = $id_modulo;
+                    $modulo->id_menu = $id_menu;
+                    $modulo->id_tarea = $id_tarea;
+                    $modulo->save();
+                }
+                }
+
 
         }elseif (count($tarea) > 1){
             $nueva_tarea = MODULOS_GRUPO_SIZ::where('id_grupo',$id_grupo)
                 ->where('id_modulo', $id_modulo)
-                ->where('id_menu', $id_modulo)
-                ->where('id_tarea', $id_modulo)
+                ->where('id_menu', $id_menu)
+                ->where('id_tarea', $id_tarea)
                 ->first();
-            if ($nueva_tarea == null or count($nueva_tarea) == 0){
+           // dd(count($tarea));
+            if  (count($nueva_tarea) == 1){
+                return redirect()->back()->withErrors(array('message' => 'La tarea ya existe.'));
+            }else{
                 $modulo = new MODULOS_GRUPO_SIZ();
                 $modulo->id_grupo = $id_grupo;
                 $modulo->id_modulo = $id_modulo;

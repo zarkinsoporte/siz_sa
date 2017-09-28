@@ -96,4 +96,8 @@ class User extends Model implements AuthenticatableContract,
         return $actividades;
     }
 
+    public static function getEstaciones($id){
+
+    }
+
 }

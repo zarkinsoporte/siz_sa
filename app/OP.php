@@ -7,7 +7,7 @@ use DB;
 class OP extends Model
 {
     protected $table = 'dbo.@CP_OF';
-    protected $primaryKey = 'U_DocEntry';
+    protected $primaryKey = 'Code';
     public $timestamps = false;
 
 
@@ -21,17 +21,70 @@ class OP extends Model
    }
 
    public static function getStatus($docEntry){
-        return $order = OP::find($docEntry);
+    /*   select	OWOR.docentry, [@CP_OF].Code,
+            [@CP_OF].U_CT, [@CP_OF].U_Orden,
+            OWOR.Status, OriginNum,
+            OITM.ItemName,[@CP_OF].U_Reproceso,
+            OWOR.PlannedQty,[@CP_OF].U_Recibido,
+            [@CP_OF].U_Procesado
+        from OWOR
+            left join OITM on OITM.ItemCode = OWOR.ItemCode
+            left join [@CP_OF] on [@CP_OF].U_DocEntry = OWOR.DocEntry
+        where OWOR.DocEntry = '70516'*/
+
+       $order =  DB::table('OWOR')
+           ->join('@CP_OF', '@CP_OF.U_DocEntry','=', 'OWOR.DocEntry')
+           ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
+           ->leftJoin('@PL_RUTAS', '@PL_RUTAS.U_Orden','=', '@CP_OF.U_Orden')
+           ->select('OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_CT',
+                    '@CP_OF.U_Orden','OWOR.Status', 'OWOR.OriginNum',
+                    'OITM.ItemName', '@CP_OF.U_Reproceso', 'OWOR.PlannedQty',
+                    '@CP_OF.U_Recibido', '@CP_OF.U_Procesado')
+           ->where('OWOR.DocEntry', '70516')->get();
+
+
+        return $order;
    }
 
-   public static function getEstacionSiguiente ($docEntry){
+   public static function getEstacionSiguiente ($Code){
 
-        $i = 1 +  array_search(OP::find($docEntry)->U_CT, self::getRuta($docEntry));
-
-       $rs = DB::select('select * from [@PL_RUTAS] where U_Orden ='. self::getRuta($docEntry)[$i]);
+//dd();
+        $i = 1 +  array_search(OP::find($Code)->U_CT, self::getRuta(OP::find($Code)->U_DocEntry));
+  //dd($i);
+       if ($i>=count(self::getRuta(OP::find($Code)->U_DocEntry))){
+           $i=$i-1;
+       }
+       $rs = DB::select('select * from [@PL_RUTAS] where U_Orden ='. self::getRuta(OP::find($Code)->U_DocEntry)[$i]);
 
        foreach ($rs as $r) {
-           return $r->Name;
+           return "'".$r->Name."'";
+       }
+   }
+
+   public static function getEstacionActual ($Code){
+
+        $i = array_search(OP::find($Code)->U_CT, self::getRuta(OP::find($Code)->U_DocEntry));
+
+       if ($i>=count(self::getRuta(OP::find($Code)->U_DocEntry))){
+           $i=$i-1;
+       }
+
+       $rs = DB::select('select * from [@PL_RUTAS] where U_Orden ='. self::getRuta(OP::find($Code)->U_DocEntry)[$i]);
+
+       foreach ($rs as $r) {
+           return "'".$r->Name."'";
+       }
+   }
+
+
+   public  static  function avanzarEstacion($Code, $estacionesUsuario){
+       $rutas = explode(",", $estacionesUsuario);
+
+       if (array_search(OP::find($Code)->U_CT, $rutas) !== FALSE)
+       {
+           return "'".'enabled'."'";
+       }else{
+           return "'".'disabled'."'";
        }
    }
 

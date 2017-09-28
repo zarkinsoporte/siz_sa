@@ -13,6 +13,7 @@
 use App\Grupo;
 use App\Modelos\MOD01\TAREA_MENU;
 use App\Modelos\MOD01\MODULOS_GRUPO_SIZ;
+use App\OP;
 Route::get('/','HomeController@index');
 Route::get('/home', 'HomeController@index');
 /*
@@ -40,8 +41,40 @@ Route::get('auth/logout', ['as' => 'auth/logout', 'uses' => 'Auth\AuthController
 Route::get('MOD00-ADMINISTRADOR','Mod00_AdministradorController@index');
 
 Route::get('orden/{code}', function ($code) {
-    $orden = DB::table('@CP_LOGOF')->where('Code', $code)->first();
-    return $orden->U_DocEntry;
+//    $orden = DB::table('@CP_LOGOF')->where('Code', $code)->first();
+//    return $orden->U_DocEntry;
+
+
+
+    $Codes = OP::where('U_DocEntry', '60987' )->get();
+//dd($Codes);
+    $index = 0;
+    foreach ($Codes as $code){
+        $index = $index+1;
+        $order =  DB::table('OWOR')
+            ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
+            ->leftJoin('@CP_OF', '@CP_OF.U_DocEntry','=', 'OWOR.DocEntry')
+            ->select(DB::raw( OP::getEstacionActual($code->Code).' AS U_CT_ACT'), DB::raw( OP::getEstacionSiguiente($code->Code).' AS U_CT_SIG'),
+                'OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden','OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
+                'OWOR.PlannedQty', '@CP_OF.U_Recibido', '@CP_OF.U_Procesado')
+            ->where('@CP_OF.Code', $code->Code)->get();
+        if ($index == 1){
+            $one = DB::table('OWOR')
+                ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
+                ->leftJoin('@CP_OF', '@CP_OF.U_DocEntry','=', 'OWOR.DocEntry')
+                ->select(DB::raw( OP::getEstacionActual($code->Code).' AS U_CT_ACT'), DB::raw( OP::getEstacionSiguiente($code->Code).' AS U_CT_SIG'),
+                    'OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden','OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
+                    'OWOR.PlannedQty', '@CP_OF.U_Recibido', '@CP_OF.U_Procesado')
+                ->where('@CP_OF.Code', $code->Code)->get();
+        }else{
+
+            $one = //array_merge($one, $order) ; //
+            $one->merge($order);
+            //dd($one);
+        }
+    }
+  //  $order = OP::find('492418');
+    return $one;
 });
 
 route::get('setpassword', function (){
@@ -78,10 +111,18 @@ Route::get('admin/grupos/delete_modulo/{id}', 'Mod00_AdministradorController@del
 Route::get('admin/grupos/conf_modulo/{id}', 'Mod00_AdministradorController@confModulo');
 Route::get('admin/grupos/conf_modulo/quitar/{id}', 'Mod00_AdministradorController@deleteTarea');
 
-Route::get('dropdown', function(){
+Route::get('help', function(){
 
-    return TAREA_MENU::where('id_menu_item',Input::get('option'))
-           ->lists('name', 'id');
+    $Code = '337651';
+    $user = \App\User::find('246');
+    $estacionesUsuario = $user->U_CP_CT;
+//dd($estacionesUsuario);
+    $rutas = explode(",", $estacionesUsuario);
+  //dd($rutas);
+
+//dd($i);
+
+
 });
 
 
@@ -107,4 +148,8 @@ Route::post('nuevatarea', 'Mod00_AdministradorController@nuevatarea');
 |--------------------------------------------------------------------------
 */
 Route::get('home/TRASLADO ÷ AREAS', 'Mod01_ProduccionController@traslados');
-Route::post('home/usuariotraslados', 'Mod01_ProduccionController@traslados');
+Route::post('home/TRASLADO ÷ AREAS', 'Mod01_ProduccionController@traslados');
+Route::post('home/TRASLADO ÷ AREAS/{id}', 'Mod01_ProduccionController@getOP');
+Route::post('home/traslados/avanzar', 'Mod01_ProduccionController@avanzarOP');
+
+
