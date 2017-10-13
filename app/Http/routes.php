@@ -12,8 +12,10 @@
 */
 use App\Grupo;
 use App\Modelos\MOD01\TAREA_MENU;
+use App\Modelos\MOD01\LOGOF;
 use App\Modelos\MOD01\MODULOS_GRUPO_SIZ;
 use App\OP;
+use Illuminate\Support\Facades\DB;
 Route::get('/','HomeController@index');
 Route::get('/home', 'HomeController@index');
 /*
@@ -112,17 +114,21 @@ Route::get('admin/grupos/conf_modulo/{id}', 'Mod00_AdministradorController@confM
 Route::get('admin/grupos/conf_modulo/quitar/{id}', 'Mod00_AdministradorController@deleteTarea');
 
 Route::get('help', function(){
+    dd(date('Y-m-d H:i:s'));
+    $index = 1;
+    $log = LOGOF::where('id', 1000)->first();
+   // dd($log);
+//    $newCode = new OP();
+//    $newCode->Code =12121212;
+//    $newCode->save();
+//    $varOP = OP::find(12121212);
+    $consecutivo =  DB::select('SELECT TOP 1 Code FROM  [FUSIONL2].[dbo].[@CP_LOGOF] ORDER BY  U_FechaHora DESC');
+    $consecutivo =  DB::select('SELECT TOP 1 Code FROM  [FUSIONL2].[dbo].[@CP_LOGOT] ORDER BY  U_FechaHora DESC');
 
-    $Code = '337651';
-    $user = \App\User::find('246');
-    $estacionesUsuario = $user->U_CP_CT;
-//dd($estacionesUsuario);
-    $rutas = explode(",", $estacionesUsuario);
-  //dd($rutas);
+    //$consecutivo = ((int)$users->Code);
+echo $consecutivo[0]->Code;
 
-//dd($i);
-
-
+   // echo $log->U_CT;
 });
 
 
@@ -149,6 +155,7 @@ Route::post('nuevatarea', 'Mod00_AdministradorController@nuevatarea');
 */
 Route::get('home/TRASLADO ÷ AREAS', 'Mod01_ProduccionController@traslados');
 Route::post('home/TRASLADO ÷ AREAS', 'Mod01_ProduccionController@traslados');
+Route::get('home/TRASLADO ÷ AREAS/{id}', 'Mod01_ProduccionController@getOP');
 Route::post('home/TRASLADO ÷ AREAS/{id}', 'Mod01_ProduccionController@getOP');
 Route::post('home/traslados/avanzar', 'Mod01_ProduccionController@avanzarOP');
 

@@ -46,7 +46,7 @@ class OP extends Model
         return $order;
    }
 
-   public static function getEstacionSiguiente ($Code){
+   public static function getEstacionSiguiente ($Code, $option){
 
 //dd();
         $i = 1 +  array_search(OP::find($Code)->U_CT, self::getRuta(OP::find($Code)->U_DocEntry));
@@ -57,7 +57,14 @@ class OP extends Model
        $rs = DB::select('select * from [@PL_RUTAS] where U_Orden ='. self::getRuta(OP::find($Code)->U_DocEntry)[$i]);
 
        foreach ($rs as $r) {
-           return "'".$r->Name."'";
+           if ($option == 1){
+               return "'".$r->Name."'";
+           }
+
+           if ($option == 2){
+               return $r->U_Orden;
+           }
+
        }
    }
 

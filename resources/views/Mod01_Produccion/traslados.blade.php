@@ -61,7 +61,7 @@
 
 
                             @if(Session::get('usertraslados') == 2)
-                                {!! Form::open(['url' => 'home/traslados/avanzar/'.$op, 'method' => 'POST']) !!}
+
 
 
                               <div class="col-md-6">
@@ -79,7 +79,7 @@
 
 
 
-                                {!! Form::close() !!}
+
 <div class="row">
                             <div style="overflow-x:auto" class="col-md-12"> <table id="usuarios" class="table table-striped table-bordered table-condensed">
                                     <thead>
@@ -117,7 +117,9 @@
                                             <td> {{$of->U_Procesado}} </td>
                                             <td> {{$of->U_CT_ACT}} </td>
                                             <td> {{$of->U_CT_SIG}} </td>
-                                            <td> <a class="btn btn-success {{$of->avanzar}}" data-toggle="modal" data-target="#cantidad" data-whatever="{{$of->Code}}" data-whatever2="{{$of->U_Recibido - $of->U_Procesado}}">
+                                            <td> <a class="btn btn-success {{$of->avanzar}}" data-toggle="modal"
+                                                    data-target="#cantidad" data-whatever="{{$of->Code}}"
+                                                    data-whatever2="{{$of->U_Recibido - $of->U_Procesado}}">
                                                     <i class="fa fa-send-o" aria-hidden="true">   Avanzar</i>
                                                 </a> </td>
                                         </tr>
@@ -183,7 +185,7 @@
             <!--  cantidadModal -->
             <div class="modal fade" id="cantidad" role="dialog" >
                 <div class="modal-dialog modal-sm" role="document">
-                    {!! Form::open(['url' => 'home/traslados/avanzar/' , 'method' => 'POST']) !!}
+                    {!! Form::open(['url' => 'home/traslados/avanzar/', 'method' => 'POST']) !!}
                     <div class="modal-content" >
 
                         <div class="modal-header" >
@@ -196,6 +198,9 @@
                <div class="row">
                    <div class="col-md-6">
                        <input id="code" name="code" type="text" hidden>
+                       @if(Session::has('usertraslados') && Session::get('usertraslados')>0)
+                          <input id="userId" name="userId" type="text" hidden value="{{$t_user->U_EmpGiro}}">
+                       @endif
                        <input id="numcant" name="numcant" type="text" hidden>
                        <label for="cant" class="control-label">Cantidad:</label>
                        <input id="cant" type="number" class="form-control" name="cant" minlength="3" maxlength="5" min="1" autofocus>
