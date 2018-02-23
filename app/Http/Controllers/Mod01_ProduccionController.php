@@ -120,7 +120,6 @@ class Mod01_ProduccionController extends Controller
                 }
             }
 
-
             if (Hash::check($request->input('pass'), $t_user->U_CP_Password)) {
                 Session::flash('usertraslados', 1);
                 return view('Mod01_Produccion.traslados', ['actividades' => $actividades, 'ultimo' => count($actividades), 't_user' => $t_user]);
@@ -163,10 +162,37 @@ class Mod01_ProduccionController extends Controller
 
 
         $Codes = OP::where('U_DocEntry',$op)->get();
+
         if (count($Codes) > 0){
             $index = 0;
         foreach ($Codes as $code) {
+
+if ($code->U_Recibido > $code->U_Procesado){
+
+
+
+           // dd($code->U_Recibido);
+            if ($code->U_Recibido == '0' && $code->U_Procesado == '0' && $code->U_Entregado == '0'){
+           $cantlogof = DB::table('@CP_LOGOF')
+               ->where('U_DocEntry', $code->U_DocEntry)
+               ->get();
+
+           //dd($cantlogof);
+
+                if (count($cantlogof) == 0){
+                    $CantOrden = DB::table('OWOR')
+                        ->where('DocEntry', $code->U_DocEntry)
+                        ->first();
+
+                   // dd($CantOrden->PlannedQty);
+                    $code->U_Recibido = (int) $CantOrden->PlannedQty;
+                    $code->save();
+                }
+
+            }
+ //dd($code);
             $index = $index + 1;
+
             $order = DB::table('OWOR')
                 ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
                 ->leftJoin('@CP_OF', '@CP_OF.U_DocEntry', '=', 'OWOR.DocEntry')
@@ -191,6 +217,8 @@ class Mod01_ProduccionController extends Controller
                 $one = array_merge($one, $order); //$one->merge($order);
                 //dd($one);
             }
+
+        }
         }
         //  $order = OP::find('492418');
         //return $one;
@@ -239,7 +267,10 @@ class Mod01_ProduccionController extends Controller
                 ->get();
 
             $dt = date('d-m-Y H:i:s');
-
+            $CantOrden = DB::table('OWOR')
+                ->where('DocEntry', $Code_actual->U_DocEntry)
+                ->first();
+            $cantO = (int)$CantOrden->PlannedQty;
             //dd($Code_siguiente);
             if (count($Code_siguiente) == 1){
                 $Code_siguiente =  OP::where('U_CT', $U_CT_siguiente)
@@ -247,7 +278,9 @@ class Mod01_ProduccionController extends Controller
                     ->where('U_Reproceso', 'N')
                     ->first();
                // dd( ($Cant_procesar + $Code_siguiente->U_Recibido) <= (Input::get('numcant')+$Code_actual->U_Procesado));
-                if ( ($Cant_procesar + $Code_siguiente->U_Recibido) <= (Input::get('numcant')+$Code_actual->U_Procesado)){
+
+
+                if ( ($Cant_procesar + $Code_siguiente->U_Recibido) <= $cantO){
 
                     $Code_siguiente->U_Recibido = $Code_siguiente->U_Recibido + $Cant_procesar;
                     $Code_siguiente->save();
@@ -293,7 +326,7 @@ class Mod01_ProduccionController extends Controller
             else{
                 return redirect()->back()->withInput()->withErrors(array('message' => 'Existen registros duplicados en la siguiente estación.'));
             }
-           // dd(count($Code_siguiente));
+            // dd(count($Code_siguiente));
             $Code_actual->U_Procesado = $Code_actual->U_Procesado + $Cant_procesar;
             $Code_actual->U_Entregado = $Code_actual->U_Entregado + $Cant_procesar;
 
@@ -312,8 +345,17 @@ class Mod01_ProduccionController extends Controller
 
             $Code_actual->save();
             $log->save();
+       // dd($cantO);
 
             Session::flash('mensaje', 'El usuario '.$id.' avanzo '.$Cant_procesar.' pza(s) a la estación '.OP::getEstacionSiguiente($Code_actual->Code, 1));
+
+            if ($Code_actual->U_Recibido > 0 && $cantO == $Code_actual->U_Procesado){
+                $lineaActual = OP::find($Code_actual->Code);   //si esta linea ya termino de procesar_todo entonces se borra
+                $lineaActual->delete();
+            }
+
+
+
             return redirect()->back()->withInput();
         }catch (Exception $e){
             return redirect()->back()->withInput()->withErrors(array('message' => 'Error al Guardar la Orden.'));

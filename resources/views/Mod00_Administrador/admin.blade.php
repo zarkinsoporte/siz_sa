@@ -6,12 +6,15 @@
         <ul class="nav navbar-nav side-nav">
 
             <li>
-                <a href="javascript:;" data-toggle="collapse" data-target="#demo"><i class="fa fa-fw fa-caret-down"></i></a>
+                <a href="javascript:;" data-toggle="collapse" data-target="#demo">MOD-Administrador<i class="fa fa-fw fa-caret-down"></i></a>
                 <ul id="demo" class="">
 
                         <li>
-                            <a href="{!! url('admin/grupos/1') !!}"><i class="fa fa-fw fa-users"></i> Grupos</a>
+                            <a href="{!! url('admin/grupos/1') !!}"><i class="fa fa-fw fa-users"></i>   Gestión de Grupos</a>
                         </li>
+                    <li>
+                        <a href="{!! url('admin/users') !!}"><i class="fa fa-fw fa-user"></i> Usuarios SIZ</a>
+                    </li>
 
                 </ul>
             </li>
@@ -41,24 +44,29 @@
             </div>
             <!-- /.row -->
          <div class="container">
+             <div class="row">
+
+                 <div class="col-md-10">
+                     @if (count($errors) > 0)
+                         <div class="alert alert-danger text-center" role="alert">
+                             @foreach($errors->getMessages() as $this_error)
+                                 <strong>¡Lo sentimos!  &nbsp; {{$this_error[0]}}</strong><br>
+                             @endforeach
+                         </div>
+                     @elseif(Session::has('mensaje'))
+                         <div class="row">
+                             <div class="alert alert-success text-center" role="alert">
+                                 {{ Session::get('mensaje') }}
+                             </div>
+                         </div>
+                     @endif
+
+                 </div>
+             </div>
              @yield('subcontent-01')
          </div>
 
-         <div class="row">
-             @if (count($errors) > 0)
-                 <div class="alert alert-danger text-center" role="alert">
-                     @foreach($errors->getMessages() as $this_error)
-                         <strong>¡Lo sentimos!  &nbsp; {{$this_error[0]}}</strong><br>
-                     @endforeach
-                 </div>
-             @elseif(Session::has('mensaje'))
-                 <div class="row">
-                     <div class="alert alert-success text-center" role="alert">
-                         {{ Session::get('mensaje') }}
-                     </div>
-                 </div>
-             @endif
-         </div>
+
 
         </div>
         <!-- /.container-fluid -->
@@ -71,4 +79,12 @@
 
 
     <!-- /#wrapper -->
+@endsection
+
+@section('script')
+
+
+
+
+
 @endsection
