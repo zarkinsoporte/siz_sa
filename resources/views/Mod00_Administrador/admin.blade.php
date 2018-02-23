@@ -15,7 +15,9 @@
                     <li>
                         <a href="{!! url('admin/users') !!}"><i class="fa fa-fw fa-user"></i> Usuarios SIZ</a>
                     </li>
-
+                    <li>
+                        <a href="{!! url('admin/users') !!}"><i class="fa fa-fw fa-user"></i> Gestión de Inventario</a>
+                    </li>
                 </ul>
             </li>
             @include('partials.section-navbar')
