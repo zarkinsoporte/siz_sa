@@ -16,7 +16,7 @@
                         <a href="{!! url('admin/users') !!}"><i class="fa fa-fw fa-user"></i> Usuarios SIZ</a>
                     </li>
                     <li>
-                        <a href="{!! url('admin/inventario') !!}"><i class="fa fa-fw fa-user"></i> Gestión de Inventario</a>
+                        <a href="{!! url('admin/inventario') !!}"><i class="fa fa-archive"></i> Gestión de Inventario</a>
                     </li>
                 </ul>
             </li>
@@ -38,7 +38,13 @@
                     </h3>
                     <ol class="breadcrumb">
                         <li>
-                            <i class="fa fa-dashboard"></i>  <a href="{!! url('home') !!}">ACTIVIDADES</a>
+                            <i class="fa fa-dashboard"></i>  <a href="MOD00-ADMINISTRADOR">INICIO</a>
+                        </li>
+                        <li>
+                            <i class="fa fa-archive"></i>  <a href="inventario">MONITORES</a>
+                        </li>
+                        <li>
+                            <i class="fa fa-archive"></i>  <a href="altaInventario">ALTA MONITORES</a>
                         </li>
 
                     </ol>
@@ -46,26 +52,24 @@
             </div>
             <!-- /.row -->
          <div class="container">
-             <div class="row">
-
-                 <div class="col-md-10">
-                     @if (count($errors) > 0)
-                         <div class="alert alert-danger text-center" role="alert">
-                             @foreach($errors->getMessages() as $this_error)
-                                 <strong>¡Lo sentimos!  &nbsp; {{$this_error[0]}}</strong><br>
-                             @endforeach
-                         </div>
-                     @elseif(Session::has('mensaje'))
-                         <div class="row">
-                             <div class="alert alert-success text-center" role="alert">
-                                 {{ Session::get('mensaje') }}
-                             </div>
-                         </div>
-                     @endif
-
-                 </div>
+         <div class="well">
+            <a href="inventario" class="btn btn-primary">Gestion Inventario</a>
+         </div>
+        <div class="row">
+             {{--este form tiene que enviar la informacion para crear un modulo--}}
+             <div class="col-md-6">
+             {!! Form::open(['url' => 'admin/altaMonitor', 'method' => 'POST']) !!}
+                <div class="form-group">
+                    <label for="exampleFormControlInput1">Nombre Monitor</label>
+                    <input type="text" id="nombre_monitor" name="nombre_monitor" class="form-control" placeholder="Ej. HP LV1911" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+             {!! Form::close() !!} 
              </div>
              @yield('subcontent-01')
+
+
+             TEXT
          </div>
 
 

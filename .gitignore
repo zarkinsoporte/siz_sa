@@ -65,3 +65,12 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+.idea/blade.xml
+.idea/encodings.xml
+.idea/blade.xml
+.idea/encodings.xml
+.idea/siz.iml
+.idea/vcs.xml
+.idea/workspace.xml
+.idea/modules.xml
+.idea/php.xml

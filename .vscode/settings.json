@@ -1,0 +1,21 @@
+{
+    "highlight-matching-tag.leftStyle": {
+        "borderWidth": "0 0 0 2px",
+        "borderStyle": "dotted",
+        "borderColor": "white",
+        "background-color": "white",
+        "borderRadius": "5px"
+      },
+
+      "highlight-matching-tag.rightStyle": {
+        "borderWidth": "0 2px 0 0",
+        "borderStyle": "dotted",
+        "borderColor": "white",
+        "background-color": "white",
+        "borderRadius": "5px"
+      },
+
+      "highlight-matching-tag.style": {
+        "background-color": "white"
+      }
+}

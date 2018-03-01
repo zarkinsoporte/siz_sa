@@ -16,7 +16,7 @@
                         <a href="{!! url('admin/users') !!}"><i class="fa fa-fw fa-user"></i> Usuarios SIZ</a>
                     </li>
                     <li>
-                        <a href="{!! url('admin/inventario') !!}"><i class="fa fa-fw fa-user"></i> Gestión de Inventario</a>
+                        <a href="{!! url('admin/inventario') !!}"><i class="fa fa-archive"></i> Gestión de Inventario</a>
                     </li>
                 </ul>
             </li>
@@ -38,15 +38,47 @@
                     </h3>
                     <ol class="breadcrumb">
                         <li>
-                            <i class="fa fa-dashboard"></i>  <a href="{!! url('home') !!}">ACTIVIDADES</a>
+                            <i class="fa fa-dashboard"></i>  <a href="inventario">INICIO</a>
+                        </li>
+                        <li>
+                            <i class="fa fa-archive"></i>  <a href="inventario">GESTIÓN DE INVENTARIOS</a>
                         </li>
 
                     </ol>
                 </div>
             </div>
             <!-- /.row -->
-         <div class="container">
+         <div class="well">
+            <a href="altaInventario" class="btn btn-primary">Alta Inventario</a>
+            <a href="monitores" class="btn btn-primary">Monitores</a>
+            <a href="inventario" class="btn btn-primary">Inventario Obsoleto</a>
+         </div>
              <div class="row">
+             <div class="col-6">
+             <table class="table table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Nombre Equipo</th>
+                        <th scope="col">Correo</th>
+                        <th scope="col">Número de Equipo</th>
+                        <th scope="col">Tipo de Equipo</th>
+                        <th scope="col">Monitor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach ($inventario as $inventario)
+                        <tr>
+                        <th scope="row">{{ $inventario->id }}</th>
+                        <td>{{ $inventario->nombre_equipo }}</td>
+                        <td>{{ $inventario->correo}}</td>
+                        <td>{{ $inventario->numero_equipo }}</td>
+                        <td>{{ $inventario->tipo_equipo }}</td>
+                        <td>{{ $inventario->nombre_monitor }}</td>
+                        </tr>
+                    @endforeach 
+                    </tbody>
+                </table>
 
                  <div class="col-md-10">
                      @if (count($errors) > 0)
@@ -65,11 +97,10 @@
 
                  </div>
              </div>
+             <div class="col-6">
+             </div>
+             </div>
              @yield('subcontent-01')
-         </div>
-
-
-
         </div>
         <!-- /.container-fluid -->
 

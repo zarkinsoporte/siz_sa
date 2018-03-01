@@ -16,7 +16,7 @@
                         <a href="{!! url('admin/users') !!}"><i class="fa fa-fw fa-user"></i> Usuarios SIZ</a>
                     </li>
                     <li>
-                        <a href="{!! url('admin/inventario') !!}"><i class="fa fa-fw fa-user"></i> Gestión de Inventario</a>
+                        <a href="{!! url('admin/inventario') !!}"><i class="fa fa-archive"></i> Gestión de Inventario</a>
                     </li>
                 </ul>
             </li>
@@ -38,15 +38,39 @@
                     </h3>
                     <ol class="breadcrumb">
                         <li>
-                            <i class="fa fa-dashboard"></i>  <a href="{!! url('home') !!}">ACTIVIDADES</a>
+                            <i class="fa fa-dashboard"></i>  <a href="MOD00-ADMINISTRADOR">INICIO</a>
+                        </li>
+                        <li>
+                            <i class="fa fa-archive"></i>  <a href="admin/inventario">MONITORES</a>
                         </li>
 
                     </ol>
                 </div>
             </div>
             <!-- /.row -->
-         <div class="container">
+         <div class="well">
+            <a href="{!! url('admin/altaMonitor') !!}" class="btn btn-primary">Alta Monitor</a>
+            <a href="inventario" class="btn btn-primary">Inventario</a>
+            <a href="inventarioObsoleto" class="btn btn-primary">Inventario Obsoleto</a>
+         </div>
              <div class="row">
+             <div class="col-6">
+             <table class="table table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Nombre Monitor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach ($monitores as $monitor)
+                        <tr>
+                        <th scope="row">{{ $monitor->id }}</th>
+                        <td>{{ $monitor->nombre_monitor }}</td>
+                        </tr>
+                    @endforeach 
+                    </tbody>
+                </table>
 
                  <div class="col-md-10">
                      @if (count($errors) > 0)
@@ -65,11 +89,10 @@
 
                  </div>
              </div>
+             <div class="col-6">
+             </div>
+             </div>
              @yield('subcontent-01')
-         </div>
-
-
-
         </div>
         <!-- /.container-fluid -->
 

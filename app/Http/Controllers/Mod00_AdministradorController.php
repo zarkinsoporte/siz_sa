@@ -414,4 +414,67 @@ dd($user);
         }
 
     }
+
+
+    public function inventario( Request $request)
+    {
+        $inventario = DB::table('siz_inventario')
+            ->join('siz_monitores', 'siz_inventario.monitor', '=', 'siz_monitores.id')
+            ->select('siz_inventario.*', 'siz_monitores.*')
+            ->get();
+        $monitores  = DB::table('siz_monitores')->get();
+        return view('Mod00_Administrador.inventario', compact('inventario', 'monitores'));    
+    }
+
+    public function monitores( Request $request)
+    {
+        $monitores = DB::table('siz_monitores')->get();
+        return view('Mod00_Administrador.monitores')->with('monitores', $monitores);
+    }
+
+    public function altaInventario( Request $request)
+    {
+        $monitores = DB::table('siz_monitores')->get();
+        return view('Mod00_Administrador.altaInventario', compact('inventario', 'monitores'));   
+    }
+
+    public function altaMonitor( Request $request)
+    {
+        //$users = User::plantilla();
+        return view('Mod00_Administrador.altaMonitor');
+    }
+
+    public function altaMonitor2(Request $request)
+    {
+        //Insertamos el monitor en la DB
+        DB::table('siz_monitores')->insert(
+            [
+             'nombre_monitor' => $request->input('nombre_monitor')
+            ]
+        );
+        //Realizamos la consulta nuevamente
+        $monitores = DB::table('siz_monitores')->get();
+        //Llamamos a la vista para mostrar su contendio
+        return view('Mod00_Administrador.monitores')->with('monitores', $monitores);
+    }
+
+    public function altaInventario2(Request $request)
+    {
+        //Insertamos el monitor en la DB
+        DB::table('siz_inventario')->insert(
+            [
+             'nombre_equipo' => $request->input('nombre_equipo'),
+             'correo' => $request->input('correo'),
+             'tipo_equipo' => $request->input('tipo_equipo'),
+             'monitor' => $request->input('monitor')
+            ]
+        );
+        //Realizamos la consulta nuevamente
+        $inventario = DB::table('siz_inventario')
+        ->join('siz_monitores', 'siz_inventario.monitor', '=', 'siz_monitores.id')
+        ->select('siz_inventario.*', 'siz_monitores.*')
+        ->get();
+        //Llamamos a la vista para mostrar su contendio
+        return view('Mod00_Administrador.inventario')->with('inventario', $inventario);
+    }
 }

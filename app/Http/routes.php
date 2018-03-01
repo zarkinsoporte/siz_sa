@@ -91,7 +91,14 @@ route::get('setpassword', function (){
 });
 
 Route::post('cambio.password',   'Mod00_AdministradorController@cambiopassword');
-
+//Módulo de inventarios
+Route::get('admin/altaInventario', 'Mod00_AdministradorController@altaInventario');
+Route::post('admin/altaInventario', 'Mod00_AdministradorController@altaInventario2');
+Route::get('/admin/altaMonitor', 'Mod00_AdministradorController@altaMonitor');
+Route::post('admin/altaMonitor', 'Mod00_AdministradorController@altaMonitor2');
+Route::get('admin/inventario', 'Mod00_AdministradorController@inventario');
+Route::get('admin/monitores', 'Mod00_AdministradorController@monitores');
+//
 Route::get('admin/users', 'Mod00_AdministradorController@allUsers');
 Route::get('users/edit/{empid}', 'Mod00_AdministradorController@editUser');
 Route::get('admin/detalle-depto/{depto}','Mod00_AdministradorController@showUsers');
