@@ -416,15 +416,58 @@ dd($user);
     }
 
 
-    public function inventario( Request $request)
+    public function inventario()
     {
+        //Realizamos la consulta nuevamente
         $inventario = DB::table('siz_inventario')
             ->join('siz_monitores', 'siz_inventario.monitor', '=', 'siz_monitores.id')
-            ->select('siz_inventario.*', 'siz_monitores.*')
+            ->select('siz_inventario.id as id_inv', 'siz_inventario.*', 'siz_monitores.id as id_mon', 'siz_monitores.*')
+            ->where('siz_inventario.activo', '=',1)
             ->get();
         $monitores  = DB::table('siz_monitores')->get();
         return view('Mod00_Administrador.inventario', compact('inventario', 'monitores'));    
     }
+
+    public function mark_obs($id)
+    {
+        //Actualizamos el valor en la DB
+        $act_inv = DB::table('siz_inventario')
+            ->where("id", "=", "$id")
+            ->update([
+                'activo' => '0'
+            ]);
+        //dd($act_inv);     
+        //Realizamos la consulta nuevamente
+        //$this->inventario();
+        return redirect('admin/inventario');
+    }
+
+    public function mark_rest($id)
+    {
+        //Actualizamos el valor en la DB
+        $act_inv = DB::table('siz_inventario')
+            ->where("id", "=", "$id")
+            ->update([
+                'activo' => '1'
+            ]);
+        //dd($act_inv);     
+        //Realizamos la consulta nuevamente
+        //$this->inventario();
+        return redirect('admin/inventarioObsoleto');
+    }
+
+    public function inventarioObsoleto( Request $request)
+    {
+        //Realizamos la consulta buscando donde activo sea igual a 0
+        $inventario = DB::table('siz_inventario')
+            ->join('siz_monitores', 'siz_inventario.monitor', '=', 'siz_monitores.id')
+            ->select('siz_inventario.id as id_inv', 'siz_inventario.*', 'siz_monitores.id as id_mon', 'siz_monitores.*')
+            ->where('siz_inventario.activo', '=',0)
+            ->get();
+        $monitores  = DB::table('siz_monitores')->get();
+        //dd($inventario);
+        return view('Mod00_Administrador.inventarioObsoleto', compact('inventario', 'monitores'));    
+    }   
 
     public function monitores( Request $request)
     {
@@ -442,6 +485,30 @@ dd($user);
     {
         //$users = User::plantilla();
         return view('Mod00_Administrador.altaMonitor');
+    }
+
+    public function mod_mon($id, $mensaje)
+    {
+        //$users = User::plantilla();
+
+        $monitor = DB::table('siz_monitores')
+        ->select('siz_monitores.*')
+        ->where('id', '=',$id)
+        ->first();
+        return view('Mod00_Administrador.modMonitor', compact('monitor', 'mensaje'));   
+    }
+
+    public function mod_mon2( Request $request)
+    {
+        //$users = User::plantilla();
+        $id_monitor = $request->input('id_monitor');
+        $act_mon = DB::table('siz_monitores')
+        ->where("id", "=", "$id_monitor")
+        ->update([
+            'nombre_monitor' => $request->input('nombre_monitor')
+        ]);
+        $mensaje="Monitor Actualizado";
+        return $this->mod_mon($id_monitor, $mensaje);   
     }
 
     public function altaMonitor2(Request $request)
@@ -473,6 +540,7 @@ dd($user);
         $inventario = DB::table('siz_inventario')
         ->join('siz_monitores', 'siz_inventario.monitor', '=', 'siz_monitores.id')
         ->select('siz_inventario.*', 'siz_monitores.*')
+        ->where('siz_inventario.activo', '=',1)
         ->get();
         //Llamamos a la vista para mostrar su contendio
         return view('Mod00_Administrador.inventario')->with('inventario', $inventario);

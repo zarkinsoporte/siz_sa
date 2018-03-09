@@ -51,7 +51,7 @@
          <div class="well">
             <a href="altaInventario" class="btn btn-primary">Alta Inventario</a>
             <a href="monitores" class="btn btn-primary">Monitores</a>
-            <a href="inventario" class="btn btn-primary">Inventario Obsoleto</a>
+            <a href="inventarioObsoleto" class="btn btn-primary">Inventario Obsoleto</a>
          </div>
              <div class="row">
              <div class="col-6">
@@ -64,17 +64,23 @@
                         <th scope="col">Número de Equipo</th>
                         <th scope="col">Tipo de Equipo</th>
                         <th scope="col">Monitor</th>
+                        <th scope="col">PDF (No Disponible)</th>
+                        <th scope="col">Marcar Obsoleto</th>
                         </tr>
                     </thead>
                     <tbody>
                     @foreach ($inventario as $inventario)
                         <tr>
-                        <th scope="row">{{ $inventario->id }}</th>
+                        <th scope="row">{{ $inventario->id_inv }}</th>
                         <td>{{ $inventario->nombre_equipo }}</td>
                         <td>{{ $inventario->correo}}</td>
                         <td>{{ $inventario->numero_equipo }}</td>
                         <td>{{ $inventario->tipo_equipo }}</td>
                         <td>{{ $inventario->nombre_monitor }}</td>
+                        <td></td>
+                        <td>
+                            <a href="mark_obs/{{$inventario->id_inv}}" class="btn btn-danger"><i class="fa fa-recycle"></i</a>
+                        </td>
                         </tr>
                     @endforeach 
                     </tbody>

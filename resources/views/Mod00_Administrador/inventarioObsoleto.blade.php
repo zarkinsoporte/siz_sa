@@ -38,10 +38,10 @@
                     </h3>
                     <ol class="breadcrumb">
                         <li>
-                            <i class="fa fa-dashboard"></i>  <a href="MOD00-ADMINISTRADOR">INICIO</a>
+                            <i class="fa fa-dashboard"></i>  <a href="inventario">INICIO</a>
                         </li>
                         <li>
-                            <i class="fa fa-archive"></i>  <a href="admin/inventario">MONITORES</a>
+                            <i class="fa fa-archive"></i>  <a href="inventario">GESTIÓN DE INVENTARIOS</a>
                         </li>
 
                     </ol>
@@ -49,9 +49,9 @@
             </div>
             <!-- /.row -->
          <div class="well">
-            <a href="{!! url('admin/altaMonitor') !!}" class="btn btn-primary">Alta Monitor</a>
+            <a href="altaInventario" class="btn btn-primary">Alta Inventario</a>
+            <a href="monitores" class="btn btn-primary">Monitores</a>
             <a href="inventario" class="btn btn-primary">Inventario</a>
-            <a href="inventarioObsoleto" class="btn btn-primary">Inventario Obsoleto</a>
          </div>
              <div class="row">
              <div class="col-6">
@@ -59,17 +59,25 @@
                     <thead class="thead-dark">
                         <tr>
                         <th scope="col">ID</th>
-                        <th scope="col">Nombre Monitor</th>
-                        <th scope="col">Modificar</th>
+                        <th scope="col">Nombre Equipo</th>
+                        <th scope="col">Correo</th>
+                        <th scope="col">Número de Equipo</th>
+                        <th scope="col">Tipo de Equipo</th>
+                        <th scope="col">Monitor</th>
+                        <th scope="col">Restaurar</th>
                         </tr>
                     </thead>
                     <tbody>
-                    @foreach ($monitores as $monitor)
+                    @foreach ($inventario as $inventario)
                         <tr>
-                        <th scope="row">{{ $monitor->id }}</th>
-                        <td>{{ $monitor->nombre_monitor }}</td>
+                        <th scope="row">{{ $inventario->id }}</th>
+                        <td>{{ $inventario->nombre_equipo }}</td>
+                        <td>{{ $inventario->correo}}</td>
+                        <td>{{ $inventario->numero_equipo }}</td>
+                        <td>{{ $inventario->tipo_equipo }}</td>
+                        <td>{{ $inventario->nombre_monitor }}</td>
                         <td>
-                            <a href="mod_mon/{{$monitor->id}}/{{0}}" class="btn btn-warning"><i class="fa fa-pencil-square"></i</a>
+                            <a href="mark_rest/{{$inventario->id_inv}}" class="btn btn-success"><i class="fa fa-reply"></i</a>
                         </td>
                         </tr>
                     @endforeach 
