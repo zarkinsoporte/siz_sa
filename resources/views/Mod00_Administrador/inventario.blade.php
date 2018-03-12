@@ -64,7 +64,7 @@
                         <th scope="col">Número de Equipo</th>
                         <th scope="col">Tipo de Equipo</th>
                         <th scope="col">Monitor</th>
-                        <th scope="col">PDF (No Disponible)</th>
+                        <th scope="col">PDF (Incompleto)</th>
                         <th scope="col">Marcar Obsoleto</th>
                         </tr>
                     </thead>
@@ -77,7 +77,9 @@
                         <td>{{ $inventario->numero_equipo }}</td>
                         <td>{{ $inventario->tipo_equipo }}</td>
                         <td>{{ $inventario->nombre_monitor }}</td>
-                        <td></td>
+                        <td>
+                            <a href="generarPdf/{{$inventario->id_inv}}" class="btn btn-danger"><i class="fa fa-recycle"></i</a>
+                        </td>
                         <td>
                             <a href="mark_obs/{{$inventario->id_inv}}" class="btn btn-danger"><i class="fa fa-recycle"></i</a>
                         </td>

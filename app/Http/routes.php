@@ -86,6 +86,7 @@ Route::post('cambio.password',   'Mod00_AdministradorController@cambiopassword')
 //Rutas del Módulo de inventarios
 Route::get('admin/altaInventario', 'Mod00_AdministradorController@altaInventario');
 Route::post('admin/altaInventario', 'Mod00_AdministradorController@altaInventario2');
+Route::post('admin/ModInventario', 'Mod00_AdministradorController@ModInventario');
 Route::get('/admin/altaMonitor', 'Mod00_AdministradorController@altaMonitor');
 Route::post('admin/altaMonitor', 'Mod00_AdministradorController@altaMonitor2');
 Route::get('admin/inventario', 'Mod00_AdministradorController@inventario');
@@ -95,6 +96,7 @@ Route::get('admin/mark_obs/{id}', 'Mod00_AdministradorController@mark_obs');
 Route::get('admin/mark_rest/{id}', 'Mod00_AdministradorController@mark_rest');
 Route::get('admin/mod_mon/{id}/{mensaje}', 'Mod00_AdministradorController@mod_mon');
 Route::post('admin/mod_mon2', 'Mod00_AdministradorController@mod_mon2');
+Route::get('admin/generarPdf/{id}', 'Mod00_AdministradorController@generarPdf');
 // Fin de Rutas del modulo de inventarios
 Route::get('admin/users', 'Mod00_AdministradorController@allUsers');
 Route::get('users/edit/{empid}', 'Mod00_AdministradorController@editUser');

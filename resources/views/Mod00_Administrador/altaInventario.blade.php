@@ -62,15 +62,15 @@
              {!! Form::open(['url' => 'admin/altaInventario', 'method' => 'POST']) !!}
                 <div class="form-group">
                     <label for="NombreEquipo">Nombre Equipo</label>
-                    <input type="text" name="nombre_equipo" class="form-control" placeholder="Ej. HP Probook 4520s">
+                    <input type="text" name="nombre_equipo" class="form-control" placeholder="Ej. HP Probook 4520s" required>
                 </div>
                 <div class="form-group">
                     <label for="Correo">Correo</label>
-                    <input type="email" name="correo" class="form-control" id="exampleFormControlInput1" placeholder="nombre.apellido@zarkin.com">
+                    <input type="email" name="correo" class="form-control" id="exampleFormControlInput1" placeholder="nombre.apellido@zarkin.com" required>
                 </div>
                 <div class="form-group">
                     <label for="NumeroEquipo">Número de Equipo</label>
-                    <input type="number" name="numero_equipo" class="form-control" id="exampleFormControlInput1" placeholder="Ej 77">
+                    <input type="number" name="numero_equipo" class="form-control" id="exampleFormControlInput1" placeholder="Ej 77" required>
                 </div>
                 <div class="form-group">
                     <label for="TipoEquipo">Tipo de Equipo</label>
@@ -84,7 +84,7 @@
                     <label for="Monitor">Monitor</label>
                     <select class="form-control" name="monitor">
                     @foreach ($monitores as $monitor)
-                        <option value="{{ $monitor->id }}">{{ $monitor->nombre_monitor }}</option>
+                        <option value="{{ $monitor->id_mon }}">{{ $monitor->nombre_monitor }}</option>
                     @endforeach 
                     </select>
                     <br>

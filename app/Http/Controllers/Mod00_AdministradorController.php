@@ -16,6 +16,11 @@ use Illuminate\Support\Facades\Input;
 use Session;
 use Auth;
 use Lava;
+//DOMPDF
+use Dompdf\Dompdf;
+use App;
+//use Pdf;
+//Fin DOMPDF
 use Illuminate\Support\Facades\Route;
 
 use Datatables;
@@ -477,8 +482,9 @@ dd($user);
 
     public function altaInventario( Request $request)
     {
-        $monitores = DB::table('siz_monitores')->get();
-        return view('Mod00_Administrador.altaInventario', compact('inventario', 'monitores'));   
+        //$monitores = DB::table('siz_monitores')->get();
+        $monitores = DB::select( DB::raw("SELECT siz_monitores.id as id_mon, nombre_monitor FROM siz_monitores LEFT JOIN siz_inventario ON siz_monitores.id = siz_inventario.monitor WHERE siz_inventario.monitor IS NULL") );
+        return view('Mod00_Administrador.altaInventario', compact('monitores'));   
     }
 
     public function altaMonitor( Request $request)
@@ -531,18 +537,29 @@ dd($user);
         DB::table('siz_inventario')->insert(
             [
              'nombre_equipo' => $request->input('nombre_equipo'),
-             'correo' => $request->input('correo'),
+             'correo' => $request->input('correo'), 
+             'numero_equipo' => $request->input('numero_equipo'),
              'tipo_equipo' => $request->input('tipo_equipo'),
              'monitor' => $request->input('monitor')
             ]
         );
         //Realizamos la consulta nuevamente
+        return redirect('admin/inventario');
+    }
+
+    public function generarPdf($id)
+    {
+        //$pdf = App::make('dompdf.wrapper');
         $inventario = DB::table('siz_inventario')
         ->join('siz_monitores', 'siz_inventario.monitor', '=', 'siz_monitores.id')
-        ->select('siz_inventario.*', 'siz_monitores.*')
-        ->where('siz_inventario.activo', '=',1)
+        ->select('siz_inventario.id as id_inv', 'siz_inventario.*', 'siz_monitores.id as id_mon', 'siz_monitores.*')
+        ->where('siz_inventario.id', '=',$id)
         ->get();
-        //Llamamos a la vista para mostrar su contendio
-        return view('Mod00_Administrador.inventario')->with('inventario', $inventario);
+        $data=array('data' => $inventario);
+        //$data = $inventario;
+        //dd($data);
+        $pdf = \PDF::loadView('Mod00_Administrador.pdfInventario', $data);
+        //return $pdf->stream();
+        return $pdf->download('Responsiva.pdf');
     }
 }
