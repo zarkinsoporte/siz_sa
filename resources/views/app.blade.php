@@ -10,17 +10,19 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ 'Fusion Confort' }}</title>
-
     <!-- Styles -->
+<!--<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />-->
+    <!--{!! Html::style('assets/css/Mod00_Admiistrador/bootstrap.daterangepicker.css') !!}
+     Material Design fonts -->
+    <!--<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">-->
+    {!! Html::style('assets/css/roboto.css') !!}
+   <!-- <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">-->
 
-    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
-    <!-- Material Design fonts -->
-    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-    <link rel="stylesheet" href="http://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
-    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
-
+    <!--<link rel="stylesheet" href="http://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">-->
+    {!! Html::style('assets/css/jquery.dataTables.min.css') !!}
+    
+    <!--<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>-->
+    {!! Html::script('assets/js/dataTables.min.js') !!}
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -34,6 +36,7 @@
 
 {!! Html::style('assets/css/sb-admin.css') !!}
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/css/bootstrap-datepicker.css">
     <style>
         ul {
             list-style-type: none;
@@ -53,6 +56,10 @@
             background-color: #555;
             color: white;
         }
+        #wrapper {
+    padding-left: 255px;
+    overflow-x: hidden;
+}
 
     </style>
 
@@ -134,31 +141,43 @@
 
 
 <script
-        src="https://code.jquery.com/jquery-3.2.1.js"
-        integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE="
-        crossorigin="anonymous"></script>
+src="https://code.jquery.com/jquery-3.2.1.js">
+</script>
+       
+ {!! Html::script('assets/js/bootstrap-datepicker.js') !!}
+ {!! Html::script('assets/js/bootstrap-datepicker.es.min.js') !!}
+ 
 
 {!! Html::script('assets/js/bootstrap-switch.js') !!}
-
-
-<script src="//cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
-
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-
-<script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<!--<script src="//cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>-->
+{!! Html::script('assets/js/jquery.dataTables.min.js') !!}
+<!--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>-->
+{!! Html::script('assets/js/bootstrap.min.js') !!}
+<!--<script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>-->
+{!! Html::script('assets/js/moment.min.js') !!}
 <!-- Include Date Range Picker -->
-<script type="text/javascript" src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
+
 
 <script>
 
-    $(document).ready(function (event) {
+$(document).ready(function (event) {
+   $('.toggle').bootstrapSwitch();
+   @yield('script')
 
-            $('.toggle').bootstrapSwitch();
+   $( function() {
+    $( "#datepicker" ).datepicker({
+        format: 'dd/mm/yyyy',
+    todayHighlight:'TRUE',
+    autoclose: true,
+    locale: "es",
+    
+    });
+       
+  } );
+ 
 
 
-
-        @yield('script')
-
+  
     });
 
 

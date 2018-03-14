@@ -11,11 +11,13 @@
 @media(min-width:768px) {
     body {
         margin-top: 50px;
+        overflow-x: hidden;
     }
 }
 
 #wrapper {
     padding-left: 0;
+    overflow-x: hidden;
 }
 
 #page-wrapper {
@@ -23,6 +25,7 @@
     padding: 0;
     background-color: #fff;
     height: 100%;
+    overflow-x: hidden;
 }
 
 .huge {
@@ -32,7 +35,8 @@
 
 @media(min-width:768px) {
     #wrapper {
-        padding-left: 225px;
+        padding-left: 255px;
+        overflow-x: hidden;
     }
 
     #page-wrapper {

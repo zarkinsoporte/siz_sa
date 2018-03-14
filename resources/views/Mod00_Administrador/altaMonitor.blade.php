@@ -38,13 +38,16 @@
                     </h3>
                     <ol class="breadcrumb">
                         <li>
-                            <i class="fa fa-dashboard"></i>  <a href="MOD00-ADMINISTRADOR">INICIO</a>
+                            <i class="fa fa-dashboard"></i>  <a href="MOD00-ADMINISTRADOR">ADMINISTRADOR</a>
                         </li>
                         <li>
-                            <i class="fa fa-archive"></i>  <a href="inventario">MONITORES</a>
+                            <i class="fa fa-archive"></i>  <a href="inventario">GESTIÒN DE INVENTARIO</a>
                         </li>
                         <li>
-                            <i class="fa fa-archive"></i>  <a href="altaInventario">ALTA MONITORES</a>
+                            <i class="fa fa-archive"></i> <a href="monitores">MONITORES</a>
+                        </li>
+                        <li>
+                            <i class="fa fa-archive"></i>  <a href="altaMonitor">ALTA MONITORES</a>
                         </li>
 
                     </ol>

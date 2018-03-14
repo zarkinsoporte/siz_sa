@@ -105,8 +105,18 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="date_range" class="control-label">Rango de Fechas:</label>
-                                            <input type="text" id="date_range" name="date_range" class="form-control" value="<?php echo date("dd-mm-yyyy")." al ".date("dd-mm-yyyy");?>">
+                                            <input> 
                                         </div>
+                                     
+                                        <div class="input-group input-daterange">
+    <input type="text" class="form-control" value="2012-04-05">
+    <div class="input-group-addon">to</div>
+    <input type="text" class="form-control" value="2012-04-19">
+    
+    
+</div>
+<input type="text" id="datepicker">
+
                                         <div class="form-group">
                                             <label for="dep" class="control-label">Departamento:</label>
                                             <select class="form-control" id="dep" name="dep" required>
@@ -229,51 +239,12 @@
                         modal.find('#cant').attr('max', recipient2);
                         });
 
-                        $('#date_range').daterangepicker().data('daterangepicker').setEndDate(moment().format("DD/MM/YYYY"));
-                        $('#date_range').daterangepicker().data('daterangepicker').setStartDate(moment().format("DD/MM/YYYY"));
-                        $('#date_range').daterangepicker(
 
-                        { "locale": {
-                        "format": "DD/MM/YYYY",
-                        "separator": " - ",
-                        "applyLabel": "Guardar",
-                        "cancelLabel": "Cancelar",
-                        "fromLabel": "Desde",
-                        "toLabel": "Hasta",
-                        "customRangeLabel": "Personalizar",
-                        "daysOfWeek": [
-                        "Do",
-                        "Lu",
-                        "Ma",
-                        "Mi",
-                        "Ju",
-                        "Vi",
-                        "Sa"
-                        ],
-                        "monthNames": [
-                        "Enero",
-                        "Febrero",
-                        "Marzo",
-                        "Abril",
-                        "Mayo",
-                        "Junio",
-                        "Julio",
-                        "Agosto",
-                        "Setiembre",
-                        "Octubre",
-                        "Noviembre",
-                        "Diciembre"
-                        ],
-                        "firstDay": 1
-                        },
-
-                        "opens": "center"
-                        });
 
                     @endsection
 
                     <script>
-
+                        
                         function mostrar(){
                             $("#hiddendiv").show();
                         };

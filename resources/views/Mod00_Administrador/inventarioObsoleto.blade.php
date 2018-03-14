@@ -38,21 +38,19 @@
                     </h3>
                     <ol class="breadcrumb">
                         <li>
-                            <i class="fa fa-dashboard"></i>  <a href="inventario">INICIO</a>
+                            <i class="fa fa-dashboard"></i>  <a href="{!! url('MOD00-ADMINISTRADOR') !!}">MOD-ADMINISTRADOR</a>
                         </li>
                         <li>
                             <i class="fa fa-archive"></i>  <a href="inventario">GESTIÓN DE INVENTARIOS</a>
                         </li>
-
+                        <li>
+                            <i class="fa fa-archive"></i> <a href="inventarioObsoleto">INVENTARIO OBSOLETO</a>
+                        </li>
                     </ol>
                 </div>
             </div>
             <!-- /.row -->
-         <div class="well">
-            <a href="altaInventario" class="btn btn-primary">Alta Inventario</a>
-            <a href="monitores" class="btn btn-primary">Monitores</a>
-            <a href="inventario" class="btn btn-primary">Inventario</a>
-         </div>
+        
              <div class="row">
              <div class="col-6">
              <table class="table table-striped">

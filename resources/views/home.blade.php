@@ -104,7 +104,7 @@ $index = 0;
     <!-- /.navbar-collapse -->
     </nav>
 
-    <div id="page-wrapper2">
+    <div >
         @yield('homecontent')
 
         <!-- /.container-fluid -->

@@ -1,6 +1,7 @@
 ﻿<!-- Styles -->
 <!-- Material Design fonts -->
-<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
+<!--<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">-->
+{!! Html::style('assets/css/family=reboto.css') !!}
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 {!! Html::style('assets/css/bootstrap.css') !!}

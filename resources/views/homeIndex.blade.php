@@ -19,7 +19,7 @@
             <div class="col-lg-12 ">
                 @include('partials.alertas')
                 <div class="alert alert-info">
-                    <strong>Welcome  ! </strong> sin tareas para hoy.
+                    <strong>Bienvenido  ! </strong> sin tareas para hoy.
                 </div>
 
 
