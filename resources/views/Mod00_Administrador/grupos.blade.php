@@ -30,8 +30,11 @@
                         Módulos del Grupo {{$nombre_grupo}}:
                     </h3>
                     <ol class="breadcrumb">
+                    <li>
+                            <i class="fa fa-dashboard"></i> <a href="{!! url('home') !!}">Inicio</a>
+                        </li>
                         <li>
-                            <i class="fa fa-dashboard"></i>  <a href="{!! url('MOD00-ADMINISTRADOR') !!}">Administrador</a>
+                            <i class="fa fa-dashboard"></i>  <a href="{!! url('MOD00-ADMINISTRADOR') !!}">MOD-Administrador</a>
                         </li>
                         <li class="active">
                             <i class="fa fa-file"></i> <a href="{!! url('admin/grupos/'.$id_grupo) !!}">Módulos</a>

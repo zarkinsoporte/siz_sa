@@ -555,11 +555,13 @@ dd($user);
         ->select('siz_inventario.id as id_inv', 'siz_inventario.*', 'siz_monitores.id as id_mon', 'siz_monitores.*')
         ->where('siz_inventario.id', '=',$id)
         ->get();
+    
         $data=array('data' => $inventario);
         //$data = $inventario;
-        //dd($data);
+        
         $pdf = \PDF::loadView('Mod00_Administrador.pdfInventario', $data);
+        //dd($pdf);
         //return $pdf->stream();
-        return $pdf->download('Responsiva.pdf');
+        return $pdf->stream('Responsiva.pdf');
     }
 }

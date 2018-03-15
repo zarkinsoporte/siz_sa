@@ -10,14 +10,19 @@
             <div class="row">
                 <div >
                     <h3 class="page-header">
+                        Gestiòn de Inventario
                         {{Route::current()->getName()}}
                     </h3>
+                </div>
                     <ol class="breadcrumb">
-                        <li>
-                            <i class="fa fa-dashboard"></i>  <a href="inventario">INICIO</a>
+                    <li>
+                            <i class="fa fa-dashboard"></i> <a href="{!! url('home') !!}">Inicio</a>
                         </li>
                         <li>
-                            <i class="fa fa-archive"></i>  <a href="inventario">GESTIÓN DE INVENTARIOS</a>
+                            <i class="fa fa-archive"></i>  <a href="{!! url('MOD00-ADMINISTRADOR') !!}">MOD-Administrador</a>
+                        </li>
+                        <li>
+                            <i class="fa fa-archive"></i>  <a href="inventario">Gestiòn de Inventarios</a>
                         </li>
                     </ol>
                 </div>
