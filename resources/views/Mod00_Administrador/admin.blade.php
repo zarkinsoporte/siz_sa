@@ -38,7 +38,7 @@
                     </h3>
                     <ol class="breadcrumb">
                         <li>
-                            <i class="fa fa-dashboard"></i>  <a href="{!! url('home') !!}">ACTIVIDADES</a>
+                            <i class="fa fa-dashboard"></i>  <a href="{!! url('home') !!}">INICIO</a>
                         </li>
 
                     </ol>
