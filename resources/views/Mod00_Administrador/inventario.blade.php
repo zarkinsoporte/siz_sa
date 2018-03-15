@@ -1,33 +1,9 @@
 @extends('app')
 
 @section('content')
-    <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
-    <div class="collapse navbar-collapse navbar-ex1-collapse">
-        <ul class="nav navbar-nav side-nav">
+@include('partials.menu-admin')
 
-            <li>
-                <a href="javascript:;" data-toggle="collapse" data-target="#demo">MOD-Administrador<i class="fa fa-fw fa-caret-down"></i></a>
-                <ul id="demo" class="">
-
-                        <li>
-                            <a href="{!! url('admin/grupos/1') !!}"><i class="fa fa-fw fa-users"></i>   Gestión de Grupos</a>
-                        </li>
-                    <li>
-                        <a href="{!! url('admin/users') !!}"><i class="fa fa-fw fa-user"></i> Usuarios SIZ</a>
-                    </li>
-                    <li>
-                        <a href="{!! url('admin/inventario') !!}"><i class="fa fa-archive"></i> Gestión de Inventario</a>
-                    </li>
-                </ul>
-            </li>
-            @include('partials.section-navbar')
-        </ul>
-    </div>
-    <!-- /.navbar-collapse -->
-    </nav>
-
-    <div >
-
+    <div>
         <div class="container" >
 
             <!-- Page Heading -->
@@ -38,20 +14,17 @@
                     </h3>
                     <ol class="breadcrumb">
                         <li>
-                            <i class="fa fa-dashboard"></i>  <a href="{!! url('MOD00-ADMINISTRADOR') !!}">MOD-ADIMINISTRADOR</a>
+                            <i class="fa fa-dashboard"></i>  <a href="inventario">INICIO</a>
                         </li>
                         <li>
                             <i class="fa fa-archive"></i>  <a href="inventario">GESTIÓN DE INVENTARIOS</a>
                         </li>
-
                     </ol>
                 </div>
             </div>
             <!-- /.row -->
          <div class="well">
-            <a href="altaInventario" class="btn btn-primary">Alta Inventario</a>
-            <a href="monitores" class="btn btn-primary">Monitores</a>
-            <a href="inventarioObsoleto" class="btn btn-primary">Inventario Obsoleto</a>
+            <a href="altaInventario" class="btn btn-success"><i class="glyphicon glyphicon-plus-sign"></i></a>
          </div>
              <div class="row">
              <div class="col-6">
@@ -78,7 +51,7 @@
                         <td>{{ $inventario->tipo_equipo }}</td>
                         <td>{{ $inventario->nombre_monitor }}</td>
                         <td>
-                            <a href="generarPdf/{{$inventario->id_inv}}" class="btn btn-danger"><i class="fa fa-recycle"></i</a>
+                            <a href="generarPdf/{{$inventario->id_inv}}" class="btn btn-default"><i class="fa fa-file-pdf-o"></i</a>
                         </td>
                         <td>
                             <a href="mark_obs/{{$inventario->id_inv}}" class="btn btn-danger"><i class="fa fa-recycle"></i</a>

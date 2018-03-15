@@ -29,6 +29,7 @@ $index = 0;
                                             <li>
                                                 <a href="{!! url('home/'.$n1->tarea) !!}">{{$n1->tarea}}</a>
                                             </li>
+                                        
 
 
                     @elseif($bnd == $n1->id_modulo)
@@ -96,7 +97,11 @@ $index = 0;
                     @endif
 
 @endforeach
-
+@if (Auth::user()->U_EmpGiro==246)
+                    <li>
+                        <a href="{!! url('/MOD00-ADMINISTRADOR') !!}">Administrador</a>
+                    </li>
+@endif
 
                 @include('partials.section-navbar')
         </ul>
@@ -104,7 +109,7 @@ $index = 0;
     <!-- /.navbar-collapse -->
     </nav>
 
-    <div >
+    <div id="page-wrapper2">
         @yield('homecontent')
 
         <!-- /.container-fluid -->

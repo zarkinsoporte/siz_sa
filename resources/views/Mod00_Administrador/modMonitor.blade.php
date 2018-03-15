@@ -1,30 +1,7 @@
 @extends('app')
 
 @section('content')
-    <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
-    <div class="collapse navbar-collapse navbar-ex1-collapse">
-        <ul class="nav navbar-nav side-nav">
-
-            <li>
-                <a href="javascript:;" data-toggle="collapse" data-target="#demo">MOD-Administrador<i class="fa fa-fw fa-caret-down"></i></a>
-                <ul id="demo" class="">
-
-                        <li>
-                            <a href="{!! url('admin/grupos/1') !!}"><i class="fa fa-fw fa-users"></i>   Gestión de Grupos</a>
-                        </li>
-                    <li>
-                        <a href="{!! url('admin/users') !!}"><i class="fa fa-fw fa-user"></i> Usuarios SIZ</a>
-                    </li>
-                    <li>
-                        <a href="{!! url('admin/inventario') !!}"><i class="fa fa-archive"></i> Gestión de Inventario</a>
-                    </li>
-                </ul>
-            </li>
-            @include('partials.section-navbar')
-        </ul>
-    </div>
-    <!-- /.navbar-collapse -->
-    </nav>
+@include('partials.menu-admin')
 
     <div >
 
@@ -52,9 +29,6 @@
             </div>
             <!-- /.row -->
          <div class="container">
-         <div class="well">
-            <a href="inventario" class="btn btn-primary">Gestion Inventario</a>
-         </div>
         <div class="row">
         @if ($mensaje !='0')
         <div class="alert alert-success">
