@@ -42,8 +42,10 @@
                         <th scope="col">Número de Equipo</th>
                         <th scope="col">Tipo de Equipo</th>
                         <th scope="col">Monitor</th>
-                        <th scope="col">PDF (Incompleto)</th>
+                        <th scope="col">PDF</th>
                         <th scope="col">Marcar Obsoleto</th>
+                        <th scope="col">Modificar</th>
+                        <th scope="col">Eliminar</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -59,7 +61,13 @@
                             <a href="generarPdf/{{$inventario->id_inv}}" class="btn btn-default"><i class="fa fa-file-pdf-o"></i</a>
                         </td>
                         <td>
-                            <a href="mark_obs/{{$inventario->id_inv}}" class="btn btn-danger"><i class="fa fa-recycle"></i</a>
+                            <a href="mark_obs/{{$inventario->id_inv}}" class="btn btn-default"><i class="fa fa-recycle"></i</a>
+                        </td>
+                        <td>
+                            <a href="mod_inv/{{$inventario->id_inv}}" class="btn btn-warning"><i class="fa fa-pencil-square"></i</a>
+                        </td>
+                        <td>
+                            <a href="delete_inv/{{$inventario->id_inv}}" class="btn btn-danger"><i class="glyphicon glyphicon-trash"></i</a>
                         </td>
                         </tr>
                     @endforeach 

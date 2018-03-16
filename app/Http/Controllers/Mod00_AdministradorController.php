@@ -428,6 +428,7 @@ dd($user);
             ->join('siz_monitores', 'siz_inventario.monitor', '=', 'siz_monitores.id')
             ->select('siz_inventario.id as id_inv', 'siz_inventario.*', 'siz_monitores.id as id_mon', 'siz_monitores.*')
             ->where('siz_inventario.activo', '=',1)
+            ->orderBy('id_inv')
             ->get();
         $monitores  = DB::table('siz_monitores')->get();
         return view('Mod00_Administrador.inventario', compact('inventario', 'monitores'));    
@@ -483,7 +484,7 @@ dd($user);
     public function altaInventario( Request $request)
     {
         //$monitores = DB::table('siz_monitores')->get();
-        $monitores = DB::select( DB::raw("SELECT siz_monitores.id as id_mon, nombre_monitor FROM siz_monitores LEFT JOIN siz_inventario ON siz_monitores.id = siz_inventario.monitor WHERE siz_inventario.monitor IS NULL AND siz_inventario.monitor !='00'") );
+        $monitores = DB::select( DB::raw("SELECT siz_monitores.id as id_mon, nombre_monitor FROM siz_monitores LEFT JOIN siz_inventario ON siz_monitores.id = siz_inventario.monitor WHERE siz_inventario.monitor IS NULL AND siz_inventario.monitor !='1'") );
         return view('Mod00_Administrador.altaInventario', compact('monitores'));   
     }
 
@@ -563,5 +564,20 @@ dd($user);
         //dd($pdf);
         //return $pdf->stream();
         return $pdf->stream('Responsiva.pdf');
+    }
+
+    public function delete_inv($id)
+    {
+
+        $eliminar = DB::table('siz_inventario')->where('id', '=', $id)->delete();
+        return redirect('admin/inventario');
+    }
+
+    public function mod_inv( Request $request)
+    {
+        //$monitores = DB::table('siz_monitores')->get();
+        $monitores = DB::select( DB::raw("SELECT siz_monitores.id as id_mon, nombre_monitor FROM siz_monitores LEFT JOIN siz_inventario ON siz_monitores.id = siz_inventario.monitor WHERE siz_inventario.monitor IS NULL AND siz_inventario.monitor !='1'") );
+        return view('Mod00_Administrador.altaInventario', compact('monitores')); 
+
     }
 }

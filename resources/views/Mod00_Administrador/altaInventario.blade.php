@@ -62,7 +62,7 @@
                 <div class="form-group">
                     <label for="Monitor">Monitor</label>
                     <select class="form-control" name="monitor">
-                    <option value="00">POR DEFINIR</option>
+                    <option value="1">POR DEFINIR</option>
                     @foreach ($monitores as $monitor)
                         <option value="{{ $monitor->id_mon }}">{{ $monitor->nombre_monitor }}</option>
                     @endforeach 
