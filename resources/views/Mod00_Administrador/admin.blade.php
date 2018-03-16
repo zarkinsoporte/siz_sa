@@ -11,13 +11,15 @@
             <div class="row">
                 <div >
                     <h3 class="page-header">
-                        {{Route::current()->getName()}}
+                        Usuarios
                     </h3>
                     <ol class="breadcrumb">
                         <li>
-                            <i class="fa fa-dashboard"></i>  <a href="{!! url('home') !!}">ACTIVIDADES</a>
+                            <i class="fa fa-dashboard"></i>  <a href="{!! url('home') !!}">Inicio</a>
                         </li>
-
+                        <li>
+                            <i class="fa fa-archive"></i> <a href="users">Usuarios</a>
+                       </li>
                     </ol>
                 </div>
             </div>

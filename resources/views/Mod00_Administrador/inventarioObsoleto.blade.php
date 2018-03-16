@@ -8,20 +8,24 @@
         <div class="container" >
 
             <!-- Page Heading -->
+            
             <div class="row">
                 <div >
                     <h3 class="page-header">
-                        {{Route::current()->getName()}}
+                        Inventario Obsoleto
                     </h3>
                     <ol class="breadcrumb">
-                        <li>
-                            <i class="fa fa-dashboard"></i>  <a href="{!! url('MOD00-ADMINISTRADOR') !!}">MOD-ADMINISTRADOR</a>
+                    <li>
+                            <i class="fa fa-dashboard"></i> <a href="{!! url('home') !!}">Inicio</a>
                         </li>
                         <li>
-                            <i class="fa fa-archive"></i>  <a href="inventario">GESTIÓN DE INVENTARIOS</a>
+                            <i class="fa fa-archive"></i>  <a href="{!! url('MOD00-ADMINISTRADOR') !!}">MOD-Administrador</a>
                         </li>
                         <li>
-                            <i class="fa fa-archive"></i> <a href="inventarioObsoleto">INVENTARIO OBSOLETO</a>
+                            <i class="fa fa-archive"></i>  <a href="inventario">Gestiòn de Inventarios</a>
+                        </li>
+                        <li>
+                            <i class="fa fa-archive"></i> <a href="inventarioObsoleto">Inventario Obsoleto</a>
                         </li>
                     </ol>
                 </div>

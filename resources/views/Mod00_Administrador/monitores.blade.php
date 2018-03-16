@@ -11,17 +11,20 @@
             <div class="row">
                 <div >
                     <h3 class="page-header">
-                        {{Route::current()->getName()}}
+                        Monitores
                     </h3>
                     <ol class="breadcrumb">
                         <li>
-                            <i class="fa fa-dashboard"></i>  <a href="{!! url('MOD00-ADMINISTRADOR') !!}">MOD-ADMINISTRADOR</a>
+                            <i class="fa fa-dashboard"></i> <a href="{!! url('home') !!}">Inicio</a>
                         </li>
                         <li>
-                            <i class="fa fa-archive"></i>  <a href="inventario">GESTIÒN DE INVENTARIO</a>
+                            <i class="fa fa-archive"></i>  <a href="{!! url('MOD00-ADMINISTRADOR') !!}">MOD-Administrador</a>
                         </li>
                         <li>
-                            <i class="fa fa-archive"></i>  <a href="monitores">MONITORES</a>
+                            <i class="fa fa-archive"></i>  <a href="inventario">Gestiòn de Inventario</a>
+                        </li>
+                        <li>
+                            <i class="fa fa-archive"></i>  <a href="monitores">Monitores</a>
                         </li>
 
                     </ol>
