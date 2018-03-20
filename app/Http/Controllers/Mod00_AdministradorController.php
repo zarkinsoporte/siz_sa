@@ -1,6 +1,6 @@
 <?php
-
 namespace App\Http\Controllers;
+ini_set('max_execution_time', 180);
 
 use App\Grupo;
 use App\Modelos\MOD01\MENU_ITEM;
