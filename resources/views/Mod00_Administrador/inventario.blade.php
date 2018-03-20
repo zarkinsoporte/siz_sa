@@ -64,7 +64,7 @@
                             <a href="mark_obs/{{$inventario->id_inv}}" class="btn btn-default"><i class="fa fa-recycle"></i</a>
                         </td>
                         <td>
-                            <a href="mod_inv/{{$inventario->id_inv}}" class="btn btn-warning"><i class="fa fa-pencil-square"></i</a>
+                            <a href="mod_inv/{{$inventario->id_inv}}/{{0}}" class="btn btn-warning"><i class="fa fa-pencil-square"></i</a>
                         </td>
                         <td>
                             <a href="delete_inv/{{$inventario->id_inv}}" class="btn btn-danger"><i class="glyphicon glyphicon-trash"></i</a>

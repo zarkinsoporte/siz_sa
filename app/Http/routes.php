@@ -95,9 +95,10 @@ Route::get('admin/monitores', 'Mod00_AdministradorController@monitores');
 Route::get('admin/mark_obs/{id}', 'Mod00_AdministradorController@mark_obs');
 Route::get('admin/mark_rest/{id}', 'Mod00_AdministradorController@mark_rest');
 Route::get('admin/delete_inv/{id}', 'Mod00_AdministradorController@delete_inv');
-Route::get('admin/mod_inv/{id}', 'Mod00_AdministradorController@mod_inv');
+Route::get('admin/mod_inv/{id}/{mensaje}', 'Mod00_AdministradorController@mod_inv');
 Route::get('admin/mod_mon/{id}/{mensaje}', 'Mod00_AdministradorController@mod_mon');
 Route::post('admin/mod_mon2', 'Mod00_AdministradorController@mod_mon2');
+Route::post('admin/mod_inv2', 'Mod00_AdministradorController@mod_inv2');
 Route::get('admin/generarPdf/{id}', 'Mod00_AdministradorController@generarPdf');
 // Fin de Rutas del modulo de inventarios
 Route::get('admin/users', 'Mod00_AdministradorController@allUsers');

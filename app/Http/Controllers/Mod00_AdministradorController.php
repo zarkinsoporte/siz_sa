@@ -573,11 +573,35 @@ dd($user);
         return redirect('admin/inventario');
     }
 
-    public function mod_inv( Request $request)
+    public function mod_inv($id, $mensaje)
     {
-        //$monitores = DB::table('siz_monitores')->get();
-        $monitores = DB::select( DB::raw("SELECT siz_monitores.id as id_mon, nombre_monitor FROM siz_monitores LEFT JOIN siz_inventario ON siz_monitores.id = siz_inventario.monitor WHERE siz_inventario.monitor IS NULL AND siz_inventario.monitor !='1'") );
-        return view('Mod00_Administrador.altaInventario', compact('monitores')); 
+        $inventario = DB::table('siz_inventario')
+            ->join('siz_monitores', 'siz_inventario.monitor', '=', 'siz_monitores.id')
+            ->select('siz_inventario.id as id_inv', 'siz_inventario.*', 'siz_monitores.id as id_mon', 'siz_monitores.*')
+            ->where('siz_inventario.id', '=',$id)
+            ->orderBy('id_inv')
+            ->get();
+        $monitores = DB::select( DB::raw("SELECT siz_monitores.id AS id_mon, nombre_monitor FROM siz_monitores LEFT JOIN siz_inventario ON siz_monitores.id = siz_inventario.monitor WHERE siz_inventario.monitor IS NULL AND siz_monitores.id !='1'") );
+        //dd($inventario[0]->nombre_equipo);
+        return view('Mod00_Administrador.modInventario', compact('monitores', 'inventario', 'mensaje')); 
+    }
 
+    public function mod_inv2(Request $request)
+    {
+        //dd($request->input('monitor'));
+        $act_inv = DB::table('siz_inventario')
+        ->where("id", "=", "$request->id_inv")
+        ->update(
+            [
+                'nombre_equipo' => $request->input('nombre_equipo'),
+                'correo' => $request->input('correo'), 
+                'numero_equipo' => $request->input('numero_equipo'),
+                'tipo_equipo' => $request->input('tipo_equipo'),
+                'monitor' => $request->input('monitor')
+               ]
+        );
+        $id_inv = $request->id_inv;
+        $mensaje="Registro Actualizado Correctamente";
+        return $this->mod_inv($id_inv, $mensaje);
     }
 }
