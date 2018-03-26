@@ -581,6 +581,7 @@ dd($user);
             ->where('siz_inventario.id', '=',$id)
             ->orderBy('id_inv')
             ->get();
+        //dd($inventario);    
         $monitores = DB::select( DB::raw("SELECT siz_monitores.id AS id_mon, nombre_monitor FROM siz_monitores LEFT JOIN siz_inventario ON siz_monitores.id = siz_inventario.monitor WHERE siz_inventario.monitor IS NULL AND siz_monitores.id !='1'") );
         //dd($inventario[0]->nombre_equipo);
         return view('Mod00_Administrador.modInventario', compact('monitores', 'inventario', 'mensaje')); 

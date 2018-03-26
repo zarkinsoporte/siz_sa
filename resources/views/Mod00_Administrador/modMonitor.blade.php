@@ -41,7 +41,7 @@
                 <div class="form-group">
                     <label for="exampleFormControlInput1">Nombre Monitor</label>
                     <input type="text" id="nombre_monitor" name="nombre_monitor" class="form-control" placeholder="Ej. HP LV1911" value="{{ $monitor->nombre_monitor }}" required>
-                    <input type="hidden" id="id_monitor" name="id_monitor" class="form-control" placeholder="Ej. HP LV1911" value="{{ $monitor->nombre_monitor }}" required>
+                    <input type="hidden" id="id_monitor" name="id_monitor" class="form-control" placeholder="Ej. HP LV1911" value="{{ $monitor->id }}" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Guardar</button>
              {!! Form::close() !!} 

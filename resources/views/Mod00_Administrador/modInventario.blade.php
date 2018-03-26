@@ -68,6 +68,7 @@
                 <div class="form-group">
                     <label for="Monitor">Monitor</label>
                     <select class="form-control" name="monitor">
+                    <option value="{{ $inventario[0]->id_mon }}">{{ $inventario[0]->nombre_monitor }} (*)</option>
                     <option value="1">N/A</option>
                     @foreach ($monitores as $monitor)
                         <option value="{{ $monitor->id_mon }}">{{ $monitor->nombre_monitor }}</option>
@@ -75,7 +76,7 @@
                     </select>
                     <br>
                     <br>
-                    <input type="text" name="id_inv" class="form-control" value="{{$inventario[0]->id_inv}}" required>
+                    <input type="hidden" name="id_inv" class="form-control" value="{{$inventario[0]->id_inv}}" required>
                     <button type="submit" class="btn btn-primary">Guardar</button>
                 </div>
                 {!! Form::close() !!} 
