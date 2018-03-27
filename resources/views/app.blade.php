@@ -56,10 +56,7 @@
             background-color: #555;
             color: white;
         }
-        #wrapper {
-    padding-left: 255px;
-    overflow-x: hidden;
-}
+     
 
     </style>
 

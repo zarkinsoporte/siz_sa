@@ -9,10 +9,15 @@
 
             <!-- Page Heading -->
             <div class="row">
+              <div class="visible-xs"><br><br></div>
                 <div >
                     <h3 class="page-header">
                         Monitores
                     </h3>
+                </div>
+                <div class= "col-lg-6.5 col-md-8 col-sm-5">
+                        <div class="hidden-xs">
+                        <div class="hidden-sm">
                     <ol class="breadcrumb">
                         <li>
                             <i class="fa fa-dashboard"></i> <a href="{!! url('home') !!}">Inicio</a>
@@ -28,14 +33,21 @@
                         </li>
 
                     </ol>
+                       </div>
+                       </div>
+                </div>
                 </div>
             </div>
             <!-- /.row -->
+            <div class="row">
+             <div class="col-lg-5.5 col-md-8 col-sm-7">
          <div class="well">
          <a href="altaMonitor" class="btn btn-success"><i class="glyphicon glyphicon-plus-sign"></i></a>
          </div>
+            </div>
              <div class="row">
-             <div class="col-6">
+             <div class="col-lg-5.5 col-md-8 col-sm-7">
+             <div class="table-responsive">
              <table class="table table-striped">
                     <thead class="thead-dark">
                         <tr>
@@ -56,8 +68,8 @@
                     @endforeach 
                     </tbody>
                 </table>
-
-                 <div class="col-md-10">
+</div>
+                 <div class="col-lg-5.5 col-md-8 col-sm-7">
                      @if (count($errors) > 0)
                          <div class="alert alert-danger text-center" role="alert">
                              @foreach($errors->getMessages() as $this_error)
@@ -71,10 +83,10 @@
                              </div>
                          </div>
                      @endif
-
+                    </div>
                  </div>
              </div>
-             <div class="col-6">
+             <div class="col-lg-5.5 col-md-8 col-sm-">
              </div>
              </div>
              @yield('subcontent-01')

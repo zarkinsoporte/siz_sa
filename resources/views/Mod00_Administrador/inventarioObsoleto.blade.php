@@ -11,9 +11,13 @@
             
             <div class="row">
                 <div >
+                    <div class="visible-xs"><br><br></div>
                     <h3 class="page-header">
                         Inventario Obsoleto
                     </h3>
+                    <div class= "col-lg-6.5 col-md-8 col-sm-7">
+                        <div class="hidden-xs">
+                        <div class="hidden-sm">
                     <ol class="breadcrumb">
                     <li>
                             <i class="fa fa-dashboard"></i> <a href="{!! url('home') !!}">Inicio</a>
@@ -28,12 +32,15 @@
                             <i class="fa fa-archive"></i> <a href="inventarioObsoleto">Inventario Obsoleto</a>
                         </li>
                     </ol>
+                        </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <!-- /.row -->
         
              <div class="row">
-             <div class="col-6">
+             <div class= "col-lg-10">
              <table class="table table-striped">
                     <thead class="thead-dark">
                         <tr>

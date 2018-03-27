@@ -9,11 +9,14 @@
             <!-- Page Heading -->
             <div class="row">
                 <div >
+                    <div class= "visible"><br><br></div>
                     <h3 class="page-header">
-                        Gestiòn de Inventario
-                        {{Route::current()->getName()}}
+                       Gestiòn de Inventario
                     </h3>
                 </div>
+                  <div class= "col-lg-6.5 col-md-8 col-sm-5">
+                    <div class="hidden-xs">
+                        <div class= "hidden-ms">
                     <ol class="breadcrumb">
                     <li>
                             <i class="fa fa-dashboard"></i> <a href="{!! url('home') !!}">Inicio</a>
@@ -25,15 +28,21 @@
                             <i class="fa fa-archive"></i>  <a href="inventario">Gestiòn de Inventarios</a>
                         </li>
                     </ol>
-                </div>
+                        </div>
+                    </div>
+                  </div>
             </div>
             <!-- /.row -->
-         <div class="well">
-            <a href="altaInventario" class="btn btn-success"><i class="glyphicon glyphicon-plus-sign"></i></a>
-         </div>
+            <div class="row">
+                <div class="col-lg-5.5 col-md-8 col-sm-7">
+                    <div class="well">
+                    <a href="altaInventario" class="btn btn-success"><i class="glyphicon glyphicon-plus-sign"></i></a>
+                    </div>
+                </div>
+            </div>
              <div class="row">
-             <div class="col-6">
-             <table class="table table-striped">
+             <div class="table-responsive">
+             <table class="table table-striped header-fixed">
                     <thead class="thead-dark">
                         <tr>
                         <th scope="col">ID</th>
@@ -42,7 +51,7 @@
                         <th scope="col">Número de Equipo</th>
                         <th scope="col">Tipo de Equipo</th>
                         <th scope="col">Monitor</th>
-                        <th scope="col">PDF</th>
+                         <th scope="col">PDF</th>
                         <th scope="col">Marcar Obsoleto</th>
                         <th scope="col">Modificar</th>
                         <th scope="col">Eliminar</th>
@@ -72,9 +81,11 @@
                         </tr>
                     @endforeach 
                     </tbody>
-                </table>
-
-                 <div class="col-md-10">
+                    </table>
+                  </table>
+                </div>
+              </div>
+                 <div class="col-lg-5.5 col-md-8 col-sm-7">
                      @if (count($errors) > 0)
                          <div class="alert alert-danger text-center" role="alert">
                              @foreach($errors->getMessages() as $this_error)
@@ -91,7 +102,7 @@
 
                  </div>
              </div>
-             <div class="col-6">
+             <div class="col-lg-5.5 col-md-8 col-sm-7">
              </div>
              </div>
              @yield('subcontent-01')

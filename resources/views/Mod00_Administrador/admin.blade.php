@@ -10,10 +10,15 @@
             <!-- Page Heading -->
             <div class="row">
                 <div >
+                    <div class="visible-xs"><br><br></div>
                     <h3 class="page-header">
                         Usuarios
                     </h3>
-                    <ol class="breadcrumb">
+                    
+                       <div class= "col-lg-6.5 col-md-8 col-sm-7">
+                        <div class="hidden-xs">
+                        <div class="hidden-sm">
+                        <ol class="breadcrumb">
                         <li>
                             <i class="fa fa-dashboard"></i>  <a href="{!! url('home') !!}">Inicio</a>
                         </li>
@@ -27,7 +32,7 @@
          <div class="container">
              <div class="row">
 
-                 <div class="col-md-10">
+                 <div class="col-md-8">
                      @if (count($errors) > 0)
                          <div class="alert alert-danger text-center" role="alert">
                              @foreach($errors->getMessages() as $this_error)
@@ -41,7 +46,8 @@
                              </div>
                          </div>
                      @endif
-
+                    </div>
+                </div>
                  </div>
              </div>
              @yield('subcontent-01')

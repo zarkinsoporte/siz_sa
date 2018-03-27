@@ -6,19 +6,19 @@
     <div >
 
         <div class="container" >
-
             <!-- Page Heading -->
-            <div class="row">
-                <div >
-                    <h3 class="page-header">
-                        Alta de Inventarios
-                    
-                        {{Route::current()->getName()}}
-                    </h3>
-                </div>
-                    <ol class="breadcrumb">
+                         <div class="row">
+                           <div class="visible-xs"><br><br></div>
+                                <h3 class="page-header">
+                                    Alta de Inventarios
+                                 </h3>
+                         </div>
+                    <div class= "col-lg-6.5 col-md-8 col-sm-7">
+                        <div class="hidden-xs">
+                        <div class="hidden-sm">
+                            <ol class="breadcrumb"> 
                     <li>
-                            <i class="fa fa-dashboard"></i> <a href="{!! url('home') !!}">Inicio</a>
+                     <i class="fa fa-dashboard"></i> <a href="{!! url('home') !!}">Inicio</a>
                         </li>
                         <li>
                             <i class="fa fa-archive"></i>  <a href="{!! url('MOD00-ADMINISTRADOR') !!}">MOD-Asministrador</a>
@@ -31,13 +31,16 @@
                         </li>
 
                     </ol>
+                 </div>
+                 </div> 
+                    </div>
                 </div>
             </div>
             <!-- /.row -->
          <div class="container">
         <div class="row">
-             {{--este form tiene que enviar la informacion para crear un modulo--}}
-             <div class="col-md-6">
+        <div class= "col-lg-6.5 col-md8 col-sm-7"    
+        {{--este form tiene que enviar la informacion para crear un modulo--}}
              {!! Form::open(['url' => 'admin/altaInventario', 'method' => 'POST']) !!}
                 <div class="form-group">
                     <label for="NombreEquipo">Nombre Equipo</label>
@@ -73,7 +76,7 @@
                 </div>
                 {!! Form::close() !!} 
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-6.5">
                     
                 </div>
         </div>
