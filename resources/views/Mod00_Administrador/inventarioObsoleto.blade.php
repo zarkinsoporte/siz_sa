@@ -40,8 +40,8 @@
             <!-- /.row -->
         
              <div class="row">
-             <div class= "col-lg-10">
-             <table class="table table-striped">
+             <div class="table-responsive">
+             <table class="table table-striped header-fixed">
                     <thead class="thead-dark">
                         <tr>
                         <th scope="col">ID</th>
@@ -69,7 +69,7 @@
                     @endforeach 
                     </tbody>
                 </table>
-
+</div>
                  <div class="col-md-10">
                      @if (count($errors) > 0)
                          <div class="alert alert-danger text-center" role="alert">

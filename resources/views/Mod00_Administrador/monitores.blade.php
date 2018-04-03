@@ -15,7 +15,7 @@
                         Monitores
                     </h3>
                 </div>
-                <div class= "col-lg-6.5 col-md-8 col-sm-5">
+                <div class= "col-lg-6.5 col-md-8 col-sm-5">   
                         <div class="hidden-xs">
                         <div class="hidden-sm">
                     <ol class="breadcrumb">
@@ -35,7 +35,7 @@
                     </ol>
                        </div>
                        </div>
-                </div>
+                    </table>
                 </div>
             </div>
             <!-- /.row -->
@@ -86,7 +86,7 @@
                     </div>
                  </div>
              </div>
-             <div class="col-lg-5.5 col-md-8 col-sm-">
+             <div class="col-lg-5.5 col-md-8 col-sm-7">
              </div>
              </div>
              @yield('subcontent-01')

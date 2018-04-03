@@ -9,10 +9,10 @@
 
 
 <div id="chart"></div>--}}
-
-       <h4>Usuarios Activos</h4> <div class="row">
+    
+    <div class="visible-lg"><br><br><br></div>
+    <center><h4>Usuarios Activos</h4></center><div class="row"><br>
        @foreach($finalarray as $clave => $valor)
-
            <div class="col-md-3">
 
                <?php

@@ -18,6 +18,7 @@ use App\OP;
 use Illuminate\Support\Facades\DB;
 Route::get('/','HomeController@index');
 Route::get('/home', 'HomeController@index');
+
 /*
 |--------------------------------------------------------------------------
 | Administrator Routes

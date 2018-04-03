@@ -14,7 +14,7 @@
                        Gestiòn de Inventario
                     </h3>
                 </div>
-                  <div class= "col-lg-6.5 col-md-8 col-sm-5">
+                  <div class= "col-lg-6.5 col-md-9 col-sm-8">
                     <div class="hidden-xs">
                         <div class= "hidden-ms">
                     <ol class="breadcrumb">
@@ -34,7 +34,7 @@
             </div>
             <!-- /.row -->
             <div class="row">
-                <div class="col-lg-5.5 col-md-8 col-sm-7">
+                <div class="col-lg-6.5 col-md-9 col-sm-8">
                     <div class="well">
                     <a href="altaInventario" class="btn btn-success"><i class="glyphicon glyphicon-plus-sign"></i></a>
                     </div>
