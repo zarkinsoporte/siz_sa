@@ -46,8 +46,6 @@ Route::get('orden/{code}', function ($code) {
 //    $orden = DB::table('@CP_LOGOF')->where('Code', $code)->first();
 //    return $orden->U_DocEntry;
 
-
-
     $Codes = OP::where('U_DocEntry', '60987' )->get();
 //dd($Codes);
     $index = 0;
@@ -94,11 +92,12 @@ route::get('setpassword', function (){
 
 Route::post('cambio.password',   'Mod00_AdministradorController@cambiopassword');
 
-Route::get('users', 'Mod00_AdministradorController@allUsers');
+Route::get('admin/users', 'Mod00_AdministradorController@allUsers');
 Route::get('users/edit/{empid}', 'Mod00_AdministradorController@editUser');
+Route::get('admin/detalle-depto/{depto}','Mod00_AdministradorController@showUsers');
+Route::get('datatables.showusers', 'Mod00_AdministradorController@DataShowUsers')->name('datatables.showusers');
 
 Route::get('controlPiso', 'Mod01_ProduccionController@estacionSiguiente');
-
 Route::get('grupo/{id}', function ($id){
   Grupo::getInfo($id);
 });
@@ -114,21 +113,22 @@ Route::get('admin/grupos/conf_modulo/{id}', 'Mod00_AdministradorController@confM
 Route::get('admin/grupos/conf_modulo/quitar/{id}', 'Mod00_AdministradorController@deleteTarea');
 
 Route::get('help', function(){
-    dd(date('Y-m-d H:i:s'));
-    $index = 1;
-    $log = LOGOF::where('id', 1000)->first();
-   // dd($log);
-//    $newCode = new OP();
-//    $newCode->Code =12121212;
-//    $newCode->save();
-//    $varOP = OP::find(12121212);
-    $consecutivo =  DB::select('SELECT TOP 1 Code FROM  [FUSIONL2].[dbo].[@CP_LOGOF] ORDER BY  U_FechaHora DESC');
-    $consecutivo =  DB::select('SELECT TOP 1 Code FROM  [FUSIONL2].[dbo].[@CP_LOGOT] ORDER BY  U_FechaHora DESC');
+    $produccion =  DB::select('SELECT "CP_ProdTerminada"."orden", "CP_ProdTerminada"."Pedido", "CP_ProdTerminada"."Codigo",
+ "CP_ProdTerminada"."modelo", "CP_ProdTerminada"."VS", "CP_ProdTerminada"."fecha", 
+ "CP_ProdTerminada"."Name", "CP_ProdTerminada"."CardName", "CP_ProdTerminada"."Semana", 
+ "CP_ProdTerminada"."U_Tiempo", "CP_ProdTerminada"."Cantidad", "CP_ProdTerminada"."TVS", 
+ "CP_ProdTerminada"."TTiempo"
+ FROM   "FUSIONL"."dbo"."CP_ProdTerminada" "CP_ProdTerminada"
+ WHERE  ("CP_ProdTerminada"."fecha">=\'12/12/2017\' AND 
+ "CP_ProdTerminada"."fecha"<=\'12/12/2017\') AND 
+ ("CP_ProdTerminada"."Name"= (\'175 Inspeccion Final\')  OR "CP_ProdTerminada"."Name"= (CASE
+ WHEN  \'175 Inspeccion Final\' like \'175%\' THEN N\'08 Inspeccionar Empaque\'
+ END))
+ ');
 
-    //$consecutivo = ((int)$users->Code);
-echo $consecutivo[0]->Code;
+    print_r($produccion);
 
-   // echo $log->U_CT;
+
 });
 
 
@@ -136,6 +136,10 @@ Route::get('datatable/{id}', 'Mod00_AdministradorController@confModulo');
 Route::get('datatables.data', 'Mod00_AdministradorController@anyData')->name('datatables.data');
 
 Route::get('updateprivilegio','Mod00_AdministradorController@updateprivilegio');
+Route::get('dropdown', function(){
+         return TAREA_MENU::where('id_menu_item',Input::get('option'))
+             ->lists('name', 'id');
+  });
 
 Route::get('switch', function (){
    $vava = MODULOS_GRUPO_SIZ::find(2);
@@ -148,15 +152,21 @@ Route::post('nuevatarea', 'Mod00_AdministradorController@nuevatarea');
 
 
 
+
 /*
 |--------------------------------------------------------------------------
 | MOD01-PRODUCCION Routes
 |--------------------------------------------------------------------------
 */
+Route::get('home/R. PROD. GRAL.','Reportes_ProduccionController@produccion1');
+Route::post('home/R. PROD. GRAL.','Reportes_ProduccionController@produccion1');
+
 Route::get('home/TRASLADO ÷ AREAS', 'Mod01_ProduccionController@traslados');
 Route::post('home/TRASLADO ÷ AREAS', 'Mod01_ProduccionController@traslados');
+
 Route::get('home/TRASLADO ÷ AREAS/{id}', 'Mod01_ProduccionController@getOP');
 Route::post('home/TRASLADO ÷ AREAS/{id}', 'Mod01_ProduccionController@getOP');
+
 Route::post('home/traslados/avanzar', 'Mod01_ProduccionController@avanzarOP');
 
 

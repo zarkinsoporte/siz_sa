@@ -22,8 +22,8 @@ $index = 0;
                             $bnd2 = $n1->id_menu;
                             ?>
 
-                            <li><a href="javascript:;" data-toggle="collapse" data-target="#mo{{$n1->id_modulo}}" ><i class="fa fa-fw fa-dashboard"></i> {{$n1->modulo}} <i class="fa fa-fw fa-caret-down"></i></a>
-                                <ul id="mo{{$n1->id_modulo}}" class="collapse">
+                            <li><a href="javascript:;" data-toggle="collapse"  data-target="#mo{{$n1->id_modulo}}" ><i class="fa fa-fw fa-dashboard"></i> {{$n1->modulo}} <i class="fa fa-fw fa-caret-down"></i></a>
+                                <ul id="mo{{$n1->id_modulo}}" class="collapse in">
                                     <li><a href="javascript:;" data-toggle="collapse" data-target="#me{{$n1->id_menu}}"><i class="fa fa-fw fa-tasks"></i> {{$n1->menu}} <i class="fa fa-fw fa-caret-down"></i></a>
                                         <ul id="me{{$n1->id_menu}}" class="collapse">
                                             <li>

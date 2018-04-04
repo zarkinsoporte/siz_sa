@@ -28,7 +28,7 @@ class Mod00_AdministradorController extends Controller
      */
     public function __construct()
     {
-        //$this->middleware('auth');
+        $this->middleware('auth');
     }
 
     /**
@@ -38,7 +38,12 @@ class Mod00_AdministradorController extends Controller
      */
     public function index()
     {
+        if ($user = Auth::user()->U_EmpGiro == 246){
             return view('Mod00_Administrador.admin');
+        }else{
+
+        }
+
     }
 
     public function plantilla( Request $request)
@@ -69,9 +74,31 @@ class Mod00_AdministradorController extends Controller
         return view('Mod00_Administrador.usuarios', compact('users', 'beto'));
     }
 
+    public function showUsers($depto)
+    {
+
+        return view('Mod00_Administrador.usuariosDepto', compact('depto'));
+    }
+    public function DataShowUsers(Request $request)
+    {
+        $users = DB::table('View_Plantilla_SIZ')
+            ->where('Depto', 'like', '%'.$request->get('depto').'%');
+
+        return Datatables::of($users)
+            ->addColumn('action', function ($user) {
+                return  '<button type="button" class="btn btn-default" data-toggle="modal" data-target="#mymodal" data-whatever="'.$user->U_EmpGiro.'">
+                                        <i class="fa fa-unlock" aria-hidden="true"></i>
+                                    </button>';
+            }
+            )
+            ->make(true);
+
+
+    }
+
     public function allUsers(Request $request){
-        $users = DB::select('select * from view_Plantilla_SIZ');
-        $users = collect($users)->sortByDesc('dept');
+        $users = DB::select('SELECT depto, COUNT(*) as c  FROM View_Plantilla_SIZ GROUP BY Depto');
+
 
         //$users = $this->arrayPaginator($users, $request);
         $stocksTable = Lava::DataTable();
@@ -93,7 +120,16 @@ class Mod00_AdministradorController extends Controller
             ]
         ]);
 
-        return view('Mod00_Administrador.usuarios', compact('users', 'beto'));
+
+        $finalarray = [];
+        foreach ($users as $user)
+        {
+
+            $miarray = DB::select('SELECT jobTitle, COUNT(*) as c FROM View_Plantilla_SIZ where Depto like \'%'.$user->depto.'%\' GROUP BY jobTitle');
+            $finalarray[$user->depto] = $miarray;
+        }
+
+        return view('Mod00_Administrador.usuarios', compact('finalarray', 'beto'));
     }
 
     public function arrayPaginator($array, $request)
@@ -121,12 +157,12 @@ class Mod00_AdministradorController extends Controller
         try {
             $password = Hash::make(Input::get('password'));
             DB::table('dbo.OHEM')
-                ->where('empID',Input::get('userId') )
+                ->where('U_EmpGiro',Input::get('userId') )
                 ->update(['U_CP_Password' => $password]);
         } catch(\Exception $e) {
             return redirect()->back()->withErrors(array('msg' => $e->getMessage()));
         }
-        $user = User::where('empID',Input::get('userId'))->first();
+        $user = User::where('U_EmpGiro',Input::get('userId'))->first();
         //dd($user);
         Session::flash('mensaje', 'La contraseña de '.$user->firstName.' '.$user->lastName.' ha cambiado.');
         return redirect()->back();
