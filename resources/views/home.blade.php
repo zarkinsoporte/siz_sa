@@ -7,6 +7,7 @@ $bnd = null;
 $bnd2 = null;
 $index = 0;
         ?>
+        
     <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
     <div class="collapse navbar-collapse navbar-ex1-collapse">
         <ul class="nav navbar-nav side-nav ">
@@ -29,6 +30,7 @@ $index = 0;
                                             <li>
                                                 <a href="{!! url('home/'.$n1->tarea) !!}">{{$n1->tarea}}</a>
                                             </li>
+                                        
 
 
                     @elseif($bnd == $n1->id_modulo)
@@ -96,7 +98,11 @@ $index = 0;
                     @endif
 
 @endforeach
-
+@if (Auth::user()->U_EmpGiro==246)
+                    <li>
+                        <a href="{!! url('/MOD00-ADMINISTRADOR') !!}">Administrador</a>
+                    </li>
+@endif
 
                 @include('partials.section-navbar')
         </ul>

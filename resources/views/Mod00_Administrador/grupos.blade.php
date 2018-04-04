@@ -26,19 +26,30 @@
             <!-- Page Heading -->
             <div class="container">
                 <div  class="row">
+                    <div class="visible-xs"><br><br></div>
                     <h3 class="page-header">
                         Módulos del Grupo {{$nombre_grupo}}:
                     </h3>
-                    <ol class="breadcrumb">
-                        <li>
-                            <i class="fa fa-dashboard"></i>  <a href="{!! url('MOD00-ADMINISTRADOR') !!}">Administrador</a>
-                        </li>
-                        <li class="active">
-                            <i class="fa fa-file"></i> <a href="{!! url('admin/grupos/'.$id_grupo) !!}">Módulos</a>
-                        </li>
-                    </ol>
+                        <div class= "hidden-xs">
+                        <div class= "hidden-sm">
+                        <div class= "col-lg-6.5 col-md-8 col-sm-7">
+                            <ol class="breadcrumb">
+                    
+                             <li>
+                                <i class="fa fa-dashboard"></i> <a href="{!! url('home') !!}">Inicio</a>
+                            </li>
+                            <li>
+                                <i class="fa fa-archive"></i>  <a href="{!! url('MOD00-ADMINISTRADOR') !!}">MOD-Administrador</a>
+                            </li>
+                            <li class="active">
+                                <i class="fa fa-file"></i> <a href="{!! url('admin/grupos/'.$id_grupo) !!}">Módulos</a>
+                            </li>
+                            </ol>
+                        </div>
+                        </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
             <!-- /.row -->
             <div class="container">
                 <div class="row">
@@ -68,7 +79,7 @@
                         <div class="col-md-4">
                             {{ csrf_field() }}
 
-                                <label for="sel1">Modulos Existentes:</label>
+                                <label for="sel1">Módulos Existentes:</label>
                                 <select class="form-control" id="sel1" name="sel1">
                                     @foreach($modulos as $m)
                                     <option value="{{$m->id}}">{{$m->name}}</option>
@@ -88,10 +99,12 @@
                     <br><br><br>
                 </div>
                     <div class="row">
-                        <div class="list-group">
+                        <div class="">
                     @foreach ($modulos_grupo as $m)
 
-                                <div class="col-sm-6 col-md-4">
+                            <div class="">
+                            
+                                <div class="col-md-4 col-sm-12 col-xs-12">                                                                                         
                                     <div class="thumbnail">
                                         <div class="caption">
                                             <h4>{{$m->name}}</h4>
@@ -104,13 +117,13 @@
                                                     <i class="fa fa-cog" aria-hidden="true"></i>
                                                 </a>
                                             </p>
-                                        </div>
+                                        </div>                                   
                                     </div>
                                 </div>
-
+                            </div>
                     @endforeach
                       </div>
-
+</div>
                     <!-- Modal -->
 
                     <div class="modal fade" id="mymodal" tabindex="-1" role="dialog" >

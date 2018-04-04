@@ -1,6 +1,7 @@
-<!-- Styles -->
+﻿<!-- Styles -->
 <!-- Material Design fonts -->
-<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
+<!--<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">-->
+{!! Html::style('assets/css/family=reboto.css') !!}
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 {!! Html::style('assets/css/bootstrap.css') !!}
@@ -42,15 +43,15 @@
     </div>
     <div class="row" ><!-- column -->
         <p align="center"  ><!-- svg -->
-            <img class="svg hidden-xs" id="u196" src="/siz/public/images/svg-pegado-150982x45.svg?crc=108988733" alt="" data-mu-svgfallback="/siz/public/images/svg%20pegado%20150982x45_poster_.png?crc=4279418901" width="200" height="200"
+            <img class="svg hidden-xs" id="u196" src={{ URL::asset('images/svg-pegado-150982x45.svg') }} alt="" data-mu-svgfallback="/siz/public/images/svg%20pegado%20150982x45_poster_.png?crc=4279418901" width="200" height="200"
            />
-            <img class="svg visible-xs" id="u196" src="/siz/public/images/svg-pegado-150982x45.svg?crc=108988733" alt="" data-mu-svgfallback="/siz/public/images/svg%20pegado%20150982x45_poster_.png?crc=4279418901" width="200" height="200"
+            <img class="svg visible-xs" id="u196" src={{ URL::asset('images/svg-pegado-150982x45.svg') }}  alt="" data-mu-svgfallback="/siz/public/images/svg%20pegado%20150982x45_poster_.png?crc=4279418901" width="200" height="200"
             style="margin-top: -30%"/>
 
         <p style="margin-top: 5%" align="center"><!-- none box -->
             &nbsp;
 
-            <img class="hidden-xs"  alt="Bienvenido" src="/siz/public/images/u343-4.png?crc=3974843000" style="height: 7%"/><!-- rasterized frame -->
+            <img class="hidden-xs"  alt="Bienvenido" src={{ URL::asset('images/u343-4.png') }} style="height: 7%"/><!-- rasterized frame -->
         </p>
         <div >
             <div >

@@ -9,6 +9,35 @@
 
 
 <div id="chart"></div>--}}
+    
+    <div class="visible-lg"><br><br><br></div>
+    <center><h4>Usuarios Activos</h4></center><div class="row"><br>
+       @foreach($finalarray as $clave => $valor)
+           <div class="col-md-3">
+
+               <?php
+               $total = 0
+               ?>
+               <div class="panel panel-default">
+                   <div class="panel-heading">
+                       <h3 class="panel-title"><i class="fa fa-users fa-fw"></i>&nbsp;{{$clave}}</h3>
+                   </div>
+                   <div class="panel-body">
+                       <div class="list-group">
+                           @foreach($valor as $dept)
+                               <a href="#" class="list-group-item">
+                                   <span class="badge">{{$dept->c}}</span>
+                                   {{$dept->jobTitle}}
+                                   <?php
+                                   $total = $total + $dept->c
+                                   ?>
+                               </a>
+                           @endforeach
+                           <a href="#" class="list-group-item">
+                               <span class="badge">{{$total}}</span>
+                               <i class="fa fa-fw fa-users"></i> Total General
+                           </a>
+
 
        <h4>Usuarios Activos</h4> <div class="row">
        @foreach($finalarray as $clave => $valor)
@@ -44,7 +73,6 @@
                        </div>
                    </div>
                </div>
-
            </div>
 
    @endforeach   </div> <!-- /.row -->

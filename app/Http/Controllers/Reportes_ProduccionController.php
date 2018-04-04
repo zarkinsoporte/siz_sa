@@ -48,6 +48,7 @@ class Reportes_ProduccionController extends Controller
                 $fecha = explode(" - ",$request->input('date_range'));
                 $fechaI = $fecha[0];
                 $fechaF = $fecha[1];
+
                 $clientes  =  DB::select('SELECT CardName from  "CP_ProdTerminada" WHERE  (fecha>=\''.$fechaI.'\' AND 
   fecha<=\''.$fechaF.'\') AND 
  (Name= (\''.$departamento.'\')  OR Name= (CASE
@@ -65,6 +66,7 @@ class Reportes_ProduccionController extends Controller
  WHEN  \''.$departamento.'\' like \'175%\' THEN N\'08 Inspeccionar Empaque\'
  END))
  GROUP BY CardName, fecha, Name');
+
 
                 $produccion =  DB::select('SELECT "CP_ProdTerminada"."orden", "CP_ProdTerminada"."Pedido", "CP_ProdTerminada"."Codigo",
  "CP_ProdTerminada"."modelo", "CP_ProdTerminada"."VS", "CP_ProdTerminada"."fecha", 
@@ -88,7 +90,8 @@ class Reportes_ProduccionController extends Controller
  WHEN  \''.$departamento.'\' like \'157%\' THEN N\'07 Tapizar y Empaque\'
  WHEN  \''.$departamento.'\' like \'175%\' THEN N\'08 Inspeccionar Empaque\'
  END))
- ');
+ ORDER BY "CP_ProdTerminada"."CardName", "CP_ProdTerminada"."orden"');
+
                 $result = json_decode(json_encode($produccion), true);
                 $finalarray = [];
                 foreach ($clientes as $client)

@@ -105,8 +105,19 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="date_range" class="control-label">Rango de Fechas:</label>
-                                            <input type="text" id="date_range" name="date_range" class="form-control" >
+
+                                            <input> 
                                         </div>
+                                     
+                                        <div class="input-group input-daterange">
+    <input type="text" class="form-control" value="2012-04-05">
+    <div class="input-group-addon">to</div>
+    <input type="text" class="form-control" value="2012-04-19">
+    
+    
+</div>
+<input type="text" id="datepicker">
+
                                         <div class="form-group">
                                             <label for="dep" class="control-label">Departamento:</label>
                                             <select class="form-control" id="dep" name="dep" required>
@@ -230,6 +241,7 @@
                         });
 
 
+
                         $('#date_range').daterangepicker(
 
                         { "locale": {
@@ -268,6 +280,7 @@
 
                         "opens": "center"
                         });
+
 
                     @endsection
 

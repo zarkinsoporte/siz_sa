@@ -1,6 +1,6 @@
 <?php
-
 namespace App\Http\Controllers;
+ini_set('max_execution_time', 180);
 
 use App\Grupo;
 use App\Modelos\MOD01\MENU_ITEM;
@@ -16,6 +16,11 @@ use Illuminate\Support\Facades\Input;
 use Session;
 use Auth;
 use Lava;
+//DOMPDF
+use Dompdf\Dompdf;
+use App;
+//use Pdf;
+//Fin DOMPDF
 use Illuminate\Support\Facades\Route;
 
 use Datatables;
@@ -413,5 +418,191 @@ dd($user);
             return redirect()->back();
         }
 
+    }
+
+
+    public function inventario()
+    {
+        //Realizamos la consulta nuevamente
+        $inventario = DB::table('siz_inventario')
+            ->join('siz_monitores', 'siz_inventario.monitor', '=', 'siz_monitores.id')
+            ->select('siz_inventario.id as id_inv', 'siz_inventario.*', 'siz_monitores.id as id_mon', 'siz_monitores.*')
+            ->where('siz_inventario.activo', '=',1)
+            ->orderBy('id_inv')
+            ->get();
+        $monitores  = DB::table('siz_monitores')->get();
+        return view('Mod00_Administrador.inventario', compact('inventario', 'monitores'));    
+    }
+
+    public function mark_obs($id)
+    {
+        //Actualizamos el valor en la DB
+        $act_inv = DB::table('siz_inventario')
+            ->where("id", "=", "$id")
+            ->update([
+                'activo' => '0'
+            ]);
+        //dd($act_inv);     
+        //Realizamos la consulta nuevamente
+        //$this->inventario();
+        return redirect('admin/inventario');
+    }
+
+    public function mark_rest($id)
+    {
+        //Actualizamos el valor en la DB
+        $act_inv = DB::table('siz_inventario')
+            ->where("id", "=", "$id")
+            ->update([
+                'activo' => '1'
+            ]);
+        //dd($act_inv);     
+        //Realizamos la consulta nuevamente
+        //$this->inventario();
+        return redirect('admin/inventarioObsoleto');
+    }
+
+    public function inventarioObsoleto( Request $request)
+    {
+        //Realizamos la consulta buscando donde activo sea igual a 0
+        $inventario = DB::table('siz_inventario')
+            ->join('siz_monitores', 'siz_inventario.monitor', '=', 'siz_monitores.id')
+            ->select('siz_inventario.id as id_inv', 'siz_inventario.*', 'siz_monitores.id as id_mon', 'siz_monitores.*')
+            ->where('siz_inventario.activo', '=',0)
+            ->get();
+        $monitores  = DB::table('siz_monitores')->get();
+        //dd($inventario);
+        return view('Mod00_Administrador.inventarioObsoleto', compact('inventario', 'monitores'));    
+    }   
+
+    public function monitores( Request $request)
+    {
+        $monitores = DB::table('siz_monitores')->orderBy('id', 'ASC')->get();
+        return view('Mod00_Administrador.monitores')->with('monitores', $monitores);
+    }
+
+    public function altaInventario( Request $request)
+    {
+        //$monitores = DB::table('siz_monitores')->get();
+        $monitores = DB::select( DB::raw("SELECT siz_monitores.id AS id_mon, nombre_monitor FROM siz_monitores LEFT JOIN siz_inventario ON siz_monitores.id = siz_inventario.monitor WHERE siz_inventario.monitor IS NULL AND siz_monitores.id !='1'") );
+        return view('Mod00_Administrador.altaInventario', compact('monitores'));   
+    }
+
+    public function altaMonitor( Request $request)
+    {
+        //$users = User::plantilla();
+        return view('Mod00_Administrador.altaMonitor');
+    }
+
+    public function mod_mon($id, $mensaje)
+    {
+        //$users = User::plantilla();
+
+        $monitor = DB::table('siz_monitores')
+        ->select('siz_monitores.*')
+        ->where('id', '=',$id)
+        ->first();
+        return view('Mod00_Administrador.modMonitor', compact('monitor', 'mensaje'));   
+    }
+
+    public function mod_mon2( Request $request)
+    {
+        //$users = User::plantilla();
+        $id_monitor = $request->input('id_monitor');
+        $act_mon = DB::table('siz_monitores')
+        ->where("id", "=", "$id_monitor")
+        ->update([
+            'nombre_monitor' => $request->input('nombre_monitor')
+        ]);
+        $mensaje="Monitor Actualizado";
+        return $this->mod_mon($id_monitor, $mensaje);   
+    }
+
+    public function altaMonitor2(Request $request)
+    {
+        //Insertamos el monitor en la DB
+        DB::table('siz_monitores')->insert(
+            [
+             'nombre_monitor' => $request->input('nombre_monitor')
+            ]
+        );
+        //Realizamos la consulta nuevamente
+        $monitores = DB::table('siz_monitores')->orderBy('id', 'ASC')->get();
+        //Llamamos a la vista para mostrar su contendio
+        return view('Mod00_Administrador.monitores')->with('monitores', $monitores);
+    }
+
+    public function altaInventario2(Request $request)
+    {
+        //Insertamos el monitor en la DB
+        DB::table('siz_inventario')->insert(
+            [
+             'nombre_equipo' => $request->input('nombre_equipo'),
+             'correo' => $request->input('correo'), 
+             'numero_equipo' => $request->input('numero_equipo'),
+             'tipo_equipo' => $request->input('tipo_equipo'),
+             'monitor' => $request->input('monitor')
+            ]
+        );
+        //Realizamos la consulta nuevamente
+        return redirect('admin/inventario');
+    }
+
+    public function generarPdf($id)
+    {
+        //$pdf = App::make('dompdf.wrapper');
+        $inventario = DB::table('siz_inventario')
+        ->join('siz_monitores', 'siz_inventario.monitor', '=', 'siz_monitores.id')
+        ->select('siz_inventario.id as id_inv', 'siz_inventario.*', 'siz_monitores.id as id_mon', 'siz_monitores.*')
+        ->where('siz_inventario.id', '=',$id)
+        ->get();
+    
+        $data=array('data' => $inventario);
+        //$data = $inventario;
+        
+        $pdf = \PDF::loadView('Mod00_Administrador.pdfInventario', $data);
+        //dd($pdf);
+        //return $pdf->stream();
+        return $pdf->stream('Responsiva.pdf');
+    }
+
+    public function delete_inv($id)
+    {
+
+        $eliminar = DB::table('siz_inventario')->where('id', '=', $id)->delete();
+        return redirect('admin/inventario');
+    }
+
+    public function mod_inv($id, $mensaje)
+    {
+        $inventario = DB::table('siz_inventario')
+            ->join('siz_monitores', 'siz_inventario.monitor', '=', 'siz_monitores.id')
+            ->select('siz_inventario.id as id_inv', 'siz_inventario.*', 'siz_monitores.id as id_mon', 'siz_monitores.*')
+            ->where('siz_inventario.id', '=',$id)
+            ->orderBy('id_inv')
+            ->get();
+        //dd($inventario);    
+        $monitores = DB::select( DB::raw("SELECT siz_monitores.id AS id_mon, nombre_monitor FROM siz_monitores LEFT JOIN siz_inventario ON siz_monitores.id = siz_inventario.monitor WHERE siz_inventario.monitor IS NULL AND siz_monitores.id !='1'") );
+        //dd($inventario[0]->nombre_equipo);
+        return view('Mod00_Administrador.modInventario', compact('monitores', 'inventario', 'mensaje')); 
+    }
+
+    public function mod_inv2(Request $request)
+    {
+        //dd($request->input('monitor'));
+        $act_inv = DB::table('siz_inventario')
+        ->where("id", "=", "$request->id_inv")
+        ->update(
+            [
+                'nombre_equipo' => $request->input('nombre_equipo'),
+                'correo' => $request->input('correo'), 
+                'numero_equipo' => $request->input('numero_equipo'),
+                'tipo_equipo' => $request->input('tipo_equipo'),
+                'monitor' => $request->input('monitor')
+               ]
+        );
+        $id_inv = $request->id_inv;
+        $mensaje="Registro Actualizado Correctamente";
+        return $this->mod_inv($id_inv, $mensaje);
     }
 }

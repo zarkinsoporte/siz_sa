@@ -36,11 +36,12 @@
 
            </div>
 
-
-
-            <div class="row">
+              
+                <div class="row">
+                
                              <h4>Usuarios Activos</h4>
                             <!-- Table -->
+                    <div class= "col-lg-6.5 col-md-7 col-xs-8">
                 <div style="overflow-x:auto"> <table id="usuarios" class="table table-striped table-bordered">
                         <thead>
                         <tr>
@@ -81,7 +82,7 @@
 
                             </tr>
                         @endforeach
-
+                    </div>
                     </table></div>
 
 

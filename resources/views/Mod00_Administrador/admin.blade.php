@@ -1,28 +1,9 @@
 @extends('app')
 
 @section('content')
-    <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
-    <div class="collapse navbar-collapse navbar-ex1-collapse">
-        <ul class="nav navbar-nav side-nav">
 
-            <li>
-                <a href="javascript:;" data-toggle="collapse" data-target="#demo">MOD-Administrador<i class="fa fa-fw fa-caret-down"></i></a>
-                <ul id="demo" class="">
+@include('partials.menu-admin')
 
-                        <li>
-                            <a href="{!! url('admin/grupos/1') !!}"><i class="fa fa-fw fa-users"></i>   Gestión de Grupos</a>
-                        </li>
-                    <li>
-                        <a href="{!! url('admin/users') !!}"><i class="fa fa-fw fa-user"></i> Usuarios SIZ</a>
-                    </li>
-
-                </ul>
-            </li>
-            @include('partials.section-navbar')
-        </ul>
-    </div>
-    <!-- /.navbar-collapse -->
-    </nav>
 
     <div >
 
@@ -31,14 +12,21 @@
             <!-- Page Heading -->
             <div class="row">
                 <div >
+                    <div class="visible-xs"><br><br></div>
                     <h3 class="page-header">
-                        {{Route::current()->getName()}}
+                        Usuarios
                     </h3>
-                    <ol class="breadcrumb">
+                    
+                       <div class= "col-lg-6.5 col-md-8 col-sm-7">
+                        <div class="hidden-xs">
+                        <div class="hidden-sm">
+                        <ol class="breadcrumb">
                         <li>
-                            <i class="fa fa-dashboard"></i>  <a href="{!! url('home') !!}">ACTIVIDADES</a>
+                            <i class="fa fa-dashboard"></i>  <a href="{!! url('home') !!}">Inicio</a>
                         </li>
-
+                        <li>
+                            <i class="fa fa-archive"></i> <a href="users">Usuarios</a>
+                       </li>
                     </ol>
                 </div>
             </div>
@@ -60,7 +48,6 @@
                              </div>
                          </div>
                      @endif
-
                  </div>
              </div>
              @yield('subcontent-01')
