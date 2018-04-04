@@ -11,17 +11,7 @@
 
     <title>{{ 'Fusion Confort' }}</title>
     <!-- Styles -->
-<<<<<<< HEAD
 
-    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
-    <!-- Material Design fonts -->
-    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-    <link rel="stylesheet" href="http://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
-    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
-
-=======
 <!--<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />-->
     <!--{!! Html::style('assets/css/Mod00_Admiistrador/bootstrap.daterangepicker.css') !!}
      Material Design fonts -->
@@ -34,7 +24,7 @@
     
     <!--<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>-->
     {!! Html::script('assets/js/dataTables.min.js') !!}
->>>>>>> 122e09cf0e790b57481081b321f2f40181d54f91
+
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
