@@ -477,14 +477,14 @@ dd($user);
 
     public function monitores( Request $request)
     {
-        $monitores = DB::table('siz_monitores')->get();
+        $monitores = DB::table('siz_monitores')->orderBy('id', 'ASC')->get();
         return view('Mod00_Administrador.monitores')->with('monitores', $monitores);
     }
 
     public function altaInventario( Request $request)
     {
         //$monitores = DB::table('siz_monitores')->get();
-        $monitores = DB::select( DB::raw("SELECT siz_monitores.id as id_mon, nombre_monitor FROM siz_monitores LEFT JOIN siz_inventario ON siz_monitores.id = siz_inventario.monitor WHERE siz_inventario.monitor IS NULL AND siz_inventario.monitor !='1'") );
+        $monitores = DB::select( DB::raw("SELECT siz_monitores.id AS id_mon, nombre_monitor FROM siz_monitores LEFT JOIN siz_inventario ON siz_monitores.id = siz_inventario.monitor WHERE siz_inventario.monitor IS NULL AND siz_monitores.id !='1'") );
         return view('Mod00_Administrador.altaInventario', compact('monitores'));   
     }
 
@@ -527,7 +527,7 @@ dd($user);
             ]
         );
         //Realizamos la consulta nuevamente
-        $monitores = DB::table('siz_monitores')->get();
+        $monitores = DB::table('siz_monitores')->orderBy('id', 'ASC')->get();
         //Llamamos a la vista para mostrar su contendio
         return view('Mod00_Administrador.monitores')->with('monitores', $monitores);
     }
