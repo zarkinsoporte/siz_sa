@@ -7,16 +7,21 @@
 
             <!-- Page Heading -->
             <div class="row">
-                <div class="col-lg-12">
+                <div class="col-lg-8 col-md-9 col-xs-10">
+                <div class="hidden-lg"><br><br></div>
                     <h3 class="page-header">
                         Traslados
                         <small>Producción</small>
                     </h3>
+                    <div class="visible-lg">
                     <ol class="breadcrumb">
                         <li>
                             <i class="fa fa-dashboard">  <a href="{!! url('home') !!}">Inicio</a></i>
                         </li>
+                        <li>
+                            <i class= "fa fa-archive"> <a href="traslados">Traslados</a></i>
                     </ol>
+                    </div>
                 </div>
             </div>
             <!-- /.row -->
@@ -75,18 +80,34 @@
                                       </div>
                                   </div>
                               </div>
+{!! Html::style('assets/css/tablas.css') !!}
+
+<style>
+   	/*
+		Label the data
+		*/
+		td:nth-of-type(1):before { content: "Código"; }
+		td:nth-of-type(2):before { content: "Descripción"; }
+		td:nth-of-type(3):before { content: "Reproceso"; }
+		td:nth-of-type(4):before { content: "Cantidad"; }
+		td:nth-of-type(5):before { content: "Cantidad Recibida"; }
+		td:nth-of-type(6):before { content: "Procesado"; }
+		td:nth-of-type(7):before { content: "Estación Actual"; }
+		td:nth-of-type(8):before { content: "Estación Siguiente"; }
+		td:nth-of-type(9):before { content: "Avanzar OP"; }
+</style>
 
 
-
-
-
+            
 <div class="row">
-                            <div style="overflow-x:auto" class="col-md-12"> <table id="usuarios" class="table table-striped table-bordered table-condensed">
+                      
+                            <div style="overflow-x:auto" class="col-md-12">
+                            
+                         <table id="usuarios" class="table table-striped table-bordered table-condensed">
                                     <thead>
                                     <tr>
 
                                         <th>Código</th>
-
                                         <th>Descripción</th>
                                         <th>Reproceso</th>
                                         <th>Cantidad</th>
@@ -98,6 +119,7 @@
 
                                     </tr>
                                     </thead>
+                                    <tbody>
                                     @foreach ($ofs as $of)
                                         <tr>
                                             {{-- <td align="center">  <button type="button" class="btn btn-default" data-toggle="modal" data-target="#mymodal" data-whatever="{{$o->empID}}">
@@ -124,7 +146,7 @@
                                                 </a> </td>
                                         </tr>
                                     @endforeach
-
+</tbody>
                                 </table></div></div>
 
                             @endif
@@ -150,11 +172,12 @@
 
                             <br>
                             <div class="row">
-                                <div class="col-md-2 col-md-offset-1">
+                                <div class="col-md-2 col-md-offset-1 col-xs-5 col-xs-offset-1">
+                                    
                                     <img src= "{{ URL::asset('images/Mod01_Produccion/password.png')}}"
                                          alt="">
                                 </div>
-                                <div class="col-md-7 col-md-offset-1">
+                                <div class="col-md-6 col-md-offset-1 col-xs-5">
                                     @include('partials.alertas')
                                     <div id="hiddendiv" style="display: none">
                                         <label for="miusuario" class="control-label">Usuario:</label>

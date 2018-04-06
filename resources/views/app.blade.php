@@ -42,6 +42,9 @@
 {!! Html::style('assets/css/font-awesome.css') !!}
 
 {!! Html::style('assets/css/sb-admin.css') !!}
+{!! Html::style('assets/css/responsive.css') !!}
+
+
 
     <style>
         ul {

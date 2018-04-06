@@ -6,7 +6,8 @@
 
         <!-- Page Heading -->
         <div class="row">
-            <div class="col-lg-12">
+            <div class="col-lg-6.5 col-md-8 col-sm-5">
+            <div class="hidden-lg"><br><br></div>
                 <h3 class="page-header">
                     Inicio
                     <small>Sistema Informatico Zarkin</small>
@@ -16,7 +17,7 @@
         </div>
         <!-- /.row -->
         <div class="row">
-            <div class="col-lg-12 ">
+            <div class="col-lg-6.5 col-md-8 col-sm-5 ">
                 @include('partials.alertas')
                 <div class="alert alert-info">
                     <strong>Bienvenido  ! </strong> sin tareas para hoy.
