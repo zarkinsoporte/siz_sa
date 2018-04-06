@@ -105,15 +105,9 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="date_range" class="control-label">Rango de Fechas:</label>
-
-                                            <input> 
-                                        </div>
-                                     
-                                        <div class="input-group input-daterange">
-
                                             <input type="text" id="date_range" name="date_range" class="form-control" >
                                         </div>
-<input type="text" id="datepicker">
+                                     
 
                                         <div class="form-group">
                                             <label for="dep" class="control-label">Departamento:</label>
