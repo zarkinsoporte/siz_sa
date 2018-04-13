@@ -39,7 +39,7 @@
             <!-- /.row -->
          <div class="container">
         <div class="row">
-        <div class= "col-lg-6.5 col-md8 col-sm-7"    
+        <div class= "col-lg-6.5 col-md8 col-sm-7">   
         {{--este form tiene que enviar la informacion para crear un modulo--}}
              {!! Form::open(['url' => 'admin/altaInventario', 'method' => 'POST']) !!}
                 <div class="form-group">
