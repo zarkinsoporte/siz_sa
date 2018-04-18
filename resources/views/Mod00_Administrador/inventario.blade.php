@@ -45,13 +45,12 @@
              <table class="table table-striped header-fixed">
                     <thead class="thead-dark">
                         <tr>
-                        <th scope="col">ID</th>
+                        <th scope="col">Número de Equipo</th>
                         <th scope="col">Nombre Equipo</th>
                         <th scope="col">Correo</th>
-                        <th scope="col">Número de Equipo</th>
                         <th scope="col">Tipo de Equipo</th>
                         <th scope="col">Monitor</th>
-                         <th scope="col">PDF</th>
+                        <th scope="col">PDF</th>
                         <th scope="col">Marcar Obsoleto</th>
                         <th scope="col">Modificar</th>
                         <th scope="col">Eliminar</th>
@@ -60,10 +59,9 @@
                     <tbody>
                     @foreach ($inventario as $inventario)
                         <tr>
-                        <th scope="row">{{ $inventario->id_inv }}</th>
+                        <th scope="row">{{ $inventario->numero_equipo }}</th>
                         <td>{{ $inventario->nombre_equipo }}</td>
                         <td>{{ $inventario->correo}}</td>
-                        <td>{{ $inventario->numero_equipo }}</td>
                         <td>{{ $inventario->tipo_equipo }}</td>
                         <td>{{ $inventario->nombre_monitor }}</td>
                         <td>

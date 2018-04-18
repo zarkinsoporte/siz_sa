@@ -428,7 +428,7 @@ dd($user);
             ->join('siz_monitores', 'siz_inventario.monitor', '=', 'siz_monitores.id')
             ->select('siz_inventario.id as id_inv', 'siz_inventario.*', 'siz_monitores.id as id_mon', 'siz_monitores.*')
             ->where('siz_inventario.activo', '=',1)
-            ->orderBy('id_inv')
+            ->orderBy('numero_equipo')
             ->get();
         $monitores  = DB::table('siz_monitores')->get();
         return view('Mod00_Administrador.inventario', compact('inventario', 'monitores'));    
