@@ -44,28 +44,11 @@ class Mod01_ProduccionController extends Controller
     }
 
     public function allUsers(Request $request){
-            $users = DB::select('select * from view_Plantilla_SIZ');
+        $users = DB::select('select * from view_Plantilla_SIZ');
         $users = $this->arrayPaginator($users, $request);
-        $stocksTable = Lava::DataTable();
-        $stocksTable->addDateColumn('Day of Month')
-            ->addNumberColumn('Projected')
-            ->addNumberColumn('Official');
+        
 
-        // Random Data For Example
-        for ($a = 1; $a < 30; $a++) {
-            $stocksTable->addRow([
-                '2015-10-' . $a, rand(800,1000), rand(800,1000)
-            ]);
-        }
-
-        $beto = Lava::AreaChart('beto', $stocksTable, [
-            'title' => 'Population Growth',
-            'legend' => [
-                'position' => 'in'
-            ]
-        ]);
-
-        return view('Mod00_Administrador.usuarios', compact('users', 'beto'));
+        return view('Mod00_Administrador.usuarios', compact('users'));
     }
 
     public function arrayPaginator($array, $request)
@@ -227,7 +210,49 @@ if ($code->U_Recibido > $code->U_Procesado){
         // $actual = OP::getEstacionActual(Input::get('op'));
         // $siguiente = OP::getEstacionSiguiente(Input::get('op'));
 
-        return view('Mod01_Produccion.traslados', ['actividades' => $actividades, 'ultimo' => count($actividades), 't_user' => $t_user, 'ofs' => $one, 'op' => $op, 'pedido' => $pedido]);
+
+       //Comienza el código para graficar 
+       $GraficaOrden = DB::select( DB::raw("SELECT [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,
+       DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOT].U_FechaHora)) AS FechaI,
+       DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)) AS FechaF ,OHEM.firstName + ' ' + OHEM.lastName AS Empleado, [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
+       SUM([@CP_LOGOF].U_Cantidad) AS U_CANTIDAD,
+       (oitm.U_VS ) AS VS,      
+       (SELECT CompnyName FROM OADM ) AS CompanyName
+        FROM [@CP_LOGOF] inner join [@PL_RUTAS] ON [@CP_LOGOF].U_CT = [@PL_RUTAS].Code
+        inner join OHEM ON [@CP_LOGOF].U_idEmpleado = OHEM.empID
+        left join Sof_Tiempos  ON [@CP_LOGOF].U_DocEntry = Sof_Tiempos.DocNum and [@CP_LOGOF].U_CT = Sof_Tiempos.U_idRuta    
+        inner join [@CP_LOGOT] ON [@CP_LOGOF].U_DocEntry = [@CP_LOGOT].U_OP and [@CP_LOGOf].U_CT = [@CP_LOGOT].U_CT 
+        inner join OWOR ON [@CP_LOGOF].U_DocEntry = OWOR.DocNum
+        inner join OITM ON OWOR.ItemCode = OITM.ItemCode
+        WHERE U_DocEntry = $op 
+        GROUP BY [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,
+        DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOT].U_FechaHora)) ,
+        DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)) ,
+        OHEM.firstName + ' ' + OHEM.lastName , [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
+        oitm.U_VS
+        ORDER BY [@CP_LOGOF].U_CT") );
+        //dd($GraficaOrden);
+        $stocksTable = Lava::DataTable();
+        $stocksTable->addDateColumn('Day of Month')
+            //->addNumberColumn('Projected')
+            ->addNumberColumn('Estación');
+
+        foreach($GraficaOrden as $campo){
+           $stocksTable->addRow([
+              $campo->FechaI, $campo->U_CT,
+            ]);
+        }    
+
+        $HisOrden = Lava::AreaChart('HisOrden', $stocksTable, [
+            'title' => 'Population Growth',
+            'interpolateNulls'   => true,
+            'pointsVisible' => true,
+            'legend' => [
+                'position' => 'in'
+            ]
+        ]);
+
+        return view('Mod01_Produccion.traslados', ['actividades' => $actividades, 'ultimo' => count($actividades), 't_user' => $t_user, 'ofs' => $one, 'op' => $op, 'pedido' => $pedido, 'HisOrden' => $HisOrden]);
 
     }
         return redirect()->back()->withErrors(array('message' => 'La OP '.Input::get('op').' no existe.'));
@@ -426,7 +451,26 @@ $op = Input::get('op');
             // $actual = OP::getEstacionActual(Input::get('op'));
             // $siguiente = OP::getEstacionSiguiente(Input::get('op'));
 
-            return view('Mod01_Produccion.traslados', ['actividades' => $actividades, 'ultimo' => count($actividades), 't_user' => $t_user, 'ofs' => $one, 'op' => $op, 'pedido' => $pedido]);
+            $stocksTable = Lava::DataTable();
+            $stocksTable->addDateColumn('Day of Month')
+                ->addNumberColumn('Projected')
+                ->addNumberColumn('Official');
+    
+            // Random Data For Example
+            for ($a = 1; $a < 30; $a++) {
+                $stocksTable->addRow([
+                    '2015-10-' . $a, rand(800,1000), rand(800,1000)
+                ]);
+            }
+    
+            $beto = Lava::AreaChart('beto', $stocksTable, [
+                'title' => 'Population Growth',
+                'legend' => [
+                    'position' => 'in'
+                ]
+            ]);
+
+            return view('Mod01_Produccion.traslados', ['actividades' => $actividades, 'ultimo' => count($actividades), 't_user' => $t_user, 'ofs' => $one, 'op' => $op, 'pedido' => $pedido, 'beto' => $beto]);
 
         }
         return redirect()->back()->withErrors(array('message' => 'La OP '.Input::get('op').' no existe.'));
