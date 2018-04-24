@@ -605,4 +605,80 @@ dd($user);
         $mensaje="Registro Actualizado Correctamente";
         return $this->mod_inv($id_inv, $mensaje);
     }
+
+//brayan
+//Muestra Vista
+
+public function Noticia()
+    {
+     return view('Mod00_Administrador.Nueva',compact('mensaje'));
+    }
+    ///inserta datos del formulario Noticias
+    public function Noticia2(Request $request)   
+    {
+            DB::table('Noticias')->insert(
+                [
+                 'Autor' => $request->input('Autor'),
+                 'Asunto' => $request->input('Asunto'), 
+                 'Descripcion' => $request->input('Descripcion'),
+                ]
+            );
+            return redirect('admin/Notificaciones'); 
+    }
+
+/////////////Vista Notificacion
+   public function Notificacion()
+    {
+
+        $noti = DB::table('Noticias')
+                  ->select('Noticias.*')
+                  ->get();
+                  //    dd($noti);
+
+                  //$data=array('data' => $noti);
+        
+         return view('Mod00_Administrador.Notificaciones', compact('noti','')); 
+         
+    }
+
+
+    //Aqui empieza modicificación
+    public function Mod_Noti($Id_Autor,$Mod_mensaje)
+    {
+        $Mod_Noti = DB::table('Noticias')
+            ->select('Noticias.*')
+            ->where('Id_Autor', '=',$Id_Autor)
+            ->get();
+        //dd($inventario);  
+      
+        //dd($inventario[0]->nombre_equipo);
+        return view('Mod00_Administrador.ModNotificacion', compact('Mod_Noti', 'Mod_mensaje')); 
+    }
+    public function Mod_Noti2(Request $request)
+    {
+           //dd($request->input('Id_Autor'));
+           $id_Autor=$request->input('Id_Autor');
+           $M_noti = DB::table('Noticias')
+            ->where("id_Autor", "=", "$id_Autor")
+            ->update(
+                        [
+                        'Autor' => $request->input('Autor'), 
+                        'Asunto' => $request->input('Asunto'),
+                        'Descripcion' => $request->input('Descripcion'),
+                        ]
+    );
+    //$Id_Autor = $request->Id_Autor;
+    //$Mod_mensaje="Registro Actualizado Correctamente";
+    return redirect('admin/Notificaciones');
+    }
+
+   
+     public function delete_noti($id_Autor)
+    {
+
+      $eliminar = DB::table('noticias')->where('Id_Autor', '=', $id_Autor)->delete();
+      return redirect('admin/Notificaciones');
+    
+    }
+//envia los datos//
 }

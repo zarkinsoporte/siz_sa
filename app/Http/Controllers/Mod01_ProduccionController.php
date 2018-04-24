@@ -298,6 +298,7 @@ if ($code->U_Recibido > $code->U_Procesado){
             $cantO = (int)$CantOrden->PlannedQty;
             //dd($Code_siguiente);
             if (count($Code_siguiente) == 1){
+               
                 $Code_siguiente =  OP::where('U_CT', $U_CT_siguiente)
                     ->where('U_DocEntry', $Code_actual->U_DocEntry)
                     ->where('U_Reproceso', 'N')
@@ -315,8 +316,9 @@ if ($code->U_Recibido > $code->U_Procesado){
                 }
             }else if(count($Code_siguiente) == 0){
                 try{
+                    //esta linea obtiene el consecutivo del numero 
                     $consecutivo =  DB::select('select top 1 MAX( mm.Code) as Code from [@CP_Of] mm inner join (SELECT TOP 1 Code, U_DocEntry FROM [@CP_LogOF] ORDER BY  U_FechaHora DESC) as tt on tt.U_DocEntry = mm.U_DocEntry');
-
+//aqui acaba num consecutivo
                     $newCode = new OP();
                     $newCode->Code = ((int)$consecutivo[0]->Code)+1;
                     $newCode->Name = ((int)$consecutivo[0]->Code)+1;
@@ -331,7 +333,7 @@ if ($code->U_Recibido > $code->U_Procesado){
                     $newCode->U_Comentarios = "";
                     $newCode->U_CTCalidad = 0;
                     $newCode->save();
-
+                   //save=insert 
                     $consecutivologot =  DB::select('SELECT TOP 1 Code FROM  [@CP_LOGOT] ORDER BY  U_FechaHora DESC');
                     $lot = new LOGOT();
                     $lot->Code = ((int)$consecutivologot[0]->Code)+1;
@@ -390,7 +392,6 @@ if ($code->U_Recibido > $code->U_Procesado){
         //creacion de linea  en CP_LOGOF y CP_LOGOT
 
     }
-
     public function MethodGET_OP($id)
     {
 

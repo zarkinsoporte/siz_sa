@@ -18,7 +18,9 @@ use App\OP;
 use Illuminate\Support\Facades\DB;
 Route::get('/','HomeController@index');
 Route::get('/home', 'HomeController@index');
-
+Route::get('/pruebas', function(){
+    return view('Mod00_Administrador.pruebas');
+});
 /*
 |--------------------------------------------------------------------------
 | Administrator Routes
@@ -155,6 +157,26 @@ echo $consecutivo[0]->Code;
 });
 Route::get('datatable/{id}', 'Mod00_AdministradorController@confModulo');
 Route::get('datatables.data', 'Mod00_AdministradorController@anyData')->name('datatables.data');
+/*
+|--------------------------------------------------------------------------
+|NOTICIAS Y NOTIFICACIONES 'BRAYAN'
+|--------------------------------------------------------------------------
+*/
+Route::get('admin/Nueva', 'Mod00_AdministradorController@Noticia');
+Route::post('admin/Nueva', 'Mod00_AdministradorController@Noticia2');
+Route::get('admin/Notificaciones', 'Mod00_AdministradorController@Notificacion');
+Route::post('admin/Notificaciones', 'Mod00_AdministradorController@Notificacion2');
+Route::get('admin/Mod_Noti/{id}/{mensaje}', 'Mod00_AdministradorController@Mod_Noti');
+Route::post('admin/Mod_Noti2/', 'Mod00_AdministradorController@Mod_Noti2');
+Route::get('admin/delete_Noti/{id}', 'Mod00_AdministradorController@delete_Noti');
+Route::post('admin/delete_Noti/', 'Mod00_AdministradorController@delete_Noti');
+//Route::get('admin/Nueva', 'Mod00_AdministradorController@Show');
+/*
+|--------------------------------------------------------------------------
+| Finaliza Rutas Noticias y Notificaciones
+|--------------------------------------------------------------------------
+*/
+
 Route::get('updateprivilegio','Mod00_AdministradorController@updateprivilegio');
 Route::get('dropdown', function(){
          return TAREA_MENU::where('id_menu_item',Input::get('option'))
@@ -181,5 +203,6 @@ Route::post('home/TRASLADO ÷ AREAS', 'Mod01_ProduccionController@traslados');
 Route::get('home/TRASLADO ÷ AREAS/{id}', 'Mod01_ProduccionController@getOP');
 Route::post('home/TRASLADO ÷ AREAS/{id}', 'Mod01_ProduccionController@getOP');
 Route::post('home/traslados/avanzar', 'Mod01_ProduccionController@avanzarOP');
+Route::post('home/traslados/Procesos ', 'Mod01_ProduccionController@procesos');
 
 
