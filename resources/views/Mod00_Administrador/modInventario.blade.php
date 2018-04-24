@@ -46,15 +46,15 @@
              {!! Form::open(['url' => 'admin/mod_inv2', 'method' => 'POST']) !!}
                 <div class="form-group">
                     <label for="NombreEquipo">Nombre Equipo</label>
-                    <input type="text" name="nombre_equipo" class="form-control" placeholder="Ej. HP Probook 4520s" value="{{ $inventario[0]->nombre_equipo }}" required>
+                    <input type="text" name="nombre_equipo" class="form-control"value="{{ $inventario[0]->nombre_equipo }}" required>
                 </div>
                 <div class="form-group">
                     <label for="Correo">Correo</label>
-                    <input type="email" name="correo" class="form-control" value="{{$inventario[0]->correo}}"  placeholder="nombre.apellido@zarkin.com" required>
+                    <input type="email" name="correo" class="form-control" value="{{$inventario[0]->correo}}"required>
                 </div>
                 <div class="form-group">
                     <label for="NumeroEquipo">Número de Equipo</label>
-                    <input type="number" name="numero_equipo" class="form-control" value="{{$inventario[0]->numero_equipo}}" placeholder="Ej 77" required>
+                    <input type="number" name="numero_equipo" class="form-control" value="{{$inventario[0]->numero_equipo}}" required>
                 </div>
                 <div class="form-group">
                     <label for="TipoEquipo">Tipo de Equipo</label>

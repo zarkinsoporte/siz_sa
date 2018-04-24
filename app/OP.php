@@ -57,7 +57,7 @@ class OP extends Model
        $rs = DB::select('select * from [@PL_RUTAS] where U_Orden ='. self::getRuta(OP::find($Code)->U_DocEntry)[$i]);
 
        foreach ($rs as $r) {
-           if ($option == 1){
+           if ($option == 1){   
                return "'".$r->Name."'";
            }
 
