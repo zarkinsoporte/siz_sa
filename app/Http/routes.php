@@ -18,7 +18,9 @@ use App\OP;
 use Illuminate\Support\Facades\DB;
 Route::get('/','HomeController@index');
 Route::get('/home', 'HomeController@index');
-
+Route::get('/pruebas', function(){
+    return view('Mod00_Administrador.pruebas');
+});
 /*
 |--------------------------------------------------------------------------
 | Administrator Routes
