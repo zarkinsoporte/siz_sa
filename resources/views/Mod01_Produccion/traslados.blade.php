@@ -2,7 +2,6 @@
 
 @section('homecontent')
 
-
         <div class="container" >
 
             <!-- Page Heading -->
@@ -322,6 +321,20 @@
     </div>
   </div>
 </div>
+        <!-- /.container -->
+<?php
+//$GraficaOrden=1;
+if(isset($HisOrden)){
+?>
+<?= 
+    Lava::render('AreaChart', 'HisOrden', 'chart');
+?> 
+<?php
+}
+?>
+<div id="chart"></div>   
+
+    
 
 @endsection
 
