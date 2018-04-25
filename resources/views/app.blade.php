@@ -9,19 +9,11 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ 'Fusion Confort' }}</title>
+    <title>{{ 'Salotto' }}</title>
     <!-- Styles -->
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- CSRF Token -->
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    <title>{{ 'Fusion Confort' }}</title>
-
-    <!-- Styles -->
-
     <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
     <!-- Material Design fonts -->
     <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
@@ -165,28 +157,12 @@ src="https://code.jquery.com/jquery-3.2.1.js">
 <!-- Include Date Range Picker -->
 
 
-<script
-        src="https://code.jquery.com/jquery-3.2.1.js"
-        integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE="
-        crossorigin="anonymous"></script>
-
-{!! Html::script('assets/js/bootstrap-switch.js') !!}
-
-
-<script src="//cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
-
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-
-<script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-<!-- Include Date Range Picker -->
-<script type="text/javascript" src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
-
 <script>
 
     $(document).ready(function (event) {
 
             $('.toggle').bootstrapSwitch();
-
+$('.dropdown-toggle').dropdown();
 
 
         @yield('script')
