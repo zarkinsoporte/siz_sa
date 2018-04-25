@@ -5,6 +5,7 @@
 @include('partials.menu-admin')
 
 
+
     <div >
 
         <div class="container" >
@@ -32,6 +33,7 @@
                     </ol>
                 </div>
             </div>
+            @include('partials.alertas')
             <table id="usuarios" class="table table-striped table-bordered table-condensed">
                                     <thead>
                                     <tr>
@@ -40,7 +42,8 @@
                                             <th>Asunto</th>  
                                             <th>Descripción</th> 
                                             <th>Modificar</th>  
-                                            <th>Eliminar</th>   
+                                            <th>Eliminar</th>  
+                                            <th>Leido</th> 
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -54,22 +57,15 @@
                             <a href=" Mod_Noti/{{$campo->Id_Autor}}/{{0}}" class="btn btn-warning"><i class="glyphicon glyphicon-edit"></i</a>
                         </td>
                         <td>
-                        <a href="delete_Noti/{{$campo->Id_Autor}}" class="btn btn-danger"><i class="glyphicon glyphicon-trash"value"Delete"></i</a>
+                        <a href="delete_Noti/{{$campo->Id_Autor}}" class="btn btn-danger"><i class="glyphicon glyphicon-trash"value"delete"></i</a>
+                        </td>
+                        <td>
+                        <a href="delete_Noti/{{$campo->Id_Autor}}" class="btn btn-success"><i class="glyphicon glyphicon-ok  "value"delete"></i</a>
                         </td>
                         </tr>
                     @endforeach 
                     </tbody>
                                 
     </div>
-
-
-    <!-- /#wrapper -->
-@endsection
-
-@section('script')
-
-
-
-
 
 @endsection

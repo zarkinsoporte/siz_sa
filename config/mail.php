@@ -28,7 +28,7 @@ return [
     |
     */
 
-    'host' => env('MAIL_HOST', 'smtp.mailgun.org'),
+    'host' => env('MAIL_HOST', 'smtp.gmail.com'),
 
     /*
     |--------------------------------------------------------------------------
@@ -54,7 +54,7 @@ return [
     |
     */
 
-    'from' => ['address' => null, 'name' => null],
+    'from' => ['address' => 'al221610899@gmail.com', 'name' => 'Brayan Hernandez'],
 
     /*
     |--------------------------------------------------------------------------
@@ -121,4 +121,12 @@ return [
 
     'pretend' => env('MAIL_PRETEND', false),
 
+
+    'stream' => [
+        'ssl' => [
+           'allow_self_signed' => true,
+           'verify_peer' => false,
+           'verify_peer_name' => false,
+        ],
+     ],
 ];

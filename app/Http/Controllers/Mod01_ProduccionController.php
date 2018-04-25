@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Input;
 use Session;
 use Auth;
 use Lava;
+use Mail;
 class Mod01_ProduccionController extends Controller
 {
     /**
@@ -432,7 +433,17 @@ $op = Input::get('op');
         }
         return redirect()->back()->withErrors(array('message' => 'La OP '.Input::get('op').' no existe.'));
 
-
+    } 
+    public function Correo(Request $request)
+    {
+        Mail::send('Emails.Reprocesos' ,$request -> all(), function($msj){
+                $msj -> subject('Que tranza perro');//ASUNTO DEL CORREO
+                $msj -> to ('brayansan788@gmail.com');//Correo del destinatario
+        });
+        //return view('home/traslados');
+        Session::flash('info', 'El correo fue enviado');
+    
+        return redirect('/');
+  
     }
-
 }

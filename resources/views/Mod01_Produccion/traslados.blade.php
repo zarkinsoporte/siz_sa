@@ -94,7 +94,8 @@
 		td:nth-of-type(6):before { content: "Procesado"; }
 		td:nth-of-type(7):before { content: "Estación Actual"; }
 		td:nth-of-type(8):before { content: "Estación Siguiente"; }
-		td:nth-of-type(9):before { content: "Avanzar OP"; }
+		td:nth-of-type(9):before { content: "Retroceder OP"; }
+        td:nth-of-type(10):before { content: "Avanzar OP"; }
 </style>
 
 
@@ -115,6 +116,9 @@
                                         <th>Procesado</th>
                                         <th>Estación Actual</th>
                                         <th>Estación Siguiente</th>
+                                        @if(Auth::user()->U_EmpGiro=='246')
+                                        <th>Retroceder OP</th>
+                                        @endif
                                         <th>Avanzar OP</th>
 
                                     </tr>
@@ -139,6 +143,14 @@
                                             <td> {{$of->U_Procesado}} </td>
                                             <td> {{$of->U_CT_ACT}} </td>
                                             <td> {{$of->U_CT_SIG}} </td>
+
+                                                @if(Auth::user()->U_EmpGiro=='246')
+                                            <td> <a class="btn btn-danger" data-toggle="modal"
+                                            data-target="#Retroceder">
+                                                    <i class="fa fa-mail-reply-all" aria-hidden="1">   Retroceder</i>
+                                                </a> </td>
+                                                @endif
+
                                             <td> <a class="btn btn-success {{$of->avanzar}}" data-toggle="modal"
                                                     data-target="#cantidad" data-whatever="{{$of->Code}}"
                                                     data-whatever2="{{$of->U_Recibido - $of->U_Procesado}}">
@@ -254,6 +266,7 @@
 
             </div>
                         <div class="modal-footer">
+                            
                             <a class="btn btn-default" onclick="limpiacant()"><i class="fa fa-eraser" aria-hidden="true"> </i></a>
                             <button type="submit" class="btn btn-primary">Procesar</button>
                             <button type="button" class="btn btn-default" data-dismiss="modal" aria-label="Close">Cancelar</button>
@@ -267,7 +280,48 @@
             <!-- /cantidadModal-->
 
         </div>
-        <!-- /.container -->
+ <!-- /.container -->
+ 
+
+        <!-- .Model retroceso -->
+<div class="modal fade" id="Retroceder" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="">Numero de Orden de Produccion OP</h4>
+      </div>
+      <div class="modal-body">
+      {!! Form::open(['url' => 'home/traslados/Reprocesos', 'method' => 'POST']) !!}
+      <div class="dropdown">
+  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+    Áreas anteriores
+    <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+    <li><a href="#">Action</a></li>
+    <li><a href="#">Another action</a></li>
+    <li><a href="#">Something else here</a></li>
+    <li role="separator" class="divider"></li>
+    <li><a href="#">Separated link</a></li>
+  </ul>
+</div>
+        <div>
+            <label for="message-text" class="control-label">Nota</label>
+            <textarea class="form-control" id="message-text"></textarea>
+          </div>
+       
+      </div>
+      <div class="modal-footer">
+      
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+        <button type="submit" class="btn btn-primary">Enviar</button>
+      </div>
+      </div>
+      {!! Form::close() !!}
+    </div>
+  </div>
+</div>
 
 @endsection
 

@@ -623,6 +623,7 @@ public function Noticia()
                  'Descripcion' => $request->input('Descripcion'),
                 ]
             );
+            Session::flash('mensaje', 'Has creado una noticia');
             return redirect('admin/Notificaciones'); 
     }
 
@@ -636,8 +637,8 @@ public function Noticia()
                   //    dd($noti);
 
                   //$data=array('data' => $noti);
-        
-         return view('Mod00_Administrador.Notificaciones', compact('noti','')); 
+                  
+         return view('Mod00_Administrador.Notificaciones', compact('noti')); 
          
     }
 
@@ -667,18 +668,20 @@ public function Noticia()
                         'Descripcion' => $request->input('Descripcion'),
                         ]
     );
-    //$Id_Autor = $request->Id_Autor;
-    //$Mod_mensaje="Registro Actualizado Correctamente";
-    return redirect('admin/Notificaciones');
+    Session::flash('info', 'Tu noticia se ha actualizado');
+    return redirect('admin/Notificaciones'); 
     }
 
    
-     public function delete_noti($id_Autor)
-    {
-
+     public function delete_noti($id_Autor){
       $eliminar = DB::table('noticias')->where('Id_Autor', '=', $id_Autor)->delete();
-      return redirect('admin/Notificaciones');
     
+        Session::flash('info', 'Eliminaste una noticia');
+        return redirect()->back();
     }
+
+
+
+    
 //envia los datos//
 }

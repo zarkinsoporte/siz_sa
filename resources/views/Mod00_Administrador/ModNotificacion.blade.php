@@ -30,9 +30,7 @@
                     </ol>
                 </div>
             </div>
-            <div class="alert alert-warning">
-                    <strong>Hola de nuevo!! ... Te quivocaste </strong> Modifica la noticia
-                </div>
+            @include('partials.alertas')
               <!-- /.row -->
             {!! Form::open(['url' => 'admin/Mod_Noti2', 'method' => 'POST']) !!}
   <div class="form-group">

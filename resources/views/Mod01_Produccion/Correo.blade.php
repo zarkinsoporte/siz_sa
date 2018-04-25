@@ -33,32 +33,28 @@
                     </ol>
                 </div>
             </div>
+            <body>
+                <p><strong>Nombre:</strong>{!!$name !!}</p>
+                <p><strong>Correo:</strong>{!!$email!!}</p>
+                <p><strong>Mensaje</strong>{!!$mensaje!!}</p>
+        </body>
             <!-- /.row -->
-            {!! Form::open(['url' => 'admin/Nueva', 'method' => 'POST']) !!}
-  <div class="form-group">
-    <label for="exampleFormControlInput1">Autor</label>
-    <input type="text" class="form-control" id="Autor" name="Autor" placeholder="Nombre del Autor"require>
+            {!! Form::open 'home/traslados/Correo', 'method'=> 'POST'!!}
+                <div class="form-group">
+   <div class="col-md-6 contact-left">
+    {!! Form:: text('name',null,['placeholder'=> 'Nombre']) 
+        !!}
+        {!! Form:: text('Email',null,['placeholder'=> 'Email']) 
+        !!}
   </div>
-  <div class="form-group">
-    <label for="exampleFormControlInput1">Dirigida a:</label>
-    <input type="text" class="form-control" id="Asunto" name="Asunto" placeholder="Destinatario" require >
+  <div class="col-md-6 contact-right">
+  {!! Form:: textarea ('mensaje',null,['placeholder'=> 'Mensaje']) 
+        !!}
   </div>
-  <div class="form-group">
-    <label for="exampleFormControlTextarea1">Noticia</label>
-    <textarea class="form-control" id="Descripcion"name="Descripcion" rows="3" require></textarea>
-  </div>
-  <button type="submit" class="btn btn-primary">Enviar</button> 
-  {!! Form::close() !!} 
-        <!-- /.container-fluid -->
-
-    </div>
-    <!-- /#page-wrapper -->
-    </div>
-    </div>
-
-
-
-    <!-- /#wrapper -->
+  {!! Form:: submit('Send') 
+        !!}
+        {!! Form::close() !!}
+        </div>
+        </div>
 
 @endsection
-
