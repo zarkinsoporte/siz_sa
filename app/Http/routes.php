@@ -79,7 +79,7 @@ route::get('setpassword', function (){
     try {
         $password = Hash::make('1234');
         DB::table('dbo.OHEM')
-            ->where('U_EmpGiro', 1314 )
+            ->where('U_EmpGiro', 1349 )
             ->update(['U_CP_Password' => $password]);
     } catch(\Exception $e) {
         echo  $e->getMessage();

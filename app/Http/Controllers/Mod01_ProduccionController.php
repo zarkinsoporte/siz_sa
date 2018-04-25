@@ -234,22 +234,33 @@ if ($code->U_Recibido > $code->U_Procesado){
         //dd($GraficaOrden);
         $stocksTable = Lava::DataTable();
         $stocksTable->addDateColumn('Day of Month')
-            //->addNumberColumn('Projected')
-            ->addNumberColumn('Estación');
 
+            //->addNumberColumn('Projected')
+
+            ->addNumberColumn('Estación')
+            ->addRoleColumn('string', 'tooltip',[
+                'html' => true
+            ]);
+     
         foreach($GraficaOrden as $campo){
+           $date = date_create($campo->FechaI);
            $stocksTable->addRow([
-              $campo->FechaI, $campo->U_CT,
+              $campo->FechaI, $campo->U_CT, '<p style=margin:10px><b>'.ucwords(strtolower($campo->Empleado)).'</b><br>Estación:<b>'.$campo->U_CT.'</b><br>Fecha:<b>'.date_format($date,'d/m/Y').'</b></p>'
             ]);
         }    
 
         $HisOrden = Lava::AreaChart('HisOrden', $stocksTable, [
-            'title' => 'Population Growth',
+            'title' => 'Historial por OP',
             'interpolateNulls'   => true,
             'pointsVisible' => true,
             'legend' => [
                 'position' => 'in'
-            ]
+            ], 
+            'tooltip'=> [
+                'isHtml' => true
+            ], 
+            
+           
         ]);
 
         return view('Mod01_Produccion.traslados', ['actividades' => $actividades, 'ultimo' => count($actividades), 't_user' => $t_user, 'ofs' => $one, 'op' => $op, 'pedido' => $pedido, 'HisOrden' => $HisOrden]);
