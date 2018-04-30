@@ -116,7 +116,7 @@ class Mod01_ProduccionController extends Controller
             Session::flash('usertraslados', false);
         }
 
-
+          return view('Mod01_Produccion.traslados', ['actividades' => $actividades, 'ultimo' => count($actividades)]);
             return view('Mod01_Produccion.traslados', ['actividades' => $actividades, 'ultimo' => count($actividades)]);
         }else{
             return redirect()->route('auth/login');
@@ -263,8 +263,11 @@ if ($code->U_Recibido > $code->U_Procesado){
             
            
         ]);
+        ////RUTA RETROCESO
+        $Ruta = OP::getRuta($op);
+     
 
-        return view('Mod01_Produccion.traslados', ['actividades' => $actividades, 'ultimo' => count($actividades), 't_user' => $t_user, 'ofs' => $one, 'op' => $op, 'pedido' => $pedido, 'HisOrden' => $HisOrden]);
+        return view('Mod01_Produccion.traslados', ['actividades' => $actividades, 'ultimo' => count($actividades),'Ruta'=>$Ruta,'t_user' => $t_user, 'ofs' => $one, 'op' => $op, 'pedido' => $pedido, 'HisOrden' => $HisOrden]);
 
     }
         return redirect()->back()->withErrors(array('message' => 'La OP '.Input::get('op').' no existe.'));
@@ -482,17 +485,19 @@ $op = Input::get('op');
                     'position' => 'in'
                 ]
             ]);
-
-            return view('Mod01_Produccion.traslados', ['actividades' => $actividades, 'ultimo' => count($actividades), 't_user' => $t_user, 'ofs' => $one, 'op' => $op, 'pedido' => $pedido, 'beto' => $beto]);
+            
+            return view('Mod01_Produccion.traslados', ['actividades' => $actividades, 'ultimo' => count($actividades),'t_user' => $t_user, 'ofs' => $one, 'op' => $op, 'pedido' => $pedido, 'beto' => $beto]);
 
         }
         return redirect()->back()->withErrors(array('message' => 'La OP '.Input::get('op').' no existe.'));
 
     } 
-    public function Correo(Request $request)
+   /* public function Correo(Request $request)
     {
+        //$ruta=OP::getRuta('3478');
+        //dd($ruta);
         Mail::send('Emails.Reprocesos' ,$request -> all(), function($msj){
-                $msj -> subject('Que tranza perro');//ASUNTO DEL CORREO
+                $msj -> subject('Bienvenida al correo de notificaciones ZARKIN');//ASUNTO DEL CORREO
                 $msj -> to ('brayansan788@gmail.com');//Correo del destinatario
         });
         //return view('home/traslados');
@@ -500,5 +505,5 @@ $op = Input::get('op');
     
         return redirect('/');
   
-    }
+    }*/
 }

@@ -12,7 +12,7 @@ class CreateActividadUsers extends Migration
      */
     public function up()
     {
-        Schema::create('MODULOS_GRUPO_SIZ', function (Blueprint $table) {
+        /*Schema::create('MODULOS_GRUPO_SIZ', function (Blueprint $table) {
                 $table->increments('id');
                 $table->integer('id_grupo');
                 $table->integer('id_modulo')->nullable();
@@ -30,7 +30,7 @@ class CreateActividadUsers extends Migration
             $table->string('name');
             $table->integer('id_menu_item');
             $table->timestamps();
-        });
+        });*/
     }
 
     /**

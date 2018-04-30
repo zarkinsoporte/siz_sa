@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateGrupoSizTable extends Migration
+class CreateMail extends Migration
 {
     /**
      * Run the migrations.
@@ -12,13 +12,11 @@ class CreateGrupoSizTable extends Migration
      */
     public function up()
     {
-       /* Schema::create('MODULOS_SIZ', function (Blueprint $table) {
+        Schema::create('Email_SIZ', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('name');
-            $table->string('descripcion');
-            $table->timestamps();
-        });*/
-
+            $table->integer('No_Nomina');
+            $table->integer('gurpoEnvioCorreo');
+        });
     }
 
     /**
@@ -26,9 +24,8 @@ class CreateGrupoSizTable extends Migration
      *
      * @return void
      */
- public function down()
-{
-    Schema::drop('MODULOS_SIZ');
-}
-
+    public function down()
+    {
+        Schema::drop('Email_SIZ');
+    }
 }

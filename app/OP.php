@@ -19,6 +19,23 @@ class OP extends Model
         return $ruta;
     }
    }
+   public static function getRutaNombres($docEntry){
+    $rs = DB::select('select u_Ruta from OWOR where DocEntry ='. $docEntry);
+
+    foreach ($rs as $r) {
+        $ruta = explode(",", $r->u_Ruta);
+
+    }
+foreach($ruta as $e){
+   $irs = DB::select('select[@PL_RUTAS].Name from  [@PL_RUTAS]'.$RutaEst);
+    
+  $data = [];
+    
+    for ( $i = 1; $i < count($ruta) ; $i++ ) {
+           $data += [ $ruta[$i] => $irs ];
+    }
+}
+   }
 
    public static function getStatus($docEntry){
     /*   select	OWOR.docentry, [@CP_OF].Code,

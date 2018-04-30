@@ -12,11 +12,11 @@ class CreateModulosTareas extends Migration
      */
     public function up()
     {
-        Schema::table('MODULOS_GRUPO_SIZ', function (Blueprint $table) {
+       /* Schema::table('MODULOS_GRUPO_SIZ', function (Blueprint $table) {
             $table->integer('id_menu')->nullable();
             $table->char('privilegio_modulo')->nullable();;
             $table->char('privilegio_tarea')->nullable();;
-        });
+        });*/
     }
 
     /**

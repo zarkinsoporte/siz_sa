@@ -145,7 +145,7 @@
 
                                                 @if(Auth::user()->U_EmpGiro=='246')
                                             <td> <a class="btn btn-danger" data-toggle="modal"
-                                            data-target="#Retroceder">
+                                            data-target="#Retroceder" class="btn btn-info btn-lg"data-codem="{{$of->U_Orden}}" >
                                                     <i class="fa fa-mail-reply-all" aria-hidden="1">   Retroceder</i>
                                                 </a> </td>
                                                 @endif
@@ -283,38 +283,40 @@
  
 
         <!-- .Model retroceso -->
+
 <div class="modal fade" id="Retroceder" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="">Numero de Orden de Produccion OP</h4>
+        <h4 class="modal-title" id="">Orden de Producción No.  @if(isset($op)) {{$op}}@endif </h4>
       </div>
       <div class="modal-body">
+        Estación Actual:<div id="code"></div>
+      <input type="hidden" id="Estacion">  
       {!! Form::open(['url' => 'home/traslados/Reprocesos', 'method' => 'POST']) !!}
-      <div class="dropdown">
-  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-    Áreas anteriores
-    <span class="caret"></span>
-  </button>
-  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-    <li><a href="#">Action</a></li>
-    <li><a href="#">Another action</a></li>
-    <li><a href="#">Something else here</a></li>
-    <li role="separator" class="divider"></li>
-    <li><a href="#">Separated link</a></li>
-  </ul>
-</div>
-        <div>
+                           
+                            <div class="dropdown">
+                            <label  for="message-text" class="control-label"  >Estaciones Anteriores</label>
+                    <select class="form-control" id="selectestaciones">
+                
+                
+                  
+                   </select>    
+                    </div>
+    
+
+                            
+            <div>
             <label for="message-text" class="control-label">Nota</label>
             <textarea class="form-control" id="message-text"></textarea>
           </div>
        
       </div>
       <div class="modal-footer">
-      
+    
         <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-        <button type="submit" class="btn btn-primary">Enviar</button>
+        <button type="submit" class="btn btn-primary" >Enviar</button>
       </div>
       </div>
       {!! Form::close() !!}
@@ -330,7 +332,8 @@ if(isset($HisOrden)){
     Lava::render('AreaChart', 'HisOrden', 'chart');
 ?> 
 <?php
-}
+} 
+
 ?>
 <div id="chart"></div>   
 
@@ -365,7 +368,52 @@ if(isset($HisOrden)){
         modal.find('#code').val(recipient)
         modal.find('#numcant').val(recipient2)
         modal.find('#cant').attr('max', recipient2);
+
+
     });
+    
+    // Execute something when the modal window is shown.
+
+
+  $('#Retroceder').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget); 
+    // Button that triggered the modal
+    
+    var codejs = button.data('codem'); 
+  
+    
+    // Extract info from data-* attributes
+    // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+    // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+    var arreglo = new Array();
+    <?php
+    if(isset($Ruta)){
+
+    
+      for ($i = 0; $i < count($Ruta); $i++){    
+    ?>
+  
+    if( '<?php echo $Ruta[$i]; ?>' < codejs){
+         arreglo[<?php echo $i ?>] = "<?php echo $Ruta[$i]; ?>";
+    }
+    <?php  
+      }
+    }
+    ?>
+
+     $('#selectestaciones').empty();
+     $.each(arreglo, function(i, p) {
+     $('#selectestaciones').append($('<option></option>').val(p).html(p));
+
+}); 
+    var modal = $(this);
+    modal.find('#code').text(codejs);
+  
+
+                  
+  });
+
+
 
 @endsection
 
@@ -391,5 +439,6 @@ function mostrar(){
         $("#ocultar").show();
         $('#miusuario').attr('required', 'required');
     };
+
 
 </script>
