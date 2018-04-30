@@ -264,8 +264,8 @@ if ($code->U_Recibido > $code->U_Procesado){
            
         ]);
         ////RUTA RETROCESO
-        $Ruta = OP::getRuta($op);
-     
+        $Ruta = OP::getRutaNombres($op);
+     dd($Ruta);
 
         return view('Mod01_Produccion.traslados', ['actividades' => $actividades, 'ultimo' => count($actividades),'Ruta'=>$Ruta,'t_user' => $t_user, 'ofs' => $one, 'op' => $op, 'pedido' => $pedido, 'HisOrden' => $HisOrden]);
 
