@@ -40,21 +40,6 @@
         </body>
             <!-- /.row -->
             {!! Form::open 'home/traslados/Correo', 'method'=> 'POST'!!}
-                <div class="form-group">
-   <div class="col-md-6 contact-left">
-    {!! Form:: text('name',null,['placeholder'=> 'Nombre']) 
-        !!}
-        {!! Form:: text('Email',null,['placeholder'=> 'Email']) 
-        !!}
-  </div>
-  <div class="col-md-6 contact-right">
-  {!! Form:: textarea ('mensaje',null,['placeholder'=> 'Mensaje']) 
-        !!}
-  </div>
-  {!! Form:: submit('Send') 
-        !!}
-        {!! Form::close() !!}
-        </div>
-        </div>
+                {{!!Form::close()}}
 
 @endsection

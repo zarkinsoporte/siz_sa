@@ -26,13 +26,19 @@ class OP extends Model
         $ruta = explode(",", $r->u_Ruta);
 
     }
-    $data = [];
+   
+    $data1= [];
+    $i= 0;
+
 foreach($ruta as $e){
 
     $irs =DB::table('@PL_RUTAS')->where('U_Orden', $e)->value('Name');
-           $data += [ $e => $irs ];     
+           $data = array ( $e, $irs );     
+           $data1 +=[$i=>$data];
+           $i++;
 }
-return $data;
+
+return $data1;
    }
 
    public static function getStatus($docEntry){

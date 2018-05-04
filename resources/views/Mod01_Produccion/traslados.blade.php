@@ -288,41 +288,38 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="">Orden de Producción No.  @if(isset($op)) {{$op}}@endif </h4>
-      </div>
-      <div class="modal-body">
-        Estación Actual:<div id="code"></div>
-      <input type="hidden" id="Estacion">  
+      
       {!! Form::open(['url' => 'home/traslados/Reprocesos', 'method' => 'POST']) !!}
-                           
-                            <div class="dropdown">
-                            <label  for="message-text" class="control-label"  >Estaciones Anteriores</label>
-                    <select class="form-control" id="selectestaciones">
-                
-                
-                  
-                   </select>    
-                    </div>
-    
-
-                            
-            <div>
-            <label for="message-text" class="control-label">Nota</label>
-            <textarea class="form-control" id="message-text"></textarea>
-          </div>
+        
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" name="orden"id="N.Orden"value="Orden">Orden de Producción No.  @if(isset($op)) {{$op}}@endif</h4>
+      <div class="modal-body">
        
-      </div>
-      <div class="modal-footer">
-    
-        <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-        <button type="submit" class="btn btn-primary" >Enviar</button>
-      </div>
-      </div>
-      {!! Form::close() !!}
-    </div>
-  </div>
+        Estación Actual:
+        <div name="Actual" id="code" value="code" ></div>
+        <input type="hidden" id="Estacion" name="Estacion"> 
+
+
+            <div class="dropdown">
+            <label  for="message-text" class="control-label"  >Estaciones Anteriores</label>
+            <select class="form-control" name="selectestaciones" id="selectestaciones"></select>    
 </div>
+                    
+                <div>
+                <label for="message-text" class="control-label" value="Nota">Nota</label>
+                <textarea class="form-control" name="nota"id="message-text"></textarea>
+</div>
+</div>
+         <div class="modal-footer">
+    
+        <button type="reset" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+        <button type="submit" class="btn btn-primary" >Enviar</button>
+</div>
+</div>   
+</div>
+</div>
+</div>
+    {!! Form::close() !!}
         <!-- /.container -->
 <?php
 //$GraficaOrden=1;
@@ -380,36 +377,28 @@ if(isset($HisOrden)){
     // Button that triggered the modal
     
     var codejs = button.data('codem'); 
+    $("#Estacion").val(codejs);   
   
     
     // Extract info from data-* attributes
     // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
     // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
     var arreglo = new Array();
+    $('#selectestaciones').empty();
     <?php
     if(isset($Ruta)){
-
-    
-      for ($i = 0; $i < count($Ruta); $i++){    
+      for ($i = 0 ; $i < count($Ruta); $i++){    
     ?>
-  
-    if( '<?php echo $Ruta[$i]; ?>' < codejs){
-         arreglo[<?php echo $i ?>] = "<?php echo $Ruta[$i]; ?>";
+    if( '<?php echo $Ruta[$i][0]; ?>' < codejs){
+         $('#selectestaciones').append($('<option></option>').val(<?php echo $Ruta[$i][0]; ?>).html("<?php echo $Ruta[$i][1]; ?>"));
     }
     <?php  
       }
     }
     ?>
-
-     $('#selectestaciones').empty();
-     $.each(arreglo, function(i, p) {
-     $('#selectestaciones').append($('<option></option>').val(p).html(p));
-
-}); 
+    
     var modal = $(this);
     modal.find('#code').text(codejs);
-  
-
                   
   });
 
