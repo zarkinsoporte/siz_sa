@@ -92,6 +92,7 @@
                     <br><br><br>
                     <div class="col-md-10">
                         <input hidden value="{{$id_modulo}}" id="getmodulo" name="getmodulo"/>
+                        <input hidden value="{{$id_grupo}}" id="getgrupo" name="getgrupo"/>
                         <table class="table table-bordered" id="users-table">
                             <thead>
                             <tr>
@@ -202,7 +203,8 @@
     ajax: {
     url: '{!! route('datatables.data') !!}',
     data: function (d) {
-      d.id = $('input[name=getmodulo]').val();
+      d.id_modulo = $('input[name=getmodulo]').val(); 
+      d.id_grupo = $('input[name=getgrupo]').val();      
     }
     },
     columns: [

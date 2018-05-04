@@ -305,11 +305,11 @@ dd($user);
 
     }
 
-    public function confModulo($id_modulo){
+    public function confModulo($id_grupo, $id_modulo){
 
         $grupos = DB::table('OHTY')
                 ->where('typeID', '>', 0)->get();
-        $primero = MODULOS_GRUPO_SIZ::where('id_modulo', $id_modulo)->first();
+        $primero = MODULOS_GRUPO_SIZ::where('id_modulo', $id_modulo)->where('id_grupo', $id_grupo)->first();
         if ($primero != null){
              $id_grupo = $primero->id_grupo;
 
@@ -342,10 +342,9 @@ dd($user);
      */
     public function anyData(Request $request)
     {
-        $primero = MODULOS_GRUPO_SIZ::where('id_modulo', $request->get('id'))->first();
-        $id_grupo = $primero->id_grupo;
-        $menus = MODULOS_GRUPO_SIZ::where('MODULOS_GRUPO_SIZ.id_modulo',$request->get('id'))
-            ->where('id_grupo', $id_grupo)
+        
+        $menus = MODULOS_GRUPO_SIZ::where('MODULOS_GRUPO_SIZ.id_modulo',$request->get('id_modulo'))
+            ->where('MODULOS_GRUPO_SIZ.id_grupo', $request->get('id_grupo'))
             ->whereNotNull('id_menu')
             ->whereNotNull('id_tarea')
             ->leftjoin('MENU_ITEM_SIZ', 'MODULOS_GRUPO_SIZ.id_menu', '=', 'MENU_ITEM_SIZ.id')
@@ -420,6 +419,21 @@ dd($user);
 
     }
 
+    public function deleteModulo($id_modulo){
+        $busqueda = MODULOS_GRUPO_SIZ::
+        where('id_modulo', $id_modulo)
+        ->first();
+
+    if (count($busqueda)>0){
+        return redirect()->back()->withErrors(array('message' => 'El Modulo no se encuentra.'));
+    }else{
+       
+        $busqueda->delete();
+    }
+
+    return redirect()->back();
+
+    }
 
     public function inventario()
     {
