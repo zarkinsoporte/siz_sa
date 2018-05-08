@@ -445,6 +445,21 @@ dd($user);
             ->orderBy('numero_equipo')
             ->get();
         $monitores  = DB::table('siz_monitores')->get();
+
+        foreach ($inventario as $inv_campo) {
+                    $nombre_usuario = explode(".", $inv_campo->correo);
+                    $nombre   = strtoupper($nombre_usuario[0]);
+                    $apellido = explode("@", $apellido = $nombre_usuario[1]);
+                    $apellido = strtoupper($apellido[0]);
+                   
+                    if($nombre_usuario[1]!="com"){    
+                        $act_usr = DB::table('siz_inventario')
+                            ->where('id', $inv_campo->id_inv)
+                            ->update(['nombre_usuario' => $nombre." ".$apellido ]);
+                        //dd($nombre_usuario[0]);
+                    }    
+        }
+
         return view('Mod00_Administrador.inventario', compact('inventario', 'monitores'));    
     }
 
@@ -633,7 +648,7 @@ public function Noticia()
             DB::table('Noticias')->insert(
                 [
                  'Autor' => $request->input('Autor'),
-                 'Asunto' => $request->input('Asunto'), 
+                 'Destinatario' => $request->input('Asunto'), 
                  'Descripcion' => $request->input('Descripcion'),
                 ]
             );
@@ -678,7 +693,7 @@ public function Noticia()
             ->update(
                         [
                         'Autor' => $request->input('Autor'), 
-                        'Asunto' => $request->input('Asunto'),
+                        'Destinatario' => $request->input('Asunto'),
                         'Descripcion' => $request->input('Descripcion'),
                         ]
     );

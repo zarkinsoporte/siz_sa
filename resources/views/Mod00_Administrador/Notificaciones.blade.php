@@ -50,7 +50,7 @@
                         <tr>
                         <th>{{ $campo->Id_Autor }}</th>
                         <td>{{ $campo->Autor }}</td>
-                        <td>{{ $campo->Asunto}}</td>
+                        <td>{{ $campo->Destinatario}}</td>
                         <td>{{ $campo->Descripcion }}</td>
                         <td>
                             <a href=" Mod_Noti/{{$campo->Id_Autor}}/{{0}}" class="btn btn-warning"><i class="glyphicon glyphicon-edit"></i</a>
