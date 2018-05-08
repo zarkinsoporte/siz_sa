@@ -203,7 +203,7 @@ Route::post('home/TRASLADO ÷ AREAS', 'Mod01_ProduccionController@traslados');
 Route::get('home/TRASLADO ÷ AREAS/{id}', 'Mod01_ProduccionController@getOP');
 Route::post('home/TRASLADO ÷ AREAS/{id}', 'Mod01_ProduccionController@getOP');
 Route::post('home/traslados/avanzar', 'Mod01_ProduccionController@avanzarOP');
-Route::post('home/traslados/Reprocesos', 'Mod01_ProduccionController@Correo');
+Route::post('home/traslados/Reprocesos', 'Mod01_ProduccionController@Retroceso');
 //Route::get('home/traslados/correo', 'Mod01_ProduccionController@Correo2');
 //Route::post('home/traslados/Reprocesos', 'Mod01_ProduccionController@C_rutas');
 

@@ -292,22 +292,35 @@
       {!! Form::open(['url' => 'home/traslados/Reprocesos', 'method' => 'POST']) !!}
         
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" name="orden"id="N.Orden"value="Orden">Orden de Producción No.  @if(isset($op)) {{$op}}@endif</h4>
+        <h4 class="modal-title" name="Orden"id="N.Orden"value="Orden">Orden de Producción No.  @if(isset($op)) {{$op}}@endif</h4>
       <div class="modal-body">
        
-        Estación Actual:
+       
+        <div class="alert alert-success" align="center" ><label for="message-text" class="control-label" value="Nota"> Estación Actual:</label>
         <div name="Actual" id="code" value="code" ></div>
-        <input type="hidden" id="Estacion" name="Estacion"> 
+        <input type="hidden" id="Estacion" name="Estacion"> </div>
+        @if(isset($t_user,$of))
+        <input type="hidden" id="Nombre" name="Nombre" 
+        value='{{$t_user->firstName.' '.$t_user->lastName}}'>  
+        <input type="hidden" id="orden" name="orden" 
+        value="{{$op}}" >
+        <div><label for="message-text" class="control-label" value="Nota">Cantidad a trasferir:</label></div>   
+        <input type="number" id="cant" name="cant" min="1" max="{{$of->U_Recibido}}" 
+        value="{{$of->U_Recibido}}" required>
+        
+@endif
+           
+
 
 
             <div class="dropdown">
             <label  for="message-text" class="control-label"  >Estaciones Anteriores</label>
-            <select class="form-control" name="selectestaciones" id="selectestaciones"></select>    
+            <select class="form-control" name="selectestaciones" id="selectestaciones" required></select>    
 </div>
                     
                 <div>
                 <label for="message-text" class="control-label" value="Nota">Nota</label>
-                <textarea class="form-control" name="nota"id="message-text"></textarea>
+                <textarea class="form-control" name="nota"id="message-text"  required></textarea>
 </div>
 </div>
          <div class="modal-footer">
@@ -386,6 +399,7 @@ if(isset($HisOrden)){
     var arreglo = new Array();
     $('#selectestaciones').empty();
     <?php
+   
     if(isset($Ruta)){
       for ($i = 0 ; $i < count($Ruta); $i++){    
     ?>

@@ -619,7 +619,7 @@ public function Noticia()
             DB::table('Noticias')->insert(
                 [
                  'Autor' => $request->input('Autor'),
-                 'Asunto' => $request->input('Asunto'), 
+                 'Destinatario' => $request->input('Asunto'), 
                  'Descripcion' => $request->input('Descripcion'),
                 ]
             );
@@ -664,7 +664,7 @@ public function Noticia()
             ->update(
                         [
                         'Autor' => $request->input('Autor'), 
-                        'Asunto' => $request->input('Asunto'),
+                        'Destinatario' => $request->input('Asunto'),
                         'Descripcion' => $request->input('Descripcion'),
                         ]
     );

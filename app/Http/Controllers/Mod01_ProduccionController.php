@@ -491,28 +491,26 @@ $op = Input::get('op');
         return redirect()->back()->withErrors(array('message' => 'La OP '.Input::get('op').' no existe.'));
 
     } 
-    public function Correo(Request $request)
-   
-   
-   
+    public function Retroceso(Request $request)
     {  
-
         $Est_act = $request->input('Estacion');
         $Est_ant = $request->input('selectestaciones');
         $nota = $request->input('nota');
+        $Nom_User=$request->input('Nombre');
+        $orden=$request->input('orden');
+        $cant_r=$request->input('cant');
+        //  dd($cant_r);
         $Num_Nominas=DB::select(DB::raw("SELECT No_Nomina from Email_SIZ where Reprocesos='1'"));
         foreach ($Num_Nominas as $Num_Nomina) {
-            
         $user= User::find($Num_Nomina->No_Nomina);
         $correo  = utf8_encode ('"'.$user['email'].'"'.'@zarkin.com');
-        $correo2  = utf8_encode ('"'.$user['email'].'"'.'@zarkin.com');
-       Mail::send('Emails.Reprocesos',['Num_Nomina'=>$Num_Nomina,'user'=>$user,'Est_act'=>$Est_act,'Est_ant'=>$Est_ant,'nota'=>$nota],function($msj) use($correo){
+       Mail::send('Emails.Reprocesos',['cant_r'=>$cant_r,'orden'=>$orden,'Nom_User'=>$Nom_User,'Num_Nomina'=>$Num_Nomina,'user'=>$user,'Est_act'=>$Est_act,'Est_ant'=>$Est_ant,'nota'=>$nota],function($msj) use($correo){
         $msj-> subject  ('Bienvenido a las notificaciones Zarkin');//ASUNTO DEL CORREO
          $msj-> to($correo);//Correo del destinatario 
         });
     }
-    
+
        Session::flash('info', 'El correo fue enviado');
-       return view('Emails.Reprocesos', ['Num_Nomina'=>$Num_Nomina,'user'=>$user,'Est_act'=>$Est_act,'Est_ant'=>$Est_ant,'nota'=>$nota]); 
+       return view('Emails.Reprocesos', ['cant_r'=>$cant_r,'orden'=>$orden,'Nom_User'=>$Nom_User,'Num_Nomina'=>$Num_Nomina,'user'=>$user,'Est_act'=>$Est_act,'Est_ant'=>$Est_ant,'nota'=>$nota]); 
     }
 }
