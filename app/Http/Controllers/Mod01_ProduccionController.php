@@ -220,7 +220,7 @@ if ($code->U_Recibido > $code->U_Procesado){
        (oitm.U_VS ) AS VS,      
        (SELECT CompnyName FROM OADM ) AS CompanyName
         FROM [@CP_LOGOF] inner join [@PL_RUTAS] ON [@CP_LOGOF].U_CT = [@PL_RUTAS].Code
-        inner join OHEM ON [@CP_LOGOF].U_idEmpleado = OHEM.empID
+        left join OHEM ON [@CP_LOGOF].U_idEmpleado = OHEM.empID
         left join Sof_Tiempos  ON [@CP_LOGOF].U_DocEntry = Sof_Tiempos.DocNum and [@CP_LOGOF].U_CT = Sof_Tiempos.U_idRuta    
         inner join [@CP_LOGOT] ON [@CP_LOGOF].U_DocEntry = [@CP_LOGOT].U_OP and [@CP_LOGOf].U_CT = [@CP_LOGOT].U_CT 
         inner join OWOR ON [@CP_LOGOF].U_DocEntry = OWOR.DocNum
