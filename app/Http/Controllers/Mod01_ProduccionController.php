@@ -331,7 +331,7 @@ if ($code->U_Recibido > $code->U_Procesado){
             }else if(count($Code_siguiente) == 0){
                 try{
                     //esta linea obtiene el consecutivo del numero 
-                    $consecutivo =  DB::select('select top 1 MAX( mm.Code) as Code from [@CP_Of] mm inner join (SELECT TOP 1 Code, U_DocEntry FROM [@CP_LogOF] ORDER BY  U_FechaHora DESC) as tt on tt.U_DocEntry = mm.U_DocEntry');
+                    $consecutivo =  DB::select('select max (CONVERT(INT,Code)) as Code from [@CP_Of]');
 //aqui acaba num consecutivo
                     $newCode = new OP();
                     $newCode->Code = ((int)$consecutivo[0]->Code)+1;
@@ -347,8 +347,8 @@ if ($code->U_Recibido > $code->U_Procesado){
                     $newCode->U_Comentarios = "";
                     $newCode->U_CTCalidad = 0;
                     $newCode->save();
-                   //save=insert 
-                    $consecutivologot =  DB::select('SELECT TOP 1 Code FROM  [@CP_LOGOT] ORDER BY  U_FechaHora DESC');
+                   //save=insert select max (CONVERT(INT,Code)) as Code
+                    $consecutivologot =  DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOT]');
                     $lot = new LOGOT();
                     $lot->Code = ((int)$consecutivologot[0]->Code)+1;
                     $lot->Name = ((int)$consecutivologot[0]->Code)+1;
@@ -372,7 +372,8 @@ if ($code->U_Recibido > $code->U_Procesado){
             $Code_actual->U_Entregado = $Code_actual->U_Entregado + $Cant_procesar;
 
 
-            $consecutivologof =  DB::select('SELECT TOP 1 Code FROM  [@CP_LOGOF] ORDER BY  U_FechaHora DESC');
+            $consecutivologof =  DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOF]');
+            
             $log = new LOGOF();
             $log->Code = ((int)$consecutivologof[0]->Code)+1;
             $log->Name = ((int)$consecutivologof[0]->Code)+1;
