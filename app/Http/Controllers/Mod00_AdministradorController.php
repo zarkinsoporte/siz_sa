@@ -452,12 +452,13 @@ dd($user);
                     $apellido = explode("@", $apellido = $nombre_usuario[1]);
                     $apellido = strtoupper($apellido[0]);
                    
-                    if($nombre_usuario[1]!="com"){    
+                    if($nombre_usuario[1]!="com" && $inv_campo->nombre_usuario==NULL){    
                         $act_usr = DB::table('siz_inventario')
                             ->where('id', $inv_campo->id_inv)
                             ->update(['nombre_usuario' => $nombre." ".$apellido ]);
                         //dd($nombre_usuario[0]);
-                    }    
+                    }
+
         }
 
         return view('Mod00_Administrador.inventario', compact('inventario', 'monitores'));    
@@ -563,13 +564,20 @@ dd($user);
 
     public function altaInventario2(Request $request)
     {
+        $tiempo_vida = $request->input('tiempo_vida');    
+        $fecha = date('Y-m-j');
+        $nuevafecha = strtotime ( "+$tiempo_vida year" , strtotime ( $fecha ) ) ;
+        $nuevafecha = date ( 'Y-m-j' , $nuevafecha );
         //Insertamos el monitor en la DB
         DB::table('siz_inventario')->insert(
             [
              'nombre_equipo' => $request->input('nombre_equipo'),
+             'nombre_usuario' => $request->input('nombre_usuario'),
              'correo' => $request->input('correo'), 
              'numero_equipo' => $request->input('numero_equipo'),
              'tipo_equipo' => $request->input('tipo_equipo'),
+             'fecha_alta' => date("Y-m-d"),
+             'fecha_baja' => $nuevafecha,
              'monitor' => $request->input('monitor')
             ]
         );
@@ -624,9 +632,12 @@ dd($user);
         ->update(
             [
                 'nombre_equipo' => $request->input('nombre_equipo'),
+                'nombre_usuario' => $request->input('nombre_usuario'),
                 'correo' => $request->input('correo'), 
                 'numero_equipo' => $request->input('numero_equipo'),
                 'tipo_equipo' => $request->input('tipo_equipo'),
+                'fecha_alta' => $request->input('fecha_alta'),
+                'fecha_baja' => $request->input('fecha_baja'),
                 'monitor' => $request->input('monitor')
                ]
         );

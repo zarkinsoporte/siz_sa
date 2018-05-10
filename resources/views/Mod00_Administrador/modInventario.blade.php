@@ -49,6 +49,10 @@
                     <input type="text" name="nombre_equipo" class="form-control"value="{{ $inventario[0]->nombre_equipo }}" required>
                 </div>
                 <div class="form-group">
+                    <label for="NombreUsuario">Nombre Usuario</label>
+                    <input type="text" name="nombre_usuario" class="form-control"value="{{ $inventario[0]->nombre_usuario }}" required>
+                </div>
+                <div class="form-group">
                     <label for="Correo">Correo</label>
                     <input type="email" name="correo" class="form-control" value="{{$inventario[0]->correo}}"required>
                 </div>
@@ -64,6 +68,16 @@
                         <option value="ALL IN ONE">ALL IN ONE</option>
                         <option value="{{$inventario[0]->tipo_equipo}}" selected>{{$inventario[0]->tipo_equipo}} (*)</option>    
                     </select>
+                </div>
+                @if ($inventario[0]->fecha_alta == NULL)
+                <div class="form-group">
+                    <label for="tiempo_vida">Fecha Alta</label>
+                    <input type="date" name="fecha_alta" class="form-control" id="fecha_alta" placeholder="Ej: 5" value="{{$inventario[0]->fecha_alta}}" required>
+                </div>
+                @endif
+                <div class="form-group">
+                    <label for="tiempo_vida">Fecha de baja Estimada</label>
+                    <input type="date" name="fecha_baja" class="form-control" id="fecha_baja" placeholder="Ej: 5" value="{{$inventario[0]->fecha_baja}}" required>
                 </div>
                 <div class="form-group">
                     <label for="Monitor">Monitor</label>

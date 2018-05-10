@@ -232,24 +232,26 @@ if ($code->U_Recibido > $code->U_Procesado){
         OHEM.firstName + ' ' + OHEM.lastName , [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
         oitm.U_VS
         ORDER BY [@CP_LOGOF].U_CT") );
-        //dd($GraficaOrden);
+        $cont = count($GraficaOrden);
+        $etiquetas = array();
+        for($i=0; $i<=$cont; $i++){
+            array_push($etiquetas, "Estacion $i");
+        }
+
         $stocksTable = Lava::DataTable();
         $stocksTable->addDateColumn('Day of Month')
+                    ->addColumns($etiquetas);
 
-            //->addNumberColumn('Projected')
-
-            ->addNumberColumn('Estación')
-            ->addRoleColumn('string', 'tooltip',[
-                'html' => true
-            ]);
-     
+        print_r($stocksTable);
         foreach($GraficaOrden as $campo){
-           $date = date_create($campo->FechaI);
-           $stocksTable->addRow([
-              $campo->FechaI, $campo->U_CT, '<p style=margin:10px><b>'.ucwords(strtolower($campo->Empleado)).'</b><br>Estación:<b>'.$campo->U_CT.'</b><br>Fecha:<b>'.date_format($date,'d/m/Y').'</b></p>'
+        $date = date_create($campo->FechaI);
+            $stocksTable->addRow([
+                    $campo->FechaI, $campo->U_CT, $campo->U_CT, '<p style=margin:10px><b>'.ucwords(strtolower($campo->Empleado)).'</b><br>Estación:<b>'.$campo->U_CT.'</b><br>Fecha:<b>'.date_format($date,'d/m/Y').'</b></p>'
             ]);
-        }    
-
+        }
+                  
+        
+    
         $HisOrden = Lava::AreaChart('HisOrden', $stocksTable, [
             'title' => 'Historial por OP',
             'interpolateNulls'   => true,
