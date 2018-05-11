@@ -212,13 +212,13 @@ if ($code->U_Recibido > $code->U_Procesado){
         // $siguiente = OP::getEstacionSiguiente(Input::get('op'));
 
 
-       //Comienza el código para graficar 
-       $GraficaOrden = DB::select( DB::raw("SELECT [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,
-       DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOT].U_FechaHora)) AS FechaI,
-       DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)) AS FechaF ,OHEM.firstName + ' ' + OHEM.lastName AS Empleado, [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
-       SUM([@CP_LOGOF].U_Cantidad) AS U_CANTIDAD,
-       (oitm.U_VS ) AS VS,      
-       (SELECT CompnyName FROM OADM ) AS CompanyName
+        //Comienza el código para graficar 
+        $GraficaOrden = DB::select( DB::raw("SELECT [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,
+        DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOT].U_FechaHora)) AS FechaI,
+        DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)) AS FechaF ,OHEM.firstName + ' ' + OHEM.lastName AS Empleado, [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
+        SUM([@CP_LOGOF].U_Cantidad) AS U_CANTIDAD,
+        (oitm.U_VS ) AS VS,      
+        (SELECT CompnyName FROM OADM ) AS CompanyName
         FROM [@CP_LOGOF] inner join [@PL_RUTAS] ON [@CP_LOGOF].U_CT = [@PL_RUTAS].Code
         left join OHEM ON [@CP_LOGOF].U_idEmpleado = OHEM.empID
         left join Sof_Tiempos  ON [@CP_LOGOF].U_DocEntry = Sof_Tiempos.DocNum and [@CP_LOGOF].U_CT = Sof_Tiempos.U_idRuta    
@@ -232,26 +232,42 @@ if ($code->U_Recibido > $code->U_Procesado){
         OHEM.firstName + ' ' + OHEM.lastName , [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
         oitm.U_VS
         ORDER BY [@CP_LOGOF].U_CT") );
+        //dd($GraficaOrden);
         $cont = count($GraficaOrden);
-        $etiquetas = array();
-        for($i=0; $i<=$cont; $i++){
-            array_push($etiquetas, "Estacion $i");
-        }
-
         $stocksTable = Lava::DataTable();
         $stocksTable->addDateColumn('Day of Month')
-                    ->addColumns($etiquetas);
-
-        print_r($stocksTable);
-        foreach($GraficaOrden as $campo){
-        $date = date_create($campo->FechaI);
-            $stocksTable->addRow([
-                    $campo->FechaI, $campo->U_CT, $campo->U_CT, '<p style=margin:10px><b>'.ucwords(strtolower($campo->Empleado)).'</b><br>Estación:<b>'.$campo->U_CT.'</b><br>Fecha:<b>'.date_format($date,'d/m/Y').'</b></p>'
+            //->addNumberColumn('Projected')
+            ->addNumberColumn('Estación')
+            ->addRoleColumn('string', 'tooltip',[
+                'html' => true
             ]);
-        }
-                  
-        
-    
+
+            foreach($GraficaOrden as $campo){
+                $date = date_create($campo->FechaI);
+
+                $nom_emp = $campo->Empleado;
+                if($nom_emp==NULL){
+                    $nom_emp=Auth::user()->firstName.' '.Auth::user()->lastName;
+                }
+                
+                $stocksTable->addRow([
+                   $campo->FechaI, $campo->U_CT, '<p style=margin:10px><b>'.
+                   ucwords(strtolower($nom_emp)).
+                   '</b><br>Estación:<b>'.
+                   $campo->NAME.
+                   '</b><br>C. Recibida:<b>'.
+                   $campo->U_CANTIDAD.
+                   '</b><br>Fecha:<b>'.
+                   date_format($date,'d/m/Y').
+                   '</b></p>'
+                 ]);
+             }
+            
+             
+            //  foreach($GraficaOrden as $campo){
+            //     $campo->U_CT;       
+            //  }
+
         $HisOrden = Lava::AreaChart('HisOrden', $stocksTable, [
             'title' => 'Historial por OP',
             'interpolateNulls'   => true,
@@ -262,9 +278,8 @@ if ($code->U_Recibido > $code->U_Procesado){
             'tooltip'=> [
                 'isHtml' => true
             ], 
-            
-           
         ]);
+
         ////RUTA RETROCESO
         $Ruta = OP::getRutaNombres($op);
 
