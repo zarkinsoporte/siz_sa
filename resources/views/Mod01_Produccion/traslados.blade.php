@@ -333,6 +333,7 @@
 </div>
 </div>
     {!! Form::close() !!}
+
         <!-- /.container -->
 <?php
 //$GraficaOrden=1;
