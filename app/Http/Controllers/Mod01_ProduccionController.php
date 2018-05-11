@@ -520,7 +520,8 @@ $op = Input::get('op');
         $Nom_User=$request->input('Nombre');
         $orden=$request->input('orden');
         $cant_r=$request->input('cant');
-        //  dd($cant_r);
+//--------------------correo-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+
         $Num_Nominas=DB::select(DB::raw("SELECT No_Nomina from Email_SIZ where Reprocesos='1'"));
         foreach ($Num_Nominas as $Num_Nomina) {
         $user= User::find($Num_Nomina->No_Nomina);
@@ -530,8 +531,63 @@ $op = Input::get('op');
          $msj-> to($correo);//Correo del destinatario 
         });
     }
+ //-------------Notificaciones--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+   
+   
+ $Us_advice = DB::table('@PL_RUTAS')->Select('U_Cuota')->where('U_orden',$Est_ant)->first();
+//dd($Us_advice->U_Cuota);
+   $cod_dep='';
+switch ($Us_advice->U_Cuota) { 
 
-       Session::flash('info', 'El correo fue enviado');
+        /*1*/case "ALM-MO":
+                $cod_dep=2;
+            break;
+        /*2*/case "CAR-MO":
+                $cod_dep=4;
+            break;
+        /*3*/case "COJ-MO":
+                $cod_dep=5;
+            break;
+        /*4*/case "COR-MO":
+                $cod_dep=7;
+            break;
+        /*5*/case "COS-MO":
+                $cod_dep=8;
+            break;
+        /*6*/case "MAN-MO":
+                $cod_dep=14;
+            break;
+        /*7*/case "PLA-MO":
+                $cod_dep=16;
+            break;
+        /*8*/case "TAP-MO":
+                $cod_dep=19;
+                break;
+        /*9*/case "TER-MO":
+                $cod_dep=20;
+                break;
+         /*10*/case "TER-MO":
+                $cod_dep=20;
+                 break;
+                      
+//dd($cod_dep);
+$Not_us=DB::select(DB::raw("SELECT top 1 U_EmpGiro,firstname from OHEM where position='4'and dept ='$cod_dep'"));
+//dd($Not_us);  
+$N_Emp  = $Not_us[0];
+//
+
+            DB::table('Noticias')->insert(
+                [
+                 'Destinatario' => $N_Emp->U_EmpGiro
+                ]
+            );
+//-----------------Refresca a la vista-------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+Session::flash('info', 'El correo fue enviado a   '.$N_Emp->U_EmpGiro.'  '.$N_Emp->firstname.'');
+
        return view('Emails.Reprocesos', ['cant_r'=>$cant_r,'orden'=>$orden,'Nom_User'=>$Nom_User,'Num_Nomina'=>$Num_Nomina,'user'=>$user,'Est_act'=>$Est_act,'Est_ant'=>$Est_ant,'nota'=>$nota]); 
     }
+    Session::flash('mensaje', 'El correo fue enviado');
+    return redirect('/');
+    } 
+
 }

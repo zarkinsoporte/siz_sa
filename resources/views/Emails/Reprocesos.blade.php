@@ -34,5 +34,4 @@
     </tbody>
 </table>
 <h4 style="color:red">El usuario que hizo este movimiento debe entregar el producto a la estacion de Destino y verificar que se acepte</h4>
-
 </html>
