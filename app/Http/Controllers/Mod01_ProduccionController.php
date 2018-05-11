@@ -247,7 +247,10 @@ if ($code->U_Recibido > $code->U_Procesado){
 
                 $nom_emp = $campo->Empleado;
                 if($nom_emp==NULL){
-                    $nom_emp=Auth::user()->firstName.' '.Auth::user()->lastName;
+                    $users = DB::table('OHEM')->where('U_EmpGiro', '=', $campo->U_idEmpleado)
+                    ->select('OHEM.lastName', 'OHEM.firstName')
+                    ->first();
+                    $nom_emp=$users->firstName.' '.$users->lastName;
                 }
                 
                 $stocksTable->addRow([
