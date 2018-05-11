@@ -212,15 +212,15 @@ if ($code->U_Recibido > $code->U_Procesado){
         // $siguiente = OP::getEstacionSiguiente(Input::get('op'));
 
 
-       //Comienza el código para graficar 
-       $GraficaOrden = DB::select( DB::raw("SELECT [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,
-       DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOT].U_FechaHora)) AS FechaI,
-       DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)) AS FechaF ,OHEM.firstName + ' ' + OHEM.lastName AS Empleado, [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
-       SUM([@CP_LOGOF].U_Cantidad) AS U_CANTIDAD,
-       (oitm.U_VS ) AS VS,      
-       (SELECT CompnyName FROM OADM ) AS CompanyName
+        //Comienza el código para graficar 
+        $GraficaOrden = DB::select( DB::raw("SELECT [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,
+        DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOT].U_FechaHora)) AS FechaI,
+        DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)) AS FechaF ,OHEM.firstName + ' ' + OHEM.lastName AS Empleado, [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
+        SUM([@CP_LOGOF].U_Cantidad) AS U_CANTIDAD,
+        (oitm.U_VS ) AS VS,      
+        (SELECT CompnyName FROM OADM ) AS CompanyName
         FROM [@CP_LOGOF] inner join [@PL_RUTAS] ON [@CP_LOGOF].U_CT = [@PL_RUTAS].Code
-        inner join OHEM ON [@CP_LOGOF].U_idEmpleado = OHEM.empID
+        left join OHEM ON [@CP_LOGOF].U_idEmpleado = OHEM.empID
         left join Sof_Tiempos  ON [@CP_LOGOF].U_DocEntry = Sof_Tiempos.DocNum and [@CP_LOGOF].U_CT = Sof_Tiempos.U_idRuta    
         inner join [@CP_LOGOT] ON [@CP_LOGOF].U_DocEntry = [@CP_LOGOT].U_OP and [@CP_LOGOf].U_CT = [@CP_LOGOT].U_CT 
         inner join OWOR ON [@CP_LOGOF].U_DocEntry = OWOR.DocNum
@@ -233,22 +233,40 @@ if ($code->U_Recibido > $code->U_Procesado){
         oitm.U_VS
         ORDER BY [@CP_LOGOF].U_CT") );
         //dd($GraficaOrden);
+        $cont = count($GraficaOrden);
         $stocksTable = Lava::DataTable();
         $stocksTable->addDateColumn('Day of Month')
-
             //->addNumberColumn('Projected')
-
             ->addNumberColumn('Estación')
             ->addRoleColumn('string', 'tooltip',[
                 'html' => true
             ]);
-     
-        foreach($GraficaOrden as $campo){
-           $date = date_create($campo->FechaI);
-           $stocksTable->addRow([
-              $campo->FechaI, $campo->U_CT, '<p style=margin:10px><b>'.ucwords(strtolower($campo->Empleado)).'</b><br>Estación:<b>'.$campo->U_CT.'</b><br>Fecha:<b>'.date_format($date,'d/m/Y').'</b></p>'
-            ]);
-        }    
+
+            foreach($GraficaOrden as $campo){
+                $date = date_create($campo->FechaI);
+
+                $nom_emp = $campo->Empleado;
+                if($nom_emp==NULL){
+                    $nom_emp=Auth::user()->firstName.' '.Auth::user()->lastName;
+                }
+                
+                $stocksTable->addRow([
+                   $campo->FechaI, $campo->U_CT, '<p style=margin:10px><b>'.
+                   ucwords(strtolower($nom_emp)).
+                   '</b><br>Estación:<b>'.
+                   $campo->NAME.
+                   '</b><br>C. Recibida:<b>'.
+                   $campo->U_CANTIDAD.
+                   '</b><br>Fecha:<b>'.
+                   date_format($date,'d/m/Y').
+                   '</b></p>'
+                 ]);
+             }
+            
+             
+            //  foreach($GraficaOrden as $campo){
+            //     $campo->U_CT;       
+            //  }
 
         $HisOrden = Lava::AreaChart('HisOrden', $stocksTable, [
             'title' => 'Historial por OP',
@@ -260,9 +278,8 @@ if ($code->U_Recibido > $code->U_Procesado){
             'tooltip'=> [
                 'isHtml' => true
             ], 
-            
-           
         ]);
+
         ////RUTA RETROCESO
         $Ruta = OP::getRutaNombres($op);
 
@@ -331,7 +348,7 @@ if ($code->U_Recibido > $code->U_Procesado){
             }else if(count($Code_siguiente) == 0){
                 try{
                     //esta linea obtiene el consecutivo del numero 
-                    $consecutivo =  DB::select('select top 1 MAX( mm.Code) as Code from [@CP_Of] mm inner join (SELECT TOP 1 Code, U_DocEntry FROM [@CP_LogOF] ORDER BY  U_FechaHora DESC) as tt on tt.U_DocEntry = mm.U_DocEntry');
+                    $consecutivo =  DB::select('select max (CONVERT(INT,Code)) as Code from [@CP_Of]');
 //aqui acaba num consecutivo
                     $newCode = new OP();
                     $newCode->Code = ((int)$consecutivo[0]->Code)+1;
@@ -347,8 +364,8 @@ if ($code->U_Recibido > $code->U_Procesado){
                     $newCode->U_Comentarios = "";
                     $newCode->U_CTCalidad = 0;
                     $newCode->save();
-                   //save=insert 
-                    $consecutivologot =  DB::select('SELECT TOP 1 Code FROM  [@CP_LOGOT] ORDER BY  U_FechaHora DESC');
+                   //save=insert select max (CONVERT(INT,Code)) as Code
+                    $consecutivologot =  DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOT]');
                     $lot = new LOGOT();
                     $lot->Code = ((int)$consecutivologot[0]->Code)+1;
                     $lot->Name = ((int)$consecutivologot[0]->Code)+1;
@@ -372,7 +389,8 @@ if ($code->U_Recibido > $code->U_Procesado){
             $Code_actual->U_Entregado = $Code_actual->U_Entregado + $Cant_procesar;
 
 
-            $consecutivologof =  DB::select('SELECT TOP 1 Code FROM  [@CP_LOGOF] ORDER BY  U_FechaHora DESC');
+            $consecutivologof =  DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOF]');
+            
             $log = new LOGOF();
             $log->Code = ((int)$consecutivologof[0]->Code)+1;
             $log->Name = ((int)$consecutivologof[0]->Code)+1;

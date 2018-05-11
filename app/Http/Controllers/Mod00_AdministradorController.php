@@ -305,11 +305,11 @@ dd($user);
 
     }
 
-    public function confModulo($id_modulo){
+    public function confModulo($id_grupo, $id_modulo){
 
         $grupos = DB::table('OHTY')
                 ->where('typeID', '>', 0)->get();
-        $primero = MODULOS_GRUPO_SIZ::where('id_modulo', $id_modulo)->first();
+        $primero = MODULOS_GRUPO_SIZ::where('id_modulo', $id_modulo)->where('id_grupo', $id_grupo)->first();
         if ($primero != null){
              $id_grupo = $primero->id_grupo;
 
@@ -342,10 +342,9 @@ dd($user);
      */
     public function anyData(Request $request)
     {
-        $primero = MODULOS_GRUPO_SIZ::where('id_modulo', $request->get('id'))->first();
-        $id_grupo = $primero->id_grupo;
-        $menus = MODULOS_GRUPO_SIZ::where('MODULOS_GRUPO_SIZ.id_modulo',$request->get('id'))
-            ->where('id_grupo', $id_grupo)
+        
+        $menus = MODULOS_GRUPO_SIZ::where('MODULOS_GRUPO_SIZ.id_modulo',$request->get('id_modulo'))
+            ->where('MODULOS_GRUPO_SIZ.id_grupo', $request->get('id_grupo'))
             ->whereNotNull('id_menu')
             ->whereNotNull('id_tarea')
             ->leftjoin('MENU_ITEM_SIZ', 'MODULOS_GRUPO_SIZ.id_menu', '=', 'MENU_ITEM_SIZ.id')
@@ -420,6 +419,21 @@ dd($user);
 
     }
 
+    public function deleteModulo($id_modulo){
+        $busqueda = MODULOS_GRUPO_SIZ::
+        where('id_modulo', $id_modulo)
+        ->first();
+
+    if (count($busqueda)>0){
+        return redirect()->back()->withErrors(array('message' => 'El Modulo no se encuentra.'));
+    }else{
+       
+        $busqueda->delete();
+    }
+
+    return redirect()->back();
+
+    }
 
     public function inventario()
     {
@@ -431,6 +445,22 @@ dd($user);
             ->orderBy('numero_equipo')
             ->get();
         $monitores  = DB::table('siz_monitores')->get();
+
+        foreach ($inventario as $inv_campo) {
+                    $nombre_usuario = explode(".", $inv_campo->correo);
+                    $nombre   = strtoupper($nombre_usuario[0]);
+                    $apellido = explode("@", $apellido = $nombre_usuario[1]);
+                    $apellido = strtoupper($apellido[0]);
+                   
+                    if($nombre_usuario[1]!="com" && $inv_campo->nombre_usuario==NULL){    
+                        $act_usr = DB::table('siz_inventario')
+                            ->where('id', $inv_campo->id_inv)
+                            ->update(['nombre_usuario' => $nombre." ".$apellido ]);
+                        //dd($nombre_usuario[0]);
+                    }
+
+        }
+
         return view('Mod00_Administrador.inventario', compact('inventario', 'monitores'));    
     }
 
@@ -534,13 +564,20 @@ dd($user);
 
     public function altaInventario2(Request $request)
     {
+        $tiempo_vida = $request->input('tiempo_vida');    
+        $fecha = date('Y-m-j');
+        $nuevafecha = strtotime ( "+$tiempo_vida year" , strtotime ( $fecha ) ) ;
+        $nuevafecha = date ( 'Y-m-j' , $nuevafecha );
         //Insertamos el monitor en la DB
         DB::table('siz_inventario')->insert(
             [
              'nombre_equipo' => $request->input('nombre_equipo'),
+             'nombre_usuario' => $request->input('nombre_usuario'),
              'correo' => $request->input('correo'), 
              'numero_equipo' => $request->input('numero_equipo'),
              'tipo_equipo' => $request->input('tipo_equipo'),
+             'fecha_alta' => date("Y-m-d"),
+             'fecha_baja' => $nuevafecha,
              'monitor' => $request->input('monitor')
             ]
         );
@@ -595,9 +632,12 @@ dd($user);
         ->update(
             [
                 'nombre_equipo' => $request->input('nombre_equipo'),
+                'nombre_usuario' => $request->input('nombre_usuario'),
                 'correo' => $request->input('correo'), 
                 'numero_equipo' => $request->input('numero_equipo'),
                 'tipo_equipo' => $request->input('tipo_equipo'),
+                'fecha_alta' => $request->input('fecha_alta'),
+                'fecha_baja' => $request->input('fecha_baja'),
                 'monitor' => $request->input('monitor')
                ]
         );

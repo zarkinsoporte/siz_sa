@@ -73,7 +73,7 @@
 
                     <br>
 
-                    {{--este form tiene que enviar la informacion para crear un modulo--}}
+                   {{--este form tiene que enviar la informacion para crear un modulo--}}
                     <form role="form" method="post" action="{!!url('/admin/createModulo/'.$id_grupo)!!}">
 
                         <div class="col-md-4">
@@ -110,10 +110,10 @@
                                             <h4>{{$m->name}}</h4>
                                             <p>{{$m->descripcion}}</p>
                                             <p align="right">
-                                                <a href="{{'delete_modulo/'.$m->id_modulo}}" class="btn btn-danger" role="button">
+                                                <a href="{{'delete_modulo/'.$id_grupo.'/'.$m->id_modulo}}" class="btn btn-danger" role="button">
                                                     <i class="fa fa-trash-o" aria-hidden="true"></i>
                                                 </a>
-                                                <a href="{{'conf_modulo/'.$m->id_modulo}}" class="btn btn-default" role="button">
+                                                <a href="{{'conf_modulo/'.$id_grupo.'/'.$m->id_modulo}}" class="btn btn-default" role="button">
                                                     <i class="fa fa-cog" aria-hidden="true"></i>
                                                 </a>
                                             </p>

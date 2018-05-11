@@ -121,8 +121,8 @@ Route::get('admin/grupos/{id}', 'Mod00_AdministradorController@editgrupos');
 Route::post('admin/createModulo/{id}', 'Mod00_AdministradorController@createModulo');
 Route::post('admin/createMenu/{id}', 'Mod00_AdministradorController@createMenu');
 Route::post('admin/createTarea/{id_grupo}', 'Mod00_AdministradorController@createTarea');//si se usa
-Route::get('admin/grupos/delete_modulo/{id}', 'Mod00_AdministradorController@deleteModulo');
-Route::get('admin/grupos/conf_modulo/{id}', 'Mod00_AdministradorController@confModulo');
+Route::get('admin/grupos/delete_modulo/{id_grupo}/{id_modulo}', 'Mod00_AdministradorController@deleteModulo');
+Route::get('admin/grupos/conf_modulo/{id_grupo}/{id_modulo}', 'Mod00_AdministradorController@confModulo');
 Route::get('admin/grupos/conf_modulo/quitar/{id}', 'Mod00_AdministradorController@deleteTarea');
 Route::get('help', function(){
 
@@ -155,7 +155,7 @@ echo $consecutivo[0]->Code;
    // echo $log->U_CT;
 
 });
-Route::get('datatable/{id}', 'Mod00_AdministradorController@confModulo');
+Route::get('datatable/{idGrup}/{idMod}', 'Mod00_AdministradorController@confModulo');
 Route::get('datatables.data', 'Mod00_AdministradorController@anyData')->name('datatables.data');
 /*
 |--------------------------------------------------------------------------
@@ -204,6 +204,18 @@ Route::get('home/TRASLADO ÷ AREAS/{id}', 'Mod01_ProduccionController@getOP');
 Route::post('home/TRASLADO ÷ AREAS/{id}', 'Mod01_ProduccionController@getOP');
 Route::post('home/traslados/avanzar', 'Mod01_ProduccionController@avanzarOP');
 Route::post('home/traslados/Reprocesos', 'Mod01_ProduccionController@Retroceso');
+
+Route::get('admin/aux', function(){
+    $menus = MODULOS_GRUPO_SIZ::where('MODULOS_GRUPO_SIZ.id_modulo',2)
+    ->where('MODULOS_GRUPO_SIZ.id_grupo', 2)
+    ->whereNotNull('id_menu')
+    ->whereNotNull('id_tarea')
+    ->leftjoin('MENU_ITEM_SIZ', 'MODULOS_GRUPO_SIZ.id_menu', '=', 'MENU_ITEM_SIZ.id')
+    ->leftjoin('TAREA_MENU_SIZ', 'MODULOS_GRUPO_SIZ.id_tarea', '=', 'TAREA_MENU_SIZ.id')
+    ->select('MODULOS_GRUPO_SIZ.*', 'MENU_ITEM_SIZ.name as menu', 'TAREA_MENU_SIZ.name as tarea')
+    ->get();
+dd($menus);
+});
 
 
 

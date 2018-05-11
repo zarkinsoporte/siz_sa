@@ -47,6 +47,10 @@
                     <input type="text" name="nombre_equipo" class="form-control" placeholder="Ej. HP Probook 4520s" required>
                 </div>
                 <div class="form-group">
+                    <label for="NombreEquipo">Nombre Usuario</label>
+                    <input type="text" name="nombre_usuario" class="form-control" placeholder="Nombre Apellido" required>
+                </div>
+                <div class="form-group">
                     <label for="Correo">Correo</label>
                     <input type="email" name="correo" class="form-control" id="exampleFormControlInput1" placeholder="nombre.apellido@zarkin.com" required>
                 </div>
@@ -61,6 +65,10 @@
                     <option>LAPTOP</option>
                     <option>ALL IN ONE</option>
                     </select>
+                </div>
+                <div class="form-group">
+                    <label for="tiempo_vida">Tiempo de Vida Estimado (Años)</label>
+                    <input type="text" min="0" max="10" maxlength="2" name="tiempo_vida" class="form-control" id="tiempo_vida" placeholder="Ej: 5" required>
                 </div>
                 <div class="form-group">
                     <label for="Monitor">Monitor</label>

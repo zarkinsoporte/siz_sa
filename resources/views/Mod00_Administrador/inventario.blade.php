@@ -47,7 +47,9 @@
                         <tr>
                         <th scope="col">Número de Equipo</th>
                         <th scope="col">Nombre Equipo</th>
+                        <th scope="col">Nombre Usuario</th>
                         <th scope="col">Correo</th>
+                        <th scope="col">Tiempo Vida</th>
                         <th scope="col">Tipo de Equipo</th>
                         <th scope="col">Monitor</th>
                         <th scope="col">PDF</th>
@@ -61,7 +63,18 @@
                         <tr>
                         <th scope="row">{{ $inventario->numero_equipo }}</th>
                         <td>{{ $inventario->nombre_equipo }}</td>
+                        <td>{{ $inventario->nombre_usuario }}</td>
                         <td>{{ $inventario->correo}}</td>
+                        <td>
+                            <?php 
+                            
+                            $fecha_baja  = explode("-", $inventario->fecha_baja);
+                            $fecha_alta  = explode("-", $inventario->fecha_alta);
+                            
+                            echo $tiempo_vida = $fecha_baja[0] - $fecha_alta[0];
+                            echo " años";
+                            ?>
+                        </td>
                         <td>{{ $inventario->tipo_equipo }}</td>
                         <td>{{ $inventario->nombre_monitor }}</td>
                         <td>

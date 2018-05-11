@@ -10,7 +10,7 @@
             <div class="hidden-lg"><br><br></div>
                 <h3 class="page-header">
                     Inicio
-                    <small>Sistema Informatico Zarkin</small>
+                    <small>Sistema Informático Zarkin</small>
                 </h3>
 
             </div>
