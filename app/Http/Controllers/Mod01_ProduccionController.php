@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Input;
 use Session;
 use Auth;
 use Lava;
+use Dompdf\Dompdf;
+use App;
 use Mail;
 class Mod01_ProduccionController extends Controller
 {
@@ -42,6 +44,96 @@ class Mod01_ProduccionController extends Controller
        // echo OP::getEstacionSiguiente("81143");
       // dd(OP::getStatus("81143"));
       // dd(OP::getRuta("81143"));
+    }
+
+    public function ReporteOpPDF($op)
+    {
+        //$pdf = App::make('dompdf.wrapper');
+        $GraficaOrden = DB::select( DB::raw("SELECT [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,
+        DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOT].U_FechaHora)) AS FechaI,
+        DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)) AS FechaF ,OHEM.firstName + ' ' + OHEM.lastName AS Empleado, [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
+        SUM([@CP_LOGOF].U_Cantidad) AS U_CANTIDAD,
+        (oitm.U_VS ) AS VS,      
+        (SELECT CompnyName FROM OADM ) AS CompanyName
+        FROM [@CP_LOGOF] inner join [@PL_RUTAS] ON [@CP_LOGOF].U_CT = [@PL_RUTAS].Code
+        left join OHEM ON [@CP_LOGOF].U_idEmpleado = OHEM.empID
+        left join Sof_Tiempos  ON [@CP_LOGOF].U_DocEntry = Sof_Tiempos.DocNum and [@CP_LOGOF].U_CT = Sof_Tiempos.U_idRuta    
+        inner join [@CP_LOGOT] ON [@CP_LOGOF].U_DocEntry = [@CP_LOGOT].U_OP and [@CP_LOGOf].U_CT = [@CP_LOGOT].U_CT 
+        inner join OWOR ON [@CP_LOGOF].U_DocEntry = OWOR.DocNum
+        inner join OITM ON OWOR.ItemCode = OITM.ItemCode
+        WHERE U_DocEntry = $op 
+        GROUP BY [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,
+        DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOT].U_FechaHora)) ,
+        DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)) ,
+        OHEM.firstName + ' ' + OHEM.lastName , [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
+        oitm.U_VS
+        ORDER BY [@CP_LOGOF].U_CT") );
+        //dd($GraficaOrden);
+    
+        $data=array(
+                    'data' => $GraficaOrden,
+                    'op'   => $op
+                   );
+        //$data = $GraficaOrden;
+        
+        $pdf = \PDF::loadView('Mod01_Produccion.ReporteOpPDF', $data);
+        //dd($pdf);
+        //return $pdf->stream();
+        return $pdf->stream('ReporteOP.pdf');
+    }
+
+    public function ReporteMaterialesPDF($op)
+    {
+        //$pdf = App::make('dompdf.wrapper');
+        $Materiales = DB::select( DB::raw("SELECT b.DocNum AS DocNumOf, 
+        '*' + CAST(b.DocNum as varchar (50)) + '*' as CodBarras,
+        b.ItemCode, 
+        c.ItemName, 
+        c.U_VS AS VS, 
+        d.CardCode, 
+        d.CardName, 
+        d.DocNum AS DocNumP, 
+        b.DueDate AS FechaEntrega, 
+        b.plannedqty, 
+        d.Comments as Comentario, 
+        b.Comments, 
+        c.UserText, 
+        f.InvntryUom,
+        --f.U_estacion as CodEstacion,
+         '*' + cast(f.u_estacion as varchar (3)) + '*' as BarrEstacion, 
+        ISNULL((SELECT Name FROM [@PL_RUTAS] WHERE Code=f.U_Estacion),'Sin Estacion') AS Estacion,
+        a.ItemCode AS Codigo, 
+        f.ItemName as Descripcion, 
+        a.PlannedQty AS Cantidad, 
+        0 AS [Cant. Entregada], 
+        0 AS [Cant. Devolución],
+        --g.Father,
+        b.U_NoSerie,
+        f.U_Metodo,
+        b.U_OF as origen,
+        (SELECT TOP 1 ItemName FROM OITM INNER JOIN OWOR ON OITM.ITEMCODE = OWOR.ItemCode  WHERE OWOR.DocNum = b.U_OF ) as Funda            
+    FROM (WOR1 a
+         INNER JOIN OWOR b ON a.DocEntry=b.DocEntry
+         INNER JOIN OITM c ON b.ItemCode=c.ItemCode
+         INNER JOIN ORDR d ON b.OriginAbs=d.DocEntry
+         INNER JOIN OITM f ON a.ItemCode=f.ItemCode)
+         --inner join ITT1 g on a.ItemCode  = g.Code and b.ItemCode = g.Father  
+    WHERE a.DocEntry=CONVERT(Int,$op) 
+       AND NOT (f.InvntItem='N' AND f.SellItem='N' AND f.PrchseItem='N' AND f.AssetItem='N')
+       AND f.ItemName  not like  '%Gast%'
+    ORDER BY CONVERT(INT, a.U_Estacion)") );
+        //dd($Materiales);
+    
+        $data=array(
+                    'data' => $Materiales,
+                    'op'   => $op
+                   );
+        //$data = $GraficaOrden;
+        
+        $pdf = \PDF::loadView('Mod01_Produccion.ReporteMaterialesPDF', $data);
+        //dd($pdf);
+        //return $pdf->stream();
+        return $pdf->stream('ReporteMateriales.pdf');
     }
 
     public function allUsers(Request $request){
