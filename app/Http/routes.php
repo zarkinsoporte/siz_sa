@@ -111,7 +111,6 @@ Route::get('admin/mod_mon/{id}/{mensaje}', 'Mod00_AdministradorController@mod_mo
 Route::post('admin/mod_mon2', 'Mod00_AdministradorController@mod_mon2');
 Route::post('admin/mod_inv2', 'Mod00_AdministradorController@mod_inv2');
 Route::get('admin/generarPdf/{id}', 'Mod00_AdministradorController@generarPdf');
-// Fin de Rutas del modulo de inventarios
 
 Route::get('controlPiso', 'Mod01_ProduccionController@estacionSiguiente');
 Route::get('grupo/{id}', function ($id){
@@ -209,6 +208,10 @@ Route::post('/', 'HomeController@index');
 Route::get('Mod01_Produccion/Noticias','HomeController@create');
 Route::get('leido/{id}', 'HomeController@UPT_Noticias');
 Route::post('/leido', 'HomeController@UPT_Noticias');
+
+// PDF de Historial por OP
+Route::get('home/ReporteOpPDF/{op}', 'Mod01_ProduccionController@ReporteOpPDF');
+Route::get('home/ReporteMaterialesPDF/{op}', 'Mod01_ProduccionController@ReporteMaterialesPDF');
 
 Route::get('admin/aux', function(){
     $menus = MODULOS_GRUPO_SIZ::where('MODULOS_GRUPO_SIZ.id_modulo',2)
