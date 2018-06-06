@@ -15,17 +15,22 @@
 
             </div>
         </div>
+        <style>
+.div{
+    font-family:arial;
+}
+        </style>
         <!-- /.row -->
         <div class="row">
             <div class="col-lg-6.5 col-md-8 col-sm-5 ">
+
                 @include('partials.alertas')
                 <div class="alert alert-info">
-                    <strong>Bienvenido  ! </strong> sin tareas para hoy.
+                    <strong>Bienvenido  ! </strong>Usted tiene <strong>{{Count($noticias)}} </strong> tareas por realizar
                 </div>
-
-
-
-            </div>
-        </div>
-    </div>
+ 
+<a href="Mod01_Produccion/Noticias" button class="btn btn-primary" type="button">
+ <div class="glyphicon glyphicon-envelope">  </div> Notificaciones   <span class="badge badge-danger"> {{Count($noticias)}}</span>
+</button></a>
 @endsection
+ 

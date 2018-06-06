@@ -61,7 +61,6 @@ class Mod01_ProduccionController extends Controller
         return new \Illuminate\Pagination\LengthAwarePaginator(array_slice($array, $offset, $perPage, true), count($array), $perPage, $page,
             ['path' => $request->url(), 'query' => $request->query()]);
     }
-
     public function usuariosActivos( Request $request)
     {
         $users = User::name($request->get('name'))->where('jobTitle', '<>' , 'Z BAJA')->where('status', '1')
@@ -306,7 +305,6 @@ if ($code->U_Recibido > $code->U_Procesado){
                 return redirect()->back()->withInput()->withErrors(array('message' => 'Error, el usuario no existe.'));
 
             }
-
             $Cant_procesar = Input::get('cant');
             $Code_actual = OP::find(Input::get('code'));
             Session::put('op', $Code_actual->U_DocEntry);
@@ -516,21 +514,15 @@ $op = Input::get('op');
     {  
         $Est_act = $request->input('Estacion');
         $Est_ant = $request->input('selectestaciones');
+        $No_Nomina= $request->input('Nomina');
         $nota = $request->input('nota');
         $Nom_User=$request->input('Nombre');
         $orden=$request->input('orden');
         $cant_r=$request->input('cant');
-//--------------------correo-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
-
-        $Num_Nominas=DB::select(DB::raw("SELECT No_Nomina from Email_SIZ where Reprocesos='1'"));
-        foreach ($Num_Nominas as $Num_Nomina) {
-        $user= User::find($Num_Nomina->No_Nomina);
-        $correo  = utf8_encode ('"'.$user['email'].'"'.'@zarkin.com');
-       Mail::send('Emails.Reprocesos',['cant_r'=>$cant_r,'orden'=>$orden,'Nom_User'=>$Nom_User,'Num_Nomina'=>$Num_Nomina,'user'=>$user,'Est_act'=>$Est_act,'Est_ant'=>$Est_ant,'nota'=>$nota],function($msj) use($correo){
-        $msj-> subject  ('Bienvenido a las notificaciones Zarkin');//ASUNTO DEL CORREO
-         $msj-> to($correo);//Correo del destinatario 
-        });
-    }
+        $reason=$_POST['reason'];
+       $reason=$request->input('reason');
+       $leido='N';
+       $dt = date('d-m-Y H:i:s');
  //-------------Notificaciones--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
    
    
@@ -564,30 +556,31 @@ switch ($Us_advice->U_Cuota) {
                 $cod_dep=19;
                 break;
         /*9*/case "TER-MO":
-                $cod_dep=20;
-                break;
-         /*10*/case "TER-MO":
-                $cod_dep=20;
-                 break;
-                      
-//dd($cod_dep);
-$Not_us=DB::select(DB::raw("SELECT top 1 U_EmpGiro,firstname from OHEM where position='4'and dept ='$cod_dep'"));
-//dd($Not_us);  
+                $cod_dep=20;    
+            }
+$Not_us=DB::select(DB::raw("SELECT top 1 U_EmpGiro,firstname,lastname from OHEM where position='4'and dept ='$cod_dep'"));
+
 $N_Emp  = $Not_us[0];
-//
 
-            DB::table('Noticias')->insert(
-                [
-                 'Destinatario' => $N_Emp->U_EmpGiro
-                ]
-            );
+DB::table('Noticias')->insert(
+    [
+     'Autor'=>$Nom_User,
+     'Destinatario' =>$N_Emp->U_EmpGiro,
+     'N_Empleado'=>$No_Nomina,
+     'No_Orden'=>$orden,
+     'Descripcion' => $reason,
+     'Estacion_Act' => $Est_act,
+     'Estacion_Destino' => $Est_ant,
+     'Cant_Enviada'=>$cant_r,
+     'Nota' => $nota,
+     'Leido' => $leido,
+     'Fecha_Reproceso'=>$dt
+
+    ]
+);
 //-----------------Refresca a la vista-------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
-Session::flash('info', 'El correo fue enviado a   '.$N_Emp->U_EmpGiro.'  '.$N_Emp->firstname.'');
-
-       return view('Emails.Reprocesos', ['cant_r'=>$cant_r,'orden'=>$orden,'Nom_User'=>$Nom_User,'Num_Nomina'=>$Num_Nomina,'user'=>$user,'Est_act'=>$Est_act,'Est_ant'=>$Est_ant,'nota'=>$nota]); 
-    }
-    Session::flash('mensaje', 'El correo fue enviado');
-    return redirect('/');
-    } 
-
+ Session::flash('info', 'El mensaje fue enviado a  ' .$N_Emp->firstname. ' ' .$N_Emp->lastname.' No.Nomina:  '.$N_Emp->U_EmpGiro.'');
+ return redirect('/');
+   return view('Emails.Reprocesos', ['dt'=>$dt,'No_Nomina' => $No_Nomina,'Leido' => $leido,'reason'=>$reason,'cant_r'=>$cant_r,'orden'=>$orden,'Nom_User'=>$Nom_User,'Num_Nomina'=>$Num_Nomina,'user'=>$user,'Est_act'=>$Est_act,'Est_ant'=>$Est_ant,'nota'=>$nota]); 
+        }     
 }

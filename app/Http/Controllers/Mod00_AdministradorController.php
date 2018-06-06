@@ -656,13 +656,19 @@ public function Noticia()
     ///inserta datos del formulario Noticias
     public function Noticia2(Request $request)   
     {
-            DB::table('Noticias')->insert(
-                [
-                 'Autor' => $request->input('Autor'),
-                 'Destinatario' => $request->input('Asunto'), 
-                 'Descripcion' => $request->input('Descripcion'),
-                ]
-            );
+        DB::table('Noticias')->insert(
+            [
+             'Autor'=>$Nom_User,
+             'Destinatario' =>$N_Emp->U_EmpGiro, 
+             'Descripcion' => $reason,
+             'Estacion_Act' => $Est_act,
+             'Estacion_Destino' => $Est_ant,
+             'Cant_Enviada'=>$cant_r,
+             'Nota' => $nota,
+             //'Leido' => 'si' ,
+        
+            ]
+        );
             Session::flash('mensaje', 'Has creado una noticia');
             return redirect('admin/Notificaciones'); 
     }
@@ -688,7 +694,7 @@ public function Noticia()
     {
         $Mod_Noti = DB::table('Noticias')
             ->select('Noticias.*')
-            ->where('Id_Autor', '=',$Id_Autor)
+            ->where('Id', '=',$Id_Autor)
             ->get();
         //dd($inventario);  
       
@@ -698,14 +704,14 @@ public function Noticia()
     public function Mod_Noti2(Request $request)
     {
            //dd($request->input('Id_Autor'));
-           $id_Autor=$request->input('Id_Autor');
+           $id_Autor=$request->input('Id');
            $M_noti = DB::table('Noticias')
-            ->where("id_Autor", "=", "$id_Autor")
+            ->where("Id", "=", "$id_Autor")
             ->update(
                         [
                         'Autor' => $request->input('Autor'), 
-                        'Destinatario' => $request->input('Asunto'),
-                        'Descripcion' => $request->input('Descripcion'),
+                        'Destinatario' => $request->input('Destinatario'),
+                        'Descripcion' => $request->input('Nota'),
                         ]
     );
     Session::flash('info', 'Tu noticia se ha actualizado');
@@ -714,7 +720,7 @@ public function Noticia()
 
    
      public function delete_noti($id_Autor){
-      $eliminar = DB::table('noticias')->where('Id_Autor', '=', $id_Autor)->delete();
+      $eliminar = DB::table('noticias')->where('Id', '=', $id_Autor)->delete();
     
         Session::flash('info', 'Eliminaste una noticia');
         return redirect()->back();

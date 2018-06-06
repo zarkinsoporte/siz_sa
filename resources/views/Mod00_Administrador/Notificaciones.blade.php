@@ -39,8 +39,13 @@
                                     <tr>
                                              <th>Id_Autor</th>
                                             <th>Autor</th>
-                                            <th>Asunto</th>  
-                                            <th>Descripción</th> 
+                                            <th>Destinatario</th>  
+                                            <th>Descripción</th>
+                                            <th>Estacion Actual</th> 
+                                            <th>Estacion Destino</th>
+                                            <th>Cantidad Recibida</th>                                        
+                                            <th>Nota</th> 
+                                            <th>Leido</th>  
                                             <th>Modificar</th>  
                                             <th>Eliminar</th>  
                                     </tr>
@@ -48,15 +53,20 @@
                                     <tbody>
                         @foreach ($noti as $campo)
                         <tr>
-                        <th>{{ $campo->Id_Autor }}</th>
+                        <th>{{ $campo->Id}}</th>
                         <td>{{ $campo->Autor }}</td>
                         <td>{{ $campo->Destinatario}}</td>
                         <td>{{ $campo->Descripcion }}</td>
+                        <td>{{ $campo->Estacion_Act }}</td>
+                        <td>{{ $campo->Estacion_Destino }}</td>
+                        <td>{{ $campo->Cant_Enviada }}</td>
+                        <td>{{ $campo->Nota }}</td>  
+                        <td>{{ $campo->Leido }}</td>                                              
                         <td>
-                            <a href=" Mod_Noti/{{$campo->Id_Autor}}/{{0}}" class="btn btn-warning"><i class="glyphicon glyphicon-edit"></i</a>
+                            <a href=" Mod_Noti/{{$campo->Id}}/{{0}}" class="btn btn-warning"><i class="glyphicon glyphicon-edit"></i</a>
                         </td>
                         <td>
-                        <a href="delete_Noti/{{$campo->Id_Autor}}" class="btn btn-danger"><i class="glyphicon glyphicon-trash"value"delete"></i></a>
+                        <a href="delete_Noti/{{$campo->Id}}" class="btn btn-danger"><i class="glyphicon glyphicon-trash"value"delete"></i></a>
                         </td>
                         </tr>
                     @endforeach 

@@ -46,7 +46,7 @@
                                     @if(Session::get('usertraslados') == 1)
                                         {!! Form::open(['url' => 'home/TRASLADO ÷ AREAS/'.$t_user->U_EmpGiro, 'method' => 'POST']) !!}
                                         <label for="op" class="control-label">Introduce Orden de Produccion:</label>
-                                        <input type="number" name="op" id="op" min="1" max="9999999999">
+                                        <input autofocus type="number" name="op" id="op" min="1" max="9999999999">
 
 
                                     @endif
@@ -197,7 +197,7 @@
                                     </div>
 
                                     <label for="pass" class="control-label">Contraseña:</label>
-                                    <input id="pass" type="password" class="form-control" name="pass" required minlength="3" maxlength="10">
+                                    <input autofocus id="pass" type="password" class="form-control" name="pass" required minlength="3" maxlength="10">
                                 </div>
                             </div>
 
@@ -302,13 +302,16 @@
         @if(isset($t_user,$of))
         <input type="hidden" id="Nombre" name="Nombre" 
         value='{{$t_user->firstName.' '.$t_user->lastName}}'>  
+        <input type="hidden" id="Nomina" name="Nomina" 
+        value='{{$t_user->U_EmpGiro}}'>  
         <input type="hidden" id="orden" name="orden" 
         value="{{$op}}" >
         <div><label for="message-text" class="control-label" value="Nota">Cantidad a trasferir:</label></div>   
-        <input type="number" id="cant" name="cant" min="1" max="{{$of->U_Recibido}}" 
-        value="{{$of->U_Recibido}}" required>
+        <input type="number" id="cant" name="cant" min="1" max="{{$of->PlannedQty}}" 
+        value="{{$of->PlannedQty}}" required>
         
 @endif
+
            
 
 
@@ -317,6 +320,26 @@
             <label  for="message-text" class="control-label"  >Estaciones Anteriores</label>
             <select class="form-control" name="selectestaciones" id="selectestaciones" required></select>    
 </div>
+
+
+  <input type="radio" name="reason" value="Error de Avance.">
+  Error de Avance.<br>
+ 
+  <input type="radio" name="reason" value=" Daño en área actual.">  
+  Daño en área actual.<br>
+ 
+  <input type="radio" name="reason" value="Mal hecho en área anteriores (calidad)"> 
+  Mal hecho en área anteriores (calidad)<br>
+ 
+  <input type="radio" name="reason" value="Producto incompleto (falta materiales).">
+   Producto incompleto (falta materiales).<br>
+ 
+  <input type="radio" name="reason" value="Cambio de Diseño"> 
+  Cambio de Diseño<br>
+ 
+  <input type="radio" name="reason" value=" Otro…">
+   Otro…<br>
+
                     
                 <div>
                 <label for="message-text" class="control-label" value="Nota">Nota</label>
@@ -325,7 +348,7 @@
 </div>
          <div class="modal-footer">
     
-        <button type="reset" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+        <button class="btn btn-default" data-dismiss="modal">Cerrar</button>
         <button type="submit" class="btn btn-primary" >Enviar</button>
 </div>
 </div>   

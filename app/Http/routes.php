@@ -202,8 +202,13 @@ Route::get('home/TRASLADO ÷ AREAS', 'Mod01_ProduccionController@traslados');
 Route::post('home/TRASLADO ÷ AREAS', 'Mod01_ProduccionController@traslados');
 Route::get('home/TRASLADO ÷ AREAS/{id}', 'Mod01_ProduccionController@getOP');
 Route::post('home/TRASLADO ÷ AREAS/{id}', 'Mod01_ProduccionController@getOP');
+//la siguiente ruta avanza la orden //
 Route::post('home/traslados/avanzar', 'Mod01_ProduccionController@avanzarOP');
 Route::post('home/traslados/Reprocesos', 'Mod01_ProduccionController@Retroceso');
+Route::post('/', 'HomeController@index');
+Route::get('Mod01_Produccion/Noticias','HomeController@create');
+Route::get('leido/{id}', 'HomeController@UPT_Noticias');
+Route::post('/leido', 'HomeController@UPT_Noticias');
 
 Route::get('admin/aux', function(){
     $menus = MODULOS_GRUPO_SIZ::where('MODULOS_GRUPO_SIZ.id_modulo',2)

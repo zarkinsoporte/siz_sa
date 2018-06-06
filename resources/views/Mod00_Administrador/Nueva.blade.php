@@ -40,12 +40,12 @@
     <input type="text" class="form-control" id="Autor" name="Autor" placeholder="Nombre del Autor"require>
   </div>
   <div class="form-group">
-    <label for="exampleFormControlInput1">Dirigida a:</label>
-    <input type="text" class="form-control" id="Asunto" name="Asunto" placeholder="Destinatario" require >
+    <label for="exampleFormControlInput1">Dirigida a:     </label>
+    <input type="text" class="form-control" id="Destinatario" name="Destinatario" placeholder="Destinatario" require >
   </div>
   <div class="form-group">
     <label for="exampleFormControlTextarea1">Noticia</label>
-    <textarea class="form-control" id="Descripcion"name="Descripcion" rows="3" require></textarea>
+    <textarea class="form-control" id="Nota"name="Nota" rows="3" require></textarea>
   </div>
   <button type="submit" class="btn btn-primary">Enviar</button> 
   {!! Form::close() !!} 

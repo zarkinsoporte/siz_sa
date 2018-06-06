@@ -36,15 +36,15 @@
   <div class="form-group">
     <label for="exampleFormControlInput1">Autor</label>
     <input type="text" class="form-control" id="Autor" name="Autor" value="{{$Mod_Noti[0]->Autor}}"placeholder="Nombre del Autor">
-    <input type="hidden" class="form-control" id="Id_Autor" name="Id_Autor" value="{{$Mod_Noti[0]->Id_Autor}}"  placeholder="Nombre del Autor">
+    <input type="hidden" class="form-control" id="Id_Autor" name="Id_Autor" value="{{$Mod_Noti[0]->Id}}"  placeholder="Nombre del Autor">
   </div>
   <div class="form-group">
     <label for="exampleFormControlInput1">Dirigida a:</label>
-    <input type="text" class="form-control" id="Asunto" name="Asunto" value="{{$Mod_Noti[0]->Asunto}}" placeholder="Descripción" >
+    <input type="text" class="form-control" id="Asunto" name="Asunto" value="{{$Mod_Noti[0]->Destinatario}}" placeholder="{{$Mod_Noti[0]->Destinatario}}" >
   </div>
   <div class="form-group">
     <label for="exampleFormControlTextarea1">Noticia</label>
-    <textarea class="form-control" id="Descripcion"name="Descripcion" value="{{$Mod_Noti[0]->Descripcion}}" rows="3"></textarea>
+    <textarea class="form-control" id="Descripcion"name="Descripcion" value="{{$Mod_Noti[0]->Descripcion}}" rows="3">{{$Mod_Noti[0]->Descripcion}}</textarea>
   </div>
   <button type="submit" class="btn btn-primary">Enviar</button> 
   {!! Form::close() !!} 
