@@ -18,8 +18,12 @@
     <!-- Material Design fonts -->
     <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
     <link rel="stylesheet" href="http://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
+<!-- Aqui inserta el Icono  de la pestaña -->
+
+<link rel="shortcut icon" href="images/IconZrk.ico" type="image/x-icon" >
+<link rel="icon" href="imagen/IconoZain.png" sizes="32x32" ><link rel="icon"
+
     <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -69,11 +73,8 @@
     </script>
 
 
-
-
 </head>
 <body>
-    <div id="app">
         <div id="wrapper">
 
             <!-- Navigation -->
@@ -89,12 +90,11 @@
 
                     <a class="navbar-brand" href="{!! url('home') !!}" style="color: white">
                       <div  style=" display: inline-block;
-    padding: 0px 8px;
-    height: 28px;
-    font-size: 18px;
-    line-height: 28px;
-    border-radius: 35px;
-    background-color: #f1f1f1;" ><img src="{{ asset('/images/zain_b.png') }}" width="12px" height="23px" ></div>
+    padding: 0px 0px;
+    height: 0px;
+    font-size: 0px;
+    line-height: 0px;">
+    <img src="{{ asset('/images/IconoZain.png') }}" width="34px" height="34px"></div>
                        &nbsp; SIZ
                     </a>
                 </div>
