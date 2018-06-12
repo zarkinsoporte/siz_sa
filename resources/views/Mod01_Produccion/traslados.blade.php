@@ -35,7 +35,7 @@
 
 
 
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="panel panel-default">
                                 <div class="panel-heading">
                                     <h3 class="panel-title">Usuario Traslado</h3>
@@ -68,35 +68,29 @@
 
 
 
-                              <div class="col-md-4">
+                              <div class="col-md-5">
                                   <div class="panel panel-default">
                                       <div class="panel-heading">
                                           <h3 class="panel-title">Orden de Producción</h3>
                                       </div>
-                                      <div class="panel-body">
-                                          <h5>O.P.: {{$op}} </h5> 
-                                          <h5>Pedido: {{$pedido}}</h5>
-                                      </div>
-                                  </div>
-                              </div>
-                              <div class="col-md-4">
-                                  <div class="panel panel-default">
-                                      <div class="panel-heading">
-                                          <h3 class="panel-title">Rerportes</h3>
-                                      </div>
-                                      <div class="panel-body">
-                                            Reporte de OP: <a href="../ReporteOpPDF/{{$op}}" target="_blank" class="btn btn-default"><i class="fa fa-file-pdf-o"></i></a>  
-                                            <br>
-                                            Reporte de Materiales: <a href="../ReporteMaterialesPDF/{{$op}}" target="_blank" class="btn btn-default"><i class="fa fa-file-pdf-o"></i></a>  
-                                      </div>
+                                        <div class="panel-body">
+                                        <div class="row">
+                                        <div class="col-md-6">
+                                         <h5> O.P.: {{$op}} <br><br>
+                                         <h5>Pedido: {{$pedido}}
+                                        </div>
+                                        <div class="col-md-6">
+                                         <a href="../ReporteOpPDF/{{$op}}" target="_blank" class="btn btn-primary"><i class="glyphicon glyphicon-save"></i> Historial de Producción</a> </h4> <br><br>                                    
+                                        <a href="../ReporteMaterialesPDF/{{$op}}" target="_blank" class="btn btn-primary"><i class="glyphicon glyphicon-save"></i> Materiales</Center></a></h4>                                         
+                                        </div>
+                                       </div>
+                                        </div>
+                                        </div>
                                   </div>
                               </div>
 {!! Html::style('assets/css/tablas.css') !!}
 
 <style>
-   	/*
-		Label the data
-		*/
 		td:nth-of-type(1):before { content: "Código"; }
 		td:nth-of-type(2):before { content: "Descripción"; }
 		td:nth-of-type(3):before { content: "Reproceso"; }

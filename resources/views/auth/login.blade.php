@@ -2,8 +2,8 @@
 <!-- Material Design fonts -->
 <!--<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">-->
 {!! Html::style('assets/css/family=reboto.css') !!}
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 {!! Html::style('assets/css/bootstrap.css') !!}
 {!! Html::style('assets/css/myMaterial-design.css') !!}
 {!! Html::style('assets/css/ripples.css') !!}
@@ -21,6 +21,7 @@
 <!DOCTYPE html>
 <html class="nojs html css_verticalspacer" lang="es-ES">
 <head>
+
     <meta http-equiv="Content-type" content="text/html;charset=UTF-8"/>
     <meta name="generator" content="2017.0.0.363"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -31,6 +32,9 @@
         if(typeof Muse == "undefined") window.Muse = {}; window.Muse.assets = {"required":["museutils.js", "museconfig.js", "webpro.js", "musewpslideshow.js", "jquery.museoverlay.js", "touchswipe.js", "jquery.watch.js", "require.js", "index.css"], "outOfDate":[]};
     </script>
     <title>Inicio</title>
+    <link rel="shortcut icon" href="images/IconZrk.ico" type="image/x-icon" >
+    <link rel="icon" href="imagen/IconoZain.png" sizes="32x32" ><link rel="icon"
+
 </head>
 <body class="container-fluid" style=" background-image: url({{ URL::asset('images/fondo.jpg') }});
         background-repeat:no-repeat;

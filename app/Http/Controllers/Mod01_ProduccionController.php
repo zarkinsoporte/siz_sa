@@ -79,7 +79,7 @@ class Mod01_ProduccionController extends Controller
         $pdf = \PDF::loadView('Mod01_Produccion.ReporteOpPDF', $data);
         //dd($pdf);
         //return $pdf->stream();
-        return $pdf->stream('ReporteOP.pdf');
+        return $pdf->download('ReporteOP.pdf');
     }
 
     public function ReporteMaterialesPDF($op)

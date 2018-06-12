@@ -40,27 +40,34 @@
 <div class="container" >
 
         <div align="left">
-            <h2><?php echo $data[0]->CompanyName ?></h2>
-            <?php echo $data[0]->ItemCode ?> - <?php echo $data[0]->ItemName ?>
+        <FONT FACE="roman"><h4 align="right" > Historial por OP</h4></FONT>
+        <h3><?php echo $data[0]->CompanyName ?></h3> <hr>
+           
+        <strong>  • Descripción: </strong> <?php echo $data[0]->ItemCode ?> - <?php echo $data[0]->ItemName ?>
         </div>
-        <div align="right">
-            Orden de fabricación: <?php echo $op ?>
-            <br>
-            V.S &nbsp; &nbsp; <?php echo number_format($data[0]->VS, 2, '.', ','); ?>
+        <div>
+        <strong>  • Orden de fabricación:</strong>  <?php echo $op ?>
+        <br>
+        <strong> • V.S : </strong>  <?php echo number_format($data[0]->VS, 2, '.', ','); ?>
         </div> 
         <hr>    
-
+<style>
+.table-blockquote {
+  padding: 3px 10px;
+  border: PowderBlue 5px solid;
+  border-radius: 20px;
+}
+</style>
      <div class="row">
         <div class="col-6">
-             <table class="table table-striped">
-                    <thead class="thead-dark">
+             <table  border="1px"class="table table-striped">
+                    <thead class="table table-striped table-bordered table-condensed" >
                         <tr>
-                        <th scope="col">FechaI</th>
-                        <th scope="col">FechaF</th>
-                        <th scope="col">Cod</th>
-                        <th scope="col">Estación</th>
-                        <th scope="col">Empleado</th>
-                        <th scope="col">Cantidad</th>
+                        <th bgcolor="8D8D8D" scope="col">FechaI</th>
+                        <th bgcolor="8D8D8D" scope="col">FechaF</th>
+                        <th bgcolor="8D8D8D" scope="col">Estación</th>
+                        <th bgcolor="8D8D8D" scope="col">Empleado</th>
+                        <th bgcolor="8D8D8D" scope="col">Cantidad</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -71,9 +78,6 @@
                             </td>
                             <td scope="row">
                                 <?php echo date('d-m-Y', strtotime($rep->FechaF));  ?> 
-                            </td>
-                            <td scope="row">
-                                {{ $rep->U_CT }}
                             </td>
                             <td scope="row">
                                 {{$rep->NAME}}
