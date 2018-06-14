@@ -91,7 +91,9 @@
 {!! Html::style('assets/css/tablas.css') !!}
 
 <style>
-
+@media only screen
+	and (min-device-width : 320px)
+	and (max-device-width : 480px) {
 		td:nth-of-type(1):before { content: "Código"; }
 		td:nth-of-type(2):before { content: "Descripción"; }
 		td:nth-of-type(3):before { content: "Reproceso"; }
@@ -102,6 +104,7 @@
 		td:nth-of-type(8):before { content: "Estación Siguiente"; }
 		td:nth-of-type(9):before { content: "Retroceder OP"; }
         td:nth-of-type(10):before { content: "Avanzar OP"; }
+    }
 </style>
             
 
