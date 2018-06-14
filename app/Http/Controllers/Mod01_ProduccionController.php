@@ -321,7 +321,7 @@ if ($code->U_Recibido > $code->U_Procesado){
         DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)) ,
         OHEM.firstName + ' ' + OHEM.lastName , [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
         oitm.U_VS
-        ORDER BY [@CP_LOGOF].U_CT") );
+        ORDER BY FechaI") );
         //dd($GraficaOrden);
         $cont = count($GraficaOrden);
         $stocksTable = Lava::DataTable();
