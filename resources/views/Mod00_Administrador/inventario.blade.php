@@ -52,6 +52,7 @@
                         <th scope="col">Tiempo Vida</th>
                         <th scope="col">Tipo de Equipo</th>
                         <th scope="col">Monitor</th>
+                        <th scope="col">Ultima Fecha de Mantenimiento</th>
                         <th scope="col">PDF</th>
                         <th scope="col">Marcar Obsoleto</th>
                         <th scope="col">Modificar</th>
@@ -77,8 +78,9 @@
                         </td>
                         <td>{{ $inventario->tipo_equipo }}</td>
                         <td>{{ $inventario->nombre_monitor }}</td>
+                        <td>{{ $inventario->Fecha_mantenimiento }}</td>
                         <td>
-                            <a href="generarPdf/{{$inventario->id_inv}}" class="btn btn-default"><i class="fa fa-file-pdf-o"></i</a>
+                            <a href="generarPdf/{{$inventario->id_inv}}" class="btn btn-default"><i class="fa fa-file-pdf-o"data-toggle="tooltip" data-placement="top" title="Tooltip on top"></i</a>
                         </td>
                         <td>
                             <a href="mark_obs/{{$inventario->id_inv}}" class="btn btn-default"><i class="fa fa-recycle"></i</a>

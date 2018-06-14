@@ -68,7 +68,7 @@
                 </div>
                 <div class="form-group">
                     <label for="tiempo_vida">Tiempo de Vida Estimado (Años)</label>
-                    <input type="text" min="0" max="10" maxlength="2" name="tiempo_vida" class="form-control" id="tiempo_vida" placeholder="Ej: 5" required>
+                    <input type="number" min="0" max="10" maxlength="2" name="tiempo_vida" class="form-control" id="tiempo_vida" placeholder="Ej: 5" required>
                 </div>
                 <div class="form-group">
                     <label for="Monitor">Monitor</label>
@@ -79,7 +79,12 @@
                     @endforeach 
                     </select>
                     <br>
+                    <div class="form-group">
+                    <label for="mantenimiento">Ultima fecha de mantenimiento</label>
+                    <input type="Date" name="mantenimiento" class="form-control" placeholder="10/Junio/2018" required>
+                </div>
                     <br>
+                    
                     <button type="submit" class="btn btn-primary">Guardar</button>
                 </div>
                 {!! Form::close() !!} 

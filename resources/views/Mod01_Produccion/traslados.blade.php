@@ -91,6 +91,7 @@
 {!! Html::style('assets/css/tablas.css') !!}
 
 <style>
+
 		td:nth-of-type(1):before { content: "Código"; }
 		td:nth-of-type(2):before { content: "Descripción"; }
 		td:nth-of-type(3):before { content: "Reproceso"; }

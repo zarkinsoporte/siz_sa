@@ -53,11 +53,10 @@ class Mod01_ProduccionController extends Controller
         DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOT].U_FechaHora)) AS FechaI,
         DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)) AS FechaF ,OHEM.firstName + ' ' + OHEM.lastName AS Empleado, [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
         SUM([@CP_LOGOF].U_Cantidad) AS U_CANTIDAD,
-        (oitm.U_VS ) AS VS,      
-        (SELECT CompnyName FROM OADM ) AS CompanyName
+        (oitm.U_VS ) AS VS,(SELECT CompnyName FROM OADM) AS CompanyName     
+       
         FROM [@CP_LOGOF] inner join [@PL_RUTAS] ON [@CP_LOGOF].U_CT = [@PL_RUTAS].Code
         left join OHEM ON [@CP_LOGOF].U_idEmpleado = OHEM.empID
-        left join Sof_Tiempos  ON [@CP_LOGOF].U_DocEntry = Sof_Tiempos.DocNum and [@CP_LOGOF].U_CT = Sof_Tiempos.U_idRuta    
         inner join [@CP_LOGOT] ON [@CP_LOGOF].U_DocEntry = [@CP_LOGOT].U_OP and [@CP_LOGOf].U_CT = [@CP_LOGOT].U_CT 
         inner join OWOR ON [@CP_LOGOF].U_DocEntry = OWOR.DocNum
         inner join OITM ON OWOR.ItemCode = OITM.ItemCode
@@ -78,8 +77,8 @@ class Mod01_ProduccionController extends Controller
         
         $pdf = \PDF::loadView('Mod01_Produccion.ReporteOpPDF', $data);
         //dd($pdf);
-        //return $pdf->stream();
-        return $pdf->download('ReporteOP.pdf');
+        return $pdf->stream();
+       // return $pdf->download('ReporteOP.pdf');
     }
 
     public function ReporteMaterialesPDF($op)

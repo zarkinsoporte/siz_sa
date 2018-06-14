@@ -2,35 +2,44 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+
 
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ 'Fusion Confort' }}</title>
+    <title>{{ 'Salotto' }}</title>
 
     <!-- Styles -->
+<style>
 
-    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
-    <!-- Material Design fonts -->
-    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+body { 
+	font: 14px/1.4 Georgia, Serif; 
+}
 
-    <link rel="stylesheet" href="http://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
-    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
 
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
+	/* 
+	Generic Styling, for Desktops/Laptops 
+	*/
+	table { 
+		width: 100%; 
+		border-collapse: collapse; 
+	}
+	/* Zebra striping */
+	tr:nth-of-type(odd) { 
+		background: #eee; 
+	}
+	th { 
+		background: #333; 
+		color: white; 
+		font-weight: bold; 
+	}
+	td, th { 
+		padding: 6px; 
+		border: 1px solid #ccc; 
+		text-align: left; 
+	}
+</style>
 
-    <![endif]-->
-{!! Html::style('assets/css/bootstrap.css') !!}
-{!! Html::style('assets/css/bootstrap-switch.min.css') !!}
-{!! Html::style('assets/css/bootstrap-switch.css') !!}
-{!! Html::style('assets/css/font-awesome.css') !!}
-{!! Html::style('assets/css/sb-admin.css') !!}
 </head>
 
 <body>

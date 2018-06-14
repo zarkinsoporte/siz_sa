@@ -578,7 +578,8 @@ dd($user);
              'tipo_equipo' => $request->input('tipo_equipo'),
              'fecha_alta' => date("Y-m-d"),
              'fecha_baja' => $nuevafecha,
-             'monitor' => $request->input('monitor')
+             'monitor' => $request->input('monitor'),
+             'Fecha_mantenimiento' => $request->input('mantenimiento')
             ]
         );
         //Realizamos la consulta nuevamente
@@ -622,6 +623,9 @@ dd($user);
         $monitores = DB::select( DB::raw("SELECT siz_monitores.id AS id_mon, nombre_monitor FROM siz_monitores LEFT JOIN siz_inventario ON siz_monitores.id = siz_inventario.monitor WHERE siz_inventario.monitor IS NULL AND siz_monitores.id !='1'") );
         //dd($inventario[0]->nombre_equipo);
         return view('Mod00_Administrador.modInventario', compact('monitores', 'inventario', 'mensaje')); 
+        {
+            return redirect('admin/inventario');
+        }
     }
 
     public function mod_inv2(Request $request)
@@ -638,7 +642,8 @@ dd($user);
                 'tipo_equipo' => $request->input('tipo_equipo'),
                 'fecha_alta' => $request->input('fecha_alta'),
                 'fecha_baja' => $request->input('fecha_baja'),
-                'monitor' => $request->input('monitor')
+                'monitor' => $request->input('monitor'),
+                'Fecha_mantenimiento' => $request->input('Mtto')
                ]
         );
         $id_inv = $request->id_inv;

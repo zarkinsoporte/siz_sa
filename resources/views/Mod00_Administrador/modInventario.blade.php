@@ -77,7 +77,11 @@
                 @endif
                 <div class="form-group">
                     <label for="tiempo_vida">Fecha de baja Estimada</label>
-                    <input type="date" name="fecha_baja" class="form-control" id="fecha_baja" placeholder="Ej: 5" value="{{$inventario[0]->fecha_baja}}" required>
+                    <input type="date" name="fecha_baja" class="form-control" id="fecha_baja" placeholder="Ej: 5" value="{{$inventario[0]->fecha_baja}}">
+                </div>
+                <div class="form-group">
+                <label for="tiempo_vida">Fecha de Mantenimiento</label>
+                    <input type="date" name="Mtto" class="form-control" id="Mtto" placeholder="Ej: 5" value="{{$inventario[0]->Fecha_mantenimiento}}" required>
                 </div>
                 <div class="form-group">
                     <label for="Monitor">Monitor</label>
