@@ -266,11 +266,15 @@ if ($code->U_Recibido > $code->U_Procesado){
             }
  //dd($code);
             $index = $index + 1;
-
+            $EstacionA = OP::getEstacionActual($code->Code);
+            $EstacionS = OP::getEstacionSiguiente($code->Code, 1);
+           // dd($EstacionA);
+            $pedido ='';
+           if ($EstacionA != null && $EstacionS != null){
             $order = DB::table('OWOR')
                 ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
                 ->leftJoin('@CP_OF', '@CP_OF.U_DocEntry', '=', 'OWOR.DocEntry')
-                ->select(DB::raw(OP::getEstacionActual($code->Code) . ' AS U_CT_ACT'), DB::raw(OP::getEstacionSiguiente($code->Code, 1) . ' AS U_CT_SIG'), DB::raw(OP::avanzarEstacion($code->Code, $t_user->U_CP_CT) . ' AS avanzar'),
+                ->select(DB::raw($EstacionA.' AS U_CT_ACT'), DB::raw($EstacionS . ' AS U_CT_SIG'), DB::raw(OP::avanzarEstacion($code->Code, $t_user->U_CP_CT) . ' AS avanzar'),
                     'OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden', 'OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
                     'OWOR.PlannedQty', '@CP_OF.U_Recibido', '@CP_OF.U_Procesado')
                 ->where('@CP_OF.Code', $code->Code)->get();
@@ -278,7 +282,7 @@ if ($code->U_Recibido > $code->U_Procesado){
                 $one = DB::table('OWOR')
                     ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
                     ->leftJoin('@CP_OF', '@CP_OF.U_DocEntry', '=', 'OWOR.DocEntry')
-                    ->select(DB::raw(OP::getEstacionActual($code->Code) . ' AS U_CT_ACT'), DB::raw(OP::getEstacionSiguiente($code->Code, 1) . ' AS U_CT_SIG'),
+                    ->select(DB::raw($EstacionA. ' AS U_CT_ACT'), DB::raw($EstacionS . ' AS U_CT_SIG'),
                         DB::raw(OP::avanzarEstacion($code->Code, $t_user->U_CP_CT) . ' AS avanzar'),
                         'OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden', 'OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
                         'OWOR.PlannedQty', '@CP_OF.U_Recibido', '@CP_OF.U_Procesado')
@@ -291,6 +295,10 @@ if ($code->U_Recibido > $code->U_Procesado){
                 $one = array_merge($one, $order); //$one->merge($order);
                 //dd($one);
             }
+
+        }else{
+            return redirect()->back()->withErrors(array('message' => 'La orden no tiene ruta en SAP.'));   
+        }
 
         }
         }

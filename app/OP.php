@@ -20,13 +20,8 @@ class OP extends Model
     }
    }
    public static function getRutaNombres($docEntry){
-    $rs = DB::select('select u_Ruta from OWOR where DocEntry ='. $docEntry);
-
-    foreach ($rs as $r) {
-        $ruta = explode(",", $r->u_Ruta);
-
-    }
-   
+    $rs = DB::table('OWOR')->where('DocEntry', $docEntry)->value('u_Ruta');
+    $ruta = explode(",", $rs);
     $data1= [];
     $i= 0;
 
@@ -70,38 +65,55 @@ return $data1;
    public static function getEstacionSiguiente ($Code, $option){
 
 //dd();
-        $i = 1 +  array_search(OP::find($Code)->U_CT, self::getRuta(OP::find($Code)->U_DocEntry));
-  //dd($i);
+       
+        $ruta = self::getRuta(OP::find($Code)->U_DocEntry);
+
+        if($ruta != null)
+        {
+            $i = 1 +  array_search(OP::find($Code)->U_CT, $ruta);
+            
        if ($i>=count(self::getRuta(OP::find($Code)->U_DocEntry))){
-           $i=$i-1;
-       }
-       $rs = DB::select('select * from [@PL_RUTAS] where U_Orden ='. self::getRuta(OP::find($Code)->U_DocEntry)[$i]);
+        $i=$i-1;
+    }
+    $rs = DB::select('select * from [@PL_RUTAS] where U_Orden ='. self::getRuta(OP::find($Code)->U_DocEntry)[$i]);
 
-       foreach ($rs as $r) {
-           if ($option == 1){   
-               return "'".$r->Name."'";
-           }
+    foreach ($rs as $r) {
+        if ($option == 1){   
+            return "'".$r->Name."'";
+        }
 
-           if ($option == 2){
-               return $r->U_Orden;
-           }
+        if ($option == 2){
+            return $r->U_Orden;
+        }
 
-       }
+    }
+        }   
+        else{
+             return NULL;
+        }    
+
    }
 
    public static function getEstacionActual ($Code){
+    $ruta = self::getRuta(OP::find($Code)->U_DocEntry);
 
-        $i = array_search(OP::find($Code)->U_CT, self::getRuta(OP::find($Code)->U_DocEntry));
+    if($ruta != null){
+        $i = array_search(OP::find($Code)->U_CT,$ruta);
+        if ($i>=count(self::getRuta(OP::find($Code)->U_DocEntry))){
+            $i=$i-1;
+        }
+ 
+        $rs = DB::select('select * from [@PL_RUTAS] where U_Orden ='. self::getRuta(OP::find($Code)->U_DocEntry)[$i]);
+ 
+        foreach ($rs as $r) {
+            return "'".$r->Name."'";
+        }
+    }   
+    else{
+         return null;
+    }    
 
-       if ($i>=count(self::getRuta(OP::find($Code)->U_DocEntry))){
-           $i=$i-1;
-       }
-
-       $rs = DB::select('select * from [@PL_RUTAS] where U_Orden ='. self::getRuta(OP::find($Code)->U_DocEntry)[$i]);
-
-       foreach ($rs as $r) {
-           return "'".$r->Name."'";
-       }
+     
    }
 
 
