@@ -6,7 +6,7 @@
 
             <!-- Page Heading -->
             <div class="row">
-                <div class="col-lg-8 col-md-9 col-xs-10">
+                <div class="col-md-12">
                 <div class="hidden-lg"><br><br></div>
                     <h3 class="page-header">
                         Traslados
@@ -87,11 +87,13 @@
                                         </div>
                                         </div>
                                   </div>
-                              </div>
+                            
 {!! Html::style('assets/css/tablas.css') !!}
 
 <style>
-
+@media only screen
+	and (min-device-width : 320px)
+	and (max-device-width : 480px) {
 		td:nth-of-type(1):before { content: "Código"; }
 		td:nth-of-type(2):before { content: "Descripción"; }
 		td:nth-of-type(3):before { content: "Reproceso"; }
@@ -102,11 +104,10 @@
 		td:nth-of-type(8):before { content: "Estación Siguiente"; }
 		td:nth-of-type(9):before { content: "Retroceder OP"; }
         td:nth-of-type(10):before { content: "Avanzar OP"; }
+    }
 </style>
-
-
             
-<div class="row">
+
                       
                             <div style="overflow-x:auto" class="col-md-12">
                             
@@ -165,13 +166,17 @@
                                         </tr>
                                     @endforeach
 </tbody>
-                                </table></div></div>
+                                </table>
+                            
+                            </div>
+                        
+                     
 
                             @endif
                     @endif
 
-                </div>
-            </div>
+                </div>  <!-- end col-md-12 -->
+            </div>  <!-- end row -->
 
 
             <!-- Modal -->
