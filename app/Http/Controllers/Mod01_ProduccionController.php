@@ -120,7 +120,7 @@ class Mod01_ProduccionController extends Controller
     WHERE a.DocEntry=CONVERT(Int,$op) 
        AND NOT (f.InvntItem='N' AND f.SellItem='N' AND f.PrchseItem='N' AND f.AssetItem='N')
        AND f.ItemName  not like  '%Gast%'
-    ORDER BY CONVERT(INT, a.U_Estacion)") );
+    ORDER BY CONVERT(INT, f.U_Estacion)") );
         //dd($Materiales);
     
         $data=array(
