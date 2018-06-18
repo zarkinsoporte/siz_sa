@@ -8,82 +8,101 @@
 
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
-'
     <title>{{ 'Reporte de Materiales' }}</title>
     <style>
-
-body { 
-	font: 14px/1.4 Georgia, Serif; 
-}
-
-
-	/* 
+    /*
 	Generic Styling, for Desktops/Laptops 
 	*/
+    img {
+    display: block;
+    margin-left:50px;
+    margin-right:50px;
+    width: 700%;
+}
 	table { 
 		width: 100%; 
 		border-collapse: collapse; 
+        font-family:arial;
 	}
-	/* Zebra striping */
-	tr:nth-of-type(odd) { 
-		background: #eee; 
-	}
+
 	th { 
-		background: #333; 
 		color: white; 
 		font-weight: bold; 
+		color: black; 
 	}
-	td, th { 
-		padding: 6px; 
-		border: 1px solid #ccc; 
-		text-align: left; 
-	}
+
+
 </style>
 
 </head>
 
 <body>
-    <div id="app">
+<div id="app">
         <div id="wrapper">
-
-<div class="container" >
-
-        <div align="left">
-            No. Orden <h2><?php echo $data[0]->DocNumOf ?></h2>
-            Código <h2><?php echo $data[0]->ItemCode ?> - <?php echo $data[0]->ItemName ?></h2>
-            Cliente <h2><?php echo $data[0]->CardCode ?> - <?php echo $data[0]->CardName ?></h2>
-            Fecha Entrega <h2><?php echo $data[0]->FechaEntrega ?>
-            Cantidad Planeada <h2><?php echo $data[0]->plannedqty ?>
-            V.S <h2><?php echo $data[0]->VS ?>
-            <?php echo $data[0]->ItemCode ?> - <?php echo $data[0]->ItemName ?>
-        </div>
-        <div align="right">
-            Orden de fabricación: <?php echo $op ?>
-            <br>
-            V.S &nbsp; &nbsp; <?php echo number_format($data[0]->VS, 2, '.', ','); ?>
-        </div> 
-        <hr>    
-
+<div class="container" >  
+<table>
+    <thead>
+        <tbody>
+            <tr>
+            <td colspan="5" align="center" bgcolor="#ccc"><h2><font face="arial">Reporte de Materiales</font></h2></td>
+            </tr>
+            <tr>
+            <th align="center">Codigo:<hr/></th>
+            <td colspan="2"><?php echo $data[0]->ItemCode ?> - <?php echo $data[0]->ItemName ?><hr/></td>         
+            <td align="center">Orden de producción:<hr/></td>
+            <td colspan="2"><?php echo $op ?><hr/></td>
+            </tr>
+            <tr>
+            <th align="center">Cliente:<hr/></th>
+            <td colspan="2"><?php echo $data[0]->CardCode ?> - <?php echo $data[0]->CardName ?><hr/></td>         
+            <td align="center">V.S:<hr/></td>
+            <td colspan="2"><?php echo number_format($data[0]->VS, 2); ?><hr/></td>
+            </tr>
+            <tr>
+            <th align="center">Fecha de Entrega:<hr/></th>
+            <td align='center'><?php echo $data[0]->FechaEntrega ?><hr/></td>
+            <td align='center'>Cantidad Planeada:<hr/></td>
+            <td  colspan="2" align='center'><?php echo $data[0]->plannedqty ?><hr/></td>
+            </tr>
+        </tbody>
+    </thead>    
      <div class="row">
+     <div align="center"><h3>Materiales a utlizar</h3></div>   
         <div class="col-6">
-             <table class="table table-striped">
+             <table  border class="table table-striped">
                     <thead class="thead-dark">
-                        <tr>
-                        <th scope="col">Código</th>
-                        <th scope="col">Descripción</th>
-                        <th scope="col">No. Entrada</th>
-                        <th scope="col">UM</th>
-                        <th scope="col">Solicitada</th>
-                        <th scope="col">Entregada</th>
-                        <th scope="col">Devolución</th>
+                    <tr>
+                        <th align="center" bgcolor="#474747" style="color:white"; scope="col">Fecha de entrega</th>
+                        <th align="center" bgcolor="#474747" style="color:white";scope="col">Código</th>
+                        <th align="center" bgcolor="#474747" style="color:white";scope="col">Descripción</th>
+                        <th align="center" bgcolor="#474747" style="color:white";scope="col">No. Entrada</th>
+                        <th align="center" bgcolor="#474747" style="color:white";scope="col">Solicitada</th>
                         </tr>
                     </thead>
                     <tbody>
+                    <?php
+                    $bandera=false;
+                    ?>
                     @foreach ($data as $rep)
-                        <tr>
+                          <?php 
+                          if($bandera==false){
+                              $bandera=true;
+                              $EstacionO=$rep->Estacion;
+                              ?>
+                              <tr><td colspan="5"align="center" bgcolor="#ccc"> <?php echo $EstacionO ?> </td></tr>
+
+                              <?php
+                          }
+                          
+                           $temporal=$rep->Estacion;
+                          //dd($EstacionO);
+                           if($EstacionO==$temporal){ 
+                            ?>
+                            <tr>
                             <td scope="row">
                                <?php echo date('d-m-Y', strtotime($rep->FechaEntrega));  ?>
                             </td>
+                            
                             <td scope="row">
                                 {{ $rep->Codigo }}
                             </td>
@@ -91,7 +110,27 @@ body {
                                 {{$rep->Descripcion}}
                             </td>
                             <td scope="row">
- 
+                                {{ $rep->InvntryUom }}
+                            </td>
+                            <td scope="row">
+                                {{ $rep->Cantidad }}
+                            </td>
+                        </tr>
+                           <?php
+                           }else{
+                            $EstacionO=$temporal;
+                            ?>  
+                           <tr><td colspan="5"align="center" bgcolor="#ccc"> <?php echo $EstacionO ?> </td></tr>
+                           <tr>
+                            <td scope="row">
+                               <?php echo date('d-m-Y', strtotime($rep->FechaEntrega));  ?>
+                            </td>
+                            
+                            <td scope="row">
+                                {{ $rep->Codigo }}
+                            </td>
+                            <td scope="row">
+                                {{$rep->Descripcion}}
                             </td>
                             <td scope="row">
                                 {{ $rep->InvntryUom }}
@@ -99,26 +138,17 @@ body {
                             <td scope="row">
                                 {{ $rep->Cantidad }}
                             </td>
-                            <td scope="row">
-                                
-                            </td>
-                            <td scope="row">
-                               
-                            </td>
-                        </tr>    
+                        </tr>
+                            <?php
+                        }
+                           ?>
+                           
                     @endforeach 
                     </tbody>
                 </table>
         </div>
      </div>
      @yield('subcontent-01')
-</div>
-<!-- /.container-fluid -->
-
-</div>
-<!-- /#page-wrapper -->
-</div>
-</div>
 
 </body>
 </html>
