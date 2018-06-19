@@ -609,11 +609,11 @@ $op = Input::get('op');
         $nota = $request->input('nota');
         $Nom_User=$request->input('Nombre');
         $orden=$request->input('orden');
-        $cant_r=$request->input('cant');
+        $cant_r=(int)$request->input('cant');
         $reason=$_POST['reason'];
        $reason=$request->input('reason');
        $leido='N';
-       $dt = date('d-m-Y H:i:s');
+       $dt = date('Y-m-d H:i:s');
  //-------------Notificaciones--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
    
    
