@@ -45,9 +45,10 @@ class Reportes_ProduccionController extends Controller
             $actividades = $user->getTareas();
             if  ($enviado == 'send') {
                 $departamento = $request->input('dep');
-                $fecha = explode(" - ",$request->input('date_range'));
-                $fechaI = $fecha[0];
-                $fechaF = $fecha[1];
+              //  $fecha = explode(" - ",$request->input('date_range'));
+              //$dt = date('d-m-Y H:i:s');  
+              $fechaI = Date('d-m-y', strtotime(str_replace('-','/',$request->input('FechIn')))) ;
+                $fechaF = Date('d-m-y',strtotime(str_replace('-','/',$request->input('FechaFa')))) ;
 
                 $clientes  =  DB::select('SELECT CardName from  "CP_ProdTerminada" WHERE  (fecha>=\''.$fechaI.'\' AND 
   fecha<=\''.$fechaF.'\') AND 

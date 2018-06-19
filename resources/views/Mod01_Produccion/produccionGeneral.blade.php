@@ -9,7 +9,7 @@
                     <div class="row">
                         <div class="col-lg-12">
                             <h3 class="page-header">
-                                FUSION CONFORT SA DE CV
+                                Salotto SA DE CV
                                 <small>Reporte de Producción</small>
                             </h3>
                             @if(Session::has('Ocultamodal') && Session::get('Ocultamodal')>0)
@@ -104,8 +104,10 @@
                                             @include('partials.alertas')
                                         </div>
                                         <div class="form-group">
-                                            <label for="date_range" class="control-label">Rango de Fechas:</label>
-                                            <input type="text" id="date_range" name="date_range" class="form-control" >
+                                            <label for="date_range" class="control-label">Rango de Fechas:</label><br>
+                                            Desde:<input type="date" id="FechIn" name="FechIn" class="form-control" >
+                                            Hasta:<input type="date" id="FechaFa" name="FechaFa" class="form-control" >
+
                                         </div>
                                      
 
