@@ -414,7 +414,7 @@ if ($code->U_Recibido > $code->U_Procesado){
                 ->where('U_Reproceso', 'N')
                 ->get();
 
-            $dt = date('d-m-Y H:i:s');
+            $dt = date('Y-m-d H:i:s');
             $CantOrden = DB::table('OWOR')
                 ->where('DocEntry', $Code_actual->U_DocEntry)
                 ->first();
