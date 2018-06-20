@@ -92,17 +92,17 @@
 
 <style>
 @media only screen
-	and (min-device-width : 320px)
-	and (max-device-width : 480px) {
-		td:nth-of-type(1):before { content: "Código"; }
-		td:nth-of-type(2):before { content: "Descripción"; }
-		td:nth-of-type(3):before { content: "Reproceso"; }
-		td:nth-of-type(4):before { content: "Cantidad"; }
-		td:nth-of-type(5):before { content: "Cantidad Recibida"; }
-		td:nth-of-type(6):before { content: "Procesado"; }
-		td:nth-of-type(7):before { content: "Estación Actual"; }
-		td:nth-of-type(8):before { content: "Estación Siguiente"; }
-		td:nth-of-type(9):before { content: "Retroceder OP"; }
+  and (min-device-width : 320px)
+  and (max-device-width : 480px) {
+    td:nth-of-type(1):before { content: "Código"; }
+    td:nth-of-type(2):before { content: "Descripción"; }
+    td:nth-of-type(3):before { content: "Reproceso"; }
+    td:nth-of-type(4):before { content: "Cantidad"; }
+    td:nth-of-type(5):before { content: "Cantidad Recibida"; }
+    td:nth-of-type(6):before { content: "Procesado"; }
+    td:nth-of-type(7):before { content: "Estación Actual"; }
+    td:nth-of-type(8):before { content: "Estación Siguiente"; }
+    td:nth-of-type(9):before { content: "Retroceder OP"; }
         td:nth-of-type(10):before { content: "Avanzar OP"; }
     }
 </style>
@@ -145,7 +145,7 @@
                                             <td> {{$of->Code}} </td>
                                             <td> {{$of->ItemName}} </td>
                                             <td> {{$of->U_Reproceso}} </td>
-                                            <td> {{$of->PlannedQty}} </td>
+                                            <td> {{number_format($of->PlannedQty,0)}} </td>
                                             <td> {{$of->U_Recibido}} </td>
                                             <td> {{$of->U_Procesado}} </td>
                                             <td> {{$of->U_CT_ACT}} </td>
@@ -312,6 +312,9 @@
         <div name="Actual" id="code" value="code" ></div>
         <input type="hidden" id="Estacion" name="Estacion"> </div>
         @if(isset($t_user,$of))
+        <input  type="hidden" id=Autorizar name="Autorizar"
+        value='{{Auth::user()->firstName.' '.Auth::user()->lastName}}'>
+        
         <input type="hidden" id="Nombre" name="Nombre" 
         value='{{$t_user->firstName.' '.$t_user->lastName}}'>  
         <input type="hidden" id="Nomina" name="Nomina" 
@@ -319,8 +322,8 @@
         <input type="hidden" id="orden" name="orden" 
         value="{{$op}}" >
         <div><label for="message-text" class="control-label" value="Nota">Cantidad a trasferir:</label></div>   
-        <input type="number" id="cant" name="cant" min="1" max="{{$of->PlannedQty}}" 
-        value="{{$of->PlannedQty}}" required>
+        <input align="center"type="number" id="cant" name="cant" min="1" max="{{$of->PlannedQty}}" 
+        value="{{number_format($of->PlannedQty,0)}}" required>
         
 @endif
 
@@ -452,8 +455,6 @@ if(isset($HisOrden)){
                   
   });
 
-
-
 @endsection
 
 <script>
@@ -478,6 +479,4 @@ function mostrar(){
         $("#ocultar").show();
         $('#miusuario').attr('required', 'required');
     };
-
-
 </script>
