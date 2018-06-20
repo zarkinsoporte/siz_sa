@@ -675,3 +675,5 @@ DB::table('Noticias')->insert(
    return view('Emails.Reprocesos', ['dt'=>$dt,'No_Nomina' => $No_Nomina,'Leido' => $leido,'reason'=>$reason,'cant_r'=>$cant_r,'orden'=>$orden,'Nom_User'=>$Nom_User,'Num_Nomina'=>$Num_Nomina,'user'=>$user,'Est_act'=>$Est_act,'Est_ant'=>$Est_ant,'nota'=>$nota]); 
         }     
 }
+
+
