@@ -760,11 +760,11 @@ if($Actual_Cp->PlannedQty > $cant_r){
   $msj-> subject  ('Notificaciones SIZ');//ASUNTO DEL CORREO
   $msj-> to($correo);//Correo del destinatario  
   });
-  
+  Session::flash('info', 'El mensaje fue enviado a  ' .$N_Emp->firstname. ' ' .$N_Emp->lastname.' No.Nomina:  '.$N_Emp->U_EmpGiro.'');
   }
         
 //-----------------Refresca a la vista-------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
- Session::flash('info', 'El mensaje fue enviado a  ' .$N_Emp->firstname. ' ' .$N_Emp->lastname.' No.Nomina:  '.$N_Emp->U_EmpGiro.'');
+ 
  return redirect('/');
   // return view('Emails.Reprocesos', ['dt'=>$dt,'No_Nomina' => $No_Nomina,'Leido' => $leido,'reason'=>$reason,'cant_r'=>$cant_r,'orden'=>$orden,'Nom_User'=>$Nom_User,'Num_Nomina'=>$Num_Nomina,'user'=>$user,'Est_act'=>$Est_act,'Est_ant'=>$Est_ant,'nota'=>$nota]); 
 });        

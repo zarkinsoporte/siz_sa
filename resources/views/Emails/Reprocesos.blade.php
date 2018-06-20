@@ -17,7 +17,7 @@ body {
 	Generic Styling, for Desktops/Laptops 
 	*/
 	table { 
-		width: 25%; 
+		width: 40%; 
 		border-collapse: collapse; 
 	}
 	/* Zebra striping */
