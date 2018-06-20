@@ -602,7 +602,9 @@ $op = Input::get('op');
 
     } 
     public function Retroceso(Request $request)
-    {  
+   
+    { 
+        DB::transaction(function () use($request){
         $Est_act = $request->input('Estacion');
         $Est_ant = $request->input('selectestaciones');
         $No_Nomina= $request->input('Nomina');
@@ -614,7 +616,7 @@ $op = Input::get('op');
         $reason=$_POST['reason'];
        $reason=$request->input('reason');
        $leido='N';
-       $dt = date('d-m-Y H:i:s');
+       $dt = date('Y-m-d H:i:s');
  //-------------Notificaciones--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
    
    
@@ -671,35 +673,8 @@ DB::table('Noticias')->insert(
 
     ]
 );
-        //--------------------correo-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
-        $DCorreo=DB::select(DB::raw("SELECT * from Noticias Where Id=$id"));
-        $Demail=$DCorreo[0];
-        $autor=$Demail->Autor;
-        $Autorizado=
-        $Nomina=$Demail->N_Empleado;
-        $orden=$Demail->No_Orden;
-        $cantidad=$Demail->Cant_Enviada;
-        $est_Act=$Demail->Estacion_Act;
-        $est_Ant=$Demail->Estacion_Destino;
-        $Descripcion=$Demail->Descripcion;
-        $Nota=$Demail->Nota;
-        $Leido=$Demail->Leido;
-        $R_Autorizado=$Demail->Reproceso_Autorizado;
-        $dt = date('d-m-Y H:i:s');
-        
-        //--------------------correo-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
-
-        $Num_Nominas=DB::select(DB::raw("SELECT No_Nomina from Email_SIZ where Reprocesos='1'"));
-        foreach ($Num_Nominas as $Num_Nomina) {
-        $user= User::find($Num_Nomina->No_Nomina);
-        $correo  = utf8_encode ('"'.$user['email'].'"'.'@zarkin.com');
-       Mail::send('Emails.Reprocesos',[ 'R_Autorizado'=>$R_Autorizado,'dt'=>$dt,'Nomina'=>$Nomina,'autor'=>$autor,'orden'=>$orden,'cantidad'=>$cantidad,'est_Act'=>$est_Act,'est_Ant'=>$est_Ant,'Descripcion'=>$Descripcion,'Nota'=>$Nota,'Leido'=>$Leido],function($msj) use($correo){
-        $msj-> subject  ('Bienvenido a las notificaciones Zarkin');//ASUNTO DEL CORREO
-         $msj-> to($correo);//Correo del destinatario  
-        });
-        }
     //---------Estacion Destino-----------------------------------------------------------------------------------------------------------------------------------------------------//
-     $DestinoCp = OP::where('U_DocEntry', $orden)->where('U_CT', $est_Ant)->first();
+     $DestinoCp = OP::where('U_DocEntry', $orden)->where('U_CT', $Est_ant)->first();
      $boolvar = $DestinoCp!=NULL;
     
       if($boolvar){
@@ -709,7 +684,7 @@ DB::table('Noticias')->insert(
         ->update([
         //  'U_Recibido'=> $DestinoCp->U_Recibido + $cantidad,
             //'U_Reproceso'=>'S',
-            'U_Defectuoso'=>$cantidad + $DestinoCp->U_Defectuoso,
+            'U_Defectuoso'=>$cant_r + $DestinoCp->U_Defectuoso,
             'U_Comentarios'=>$Nota,
           //  'U_Procesado'=>$DestinoCp->U_Procesado - $cantidad;
             ]);
@@ -722,14 +697,14 @@ DB::table('Noticias')->insert(
             $Nuevo_reproceso->Code=((int)$N_Code[0]->Code)+1;
             $Nuevo_reproceso->Name=((int)$N_Code[0]->Code)+1;
             $Nuevo_reproceso->U_DocEntry=$orden;
-            $Nuevo_reproceso->U_CT=$est_Ant;
+            $Nuevo_reproceso->U_CT=$Est_ant;
             $Nuevo_reproceso->U_Entregado=0;
-            $Nuevo_reproceso->U_Orden=$est_Ant;
+            $Nuevo_reproceso->U_Orden=$Est_ant;
             $Nuevo_reproceso->U_Procesado=0;
-            $Nuevo_reproceso->U_Recibido= $cantidad;
+            $Nuevo_reproceso->U_Recibido= $cant_r;
             $Nuevo_reproceso->U_Reproceso="S";
-            $Nuevo_reproceso->U_Defectuoso=$cantidad;
-            $Nuevo_reproceso->U_Comentarios=$Nota;
+            $Nuevo_reproceso->U_Defectuoso=$cant_r;
+            $Nuevo_reproceso->U_Comentarios=$nota;
             $Nuevo_reproceso->U_CTCalidad=0;
             $Nuevo_reproceso->save();
     //-------- Tabla Logot----//
@@ -738,8 +713,8 @@ DB::table('Noticias')->insert(
                     $cot = new LOGOT();
                     $cot->Code = ((int)$Con_Loguot[0]->Code)+1;
                     $cot->Name = ((int)$Con_Loguot[0]->Code)+1;
-                    $cot->U_idEmpleado=$Nomina;
-                    $cot->U_CT = $est_Ant;
+                    $cot->U_idEmpleado=$No_Nomina;
+                    $cot->U_CT = $Est_ant;
                     $cot->U_Status = "O";
                     $cot->U_FechaHora = $dt;
                     $cot->U_OP =$orden;
@@ -747,27 +722,27 @@ DB::table('Noticias')->insert(
    }  
     //---------Estacion Actual-----------------------------------------------------------------------------------------------------------------------------------------------------//
 
-$Actual_Cp = OP::where('U_DocEntry', $orden)->where('U_CT', $est_Act)->first();
+$Actual_Cp = OP::where('U_DocEntry', $orden)->where('U_CT', $Est_act)->first();
 $Actual=$Actual_Cp->U_Recibido;
 //dd($Actual_Cp);
 
-if($Actual==$cantidad){
+if($Actual==$cant_r){
    $Actual_Cp->delete();
 }
-if($Actual_Cp->PlannedQty > $cantidad){
+if($Actual_Cp->PlannedQty > $cant_r){
     DB::table('@CP_OF')
     ->where('Code', $Actual_Cp->Code)
     ->update([
-   'U_Recibido'=> $Actual_Cp->U_Recibido - $cantidad,
+   'U_Recibido'=> $Actual_Cp->U_Recibido - $cant_r,
         ]);
         $OrdenDest = OP::find($DestinoCp->Code);
         if($boolval && $OrdenDest->U_Reproceso == 'N'){         
-          $OrdenDest->U_Procesado = $OrdenDest->U_Procesado - $cantidad;
+          $OrdenDest->U_Procesado = $OrdenDest->U_Procesado - $cant_r;
           $OrdenDest->U_Reproceso ='S';
           $OrdenDest->save();
         }
         if($boolval && $OrdenDest->U_Reproceso == 'S'){         
-            $OrdenDest->U_Recibido = $OrdenDest->U_Recibido + $cantidad;
+            $OrdenDest->U_Recibido = $OrdenDest->U_Recibido + $cant_r;
             $OrdenDest->save();
           }
 }
@@ -783,25 +758,40 @@ if($Actual_Cp->PlannedQty > $cantidad){
             //---------Count Cantidades negativas  /_(○_○)-/-----------------------------------------------------------------------------------------------------------------------------------------------------//
         $estaciones = OP::getRuta($orden);
         foreach($estaciones as $estacion){
-            if($estacion >= $est_Ant && $estacion < $est_Act ){
+            if($estacion >= $Est_ant && $estacion < $Est_act ){
                 $Con_Logof =  DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOF]');
                 $log = new LOGOF();
                 $log->Code = ((int)$Con_Logof[0]->Code)+1;
                 $log->Name = ((int)$Con_Logof[0]->Code)+1;
-                $log->U_idEmpleado = $Nomina;
+                $log->U_idEmpleado = $No_Nomina;
                 $log->U_CT =$estacion;
                 $log->U_Status = "T";
                 $log->U_FechaHora = $dt;
                 $log->U_DocEntry = $orden;
-                $log->U_Cantidad = $cantidad*-1;
+                $log->U_Cantidad = $cant_r*-1;
                 $log->U_Reproceso = 'S';    
                 //$Code_actual->save();
                 $log->save();
             }
+  //--------------------correo-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+
+        $Num_Nominas=DB::select(DB::raw("SELECT No_Nomina from Email_SIZ where Reprocesos='1'"));
+        foreach ($Num_Nominas as $Num_Nomina) {
+        $user= User::find($Num_Nomina->No_Nomina);
+        $correo  = utf8_encode ('"'.$user['email'].'"'.'@zarkin.com');
+       Mail::send('Emails.Reprocesos',[ 'autorizo'=>$autorizo,'dt'=>$dt,'No_Nomina'=>$No_Nomina ,'Nom_User'=>$Nom_User,'orden'=>$orden,'cant_r'=>$cant_r,'Est_act'=>$Est_act,'Est_ant'=>$Est_ant,'reason'=>$reason,'nota'=>$nota,'leido'=>$leido],function($msj) use($correo){
+        $msj-> subject  ('Bienvenido a las notificaciones Zarkin');//ASUNTO DEL CORREO
+         $msj-> to($correo);//Correo del destinatario  
+        });
+        
+    }
+    
         }
 //-----------------Refresca a la vista-------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
  Session::flash('info', 'El mensaje fue enviado a  ' .$N_Emp->firstname. ' ' .$N_Emp->lastname.' No.Nomina:  '.$N_Emp->U_EmpGiro.'');
  return redirect('/');
    return view('Emails.Reprocesos', ['dt'=>$dt,'No_Nomina' => $No_Nomina,'Leido' => $leido,'reason'=>$reason,'cant_r'=>$cant_r,'orden'=>$orden,'Nom_User'=>$Nom_User,'Num_Nomina'=>$Num_Nomina,'user'=>$user,'Est_act'=>$Est_act,'Est_ant'=>$Est_ant,'nota'=>$nota]); 
-        }     
+});        
+} 
+
 }

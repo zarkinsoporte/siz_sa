@@ -321,7 +321,7 @@
         <input type="hidden" id="orden" name="orden" 
         value="{{$op}}" >
         <div><label for="message-text" class="control-label" value="Nota">Cantidad a trasferir:</label></div>   
-        <input type="number" id="cant" name="cant" min="1" max="{{$of->PlannedQty}}" 
+        <input align="center"type="number" id="cant" name="cant" min="1" max="{{$of->PlannedQty}}" 
         value="{{number_format($of->PlannedQty,0)}}" required>
         
 @endif
