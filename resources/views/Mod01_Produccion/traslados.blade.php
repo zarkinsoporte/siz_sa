@@ -145,7 +145,7 @@
                                             <td> {{$of->Code}} </td>
                                             <td> {{$of->ItemName}} </td>
                                             <td> {{$of->U_Reproceso}} </td>
-                                            <td> {{$of->PlannedQty}} </td>
+                                            <td> {{number_format($of->PlannedQty,0)}} </td>
                                             <td> {{$of->U_Recibido}} </td>
                                             <td> {{$of->U_Procesado}} </td>
                                             <td> {{$of->U_CT_ACT}} </td>
@@ -312,6 +312,8 @@
         <div name="Actual" id="code" value="code" ></div>
         <input type="hidden" id="Estacion" name="Estacion"> </div>
         @if(isset($t_user,$of))
+        <input  type="hidden" id=Autorizar name="Autorizar"
+        value='{{Auth::user()->firstName.' '.Auth::user()->lastName}}'>
         <input type="hidden" id="Nombre" name="Nombre" 
         value='{{$t_user->firstName.' '.$t_user->lastName}}'>  
         <input type="hidden" id="Nomina" name="Nomina" 
@@ -320,7 +322,7 @@
         value="{{$op}}" >
         <div><label for="message-text" class="control-label" value="Nota">Cantidad a trasferir:</label></div>   
         <input type="number" id="cant" name="cant" min="1" max="{{$of->PlannedQty}}" 
-        value="{{$of->PlannedQty}}" required>
+        value="{{number_format($of->PlannedQty,0)}}" required>
         
 @endif
 

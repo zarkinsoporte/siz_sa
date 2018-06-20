@@ -20,7 +20,7 @@
                  
               <th id="Encabezado"> 
                   <div align="Right">
-                      De:{{$autor}}</div>
+                      Autorizo:{{$Autorizo}}</div>
                   <div align="Right">
                       {{$dt}}</div>
                       <img class="svg hidden-xs" id="u196" src={{ URL::asset('images/svg-pegado-150982x45.svg') }} alt="" data-mu-svgfallback="/siz/public/images/svg%20pegado%20150982x45_poster_.png?crc=4279418901" width="200" height="200"
