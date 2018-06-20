@@ -36,6 +36,7 @@
              por motivo de <strong> {{$noticia->Descripcion}}</strong>.
              <br>            
              <strong> Nota:</strong>  {{$noticia->Nota}}
+             <strong> Autorizado por :</strong>  {{$noticia->Nota}}
              <div align="right"><button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#{{$noticia->Id}}">Aceptar y Retroceder</button></div>
 
                            <!-- Modal -->

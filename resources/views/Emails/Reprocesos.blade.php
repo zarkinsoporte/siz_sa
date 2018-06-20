@@ -5,40 +5,46 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Correo</title>
 </head>
-<body class="container-fluid" style=" background-image: url(http://localhost/sizb/sizb/public/images/Zrk.jpg);
-        background-repeat:no-repeat;
-        background-size:cover;
-        background-position:center;"><br>
-        
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+<body>
+<style>
 
-    
-    <div class="row">
-    <div style="overflow-x:auto" class="col-md-12">
-   <table  id="usuarios" class="table table-striped table-bordered table-condensed">
-        <tr>
-                 
-              <th id="Encabezado"> 
-                  <div align="Right">
-                      De:{{$autor}}</div>
-                  <div align="Right">
-                      {{$dt}}</div>
-                      <img class="svg hidden-xs" id="u196" src={{ URL::asset('images/svg-pegado-150982x45.svg') }} alt="" data-mu-svgfallback="/siz/public/images/svg%20pegado%20150982x45_poster_.png?crc=4279418901" width="200" height="200"
-           
-<div class="alert alert-Primary" align="Center">Se esta llevando a cabo el siguiente Reproceso</div>
+body { 
+	font: 14px/1.4 Georgia, Serif; 
+}
+
+
+	/* 
+	Generic Styling, for Desktops/Laptops 
+	*/
+	table { 
+		width: 25%; 
+		border-collapse: collapse; 
+	}
+	/* Zebra striping */
+	tr:nth-of-type(odd) { 
+		background: #eee; 
+	}
+	th { 
+		background: #333; 
+		color: white; 
+		font-weight: bold; 
+	}
+	td, th { 
+		padding: 6px; 
+		border: 1px solid #ccc; 
+		text-align: left; 
+	}
+</style>      
+Se llevó a cabo el siguiente Reproceso
                      
-            </th>
-             
-     </tr>
-        </table>
-        <table id="usuarios" class="table table-striped table-bordered table-condensed">
+        <table border="1px" id="usuarios" class="table table-striped table-bordered table-condensed">
              <tr>
             <th>Fecha del reproceso</th>
               <td>{{$dt}}</td>
          </tr>
         <tr>
             <th>Usuario</th>
-            <td>{{$Nomina}}{{$autor}}</td> 
+            <td>{{$No_Nomina}}{{$Nom_User}}</td> 
           
         </tr>
          <tr>
@@ -47,33 +53,32 @@
          </tr>
           <tr>
             <th>Cantidad</th>
-             <td>{{$cantidad}}</td>
+             <td>{{$cant_r}}</td>
          </tr>
           <tr>
             <th>Estacion de Origen</th>  
-               <td bgcolor="#58B435">{{$est_Act}}</td>
+               <td bgcolor="#58B435">{{$Est_act}}</td>
          </tr>
           <tr>
             <th>Estacion de Destino</th>
-              <td bgcolor="#D13434">{{$est_Ant}}</td>
+              <td bgcolor="#D13434">{{$Est_ant}}</td>
          </tr>
           <tr>
             <th>Motivo</th>
-               <td>{{$Descripcion}}</td>
+               <td>{{$reason}}</td>
          </tr>
           <tr>
             <th>Descripcion de la falla</th>
-              <td>{{$Nota}}</td>
+              <td>{{$nota}}</td>
          </tr>
           <tr>
-           <th>Recibido en Estación Destino</th>
-              <td>{{$Leido}}</td>
-         </tr>
+            <th>Autorizado por:</th>
+              <td>{{$autorizo}}</td>
+            </tr>
+          
                           
         </table>
-    </div>
-     </div>
-        <div class="alert alert-success" role="alert">El usuario que hizo este movimiento debe entregar el producto a la estacion de Destino y verificar que se acepte</div>
+ El usuario que hizo este movimiento debe entregar el producto a la estacion de Destino y verificar que se acepte
         </body>
 </html>
     
