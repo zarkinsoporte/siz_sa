@@ -266,11 +266,15 @@ if ($code->U_Recibido > $code->U_Procesado){
             }
  //dd($code);
             $index = $index + 1;
-
+            $EstacionA = OP::getEstacionActual($code->Code);
+            $EstacionS = OP::getEstacionSiguiente($code->Code, 1);
+           // dd($EstacionA);
+            $pedido ='';
+           if ($EstacionA != null && $EstacionS != null){
             $order = DB::table('OWOR')
                 ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
                 ->leftJoin('@CP_OF', '@CP_OF.U_DocEntry', '=', 'OWOR.DocEntry')
-                ->select(DB::raw(OP::getEstacionActual($code->Code) . ' AS U_CT_ACT'), DB::raw(OP::getEstacionSiguiente($code->Code, 1) . ' AS U_CT_SIG'), DB::raw(OP::avanzarEstacion($code->Code, $t_user->U_CP_CT) . ' AS avanzar'),
+                ->select(DB::raw($EstacionA.' AS U_CT_ACT'), DB::raw($EstacionS . ' AS U_CT_SIG'), DB::raw(OP::avanzarEstacion($code->Code, $t_user->U_CP_CT) . ' AS avanzar'),
                     'OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden', 'OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
                     'OWOR.PlannedQty', '@CP_OF.U_Recibido', '@CP_OF.U_Procesado')
                 ->where('@CP_OF.Code', $code->Code)->get();
@@ -278,7 +282,7 @@ if ($code->U_Recibido > $code->U_Procesado){
                 $one = DB::table('OWOR')
                     ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
                     ->leftJoin('@CP_OF', '@CP_OF.U_DocEntry', '=', 'OWOR.DocEntry')
-                    ->select(DB::raw(OP::getEstacionActual($code->Code) . ' AS U_CT_ACT'), DB::raw(OP::getEstacionSiguiente($code->Code, 1) . ' AS U_CT_SIG'),
+                    ->select(DB::raw($EstacionA. ' AS U_CT_ACT'), DB::raw($EstacionS . ' AS U_CT_SIG'),
                         DB::raw(OP::avanzarEstacion($code->Code, $t_user->U_CP_CT) . ' AS avanzar'),
                         'OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden', 'OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
                         'OWOR.PlannedQty', '@CP_OF.U_Recibido', '@CP_OF.U_Procesado')
@@ -291,6 +295,10 @@ if ($code->U_Recibido > $code->U_Procesado){
                 $one = array_merge($one, $order); //$one->merge($order);
                 //dd($one);
             }
+
+        }else{
+            return redirect()->back()->withErrors(array('message' => 'La orden no tiene ruta en SAP.'));   
+        }
 
         }
         }
@@ -602,57 +610,26 @@ $op = Input::get('op');
 
     } 
     public function Retroceso(Request $request)
-    {  
+   
+    {
+     DB::transaction(function () use($request){
         $Est_act = $request->input('Estacion');
         $Est_ant = $request->input('selectestaciones');
         $No_Nomina= $request->input('Nomina');
         $nota = $request->input('nota');
         $Nom_User=$request->input('Nombre');
+        $autorizo=$request->input('Autorizar');
         $orden=$request->input('orden');
-        $cant_r=(int)$request->input('cant');
-        $reason=$_POST['reason'];
+        $cant_r=$request->input('cant');            
        $reason=$request->input('reason');
        $leido='N';
-       $dt = date('Y-m-d H:i:s');
- //-------------Notificaciones--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
-   
-   
- $Us_advice = DB::table('@PL_RUTAS')->Select('U_Cuota')->where('U_orden',$Est_ant)->first();
-//dd($Us_advice->U_Cuota);
-   $cod_dep='';
-switch ($Us_advice->U_Cuota) { 
+       $dt = date('Ymd h:m:s'); 
+//-------------Notificaciones--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
 
-        /*1*/case "ALM-MO":
-                $cod_dep=2;
-            break;
-        /*2*/case "CAR-MO":
-                $cod_dep=4;
-            break;
-        /*3*/case "COJ-MO":
-                $cod_dep=5;
-            break;
-        /*4*/case "COR-MO":
-                $cod_dep=7;
-            break;
-        /*5*/case "COS-MO":
-                $cod_dep=8;
-            break;
-        /*6*/case "MAN-MO":
-                $cod_dep=14;
-            break;
-        /*7*/case "PLA-MO":
-                $cod_dep=16;
-            break;
-        /*8*/case "TAP-MO":
-                $cod_dep=19;
-                break;
-        /*9*/case "TER-MO":
-                $cod_dep=20;    
-            }
-$Not_us=DB::select(DB::raw("SELECT top 1 U_EmpGiro,firstname,lastname from OHEM where position='4'and dept ='$cod_dep'"));
-
-$N_Emp  = $Not_us[0];
-
+//$Not_us=DB::select(DB::raw("SELECT top 1 U_EmpGiro,firstname,lastname from OHEM where position='4'and dept ='$cod_dep'"));
+$N_Emp  = User::where('position', 4)->where('U_CP_CT','like', '%'.$Est_ant.'%' )->first();
+//$N_Emp  = $Not_us[0];
+//dd($supervisor);
 DB::table('Noticias')->insert(
     [
      'Autor'=>$Nom_User,
@@ -665,15 +642,131 @@ DB::table('Noticias')->insert(
      'Cant_Enviada'=>$cant_r,
      'Nota' => $nota,
      'Leido' => $leido,
-     'Fecha_Reproceso'=>$dt
+     'Fecha_Reproceso'=>$dt,
+     'Reproceso_Autorizado'=>$autorizo
 
     ]
 );
+    //---------Estacion Destino-----------------------------------------------------------------------------------------------------------------------------------------------------//
+     $DestinoCp = OP::where('U_DocEntry', $orden)->where('U_CT', $Est_ant)->first();
+     $boolvar = $DestinoCp!=NULL;
+    
+      if($boolvar){
+      //  dd('update '.$DestinoCp);
+        DB::table('@CP_OF')
+        ->where('Code', $DestinoCp->Code)
+        ->update([
+        //  'U_Recibido'=> $DestinoCp->U_Recibido + $cantidad,
+            //'U_Reproceso'=>'S',
+            'U_Defectuoso'=>$cant_r + $DestinoCp->U_Defectuoso,
+            'U_Comentarios'=>$Nota,
+          //  'U_Procesado'=>$DestinoCp->U_Procesado - $cantidad;
+            ]);
+      }
+      else{
+      //  dd('insert '.$DestinoCp);
+        $N_Code =  DB::select('select max (CONVERT(INT,Code)) as Code from [@CP_OF]');
+
+            $Nuevo_reproceso = new OP();
+            $Nuevo_reproceso->Code=((int)$N_Code[0]->Code)+1;
+            $Nuevo_reproceso->Name=((int)$N_Code[0]->Code)+1;
+            $Nuevo_reproceso->U_DocEntry=$orden;
+            $Nuevo_reproceso->U_CT=$Est_ant;
+            $Nuevo_reproceso->U_Entregado=0;
+            $Nuevo_reproceso->U_Orden=$Est_ant;
+            $Nuevo_reproceso->U_Procesado=0;
+            $Nuevo_reproceso->U_Recibido= $cant_r;
+            $Nuevo_reproceso->U_Reproceso="S";
+            $Nuevo_reproceso->U_Defectuoso=$cant_r;
+            $Nuevo_reproceso->U_Comentarios=$nota;
+            $Nuevo_reproceso->U_CTCalidad=0;
+            $Nuevo_reproceso->save();
+    //-------- Tabla Logot----//
+
+    $Con_Loguot =  DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOT]');
+                    $cot = new LOGOT();
+                    $cot->Code = ((int)$Con_Loguot[0]->Code)+1;
+                    $cot->Name = ((int)$Con_Loguot[0]->Code)+1;
+                    $cot->U_idEmpleado=$No_Nomina;
+                    $cot->U_CT = $Est_ant;
+                    $cot->U_Status = "O";
+                    $cot->U_FechaHora = $dt;
+                    $cot->U_OP =$orden;
+                   $cot->save();
+   }  
+    //---------Estacion Actual-----------------------------------------------------------------------------------------------------------------------------------------------------//
+
+$Actual_Cp = OP::where('U_DocEntry', $orden)->where('U_CT', $Est_act)->first();
+$Actual=$Actual_Cp->U_Recibido;
+//dd($Actual_Cp);
+
+if($Actual==$cant_r){
+   $Actual_Cp->delete();
+}
+if($Actual_Cp->PlannedQty > $cant_r){
+    DB::table('@CP_OF')
+    ->where('Code', $Actual_Cp->Code)
+    ->update([
+   'U_Recibido'=> $Actual_Cp->U_Recibido - $cant_r,
+        ]);
+        $OrdenDest = OP::find($DestinoCp->Code);
+        if($boolval && $OrdenDest->U_Reproceso == 'N'){         
+          $OrdenDest->U_Procesado = $OrdenDest->U_Procesado - $cant_r;
+          $OrdenDest->U_Reproceso ='S';
+          $OrdenDest->save();
+        }
+        if($boolval && $OrdenDest->U_Reproceso == 'S'){         
+            $OrdenDest->U_Recibido = $OrdenDest->U_Recibido + $cant_r;
+            $OrdenDest->save();
+          }
+}
+
+   //-------------Tabla LOGOF-----------------------------//
+   //$Code_actual = OP::find(Input::get('code'));
+
+   
+//dd(Input::get('code'));
+                                    
+           
+   
+            //---------Count Cantidades negativas  /_(○_○)-/-----------------------------------------------------------------------------------------------------------------------------------------------------//
+        $estaciones = OP::getRuta($orden);
+        foreach($estaciones as $estacion){
+            if($estacion >= $Est_ant && $estacion < $Est_act ){
+                $Con_Logof =  DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOF]');
+                $log = new LOGOF();
+                $log->Code = ((int)$Con_Logof[0]->Code)+1;
+                $log->Name = ((int)$Con_Logof[0]->Code)+1;
+                $log->U_idEmpleado = $No_Nomina;
+                $log->U_CT =$estacion;
+                $log->U_Status = "T";
+                $log->U_FechaHora = $dt;
+                $log->U_DocEntry = $orden;
+                $log->U_Cantidad = $cant_r*-1;
+                $log->U_Reproceso = 'S';    
+                //$Code_actual->save();
+                $log->save();
+            }}
+  //--------------------correo-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+  $Num_Nominas=DB::select(DB::raw("SELECT No_Nomina from Email_SIZ where Reprocesos='1'"));
+  foreach ($Num_Nominas as $Num_Nomina) {
+  $user= User::find($Num_Nomina->No_Nomina);
+  
+  $correo  = utf8_encode ($user['email'].'@zarkin.com');
+  
+  Mail::send('Emails.Reprocesos',[ 'autorizo'=>$autorizo,'dt'=> date('d/M/Y h:m:s'),
+  'No_Nomina'=>$No_Nomina ,'Nom_User'=>$Nom_User,'orden'=>$orden,
+  'cant_r'=>$cant_r,'Est_act'=>$Est_act,'Est_ant'=>$Est_ant,'reason'=>$reason,'nota'=>$nota,'leido'=>$leido],function($msj) use($correo){
+  $msj-> subject  ('Notificaciones SIZ');//ASUNTO DEL CORREO
+  $msj-> to($correo);//Correo del destinatario  
+  });
+  
+  }
+        
 //-----------------Refresca a la vista-------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
  Session::flash('info', 'El mensaje fue enviado a  ' .$N_Emp->firstname. ' ' .$N_Emp->lastname.' No.Nomina:  '.$N_Emp->U_EmpGiro.'');
  return redirect('/');
-   return view('Emails.Reprocesos', ['dt'=>$dt,'No_Nomina' => $No_Nomina,'Leido' => $leido,'reason'=>$reason,'cant_r'=>$cant_r,'orden'=>$orden,'Nom_User'=>$Nom_User,'Num_Nomina'=>$Num_Nomina,'user'=>$user,'Est_act'=>$Est_act,'Est_ant'=>$Est_ant,'nota'=>$nota]); 
-        }     
+});        
+     }
+
 }
-
-
