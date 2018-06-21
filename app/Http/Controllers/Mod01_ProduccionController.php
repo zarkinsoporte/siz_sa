@@ -753,7 +753,7 @@ if($Actual_Cp->PlannedQty > $cant_r){
   $user= User::find($Num_Nomina->No_Nomina);
   
   $correo  = utf8_encode ($user['email'].'@zarkin.com');
-  
+  //dd($correo,$user);
   Mail::send('Emails.Reprocesos',[ 'autorizo'=>$autorizo,'dt'=> date('d/M/Y h:m:s'),
   'No_Nomina'=>$No_Nomina ,'Nom_User'=>$Nom_User,'orden'=>$orden,
   'cant_r'=>$cant_r,'Est_act'=>$Est_act,'Est_ant'=>$Est_ant,'reason'=>$reason,'nota'=>$nota,'leido'=>$leido],function($msj) use($correo){
@@ -765,7 +765,7 @@ if($Actual_Cp->PlannedQty > $cant_r){
         
 //-----------------Refresca a la vista-------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
  Session::flash('info', 'El mensaje fue enviado a  ' .$N_Emp->firstname. ' ' .$N_Emp->lastname.' No.Nomina:  '.$N_Emp->U_EmpGiro.'');
- return redirect('/');
+ return redirect()->action('HomeController@index');
 });        
      }
 
