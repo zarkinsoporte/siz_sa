@@ -396,7 +396,7 @@ if ($code->U_Recibido > $code->U_Procesado){
 
 
         try{
-
+            DB::transaction(function () {
             $id = Input::get('userId');
 
             $t_user = User::find($id);
@@ -411,7 +411,7 @@ if ($code->U_Recibido > $code->U_Procesado){
             $U_CT_siguiente = OP::getEstacionSiguiente($Code_actual->Code, 2);
 
             if ($U_CT_siguiente == $Code_actual->U_CT){
-                Session::flash('info', 'La estacion '.OP::getEstacionSiguiente($Code_actual->Code, 1).' es la ultima');
+                Session::flash('info', 'La estacion '.OP::getEstacionSiguiente($Code_actual->Code, 1).' es la última');
                 return redirect()->back();
             }
 
@@ -514,7 +514,7 @@ if ($code->U_Recibido > $code->U_Procesado){
             }
 
 
-
+        });
             return redirect()->back()->withInput();
         }catch (Exception $e){
             return redirect()->back()->withInput()->withErrors(array('message' => 'Error al Guardar la Orden.'));
