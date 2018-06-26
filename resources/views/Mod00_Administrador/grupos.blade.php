@@ -110,10 +110,10 @@
                                             <h4>{{$m->name}}</h4>
                                             <p>{{$m->descripcion}}</p>
                                             <p align="right">
-                                                <a href="{{'delete_modulo/'.$id_grupo.'/'.$m->id_modulo}}" class="btn btn-danger" role="button">
+                                                <a href="{{'delete_modulo/'.$m->id}}" class="btn btn-danger" role="button">
                                                     <i class="fa fa-trash-o" aria-hidden="true"></i>
                                                 </a>
-                                                <a href="{{'conf_modulo/'.$id_grupo.'/'.$m->id_modulo}}" class="btn btn-default" role="button">
+                                                <a href="{{'conf_modulo/'.$m->id}}" class="btn btn-default" role="button">
                                                     <i class="fa fa-cog" aria-hidden="true"></i>
                                                 </a>
                                             </p>
@@ -137,7 +137,7 @@
                                 <div class="modal-body">
 
                                     <div class="form-group">
-                                        <div >
+                                        <div>
                                             <label for="password" class="col-md-12 control-label">Id de Usuario:</label>
                                             <input type="text" name="userId" class="form-control" id="userId" value="" readonly/>
                                             <label for="password" class="col-md-12 control-label">Ingresa la nueva Contraseña:</label>

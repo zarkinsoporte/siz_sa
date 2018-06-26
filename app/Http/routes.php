@@ -120,8 +120,8 @@ Route::get('admin/grupos/{id}', 'Mod00_AdministradorController@editgrupos');
 Route::post('admin/createModulo/{id}', 'Mod00_AdministradorController@createModulo');
 Route::post('admin/createMenu/{id}', 'Mod00_AdministradorController@createMenu');
 Route::post('admin/createTarea/{id_grupo}', 'Mod00_AdministradorController@createTarea');//si se usa
-Route::get('admin/grupos/delete_modulo/{id_grupo}/{id_modulo}', 'Mod00_AdministradorController@deleteModulo');
-Route::get('admin/grupos/conf_modulo/{id_grupo}/{id_modulo}', 'Mod00_AdministradorController@confModulo');
+Route::get('admin/grupos/delete_modulo/{id}', 'Mod00_AdministradorController@deleteModulo');
+Route::get('admin/grupos/conf_modulo/{id}', 'Mod00_AdministradorController@confModulo');
 Route::get('admin/grupos/conf_modulo/quitar/{id}', 'Mod00_AdministradorController@deleteTarea');
 Route::get('help', function(){
 
