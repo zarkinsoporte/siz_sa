@@ -692,7 +692,7 @@ DB::table('Noticias')->insert(
                     $cot->U_FechaHora = $dt;
                     $cot->U_OP =$orden;
                    $cot->save();
-   }  
+   }   
     //---------Estacion Actual-----------------------------------------------------------------------------------------------------------------------------------------------------//
 
 $Actual_Cp = OP::where('U_DocEntry', $orden)->where('U_CT', $Est_act)->first();

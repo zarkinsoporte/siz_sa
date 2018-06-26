@@ -191,9 +191,9 @@ dd($user);
      $nombre_grupo = $grupos[$id_grupo-1]->name;
      $modulos_grupo = MODULOS_GRUPO_SIZ::where('id_grupo', $id_grupo)
          ->leftJoin('MODULOS_SIZ', 'MODULOS_GRUPO_SIZ.id_modulo', '=', 'MODULOS_SIZ.id')
-         ->select('MODULOS_GRUPO_SIZ.id_modulo', 'MODULOS_SIZ.descripcion', 'MODULOS_SIZ.name')
-         ->groupBy('id_modulo', 'descripcion', 'name')
-         ->get();
+         ->select('MODULOS_GRUPO_SIZ.id_modulo', 'MODULOS_GRUPO_SIZ.id', 'MODULOS_SIZ.descripcion', 'MODULOS_SIZ.name')
+         ->groupBy('MODULOS_GRUPO_SIZ.id', 'id_modulo', 'descripcion', 'name')
+         ->get();       
      $modulos = MODULOS_SIZ::all();
      return view('Mod00_Administrador.grupos', compact('grupos', 'modulos','modulos_grupo', 'id_grupo', 'nombre_grupo'));
  }else{
@@ -305,11 +305,11 @@ dd($user);
 
     }
 
-    public function confModulo($id_grupo, $id_modulo){
+    public function confModulo($id){
 
         $grupos = DB::table('OHTY')
                 ->where('typeID', '>', 0)->get();
-        $primero = MODULOS_GRUPO_SIZ::where('id_modulo', $id_modulo)->where('id_grupo', $id_grupo)->first();
+        $primero = MODULOS_GRUPO_SIZ::where('id', $id)->first();
         if ($primero != null){
              $id_grupo = $primero->id_grupo;
 
@@ -323,6 +323,7 @@ dd($user);
                  ->get();*/
 
              $grupo = Grupo::find($id_grupo);
+             $id_modulo=$primero->id_modulo;
              $modulo = MODULOS_SIZ::find($id_modulo);
 
              $menus_existentes = MENU_ITEM::where('id_modulo', $id_modulo)
@@ -419,19 +420,18 @@ dd($user);
 
     }
 
-    public function deleteModulo($id_modulo){
+    public function deleteModulo($id){
         $busqueda = MODULOS_GRUPO_SIZ::
-        where('id_modulo', $id_modulo)
+        where('id', $id)
         ->first();
-
-    if (count($busqueda)>0){
-        return redirect()->back()->withErrors(array('message' => 'El Modulo no se encuentra.'));
-    }else{
-       
+//dd($busqueda);
+    if (count($busqueda)==1){
         $busqueda->delete();
+        Session::flash('mensaje', 'Módulo Eliminado!!');
+        return redirect()->back();
+    }else{
+        return redirect()->back()->withErrors(array('message' => 'El Modulo no se encuentra.'));        
     }
-
-    return redirect()->back();
 
     }
 
