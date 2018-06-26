@@ -129,7 +129,7 @@ class Mod01_ProduccionController extends Controller
                    );
         //$data = $GraficaOrden;
         
-        $pdf = \PDF::loadView('Mod01_Produccion.ReporteMaterialesPDF', $data);
+        $pdf = \PDF::loadView('Mod01_Produccion.ReporteMateriales', $data);
         //dd($pdf);
         //return $pdf->stream();
         return $pdf->stream('ReporteMateriales.pdf');
@@ -610,7 +610,6 @@ $op = Input::get('op');
 
     } 
     public function Retroceso(Request $request)
-   
     {
      DB::transaction(function () use($request){
         $Est_act = $request->input('Estacion');
@@ -629,7 +628,7 @@ $op = Input::get('op');
 //$Not_us=DB::select(DB::raw("SELECT top 1 U_EmpGiro,firstname,lastname from OHEM where position='4'and dept ='$cod_dep'"));
 $N_Emp  = User::where('position', 4)->where('U_CP_CT','like', '%'.$Est_ant.'%' )->first();
 //$N_Emp  = $Not_us[0];
-//dd($supervisor);
+//dd($N_Emp);
 DB::table('Noticias')->insert(
     [
      'Autor'=>$Nom_User,
@@ -730,7 +729,9 @@ if($Actual_Cp->PlannedQty > $cant_r){
            
    
             //---------Count Cantidades negativas  /_(○_○)-/-----------------------------------------------------------------------------------------------------------------------------------------------------//
-        $estaciones = OP::getRuta($orden);
+
+       
+            $estaciones = OP::getRuta($orden);
         foreach($estaciones as $estacion){
             if($estacion >= $Est_ant && $estacion < $Est_act ){
                 $Con_Logof =  DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOF]');
@@ -747,6 +748,9 @@ if($Actual_Cp->PlannedQty > $cant_r){
                 //$Code_actual->save();
                 $log->save();
             }}
+    
+            $Nombre_Destino= DB::table('@PL_RUTAS')->where('U_Orden', $request->input('selectestaciones'))->value('Name');             
+            $Nombre_Actual= DB::table('@PL_RUTAS')->where('U_Orden', $request->input('Estacion'))->value('Name'); 
   //--------------------correo-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
   $Num_Nominas=DB::select(DB::raw("SELECT No_Nomina from Email_SIZ where Reprocesos='1'"));
   foreach ($Num_Nominas as $Num_Nomina) {
@@ -754,7 +758,7 @@ if($Actual_Cp->PlannedQty > $cant_r){
   
   $correo  = utf8_encode ($user['email'].'@zarkin.com');
   //dd($correo,$user);
-  Mail::send('Emails.Reprocesos',[ 'autorizo'=>$autorizo,'dt'=> date('d/M/Y h:m:s'),
+  Mail::send('Emails.Reprocesos',[ 'Nombre_Destino'=>$Nombre_Destino,'Nombre_Actual'=>$Nombre_Actual,'autorizo'=>$autorizo,'dt'=> date('d/M/Y h:m:s'),
   'No_Nomina'=>$No_Nomina ,'Nom_User'=>$Nom_User,'orden'=>$orden,
   'cant_r'=>$cant_r,'Est_act'=>$Est_act,'Est_ant'=>$Est_ant,'reason'=>$reason,'nota'=>$nota,'leido'=>$leido],function($msj) use($correo){
   $msj-> subject  ('Notificaciones SIZ');//ASUNTO DEL CORREO
@@ -762,11 +766,16 @@ if($Actual_Cp->PlannedQty > $cant_r){
   });
   
   }
-        
+   
 //-----------------Refresca a la vista-------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
- Session::flash('info', 'El mensaje fue enviado a  ' .$N_Emp->firstname. ' ' .$N_Emp->lastname.' No.Nomina:  '.$N_Emp->U_EmpGiro.'');
- return redirect()->action('HomeController@index');
-});        
+ Session::flash('info', 'Reproceso Realizado!!...
+ De :'.$Nombre_Actual.'
+ A:'.$Nombre_Destino.'
+ Supervisor:' .$N_Emp->firstName. ' ' .$N_Emp->lastName.'
+ Autorizado por:  '.$autorizo.'');
+
+});   
+return redirect()->action('HomeController@index');     
      }
 
 }

@@ -17,7 +17,7 @@ body {
   Generic Styling, for Desktops/Laptops 
   */
   table { 
-    width: 40%; 
+    width: 50%; 
     border-collapse: collapse; 
   }
   /* Zebra striping */
@@ -25,17 +25,29 @@ body {
     background: #eee; 
   }
   th { 
-    background: #333; 
-    color: white; 
+    background: #ccc; 
+    color: black; 
     font-weight: bold; 
+    font-family: monospace;
   }
   td, th { 
     padding: 6px; 
-    border: 1px solid #ccc; 
+    border: 1px solid #000; 
     text-align: left; 
+      font-family:monospace;
   }
+    p{
+        color:#5499C7;
+        font-family: verdana;
+      font-size: 20px;  
+    }
+    pP{
+        color: red;
+        font-family: Verdana;
+        font-size: 15px;
+    }
 </style>      
-Se llevó a cabo el siguiente Reproceso
+<p>• Se llevó a cabo el siguiente Reproceso</p>
                      
         <table border="1px" id="usuarios" class="table table-striped table-bordered table-condensed">
              <tr>
@@ -44,7 +56,7 @@ Se llevó a cabo el siguiente Reproceso
          </tr>
         <tr>
             <th>Usuario</th>
-            <td>{{$No_Nomina}}{{$Nom_User}}</td> 
+            <td>{{$No_Nomina}}&nbsp;&nbsp;{{$Nom_User}}</td> 
           
         </tr>
          <tr>
@@ -57,11 +69,11 @@ Se llevó a cabo el siguiente Reproceso
          </tr>
           <tr>
             <th>Estacion de Origen</th>  
-               <td bgcolor="#58B435">{{$Est_act}}</td>
+               <td bgcolor="#ABEBC6">{{$Nombre_Actual}}</td>
          </tr>
           <tr>
             <th>Estacion de Destino</th>
-              <td bgcolor="#D13434">{{$Est_ant}}</td>
+              <td bgcolor="#F5B7B1">{{$Nombre_Destino}}</td>
          </tr>
           <tr>
             <th>Motivo</th>
@@ -78,7 +90,8 @@ Se llevó a cabo el siguiente Reproceso
           
                           
         </table>
- El usuario que hizo este movimiento debe entregar el producto a la estacion de Destino y verificar que se acepte
+    <br>
+ <pP>• El usuario que hizo este movimiento debe entregar el producto a la estacion de Destino y verificar que se acepte</pP>
         </body>
 </html>
     

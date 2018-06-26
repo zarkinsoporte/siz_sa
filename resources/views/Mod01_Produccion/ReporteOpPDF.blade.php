@@ -2,64 +2,72 @@
 <html lang="en">
 
 <head>
-
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    <title>{{ 'Salotto' }}</title>
-
-    <!-- Styles -->
-<style>
-
-body { 
-	font: 14px/1.4 Georgia, Serif; 
-}
-
-
-	/* 
+    <title>{{ 'Historial OP' }}</title>
+    <style>
+    /*
 	Generic Styling, for Desktops/Laptops 
 	*/
+    img {
+    display: block;
+    margin-left:50px;
+    margin-right:50px;
+    width: 700%;
+}
 	table { 
 		width: 100%; 
 		border-collapse: collapse; 
+        font-family:arial;
 	}
-	/* Zebra striping */
-	tr:nth-of-type(odd) { 
-		background: #eee; 
-	}
+
 	th { 
-		background: #333; 
 		color: white; 
 		font-weight: bold; 
+		color: black; 
 	}
-	td, th { 
-		padding: 6px; 
-		border: 1px solid #ccc; 
-		text-align: left; 
-	}
+
+        img{
+         width:500;
+            height: 20;
+            position: absolute;right:-2%;
+            align-content:;
+        }
+        h3{
+            font-family: 'Helvetica';
+        }
 </style>
 
 </head>
 
 <body>
-    <div id="app">
+<div id="app">
         <div id="wrapper">
-
-<div class="container" >
-
-        <div align="left">
-        <FONT FACE="roman"><h4 align="right" > Historial por OP</h4></FONT>
-        <h3><?php echo $data[0]->CompanyName ?></h3> <hr>
-           
-        <strong>  • Descripción: </strong> <?php echo $data[0]->ItemCode ?> - <?php echo $data[0]->ItemName ?>
-        </div>
-        <div>
-        <strong>  • Orden de fabricación:</strong>  <?php echo $op ?>
-        <br>
-        <strong> • V.S : </strong>  <?php echo number_format($data[0]->VS, 2, '.', ','); ?>
-        </div> 
-        <hr>    
+<div class="container" >  
+<img src="images/Mod01_Produccion/siz1.png" >
+<br><br>
+<table>
+    <thead>
+        <tbody>
+            <tr>
+            <td colspan="2" align="center" bgcolor="#ccc"><h3><?php echo $data[0]->CompanyName ?></h3></td>
+            <td colspan="5" align="left" bgcolor="#ccc"><h3>Historial OP</h3></td>           
+ </tr>
+            <tr>
+            <th align="center">Orden de fabricación:<hr/></th>
+            <td colspan="2"><?php echo $op ?><hr/></td>         
+            <td align="center">V S:<hr/></td>
+            <td colspan="2"><?php echo number_format($data[0]->VS, 2, '.', ','); ?><hr/></td>
+            </tr>
+            <tr>
+            <th align="center">Descripción:<hr/></th>
+            <td colspan="2"><?php echo $data[0]->ItemCode ?> - <?php echo $data[0]->ItemName ?><hr/></td>    
+        </tbody>
+    </thead> 
 <style>
 .table-blockquote {
   padding: 3px 10px;

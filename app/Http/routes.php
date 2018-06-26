@@ -225,5 +225,10 @@ Route::get('admin/aux', function(){
 dd($menus);
 });
 
-
+Route::get('Mod07_Calidad/RechazosNuevo', 'Mod07_CalidadController@Rechazo');
+Route::post('Mod07_Calidad/RechazosNuevo', 'Mod07_CalidadController@RechazoIn');
+Route::get('Mod07_Calidad/Mod_Rechazo/{id}/{mensaje}', 'Mod07_CalidadController@Mod_Rechazo');
+Route::post('Mod07_Calidad/Mod_RechazoUPDT', 'Mod07_CalidadController@Mod_RechazoUPDT');
+Route::get('admin/Delete_Rechazo/{id}', 'Mod07_CalidadController@Delete_Rechazo');
+Route::post('admin/Delete_Rechazo/', 'Mod07_CalidadController@Delete_Rechazo');
 

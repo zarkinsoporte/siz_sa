@@ -31,7 +31,15 @@
 		color: black; 
 	}
 
-
+        img{
+         width:500;
+            height: 20;
+            position: absolute;right:-2%;
+            align-content:;
+        }
+        h3{
+            font-family: 'Helvetica';
+        }
 </style>
 
 </head>
@@ -40,11 +48,13 @@
 <div id="app">
         <div id="wrapper">
 <div class="container" >  
+<img src="images/Mod01_Produccion/siz1.png" >
+<br><br>
 <table>
     <thead>
         <tbody>
             <tr>
-            <td colspan="5" align="center" bgcolor="#ccc"><h2><font face="arial">Reporte de Materiales</font></h2></td>
+            <td colspan="5" align="center" bgcolor="#ccc"><h3>Reporte de Materiales</font></h3></td>
             </tr>
             <tr>
             <th align="center">Codigo:<hr/></th>
@@ -145,7 +155,7 @@
                            
                     @endforeach 
                     </tbody>
-                </table>
+                </table>        
         </div>
      </div>
      @yield('subcontent-01')
