@@ -156,6 +156,12 @@ echo $consecutivo[0]->Code;
 });
 Route::get('datatable/{idGrup}/{idMod}', 'Mod00_AdministradorController@confModulo');
 Route::get('datatables.data', 'Mod00_AdministradorController@anyData')->name('datatables.data');
+Route::get('getAutocomplete', function(){
+    return view('Mod07_Calidad.RechazoFrame');
+})->name('getAutocomplete');
+
+Route::get('search',array('as'=>'search','uses'=>'Mod07_CalidadController@search'));
+Route::get('autocomplete',array('as'=>'autocomplete','uses'=>'Mod07_CalidadController@autocomplete'));
 /*
 |--------------------------------------------------------------------------
 |NOTICIAS Y NOTIFICACIONES 'BRAYAN'
@@ -225,10 +231,10 @@ Route::get('admin/aux', function(){
 dd($menus);
 });
 
-Route::get('Mod07_Calidad/RechazosNuevo', 'Mod07_CalidadController@Rechazo');
-Route::post('Mod07_Calidad/RechazosNuevo', 'Mod07_CalidadController@RechazoIn');
+Route::get('home/NUEVO RECHAZO', 'Mod07_CalidadController@Rechazo');
+Route::post('RechazosNuevo', 'Mod07_CalidadController@RechazoIn');
 Route::get('Mod07_Calidad/Mod_Rechazo/{id}/{mensaje}', 'Mod07_CalidadController@Mod_Rechazo');
 Route::post('Mod07_Calidad/Mod_RechazoUPDT', 'Mod07_CalidadController@Mod_RechazoUPDT');
 Route::get('admin/Delete_Rechazo/{id}', 'Mod07_CalidadController@Delete_Rechazo');
 Route::post('admin/Delete_Rechazo/', 'Mod07_CalidadController@Delete_Rechazo');
-
+Route::get('search/autocomplete', 'Mod07_CalidadController@autocomplete');

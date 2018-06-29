@@ -34,9 +34,9 @@
                 </div>
             </div>
             <!-- /.row -->
-            {!! Form::open(['url' => 'Mod07_Calidad/rechazoNuevo', 'method' => 'POST']) !!}
-            <div class="form-group">
-            <input type="hidden" class="form-control" id="Id_Folio" name="Id_Folio" value="{{$Mod_Rechazo[0]->folio}}">
+    {!! Form::open(['url' => 'Mod07_Calidad/rechazoNuevo', 'method' => 'POST']) !!}
+    <div class="form-group">
+    <input type="hidden" class="form-control" id="Id_Folio" name="Id_Folio" value="{{$Mod_Rechazo[0]->folio}}">
 
     <label for="exampleFormControlInput1">Fecha de revisión</label>
     <input type="date"class="form-control" id="Fech_Rev" name="Fech_Rev" placeholder="Fecha de revisión"  value="{{$Mod_Rechazo[0]->fechaRevision}}"require>
@@ -65,7 +65,6 @@
     <label for="exampleFormControlTextarea1">Descripcion de Material</label>
     <input type="text" class="form-control" id="Material" name="Material"value="{{$Mod_Rechazo[0]->materialDescripcion}}"  require >
   </div>
-
   <div class="form-group">
     <label for="exampleFormControlTextarea1">Cantidad Revisada</label>
     <input type="number" class="form-control" id="C_Revisada" name="C_Revisada" value="{{$Mod_Rechazo[0]->cantidadRevisada}}"  require >

@@ -170,5 +170,5 @@ $('.dropdown-toggle').dropdown();
 
 
 </script>
-
+  @yield('script')
 </html>
