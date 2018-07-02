@@ -38,5 +38,7 @@
  var myvar = <?php echo json_encode($var);?>;
  var Codeprov= <?php echo json_encode($CodeP);?>;
  var Nameprov= <?php echo json_encode($NameP);?>;
+ var CodeMaterial= <?php echo json_encode($CodeMat);?>;
+ var NameMaterial= <?php echo json_encode($NameM);?>;
 </script>
   

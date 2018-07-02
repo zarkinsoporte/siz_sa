@@ -139,6 +139,8 @@ iframe[seamless] {
     //var countries = ["Afghanistan","Albania","Algeria","Andorra","Angola","Anguilla","Antigua &amp; Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia &amp; Herzegovina","Botswana","Brazil","British Virgin Islands","Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon","Canada","Cape Verde","Cayman Islands","Central Arfrican Republic","Chad","Chile","China","Colombia","Congo","Cook Islands","Costa Rica","Cote D Ivoire","Croatia","Cuba","Curacao","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Ethiopia","Falkland Islands","Faroe Islands","Fiji","Finland","France","French Polynesia","French West Indies","Gabon","Gambia","Georgia","Germany","Ghana","Gibraltar","Greece","Greenland","Grenada","Guam","Guatemala","Guernsey","Guinea","Guinea Bissau","Guyana","Haiti","Honduras","Hong Kong","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","México"];
     var codeP=window.parent.Codeprov;
     var NameP=window.parent.Nameprov;
+    var Code_Ma=window.parent.CodeMaterial;
+    var Name_Ma=window.parent.NameMaterial;
     
 </script>
     <script>
@@ -242,6 +244,8 @@ document.addEventListener("click", function (e) {
 <script>
 autocomplete(document.getElementById("Proveedor"), NameP);
 autocomplete(document.getElementById("Id_prov"), codeP);
+autocomplete(document.getElementById("Codigo"), Code_Ma);
+autocomplete(document.getElementById("Material"), Name_Ma);
 var app = angular.module('app', []);
 </script>
 
