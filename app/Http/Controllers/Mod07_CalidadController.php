@@ -28,9 +28,17 @@ class Mod07_CalidadController extends Controller
    {
     $var =  DB::table('OCRD')->where('CardType', 'S')->whereNotNull('CardName')->lists('CardName','CardCode');
     list($CodeP, $NameP) = array_divide($var);
+    $Material =  DB::table('OITM')->lists('ItemName','ItemCode');
+    list($CodeMat,$NameM)=array_divide($Material);
+    
+     return print_r($Material);
+    
+    dd();
+    $CodeMat2=array_map('strval', $CodeMat);
+    //dd($CodeMat2);
     $user = Auth::user();
     $actividades = $user->getTareas();
-    return view('Mod07_Calidad.rechazosNuevo',['CodeP'=>$CodeP,'NameP'=>$NameP,'var'=>$var,'actividades' => $actividades, 'ultimo' => count($actividades)]);
+    return view('Mod07_Calidad.rechazosNuevo',['Material'=>$Material,'CodeMat'=>$CodeMat2,'NameM'=>$NameM,'CodeP'=>$CodeP,'NameP'=>$NameP,'var'=>$var,'actividades' => $actividades, 'ultimo' => count($actividades)]);
    }
 
 public function RechazoIn(Request $request)   
