@@ -125,6 +125,4 @@ $index = 0;
 @section('script')
 @yield('homescript')
 @endsection
-@section('script2')
-@yield('homescript2')
-@endsection
+
