@@ -4,7 +4,7 @@
 <title>Title of the document</title>
 
 <base target="_parent" />
-
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
 <style>
 * { box-sizing: border-box; }
@@ -68,72 +68,113 @@ iframe[seamless] {
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
 </head>
 <body>
+
 @include('partials.alertas')
+
 <form autocomplete="off"  method="post" action="{!!action('Mod07_CalidadController@RechazoIn')!!}">
 {{ csrf_field() }}
-  </div>
-  <div class="autocomplete form-group col-sm-4">
+<div class="row">
+<div class="autocomplete form-group col-md-6">
   <label>Fecha de revisión</label>
     <input class="form-control" id="Fech_Rev" type="date" name="Fech_Rev"required>
   </div>
-  <div class="autocomplete form-group col-sm-4">
+  <div class="autocomplete form-group col-md-6">
   <label>Fecha de Recepción</label>
     <input class="form-control" id="Fech_Recp" type="date" name="Fech_Recp"required>
   </div>
   </div>
-  <div class="autocomplete form-group col-sm-4">
-  <label>Código del proveedor</label>
-    <input class="form-control" id="Id_prov" type="text" name="Id_prov" placeholder="ID del proveedor"required>
-  </div>
-  <div class="autocomplete form-group col-sm-4">
+
+  <div class="row">
+  <div class="form-group col-md-6">
+<label>Código del proveedor</label>
+    <div class="autocomplete input-group">
+         <input class="form-control" id="Id_prov" type="text" name="Id_prov" placeholder="Ejemplo:P112..."required>
+      <span class="input-group-btn">
+      <button class="btn btn-default"><i class="fas fa-bolt"></i>&nbsp;
+      </button>
+      </span>
+      </div>
+    </div>
+ <div class="form-group col-md-6">
   <label>Nombre del provedor</label>
-    <input class="form-control" id="Proveedor" type="text" name="Proveedor" placeholder="Provedor"required>
+    <div class="autocomplete input-group">
+      <input class="form-control" id="Proveedor" type="text" name="Proveedor" placeholder="Ejemplo:Distr..."required>
+      <span class="input-group-btn">
+      <button class="btn btn-default" type="button"><i class="fas fa-bolt"></i>&nbsp;</button>
+      </span>
+    </div>
+    </div>
   </div>
-  <div class="autocomplete form-group col-sm-5">
-    <label for="exampleFormControlTextarea1">Código de Material</label>
-    <input type="text" class="form-control" id="Codigo" name="Codigo"  required >
-  </div>
-  <div class="autocomplete form-group col-sm-5">
-    <label for="exampleFormControlTextarea1">Unidad Medida</label>
+   
+<div class="row">
+   <div class="col-md-3 form-group">
+<label>Código de Material</label>
+    <div class="autocomplete input-group">
+      <input type="text" class="form-control" id="Codigo" name="Codigo"  placeholder="Ejemplo:C123..."  required >
+      <span class="input-group-btn">
+      <button class="btn btn-default" type="button"><i class="fas fa-bolt"></i>&nbsp;</button>
+      </span>
+    </div>
+    </div>
+
+   <div class="col-md-3 form-group">
+<label>Unidad de Medida</label>
+    <div class="autocomplete input-group">
     <input type="text" class="form-control" id="Um" name="Um" required >
-  </div>
-  <div class="autocomplete form-group col-sm-10">
-    <label for="exampleFormControlTextarea1">Descripcion de Material</label>
-    <input type="text" class="form-control" id="Material" name="Material" required >
+    </div>
+    </div>
+
+   <div class="form-group col-md-6">
+<label>Descripcion de Material</label>
+    <div class="autocomplete input-group">
+ <input type="text" class="form-control" id="Material" name="Material"placeholder="Ejemplo:Adap..." required >
+      <span class="input-group-btn">
+      <button class="btn btn-default" type="button"><i class="fas fa-bolt"></i>&nbsp;</button>
+      </span>
+    </div>
+    </div>
   </div>
   <div class="autocomplete form-group col-sm-3">
     <label for="exampleFormControlTextarea1">Cantidad Aceptada</label>
     <input type="number" min="1"ng-model="n1" class="form-control" id="C_Aceptada" name="C_Aceptada"required >
   </div>
+
   <div class="autocomplete form-group col-sm-3">
     <label for="exampleFormControlTextarea1">Cantidad Rechazada</label>
     <input type="number" min="1"ng-model="n2" class="form-control" id="C_Rechazada" name="C_Rechazada"required >
   </div>
+
   <div class="autocomplete form-group col-sm-3">
     <label for="exampleFormControlTextarea1">Cantidad Revisada</label>
     <input type="number"  class="form-control" id="C_Revisada" name="C_Revisada" value="@{{n1+n2 }}" required > 
   </div>
+
   <div class="autocomplete form-group col-sm-10">
     <label for="exampleFormControlTextarea1">Descripcion del Rechazo</label>
     <input type="text" class="form-control" id="D_Rechazo" name="D_Rechazo" required >
   </div>
+
   <div class="autocomplete form-group col-sm-10">
     <label for="exampleFormControlTextarea1">Numero de Factura</label>
     <input type="text" class="form-control" id="N_Doc" name="N_Doc" required >
   </div>
+
   <div class="autocomplete form-group col-sm-10">
     <label for="exampleFormControlTextarea1">Nombre del Inspector</label>
     <input type="text" class="form-control" id="Inspector" name="Inspector"
     value='{{Auth::user()->firstName.' '.Auth::user()->lastName}}'  readonly>
   </div>
+
   <div class="autocomplete form-group col-sm-10">
     <label for="exampleFormControlTextarea1">Observaciones</label>
     <textarea class="form-control" id="Observaciones"name="Observaciones" rows="3"required></textarea>
   </div>
+
 <div>
   <button type="submit" class="btn btn-primary">Enviar</button> 
   </div>
 </form>
+
 </body>
 <script> 
     //var countries = ["Afghanistan","Albania","Algeria","Andorra","Angola","Anguilla","Antigua &amp; Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia &amp; Herzegovina","Botswana","Brazil","British Virgin Islands","Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon","Canada","Cape Verde","Cayman Islands","Central Arfrican Republic","Chad","Chile","China","Colombia","Congo","Cook Islands","Costa Rica","Cote D Ivoire","Croatia","Cuba","Curacao","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Ethiopia","Falkland Islands","Faroe Islands","Fiji","Finland","France","French Polynesia","French West Indies","Gabon","Gambia","Georgia","Germany","Ghana","Gibraltar","Greece","Greenland","Grenada","Guam","Guatemala","Guernsey","Guinea","Guinea Bissau","Guyana","Haiti","Honduras","Hong Kong","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","México"];

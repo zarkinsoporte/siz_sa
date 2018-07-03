@@ -82,7 +82,7 @@ return array(
         |--------------------------------------------------------------------------
         */
         'pageSetup' => [
-            'orientation'           => 'portrait',
+            'orientation'           => 'potrait',
             'paperSize'             => '9',
             'scale'                 => '100',
             'fitToPage'             => false,
@@ -90,10 +90,10 @@ return array(
             'fitToWidth'            => true,
             'columnsToRepeatAtLeft' => ['', ''],
             'rowsToRepeatAtTop'     => [0, 0],
-            'horizontalCentered'    => false,
+            'horizontalCentered'    => TRUE,
             'verticalCentered'      => false,
             'printArea'             => null,
-            'firstPageNumber'       => null,
+            'firstPageNumber'       =>TRUE,
         ],
     ],
 

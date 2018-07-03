@@ -30,10 +30,7 @@ class Mod07_CalidadController extends Controller
     list($CodeP, $NameP) = array_divide($var);
     $Material =  DB::table('OITM')->lists('ItemName','ItemCode');
     list($CodeMat,$NameM)=array_divide($Material);
-    
-     return print_r($Material);
-    
-    dd();
+
     $CodeMat2=array_map('strval', $CodeMat);
     //dd($CodeMat2);
     $user = Auth::user();
@@ -133,4 +130,14 @@ public function RechazoIn(Request $request)
        // dd($data);
        return response()->json(DB::table('OCRD')->where('CardType', 'S')->value('CardName'));
     }
+
+    public function Pdf_Rechazo()
+    {
+       
+            $pdf = \PDF::loadView('Mod07_Calidad.RechazoPDF');
+            return $pdf->setPaper('Letter','landscape')->stream();
+           // return $pdf->download('ReporteOP.pdf');
+       
+    }
+
 }
