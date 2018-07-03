@@ -26,19 +26,23 @@ class Mod07_CalidadController extends Controller
 {
     public function Rechazo()
    {
-    $var =  DB::table('OCRD')->where('CardType', 'S')->whereNotNull('CardName')->lists('CardName','CardCode');
-    list($CodeP, $NameP) = array_divide($var);
-    $Material =  DB::table('OITM')->lists('ItemName','ItemCode');
-    list($CodeMat,$NameM)=array_divide($Material);
+    //$var =  DB::table('OCRD')->where('CardType', 'S')->whereNotNull('CardName')->lists('CardName','CardCode');
+    //list($CodeP, $NameP) = array_divide($var);
+    $resultProveedores =  DB::select('SELECT CardName, CardCode FROM OCRD WHERE CardType = \'S\' AND CardName IS NOT NULL');
+    $CardNames = array_pluck($resultProveedores, 'CardName');
+    $CardCodes = array_pluck($resultProveedores, 'CardCode');
+    //dd($var);
+    //DB::table('OITM')->lists('ItemName','ItemCode');
+    //list($CodeMat,$NameM)=array_divide($Material);
+    // $CodeMat2=array_map('strval', $CodeMat);
+    $resultMateriales = DB::select('SELECT ItemCode, ItemName, InvntryUom AS UM FROM OITM WHERE PrchseItem = \'Y\' AND InvntItem = \'Y\'');
+    $ItemNames = array_pluck($resultMateriales, 'ItemName');
+    $ItemCodes = array_pluck($resultMateriales, 'ItemCode');
     
-     return print_r($Material);
-    
-    dd();
-    $CodeMat2=array_map('strval', $CodeMat);
-    //dd($CodeMat2);
     $user = Auth::user();
     $actividades = $user->getTareas();
-    return view('Mod07_Calidad.rechazosNuevo',['Material'=>$Material,'CodeMat'=>$CodeMat2,'NameM'=>$NameM,'CodeP'=>$CodeP,'NameP'=>$NameP,'var'=>$var,'actividades' => $actividades, 'ultimo' => count($actividades)]);
+    //dd($actividades );
+    return view('Mod07_Calidad.rechazosNuevo',['Material'=>$resultMateriales,'CodeMat'=>$ItemCodes,'NameM'=>$ItemNames,'CodeP'=>$CardCodes,'NameP'=>$CardNames,'var'=>$resultProveedores,'actividades' => $actividades, 'ultimo' => count($actividades)]);
    }
 
 public function RechazoIn(Request $request)   
@@ -112,15 +116,6 @@ public function RechazoIn(Request $request)
         return redirect()->back();
      }*/
     //------------------------------------------------------------------------------------------------------------------------------------------//
-    public function search(Request $request)
-    {
-   $var =  DB::table('OCRD')->where('CardType', 'S')->whereNotNull('CardName')->lists('CardName');
-     dd(
-       $var
-    );
-        return view('Mod07_Calidad.search');
-    }
-
 
     /**
      * Show the form for creating a new resource.
