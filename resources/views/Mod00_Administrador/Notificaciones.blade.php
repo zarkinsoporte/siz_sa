@@ -63,7 +63,7 @@
                         <td>{{ $campo->Nota }}</td>  
                         <td>{{ $campo->Leido }}</td>                                              
                         <td>
-                            <a href=" Mod_Noti/{{$campo->Id}}/{{0}}" class="btn btn-warning"><i class="glyphicon glyphicon-edit"></i</a>
+                            <a href=" Mod_Noti/{{$campo->Id}}/{{0}}" class="btn btn-warning"><i class="glyphicon glyphicon-edit"></i></a>
                         </td>
                         <td>
                         <a href="delete_Noti/{{$campo->Id}}" class="btn btn-danger"><i class="glyphicon glyphicon-trash"value"delete"></i></a>

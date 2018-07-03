@@ -128,4 +128,14 @@ public function RechazoIn(Request $request)
        // dd($data);
        return response()->json(DB::table('OCRD')->where('CardType', 'S')->value('CardName'));
     }
+
+    public function Pdf_Rechazo()
+    {
+       
+            $pdf = \PDF::loadView('Mod07_Calidad.RechazoPDF');
+            return $pdf->setPaper('Letter','landscape')->stream();
+           // return $pdf->download('ReporteOP.pdf');
+       
+    }
+
 }

@@ -238,3 +238,4 @@ Route::post('Mod07_Calidad/Mod_RechazoUPDT', 'Mod07_CalidadController@Mod_Rechaz
 Route::get('admin/Delete_Rechazo/{id}', 'Mod07_CalidadController@Delete_Rechazo');
 Route::post('admin/Delete_Rechazo/', 'Mod07_CalidadController@Delete_Rechazo');
 Route::get('search/autocomplete', 'Mod07_CalidadController@autocomplete');
+Route::get('home/REPORTE DE RECHAZOS', 'Mod07_CalidadController@Pdf_Rechazo');
