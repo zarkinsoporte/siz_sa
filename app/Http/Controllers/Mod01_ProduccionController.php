@@ -77,7 +77,7 @@ class Mod01_ProduccionController extends Controller
         
         $pdf = \PDF::loadView('Mod01_Produccion.ReporteOpPDF', $data);
         //dd($pdf);
-        return $pdf->stream();
+        return $pdf->setOptions(['isPhpEnabled'=>true])->stream();
        // return $pdf->download('ReporteOP.pdf');
     }
 
@@ -132,7 +132,7 @@ class Mod01_ProduccionController extends Controller
         $pdf = \PDF::loadView('Mod01_Produccion.ReporteMateriales', $data);
         //dd($pdf);
         //return $pdf->stream();
-        return $pdf->stream('ReporteMateriales.pdf');
+        return $pdf->setOptions(['isPhpEnabled'=>true])->stream('ReporteMateriales.pdf');
     }
 
     public function allUsers(Request $request){

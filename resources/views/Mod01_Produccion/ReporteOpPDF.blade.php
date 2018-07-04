@@ -118,6 +118,19 @@
 </div>
 <!-- /#page-wrapper -->
 </div>
+<footer>
+<script type="text/php">
+ $text = 'Pagina: {PAGE_NUM} / {PAGE_COUNT}';
+ $date = 'Fecha de impresion : <?php echo $hoy = date("d-m-Y H:i:s");?>';
+ $tittle = 'Reporte OP.Pdf';
+ $font = $fontMetrics->get_font("Arial, Helvetica, sans-serif", "normal");
+ $pdf->page_text(40, 740, $text, $font, 9);
+ $pdf->page_text(420, 23, $date, $font, 9);
+ $pdf->page_text(420, 740, $tittle, $font, 9);
+
+
+</script> 
+</footer>
 </div>
 
 </body>

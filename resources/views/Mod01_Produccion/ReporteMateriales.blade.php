@@ -18,6 +18,7 @@
     margin-left:50px;
     margin-right:50px;
     width: 700%;
+    margin-top:6%;
 }
 	table { 
 		width: 100%; 
@@ -45,9 +46,10 @@
 </head>
 
 <body>
+
 <div id="app">
         <div id="wrapper">
-<div class="container" >  
+<div class="container" > 
 <img src="images/Mod01_Produccion/siz1.png" >
 <br><br>
 <table>
@@ -57,22 +59,22 @@
             <td colspan="5" align="center" bgcolor="#ccc"><h3>Reporte de Materiales</font></h3></td>
             </tr>
             <tr>
-            <th align="center">Codigo:<hr/></th>
-            <td colspan="2"><?php echo $data[0]->ItemCode ?> - <?php echo $data[0]->ItemName ?><hr/></td>         
-            <td align="center">Orden de producción:<hr/></td>
-            <td colspan="2"><?php echo $op ?><hr/></td>
+            <th align="center" >Codigo:</th>
+            <td colspan="2"><?php echo $data[0]->ItemCode ?> - <?php echo $data[0]->ItemName ?></td>         
+            <td align="center"><h3>O.P:</h3></td>
+            <td colspan="2"><h3><?php echo $op ?></h3></td>
             </tr>
             <tr>
-            <th align="center">Cliente:<hr/></th>
-            <td colspan="2"><?php echo $data[0]->CardCode ?> - <?php echo $data[0]->CardName ?><hr/></td>         
-            <td align="center">V.S:<hr/></td>
-            <td colspan="2"><?php echo number_format($data[0]->VS, 2); ?><hr/></td>
+            <th align="center">Cliente:</th>
+            <td colspan="2"><?php echo $data[0]->CardCode ?> - <?php echo $data[0]->CardName ?></td>         
+            <td align="center">V.S:</td>
+            <td colspan="2"><?php echo number_format($data[0]->VS, 2); ?></td>
             </tr>
             <tr>
-            <th align="center">Fecha de Entrega:<hr/></th>
-            <td align='center'><?php echo $data[0]->FechaEntrega ?><hr/></td>
-            <td align='center'>Cantidad Planeada:<hr/></td>
-            <td  colspan="2" align='center'><?php echo $data[0]->plannedqty ?><hr/></td>
+            <th colspan="2"align="center">Fecha de Entrega: <hr></th>
+            <td align='center'><?php echo date_create($data[0]->FechaEntrega)->format('Y-m-d'); ?><hr></td>
+            <td align='center'>Cantidad Planeada:<hr></td>
+            <td align='center'><?php echo number_format($data[0]->plannedqty,0); ?><hr></td>
             </tr>
         </tbody>
     </thead>    
@@ -85,7 +87,7 @@
                         <th align="center" bgcolor="#474747" style="color:white"; scope="col">Fecha de entrega</th>
                         <th align="center" bgcolor="#474747" style="color:white";scope="col">Código</th>
                         <th align="center" bgcolor="#474747" style="color:white";scope="col">Descripción</th>
-                        <th align="center" bgcolor="#474747" style="color:white";scope="col">No. Entrada</th>
+                        <th align="center" bgcolor="#474747" style="color:white";scope="col">Unidad Medida</th>
                         <th align="center" bgcolor="#474747" style="color:white";scope="col">Solicitada</th>
                         </tr>
                     </thead>
@@ -123,7 +125,7 @@
                                 {{ $rep->InvntryUom }}
                             </td>
                             <td scope="row">
-                                {{ $rep->Cantidad }}
+                            <?php echo number_format($rep->Cantidad,2); ?>
                             </td>
                         </tr>
                            <?php
@@ -146,7 +148,8 @@
                                 {{ $rep->InvntryUom }}
                             </td>
                             <td scope="row">
-                                {{ $rep->Cantidad }}
+                                <?php echo number_format($rep->Cantidad,2); ?>
+
                             </td>
                         </tr>
                             <?php
@@ -157,8 +160,22 @@
                     </tbody>
                 </table>        
         </div>
+        <footer>
+<script type="text/php">
+ $text = 'Pagina: {PAGE_NUM} / {PAGE_COUNT}';
+ $date = 'Fecha de impresion : <?php echo $hoy = date("d-m-Y H:i:s");?>';
+ $tittle = 'Reporte_Materiales.Pdf';
+ $font = $fontMetrics->get_font("Arial, Helvetica, sans-serif", "normal");
+ $pdf->page_text(40, 740, $text, $font, 9);
+ $pdf->page_text(420, 23, $date, $font, 9);
+ $pdf->page_text(420, 740, $tittle, $font, 9);
+
+
+</script> 
+</footer>
      </div>
      @yield('subcontent-01')
 
 </body>
+
 </html>
