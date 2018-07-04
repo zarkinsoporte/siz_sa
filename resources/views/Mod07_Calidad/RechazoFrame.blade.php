@@ -65,9 +65,9 @@ iframe[seamless] {
 }   
 </style>
 <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"/>
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.7.2/angular.min.js"></script>
 </head>
-<body>
+<body ng-controller="MainController">
 
 @include('partials.alertas')
 
@@ -88,9 +88,9 @@ iframe[seamless] {
   <div class="form-group col-md-6">
 <label>Código del proveedor</label>
     <div class="autocomplete input-group">
-         <input class="form-control" id="Id_prov" type="text" name="Id_prov" placeholder="Ejemplo:P112..."required>
+         <input class="form-control" id="Id_prov" type="text" ng-model="codigoproveedor" name="Id_prov" placeholder="Ejemplo:P112..."required>
       <span class="input-group-btn">
-      <button class="btn btn-default"><i class="fas fa-bolt"></i>&nbsp;
+      <button class="btn btn-default" type="button" ng-click="findCardName(codigoproveedor)"><i class="fas fa-bolt"></i>&nbsp;
       </button>
       </span>
       </div>
@@ -98,9 +98,9 @@ iframe[seamless] {
  <div class="form-group col-md-6">
   <label>Nombre del provedor</label>
     <div class="autocomplete input-group">
-      <input class="form-control" id="Proveedor" type="text" name="Proveedor" placeholder="Ejemplo:Distr..."required>
+      <input class="form-control" id="Proveedor" type="text" ng-model="nombreproveedor" name="Proveedor" placeholder="Ejemplo:Distr..."required>
       <span class="input-group-btn">
-      <button class="btn btn-default" type="button"><i class="fas fa-bolt"></i>&nbsp;</button>
+      <button class="btn btn-default" type="button" ng-click="findCardCode(nombreproveedor)"><i class="fas fa-bolt"></i>&nbsp;</button>
       </span>
     </div>
     </div>
@@ -110,9 +110,9 @@ iframe[seamless] {
    <div class="col-md-3 form-group">
 <label>Código de Material</label>
     <div class="autocomplete input-group">
-      <input type="text" class="form-control" id="Codigo" name="Codigo"  placeholder="Ejemplo:C123..."  required >
+      <input type="text" class="form-control" id="Codigo" ng-model="codigoitem" name="Codigo"  placeholder="Ejemplo:100..."  required >
       <span class="input-group-btn">
-      <button class="btn btn-default" type="button"><i class="fas fa-bolt"></i>&nbsp;</button>
+      <button class="btn btn-default" type="button" ng-click="findItemName(codigoitem)"><i class="fas fa-bolt"></i>&nbsp;</button>
       </span>
     </div>
     </div>
@@ -120,16 +120,16 @@ iframe[seamless] {
    <div class="col-md-3 form-group">
 <label>Unidad de Medida</label>
     <div class="autocomplete input-group">
-    <input type="text" class="form-control" id="Um" name="Um" required >
+    <input type="text" class="form-control" id="Um" ng-model="unidadmedida" name="Um" required >
     </div>
     </div>
 
    <div class="form-group col-md-6">
 <label>Descripcion de Material</label>
     <div class="autocomplete input-group">
- <input type="text" class="form-control" id="Material" name="Material"placeholder="Ejemplo:Adap..." required >
+ <input type="text" class="form-control" id="Material" ng-model="nombreitem" name="Material"placeholder="Ejemplo:Adap..." required >
       <span class="input-group-btn">
-      <button class="btn btn-default" type="button"><i class="fas fa-bolt"></i>&nbsp;</button>
+      <button class="btn btn-default" type="button" ng-click="findItemCode(nombreitem)"><i class="fas fa-bolt"></i>&nbsp;</button>
       </span>
     </div>
     </div>
@@ -177,23 +177,29 @@ iframe[seamless] {
 
 </body>
 <script> 
-    //var countries = ["Afghanistan","Albania","Algeria","Andorra","Angola","Anguilla","Antigua &amp; Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia &amp; Herzegovina","Botswana","Brazil","British Virgin Islands","Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon","Canada","Cape Verde","Cayman Islands","Central Arfrican Republic","Chad","Chile","China","Colombia","Congo","Cook Islands","Costa Rica","Cote D Ivoire","Croatia","Cuba","Curacao","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Ethiopia","Falkland Islands","Faroe Islands","Fiji","Finland","France","French Polynesia","French West Indies","Gabon","Gambia","Georgia","Germany","Ghana","Gibraltar","Greece","Greenland","Grenada","Guam","Guatemala","Guernsey","Guinea","Guinea Bissau","Guyana","Haiti","Honduras","Hong Kong","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","México"];
+    var globalvalue='';
     var codeP=window.parent.Codeprov;
     var NameP=window.parent.Nameprov;
     var Code_Ma=window.parent.CodeMaterial;
     var Name_Ma=window.parent.NameMaterial;
+    var resultMateriales = window.parent.Materiales;
+    var resultProveedores = window.parent.Proveedores;
     
 </script>
     <script>
-    function autocomplete(inp, arr) {
+    function autocomplete(inp, arr, model) {
   /*the autocomplete function takes two arguments,
   the text field element and an array of possible autocompleted values:*/
   var currentFocus;
   /*execute a function when someone writes in the text field:*/
   inp.addEventListener("input", function(e) {
+    
       var a, b, i, val = this.value;
       /*close any already open lists of autocompleted values*/
       closeAllLists();
+
+      inp.value = this.value;
+      globalvalue = this.value;
       if (!val) { return false;}
       currentFocus = -1;
       /*create a DIV element that will contain the items (values):*/
@@ -212,11 +218,13 @@ iframe[seamless] {
           b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>";
           b.innerHTML += arr[i].substr(val.length);
           /*insert a input field that will hold the current array item's value:*/
-          b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+          b.innerHTML += "<input type='hidden' value='" + arr[i] + "' ng-model='" + model + "'>";
           /*execute a function when someone clicks on the item value (DIV element):*/
               b.addEventListener("click", function(e) {
               /*insert the value for the autocomplete text field:*/
               inp.value = this.getElementsByTagName("input")[0].value;
+              globalvalue = this.getElementsByTagName("input")[0].value;
+              //alert(globalvalue);
               /*close the list of autocompleted values,
               (or any other open lists of autocompleted values:*/
               closeAllLists();
@@ -283,11 +291,54 @@ document.addEventListener("click", function (e) {
 }
     </script>
 <script>
-autocomplete(document.getElementById("Proveedor"), NameP);
-autocomplete(document.getElementById("Id_prov"), codeP);
-autocomplete(document.getElementById("Codigo"), Code_Ma);
-autocomplete(document.getElementById("Material"), Name_Ma);
+autocomplete(document.getElementById("Proveedor"), NameP, 'nombreproveedor');
+autocomplete(document.getElementById("Id_prov"), codeP,'codigoproveedor');
+autocomplete(document.getElementById("Codigo"), Code_Ma,'codigoitem');
+autocomplete(document.getElementById("Material"), Name_Ma,'nombreitem');
+
 var app = angular.module('app', []);
+app.controller('MainController',  ['$document','$filter', '$scope', '$window', function($document, $filter, $scope, $window) {
+  $scope.resultProveedores = $window.resultProveedores;
+  $scope.resultMateriales = $window.resultMateriales;
+    $scope.findCardName = function (codigoproveedor) {
+      if($window.globalvalue.trim().length > 0){
+      codigoproveedor = $window.globalvalue;
+      }
+     // $window.globalvalue = '';          
+      var o5 = $filter('filter')($scope.resultProveedores, {CardCode: codigoproveedor}, true)[0];
+      $scope.nombreproveedor = o5.CardName;
+    };
+
+    $scope.findCardCode = function (nombreproveedor) {
+      if($window.globalvalue.trim().length > 0){
+      nombreproveedor = $window.globalvalue;
+      }
+     // $window.globalvalue = '';      
+      var o5 = $filter('filter')($scope.resultProveedores, {CardName: nombreproveedor}, true)[0];
+      $scope.codigoproveedor = o5.CardCode;
+    };
+
+    $scope.findItemCode = function (nombreitem) {
+      if($window.globalvalue.trim().length > 0){
+        nombreitem = $window.globalvalue;
+      }      
+      //$window.globalvalue = '';      
+      var obj = $filter('filter')($scope.resultMateriales, {ItemName: nombreitem}, true)[0];
+      $scope.codigoitem = obj.ItemCode;
+      $scope.unidadmedida = obj.UM;
+    };
+
+    $scope.findItemName = function (codigoitem) {
+      if($window.globalvalue.trim().length > 0){
+        codigoitem = $window.globalvalue;
+      }      
+      //$window.globalvalue = '';      
+      var obj = $filter('filter')($scope.resultMateriales, {ItemCode: codigoitem}, true)[0];
+      $scope.nombreitem = obj.ItemName;
+      $scope.unidadmedida = obj.UM;
+    };
+}]);
+
 </script>
 
 </html>

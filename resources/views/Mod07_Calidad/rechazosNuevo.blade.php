@@ -35,10 +35,12 @@
 
 <script>
 
- var myvar = <?php echo json_encode($var);?>;
+ var Proveedores = <?php echo json_encode($var);?>;
+ var Materiales = <?php echo json_encode($Material);?>;
  var Codeprov= <?php echo json_encode($CodeP);?>;
  var Nameprov= <?php echo json_encode($NameP);?>;
  var CodeMaterial= <?php echo json_encode($CodeMat);?>;
  var NameMaterial= <?php echo json_encode($NameM);?>;
+
 </script>
   
