@@ -70,58 +70,6 @@ public function RechazoIn(Request $request)
             Session::flash('mensaje', 'Registro Guardado');
           return response()->redirectTo('home/NUEVO RECHAZO');
     }
-/*
-   public function Mod_Rechazo($Id_Autor,$Mod_mensaje)
-    {
-        $Mod_Noti = DB::table('SIZ_Calidad_Rechazos')
-            ->select('SIZ_Calidad_Rechazos.*')
-            ->where('Id', '=',"folio")
-            ->get();
-
-        return view('Mod07_Calidad/RechazosNuevo', compact('Mod_Noti', 'Mod_mensaje')); 
-    }
-    public function Mod_RechazoUPDT(Request $request)
-    {
-           //dd($request->input('Id_Autor'));
-           $folio=$request->input('folio');
-           $M_noti = DB::table('SIZ_Calidad_Rechazos')
-            ->where("Id", "=", "$folio")
-            ->update(
-                        [
-                            'fechaRevision'      =>$request->input('Fech_Rev'),
-                            'fechaRecepcion'     =>$request->input('Fech_Recp'),
-                            'proveedorId'        =>$request->input('Id_prov'),
-                            'proveedorNombre'    =>$request->input('Proveedor'),
-                            'materialCodigo'     =>$request->input('Codigo'),
-                            'materialIUM'        =>$request->input('Um'),
-                            'materialDescripcion'=>$request->input('Material'),
-                            'cantidadRevisada'   =>$request->input('C_Revisada'),
-                            'cantidadAceptada'   =>$request->input('C_Aceptada'),
-                            'cantidadRechazada'  =>$request->input('C_Rechazada'),
-                            'DescripcionRechazo' =>$request->input('D_Rechazo'),
-                            'DocumentoNumero'    =>$request->input('N_Doc'),
-                            'InspectorNombre'    =>$request->input('Inspector'),
-                            'Observaciones'      =>$request->input('Observaciones'),
-                        ]
-    );
-    Session::flash('info', '');
-    return redirect('Mod07_Calidad/RechazosNuevo'); 
-    } 
-
-   
-     public function Delete_Rechazo($folio){
-      $eliminar = DB::table('SIZ_Calidad_Rechazos')->where('Id', '=', $folio)->delete();
-    
-        Session::flash('info', '');
-        return redirect()->back();
-     }*/
-    //------------------------------------------------------------------------------------------------------------------------------------------//
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function autocomplete(Request $request)
     {
       
@@ -129,11 +77,26 @@ public function RechazoIn(Request $request)
        return response()->json(DB::table('OCRD')->where('CardType', 'S')->value('CardName'));
     }
 
-    public function Pdf_Rechazo()
+   public function Reporte(){
+   
+    $user = Auth::user();
+    $actividades = $user->getTareas();
+    //dd($actividades );
+    return view('Mod07_Calidad.Reporte_Rechazos',['actividades' => $actividades, 'ultimo' => count($actividades)]);
+   
+   }
+   
+    public function Pdf_Rechazo(Request $request)
     {
-       
-            $pdf = \PDF::loadView('Mod07_Calidad.RechazoPDF');
-            return $pdf->setPaper('Letter','landscape')->stream();
+      // $rechazo=DB::select('SELECT* FROM SIZ_Calidad_Rechazos');
+       //$pdf = App::make('dompdf');
+       $fechaIni = $request->input('FechIn');
+       $fechaFin = $request->input('FechaFa');
+       $rechazo=DB::table('SIZ_Calidad_Rechazos')->whereBetween('fechaRevision',[$fechaIni ,$fechaFin])->get();
+
+       //dd($rechazo);
+            $pdf = \PDF::loadView('Mod07_Calidad.RechazoPDF',['rechazo'=>$rechazo,'fechaIni'=>$fechaIni,'fechaFin'=>$fechaFin]);
+            return $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true])->stream();
            // return $pdf->download('ReporteOP.pdf');
        
     }
