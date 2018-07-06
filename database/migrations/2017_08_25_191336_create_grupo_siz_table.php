@@ -12,7 +12,7 @@ class CreateGrupoSizTable extends Migration
      */
     public function up()
     {
-       /* Schema::create('MODULOS_SIZ', function (Blueprint $table) {
+       /* Schema::create('Siz_Modulo', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
             $table->string('descripcion');
@@ -28,7 +28,7 @@ class CreateGrupoSizTable extends Migration
      */
  public function down()
 {
-    Schema::drop('MODULOS_SIZ');
+    Schema::drop('Siz_Modulo');
 }
 
 }

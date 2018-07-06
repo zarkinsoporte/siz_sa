@@ -12,7 +12,7 @@ class CreateModulosTareas extends Migration
      */
     public function up()
     {
-       /* Schema::table('MODULOS_GRUPO_SIZ', function (Blueprint $table) {
+       /* Schema::table('Siz_Modulos_Grupo', function (Blueprint $table) {
             $table->integer('id_menu')->nullable();
             $table->char('privilegio_modulo')->nullable();;
             $table->char('privilegio_tarea')->nullable();;
@@ -26,7 +26,7 @@ class CreateModulosTareas extends Migration
      */
     public function down()
     {
-        Schema::table('MODULOS_GRUPO_SIZ', function (Blueprint $table) {
+        Schema::table('Siz_Modulos_Grupo', function (Blueprint $table) {
             $table->dropColumn('nombre');
             $table->dropColumn('privilegio_modulo');
             $table->dropColumn('privilegio_tarea');

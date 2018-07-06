@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use DB;
 class MENU_ITEM extends Model
 {
-    protected $table = 'dbo.MENU_ITEM_SIZ';
+    protected $table = 'dbo.Siz_Menu_Item';
 
     public function tareas() {
         return $this->hasMany('TAREA_MENU');

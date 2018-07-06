@@ -79,17 +79,17 @@ class User extends Model implements AuthenticatableContract,
         $actividades = DB::table('OHEM')
             ->leftJoin('HEM6', 'OHEM.empID', '=', 'HEM6.empID')
             ->join('OHTY', 'OHTY.typeID', '=', 'HEM6.roleID')
-            ->leftJoin('MODULOS_GRUPO_SIZ','MODULOS_GRUPO_SIZ.id_grupo' ,'=', 'HEM6.roleID')
-            ->leftJoin('MODULOS_SIZ','MODULOS_SIZ.id' ,'=', 'MODULOS_GRUPO_SIZ.id_modulo')
-            ->leftJoin('MENU_ITEM_SIZ','MENU_ITEM_SIZ.id' ,'=', 'MODULOS_GRUPO_SIZ.id_menu')
-            ->leftJoin('TAREA_MENU_SIZ','TAREA_MENU_SIZ.id' ,'=', 'MODULOS_GRUPO_SIZ.id_tarea')
+            ->leftJoin('Siz_Modulos_Grupo','Siz_Modulos_Grupo.id_grupo' ,'=', 'HEM6.roleID')
+            ->leftJoin('Siz_Modulo','Siz_Modulo.id' ,'=', 'Siz_Modulos_Grupo.id_modulo')
+            ->leftJoin('Siz_Menu_Item','Siz_Menu_Item.id' ,'=', 'Siz_Modulos_Grupo.id_menu')
+            ->leftJoin('Siz_Tarea_menu','Siz_Tarea_menu.id' ,'=', 'Siz_Modulos_Grupo.id_tarea')
             ->where('U_EmpGiro', Auth::user()->U_EmpGiro)
             ->where('HEM6.line', '1')
-            ->whereNotNull('MODULOS_GRUPO_SIZ.id_tarea')
-            ->select('MODULOS_GRUPO_SIZ.*',
-                'MODULOS_SIZ.name AS modulo',
-                'MENU_ITEM_SIZ.name AS menu',
-                'TAREA_MENU_SIZ.name AS tarea')
+            ->whereNotNull('Siz_Modulos_Grupo.id_tarea')
+            ->select('Siz_Modulos_Grupo.*',
+                'Siz_Modulo.name AS modulo',
+                'Siz_Menu_Item.name AS menu',
+                'Siz_Tarea_menu.name AS tarea')
             ->orderBy('id_menu', 'asc')
             ->orderBy('id_tarea', 'asc')
             ->get();

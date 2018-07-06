@@ -629,7 +629,7 @@ $op = Input::get('op');
 $N_Emp  = User::where('position', 4)->where('U_CP_CT','like', '%'.$Est_ant.'%' )->first();
 //$N_Emp  = $Not_us[0];
 //dd($N_Emp);
-DB::table('Noticias')->insert(
+DB::table('Siz_Noticias')->insert(
     [
      'Autor'=>$Nom_User,
      'Destinatario' =>$N_Emp->U_EmpGiro,
@@ -658,7 +658,7 @@ DB::table('Noticias')->insert(
         //  'U_Recibido'=> $DestinoCp->U_Recibido + $cantidad,
             //'U_Reproceso'=>'S',
             'U_Defectuoso'=>$cant_r + $DestinoCp->U_Defectuoso,
-            'U_Comentarios'=>$Nota,
+            'U_Comentarios'=>$nota,
           //  'U_Procesado'=>$DestinoCp->U_Procesado - $cantidad;
             ]);
       }
@@ -752,7 +752,7 @@ if($Actual_Cp->PlannedQty > $cant_r){
             $Nombre_Destino= DB::table('@PL_RUTAS')->where('U_Orden', $request->input('selectestaciones'))->value('Name');             
             $Nombre_Actual= DB::table('@PL_RUTAS')->where('U_Orden', $request->input('Estacion'))->value('Name'); 
   //--------------------correo-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
-  $Num_Nominas=DB::select(DB::raw("SELECT No_Nomina from Email_SIZ where Reprocesos='1'"));
+  $Num_Nominas=DB::select(DB::raw("SELECT No_Nomina from Siz_Email where Reprocesos='1'"));
   foreach ($Num_Nominas as $Num_Nomina) {
   $user= User::find($Num_Nomina->No_Nomina);
   

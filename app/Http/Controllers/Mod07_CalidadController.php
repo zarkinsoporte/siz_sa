@@ -48,7 +48,7 @@ class Mod07_CalidadController extends Controller
 public function RechazoIn(Request $request)   
     {
       //  dd($request->input('Inspector'));
-        DB::table('SIZ_Calidad_Rechazos')->insert(
+        DB::table('Siz_Calidad_Rechazos')->insert(
             [
                 'fechaRevision'      =>$request->input('Fech_Rev'),
                 'fechaRecepcion'     =>$request->input('Fech_Recp'),
@@ -88,11 +88,11 @@ public function RechazoIn(Request $request)
    
     public function Pdf_Rechazo(Request $request)
     {
-      // $rechazo=DB::select('SELECT* FROM SIZ_Calidad_Rechazos');
+      // $rechazo=DB::select('SELECT* FROM Siz_Calidad_Rechazos');
        //$pdf = App::make('dompdf');
        $fechaIni = $request->input('FechIn');
        $fechaFin = $request->input('FechaFa');
-       $rechazo=DB::table('SIZ_Calidad_Rechazos')->whereBetween('fechaRevision',[$fechaIni ,$fechaFin])->get();
+       $rechazo=DB::table('Siz_Calidad_Rechazos')->whereBetween('fechaRevision',[$fechaIni ,$fechaFin])->get();
 
        //dd($rechazo);
             $pdf = \PDF::loadView('Mod07_Calidad.RechazoPDF',['rechazo'=>$rechazo,'fechaIni'=>$fechaIni,'fechaFin'=>$fechaFin]);
