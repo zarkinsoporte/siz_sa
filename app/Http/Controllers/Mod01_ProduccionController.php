@@ -71,8 +71,10 @@ class Mod01_ProduccionController extends Controller
     
         $data=array(
                     'data' => $GraficaOrden,
-                    'op'   => $op
+                    'op'   => $op,
                    );
+                  
+                // dd($sociedad);
         //$data = $GraficaOrden;
         
         $pdf = \PDF::loadView('Mod01_Produccion.ReporteOpPDF', $data);
@@ -125,7 +127,8 @@ class Mod01_ProduccionController extends Controller
     
         $data=array(
                     'data' => $Materiales,
-                    'op'   => $op
+                    'op'   => $op,
+                    'db' => DB::table('OADM')->value('CompnyName')
                    );
         //$data = $GraficaOrden;
         

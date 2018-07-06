@@ -93,9 +93,9 @@ public function RechazoIn(Request $request)
        $fechaIni = $request->input('FechIn');
        $fechaFin = $request->input('FechaFa');
        $rechazo=DB::table('Siz_Calidad_Rechazos')->whereBetween('fechaRevision',[$fechaIni ,$fechaFin])->get();
-
+       $sociedad=DB::table('OADM')->value('CompnyName');
        //dd($rechazo);
-            $pdf = \PDF::loadView('Mod07_Calidad.RechazoPDF',['rechazo'=>$rechazo,'fechaIni'=>$fechaIni,'fechaFin'=>$fechaFin]);
+            $pdf = \PDF::loadView('Mod07_Calidad.RechazoPDF',['sociedad'=>$sociedad,'rechazo'=>$rechazo,'fechaIni'=>$fechaIni,'fechaFin'=>$fechaFin]);
             return $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true])->stream();
            // return $pdf->download('ReporteOP.pdf');
        
