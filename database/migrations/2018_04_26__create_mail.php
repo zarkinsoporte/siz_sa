@@ -12,7 +12,7 @@ class CreateMail extends Migration
      */
     public function up()
     {
-        Schema::create('Email_SIZ', function (Blueprint $table) {
+        Schema::create('Siz_Email', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('No_Nomina');
             $table->integer('gurpoEnvioCorreo');
@@ -26,6 +26,6 @@ class CreateMail extends Migration
      */
     public function down()
     {
-        Schema::drop('Email_SIZ');
+        Schema::drop('Siz_Email');
     }
 }

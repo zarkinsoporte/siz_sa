@@ -16,6 +16,7 @@
     margin-left:50px;
     margin-right:50px;
     width: 700%;
+    margin-top:1.8%;
 }
 	table { 
 		width: 100%; 
@@ -27,18 +28,28 @@
 		color: white; 
 		font-weight: bold; 
 		color: black; 
+        font-family: 'Helvetica';
+        font-size:80%;
 	}
+    td{
+        font-family: 'Helvetica';
+        font-size:80%;
+    }
 
         img{
-         width:500;
+         width:640;
             height: 20;
-            position: absolute;right:10%;
+            position: absolute;right:0%;
             align-content:;
         }
         h3{
             font-family: 'Helvetica';
         }
+        b{
+            font-size:100%;
+        }
 </style>
+
 </head>
 <body>
 <header>
@@ -46,24 +57,24 @@
         <div id="wrapper">
 <div class="container" >  
 <img src="images/Mod01_Produccion/siz1.png" >
-<br><br>
 </header>
 <div class="col-6">
      <table  border="1px" class="table table-striped">
-         <thead class="thead-dark">
+         <thead class="thead-dark">  
      <tr>
       <td colspan="5" align="center" bgcolor="#ccc"><h3>Reporte de Rechazos</font></h3></td>
       </tr>
+      </thead>
       <tbody>
-     <br>
-      <th>De la fecha</th>
-      <td>{{$fechaIni}}</td>
-      <th>A la fecha:</th>
-      <td>{{$fechaFin}}</td>
+      <tr>
+      <th align="center">De la fecha</th>
+      <td align="center">{{$fechaIni}}</td>
+      <th align="center">A la fecha:</th>
+      <td align="center"colspan="2">{{$fechaFin}}</td>
+      </tr>
       </tbody>
-</thead>
 </table>
-<br><br>
+<br>
 
 <div>
     <table border="1px" class="table table-striped" >
@@ -72,15 +83,15 @@
             <tr>
             <td rowspan="2" align="center" bgcolor="#474747" style="color:white"; scope="col">Fecha de Revisión</td>
             <td rowspan="2" align="center" bgcolor="#474747" style="color:white"; scope="col">Proveedor</td>
-            <td rowspan="2"  align="center" bgcolor="#474747" style="color:white"; scope="col">Descripcion de Marerial</td>
-            <td colspan="3" align="center" bgcolor="#000" style="color:white"; scope="col">Cantidad</td>
+            <td rowspan="2"  align="center" bgcolor="#474747" style="color:white"; scope="col">Descripcion de Material</td>
+            <td colspan="3" align="center" bgcolor="#474747" style="color:white"; scope="col">Cantidad</td>
             <td rowspan="2" align="center" bgcolor="#474747" style="color:white"; scope="col">Nombre del Inspector</td>
             <td rowspan="2" align="center" bgcolor="#474747" style="color:white"; scope="col"   >No.Factura</td>
              </tr>
              <tr>
-             <td bgcolor="#000" style="color:white";>Aceptada</td>
-             <td bgcolor="#000" style="color:white";>Rechazada</td>
-             <td bgcolor="#000" style="color:white";>Revisada</td>
+             <td align="center"bgcolor="#474747" style="color:white";>Aceptada</td>
+             <td align="center"bgcolor="#474747" style="color:white";>Rechazada</td>
+             <td align="center"bgcolor="#474747" style="color:white";>Revisada</td>
              </tr>
             </tbody>
             @foreach($rechazo as $rep)
@@ -129,7 +140,8 @@
  $pdf->page_text(40, 580, $text, $font, 9);
  $pdf->page_text(603, 23, $date, $font, 9);
  $pdf->page_text(680, 580, $tittle, $font, 9);
-
+ $empresa = 'Sociedad: <?php echo $sociedad ?>';
+ $pdf->page_text(40, 23, $empresa, $font, 9);
 
 </script> 
 </footer>

@@ -220,13 +220,13 @@ Route::get('home/ReporteOpPDF/{op}', 'Mod01_ProduccionController@ReporteOpPDF');
 Route::get('home/ReporteMaterialesPDF/{op}', 'Mod01_ProduccionController@ReporteMaterialesPDF');
 
 Route::get('admin/aux', function(){
-    $menus = MODULOS_GRUPO_SIZ::where('MODULOS_GRUPO_SIZ.id_modulo',2)
-    ->where('MODULOS_GRUPO_SIZ.id_grupo', 2)
+    $menus = MODULOS_GRUPO_SIZ::where('Siz_Modulos_Grupo.id_modulo',2)
+    ->where('Siz_Modulos_Grupo.id_grupo', 2)
     ->whereNotNull('id_menu')
     ->whereNotNull('id_tarea')
-    ->leftjoin('MENU_ITEM_SIZ', 'MODULOS_GRUPO_SIZ.id_menu', '=', 'MENU_ITEM_SIZ.id')
-    ->leftjoin('TAREA_MENU_SIZ', 'MODULOS_GRUPO_SIZ.id_tarea', '=', 'TAREA_MENU_SIZ.id')
-    ->select('MODULOS_GRUPO_SIZ.*', 'MENU_ITEM_SIZ.name as menu', 'TAREA_MENU_SIZ.name as tarea')
+    ->leftjoin('Siz_Menu_Item', 'Siz_Modulos_Grupo.id_menu', '=', 'Siz_Menu_Item.id')
+    ->leftjoin('Siz_Tarea_menu', 'Siz_Modulos_Grupo.id_tarea', '=', 'Siz_Tarea_menu.id')
+    ->select('Siz_Modulos_Grupo.*', 'Siz_Menu_Item.name as menu', 'Siz_Tarea_menu.name as tarea')
     ->get();
 dd($menus);
 });

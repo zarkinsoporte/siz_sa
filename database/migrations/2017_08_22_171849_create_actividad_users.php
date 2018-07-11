@@ -12,20 +12,20 @@ class CreateActividadUsers extends Migration
      */
     public function up()
     {
-        /*Schema::create('MODULOS_GRUPO_SIZ', function (Blueprint $table) {
+        /*Schema::create('Siz_Modulos_Grupo', function (Blueprint $table) {
                 $table->increments('id');
                 $table->integer('id_grupo');
                 $table->integer('id_modulo')->nullable();
                 $table->integer('id_tarea')->nullable();
                 $table->timestamps();
             });
-        Schema::create('MENU_ITEM_SIZ', function (Blueprint $table) {
+        Schema::create('Siz_Menu_Item', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
             $table->integer('id_modulo');
             $table->timestamps();
         });
-        Schema::create('TAREA_MENU_SIZ', function (Blueprint $table) {
+        Schema::create('Siz_Tarea_menu', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
             $table->integer('id_menu_item');
@@ -40,8 +40,8 @@ class CreateActividadUsers extends Migration
      */
     public function down()
     {
-        Schema::drop('MODULOS_GRUPO_SIZ');
-        Schema::drop('MENU_ITEM_SIZ');
-        Schema::drop('TAREA_MENU_SIZ');
+        Schema::drop('Siz_Modulos_Grupo');
+        Schema::drop('Siz_Menu_Item');
+        Schema::drop('Siz_Tarea_menu');
     }
 }

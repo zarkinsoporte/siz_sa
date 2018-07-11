@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use DB;
 class TAREA_MENU extends Model
 {
-    protected $table = 'dbo.TAREA_MENU_SIZ';
+    protected $table = 'dbo.Siz_Tarea_menu';
 
     public function menus() {
         return $this->belongsTo('MENU_ITEM', 'id_menu_item');

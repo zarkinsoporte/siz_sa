@@ -86,7 +86,7 @@ class Mod00_AdministradorController extends Controller
     }
     public function DataShowUsers(Request $request)
     {
-        $users = DB::table('View_Plantilla_SIZ')
+        $users = DB::table('Siz_View_Plantilla_Personal')
             ->where('Depto', 'like', '%'.$request->get('depto').'%');
 
         return Datatables::of($users)
@@ -102,7 +102,7 @@ class Mod00_AdministradorController extends Controller
     }
 
     public function allUsers(Request $request){
-        $users = DB::select('SELECT depto, COUNT(*) as c  FROM View_Plantilla_SIZ GROUP BY Depto');
+        $users = DB::select('SELECT depto, COUNT(*) as c  FROM Siz_View_Plantilla_Personal GROUP BY Depto');
 
 
         //$users = $this->arrayPaginator($users, $request);
@@ -130,7 +130,7 @@ class Mod00_AdministradorController extends Controller
         foreach ($users as $user)
         {
 
-            $miarray = DB::select('SELECT jobTitle, COUNT(*) as c FROM View_Plantilla_SIZ where Depto like \'%'.$user->depto.'%\' GROUP BY jobTitle');
+            $miarray = DB::select('SELECT jobTitle, COUNT(*) as c FROM Siz_View_Plantilla_Personal where Depto like \'%'.$user->depto.'%\' GROUP BY jobTitle');
             $finalarray[$user->depto] = $miarray;
         }
 
@@ -190,9 +190,9 @@ dd($user);
 
      $nombre_grupo = $grupos[$id_grupo-1]->name;
      $modulos_grupo = MODULOS_GRUPO_SIZ::where('id_grupo', $id_grupo)
-         ->leftJoin('MODULOS_SIZ', 'MODULOS_GRUPO_SIZ.id_modulo', '=', 'MODULOS_SIZ.id')
-         ->select('MODULOS_GRUPO_SIZ.id_modulo', 'MODULOS_GRUPO_SIZ.id', 'MODULOS_SIZ.descripcion', 'MODULOS_SIZ.name')
-         ->groupBy('MODULOS_GRUPO_SIZ.id', 'id_modulo', 'descripcion', 'name')
+         ->leftJoin('Siz_Modulo', 'Siz_Modulos_Grupo.id_modulo', '=', 'Siz_Modulo.id')
+         ->select('Siz_Modulos_Grupo.id_modulo', 'Siz_Modulos_Grupo.id', 'Siz_Modulo.descripcion', 'Siz_Modulo.name')
+         ->groupBy('Siz_Modulos_Grupo.id', 'id_modulo', 'descripcion', 'name')
          ->get();       
      $modulos = MODULOS_SIZ::all();
      return view('Mod00_Administrador.grupos', compact('grupos', 'modulos','modulos_grupo', 'id_grupo', 'nombre_grupo'));
@@ -313,13 +313,13 @@ dd($user);
         if ($primero != null){
              $id_grupo = $primero->id_grupo;
 
-             /*$menus = MODULOS_GRUPO_SIZ::where('MODULOS_GRUPO_SIZ.id_modulo',$id_modulo)
+             /*$menus = MODULOS_GRUPO_SIZ::where('Siz_Modulos_Grupo.id_modulo',$id_modulo)
                  ->where('id_grupo', $id_grupo)
                  ->whereNotNull('id_menu')
                  ->whereNotNull('id_tarea')
-                 ->leftjoin('MENU_ITEM_SIZ', 'MODULOS_GRUPO_SIZ.id_menu', '=', 'MENU_ITEM_SIZ.id')
-                 ->leftjoin('TAREA_MENU_SIZ', 'MODULOS_GRUPO_SIZ.id_tarea', '=', 'TAREA_MENU_SIZ.id')
-                 ->select('MODULOS_GRUPO_SIZ.*', 'MENU_ITEM_SIZ.name as menu', 'TAREA_MENU_SIZ.name as tarea')
+                 ->leftjoin('Siz_Menu_Item', 'Siz_Modulos_Grupo.id_menu', '=', 'Siz_Menu_Item.id')
+                 ->leftjoin('Siz_Tarea_menu', 'Siz_Modulos_Grupo.id_tarea', '=', 'Siz_Tarea_menu.id')
+                 ->select('Siz_Modulos_Grupo.*', 'Siz_Menu_Item.name as menu', 'Siz_Tarea_menu.name as tarea')
                  ->get();*/
 
              $grupo = Grupo::find($id_grupo);
@@ -344,13 +344,13 @@ dd($user);
     public function anyData(Request $request)
     {
         
-        $menus = MODULOS_GRUPO_SIZ::where('MODULOS_GRUPO_SIZ.id_modulo',$request->get('id_modulo'))
-            ->where('MODULOS_GRUPO_SIZ.id_grupo', $request->get('id_grupo'))
+        $menus = MODULOS_GRUPO_SIZ::where('Siz_Modulos_Grupo.id_modulo',$request->get('id_modulo'))
+            ->where('Siz_Modulos_Grupo.id_grupo', $request->get('id_grupo'))
             ->whereNotNull('id_menu')
             ->whereNotNull('id_tarea')
-            ->leftjoin('MENU_ITEM_SIZ', 'MODULOS_GRUPO_SIZ.id_menu', '=', 'MENU_ITEM_SIZ.id')
-            ->leftjoin('TAREA_MENU_SIZ', 'MODULOS_GRUPO_SIZ.id_tarea', '=', 'TAREA_MENU_SIZ.id')
-            ->select('MODULOS_GRUPO_SIZ.*', 'MENU_ITEM_SIZ.name as menu', 'TAREA_MENU_SIZ.name as tarea')
+            ->leftjoin('Siz_Menu_Item', 'Siz_Modulos_Grupo.id_menu', '=', 'Siz_Menu_Item.id')
+            ->leftjoin('Siz_Tarea_menu', 'Siz_Modulos_Grupo.id_tarea', '=', 'Siz_Tarea_menu.id')
+            ->select('Siz_Modulos_Grupo.*', 'Siz_Menu_Item.name as menu', 'Siz_Tarea_menu.name as tarea')
             ->get();
 
        return Datatables::of($menus)
@@ -438,13 +438,13 @@ dd($user);
     public function inventario()
     {
         //Realizamos la consulta nuevamente
-        $inventario = DB::table('siz_inventario')
-            ->join('siz_monitores', 'siz_inventario.monitor', '=', 'siz_monitores.id')
-            ->select('siz_inventario.id as id_inv', 'siz_inventario.*', 'siz_monitores.id as id_mon', 'siz_monitores.*')
-            ->where('siz_inventario.activo', '=',1)
+        $inventario = DB::table('Siz_Inventario')
+            ->join('Siz_Monitores', 'Siz_Inventario.monitor', '=', 'Siz_Monitores.id')
+            ->select('Siz_Inventario.id as id_inv', 'Siz_Inventario.*', 'Siz_Monitores.id as id_mon', 'Siz_Monitores.*')
+            ->where('Siz_Inventario.activo', '=',1)
             ->orderBy('numero_equipo')
             ->get();
-        $monitores  = DB::table('siz_monitores')->get();
+        $monitores  = DB::table('Siz_Monitores')->get();
 
         foreach ($inventario as $inv_campo) {
                     $nombre_usuario = explode(".", $inv_campo->correo);
@@ -453,7 +453,7 @@ dd($user);
                     $apellido = strtoupper($apellido[0]);
                    
                     if($nombre_usuario[1]!="com" && $inv_campo->nombre_usuario==NULL){    
-                        $act_usr = DB::table('siz_inventario')
+                        $act_usr = DB::table('Siz_Inventario')
                             ->where('id', $inv_campo->id_inv)
                             ->update(['nombre_usuario' => $nombre." ".$apellido ]);
                         //dd($nombre_usuario[0]);
@@ -467,7 +467,7 @@ dd($user);
     public function mark_obs($id)
     {
         //Actualizamos el valor en la DB
-        $act_inv = DB::table('siz_inventario')
+        $act_inv = DB::table('Siz_Inventario')
             ->where("id", "=", "$id")
             ->update([
                 'activo' => '0'
@@ -481,7 +481,7 @@ dd($user);
     public function mark_rest($id)
     {
         //Actualizamos el valor en la DB
-        $act_inv = DB::table('siz_inventario')
+        $act_inv = DB::table('Siz_Inventario')
             ->where("id", "=", "$id")
             ->update([
                 'activo' => '1'
@@ -495,26 +495,26 @@ dd($user);
     public function inventarioObsoleto( Request $request)
     {
         //Realizamos la consulta buscando donde activo sea igual a 0
-        $inventario = DB::table('siz_inventario')
-            ->join('siz_monitores', 'siz_inventario.monitor', '=', 'siz_monitores.id')
-            ->select('siz_inventario.id as id_inv', 'siz_inventario.*', 'siz_monitores.id as id_mon', 'siz_monitores.*')
-            ->where('siz_inventario.activo', '=',0)
+        $inventario = DB::table('Siz_Inventario')
+            ->join('Siz_Monitores', 'Siz_Inventario.monitor', '=', 'Siz_Monitores.id')
+            ->select('Siz_Inventario.id as id_inv', 'Siz_Inventario.*', 'Siz_Monitores.id as id_mon', 'Siz_Monitores.*')
+            ->where('Siz_Inventario.activo', '=',0)
             ->get();
-        $monitores  = DB::table('siz_monitores')->get();
+        $monitores  = DB::table('Siz_Monitores')->get();
         //dd($inventario);
         return view('Mod00_Administrador.inventarioObsoleto', compact('inventario', 'monitores'));    
     }   
 
     public function monitores( Request $request)
     {
-        $monitores = DB::table('siz_monitores')->orderBy('id', 'ASC')->get();
+        $monitores = DB::table('Siz_Monitores')->orderBy('id', 'ASC')->get();
         return view('Mod00_Administrador.monitores')->with('monitores', $monitores);
     }
 
     public function altaInventario( Request $request)
     {
-        //$monitores = DB::table('siz_monitores')->get();
-        $monitores = DB::select( DB::raw("SELECT siz_monitores.id AS id_mon, nombre_monitor FROM siz_monitores LEFT JOIN siz_inventario ON siz_monitores.id = siz_inventario.monitor WHERE siz_inventario.monitor IS NULL AND siz_monitores.id !='1'") );
+        //$monitores = DB::table('Siz_Monitores')->get();
+        $monitores = DB::select( DB::raw("SELECT Siz_Monitores.id AS id_mon, nombre_monitor FROM Siz_Monitores LEFT JOIN Siz_Inventario ON Siz_Monitores.id = Siz_Inventario.monitor WHERE Siz_Inventario.monitor IS NULL AND Siz_Monitores.id !='1'") );
         return view('Mod00_Administrador.altaInventario', compact('monitores'));   
     }
 
@@ -528,8 +528,8 @@ dd($user);
     {
         //$users = User::plantilla();
 
-        $monitor = DB::table('siz_monitores')
-        ->select('siz_monitores.*')
+        $monitor = DB::table('Siz_Monitores')
+        ->select('Siz_Monitores.*')
         ->where('id', '=',$id)
         ->first();
         return view('Mod00_Administrador.modMonitor', compact('monitor', 'mensaje'));   
@@ -539,7 +539,7 @@ dd($user);
     {
         //$users = User::plantilla();
         $id_monitor = $request->input('id_monitor');
-        $act_mon = DB::table('siz_monitores')
+        $act_mon = DB::table('Siz_Monitores')
         ->where("id", "=", "$id_monitor")
         ->update([
             'nombre_monitor' => $request->input('nombre_monitor')
@@ -551,13 +551,13 @@ dd($user);
     public function altaMonitor2(Request $request)
     {
         //Insertamos el monitor en la DB
-        DB::table('siz_monitores')->insert(
+        DB::table('Siz_Monitores')->insert(
             [
              'nombre_monitor' => $request->input('nombre_monitor')
             ]
         );
         //Realizamos la consulta nuevamente
-        $monitores = DB::table('siz_monitores')->orderBy('id', 'ASC')->get();
+        $monitores = DB::table('Siz_Monitores')->orderBy('id', 'ASC')->get();
         //Llamamos a la vista para mostrar su contendio
         return view('Mod00_Administrador.monitores')->with('monitores', $monitores);
     }
@@ -569,7 +569,7 @@ dd($user);
         $nuevafecha = strtotime ( "+$tiempo_vida year" , strtotime ( $fecha ) ) ;
         $nuevafecha = date ( 'Y-m-j' , $nuevafecha );
         //Insertamos el monitor en la DB
-        DB::table('siz_inventario')->insert(
+        DB::table('Siz_Inventario')->insert(
             [
              'nombre_equipo' => $request->input('nombre_equipo'),
              'nombre_usuario' => $request->input('nombre_usuario'),
@@ -589,10 +589,10 @@ dd($user);
     public function generarPdf($id)
     {
         //$pdf = App::make('dompdf.wrapper');
-        $inventario = DB::table('siz_inventario')
-        ->join('siz_monitores', 'siz_inventario.monitor', '=', 'siz_monitores.id')
-        ->select('siz_inventario.id as id_inv', 'siz_inventario.*', 'siz_monitores.id as id_mon', 'siz_monitores.*')
-        ->where('siz_inventario.id', '=',$id)
+        $inventario = DB::table('Siz_Inventario')
+        ->join('Siz_Monitores', 'Siz_Inventario.monitor', '=', 'Siz_Monitores.id')
+        ->select('Siz_Inventario.id as id_inv', 'Siz_Inventario.*', 'Siz_Monitores.id as id_mon', 'Siz_Monitores.*')
+        ->where('Siz_Inventario.id', '=',$id)
         ->get();
     
         $data=array('data' => $inventario);
@@ -607,20 +607,20 @@ dd($user);
     public function delete_inv($id)
     {
 
-        $eliminar = DB::table('siz_inventario')->where('id', '=', $id)->delete();
+        $eliminar = DB::table('Siz_Inventario')->where('id', '=', $id)->delete();
         return redirect('admin/inventario');
     }
 
     public function mod_inv($id, $mensaje)
     {
-        $inventario = DB::table('siz_inventario')
-            ->join('siz_monitores', 'siz_inventario.monitor', '=', 'siz_monitores.id')
-            ->select('siz_inventario.id as id_inv', 'siz_inventario.*', 'siz_monitores.id as id_mon', 'siz_monitores.*')
-            ->where('siz_inventario.id', '=',$id)
+        $inventario = DB::table('Siz_Inventario')
+            ->join('Siz_Monitores', 'Siz_Inventario.monitor', '=', 'Siz_Monitores.id')
+            ->select('Siz_Inventario.id as id_inv', 'Siz_Inventario.*', 'Siz_Monitores.id as id_mon', 'Siz_Monitores.*')
+            ->where('Siz_Inventario.id', '=',$id)
             ->orderBy('id_inv')
             ->get();
         //dd($inventario);    
-        $monitores = DB::select( DB::raw("SELECT siz_monitores.id AS id_mon, nombre_monitor FROM siz_monitores LEFT JOIN siz_inventario ON siz_monitores.id = siz_inventario.monitor WHERE siz_inventario.monitor IS NULL AND siz_monitores.id !='1'") );
+        $monitores = DB::select( DB::raw("SELECT Siz_Monitores.id AS id_mon, nombre_monitor FROM Siz_Monitores LEFT JOIN Siz_Inventario ON Siz_Monitores.id = Siz_Inventario.monitor WHERE Siz_Inventario.monitor IS NULL AND Siz_Monitores.id !='1'") );
         //dd($inventario[0]->nombre_equipo);
         return view('Mod00_Administrador.modInventario', compact('monitores', 'inventario', 'mensaje')); 
         {
@@ -631,7 +631,7 @@ dd($user);
     public function mod_inv2(Request $request)
     {
         //dd($request->input('monitor'));
-        $act_inv = DB::table('siz_inventario')
+        $act_inv = DB::table('Siz_Inventario')
         ->where("id", "=", "$request->id_inv")
         ->update(
             [
@@ -661,7 +661,7 @@ public function Noticia()
     ///inserta datos del formulario Noticias
     public function Noticia2(Request $request)   
     {
-        DB::table('Noticias')->insert(
+        DB::table('Siz_Noticias')->insert(
             [
              'Autor'=>$Nom_User,
              'Destinatario' =>$N_Emp->U_EmpGiro, 
@@ -682,8 +682,8 @@ public function Noticia()
    public function Notificacion()
     {
 
-        $noti = DB::table('Noticias')
-                  ->select('Noticias.*')
+        $noti = DB::table('Siz_Noticias')
+                  ->select('Siz_Noticias.*')
                   ->get();
                   //    dd($noti);
 
@@ -697,8 +697,8 @@ public function Noticia()
     //Aqui empieza modicificación
     public function Mod_Noti($Id_Autor,$Mod_mensaje)
     {
-        $Mod_Noti = DB::table('Noticias')
-            ->select('Noticias.*')
+        $Mod_Noti = DB::table('Siz_Noticias')
+            ->select('Siz_Noticias.*')
             ->where('Id', '=',$Id_Autor)
             ->get();
         //dd($inventario);  
@@ -710,7 +710,7 @@ public function Noticia()
     {
            //dd($request->input('Id_Autor'));
            $id_Autor=$request->input('Id');
-           $M_noti = DB::table('Noticias')
+           $M_noti = DB::table('Siz_Noticias')
             ->where("Id", "=", "$id_Autor")
             ->update(
                         [
@@ -725,7 +725,7 @@ public function Noticia()
 
    
      public function delete_noti($id_Autor){
-      $eliminar = DB::table('noticias')->where('Id', '=', $id_Autor)->delete();
+      $eliminar = DB::table('Siz_Noticias')->where('Id', '=', $id_Autor)->delete();
     
         Session::flash('info', 'Eliminaste una noticia');
         return redirect()->back();

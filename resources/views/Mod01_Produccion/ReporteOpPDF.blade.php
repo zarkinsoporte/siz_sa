@@ -18,6 +18,7 @@
     margin-left:50px;
     margin-right:50px;
     width: 700%;
+    margin-top:1.5%;
 }
 	table { 
 		width: 100%; 
@@ -29,7 +30,13 @@
 		color: white; 
 		font-weight: bold; 
 		color: black; 
+        font-family: 'Helvetica';
+        font-size:80%;
 	}
+    td{
+        font-family: 'Helvetica';
+        font-size:80%;
+    }
 
         img{
          width:500;
@@ -40,34 +47,35 @@
         h3{
             font-family: 'Helvetica';
         }
+        b{
+            font-size:100%;
+        }
 </style>
-
 </head>
-
 <body>
 <div id="app">
         <div id="wrapper">
 <div class="container" >  
 <img src="images/Mod01_Produccion/siz1.png" >
-<br><br>
-<table>
+<table border="1px"class="table table-striped">
     <thead>
         <tbody>
             <tr>
-            <td colspan="2" align="center" bgcolor="#ccc"><h3><?php echo $data[0]->CompanyName ?></h3></td>
-            <td colspan="5" align="left" bgcolor="#ccc"><h3>Historial OP</h3></td>           
+            <td colspan="5" align="center" bgcolor="#ccc"><h3>Historial OP</h3></td>           
  </tr>
             <tr>
-            <th align="center">Orden de fabricación:<hr/></th>
-            <td colspan="2"><?php echo $op ?><hr/></td>         
-            <td align="center">V S:<hr/></td>
-            <td colspan="2"><?php echo number_format($data[0]->VS, 2, '.', ','); ?><hr/></td>
+            <th align="center">Orden de fabricación:</th>
+            <td align="center"colspan="1"><?php echo $op ?></td>         
+            <th align="center">V S:</th>
+            <td align="center"colspan="2"><?php echo number_format($data[0]->VS, 2, '.', ','); ?></td>
             </tr>
             <tr>
-            <th align="center">Descripción:<hr/></th>
-            <td colspan="2"><?php echo $data[0]->ItemCode ?> - <?php echo $data[0]->ItemName ?><hr/></td>    
+            <th align="center">Descripción:</th>
+            <td align="center"colspan="4"><?php echo $data[0]->ItemCode ?> - <?php echo $data[0]->ItemName ?></td>    
         </tbody>
     </thead> 
+    </table>
+    <br>
 <style>
 .table-blockquote {
   padding: 3px 10px;
@@ -80,11 +88,11 @@
              <table  border="1px"class="table table-striped">
                     <thead class="table table-striped table-bordered table-condensed" >
                         <tr>
-                        <th bgcolor="8D8D8D" scope="col">FechaI</th>
-                        <th bgcolor="8D8D8D" scope="col">FechaF</th>
-                        <th bgcolor="8D8D8D" scope="col">Estación</th>
-                        <th bgcolor="8D8D8D" scope="col">Empleado</th>
-                        <th bgcolor="8D8D8D" scope="col">Cantidad</th>
+                        <th align="center" bgcolor="#474747" style="color:white";scope="col">FechaI</th>
+                        <th align="center" bgcolor="#474747" style="color:white";scope="col">FechaF</th>
+                        <th align="center" bgcolor="#474747" style="color:white"; scope="col">Estación</th>
+                        <th align="center" bgcolor="#474747" style="color:white";scope="col">Empleado</th>
+                        <th align="center" bgcolor="#474747" style="color:white"; scope="col">Cantidad</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -102,7 +110,7 @@
                             <td scope="row">
                                 {{ $rep->Empleado }}
                             </td>
-                            <td scope="row">
+                            <td align="center"scope="row">
                                 {{ $rep->U_CANTIDAD }}
                             </td>
                         </tr>    
@@ -114,10 +122,22 @@
      @yield('subcontent-01')
 </div>
 <!-- /.container-fluid -->
-
 </div>
 <!-- /#page-wrapper -->
 </div>
+<footer>
+<script type="text/php">
+ $text = 'Pagina: {PAGE_NUM} / {PAGE_COUNT}';
+ $date = 'Fecha de impresion : <?php echo $hoy = date("d-m-Y H:i:s");?>';
+ $tittle = 'Siz_Producción_Reporte_OP.Pdf';
+ $font = $fontMetrics->get_font("Arial, Helvetica, sans-serif", "normal");
+ $pdf->page_text(35, 755, $text, $font, 9);
+ $pdf->page_text(405, 23, $date, $font, 9);
+ $pdf->page_text(420, 755, $tittle, $font, 9);
+ $empresa='<?php echo  $data[0]->CompanyName?>';
+ $pdf->page_text(35, 23, $empresa, $font, 9);
+</script> 
+</footer>
 </div>
 
 </body>

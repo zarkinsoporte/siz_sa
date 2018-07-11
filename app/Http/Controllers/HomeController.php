@@ -34,7 +34,7 @@ class HomeController extends Controller
         $actividades = $user->getTareas();
        // dd($id_not);
         $id_user=Auth::user()->U_EmpGiro;
-        $noticias=DB::select(DB::raw("SELECT * FROM Noticias WHERE Destinatario='$id_user'and Leido='N'"));
+        $noticias=DB::select(DB::raw("SELECT * FROM Siz_Noticias WHERE Destinatario='$id_user'and Leido='N'"));
         $user = Auth::user();
         $actividades = $user->getTareas();
         return view('homeIndex',   ['actividades' => $actividades,'noticias' => $noticias,'id_user' => $id_user, 'ultimo' => count($actividades)]);
@@ -43,7 +43,7 @@ class HomeController extends Controller
 
     public function UPT_Noticias($id){
      
-       DB::table('noticias')
+       DB::table('Siz_Noticias')
         ->where('Id', $id)
         ->update(['Leido' => 'Si']);
         $user = Auth::user();
@@ -64,7 +64,7 @@ class HomeController extends Controller
 
         $id_user=Auth::user()->U_EmpGiro;
     
-        $noticias=DB::select(DB::raw("SELECT * FROM Noticias WHERE Destinatario='$id_user'and Leido='N'"));
+        $noticias=DB::select(DB::raw("SELECT * FROM Siz_Noticias WHERE Destinatario='$id_user'and Leido='N'"));
         //dd
       return view('Mod01_Produccion/Noticias', ['actividades' => $actividades,'noticias' => $noticias,'id_user' => $id_user, 'ultimo' => count($actividades)]);
     }

@@ -71,13 +71,15 @@ class Mod01_ProduccionController extends Controller
     
         $data=array(
                     'data' => $GraficaOrden,
-                    'op'   => $op
+                    'op'   => $op,
                    );
+                  
+                // dd($sociedad);
         //$data = $GraficaOrden;
         
         $pdf = \PDF::loadView('Mod01_Produccion.ReporteOpPDF', $data);
         //dd($pdf);
-        return $pdf->stream();
+        return $pdf->setOptions(['isPhpEnabled'=>true])->stream();
        // return $pdf->download('ReporteOP.pdf');
     }
 
@@ -125,14 +127,15 @@ class Mod01_ProduccionController extends Controller
     
         $data=array(
                     'data' => $Materiales,
-                    'op'   => $op
+                    'op'   => $op,
+                    'db' => DB::table('OADM')->value('CompnyName')
                    );
         //$data = $GraficaOrden;
         
         $pdf = \PDF::loadView('Mod01_Produccion.ReporteMateriales', $data);
         //dd($pdf);
         //return $pdf->stream();
-        return $pdf->stream('ReporteMateriales.pdf');
+        return $pdf->setOptions(['isPhpEnabled'=>true])->stream('ReporteMateriales.pdf');
     }
 
     public function allUsers(Request $request){
@@ -629,7 +632,7 @@ $op = Input::get('op');
 $N_Emp  = User::where('position', 4)->where('U_CP_CT','like', '%'.$Est_ant.'%' )->first();
 //$N_Emp  = $Not_us[0];
 //dd($N_Emp);
-DB::table('Noticias')->insert(
+DB::table('Siz_Noticias')->insert(
     [
      'Autor'=>$Nom_User,
      'Destinatario' =>$N_Emp->U_EmpGiro,
@@ -658,7 +661,7 @@ DB::table('Noticias')->insert(
         //  'U_Recibido'=> $DestinoCp->U_Recibido + $cantidad,
             //'U_Reproceso'=>'S',
             'U_Defectuoso'=>$cant_r + $DestinoCp->U_Defectuoso,
-            'U_Comentarios'=>$Nota,
+            'U_Comentarios'=>$nota,
           //  'U_Procesado'=>$DestinoCp->U_Procesado - $cantidad;
             ]);
       }
@@ -681,17 +684,20 @@ DB::table('Noticias')->insert(
             $Nuevo_reproceso->U_CTCalidad=0;
             $Nuevo_reproceso->save();
     //-------- Tabla Logot----//
-
-    $Con_Loguot =  DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOT]');
-                    $cot = new LOGOT();
-                    $cot->Code = ((int)$Con_Loguot[0]->Code)+1;
-                    $cot->Name = ((int)$Con_Loguot[0]->Code)+1;
-                    $cot->U_idEmpleado=$No_Nomina;
-                    $cot->U_CT = $Est_ant;
-                    $cot->U_Status = "O";
-                    $cot->U_FechaHora = $dt;
-                    $cot->U_OP =$orden;
-                   $cot->save();
+            $Iniciar=DB::select('SELECT * from [@CP_LOGOT] Where U_CT='.$Est_ant.' AND U_OP='.$orden);
+    if(COUNT($Iniciar)<1){
+        $Con_Loguot =  DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOT]');
+        $cot = new LOGOT();
+        $cot->Code = ((int)$Con_Loguot[0]->Code)+1;
+        $cot->Name = ((int)$Con_Loguot[0]->Code)+1;
+        $cot->U_idEmpleado=$No_Nomina;
+        $cot->U_CT = $Est_ant;
+        $cot->U_Status = "O";
+        $cot->U_FechaHora = $dt;
+        $cot->U_OP =$orden;
+       $cot->save();
+    }
+    
    }   
     //---------Estacion Actual-----------------------------------------------------------------------------------------------------------------------------------------------------//
 
@@ -709,12 +715,13 @@ if($Actual_Cp->PlannedQty > $cant_r){
    'U_Recibido'=> $Actual_Cp->U_Recibido - $cant_r,
         ]);
         $OrdenDest = OP::find($DestinoCp->Code);
-        if($boolval && $OrdenDest->U_Reproceso == 'N'){         
+        if( $OrdenDest->U_Reproceso == 'N'){         
           $OrdenDest->U_Procesado = $OrdenDest->U_Procesado - $cant_r;
+          $OrdenDest->U_Entregado = $OrdenDest->U_Entregado - $cant_r;
           $OrdenDest->U_Reproceso ='S';
           $OrdenDest->save();
         }
-        if($boolval && $OrdenDest->U_Reproceso == 'S'){         
+        if($OrdenDest->U_Reproceso == 'S'){         
             $OrdenDest->U_Recibido = $OrdenDest->U_Recibido + $cant_r;
             $OrdenDest->save();
           }
@@ -752,7 +759,7 @@ if($Actual_Cp->PlannedQty > $cant_r){
             $Nombre_Destino= DB::table('@PL_RUTAS')->where('U_Orden', $request->input('selectestaciones'))->value('Name');             
             $Nombre_Actual= DB::table('@PL_RUTAS')->where('U_Orden', $request->input('Estacion'))->value('Name'); 
   //--------------------correo-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
-  $Num_Nominas=DB::select(DB::raw("SELECT No_Nomina from Email_SIZ where Reprocesos='1'"));
+  $Num_Nominas=DB::select(DB::raw("SELECT No_Nomina from Siz_Email where Reprocesos='1'"));
   foreach ($Num_Nominas as $Num_Nomina) {
   $user= User::find($Num_Nomina->No_Nomina);
   
