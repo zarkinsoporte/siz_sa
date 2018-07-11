@@ -70,7 +70,7 @@
         <thead class="thead-dark">
             <tbody>
             <tr>
-            <td rowspan="2" align="center" bgcolor="#474747" style="color:white"; scope="col">Fecha de Recepción</td>
+            <td rowspan="2" align="center" bgcolor="#474747" style="color:white"; scope="col">Fecha de Revisión</td>
             <td rowspan="2" align="center" bgcolor="#474747" style="color:white"; scope="col">Proveedor</td>
             <td rowspan="2"  align="center" bgcolor="#474747" style="color:white"; scope="col">Descripcion de Marerial</td>
             <td colspan="3" align="center" bgcolor="#000" style="color:white"; scope="col">Cantidad</td>

@@ -5,7 +5,7 @@
 
 @section('subcontent-01')
 
-     @areachart( 'beto', 'chart')
+    <!-- @aareachart( 'beto', 'chart') -->
 
 <div id="chart"></div>
 
