@@ -684,17 +684,20 @@ DB::table('Siz_Noticias')->insert(
             $Nuevo_reproceso->U_CTCalidad=0;
             $Nuevo_reproceso->save();
     //-------- Tabla Logot----//
-
-    $Con_Loguot =  DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOT]');
-                    $cot = new LOGOT();
-                    $cot->Code = ((int)$Con_Loguot[0]->Code)+1;
-                    $cot->Name = ((int)$Con_Loguot[0]->Code)+1;
-                    $cot->U_idEmpleado=$No_Nomina;
-                    $cot->U_CT = $Est_ant;
-                    $cot->U_Status = "O";
-                    $cot->U_FechaHora = $dt;
-                    $cot->U_OP =$orden;
-                   $cot->save();
+            $Iniciar=DB::select('SELECT * from [@CP_LOGOT] Where U_CT='.$Est_ant.' AND U_OP='.$orden);
+    if(COUNT($Iniciar)<1){
+        $Con_Loguot =  DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOT]');
+        $cot = new LOGOT();
+        $cot->Code = ((int)$Con_Loguot[0]->Code)+1;
+        $cot->Name = ((int)$Con_Loguot[0]->Code)+1;
+        $cot->U_idEmpleado=$No_Nomina;
+        $cot->U_CT = $Est_ant;
+        $cot->U_Status = "O";
+        $cot->U_FechaHora = $dt;
+        $cot->U_OP =$orden;
+       $cot->save();
+    }
+    
    }   
     //---------Estacion Actual-----------------------------------------------------------------------------------------------------------------------------------------------------//
 
@@ -712,12 +715,13 @@ if($Actual_Cp->PlannedQty > $cant_r){
    'U_Recibido'=> $Actual_Cp->U_Recibido - $cant_r,
         ]);
         $OrdenDest = OP::find($DestinoCp->Code);
-        if($boolval && $OrdenDest->U_Reproceso == 'N'){         
+        if( $OrdenDest->U_Reproceso == 'N'){         
           $OrdenDest->U_Procesado = $OrdenDest->U_Procesado - $cant_r;
+          $OrdenDest->U_Entregado = $OrdenDest->U_Entregado - $cant_r;
           $OrdenDest->U_Reproceso ='S';
           $OrdenDest->save();
         }
-        if($boolval && $OrdenDest->U_Reproceso == 'S'){         
+        if($OrdenDest->U_Reproceso == 'S'){         
             $OrdenDest->U_Recibido = $OrdenDest->U_Recibido + $cant_r;
             $OrdenDest->save();
           }
