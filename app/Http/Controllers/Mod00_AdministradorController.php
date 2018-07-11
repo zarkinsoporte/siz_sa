@@ -191,8 +191,8 @@ dd($user);
      $nombre_grupo = $grupos[$id_grupo-1]->name;
      $modulos_grupo = MODULOS_GRUPO_SIZ::where('id_grupo', $id_grupo)
          ->leftJoin('Siz_Modulo', 'Siz_Modulos_Grupo.id_modulo', '=', 'Siz_Modulo.id')
-         ->select('Siz_Modulos_Grupo.id_modulo', 'Siz_Modulos_Grupo.id', 'Siz_Modulo.descripcion', 'Siz_Modulo.name')
-         ->groupBy('Siz_Modulos_Grupo.id', 'id_modulo', 'descripcion', 'name')
+         ->select('Siz_Modulos_Grupo.id_modulo', 'Siz_Modulos_Grupo.id_grupo', 'Siz_Modulo.descripcion', 'Siz_Modulo.name')
+         ->groupBy('Siz_Modulos_Grupo.id_grupo', 'id_modulo', 'descripcion', 'name')
          ->get();       
      $modulos = MODULOS_SIZ::all();
      return view('Mod00_Administrador.grupos', compact('grupos', 'modulos','modulos_grupo', 'id_grupo', 'nombre_grupo'));
@@ -305,13 +305,13 @@ dd($user);
 
     }
 
-    public function confModulo($id){
+    public function confModulo($id_grupo, $id_modulo){
 
         $grupos = DB::table('OHTY')
                 ->where('typeID', '>', 0)->get();
-        $primero = MODULOS_GRUPO_SIZ::where('id', $id)->first();
-        if ($primero != null){
-             $id_grupo = $primero->id_grupo;
+        //$primero = MODULOS_GRUPO_SIZ::where('id_grupo', $id)->first();
+        if ($id_modulo != null){
+            // $id_grupo = $primero->id_grupo;
 
              /*$menus = MODULOS_GRUPO_SIZ::where('Siz_Modulos_Grupo.id_modulo',$id_modulo)
                  ->where('id_grupo', $id_grupo)
@@ -323,12 +323,11 @@ dd($user);
                  ->get();*/
 
              $grupo = Grupo::find($id_grupo);
-             $id_modulo=$primero->id_modulo;
+           //  $id_modulo=$primero->id_modulo;
              $modulo = MODULOS_SIZ::find($id_modulo);
-
              $menus_existentes = MENU_ITEM::where('id_modulo', $id_modulo)
                  ->get();
-
+            
              return view('Mod00_Administrador.createMenu', compact('id_grupo','id_modulo','grupos','menus_existentes','grupo', 'modulo'));
         }else{
             return view('Mod00_Administrador.admin')->withErrors(array('message' => 'El modulo no existe.'));
@@ -376,43 +375,43 @@ dd($user);
     }
 
     public function nuevatarea(){
-
+///dd(Input::get('radio1'));
        if (Input::get('radio1')=='1'){
-         $mimenu = Input::get('sel3');
-
+         $id_menu_i = Input::get('sel3');
+         $menuexiste =  MENU_ITEM::where('id', Input::get('sel3'))
+         ->where('id_modulo', Input::get('modulo'))->first();
        }else{
-         $mimenu = strtoupper(Input::get('menu2'));
-
-         if (empty($mimenu)){
+           
+//$mimenu = strtoupper(Input::get('menu2'));
+         if (empty(Input::get('menu2'))){
              return redirect()->back()->withErrors(array('message' => 'El nombre del modulo no es válido.'));
          }else{
-            $menuexiste = MENU_ITEM::where('name',$mimenu)
+            $menuexiste = MENU_ITEM::where('name', strtoupper(Input::get('menu2')))
             ->where('id_modulo', Input::get('modulo'))->first();
 
             if (count($menuexiste)== 1 && $menuexiste!= null){
-                $mimenu = $menuexiste->id;
-            }else{
-                $modulo = new MENU_ITEM();
-                $id = $modulo->id;
-                $modulo->name = $mimenu;
+                $id_menu_i = $menuexiste->id;
+            }else{               
+                $modulo = new MENU_ITEM();                
+                $modulo->name = strtoupper(Input::get('menu2'));
                 $modulo->id_modulo = Input::get('modulo');
+                
                 $modulo->save();
-
-                $mimenu = $id;
+                $id_menu_i = $modulo->id;                
             }
 
          }
        }
         $nombretarea = strtoupper(Input::get('name'));
         $tareaexiste = TAREA_MENU::where('name', $nombretarea)
-            ->where('id_menu_item', $mimenu)->get();
+            ->where('id_menu_item', $menuexiste->id)->get();
 
         if (count($tareaexiste)== 1 && $tareaexiste!= null){
             return redirect()->back()->withErrors(array('message' => 'La tarea '.$nombretarea.' ya existe.'));
         }else{
             $modulo = new TAREA_MENU();
             $modulo->name = $nombretarea;
-            $modulo->id_menu_item = $mimenu;
+            $modulo->id_menu_item = $id_menu_i;
             $modulo->save();
             Session::flash('mensaje', 'La tarea '.$nombretarea.' se creo, pero no ha sido agregada a este grupo.');
             return redirect()->back();
@@ -420,13 +419,16 @@ dd($user);
 
     }
 
-    public function deleteModulo($id){
+    public function deleteModulo($grupo, $id){
         $busqueda = MODULOS_GRUPO_SIZ::
-        where('id', $id)
-        ->first();
+        where('id_modulo', $id)->where('id_grupo', $grupo)
+        ->get();
 //dd($busqueda);
-    if (count($busqueda)==1){
-        $busqueda->delete();
+    if (count($busqueda)>1){
+        foreach($busqueda as $b)
+        {
+            $b->delete();
+        }
         Session::flash('mensaje', 'Módulo Eliminado!!');
         return redirect()->back();
     }else{
