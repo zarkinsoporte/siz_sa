@@ -287,7 +287,8 @@ dd($user);
         return redirect()->back();
     }
 
-    public function deleteTarea($id_modulog){
+    public function deleteTarea($grupo, $id){
+       $id_modulog = $id;
        $modulo =  MODULOS_GRUPO_SIZ::find($id_modulog);
        if ($modulo != null && count($modulo) > 0){
            if (count($modulo) == 1){
@@ -354,7 +355,7 @@ dd($user);
 
        return Datatables::of($menus)
            ->addColumn('action', function ($menu) {
-               return  '<a href="quitar/'.$menu->id.'" class="btn btn-xs btn-danger"><i class="glyphicon glyphicon-remove"></i> Quitar</a>';
+               return  '<a href="quitar-tarea/'.$menu->id.'" class="btn btn-xs btn-danger"><i class="glyphicon glyphicon-remove"></i> Quitar</a>';
            }
 
            )
@@ -424,7 +425,7 @@ dd($user);
         where('id_modulo', $id)->where('id_grupo', $grupo)
         ->get();
 //dd($busqueda);
-    if (count($busqueda)>1){
+    if (count($busqueda)>=1){
         foreach($busqueda as $b)
         {
             $b->delete();
