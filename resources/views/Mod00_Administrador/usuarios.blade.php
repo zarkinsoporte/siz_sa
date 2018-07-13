@@ -12,7 +12,8 @@
     <div class="visible-lg"><br><br><br></div>
 
 
-       <h4>Usuarios Activos</h4> <div class="row">
+       <h4>Usuarios Activos</h4>
+        <div class="row">
        @foreach($finalarray as $clave => $valor)
 
            <div class="col-md-3">
@@ -29,7 +30,11 @@
                            @foreach($valor as $dept)
                                <a href="#" class="list-group-item">
                                    <span class="badge">{{$dept->c}}</span>
-                                   {{$dept->jobTitle}}
+                                   @if(empty($dept->jobTitle))
+                                        NO CAPTURADO
+                                   @else
+                                      {{$dept->jobTitle}}
+                                   @endif
                                    <?php
                                    $total = $total + $dept->c
                                    ?>
