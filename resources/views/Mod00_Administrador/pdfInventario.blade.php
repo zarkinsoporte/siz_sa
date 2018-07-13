@@ -1,46 +1,61 @@
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<TITLE>Inventario de equipo</TITLE>
 
-    <!-- CSRF Token -->
-    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ 'Fusion Confort' }}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+    <script src="main.js"></script>
+    <style>
+    /*
+	Generic Styling, for Desktops/Laptops 
+	*/
+    img {
+    display: block;
+    margin-left:10px;
+    margin-right:50px;
+    width: 700%;
+    margin-top:1.8%;
+}
+	table { 
+		width: 100%; 
+		border-collapse: collapse; 
+        font-family:arial;
+	}
 
-    <!-- Styles -->
+	th { 
+		color: white; 
+		font-weight: bold; 
+		color: black; 
+        font-family: 'Helvetica';
+        font-size:80%;
+	}
+    td{
+        font-family: 'Helvetica';
+        font-size:80%;
+    }
 
-    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
-    <!-- Material Design fonts -->
-    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-    <link rel="stylesheet" href="http://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
-    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
-
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-
-    <![endif]-->
-{!! Html::style('assets/css/bootstrap.css') !!}
-{!! Html::style('assets/css/bootstrap-switch.min.css') !!}
-{!! Html::style('assets/css/bootstrap-switch.css') !!}
-{!! Html::style('assets/css/font-awesome.css') !!}
-{!! Html::style('assets/css/sb-admin.css') !!}
-</head>
-
+        img{
+         width:200;
+            height: 20;
+            position: absolute;left:0%;
+            align-content:;
+        }
+        h3{
+            font-family: 'Helvetica';
+        }
+        b{
+            font-size:100%;
+        }
+</style>
 <body>
     <div id="app">
         <div id="wrapper">
 
 <div class="container" >
-
+<img src="images/ZARKIN_0.png" >
      <div class="row">
         <div class="col-6">
+        <BR>
              <table class="table table-striped">
                     <thead class="thead-dark">
                         <tr>
@@ -51,17 +66,26 @@
                     </thead>
                     <tbody>
                     @foreach ($data as $inv)
+                    
                         <tr>
                             <td scope="row">
-                                <img src="{{ asset('/images/zarkin.png') }}" width="120px" height="52px">       
+                                      
                             </td>
                             <td scope="row">
                                     
                             </td>
-                            <td scope="row">
-                            INVENTARIO DE EQUIPO DE CÓMPUTO      
+                            <td  align="right">
+                            <H2><B>Tecnologías de la Información</B></H2>
+                          
+                            Asignación de equipos de Cómputo
                             </td>
                         </tr>    
+                        <tr>
+                            <td scope="row" colspan="5"   scope="col"> 
+                            <b>Información del Usuario</b><hr>
+                            </td>
+                           
+                        </tr>
                         <tr>
                             <td scope="row"colspan="2">
                                 Número de Equipo
@@ -91,6 +115,14 @@
                                 Equipo Asignado a
                             </td>
                             <td scope="row">
+                                {{ $inv->nombre_usuario}}
+                            </td>
+                        </tr> 
+                        <tr>
+                            <td scope="row"colspan="2">
+                                Correo
+                            </td>
+                            <td scope="row">
                                 {{ $inv->correo}}
                             </td>
                         </tr>    
@@ -107,7 +139,7 @@
                 </table>
         </div>
      <div class="col-6">
-     <h4>Confidencialidad/Responsabilidades</h4>
+     <h4>Informacion de Confidencialidad y Responsabilidad de uso.</h4><hr>
         <h6>1. ES RESPONSABILIDAD DEL USUARIO ACATAR LA PRESENTE NORMATIVIDAD EN EL USO DE LOS BIENES INFORMÁTICOS</h6>
         <h6>2. SERÁ RESPONSABILIDAD DEL USUARIO EL USO Y CUIDADO DEL EQUIPO DE CÓMPUTO</h6>
         <h6>3. QUEDA ESTRICTAMENTE PROHIBIDO LA DESCARGA, INSTALACIÓN O DISTRIBUCIÓN DE SOFTWARE QUE NO SEA PROPORCIONADO POR EL ÁREA DE SISTEMAS</h6>
@@ -123,18 +155,34 @@
         <br>
         <br>
         <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
+        <center>______________________</center>
         <center>Nombre y Firma</center>
      </div>
      </div>
      @yield('subcontent-01')
 </div>
 <!-- /.container-fluid -->
+
+<!-- Pie de pagina fecah de impresion y nombre de archivo -->
+<footer>
+<script type="text/php">
+ $text = 'Pagina: {PAGE_NUM} / {PAGE_COUNT}';
+ $date = 'Fecha de impresion : <?php echo $hoy = date("d-m-Y H:i:s");?>';
+ $tittle = 'SIZ_Sistemas_FormatoResponsiva.pdf';
+ $font = $fontMetrics->get_font("Arial, Helvetica, sans-serif", "normal");
+ $pdf->page_text(40, 740, $text, $font, 9);
+ $pdf->page_text(420, 23, $date, $font, 9);
+ $pdf->page_text(420, 740, $tittle, $font, 9);
+ $sociedad = 'Sociedad: <?php echo $db ?>';
+ $pdf->page_text(40, 23, $sociedad, $font, 9);
+
+
+</script> 
+</footer>
+
+
+
+
 
 </div>
 <!-- /#page-wrapper -->
