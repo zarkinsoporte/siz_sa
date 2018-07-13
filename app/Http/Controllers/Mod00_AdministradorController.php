@@ -287,7 +287,8 @@ dd($user);
         return redirect()->back();
     }
 
-    public function deleteTarea($id_modulog){
+    public function deleteTarea($grupo, $id){
+       $id_modulog = $id;
        $modulo =  MODULOS_GRUPO_SIZ::find($id_modulog);
        if ($modulo != null && count($modulo) > 0){
            if (count($modulo) == 1){
@@ -354,7 +355,7 @@ dd($user);
 
        return Datatables::of($menus)
            ->addColumn('action', function ($menu) {
-               return  '<a href="quitar/'.$menu->id.'" class="btn btn-xs btn-danger"><i class="glyphicon glyphicon-remove"></i> Quitar</a>';
+               return  '<a href="quitar-tarea/'.$menu->id.'" class="btn btn-xs btn-danger"><i class="glyphicon glyphicon-remove"></i> Quitar</a>';
            }
 
            )
@@ -394,17 +395,15 @@ dd($user);
             }else{               
                 $modulo = new MENU_ITEM();                
                 $modulo->name = strtoupper(Input::get('menu2'));
-                $modulo->id_modulo = Input::get('modulo');
-                
+                $modulo->id_modulo = Input::get('modulo');                
                 $modulo->save();
                 $id_menu_i = $modulo->id;                
             }
-
          }
        }
         $nombretarea = strtoupper(Input::get('name'));
         $tareaexiste = TAREA_MENU::where('name', $nombretarea)
-            ->where('id_menu_item', $menuexiste->id)->get();
+            ->where('id_menu_item', $id_menu_i)->get();
 
         if (count($tareaexiste)== 1 && $tareaexiste!= null){
             return redirect()->back()->withErrors(array('message' => 'La tarea '.$nombretarea.' ya existe.'));
@@ -424,7 +423,7 @@ dd($user);
         where('id_modulo', $id)->where('id_grupo', $grupo)
         ->get();
 //dd($busqueda);
-    if (count($busqueda)>1){
+    if (count($busqueda)>=1){
         foreach($busqueda as $b)
         {
             $b->delete();
