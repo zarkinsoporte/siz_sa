@@ -425,7 +425,8 @@ if ($code->U_Recibido > $code->U_Procesado){
                 ->where('U_Reproceso', 'N')
                 ->get();
 
-            $dt = date('Y-m-d H:i:s');
+           // $dt = date('Y-m-d H:i:s');
+            $dt = date('Ymd h:m:s'); 
             $CantOrden = DB::table('OWOR')
                 ->where('DocEntry', $Code_actual->U_DocEntry)
                 ->first();
@@ -512,6 +513,10 @@ if ($code->U_Recibido > $code->U_Procesado){
             Session::flash('mensaje', 'El usuario '.$id.' avanzo '.$Cant_procesar.' pza(s) a la estación '.OP::getEstacionSiguiente($Code_actual->Code, 1));
 
             if ($Code_actual->U_Recibido > 0 && $cantO == $Code_actual->U_Procesado){
+                $lineaActual = OP::find($Code_actual->Code);   //si esta linea ya termino de procesar_todo entonces se borra
+                $lineaActual->delete();
+            }
+            if ($Code_actual->U_Recibido == $Code_actual->U_Procesado && $Code_actual->U_Recibido == $Code_actual->U_Entregado){
                 $lineaActual = OP::find($Code_actual->Code);   //si esta linea ya termino de procesar_todo entonces se borra
                 $lineaActual->delete();
             }
@@ -622,10 +627,12 @@ $op = Input::get('op');
         $Nom_User=$request->input('Nombre');
         $autorizo=$request->input('Autorizar');
         $orden=$request->input('orden');
-        $cant_r=$request->input('cant');            
+        $cant_r=$request->input('retrocant');            
        $reason=$request->input('reason');
        $leido='N';
+       $banderita = false;  // esta bandera sirva para verificar si la estacion destino es un retroceso creado o ya existente 
        $dt = date('Ymd h:m:s'); 
+    //   $dt = date('Y-m-d H:i:s');  no usar
 //-------------Notificaciones--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 //$Not_us=DB::select(DB::raw("SELECT top 1 U_EmpGiro,firstname,lastname from OHEM where position='4'and dept ='$cod_dep'"));
@@ -658,7 +665,7 @@ DB::table('Siz_Noticias')->insert(
         DB::table('@CP_OF')
         ->where('Code', $DestinoCp->Code)
         ->update([
-        //  'U_Recibido'=> $DestinoCp->U_Recibido + $cantidad,
+        //'U_Recibido'=> $DestinoCp->U_Recibido + $cant_r,
             //'U_Reproceso'=>'S',
             'U_Defectuoso'=>$cant_r + $DestinoCp->U_Defectuoso,
             'U_Comentarios'=>$nota,
@@ -667,6 +674,7 @@ DB::table('Siz_Noticias')->insert(
       }
       else{
       //  dd('insert '.$DestinoCp);
+       $banderita = true;  //si es un reproceso creado de cero
         $N_Code =  DB::select('select max (CONVERT(INT,Code)) as Code from [@CP_OF]');
 
             $Nuevo_reproceso = new OP();
@@ -682,7 +690,7 @@ DB::table('Siz_Noticias')->insert(
             $Nuevo_reproceso->U_Defectuoso=$cant_r;
             $Nuevo_reproceso->U_Comentarios=$nota;
             $Nuevo_reproceso->U_CTCalidad=0;
-            $Nuevo_reproceso->save();
+            $Nuevo_reproceso->save();          
     //-------- Tabla Logot----//
             $Iniciar=DB::select('SELECT * from [@CP_LOGOT] Where U_CT='.$Est_ant.' AND U_OP='.$orden);
     if(COUNT($Iniciar)<1){
@@ -708,20 +716,21 @@ $Actual=$Actual_Cp->U_Recibido;
 if($Actual==$cant_r){
    $Actual_Cp->delete();
 }
-if($Actual_Cp->PlannedQty > $cant_r){
+if($Actual > $cant_r){
     DB::table('@CP_OF')
     ->where('Code', $Actual_Cp->Code)
     ->update([
-   'U_Recibido'=> $Actual_Cp->U_Recibido - $cant_r,
+   'U_Recibido'=> $Actual - $cant_r,
         ]);
-        $OrdenDest = OP::find($DestinoCp->Code);
+        $OrdenDest = OP::where('U_DocEntry', $orden)->where('U_CT', $Est_ant)->first();
+       // $OrdenDest = OP::find($DestinoCp->Code);
         if( $OrdenDest->U_Reproceso == 'N'){         
           $OrdenDest->U_Procesado = $OrdenDest->U_Procesado - $cant_r;
           $OrdenDest->U_Entregado = $OrdenDest->U_Entregado - $cant_r;
           $OrdenDest->U_Reproceso ='S';
           $OrdenDest->save();
         }
-        if($OrdenDest->U_Reproceso == 'S'){         
+        if($OrdenDest->U_Reproceso == 'S' && $banderita == false){         
             $OrdenDest->U_Recibido = $OrdenDest->U_Recibido + $cant_r;
             $OrdenDest->save();
           }

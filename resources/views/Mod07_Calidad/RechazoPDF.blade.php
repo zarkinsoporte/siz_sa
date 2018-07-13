@@ -135,11 +135,11 @@
 <script type="text/php">
  $text = 'Pagina: {PAGE_NUM} / {PAGE_COUNT}';
  $date = 'Fecha de impresion : <?php echo $hoy = date("d-m-Y H:i:s");?>';
- $tittle = 'Reporte_Rechazo.Pdf';
+ $tittle = 'Siz_Calidad_Reporte_Rechazo.Pdf';
  $font = $fontMetrics->get_font("Arial, Helvetica, sans-serif", "normal");
  $pdf->page_text(40, 580, $text, $font, 9);
  $pdf->page_text(603, 23, $date, $font, 9);
- $pdf->page_text(680, 580, $tittle, $font, 9);
+ $pdf->page_text(630, 580, $tittle, $font, 9);
  $empresa = 'Sociedad: <?php echo $sociedad ?>';
  $pdf->page_text(40, 23, $empresa, $font, 9);
 

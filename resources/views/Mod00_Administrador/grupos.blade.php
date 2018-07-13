@@ -1,12 +1,17 @@
 @extends('app')
 
 @section('content')
-
+<style>
+img{
+    border:100%;
+    border-color: black;
+}
+</style>
     <div class="collapse navbar-collapse navbar-ex1-collapse">
         <ul class="nav navbar-nav side-nav">
 
             <li>
-                <img src="{{asset('images/zarkinlogo.jpg')}}" class="img-responsive">
+                <img src="{{asset('images/white.png')}}" class="img-responsive">
                 <ul id="demo" class="">
                     @foreach ($grupos as $a)
                         <li>

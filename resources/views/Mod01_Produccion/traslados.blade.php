@@ -18,7 +18,7 @@
                             <i class="fa fa-dashboard">  <a href="{!! url('home') !!}">Inicio</a></i>
                         </li>
                         <li>
-                            <i class= "fa fa-archive"> <a href="traslados">Traslados</a></i>
+                            <i class= "fa fa-archive"> <a href="{!! url('home/TRASLADO ÷ AREAS') !!}">Traslados</a></i>
                     </ol>
                     </div>
                 </div>
@@ -45,8 +45,8 @@
                                     <h5>Control de Piso: {{$t_user->U_EmpGiro}}</h5>
                                     @if(Session::get('usertraslados') == 1)
                                         {!! Form::open(['url' => 'home/TRASLADO ÷ AREAS/'.$t_user->U_EmpGiro, 'method' => 'POST']) !!}
-                                        <label for="op" class="control-label">Introduce Orden de Produccion:</label>
-                                        <input autofocus type="number" name="op" id="op" min="1" max="9999999999">
+                                        <label for="op" class="control-label" >Introduce Orden de Produccion:</label>
+                                        <input autofocus type="number" name="op" id="op" min="1" max="9999999999" required>
 
 
                                     @endif
@@ -54,7 +54,7 @@
                                 @if(Session::get('usertraslados') == 1)
                                 <div class="panel-footer">
                                     <div align="right">
-                                        <button type="submit" class="btn btn-primary">Consultar</button>
+                                        <button type="submit" class="btn btn-primary" >Consultar</button>
                                     </div>
 
                                 </div>
@@ -103,7 +103,7 @@
     td:nth-of-type(7):before { content: "Estación Actual"; }
     td:nth-of-type(8):before { content: "Estación Siguiente"; }
     td:nth-of-type(9):before { content: "Retroceder OP"; }
-        td:nth-of-type(10):before { content: "Avanzar OP"; }
+    td:nth-of-type(10):before { content: "Avanzar OP"; }
     }
 </style>
             
@@ -153,7 +153,7 @@
 
                                                 @if(Auth::user()->U_EmpGiro=='246')
                                             <td> <a class="btn btn-danger" data-toggle="modal"
-                                            data-target="#Retroceder" class="btn btn-info btn-lg"data-codem="{{$of->U_Orden}}" >
+                                            data-target="#Retroceder" class="btn btn-info btn-lg" data-codem="{{$of->U_Orden}}" data-recibido="{{$of->U_Recibido - $of->U_Procesado}}">
                                                     <i class="fa fa-mail-reply-all" aria-hidden="1">   Retroceder</i>
                                                 </a> </td>
                                                 @endif
@@ -322,8 +322,7 @@
         <input type="hidden" id="orden" name="orden" 
         value="{{$op}}" >
         <div><label for="message-text" class="control-label" value="Nota">Cantidad a trasferir:</label></div>   
-        <input align="center"type="number" id="cant" name="cant" min="1" max="{{$of->PlannedQty}}" 
-        value="{{number_format($of->PlannedQty,0)}}" required>
+        <input align="center"type="number" id="retrocant" name="retrocant" min="1" required>
         
 @endif
 
@@ -429,6 +428,10 @@ if(isset($HisOrden)){
     // Button that triggered the modal
     
     var codejs = button.data('codem'); 
+    var urecibido = button.data('recibido');
+    var modal = $(this)
+    modal.find('#retrocant').val(urecibido);
+    modal.find('#retrocant').attr('max', urecibido);
     $("#Estacion").val(codejs);   
   
     
