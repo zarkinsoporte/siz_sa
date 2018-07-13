@@ -75,12 +75,14 @@ iframe[seamless] {
 {{ csrf_field() }}
 <div class="row">
 <div class="autocomplete form-group col-md-6">
-  <label>Fecha de revisión</label>
-    <input class="form-control" id="Fech_Rev" type="date" name="Fech_Rev"required>
+<label>Fecha de Recepción</label>
+<input class="form-control" id="Fech_Recp" type="date" name="Fech_Recp"required>
+    
   </div>
   <div class="autocomplete form-group col-md-6">
-  <label>Fecha de Recepción</label>
-    <input class="form-control" id="Fech_Recp" type="date" name="Fech_Recp"required>
+  <label>Fecha de revisión</label>
+  <input class="form-control" id="Fech_Rev" type="date" name="Fech_Rev"required>  
+  
   </div>
   </div>
 
@@ -146,7 +148,7 @@ iframe[seamless] {
 
   <div class="autocomplete form-group col-sm-3">
     <label for="exampleFormControlTextarea1">Cantidad Revisada</label>
-    <input type="number"  class="form-control" id="C_Revisada" name="C_Revisada" value="@{{n1+n2 }}" required > 
+    <input type="number"  class="form-control" id="C_Revisada" name="C_Revisada" value="@{{n1+n2 }}" readonly required > 
   </div>
 
   <div class="autocomplete form-group col-sm-10">
@@ -340,5 +342,10 @@ app.controller('MainController',  ['$document','$filter', '$scope', '$window', f
 }]);
 
 </script>
+<script>
+    window.onload=function() {
+      document.getElementById("Fech_Recp").value =new Date().toJSON().slice(0,10);
+    }
+    </script>
 
 </html>

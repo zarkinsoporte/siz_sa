@@ -25,7 +25,7 @@
                             <i class="fa fa-dashboard"></i>  <a href="{!! url('home') !!}">Inicio</a>
                         </li>
                         <li>
-                            <i class="fa fa-archive"></i> <a href="users">Usuarios</a>
+                            <i class="fa fa-archive"></i> <a href="admin/users">Usuarios</a>
                        </li>
                     </ol>
                 </div>

@@ -61,7 +61,7 @@
     <thead>
         <tbody>
             <tr>
-            <td colspan="5" align="center" bgcolor="#ccc"><h3>Historial OP</h3></td>           
+            <td colspan="5" align="center" bgcolor="#fff"><h3>Historial OP</h3></td>           
  </tr>
             <tr>
             <th align="center">Orden de fabricación:</th>

@@ -65,7 +65,7 @@
     <thead>
         <tbody>
             <tr>
-            <td colspan="5" align="center" bgcolor="#ccc"><h3>Reporte de Materiales</font></h3></td>
+            <td colspan="5" align="center" bgcolor="#fff"><h3>Reporte de Materiales</font></h3></td>
             </tr>
             <tr>
             <th align="center">Código: </th>

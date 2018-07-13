@@ -96,7 +96,7 @@ public function RechazoIn(Request $request)
        $sociedad=DB::table('OADM')->value('CompnyName');
        //dd($rechazo);
             $pdf = \PDF::loadView('Mod07_Calidad.RechazoPDF',['sociedad'=>$sociedad,'rechazo'=>$rechazo,'fechaIni'=>$fechaIni,'fechaFin'=>$fechaFin]);
-            return $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true])->stream();
+            return $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true])->stream('Siz_Calidad_Reporte_Rechazo.Pdf');
            // return $pdf->download('ReporteOP.pdf');
        
     }
