@@ -138,7 +138,7 @@
   
                     <tr>
                 <td colspan="1">
-                <b> Descripción : </b>
+                <b>  Motivo del Rechazo: </b>
                 </td>
                 <td colspan="7">
                 &nbsp;<?php echo ($rep->DescripcionRechazo);?>

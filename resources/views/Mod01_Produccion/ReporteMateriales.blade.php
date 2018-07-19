@@ -64,9 +64,12 @@
 <table  border="1" class="table table-striped">
     <thead>
         <tbody>
-            <tr>
-            <td colspan="5" align="center" bgcolor="#fff"><h3>Reporte de Materiales</font></h3></td>
-            </tr>
+        <tr>
+      <td colspan="5" align="center" bgcolor="#fff">
+      <b><?php echo  $db?></b><br>    
+      <b>Mod06-Producción</b>
+      <h3>Reporte de Materiales</h3></td>
+      </tr>
             <tr>
             <th align="center">Código: </th>
             <td colspan="2"align='center'><?php echo $data[0]->ItemCode ?> - <?php echo $data[0]->ItemName ?></td>        
@@ -77,7 +80,7 @@
             <th align="center">Cliente:</th>
             <td align="center"colspan="2"><?php echo $data[0]->CardCode ?> - <?php echo $data[0]->CardName ?></td>         
             <th align="center">V.S:</th>
-            <td align="center"><?php echo number_format($data[0]->VS, 2); ?></td>
+            <td align="center"><?php echo number_format($data[0]->VS, 3); ?></td>
             </tr>
             <tr>
             <th align="center">Fecha de Entrega: </th>
