@@ -31,7 +31,7 @@
 	}
     td{
         font-family: 'Helvetica';
-        font-size:80%;
+        font-size:70%;
     }
 
         img{
@@ -42,6 +42,13 @@
         }
         h3{
             font-family: 'Helvetica';
+        }
+        h4{
+            font-family: 'Helvetica';
+            font-size:80%;
+        }
+        h6{
+            font-family: 'monospace';
         }
         b{
             font-size:100%;
