@@ -81,7 +81,7 @@
                             <div class="form-group label-floating">
                                 <label class="control-label" for="id">No. Nómina:</label>
                                 <div class="input-group">
-                                    <input type="number" id="id" name="id" class="form-control" style="color: white" value="{{old('id')}}" required autofocus>
+                                    <input type="number" min="0"id="id" name="id" class="form-control" style="color: white" value="{{old('id')}}" required autofocus>
                                     <span class="input-group-btn">
 
                                       </span>
