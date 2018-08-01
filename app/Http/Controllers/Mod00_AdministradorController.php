@@ -596,13 +596,14 @@ dd($user);
         ->where('Siz_Inventario.id', '=',$id)
         ->get();
     
-        $data=array('data' => $inventario);
-        //$data = $inventario;
-        
-        $pdf = \PDF::loadView('Mod00_Administrador.pdfInventario', $data);
+        $data=array('data' => $inventario,
+        'db' => DB::table('OADM')->value('CompnyName')
+    );
+        $sociedad=DB::table('OADM')->value('CompnyName');
+        $pdf = \PDF::loadView('Mod00_Administrador.pdfInventario',$data);
         //dd($pdf);
         //return $pdf->stream();
-        return $pdf->stream('Responsiva.pdf');
+        return $pdf->setOptions(['isPhpEnabled'=>true])->stream();
     }
 
     public function delete_inv($id)

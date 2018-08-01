@@ -4,30 +4,34 @@
 
 @include('partials.menu-admin')
 
+
+    <div >
+
         <div class="container" >
 
             <!-- Page Heading -->
-            <div class="row">                            
+            <div class="row">
+                <div >
                     <div class="visible-xs"><br><br></div>
                     <h3 class="page-header">
-                       &nbsp;Usuarios
+                        Usuarios
                     </h3>
                     
-                    <div class= "col-lg-6.5 col-md-12 col-sm-7">
+                       <div class= "col-lg-6.5 col-md-8 col-sm-7">
                         <div class="hidden-xs">
-                             <div class="hidden-sm">
-                                <ol class="breadcrumb">
-                                    <li>
-                                    <i class="fa fa-dashboard"></i>  <a href="{!! url('home') !!}">Inicio</a>
-                                    </li>
-                                    <li>
-                                    <i class="fa fa-archive"></i> <a href="users">Usuarios</a>
-                                    </li>
-                                 </ol>
-                             </div>
-                         </div>
-                     </div>
-            </div> <!-- /.row -->     
+                        <div class="hidden-sm">
+                        <ol class="breadcrumb">
+                        <li>
+                            <i class="fa fa-dashboard"></i>  <a href="{!! url('home') !!}">Inicio</a>
+                        </li>
+                        <li>
+                            <i class="fa fa-archive"></i> <a href="admin/users">Usuarios</a>
+                       </li>
+                    </ol>
+                </div>
+            </div>
+            <!-- /.row -->
+         <div class="container">
              <div class="row">
 
                  <div class="col-md-10">
@@ -47,7 +51,21 @@
                  </div>
              </div>
              @yield('subcontent-01')
-         </div> <!-- /.container-fluid -->
+         </div>
+
+
+
+        </div>
+        <!-- /.container-fluid -->
+
+    </div>
+    <!-- /#page-wrapper -->
+    </div>
+    </div>
+
+
+
+    <!-- /#wrapper -->
 @endsection
 
 @section('script')

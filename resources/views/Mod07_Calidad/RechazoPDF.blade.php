@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -16,7 +16,7 @@
     margin-left:50px;
     margin-right:50px;
     width: 700%;
-    margin-top:1.8%;
+    margin-top:4%;
 }
 	table { 
 		width: 100%; 
@@ -44,10 +44,13 @@
         }
         h3{
             font-family: 'Helvetica';
+            
         }
         b{
-            font-size:100%;
+            font-size:80%;
         }
+
+
 </style>
 
 </head>
@@ -62,7 +65,10 @@
      <table  border="1px" class="table table-striped">
          <thead class="thead-dark">  
      <tr>
-      <td colspan="5" align="center" bgcolor="#ccc"><h3>Reporte de Rechazos</font></h3></td>
+      <td colspan="5" align="center" bgcolor="#fff">
+      <b><?php echo $sociedad ?></b><br>    
+      <b>Mod07-Calidad</b>
+      <h3>Reporte de Rechazos</h3></td>
       </tr>
       </thead>
       <tbody>
@@ -93,7 +99,9 @@
              <td align="center"bgcolor="#474747" style="color:white";>Rechazada</td>
              <td align="center"bgcolor="#474747" style="color:white";>Revisada</td>
              </tr>
+            
             </tbody>
+            
             @foreach($rechazo as $rep)
                         <tr>
                             <td scope="row"align="center">
@@ -127,8 +135,27 @@
                             <td scope="row"align="center">
                             {{$rep->DocumentoNumero}}
                             </td>
-                        </tr>    
+  
+                    <tr>
+                <td colspan="1">
+                <b>  Motivo del Rechazo: </b>
+                </td>
+                <td colspan="7">
+                &nbsp;<?php echo ($rep->DescripcionRechazo);?>
+             </td>
+             </tr>
+             <tr>
+             <td colspan="1">
+               <b>Observaciones : </b>
+                </td>
+                <td colspan="7">
+                &nbsp;<?php echo ($rep->Observaciones);?>
+             </td>
+             </tr>
+
                     @endforeach 
+            
+
         </thead>
     </table>
 <footer>
