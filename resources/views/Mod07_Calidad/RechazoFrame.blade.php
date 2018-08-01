@@ -80,7 +80,7 @@ iframe[seamless] {
     
   </div>
   <div class="autocomplete form-group col-md-6">
-  <label>Fecha de revisión</label>
+  <label>Fecha de Revisión</label>
   <input class="form-control" data-date-format="DD MMMM YYYY" id="Fech_Rev" type="date" name="Fech_Rev" required>  
   
   </div>
@@ -88,7 +88,7 @@ iframe[seamless] {
 
   <div class="row">
   <div class="form-group col-md-6">
-<label>Código del proveedor</label>
+<label>Código del Proveedor</label>
     <div class="autocomplete input-group">
          <input class="form-control" id="Id_prov" type="text" ng-model="codigoproveedor" name="Id_prov" placeholder="Ejemplo:P112..."required>
       <span class="input-group-btn">
@@ -98,7 +98,7 @@ iframe[seamless] {
       </div>
     </div>
  <div class="form-group col-md-6">
-  <label>Nombre del provedor</label>
+  <label>Nombre del Proveedor</label>
     <div class="autocomplete input-group">
       <input class="form-control" id="Proveedor" type="text" ng-model="nombreproveedor" name="Proveedor" placeholder="Ejemplo:Distr..."required>
       <span class="input-group-btn">
@@ -127,7 +127,7 @@ iframe[seamless] {
     </div>
 
    <div class="form-group col-md-6">
-<label>Descripcion de Material</label>
+<label>Descripción de Material</label>
     <div class="autocomplete input-group">
  <input type="text" class="form-control" id="Material" ng-model="nombreitem" name="Material"placeholder="Ejemplo:Adap..." required >
       <span class="input-group-btn">
@@ -157,7 +157,7 @@ iframe[seamless] {
   </div>
 
   <div class="autocomplete form-group col-sm-10">
-    <label for="exampleFormControlTextarea1">Numero de Factura</label>
+    <label for="exampleFormControlTextarea1">Número de Factura</label>
     <input type="text" class="form-control" id="N_Doc" name="N_Doc" required >
   </div>
 
@@ -173,7 +173,7 @@ iframe[seamless] {
   </div>
 
 <div>
-  <button type="submit" class="btn btn-primary">Enviar</button> 
+  <button type="submit" class="btn btn-primary">Guardar</button> 
   </div>
 </form>
 
