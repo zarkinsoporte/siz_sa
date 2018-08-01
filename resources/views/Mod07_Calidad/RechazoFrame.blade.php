@@ -76,12 +76,12 @@ iframe[seamless] {
 <div class="row">
 <div class="autocomplete form-group col-md-6">
 <label>Fecha de Recepción</label>
-<input class="form-control" id="Fech_Recp" type="date" name="Fech_Recp"required>
+<input class="form-control"data-date-format="DD MMMM YYYY" id="Fech_Recp"type="date" name="Fech_Recp"required>
     
   </div>
   <div class="autocomplete form-group col-md-6">
   <label>Fecha de revisión</label>
-  <input class="form-control" id="Fech_Rev" type="date" name="Fech_Rev"required>  
+  <input class="form-control" data-date-format="DD MMMM YYYY" id="Fech_Rev" type="date" name="Fech_Rev" required>  
   
   </div>
   </div>
@@ -177,7 +177,21 @@ iframe[seamless] {
   </div>
 </form>
 
+
 </body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.15.0/moment.min.js"></script>
+<script>
+$(document).ready(function(){
+    $("#Fech_Recp").change(function(){
+       document.getElementById('Fech_Rev').value=document.getElementById('Fech_Recp').value;
+       var fecha = moment(document.getElementById('Fech_Recp').value);
+       var fecha_format=fecha.format('Y-MM-DD');
+   
+       document.getElementById('Fech_Rev').setAttribute("min",fecha_format);
+    });
+  });
+</script>
 <script> 
     var globalvalue='';
     var codeP=window.parent.Codeprov;
@@ -339,13 +353,14 @@ app.controller('MainController',  ['$document','$filter', '$scope', '$window', f
       $scope.nombreitem = obj.ItemName;
       $scope.unidadmedida = obj.UM;
     };
-}]);
 
+}]);
 </script>
 <script>
     window.onload=function() {
       document.getElementById("Fech_Recp").value =new Date().toJSON().slice(0,10);
     }
     </script>
+
 
 </html>

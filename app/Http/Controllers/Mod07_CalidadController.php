@@ -47,11 +47,14 @@ class Mod07_CalidadController extends Controller
 
 public function RechazoIn(Request $request)   
     {
+    if($request->input('Fech_Recp')<=($request->input('Fech_Rev')))
+    {
+ 
       //  dd($request->input('Inspector'));
         DB::table('Siz_Calidad_Rechazos')->insert(
             [
-                'fechaRevision'      =>$request->input('Fech_Rev'),
                 'fechaRecepcion'     =>$request->input('Fech_Recp'),
+                'fechaRevision'      =>$request->input('Fech_Rev'),
                 'proveedorId'        =>$request->input('Id_prov'),
                 'proveedorNombre'    =>$request->input('Proveedor'),
                 'materialCodigo'     =>$request->input('Codigo'),
@@ -64,12 +67,17 @@ public function RechazoIn(Request $request)
                 'DocumentoNumero'    =>$request->input('N_Doc'),
                 'InspectorNombre'    =>$request->input('Inspector'),
                 'Observaciones'      =>$request->input('Observaciones'),
+           
         
             ]
         );
             Session::flash('mensaje', 'Registro Guardado');
           return response()->redirectTo('home/NUEVO RECHAZO');
-    }
+    } 
+else{
+    return Redirect::back()->with('message' , 'Error,La fecha Revisión es menor a la fecha de Recepción');
+}
+}
     public function autocomplete(Request $request)
     {
       
