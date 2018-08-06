@@ -74,12 +74,12 @@ iframe[seamless] {
 <form autocomplete="off"  method="post" action="{!!action('Mod07_CalidadController@RechazoIn')!!}">
 {{ csrf_field() }}
 <div class="row">
-<div class="autocomplete form-group col-md-6">
+<div class="autocomplete form-group col-md-6 col-sm-6">
 <label>Fecha de Recepción</label>
 <input class="form-control"data-date-format="DD MMMM YYYY" id="Fech_Recp"type="date" name="Fech_Recp"required>
     
   </div>
-  <div class="autocomplete form-group col-md-6">
+  <div class="autocomplete form-group col-md-6 col-sm-6">
   <label>Fecha de Revisión</label>
   <input class="form-control" data-date-format="DD MMMM YYYY" id="Fech_Rev" type="date" name="Fech_Rev" required>  
   
@@ -87,7 +87,7 @@ iframe[seamless] {
   </div>
 
   <div class="row">
-  <div class="form-group col-md-6">
+  <div class="form-group col-md-6 col-sm-6">
 <label>Código del Proveedor</label>
     <div class="autocomplete input-group">
          <input class="form-control" id="Id_prov" type="text" ng-model="codigoproveedor" name="Id_prov" placeholder="Ejemplo:P112..."required>
@@ -97,7 +97,7 @@ iframe[seamless] {
       </span>
       </div>
     </div>
- <div class="form-group col-md-6">
+ <div class="form-group col-md-6 col-sm-6">
   <label>Nombre del Proveedor</label>
     <div class="autocomplete input-group">
       <input class="form-control" id="Proveedor" type="text" ng-model="nombreproveedor" name="Proveedor" placeholder="Ejemplo:Distr..."required>
@@ -109,7 +109,7 @@ iframe[seamless] {
   </div>
    
 <div class="row">
-   <div class="col-md-3 form-group">
+   <div class="col-md-3 col-sm-3 form-group">
 <label>Código de Material</label>
     <div class="autocomplete input-group">
       <input type="text" class="form-control" id="Codigo" ng-model="codigoitem" name="Codigo"  placeholder="Ejemplo:100..."  required >
@@ -119,14 +119,14 @@ iframe[seamless] {
     </div>
     </div>
 
-   <div class="col-md-3 form-group">
+   <div class="col-md-3 col-sm-3 form-group">
 <label>Unidad de Medida</label>
     <div class="autocomplete input-group">
     <input type="text" class="form-control" id="Um" ng-model="unidadmedida" name="Um" required >
     </div>
     </div>
 
-   <div class="form-group col-md-6">
+   <div class="form-group col-md-6 col-sm-6">
 <label>Descripción de Material</label>
     <div class="autocomplete input-group">
  <input type="text" class="form-control" id="Material" ng-model="nombreitem" name="Material"placeholder="Ejemplo:Adap..." required >
@@ -136,38 +136,38 @@ iframe[seamless] {
     </div>
     </div>
   </div>
-  <div class="autocomplete form-group col-sm-3">
+  <div class="autocomplete form-group col-sm-3 col-md-3">
     <label for="exampleFormControlTextarea1">Cantidad Aceptada</label>
     <input type="number" min="1"ng-model="n1" class="form-control" id="C_Aceptada" name="C_Aceptada"required >
   </div>
 
-  <div class="autocomplete form-group col-sm-3">
+  <div class="autocomplete form-group col-sm-3 col-md-3">
     <label for="exampleFormControlTextarea1">Cantidad Rechazada</label>
-    <input type="number" min="1"ng-model="n2" class="form-control" id="C_Rechazada" name="C_Rechazada"required >
+    <input type="number" min="0"ng-model="n2" class="form-control" id="C_Rechazada" name="C_Rechazada"required >
   </div>
 
-  <div class="autocomplete form-group col-sm-3">
+  <div class="autocomplete form-group col-sm-3 col-md-3">
     <label for="exampleFormControlTextarea1">Cantidad Revisada</label>
     <input type="number"  class="form-control" id="C_Revisada" name="C_Revisada" value="@{{n1+n2 }}" readonly required > 
   </div>
 
-  <div class="autocomplete form-group col-sm-10">
+  <div class="autocomplete form-group col-sm-10 col-md-10">
     <label for="exampleFormControlTextarea1">Descripcion del Rechazo</label>
     <input type="text" class="form-control" id="D_Rechazo" name="D_Rechazo" required >
   </div>
 
-  <div class="autocomplete form-group col-sm-10">
+  <div class="autocomplete form-group col-sm-10 col-md-10">
     <label for="exampleFormControlTextarea1">Número de Factura</label>
     <input type="text" class="form-control" id="N_Doc" name="N_Doc" required >
   </div>
 
-  <div class="autocomplete form-group col-sm-10">
+  <div class="autocomplete form-group col-sm-10 col-md-10">
     <label for="exampleFormControlTextarea1">Nombre del Inspector</label>
     <input type="text" class="form-control" id="Inspector" name="Inspector"
     value='{{Auth::user()->firstName.' '.Auth::user()->lastName}}'  readonly>
   </div>
 
-  <div class="autocomplete form-group col-sm-10">
+  <div class="autocomplete form-group col-sm-10 col-md-10">
     <label for="exampleFormControlTextarea1">Observaciones</label>
     <textarea class="form-control" id="Observaciones"name="Observaciones" rows="3"required></textarea>
   </div>

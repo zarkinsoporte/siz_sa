@@ -90,7 +90,12 @@ else{
     $user = Auth::user();
     $actividades = $user->getTareas();
     //dd($actividades );
-    return view('Mod07_Calidad.Reporte_Rechazos',['actividades' => $actividades, 'ultimo' => count($actividades)]);
+    //aqui va tu qwery
+    $Proveedores=  DB::select('SELECT proveedorId, proveedorNombre FROM Siz_Calidad_Rechazos group by proveedorId, proveedorNombre');
+   
+    $Articulos=  DB::select('SELECT materialCodigo, materialDescripcion FROM Siz_Calidad_Rechazos group by materialCodigo, materialDescripcion');
+
+    return view('Mod07_Calidad.Reporte_Rechazos',['Articulos' => $Articulos,'Proveedores' => $Proveedores,'actividades' => $actividades, 'ultimo' => count($actividades)]);
    
    }
    
@@ -100,8 +105,49 @@ else{
        //$pdf = App::make('dompdf');
        $fechaIni = $request->input('FechIn');
        $fechaFin = $request->input('FechaFa');
-       $rechazo=DB::table('Siz_Calidad_Rechazos')->whereBetween('fechaRevision',[$fechaIni ,$fechaFin])->get();
        $sociedad=DB::table('OADM')->value('CompnyName');
+       
+    
+         $prov1= $request->input('prov');
+       if($prov1==null){
+        $prov1='';
+    }
+       $btnradio=$request->input('registro');
+       if($btnradio==null){
+        $btnradio='0';
+    }
+       $artic1=$request->input('arti');
+       if($artic1==null){
+        $artic1='';
+    }
+    $rechazo=null;
+    switch ($btnradio) {
+        case 0:
+        $rechazo=DB::table('Siz_Calidad_Rechazos')
+        ->whereBetween('fechaRevision',[$fechaIni ,$fechaFin])
+        ->where('proveedorId','LIKE','%'.$prov1.'%')
+        ->where('materialCodigo','LIKE','%'.$artic1.'%')
+        ->get();
+            break;
+        case 1:
+        $rechazo=DB::table('Siz_Calidad_Rechazos')->whereBetween('fechaRevision',[$fechaIni ,$fechaFin])
+        ->where('proveedorId','LIKE','%'.$prov1.'%')
+        ->where('materialCodigo','LIKE','%'.$artic1.'%')
+        ->where('cantidadRechazada',">",0)
+        ->get();
+
+            break;
+        case 2:
+        $rechazo=DB::table('Siz_Calidad_Rechazos')
+        ->whereBetween('fechaRevision',[$fechaIni ,$fechaFin])
+        ->where('proveedorId','LIKE','%'.$prov1.'%')
+        ->where('materialCodigo','LIKE','%'.$artic1.'%')
+        ->where('cantidadRechazada',0)
+        ->get();
+
+            break;
+    }
+//dd($rechazo);
        //dd($rechazo);
             $pdf = \PDF::loadView('Mod07_Calidad.RechazoPDF',['sociedad'=>$sociedad,'rechazo'=>$rechazo,'fechaIni'=>$fechaIni,'fechaFin'=>$fechaFin]);
             return $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true])->stream('Siz_Calidad_Reporte_Rechazo.Pdf');
