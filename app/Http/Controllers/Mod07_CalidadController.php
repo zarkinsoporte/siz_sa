@@ -155,4 +155,34 @@ else{
        
     }
 
+    
+    public function Cancelado()
+    {
+        $user = Auth::user();
+        $actividades = $user->getTareas();
+        $DelRechazo= DB::select("SELECT * FROM Siz_Calidad_Rechazos where Borrado='N'");
+        //$Delfechas=DB::select('SELECT fechaRevision FROM Siz_Calidad_Rechazos');
+     //dd($DelRechazo);
+     return view('Mod07_Calidad.Cancelaciones',['DelRechazo'=>$DelRechazo,'actividades' => $actividades, 'ultimo' => count($actividades)]);
+    }
+    
+    public function UPT_Cancelado($id){
+     
+        DB::table('Siz_Calidad_Rechazos')
+         ->where('id', $id)
+         ->update(['Borrado' => 'S']);
+         $user = Auth::user();
+                 
+         return redirect()->back();
+     }
+     public function Historial()
+     {
+         $user = Auth::user();
+         $actividades = $user->getTareas();
+         $VerHistorial= DB::select("SELECT * FROM Siz_Calidad_Rechazos where Borrado='S'");
+         //$Delfechas=DB::select('SELECT fechaRevision FROM Siz_Calidad_Rechazos');
+      //dd($DelRechazo);
+      return view('Mod07_Calidad.Historial',['VerHistorial'=>$VerHistorial,'actividades' => $actividades, 'ultimo' => count($actividades)]);
+     }
+
 }
