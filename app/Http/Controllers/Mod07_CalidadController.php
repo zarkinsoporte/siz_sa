@@ -86,17 +86,20 @@ else{
     }
 
    public function Reporte(){
-   
-    $user = Auth::user();
-    $actividades = $user->getTareas();
-    //dd($actividades );
-    //aqui va tu qwery
-    $Proveedores=  DB::select('SELECT proveedorId, proveedorNombre FROM Siz_Calidad_Rechazos group by proveedorId, proveedorNombre');
-   
-    $Articulos=  DB::select('SELECT materialCodigo, materialDescripcion FROM Siz_Calidad_Rechazos group by materialCodigo, materialDescripcion');
+    if(Auth::check()){
+        $user = Auth::user();
+        $actividades = $user->getTareas();
+        //dd($actividades );
+        //aqui va tu qwery
+        $Proveedores=  DB::select('SELECT proveedorId, proveedorNombre FROM Siz_Calidad_Rechazos group by proveedorId, proveedorNombre');
+    
+        $Articulos=  DB::select('SELECT materialCodigo, materialDescripcion FROM Siz_Calidad_Rechazos group by materialCodigo, materialDescripcion');
 
-    return view('Mod07_Calidad.Reporte_Rechazos',['Articulos' => $Articulos,'Proveedores' => $Proveedores,'actividades' => $actividades, 'ultimo' => count($actividades)]);
-   
+        return view('Mod07_Calidad.Reporte_Rechazos',['Articulos' => $Articulos,'Proveedores' => $Proveedores,'actividades' => $actividades, 'ultimo' => count($actividades)]);
+    }else {
+        return  redirect()->route('auth/login');
+    }
+    
    }
    
     public function Pdf_Rechazo(Request $request)
@@ -149,8 +152,9 @@ else{
     }
 //dd($rechazo);
        //dd($rechazo);
-            $pdf = \PDF::loadView('Mod07_Calidad.RechazoPDF',['sociedad'=>$sociedad,'rechazo'=>$rechazo,'fechaIni'=>$fechaIni,'fechaFin'=>$fechaFin]);
-            return $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true])->stream('Siz_Calidad_Reporte_Rechazo.Pdf');
+            $pdf = \PDF::loadView('Mod07_Calidad.RechazoPDF',compact('sociedad','rechazo','fechaIni','fechaFin'));
+            $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);
+            return $pdf->stream('Siz_Calidad_Reporte_Rechazo.Pdf');
            // return $pdf->download('ReporteOP.pdf');
        
     }
@@ -158,12 +162,18 @@ else{
     
     public function Cancelado()
     {
-        $user = Auth::user();
-        $actividades = $user->getTareas();
-        $DelRechazo= DB::select("SELECT * FROM Siz_Calidad_Rechazos where Borrado='N'");
-        //$Delfechas=DB::select('SELECT fechaRevision FROM Siz_Calidad_Rechazos');
-     //dd($DelRechazo);
-     return view('Mod07_Calidad.Cancelaciones',['DelRechazo'=>$DelRechazo,'actividades' => $actividades, 'ultimo' => count($actividades)]);
+        if(Auth::check()){
+            $user = Auth::user();
+            $actividades = $user->getTareas();
+            $DelRechazo= DB::select("SELECT * FROM Siz_Calidad_Rechazos where Borrado='N'");
+            //$Delfechas=DB::select('SELECT fechaRevision FROM Siz_Calidad_Rechazos');
+         //dd($DelRechazo);
+           return view('Mod07_Calidad.Cancelaciones',['DelRechazo'=>$DelRechazo,'actividades' => $actividades, 'ultimo' => count($actividades)]);
+        }else {
+            return  redirect()->route('/auth/login');
+        }
+    
+       
     }
     
     public function UPT_Cancelado($id){
@@ -171,7 +181,7 @@ else{
         DB::table('Siz_Calidad_Rechazos')
          ->where('id', $id)
          ->update(['Borrado' => 'S']);
-         $user = Auth::user();
+        
                  
          return redirect()->back();
      }

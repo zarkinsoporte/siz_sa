@@ -138,12 +138,12 @@ iframe[seamless] {
   </div>
   <div class="autocomplete form-group col-sm-3 col-md-3">
     <label for="exampleFormControlTextarea1">Cantidad Aceptada</label>
-    <input type="number" min="1"ng-model="n1" class="form-control" id="C_Aceptada" name="C_Aceptada"required >
+    <input type="number" min="1"ng-model="n1" class="form-control" id="C_Aceptada" name="C_Aceptada"  step=".01"required >
   </div>
 
   <div class="autocomplete form-group col-sm-3 col-md-3">
     <label for="exampleFormControlTextarea1">Cantidad Rechazada</label>
-    <input type="number" min="0"ng-model="n2" class="form-control" id="C_Rechazada" name="C_Rechazada"required >
+    <input type="number" min="0"ng-model="n2" class="form-control" id="C_Rechazada" name="C_Rechazada"  step=".01"required >
   </div>
 
   <div class="autocomplete form-group col-sm-3 col-md-3">

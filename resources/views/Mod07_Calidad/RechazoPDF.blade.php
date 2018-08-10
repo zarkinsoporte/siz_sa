@@ -49,17 +49,27 @@
         b{
             font-size:80%;
         }
+        .centerbtn{ 
+    position:absolute;; 
+    width:100%; left:88%;
+    text-align:center;
+    
+    /*position: relative; top: 50%; transform: translateY(-50%) translateX(30%); width: 100%;*/
+}
 
 
 </style>
 
 </head>
 <body>
+<div class="centerbtn">
+</div>
 <header>
+
 <div id="app">
         <div id="wrapper">
 <div class="container" >  
-<img src="images/Mod01_Produccion/siz1.png" >
+<img href="{!! url('home/NUEVO RECHAZO') !!}"src="images/Mod01_Produccion/siz1.png" >
 </header>
 <div class="col-6">
      <table  border="1px" class="table table-striped">
@@ -89,6 +99,7 @@
             <tr>
             <td rowspan="2" align="center" bgcolor="#474747" style="color:white"; scope="col">Fecha de Revisión</td>
             <td rowspan="2" align="center" bgcolor="#474747" style="color:white"; scope="col">Proveedor</td>
+            <td rowspan="2" align="center" bgcolor="#474747" style="color:white"; scope="col">Código de Material</td>
             <td rowspan="2"  align="center" bgcolor="#474747" style="color:white"; scope="col">Descripcion de Material</td>
             <td colspan="3" align="center" bgcolor="#474747" style="color:white"; scope="col">Cantidad</td>
             <td rowspan="2" align="center" bgcolor="#474747" style="color:white"; scope="col">Nombre del Inspector</td>
@@ -110,6 +121,9 @@
 
                             <td scope="row"align="center">
                             {{$rep->proveedorNombre}}
+                            </td>
+                            <td scope="row"align="center">
+                            {{$rep->materialCodigo}}
                             </td>
 
                             <td scope="row"align="center">
@@ -140,7 +154,7 @@
                 <td colspan="1">
                 <b>  Motivo del Rechazo: </b>
                 </td>
-                <td colspan="7">
+                <td colspan="8">
                 &nbsp;<?php echo ($rep->DescripcionRechazo);?>
              </td>
              </tr>
@@ -148,7 +162,7 @@
              <td colspan="1">
                <b>Observaciones : </b>
                 </td>
-                <td colspan="7">
+                <td colspan="8">
                 &nbsp;<?php echo ($rep->Observaciones);?>
              </td>
              </tr>

@@ -113,7 +113,7 @@
                             </div>
                             </div>
                             &nbsp;&nbsp;&nbsp;
-                            <input id="submit" name="submit" type="submit" value="Generar" onclick="mostrar();"  class="btn btn-primary"/>
+                            <input   formtarget="_blank" id="submit" name="submit" type="submit" value="Generar" onclick="mostrar();"  class="btn btn-primary"/>
 
                              <a type="button" class="btn btn-default"  href="{!!url('home')!!}">Cancelar</a>
                     </div>
