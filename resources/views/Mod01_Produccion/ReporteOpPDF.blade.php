@@ -18,7 +18,7 @@
     margin-left:50px;
     margin-right:50px;
     width: 700%;
-    margin-top:1.5%;
+    margin-top:3.5%;
 }
 	table { 
 		width: 100%; 
@@ -50,12 +50,13 @@
         b{
             font-size:100%;
         }
+        #header  {position: fixed; margin-top:2px; }
+    #content {position: relative; top:17%}
 </style>
 </head>
 <body>
-<div id="app">
-        <div id="wrapper">
-<div class="container" >  
+
+<div id="header" >  
 <img src="images/Mod01_Produccion/siz1.png" >
 <table border="1px"class="table table-striped">
     <thead>
@@ -78,21 +79,12 @@
         </tbody>
     </thead> 
     </table>
-    <br>
-<style>
-.table-blockquote {
-  padding: 3px 10px;
-  border: PowderBlue 5px solid;
-  border-radius: 20px;
-}
-</style>
-     <div class="row">
-        <div class="col-6">
+    </div>
+     <div id="content">
              <table  border="1px"class="table table-striped">
                     <thead class="table table-striped table-bordered table-condensed" >
-                        <tr>
-                        <th align="center" bgcolor="#474747" style="color:white";scope="col">FechaI</th>
-                        <th align="center" bgcolor="#474747" style="color:white";scope="col">FechaF</th>
+                        <tr>                      
+                        <th align="center" bgcolor="#474747" style="color:white";scope="col">Fecha>
                         <th align="center" bgcolor="#474747" style="color:white"; scope="col">Estación</th>
                         <th align="center" bgcolor="#474747" style="color:white";scope="col">Empleado</th>
                         <th align="center" bgcolor="#474747" style="color:white"; scope="col">Cantidad</th>
@@ -100,10 +92,7 @@
                     </thead>
                     <tbody>
                     @foreach ($data as $rep)
-                        <tr>
-                            <td scope="row">
-                               <?php echo date('d-m-Y', strtotime($rep->FechaI));  ?>
-                            </td>
+                        <tr>                            
                             <td scope="row">
                                 <?php echo date('d-m-Y', strtotime($rep->FechaF));  ?> 
                             </td>
