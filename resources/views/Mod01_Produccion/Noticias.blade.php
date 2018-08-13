@@ -29,7 +29,7 @@
             @foreach ($noticias as $noticia)
            
             
-
+<div class="col-md-8"   >
     <div class="alert alert-info alert-dismissible fade in">  
              <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
              <strong>• Retroceso:</strong> Se esta llevando a cabo el reproceso de la orden <strong>"{{$noticia->No_Orden}}"</strong> de la estación {{$noticia->Estacion_Act}} a la estacion de destino{{$noticia->Estacion_Destino}} 
@@ -37,28 +37,10 @@
              <br>            
              <strong> Nota:</strong>  {{$noticia->Nota}}
 
-             <div align="center">
+             <div align="right">
              <strong> Autorizo :</strong>  {{$noticia->Reproceso_Autorizado}}
             </div>
-<div align="right"><button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#{{$noticia->Id}}">Aceptar y Retroceder</button></div>
-
-                           <!-- Modal -->
-  <div class="modal fade" id="{{$noticia->Id}}" role="dialog">
-    <div class="modal-dialog modal-sm">
-    
-      <!-- Modal content-->
-      <div class="modal-content">
-        <div class="modal-body">
-            <p>¿Esta seguro de realizar el reproceso?</p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-            <a href="../leido/{{$noticia->Id}}" class="btn btn-primary btn-sm">Aceptar</a>
-      </div>
-      </div>   
-      </div>   
-    </div>
-  </div>
+<a href="../leido/{{$noticia->Id}}" class="btn btn-primary btn-sm">Aceptar</a></div>
 @endforeach
         <!-- /.container-fluid -->
 
