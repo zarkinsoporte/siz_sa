@@ -107,16 +107,11 @@
 
 
                          <div class="modal-footer">
-                            <div id="hiddendiv" class="progress" style="display: none">
-                            <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
-                            <span>Espere un momento...<span class="dotdotdot"></span></span>
-                            </div>
-                            </div>
-                            &nbsp;&nbsp;&nbsp;
-                            <input   formtarget="_blank" id="submit" name="submit" type="submit" value="Generar" onclick="mostrar();"  class="btn btn-primary"/>
+                          <input formtarget="_blank" id="submit" name="submit" type="submit" value="Generar" onclick="mostrar();"  class="btn btn-primary"/>
 
                              <a type="button" class="btn btn-default"  href="{!!url('home')!!}">Cancelar</a>
-                    </div>
+                            
+                            </div>
                     {!! Form::close() !!}
                     </div>
                             </div>
