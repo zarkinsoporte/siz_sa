@@ -84,7 +84,7 @@
              <table  border="1px"class="table table-striped">
                     <thead class="table table-striped table-bordered table-condensed" >
                         <tr>                      
-                        <th align="center" bgcolor="#474747" style="color:white";scope="col">Fecha>
+                        <th align="center" bgcolor="#474747" style="color:white";scope="col">Fecha</th>
                         <th align="center" bgcolor="#474747" style="color:white"; scope="col">Estación</th>
                         <th align="center" bgcolor="#474747" style="color:white";scope="col">Empleado</th>
                         <th align="center" bgcolor="#474747" style="color:white"; scope="col">Cantidad</th>

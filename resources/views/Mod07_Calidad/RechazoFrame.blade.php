@@ -148,12 +148,16 @@ iframe[seamless] {
 
   <div class="autocomplete form-group col-sm-3 col-md-3">
     <label for="exampleFormControlTextarea1">Cantidad Revisada</label>
-    <input type="number"  class="form-control" id="C_Revisada" name="C_Revisada" value="@{{n1+n2 }}" readonly required > 
+    <input type="number"  class="form-control" ng-model="n3 "id="C_Revisada" name="C_Revisada" value="@{{n1+n2 }}" readonly required > 
+  </div>
+  <div class="autocomplete form-group col-sm-2 col-md-2">
+    <label for="exampleFormControlTextarea1">Porcentaje de Aceptados</label>
+    <input type="number"  class="form-control" id="C_Revisada" name="C_Revisada" value="@{{(n1/(n1+n2))*100 }}" readonly step=".01" required > 
   </div>
 
   <div class="autocomplete form-group col-sm-10 col-md-10">
     <label for="exampleFormControlTextarea1">Descripcion del Rechazo</label>
-    <input type="text" class="form-control" id="D_Rechazo" name="D_Rechazo" required >
+    <input type="text" class="form-control" id="D_Rechazo" name="D_Rechazo"  required >
   </div>
 
   <div class="autocomplete form-group col-sm-10 col-md-10">

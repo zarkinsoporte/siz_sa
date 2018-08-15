@@ -123,10 +123,23 @@
                                         <th>Procesado</th>
                                         <th>Estación Actual</th>
                                         <th>Estación Siguiente</th>
-                                        @if(Auth::user()->U_EmpGiro=='246')
-                                        <th>Retroceder OP</th>
-                                        @endif
-                                        <th>Avanzar OP</th>
+<?php
+
+switch ($t_user->position) {
+    case '4';   //Supervisor SAP
+        break;             
+    case '3';   //Operador SAP      
+?>
+   <th>Avanzar OP</th>
+<?php
+    break;
+    case '2';  //Gerencia SAP
+?> 
+<th>Retroceder OP</th><th>Avanzar OP</th>
+<?php  
+    break;
+ }
+?>                                   
 
                                     </tr>
                                     </thead>
@@ -151,18 +164,42 @@
                                             <td> {{$of->U_CT_ACT}} </td>
                                             <td> {{$of->U_CT_SIG}} </td>
 
-                                                @if(Auth::user()->U_EmpGiro=='246')
-                                            <td> <a class="btn btn-danger" data-toggle="modal"
+<?php
+
+switch ($t_user->position) {
+    case '4';   //Supervisor SAP
+        break;             
+    case '3';   //Operador SAP      
+?>
+                  <!--Boton Avanzar-->
+                  <td> <a class="btn btn-success {{$of->avanzar}}" data-toggle="modal"
+                                                    data-target="#cantidad" data-whatever="{{$of->Code}}"
+                                                    data-whatever2="{{$of->U_Recibido - $of->U_Procesado}}">
+                                                    <i class="fa fa-send-o" aria-hidden="true">   Avanzar</i>
+                                                </a> </td>
+<?php
+    break;
+    case '2';  //Gerencia SAP
+?> 
+
+                                                <!--Boton Retroceder-->
+                                                <td> <a class="btn btn-danger" data-toggle="modal"
                                             data-target="#Retroceder" class="btn btn-info btn-lg" data-codem="{{$of->U_Orden}}" data-recibido="{{$of->U_Recibido - $of->U_Procesado}}">
                                                     <i class="fa fa-mail-reply-all" aria-hidden="1">   Retroceder</i>
                                                 </a> </td>
-                                                @endif
-
+                                           
+                                                    <!--Boton Avanzar-->
                                             <td> <a class="btn btn-success {{$of->avanzar}}" data-toggle="modal"
                                                     data-target="#cantidad" data-whatever="{{$of->Code}}"
                                                     data-whatever2="{{$of->U_Recibido - $of->U_Procesado}}">
                                                     <i class="fa fa-send-o" aria-hidden="true">   Avanzar</i>
                                                 </a> </td>
+<?php  
+    break;
+ }
+?> 
+
+
                                         </tr>
                                     @endforeach
 </tbody>
