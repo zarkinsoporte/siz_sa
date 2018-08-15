@@ -50,23 +50,20 @@ class Mod01_ProduccionController extends Controller
     {
         //$pdf = App::make('dompdf.wrapper');
         $GraficaOrden = DB::select( DB::raw("SELECT [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,
-        DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOT].U_FechaHora)) AS FechaI,
         DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)) AS FechaF ,OHEM.firstName + ' ' + OHEM.lastName AS Empleado, [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
         SUM([@CP_LOGOF].U_Cantidad) AS U_CANTIDAD,
-        (oitm.U_VS ) AS VS,(SELECT CompnyName FROM OADM) AS CompanyName     
-       
+        (oitm.U_VS ) AS VS,      
+        (SELECT CompnyName FROM OADM ) AS CompanyName
         FROM [@CP_LOGOF] inner join [@PL_RUTAS] ON [@CP_LOGOF].U_CT = [@PL_RUTAS].Code
         left join OHEM ON [@CP_LOGOF].U_idEmpleado = OHEM.empID
-        inner join [@CP_LOGOT] ON [@CP_LOGOF].U_DocEntry = [@CP_LOGOT].U_OP and [@CP_LOGOf].U_CT = [@CP_LOGOT].U_CT 
         inner join OWOR ON [@CP_LOGOF].U_DocEntry = OWOR.DocNum
         inner join OITM ON OWOR.ItemCode = OITM.ItemCode
         WHERE U_DocEntry = $op 
-        GROUP BY [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,
-        DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOT].U_FechaHora)) ,
+        GROUP BY [@CP_LOGOF].[U_FechaHora], [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,
         DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)) ,
         OHEM.firstName + ' ' + OHEM.lastName , [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
         oitm.U_VS
-        ORDER BY [@CP_LOGOF].U_CT") );
+        ORDER BY FechaF,[@CP_LOGOF].U_CT") );
         //dd($GraficaOrden);
     
         $data=array(
@@ -332,7 +329,7 @@ if ($code->U_Recibido > $code->U_Procesado){
         DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)) ,
         OHEM.firstName + ' ' + OHEM.lastName , [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
         oitm.U_VS
-        ORDER BY FechaI,[@CP_LOGOF].U_CT") );
+        ORDER BY FechaF,[@CP_LOGOF].U_CT") );
         //dd($GraficaOrden);
         $cont = count($GraficaOrden);
         $stocksTable = Lava::DataTable();
@@ -344,7 +341,7 @@ if ($code->U_Recibido > $code->U_Procesado){
             ]);
 
             foreach($GraficaOrden as $campo){
-                $date = date_create($campo->FechaI);
+                $date = date_create($campo->FechaF);
 
                 $nom_emp = $campo->Empleado;
                 if($nom_emp==NULL){
@@ -355,7 +352,7 @@ if ($code->U_Recibido > $code->U_Procesado){
                 }
                 
                 $stocksTable->addRow([
-                   $campo->FechaI, $campo->U_CT, '<p style=margin:10px><b>'.
+                   $campo->FechaF, $campo->U_CT, '<p style=margin:10px><b>'.
                    ucwords(strtolower($nom_emp)).
                    '</b><br>Estación:<b>'.
                    $campo->NAME.
@@ -408,7 +405,7 @@ if ($code->U_Recibido > $code->U_Procesado){
 
             }
             $Cant_procesar = Input::get('cant');
-            $Code_actual = OP::find(Input::get('code'));
+            $Code_actual = OP::find(Input::get('code'));        
             Session::put('op', $Code_actual->U_DocEntry);
 //dd($Code_actual);
             $U_CT_siguiente = OP::getEstacionSiguiente($Code_actual->Code, 2);
@@ -473,7 +470,7 @@ if ($code->U_Recibido > $code->U_Procesado){
                     $lot = new LOGOT();
                     $lot->Code = ((int)$consecutivologot[0]->Code)+1;
                     $lot->Name = ((int)$consecutivologot[0]->Code)+1;
-                    $lot->U_idEmpleado = $id;
+                    $lot->U_idEmpleado = $t_user->empID;
                     $lot->U_CT = $Code_actual->U_CT;
                     $lot->U_Status = "O";
                     $lot->U_FechaHora = $dt;
@@ -498,7 +495,7 @@ if ($code->U_Recibido > $code->U_Procesado){
             $log = new LOGOF();
             $log->Code = ((int)$consecutivologof[0]->Code)+1;
             $log->Name = ((int)$consecutivologof[0]->Code)+1;
-            $log->U_idEmpleado = $id;
+            $log->U_idEmpleado = $t_user->empID;
             $log->U_CT = $Code_actual->U_CT;
             $log->U_Status = "T";
             $log->U_FechaHora = $dt;
@@ -508,18 +505,19 @@ if ($code->U_Recibido > $code->U_Procesado){
 
             $Code_actual->save();
             $log->save();
-       // dd($cantO);
+       // dd($Code_actual->Code);
 
             Session::flash('mensaje', 'El usuario '.$id.' avanzo '.$Cant_procesar.' pza(s) a la estación '.OP::getEstacionSiguiente($Code_actual->Code, 1));
 
-            if ($Code_actual->U_Recibido > 0 && $cantO == $Code_actual->U_Procesado){
+            if (($Code_actual->U_Recibido > 0 && $cantO == $Code_actual->U_Procesado)||
+                ($Code_actual->U_Recibido == $Code_actual->U_Procesado && $Code_actual->U_Recibido == $Code_actual->U_Entregado)){
                 $lineaActual = OP::find($Code_actual->Code);   //si esta linea ya termino de procesar_todo entonces se borra
                 $lineaActual->delete();
             }
-            if ($Code_actual->U_Recibido == $Code_actual->U_Procesado && $Code_actual->U_Recibido == $Code_actual->U_Entregado){
-                $lineaActual = OP::find($Code_actual->Code);   //si esta linea ya termino de procesar_todo entonces se borra
-                $lineaActual->delete();
-            }
+           // if (){
+             //   $lineaActual = OP::find($Code_actual->Code);   //si esta linea ya termino de procesar_todo entonces se borra
+               // $lineaActual->delete();
+            //}
 
 
         });
@@ -623,6 +621,7 @@ $op = Input::get('op');
         $Est_act = $request->input('Estacion');
         $Est_ant = $request->input('selectestaciones');
         $No_Nomina= $request->input('Nomina');
+        $Num_user = User::find($No_Nomina)->empID;
         $nota = $request->input('nota');
         $Nom_User=$request->input('Nombre');
         $autorizo=$request->input('Autorizar');
@@ -637,6 +636,7 @@ $op = Input::get('op');
 
 //$Not_us=DB::select(DB::raw("SELECT top 1 U_EmpGiro,firstname,lastname from OHEM where position='4'and dept ='$cod_dep'"));
 $N_Emp  = User::where('position', 4)->where('U_CP_CT','like', '%'.$Est_ant.'%' )->first();
+
 //$N_Emp  = $Not_us[0];
 //dd($N_Emp);
 DB::table('Siz_Noticias')->insert(
@@ -698,7 +698,7 @@ DB::table('Siz_Noticias')->insert(
         $cot = new LOGOT();
         $cot->Code = ((int)$Con_Loguot[0]->Code)+1;
         $cot->Name = ((int)$Con_Loguot[0]->Code)+1;
-        $cot->U_idEmpleado=$No_Nomina;
+        $cot->U_idEmpleado=$Num_user;
         $cot->U_CT = $Est_ant;
         $cot->U_Status = "O";
         $cot->U_FechaHora = $dt;
@@ -754,7 +754,7 @@ if($Actual > $cant_r){
                 $log = new LOGOF();
                 $log->Code = ((int)$Con_Logof[0]->Code)+1;
                 $log->Name = ((int)$Con_Logof[0]->Code)+1;
-                $log->U_idEmpleado = $No_Nomina;
+                $log->U_idEmpleado = $Num_user;
                 $log->U_CT =$estacion;
                 $log->U_Status = "T";
                 $log->U_FechaHora = $dt;
@@ -791,7 +791,7 @@ if($Actual > $cant_r){
  Autorizado por:  '.$autorizo.'');
 
 });   
-return redirect()->action('HomeController@index');     
+return redirect()->back();     
      }
 
 }
