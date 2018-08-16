@@ -120,8 +120,7 @@ class Mod01_ProduccionController extends Controller
        AND NOT (f.InvntItem='N' AND f.SellItem='N' AND f.PrchseItem='N' AND f.AssetItem='N')
        AND f.ItemName  not like  '%Gast%'
     ORDER BY CONVERT(INT, f.U_Estacion)") );
-        //dd($Materiales);
-    
+        //dd($Materiales);    
         $data=array(
                     'data' => $Materiales,
                     'op'   => $op,
@@ -339,18 +338,15 @@ if ($code->U_Recibido > $code->U_Procesado){
             ->addRoleColumn('string', 'tooltip',[
                 'html' => true
             ]);
-
             foreach($GraficaOrden as $campo){
                 $date = date_create($campo->FechaF);
-
                 $nom_emp = $campo->Empleado;
                 if($nom_emp==NULL){
                     $users = DB::table('OHEM')->where('U_EmpGiro', '=', $campo->U_idEmpleado)
                     ->select('OHEM.lastName', 'OHEM.firstName')
                     ->first();
                     $nom_emp=$users->firstName.' '.$users->lastName;
-                }
-                
+                }                
                 $stocksTable->addRow([
                    $campo->FechaF, $campo->U_CT, '<p style=margin:10px><b>'.
                    ucwords(strtolower($nom_emp)).
@@ -362,9 +358,7 @@ if ($code->U_Recibido > $code->U_Procesado){
                    date_format($date,'d/m/Y').
                    '</b></p>'
                  ]);
-             }
-            
-             
+             }              
             //  foreach($GraficaOrden as $campo){
             //     $campo->U_CT;       
             //  }
@@ -380,21 +374,14 @@ if ($code->U_Recibido > $code->U_Procesado){
                 'isHtml' => true
             ], 
         ]);
-
         ////RUTA RETROCESO
         $Ruta = OP::getRutaNombres($op);
-
         return view('Mod01_Produccion.traslados', ['actividades' => $actividades, 'ultimo' => count($actividades),'Ruta'=>$Ruta,'t_user' => $t_user, 'ofs' => $one, 'op' => $op, 'pedido' => $pedido, 'HisOrden' => $HisOrden]);
-
     }
         return redirect()->back()->withErrors(array('message' => 'La OP '.Input::get('op').' no existe.'));
-
-
     }
 
     public function avanzarOP(){
-
-
         try{
             DB::transaction(function () {
             $id = Input::get('userId');
@@ -422,27 +409,22 @@ if ($code->U_Recibido > $code->U_Procesado){
                 ->where('U_Reproceso', 'N')
                 ->get();
 
-           // $dt = date('Y-m-d H:i:s');
+            // $dt = date('Y-m-d H:i:s');
             $dt = date('Ymd h:m:s'); 
             $CantOrden = DB::table('OWOR')
                 ->where('DocEntry', $Code_actual->U_DocEntry)
                 ->first();
             $cantO = (int)$CantOrden->PlannedQty;
             //dd($Code_siguiente);
-            if (count($Code_siguiente) == 1){
-               
+            if (count($Code_siguiente) == 1){               
                 $Code_siguiente =  OP::where('U_CT', $U_CT_siguiente)
                     ->where('U_DocEntry', $Code_actual->U_DocEntry)
                     ->where('U_Reproceso', 'N')
                     ->first();
                // dd( ($Cant_procesar + $Code_siguiente->U_Recibido) <= (Input::get('numcant')+$Code_actual->U_Procesado));
-
-
                 if ( ($Cant_procesar + $Code_siguiente->U_Recibido) <= $cantO){
-
                     $Code_siguiente->U_Recibido = $Code_siguiente->U_Recibido + $Cant_procesar;
                     $Code_siguiente->save();
-
                 }else{
                     return redirect()->back()->withInput()->withErrors(array('message' => 'La cantidad total recibida no debe ser mayor a la cantidad de la Orden.'));
                 }
@@ -450,7 +432,7 @@ if ($code->U_Recibido > $code->U_Procesado){
                 try{
                     //esta linea obtiene el consecutivo del numero 
                     $consecutivo =  DB::select('select max (CONVERT(INT,Code)) as Code from [@CP_Of]');
-//aqui acaba num consecutivo
+                    //aqui acaba num consecutivo
                     $newCode = new OP();
                     $newCode->Code = ((int)$consecutivo[0]->Code)+1;
                     $newCode->Name = ((int)$consecutivo[0]->Code)+1;
@@ -476,7 +458,6 @@ if ($code->U_Recibido > $code->U_Procesado){
                     $lot->U_FechaHora = $dt;
                     $lot->U_OP = $Code_actual->U_DocEntry;
                     $lot->save();
-
                 }catch (Exception $e)
                 {
                     return redirect()->back()->withInput()->withErrors(array('message' => 'Error al guardar nuevo registro en CP_OF.'));
@@ -488,10 +469,7 @@ if ($code->U_Recibido > $code->U_Procesado){
             // dd(count($Code_siguiente));
             $Code_actual->U_Procesado = $Code_actual->U_Procesado + $Cant_procesar;
             $Code_actual->U_Entregado = $Code_actual->U_Entregado + $Cant_procesar;
-
-
-            $consecutivologof =  DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOF]');
-            
+            $consecutivologof =  DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOF]');            
             $log = new LOGOF();
             $log->Code = ((int)$consecutivologof[0]->Code)+1;
             $log->Name = ((int)$consecutivologof[0]->Code)+1;
@@ -502,33 +480,26 @@ if ($code->U_Recibido > $code->U_Procesado){
             $log->U_DocEntry = $Code_actual->U_DocEntry;
             $log->U_Cantidad = $Cant_procesar;
             $log->U_Reproceso = 'N';
-
             $Code_actual->save();
             $log->save();
        // dd($Code_actual->Code);
-
             Session::flash('mensaje', 'El usuario '.$id.' avanzo '.$Cant_procesar.' pza(s) a la estación '.OP::getEstacionSiguiente($Code_actual->Code, 1));
-
             if (($Code_actual->U_Recibido > 0 && $cantO == $Code_actual->U_Procesado)||
                 ($Code_actual->U_Recibido == $Code_actual->U_Procesado && $Code_actual->U_Recibido == $Code_actual->U_Entregado)){
                 $lineaActual = OP::find($Code_actual->Code);   //si esta linea ya termino de procesar_todo entonces se borra
                 $lineaActual->delete();
             }
-           // if (){
+             // if (){
              //   $lineaActual = OP::find($Code_actual->Code);   //si esta linea ya termino de procesar_todo entonces se borra
-               // $lineaActual->delete();
-            //}
-
-
+             // $lineaActual->delete();
+             //}
         });
             return redirect()->back()->withInput();
         }catch (Exception $e){
             return redirect()->back()->withInput()->withErrors(array('message' => 'Error al Guardar la Orden.'));
         }
-
         //eliminar linea procesada completa de CP_OF
         //creacion de linea  en CP_LOGOF y CP_LOGOT
-
     }
     public function MethodGET_OP($id)
     {
@@ -542,17 +513,13 @@ $op = Input::get('op');
         }else{
             return redirect()->route('home');
         }
-
         $t_user = User::find($id);
         if ($t_user == null) {
             return redirect()->back()->withErrors(array('message' => 'Error, el usuario no existe.'));
         }
-
         $user = Auth::user();
         $actividades = $user->getTareas();
         Session::flash('usertraslados', 2);  //evita que salga el modal
-
-
         $Codes = OP::where('U_DocEntry', Input::get('op'))->get();
         if (count($Codes) > 0){
             $index = 0;
@@ -583,13 +550,10 @@ $op = Input::get('op');
                     //dd($one);
                 }
             }
-            //  $order = OP::find('492418');
-            //return $one;
-
-
+            // $order = OP::find('492418');
+            // return $one;
             // $actual = OP::getEstacionActual(Input::get('op'));
             // $siguiente = OP::getEstacionSiguiente(Input::get('op'));
-
             $stocksTable = Lava::DataTable();
             $stocksTable->addDateColumn('Day of Month')
                 ->addNumberColumn('Projected')
@@ -608,12 +572,9 @@ $op = Input::get('op');
                     'position' => 'in'
                 ]
             ]);
-            
             return view('Mod01_Produccion.traslados', ['actividades' => $actividades, 'ultimo' => count($actividades),'t_user' => $t_user, 'ofs' => $one, 'op' => $op, 'pedido' => $pedido, 'beto' => $beto]);
-
         }
         return redirect()->back()->withErrors(array('message' => 'La OP '.Input::get('op').' no existe.'));
-
     } 
     public function Retroceso(Request $request)
     {
@@ -631,12 +592,17 @@ $op = Input::get('op');
        $leido='N';
        $banderita = false;  // esta bandera sirva para verificar si la estacion destino es un retroceso creado o ya existente 
        $dt = date('Ymd h:m:s'); 
-    //   $dt = date('Y-m-d H:i:s');  no usar
+//   $dt = date('Y-m-d H:i:s');  no usar
 //-------------Notificaciones--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
-
 //$Not_us=DB::select(DB::raw("SELECT top 1 U_EmpGiro,firstname,lastname from OHEM where position='4'and dept ='$cod_dep'"));
 $N_Emp  = User::where('position', 4)->where('U_CP_CT','like', '%'.$Est_ant.'%' )->first();
-
+if ($N_Emp == null || count($N_Emp) < 1){
+    $request->session()->flash('op', $orden);
+    return redirect()->back()->withErrors(array('message' => 'Error, La estación anterior no esta asignada al Supervisor en SAP.'));
+  //return Redirect::back()->withErrors(['message', 'The Message']);
+}else if(count($N_Emp) > 1){
+    return redirect()->back()->withErrors(array('message' => 'Error, Hay dos Supervisores para el área anterior en SAP.'));
+}
 //$N_Emp  = $Not_us[0];
 //dd($N_Emp);
 DB::table('Siz_Noticias')->insert(
@@ -676,7 +642,6 @@ DB::table('Siz_Noticias')->insert(
       //  dd('insert '.$DestinoCp);
        $banderita = true;  //si es un reproceso creado de cero
         $N_Code =  DB::select('select max (CONVERT(INT,Code)) as Code from [@CP_OF]');
-
             $Nuevo_reproceso = new OP();
             $Nuevo_reproceso->Code=((int)$N_Code[0]->Code)+1;
             $Nuevo_reproceso->Name=((int)$N_Code[0]->Code)+1;
@@ -704,15 +669,12 @@ DB::table('Siz_Noticias')->insert(
         $cot->U_FechaHora = $dt;
         $cot->U_OP =$orden;
        $cot->save();
-    }
-    
+    }    
    }   
     //---------Estacion Actual-----------------------------------------------------------------------------------------------------------------------------------------------------//
-
 $Actual_Cp = OP::where('U_DocEntry', $orden)->where('U_CT', $Est_act)->first();
 $Actual=$Actual_Cp->U_Recibido;
 //dd($Actual_Cp);
-
 if($Actual==$cant_r){
    $Actual_Cp->delete();
 }
@@ -735,18 +697,10 @@ if($Actual > $cant_r){
             $OrdenDest->save();
           }
 }
-
-   //-------------Tabla LOGOF-----------------------------//
-   //$Code_actual = OP::find(Input::get('code'));
-
-   
-//dd(Input::get('code'));
-                                    
-           
-   
-            //---------Count Cantidades negativas  /_(○_○)-/-----------------------------------------------------------------------------------------------------------------------------------------------------//
-
-       
+    //-------------Tabla LOGOF-----------------------------//
+    //$Code_actual = OP::find(Input::get('code'));  
+    //dd(Input::get('code'));
+    //---------Count Cantidades negativas  /_(○_○)-/-----------------------------------------------------------------------------------------------------------------------------------------------------//       
             $estaciones = OP::getRuta($orden);
         foreach($estaciones as $estacion){
             if($estacion >= $Est_ant && $estacion < $Est_act ){
@@ -763,15 +717,13 @@ if($Actual > $cant_r){
                 $log->U_Reproceso = 'S';    
                 //$Code_actual->save();
                 $log->save();
-            }}
-    
+            }}    
             $Nombre_Destino= DB::table('@PL_RUTAS')->where('U_Orden', $request->input('selectestaciones'))->value('Name');             
             $Nombre_Actual= DB::table('@PL_RUTAS')->where('U_Orden', $request->input('Estacion'))->value('Name'); 
   //--------------------correo-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
   $Num_Nominas=DB::select(DB::raw("SELECT No_Nomina from Siz_Email where Reprocesos='1'"));
   foreach ($Num_Nominas as $Num_Nomina) {
-  $user= User::find($Num_Nomina->No_Nomina);
-  
+  $user= User::find($Num_Nomina->No_Nomina);  
   $correo  = utf8_encode ($user['email'].'@zarkin.com');
   //dd($correo,$user);
   Mail::send('Emails.Reprocesos',[ 'Nombre_Destino'=>$Nombre_Destino,'Nombre_Actual'=>$Nombre_Actual,'autorizo'=>$autorizo,'dt'=> date('d/M/Y h:m:s'),
@@ -779,19 +731,21 @@ if($Actual > $cant_r){
   'cant_r'=>$cant_r,'Est_act'=>$Est_act,'Est_ant'=>$Est_ant,'reason'=>$reason,'nota'=>$nota,'leido'=>$leido],function($msj) use($correo){
   $msj-> subject  ('Notificaciones SIZ');//ASUNTO DEL CORREO
   $msj-> to($correo);//Correo del destinatario  
-  });
-  
-  }
-   
+  });  
+  }   
 //-----------------Refresca a la vista-------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
- Session::flash('info', 'Reproceso Realizado!!...
+ Session::flash('mensaje', 'Reproceso Realizado!!...
  De :'.$Nombre_Actual.'
  A:'.$Nombre_Destino.'
  Supervisor:' .$N_Emp->firstName. ' ' .$N_Emp->lastName.'
  Autorizado por:  '.$autorizo.'');
 
-});   
-return redirect()->back();     
-     }
+ Session::flash('op', $orden);
+
+}
+);   
+return redirect()->back(); 
+//return redirect()->back()->withErrors(array('message' => 'Error, Consulte con el Administrador de SIZ, por que no se llevo a cabo el retroceso.'));
+}
 
 }

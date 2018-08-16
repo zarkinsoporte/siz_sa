@@ -133,7 +133,7 @@ switch ($t_user->position) {
    <th>Avanzar OP</th>
 <?php
     break;
-    case '2';  //Gerencia SAP
+    case '1';  //Gerencia SAP
 ?> 
 <th>Retroceder OP</th><th>Avanzar OP</th>
 <?php  
@@ -179,7 +179,7 @@ switch ($t_user->position) {
                                                 </a> </td>
 <?php
     break;
-    case '2';  //Gerencia SAP
+    case '1';  //Gerencia SAP 1 pruebas
 ?> 
 
                                                 <!--Boton Retroceder-->

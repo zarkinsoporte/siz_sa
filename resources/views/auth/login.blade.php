@@ -12,6 +12,14 @@
 {!! Html::style('assets/css/index.css?crc=3185328.css') !!}
 
 <!-- Scripts -->
+<!-- 
+number bindec ( string $binary_string )
+
+$str = 'In My Cart : 11 12 items';
+preg_match_all('!\d+!', $str, $matches);
+print_r($matches);
+
+-->
 <script>
     window.Laravel = {!! json_encode([
             'csrfToken' => csrf_token(),
