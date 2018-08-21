@@ -12,6 +12,14 @@
 {!! Html::style('assets/css/index.css?crc=3185328.css') !!}
 
 <!-- Scripts -->
+<!-- 
+number bindec ( string $binary_string )
+
+$str = 'In My Cart : 11 12 items';
+preg_match_all('!\d+!', $str, $matches);
+print_r($matches);
+
+-->
 <script>
     window.Laravel = {!! json_encode([
             'csrfToken' => csrf_token(),
@@ -81,7 +89,7 @@
                             <div class="form-group label-floating">
                                 <label class="control-label" for="id">No. Nómina:</label>
                                 <div class="input-group">
-                                    <input type="number" id="id" name="id" class="form-control" style="color: white" value="{{old('id')}}" required autofocus>
+                                    <input type="number" min="0" id="id" name="id" class="form-control" style="color: white" value="{{old('id')}}" required autofocus>
                                     <span class="input-group-btn">
 
                                       </span>

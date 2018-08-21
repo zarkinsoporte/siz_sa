@@ -47,11 +47,14 @@ class Mod07_CalidadController extends Controller
 
 public function RechazoIn(Request $request)   
     {
+    if($request->input('Fech_Recp')<=($request->input('Fech_Rev')))
+    {
+ 
       //  dd($request->input('Inspector'));
         DB::table('Siz_Calidad_Rechazos')->insert(
             [
-                'fechaRevision'      =>$request->input('Fech_Rev'),
                 'fechaRecepcion'     =>$request->input('Fech_Recp'),
+                'fechaRevision'      =>$request->input('Fech_Rev'),
                 'proveedorId'        =>$request->input('Id_prov'),
                 'proveedorNombre'    =>$request->input('Proveedor'),
                 'materialCodigo'     =>$request->input('Codigo'),
@@ -64,12 +67,17 @@ public function RechazoIn(Request $request)
                 'DocumentoNumero'    =>$request->input('N_Doc'),
                 'InspectorNombre'    =>$request->input('Inspector'),
                 'Observaciones'      =>$request->input('Observaciones'),
+           
         
             ]
         );
             Session::flash('mensaje', 'Registro Guardado');
           return response()->redirectTo('home/NUEVO RECHAZO');
-    }
+    } 
+else{
+    return Redirect::back()->with('message' , 'Error,La fecha Revisión es menor a la fecha de Recepción');
+}
+}
     public function autocomplete(Request $request)
     {
       
@@ -78,12 +86,20 @@ public function RechazoIn(Request $request)
     }
 
    public function Reporte(){
-   
-    $user = Auth::user();
-    $actividades = $user->getTareas();
-    //dd($actividades );
-    return view('Mod07_Calidad.Reporte_Rechazos',['actividades' => $actividades, 'ultimo' => count($actividades)]);
-   
+    if(Auth::check()){
+        $user = Auth::user();
+        $actividades = $user->getTareas();
+        //dd($actividades );
+        //aqui va tu qwery
+        $Proveedores=  DB::select('SELECT proveedorId, proveedorNombre FROM Siz_Calidad_Rechazos group by proveedorId, proveedorNombre');
+    
+        $Articulos=  DB::select('SELECT materialCodigo, materialDescripcion FROM Siz_Calidad_Rechazos group by materialCodigo, materialDescripcion');
+
+        return view('Mod07_Calidad.Reporte_Rechazos',['Articulos' => $Articulos,'Proveedores' => $Proveedores,'actividades' => $actividades, 'ultimo' => count($actividades)]);
+    }else {
+        return  redirect()->route('auth/login');
+    }
+    
    }
    
     public function Pdf_Rechazo(Request $request)
@@ -92,13 +108,91 @@ public function RechazoIn(Request $request)
        //$pdf = App::make('dompdf');
        $fechaIni = $request->input('FechIn');
        $fechaFin = $request->input('FechaFa');
-       $rechazo=DB::table('Siz_Calidad_Rechazos')->whereBetween('fechaRevision',[$fechaIni ,$fechaFin])->get();
        $sociedad=DB::table('OADM')->value('CompnyName');
+       
+    
+         $prov1= $request->input('prov');
+       if($prov1==null){
+        $prov1='';
+    }
+       $btnradio=$request->input('registro');
+       if($btnradio==null){
+        $btnradio='0';
+    }
+       $artic1=$request->input('arti');
+       if($artic1==null){
+        $artic1='';
+    }
+    $rechazo=null;
+    switch ($btnradio) {
+        case 0:
+        $rechazo=DB::table('Siz_Calidad_Rechazos')
+        ->whereBetween('fechaRevision',[$fechaIni ,$fechaFin])
+        ->where('proveedorId','LIKE','%'.$prov1.'%')
+        ->where('materialCodigo','LIKE','%'.$artic1.'%')
+        ->get();
+            break;
+        case 1:
+        $rechazo=DB::table('Siz_Calidad_Rechazos')->whereBetween('fechaRevision',[$fechaIni ,$fechaFin])
+        ->where('proveedorId','LIKE','%'.$prov1.'%')
+        ->where('materialCodigo','LIKE','%'.$artic1.'%')
+        ->where('cantidadRechazada',">",0)
+        ->get();
+
+            break;
+        case 2:
+        $rechazo=DB::table('Siz_Calidad_Rechazos')
+        ->whereBetween('fechaRevision',[$fechaIni ,$fechaFin])
+        ->where('proveedorId','LIKE','%'.$prov1.'%')
+        ->where('materialCodigo','LIKE','%'.$artic1.'%')
+        ->where('cantidadRechazada',0)
+        ->get();
+
+            break;
+    }
+//dd($rechazo);
        //dd($rechazo);
-            $pdf = \PDF::loadView('Mod07_Calidad.RechazoPDF',['sociedad'=>$sociedad,'rechazo'=>$rechazo,'fechaIni'=>$fechaIni,'fechaFin'=>$fechaFin]);
-            return $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true])->stream('Siz_Calidad_Reporte_Rechazo.Pdf');
+            $pdf = \PDF::loadView('Mod07_Calidad.RechazoPDF',compact('sociedad','rechazo','fechaIni','fechaFin'));
+            $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);
+            return $pdf->stream('Siz_Calidad_Reporte_Rechazo.Pdf');
            // return $pdf->download('ReporteOP.pdf');
        
     }
+
+    
+    public function Cancelado()
+    {
+        if(Auth::check()){
+            $user = Auth::user();
+            $actividades = $user->getTareas();
+            $DelRechazo= DB::select("SELECT * FROM Siz_Calidad_Rechazos where Borrado='N'");
+            //$Delfechas=DB::select('SELECT fechaRevision FROM Siz_Calidad_Rechazos');
+         //dd($DelRechazo);
+           return view('Mod07_Calidad.Cancelaciones',['DelRechazo'=>$DelRechazo,'actividades' => $actividades, 'ultimo' => count($actividades)]);
+        }else {
+            return  redirect()->route('/auth/login');
+        }
+    
+       
+    }
+    
+    public function UPT_Cancelado($id){
+     
+        DB::table('Siz_Calidad_Rechazos')
+         ->where('id', $id)
+         ->update(['Borrado' => 'S']);
+        
+                 
+         return redirect()->back();
+     }
+     public function Historial()
+     {
+         $user = Auth::user();
+         $actividades = $user->getTareas();
+         $VerHistorial= DB::select("SELECT * FROM Siz_Calidad_Rechazos where Borrado='S'");
+         //$Delfechas=DB::select('SELECT fechaRevision FROM Siz_Calidad_Rechazos');
+      //dd($DelRechazo);
+      return view('Mod07_Calidad.Historial',['VerHistorial'=>$VerHistorial,'actividades' => $actividades, 'ultimo' => count($actividades)]);
+     }
 
 }

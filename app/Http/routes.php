@@ -17,7 +17,11 @@ use App\Modelos\MOD01\MODULOS_GRUPO_SIZ;
 use App\OP;
 use Illuminate\Support\Facades\DB;
 Route::get('/','HomeController@index');
-Route::get('/home', 'HomeController@index');
+Route::get('/home',
+[
+    'as' => 'home',
+    'uses' => 'HomeController@index'
+]);
 Route::get('/pruebas', function(){
     return view('Mod00_Administrador.pruebas');
 });
@@ -32,6 +36,7 @@ Route::get('/pruebas', function(){
 |--------------------------------------------------------------------------
 */
 Route::get('auth/login', 'Auth\AuthController@getLogin');
+Route::get('login', 'Auth\AuthController@getLogin');
 Route::post('auth/login', ['as' =>'auth/login', 'uses' => 'Auth\AuthController@postLogin']);
 Route::get('auth/logout', ['as' => 'auth/logout', 'uses' => 'Auth\AuthController@getLogout']);
 /*
@@ -238,5 +243,9 @@ Route::post('Mod07_Calidad/Mod_RechazoUPDT', 'Mod07_CalidadController@Mod_Rechaz
 Route::get('admin/Delete_Rechazo/{id}', 'Mod07_CalidadController@Delete_Rechazo');
 Route::post('admin/Delete_Rechazo/', 'Mod07_CalidadController@Delete_Rechazo');
 Route::get('search/autocomplete', 'Mod07_CalidadController@autocomplete');
-Route::post('pdfRechazo', 'Mod07_CalidadController@Pdf_Rechazo');
+Route::post('/pdfRechazo', 'Mod07_CalidadController@Pdf_Rechazo');
 Route::get('home/REPORTE DE RECHAZOS', 'Mod07_CalidadController@Reporte');
+Route::get('home/CANCELACIONES', 'Mod07_CalidadController@Cancelado');
+Route::get('borrado/{id}', 'Mod07_CalidadController@UPT_Cancelado');
+Route::post('/borrado', 'Mod07_CalidadController@UPT_Cancelado');
+Route::get('home/HISTORIAL', 'Mod07_CalidadController@Historial');

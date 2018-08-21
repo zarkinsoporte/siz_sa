@@ -18,7 +18,7 @@
     margin-left:50px;
     margin-right:50px;
     width: 700%;
-    margin-top:1.5%;
+    margin-top:3.5%;
 }
 	table { 
 		width: 100%; 
@@ -50,21 +50,22 @@
         b{
             font-size:100%;
         }
+    #header  {position: fixed; margin-top:2px; }
+    #content {position: relative; top:17%}
+
 </style>
 
 </head>
 
 <body>
 
-<div id="app">
-        <div id="wrapper">
-<div class="container" > 
+<div id="header" > 
 <img src="images/Mod01_Produccion/siz1.png" >
-<table border="1px" class="table table-striped">
 <table  border="1" class="table table-striped">
-    <thead>
+    <thead>   
+        </thead>
         <tbody>
-        <tr>
+         <tr>
       <td colspan="5" align="center" bgcolor="#fff">
       <b><?php echo  $db?></b><br>    
       <b>Mod06-Producción</b>
@@ -89,11 +90,14 @@
             <td colspan="2"align='center'><?php echo number_format($data[0]->plannedqty,0); ?></td>
             </tr>
         </tbody>
-    </thead>    
-    <table>    
-     <div class="row">
-     <div align="center"><h3>Materiales a utlizar</h3></div>   
-        <div class="col-6">
+        
+    </table>
+        
+        
+</div> 
+
+        <table>   
+<div id="content">
              <table  border="1px" class="table table-striped">
                     <thead class="thead-dark">
                     <tr>
@@ -172,7 +176,8 @@
                     @endforeach 
                     </tbody>
                 </table>        
-        </div>
+                </div>
+
        
         <footer>
 <script type="text/php">
@@ -187,7 +192,6 @@
  $pdf->page_text(35, 23, $sociedad, $font, 9);
 </script> 
 </footer>
-     </div>
      @yield('subcontent-01')
 
 </body>

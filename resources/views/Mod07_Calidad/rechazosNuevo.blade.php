@@ -18,7 +18,7 @@
                 <i class="fa fa-dashboard">  <a href="{!! url('home') !!}">Inicio</a></i>
             </li>
             <li>
-                <i class= "fa fa-archive"> <a href="traslados">Traslados</a></i>
+                <i class= "fa fa-archive"> <a href="traslados">Rechazos</a></i>
             </li>
         </ol>
         </div>
@@ -27,7 +27,7 @@
     
 </div>
 @include('partials.alertas')
-<iframe class="col-md-9 " scrolling="no" height="200%" src="{!! url('getAutocomplete') !!}" frameborder="0"></iframe>
+<iframe class="col-md-9 " scrolling="yes" height="150%" src="{!! url('getAutocomplete') !!}" frameborder="0"></iframe>
 @endsection
 @section ('homescript2')
 

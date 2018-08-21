@@ -32,27 +32,36 @@
                     </div>
                   </div>
             </div>
+            <style>
+         td{
+        font-family: 'Helvetica';
+        font-size:80%;
+    }
+    th{
+       font-family: 'Helvetica';
+        font-size:90%;
+    }
+            </style>
             <!-- /.row -->
-            <div class="row">
-                <div class="col-lg-6.5 col-md-9 col-sm-8">
+            <div class="row" scrolling="yes">
+                <div class="col-lg-5 col-md-9 col-sm-8">
                     <div class="well">
-                    <a href="altaInventario" class="btn btn-success"><i class="glyphicon glyphicon-plus-sign"></i></a>
+                    <a href="altaInventario" class="btn btn-success"data-toggle="tooltip" title="Nuevo Registro"><i class="glyphicon glyphicon-plus-sign"></i></a>
                     </div>
                 </div>
             </div>
-             <div class="row">
+            <div class="row">
+        <div class="col-md-12">
              <div class="table-responsive">
-             <table class="table table-striped header-fixed">
+             <table  class="table table-striped header-fixed">
                     <thead class="thead-dark">
                         <tr>
-                        <th scope="col">Número de Equipo</th>
+                        <th scope="col">No.Equipo</th>
                         <th scope="col">Nombre Equipo</th>
                         <th scope="col">Nombre Usuario</th>
                         <th scope="col">Correo</th>
-                        <th scope="col">Tiempo Vida</th>
-                        <th scope="col">Tipo de Equipo</th>
                         <th scope="col">Monitor</th>
-                        <th scope="col">Ultima Fecha de Mantenimiento</th>
+                        <th scope="col">Fecha de Mantenimiento</th>
                         <th scope="col">PDF</th>
                         <th scope="col">Marcar Obsoleto</th>
                         <th scope="col">Modificar</th>
@@ -66,17 +75,6 @@
                         <td>{{ $inventario->nombre_equipo }}</td>
                         <td>{{ $inventario->nombre_usuario }}</td>
                         <td>{{ $inventario->correo}}</td>
-                        <td>
-                            <?php 
-                            
-                            $fecha_baja  = explode("-", $inventario->fecha_baja);
-                            $fecha_alta  = explode("-", $inventario->fecha_alta);
-                            
-                            echo $tiempo_vida = $fecha_baja[0] - $fecha_alta[0];
-                            echo " años";
-                            ?>
-                        </td>
-                        <td>{{ $inventario->tipo_equipo }}</td>
                         <td>{{ $inventario->nombre_monitor }}</td>
                         <td>{{ $inventario->Fecha_mantenimiento }}</td>
                         <td>
