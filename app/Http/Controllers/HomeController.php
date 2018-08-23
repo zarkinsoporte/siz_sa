@@ -48,7 +48,7 @@ class HomeController extends Controller
         ->update(['Leido' => 'Si']);
         $user = Auth::user();
                 
-       return redirect('/');
+       return redirect()->back();
     }
     /**
      * Show the form for creating a new resource.
