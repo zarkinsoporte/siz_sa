@@ -11,6 +11,7 @@ use Hash;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
+use Maatwebsite\Excel\Facades\Excel;
 use Session;
 use Auth;
 use Lava;
@@ -109,6 +110,7 @@ else{
        $fechaIni = $request->input('FechIn');
        $fechaFin = $request->input('FechaFa');
        $sociedad=DB::table('OADM')->value('CompnyName');
+
        
     
          $prov1= $request->input('prov');
@@ -124,6 +126,7 @@ else{
         $artic1='';
     }
     $rechazo=null;
+    
     switch ($btnradio) {
         case 0:
         $rechazo=DB::table('Siz_Calidad_Rechazos')
@@ -150,13 +153,44 @@ else{
 
             break;
     }
-//dd($rechazo);
-       //dd($rechazo);
+    $Opc_Document = $request->input('expor');
+
+    if($Opc_Document==1){
             $pdf = \PDF::loadView('Mod07_Calidad.RechazoPDF',compact('sociedad','rechazo','fechaIni','fechaFin'));
             $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);
             return $pdf->stream('Siz_Calidad_Reporte_Rechazo.Pdf');
            // return $pdf->download('ReporteOP.pdf');
-       
+        }
+        else
+        {
+            Excel::create('Siz_Calidad_Reporte_Rechazo', function($excel)use($rechazo) {
+             
+               //Header
+                $excel->sheet('Hoja 1', function($sheet) use($rechazo){
+                //$sheet->margeCells('A1:F5');     
+                $sheet->row(6, [
+                    'Fecha Revision', 'Proveedor', 'Codigo de Material', 'Descripcion de material', 'Cantidad','Nombre del Inspector','No.Factura'
+                ]);
+               //Datos 
+        foreach($rechazo as $R => $Rec) {
+            $sheet->row($R+8, [
+             $Rec->fechaRevision,
+             $Rec->proveedorNombre, 
+             $Rec->materialCodigo, 
+             $Rec->materialDescripcion, 
+             $Rec->cantidadAceptada,
+             $Rec->cantidadRechazada,
+             $Rec->cantidadRevisada,
+             $Rec->InspectorNombre,
+             $Rec->DocumentoNumero 
+             
+    ]);	
+                }         
+            });
+             
+            })->export('xlsx');
+            
+        }
     }
 
     
@@ -194,5 +228,19 @@ else{
       //dd($DelRechazo);
       return view('Mod07_Calidad.Historial',['VerHistorial'=>$VerHistorial,'actividades' => $actividades, 'ultimo' => count($actividades)]);
      }
-
+     
+     public function excel()
+     {        
+         /**
+          * toma en cuenta que para ver los mismos 
+          * datos debemos hacer la misma consulta
+         **/
+         Excel::create('Laravel Excel', function($excel) {
+             $excel->sheet('Excel sheet', function($sheet) {
+                 //otra opción -> $products = Product::select('name')->get();
+                
+                 $sheet->setOrientation('landscape');
+             });
+         })->export('xls');
+     }
 }

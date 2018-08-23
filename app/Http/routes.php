@@ -249,3 +249,4 @@ Route::get('home/CANCELACIONES', 'Mod07_CalidadController@Cancelado');
 Route::get('borrado/{id}', 'Mod07_CalidadController@UPT_Cancelado');
 Route::post('/borrado', 'Mod07_CalidadController@UPT_Cancelado');
 Route::get('home/HISTORIAL', 'Mod07_CalidadController@Historial');
+Route::post('/excel', 'Mod07_CalidadController@excel');

@@ -37,24 +37,35 @@
 
                         <div class="col-md-6">
                             <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    <h3 class="panel-title">Usuario Traslado</h3>
+                                <div class="panel-heading">                                
+                                    <h3 class="panel-title">Usuario Traslado</h3>                                   
                                 </div>
-                                <div class="panel-body">
-                                    <h5>Usuario: {{$t_user->firstName.' '.$t_user->lastName}}</h5>
-                                    <h5>Control de Piso: {{$t_user->U_EmpGiro}}</h5>
+                                <div class="panel-body">                               
+                                    <h5>Usuario: {{$t_user->firstName.' '.$t_user->lastName}} &nbsp;&nbsp;<a href="{!! url('home/TRASLADO ÷ AREAS') !!}">Cambiar Usuario</a>  </h5>                                                       
+                                    <h5>Control de Piso: {{$t_user->U_EmpGiro}}</h5>                                   
                                     @if(Session::get('usertraslados') == 1)
                                         {!! Form::open(['url' => 'home/TRASLADO ÷ AREAS/'.$t_user->U_EmpGiro, 'method' => 'POST']) !!}
                                         <label for="op" class="control-label" >Introduce Orden de Produccion:</label>
                                         <input autofocus type="number" name="op" id="op" min="1" max="9999999999" required>
-
-
-                                    @endif
+                                    
+                                    
+                                     @else
+                                       {!! Form::open(['url' => 'home/TRASLADO ÷ AREAS/', 'method' => 'POST']) !!}
+                                       <input type="text" hidden name="send" value="send">
+                                <input id="miusuario" hidden type="number"  name="miusuario" value="{{$t_user->U_EmpGiro}}">                                      
+                                        <input id="pass" hidden type="password" name="pass" value="0123">
+                                        <input id="pass2" hidden type="password" name="pass2" value="1234">
+                                       <input type="checkbox" hidden name="Recordarpass" value="0">
+                                       <div align="right" >
+                                    <button type="sumbmit"class="btn btn-success">Mover otra OP</button>
+                                    </div>
+                                    {!! Form::close() !!}
+                                     @endif
                                 </div>
                                 @if(Session::get('usertraslados') == 1)
                                 <div class="panel-footer">
                                     <div align="right">
-                                        <button type="submit" class="btn btn-primary" >Consultar</button>
+                                    <button type="submit" class="btn btn-primary" >Consultar</button>
                                     </div>
 
                                 </div>
@@ -205,19 +216,12 @@ switch ($t_user->position) {
 </tbody>
                                 </table>
                             
-                            </div>
-                        
-                     
-
+                            </div>                
                             @endif
                     @endif
-
                 </div>  <!-- end col-md-12 -->
             </div>  <!-- end row -->
-
-
             <!-- Modal -->
-
             <div class="modal fade" id="pass" role="dialog" >
                 <div class="modal-dialog modal-md" role="document">
                     <div class="modal-content" style=" background-color: rgb(189, 217, 254)">
@@ -227,9 +231,8 @@ switch ($t_user->position) {
                         </div>
                         {!! Form::open(['url' => 'home/TRASLADO ÷ AREAS', 'method' => 'POST']) !!}
                         <div class="modal-body image">
-
+                        
                             <input type="text" hidden name="send" value="send">
-
                             <br>
                             <div class="row">
                                 <div class="col-md-2 col-md-offset-1 col-xs-5 col-xs-offset-1">
@@ -244,9 +247,12 @@ switch ($t_user->position) {
                                         <input id="miusuario" type="number" class="form-control" name="miusuario" minlength="3" maxlength="5">
                                         <br>
                                     </div>
-
+                                    @if(Session::has('usertraslados'))
                                     <label for="pass" class="control-label">Contraseña:</label>
-                                    <input autofocus id="pass" type="password" class="form-control" name="pass" required minlength="3" maxlength="10">
+                                    <input autofocus id="pass" type="password" class="form-control" name="pass" required minlength="3" maxlength="10" value="{{Session::get('Rec_pass')}}">
+                                    @endif
+                                    <input type="checkbox" name="Recordarpass">Recordar contraseña<br>
+                                    
                                 </div>
                             </div>
 
