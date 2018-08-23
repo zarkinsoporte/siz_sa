@@ -102,11 +102,12 @@ else{
        $fechaFin = $request->input('FechaFa');
        $rechazo=DB::table('Siz_Calidad_Rechazos')->whereBetween('fechaRevision',[$fechaIni ,$fechaFin])->get();
        $sociedad=DB::table('OADM')->value('CompnyName');
-       //dd($rechazo);
+    //dd($rechazo);
             $pdf = \PDF::loadView('Mod07_Calidad.RechazoPDF',['sociedad'=>$sociedad,'rechazo'=>$rechazo,'fechaIni'=>$fechaIni,'fechaFin'=>$fechaFin]);
             return $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true])->stream('Siz_Calidad_Reporte_Rechazo.Pdf');
            // return $pdf->download('ReporteOP.pdf');
        
     }
+
 
 }
