@@ -136,7 +136,9 @@ return [
         Illuminate\Translation\TranslationServiceProvider::class,
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
-        Barryvdh\DomPDF\ServiceProvider::class,
+        Barryvdh\DomPDF\ServiceProvider::class,      	
+        Maatwebsite\Excel\ExcelServiceProvider::class,
+        
 
         /*
          * Application Service Providers...
@@ -200,7 +202,8 @@ return [
         'Form'      => Illuminate\Html\FormFacade::class,
         'Lava'      => Khill\Lavacharts\Laravel\LavachartsFacade::class,
         'Datatables'=> Yajra\Datatables\Facades\Datatables::class,
-		'PDF'       => Barryvdh\DomPDF\Facade::class,
+        'PDF'       => Barryvdh\DomPDF\Facade::class,
+        'Excel'     => Maatwebsite\Excel\Facades\Excel::class,
     ],
 
 ];
