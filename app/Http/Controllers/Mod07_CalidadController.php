@@ -11,10 +11,11 @@ use Hash;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
-use Maatwebsite\Excel\Facades\Excel;
 use Session;
 use Auth;
 use Lava;
+//excel
+use Maatwebsite\Excel\Facades\Excel;
 //DOMPDF
 use Dompdf\Dompdf;
 use App;
@@ -110,7 +111,6 @@ else{
        $fechaIni = $request->input('FechIn');
        $fechaFin = $request->input('FechaFa');
        $sociedad=DB::table('OADM')->value('CompnyName');
-
        
     
          $prov1= $request->input('prov');
@@ -126,7 +126,6 @@ else{
         $artic1='';
     }
     $rechazo=null;
-    
     switch ($btnradio) {
         case 0:
         $rechazo=DB::table('Siz_Calidad_Rechazos')
@@ -159,6 +158,11 @@ else{
             $pdf = \PDF::loadView('Mod07_Calidad.RechazoPDF',compact('sociedad','rechazo','fechaIni','fechaFin'));
             $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);
             return $pdf->stream('Siz_Calidad_Reporte_Rechazo.Pdf');
+
+    //dd($rechazo);
+            $pdf = \PDF::loadView('Mod07_Calidad.RechazoPDF',['sociedad'=>$sociedad,'rechazo'=>$rechazo,'fechaIni'=>$fechaIni,'fechaFin'=>$fechaFin]);
+            return $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true])->stream('Siz_Calidad_Reporte_Rechazo.Pdf');
+
            // return $pdf->download('ReporteOP.pdf');
         }
         else
@@ -192,6 +196,8 @@ else{
             
         }
     }
+
+
 
     
     public function Cancelado()
@@ -228,19 +234,5 @@ else{
       //dd($DelRechazo);
       return view('Mod07_Calidad.Historial',['VerHistorial'=>$VerHistorial,'actividades' => $actividades, 'ultimo' => count($actividades)]);
      }
-     
-     public function excel()
-     {        
-         /**
-          * toma en cuenta que para ver los mismos 
-          * datos debemos hacer la misma consulta
-         **/
-         Excel::create('Laravel Excel', function($excel) {
-             $excel->sheet('Excel sheet', function($sheet) {
-                 //otra opción -> $products = Product::select('name')->get();
-                
-                 $sheet->setOrientation('landscape');
-             });
-         })->export('xls');
-     }
+
 }
