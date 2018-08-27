@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Input;
 use Session;
 use Auth;
 use Lava;
+//Excel
+use Maatwebsite\Excel\Facades\Excel;
 //DOMPDF
 use Dompdf\Dompdf;
 use App;
@@ -97,34 +99,72 @@ class Mod00_AdministradorController extends Controller
             }
             )
             ->make(true);
+        }
+           public function Plantilla_PDF($clave)
+{
+    $users = DB::table('Siz_View_Plantilla_Personal')
+    ->where('Depto', 'like', '%'.$clave.'%')->get();
+    $sociedad=DB::table('OADM')->value('CompnyName');
+    $pdf = \PDF::loadView('Mod00_Administrador.PlantillaPDF',compact('users','sociedad','clave'));
+    $pdf->setOptions(['isPhpEnabled'=>true]);
+    return $pdf->stream('Siz_Plantilla_Personal'.$clave.' - '.$hoy = date("d/m/Y").'.Pdf');
+ }
+     
 
-
+    public function PlantillaExcel($clave)
+    {
+        $users = DB::table('Siz_View_Plantilla_Personal')
+        ->where('Depto', 'like', '%'.$clave.'%')->get();
+        Excel::create('Siz_Plantilla_Personal '.$clave.' - '.$hoy = date("d/m/Y").'', function($excel)use($users) {
+                 
+            //Header
+             $excel->sheet('Hoja 1', function($sheet) use($users){
+             //$sheet->margeCells('A1:F5');     
+             $sheet->row(2, [
+                '','Nombre','Apellido','No.Nomina','Departamento','Estaciones','Funcion' 
+             ]);
+            //Datos 
+     foreach($users as $U => $P_user) {
+            $sheet->row($U+4, [
+                '',
+          $P_user->firstName,
+          $P_user->lastName, 
+          $P_user->U_EmpGiro,
+          $P_user->dept, 
+          $P_user->U_CP_CT,
+          $P_user->jobTitle,
+ 
+ ]);	
+             }         
+         });
+          
+         })->export('xlsx');
     }
 
     public function allUsers(Request $request){
         $users = DB::select('SELECT depto, COUNT(*) as c  FROM Siz_View_Plantilla_Personal GROUP BY Depto');
 
 
-        //$users = $this->arrayPaginator($users, $request);
-        $stocksTable = Lava::DataTable();
-        $stocksTable->addDateColumn('Day of Month')
-            ->addNumberColumn('Projected')
-            ->addNumberColumn('Official');
+        ///$users = $this->arrayPaginator($users, $request);
+
+        //$stocksTable = Lava::DataTable();
+       // $stocksTable->addDateColumn('Day of Month')
+        //    ->addNumberColumn('Projected')
+          //  ->addNumberColumn('Official');
 
         // Random Data For Example
-        for ($a = 1; $a < 30; $a++) {
-            $stocksTable->addRow([
-                '2015-10-' . $a, rand(800,1000), rand(800,1000)
-            ]);
-        }
+       // for ($a = 1; $a < 30; $a++) {
+         //   $stocksTable->addRow([
+             //   '2015-10-' . $a, rand(800,1000), rand(800,1000)
+           // ]);
+        //}
 
-        $beto = Lava::AreaChart('beto', $stocksTable, [
-            'title' => 'Population Growth',
-            'legend' => [
-                'position' => 'in'
-            ]
-        ]);
-
+        //$beto = Lava::AreaChart('beto', $stocksTable, [
+          //  'title' => 'Population Growth',
+            //'legend' => [
+              //  'position' => 'in'
+           // ]
+       // ]);
 
         $finalarray = [];
         foreach ($users as $user)
@@ -133,8 +173,7 @@ class Mod00_AdministradorController extends Controller
             $miarray = DB::select('SELECT jobTitle, COUNT(*) as c FROM Siz_View_Plantilla_Personal where Depto like \'%'.$user->depto.'%\' GROUP BY jobTitle');
             $finalarray[$user->depto] = $miarray;
         }
-
-        return view('Mod00_Administrador.usuarios', compact('finalarray', 'beto'));
+        return view('Mod00_Administrador.usuarios', compact('finalarray'));
     }
 
     public function arrayPaginator($array, $request)
@@ -172,6 +211,7 @@ class Mod00_AdministradorController extends Controller
         Session::flash('mensaje', 'La contraseña de '.$user->firstName.' '.$user->lastName.' ha cambiado.');
         return redirect()->back();
     }
+  
 
     public function editUser($empid){
 
@@ -180,6 +220,8 @@ class Mod00_AdministradorController extends Controller
 dd($user);
         return view('Mod00_Administrador.editUser', compact('user'));
     }
+
+    
 
 
     public function editgrupos($id_grupo){

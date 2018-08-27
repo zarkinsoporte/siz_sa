@@ -167,17 +167,20 @@ else{
         }
         else
         {
-            Excel::create('Siz_Calidad_Reporte_Rechazo', function($excel)use($rechazo) {
+            Excel::create('Siz_Calidad_Reporte_Rechazo '.$hoy = date("d/m/Y").'', function($excel)use($rechazo) {
              
                //Header
                 $excel->sheet('Hoja 1', function($sheet) use($rechazo){
                 //$sheet->margeCells('A1:F5');     
-                $sheet->row(6, [
-                    'Fecha Revision', 'Proveedor', 'Codigo de Material', 'Descripcion de material', 'Cantidad','Nombre del Inspector','No.Factura'
+                $sheet->row(2, [
+                   '', 'Fecha Revision', 'Proveedor', 'Codigo de Material', 'Descripcion de material', 'Cantidad aceptada', 'Cantidad Rechazada',
+                    'Cantidad Revisada','Nombre del Inspector','No.Factura'
                 ]);
+
                //Datos 
         foreach($rechazo as $R => $Rec) {
-            $sheet->row($R+8, [
+            $sheet->row($R+4, [
+                "        ",
              $Rec->fechaRevision,
              $Rec->proveedorNombre, 
              $Rec->materialCodigo, 

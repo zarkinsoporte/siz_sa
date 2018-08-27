@@ -17,7 +17,7 @@
                         Usuarios
                     </h3>
                     
-                       <div class= "col-lg-6.5 col-md-8 col-sm-7">
+                       <div class= "col-lg-12 col-md-12 col-sm-12">
                         <div class="hidden-xs">
                         <div class="hidden-sm">
                         <ol class="breadcrumb">
@@ -34,7 +34,7 @@
          <div class="container">
              <div class="row">
 
-                 <div class="col-md-10">
+                 <div class="col-md-12">
                      @if (count($errors) > 0)
                          <div class="alert alert-danger text-center" role="alert">
                              @foreach($errors->getMessages() as $this_error)

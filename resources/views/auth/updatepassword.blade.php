@@ -20,11 +20,6 @@ preg_match_all('!\d+!', $str, $matches);
 print_r($matches);
 
 -->
-<script>
-    window.Laravel = {!! json_encode([
-            'csrfToken' => csrf_token(),
-        ]) !!};
-</script>
 
 <!DOCTYPE html>
 <html class="nojs html css_verticalspacer" lang="es-ES">
@@ -41,8 +36,12 @@ print_r($matches);
     </script>
     <title>Inicio</title>
     <link rel="shortcut icon" href="images/IconZrk.ico" type="image/x-icon" >
-    <link rel="icon" href="imagen/IconoZain.png" sizes="32x32" ><link rel="icon"
-
+    <link rel="icon" href="imagen/IconoZain.png" sizes="32x32" ><link rel="icon">
+    <style>
+    p.courier{
+        font-family:Verdana, Geneva, sans-serif;
+    }
+    </style>
 </head>
 <body class="container-fluid" style=" background-image: url({{ URL::asset('images/fondo.jpg') }});
         background-repeat:no-repeat;
@@ -60,10 +59,6 @@ print_r($matches);
             <img class="svg visible-xs" id="u196" src={{ URL::asset('images/svg-pegado-150982x45.svg') }}  alt="" data-mu-svgfallback="/siz/public/images/svg%20pegado%20150982x45_poster_.png?crc=4279418901" width="200" height="200"
             style="margin-top: -30%"/>
 
-        <p style="margin-top: 5%" align="center"><!-- none box -->
-            &nbsp;          
-            <img class="hidden-xs"  alt="Bienvenido" src={{ URL::asset('images/u343-4.png') }} style="height: 7%"/><!-- rasterized frame -->
-        </p>
         <div >
             <div >
                 <div class="col-md-4 col-xs-8 col-xs-offset-2 col-md-offset-4">
@@ -75,34 +70,30 @@ print_r($matches);
                                 <strong>Error  &nbsp; {{$this_error[0]}}</strong><br>
                             @endforeach
                         </div>
-                    @elseif(Session::has('mensaje'))
-                        <div class="alert alert-success text-center"style="opacity: .9; border-radius: 15px; color: white" role="alert">
-                            {{ Session::get('mensaje') }}
-                        </div>
                     @endif
-                 
+                    <div class="col-md-12 ">
+                        @include('partials.alertas')                        
+                    </div>
 
-                    <div >
-
-
-                        <form class="form-horizontal"  role="form" method="post" action="{{url('/auth/login')}}">
-                            {{ csrf_field() }}
-
-
+               
+                    <div>                                                                                                    
+                        {!! Form::open(['url' => 'passwordUpdate', 'method' => 'POST']) !!}                    
+                        <input type="text" min="0" id="userId" name="userId" value="{{Auth::user()->U_EmpGiro}}" hidden>
+                                                <font size="5" style="color: white"><p align="center" class="courier">Hola:</p></font> <br>
+                        <font size="5" style="color: white"><p align="center" class="courier">{{Auth::user()->firstName}}</p></font> <br>
                             <div class="form-group label-floating">
-                                <label class="control-label" for="id">No. Nómina:</label>
+                                <label class="control-label" for="password">Escribe tu contraseña:</label>
                                 <div class="input-group">
-                                    <input type="number" min="0" id="id" name="id" class="form-control" style="color: white" value="{{old('id')}}" required autofocus>
-                                    <span class="input-group-btn">
-
+                                    <input type="password" min="0" id="password" name="password" class="form-control" style="color: white" value="{{old('id')}}" required autofocus
+                                    data-toggle="tooltip" data-placement="bottom" title="La Contraseña debe tener 2 letras primero y 3 numeros"> 
+                                </input><span class="input-group-btn">
                                       </span>
                                 </div>
                             </div>
-
                             <div class="form-group label-floating">
-                                <label class="control-label" for="password">Contraseña:</label>
+                                <label class="control-label" for="password_confirmation">Confirma contraseña:</label>
                                 <div class="input-group">
-                                    <input type="password" id="password" class="form-control"  style="color: white" name="password" required>
+                                    <input type="password" id="password_confirmation" name="password_confirmation" class="form-control"  style="color: white"  required>
                                     <span class="input-group-btn">
                                         <button type="submit" class="btn btn-fab btn-fab-mini">
                                           <i class="material-icons">send</i>
@@ -110,12 +101,8 @@ print_r($matches);
                                       </span>
                                 </div>
                             </div>
-
-
-                        </form>
+                            {!! Form::close() !!}
                     </div>
-
-
                 </div>
             </div>
         </div>

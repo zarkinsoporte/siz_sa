@@ -39,6 +39,8 @@ Route::get('auth/login', 'Auth\AuthController@getLogin');
 Route::get('login', 'Auth\AuthController@getLogin');
 Route::post('auth/login', ['as' =>'auth/login', 'uses' => 'Auth\AuthController@postLogin']);
 Route::get('auth/logout', ['as' => 'auth/logout', 'uses' => 'Auth\AuthController@getLogout']);
+Route::post('passwordUpdate',  ['as' => 'passwordUpdate', 'uses' =>'Auth\FunctionsController@cambioPasswordUsers']);
+Route::get('viewpassword', ['as' => 'viewpassword', 'uses' => 'Auth\FunctionsController@viewpassword']);
 /*
 |--------------------------------------------------------------------------
 | MOD00-ADMINISTRADOR Routes
@@ -98,6 +100,9 @@ Route::get('admin/users', 'Mod00_AdministradorController@allUsers');
 Route::get('users/edit/{empid}', 'Mod00_AdministradorController@editUser');
 Route::get('admin/detalle-depto/{depto}','Mod00_AdministradorController@showUsers');
 Route::get('datatables.showusers', 'Mod00_AdministradorController@DataShowUsers')->name('datatables.showusers');
+//--nuevas rutas 27/08/2018
+Route::get('admin/plantilla/{depto}','Mod00_AdministradorController@PlantillaExcel');
+Route::get('admin/Plantilla_PDF/{depto}','Mod00_AdministradorController@Plantilla_PDF');
 
 //Rutas del Módulo de inventarios
 Route::get('admin/altaInventario', 'Mod00_AdministradorController@altaInventario');

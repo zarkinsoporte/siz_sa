@@ -50,8 +50,8 @@
                   </div>
                   <div class="form-group">
                       <label for="date_range" class="control-label">Rango de Fechas:</label><br>
-                       Desde:<input type="date" id="FechIn" name="FechIn" class="form-control" >
-                      Hasta:<input type="date" id="FechaFa" name="FechaFa" class="form-control" >
+                       Desde:<input type="date" id="FechIn" name="FechIn" class="form-control" required>
+                      Hasta:<input type="date" id="FechaFa" name="FechaFa" class="form-control" required >
                       </div>
                                      
                       <div class="panel panel-default">
@@ -85,21 +85,39 @@
                       </div>
 
 <div>
-
-<label for="date_range" class="control-label">Registros :</label><br>
-<form>
-    <div class="radio">
-      <label><input type="radio" name="registro"value="0" checked>Todos</label>
-    </div>
-    <div class="radio">
-      <label><input type="radio" name="registro" value="1">Solo Rechazados</label>
-    </div>
-    <div class="radio">
-      <label><input type="radio" name="registro"  value="2" >Solo Aceptados</label>
-    </div>
+<form id="form1" name="form1">
+   <fieldset>
+        <label>Registros :</label><br>
+        <label class="radio-inline">
+      <input  type="radio" name="registro"value="0" checked>Todos
+      </label>
+  
+      <label class="radio-inline">
+      <input  type="radio" name="registro" value="1">Solo Rechazados
+      </label>
+      
+      <label class="radio-inline">
+      <input  type="radio" name="registro"  value="2" >Solo Aceptados
+      </label>
+   </fieldset>
+     
+<fieldset>
+ <label >Opciones de exportación :</label><br>
+       <label class="radio-inline">
+      <input  type="radio" id="expor" name="expor" value="1" checked>PDF
+      </label>
+      
+      <label class="radio-inline">
+      <input  type="radio" id= "expor" name="expor" value="2" >EXCEL
+      </label>
+</fieldset>
+ 
+     
   </form>
-
-  </div>
+    
+  
+            
+        </div>
       </div>
     </div>
 

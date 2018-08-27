@@ -5,8 +5,7 @@
    <div class="row">
 
 
-
-               <div class="col-md-10">
+               <div class="col-md-12">
 
                    <table class="table table-bordered" id="users-table2">
                        <thead>
@@ -14,7 +13,7 @@
                        <tr>
                            <th># Nómina</th>
                            <th># CP</th>
-                           <th>Nombre</th>
+                           <th>Nombre</th>  
                            <th>Apellido</th>
                            <th>Estaciones</th>
                            <th>Puesto</th>
@@ -23,7 +22,6 @@
                        </thead>
                    </table>
                </div>
-
 
 
 
@@ -57,6 +55,7 @@
                         </div>
                     </div>
                 </div>
+             <!--Aqui termina HTML -->
                 <script data-require="jquery@*" data-semver="2.0.3" src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
                 <script type="text/javascript" >
                     $(document).ready(function (event) {

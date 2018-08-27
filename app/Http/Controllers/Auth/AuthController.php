@@ -6,6 +6,8 @@ use App\User;
 use Illuminate\Http\Request;
 use Validator;
 use Auth;
+use Hash;
+use Input;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
@@ -72,21 +74,36 @@ class AuthController extends Controller
 
     public function postLogin(Request $request)
     {
-        try {
+        if ($request->get('password') != "1234"){
+            try {
+                if (Auth::attempt(['U_EmpGiro' => $request->get('id'), 'password'   => $request->get('password'), 'status' => 1])) {
+                    //dd($request->all());
+    
+                    return redirect()->intended('home');
+    
+                }else{
+                    return redirect($this->loginPath())
+                        ->withInput($request->only($this->loginUsername(), 'remember'))
+                        ->withErrors('Usuario/contraseña inválidos, ó Baja');
+                }
+            } catch(\Exception $e) {
+                echo ''. $e->getMessage();
+            }
+    
+        }else{
             if (Auth::attempt(['U_EmpGiro' => $request->get('id'), 'password'   => $request->get('password'), 'status' => 1])) {
-                //dd($request->all());
-
-                return redirect()->intended('home');
+                //dd($request->all());                     
+                //return view('auth.updatepassword');
+                return redirect()->route('viewpassword');
 
             }else{
                 return redirect($this->loginPath())
                     ->withInput($request->only($this->loginUsername(), 'remember'))
                     ->withErrors('Usuario/contraseña inválidos, ó Baja');
             }
-        } catch(\Exception $e) {
-            echo ''. $e->getMessage();
+           
         }
 
-
     }
+   
 }
