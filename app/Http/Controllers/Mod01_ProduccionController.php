@@ -49,21 +49,21 @@ class Mod01_ProduccionController extends Controller
     public function ReporteOpPDF($op)
     {
         //$pdf = App::make('dompdf.wrapper');
-        $GraficaOrden = DB::select( DB::raw("SELECT [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,
-        DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)) AS FechaF ,OHEM.firstName + ' ' + OHEM.lastName AS Empleado, [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
-        SUM([@CP_LOGOF].U_Cantidad) AS U_CANTIDAD,
-        (oitm.U_VS ) AS VS,      
-        (SELECT CompnyName FROM OADM ) AS CompanyName
+        $GraficaOrden = DB::select( DB::raw("SELECT [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,OHEM.firstName + ' ' + OHEM.lastName AS Empleado,
+        DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)) AS FechaF ,
+       [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
+  SUM([@CP_LOGOF].U_Cantidad) AS U_CANTIDAD,
+        sum(oitm.U_VS ) AS VS
         FROM [@CP_LOGOF] inner join [@PL_RUTAS] ON [@CP_LOGOF].U_CT = [@PL_RUTAS].Code
         left join OHEM ON [@CP_LOGOF].U_idEmpleado = OHEM.empID
         inner join OWOR ON [@CP_LOGOF].U_DocEntry = OWOR.DocNum
         inner join OITM ON OWOR.ItemCode = OITM.ItemCode
-        WHERE U_DocEntry = $op 
-        GROUP BY [@CP_LOGOF].[U_FechaHora], [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,
-        DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)) ,
-        OHEM.firstName + ' ' + OHEM.lastName , [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
-        oitm.U_VS
-        ORDER BY FechaF,[@CP_LOGOF].U_CT") );
+        WHERE U_DocEntry = $op
+        GROUP BY [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,        
+        OHEM.firstName + ' ' + OHEM.lastName ,
+         DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)),[@CP_LOGOF].U_DocEntry  
+        ,OWOR.ItemCode , OITM.ItemName        
+ORDER BY FechaF,[@CP_LOGOF].U_CT") );
         //dd($GraficaOrden);
     
         $data=array(
@@ -200,7 +200,13 @@ class Mod01_ProduccionController extends Controller
                 }
                 
                 
-                return view('Mod01_Produccion.traslados', ['actividades' => $actividades, 'ultimo' => count($actividades), 't_user' => $t_user]);
+                $est_Av= $t_user->U_CP_CT;
+                $Fil_Est = explode(",", $est_Av);  //ARRAY SIMPLE
+                $rutasConNombres = self::getNombresRutas($Fil_Est); //ARRAY LLAVE VALOR
+            //   dd($rutasConNombres);
+                //$ruts1=DB::select("SELECT Name From [@PL_RUTAS] where Code=".Input::get('OP_us'));
+                
+                return view('Mod01_Produccion.traslados', ['rutasConNombres'=>$rutasConNombres,'t_user'=>$t_user,'est_Av'=>$est_Av,'Fil_Est'=>$Fil_Est,'actividades' => $actividades, 'ultimo' => count($actividades), 't_user' => $t_user]);
             }else{
                 return redirect()->back()->withErrors(array('message' => 'Error de autenticación.'));
             }
@@ -211,14 +217,32 @@ class Mod01_ProduccionController extends Controller
         }
 
           return view('Mod01_Produccion.traslados', ['actividades' => $actividades, 'ultimo' => count($actividades)]);
-            return view('Mod01_Produccion.traslados', ['actividades' => $actividades, 'ultimo' => count($actividades)]);
+           
         }else{
             return redirect()->route('auth/login');
         }
 
     }
-    public function getOP($id)
+
+    public function getNombresRutas($Fil_Est)
     {
+        $i=0;   
+        $data= array();
+        foreach($Fil_Est as $elemmento){
+           // $ruts1=DB::select("SELECT Name From [] where Code=".$elemmento)->first();
+            $ruts1 = DB::table('@PL_RUTAS')->where('Code',$elemmento)->value('Name');
+            //dd($ruts1);
+            $data[$elemmento]=$ruts1;
+            $i++;
+        }
+
+        return $data;
+    }
+    public function getOP(Request $request,$id)
+ {
+    $stawer=Input::get('OP_us');
+    $AvanceEst=Input::get('AvanceEst');
+     if($AvanceEst==1){   
         if (Session::has('op')) {
             $op = Session::get('op');
             Session::forget('op');
@@ -228,24 +252,27 @@ class Mod01_ProduccionController extends Controller
         }else{
             return redirect()->route('home');
         }
-
         $t_user = User::find($id);
         if ($t_user == null) {
             return redirect()->back()->withErrors(array('message' => 'Error, el usuario no existe.'));
         }
+        
+       // dd(Input::get('OP_us'));
 
         $user = Auth::user();
         $actividades = $user->getTareas();
         Session::flash('usertraslados', 2);  //evita que salga el modal
 
-
         $Codes = OP::where('U_DocEntry',$op)->get();
+       
+
 
         if (count($Codes) > 0){
             $index = 0;
+             
         foreach ($Codes as $code) {
 
-if ($code->U_Recibido > $code->U_Procesado){
+if ($code->U_Recibido > $code->U_Procesado || OP::onFirstEstacion($code->Code) && ($code->U_Recibido>=1)){
 
 
 
@@ -254,8 +281,6 @@ if ($code->U_Recibido > $code->U_Procesado){
            $cantlogof = DB::table('@CP_LOGOF')
                ->where('U_DocEntry', $code->U_DocEntry)
                ->get();
-
-           //dd($cantlogof);
 
                 if (count($cantlogof) == 0){
                     $CantOrden = DB::table('OWOR')
@@ -268,11 +293,9 @@ if ($code->U_Recibido > $code->U_Procesado){
                 }
 
             }
- //dd($code);
             $index = $index + 1;
-            $EstacionA = OP::getEstacionActual($code->Code);
+            $EstacionA = OP::getEstacionActual($code->Code);        
             $EstacionS = OP::getEstacionSiguiente($code->Code, 1);
-           // dd($EstacionA);
             $pedido ='';
            if ($EstacionA != null && $EstacionS != null){
             $order = DB::table('OWOR')
@@ -282,7 +305,7 @@ if ($code->U_Recibido > $code->U_Procesado){
                     'OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden', 'OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
                     'OWOR.PlannedQty', '@CP_OF.U_Recibido', '@CP_OF.U_Procesado')
                 ->where('@CP_OF.Code', $code->Code)->get();
-            if ($index == 1) {
+                if ($index == 1) {
                 $one = DB::table('OWOR')
                     ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
                     ->leftJoin('@CP_OF', '@CP_OF.U_DocEntry', '=', 'OWOR.DocEntry')
@@ -295,7 +318,6 @@ if ($code->U_Recibido > $code->U_Procesado){
                     $pedido = $o->OriginNum;
                 }
             } else {
-
                 $one = array_merge($one, $order); //$one->merge($order);
                 //dd($one);
             }
@@ -304,7 +326,8 @@ if ($code->U_Recibido > $code->U_Procesado){
             return redirect()->back()->withErrors(array('message' => 'La orden no tiene ruta en SAP.'));   
         }
 
-        }
+        }else
+        return redirect()->back()->withErrors(array('message' => 'La orden no tiene Cantidad Recibida.')); 
         }
         //  $order = OP::find('492418');
         //return $one;
@@ -381,11 +404,23 @@ if ($code->U_Recibido > $code->U_Procesado){
         ]);
         ////RUTA RETROCESO
         $Ruta = OP::getRutaNombres($op);
-        return view('Mod01_Produccion.traslados', ['actividades' => $actividades, 'ultimo' => count($actividades),'Ruta'=>$Ruta,'t_user' => $t_user, 'ofs' => $one, 'op' => $op, 'pedido' => $pedido, 'HisOrden' => $HisOrden]);
+        return view('Mod01_Produccion.traslados', ['Ruta'=>$Ruta,'actividades' => $actividades, 'ultimo' => count($actividades),'t_user' => $t_user, 'ofs' => $one, 'op' => $op, 'pedido' => $pedido, 'HisOrden' => $HisOrden]);
     }
         return redirect()->back()->withErrors(array('message' => 'La OP '.Input::get('op').' no existe.'));
     }
 
+else{
+    $user = Auth::user();
+    $actividades = $user->getTareas();
+    $EstacionOrden = DB::table('OWOR')
+    ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
+    ->leftJoin('@CP_OF', '@CP_OF.U_DocEntry', '=', 'OWOR.DocEntry') 
+    ->select('OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden', 'OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
+        'OWOR.PlannedQty', '@CP_OF.U_Recibido', '@CP_OF.U_Procesado')
+        ->where('U_CT',$stawer)->get();
+        return view('Mod01_Produccion.AvanzarEst', ['EstacionOrden'=>$EstacionOrden,'actividades' => $actividades, 'ultimo' => count($actividades)]);
+}
+    }
     public function avanzarOP(){
         try{
             DB::transaction(function () {
@@ -753,4 +788,13 @@ return redirect()->back();
 //return redirect()->back()->withErrors(array('message' => 'Error, Consulte con el Administrador de SIZ, por que no se llevo a cabo el retroceso.'));
 }
 
+public function Avanzar(Request $request)
+{
+    $user = Auth::user();
+    $actividades = $user->getTareas();
+    return view('Mod01_Produccion.AvanzarEst',
+    ['order'=>$order,
+    'actividades' => $actividades, 
+    'ultimo' => count($actividades)]);
+}
 }

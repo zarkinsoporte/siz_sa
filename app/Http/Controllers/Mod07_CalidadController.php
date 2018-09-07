@@ -62,6 +62,7 @@ public function RechazoIn(Request $request)
                 'materialCodigo'     =>$request->input('Codigo'),
                 'materialUM'         =>$request->input('Um'),
                 'materialDescripcion'=>$request->input('Material'),
+                'cantidadRecibida'   =>$request->input('C_Recibida'),
                 'cantidadRevisada'   =>$request->input('C_Revisada'),
                 'cantidadAceptada'   =>$request->input('C_Aceptada'),
                 'cantidadRechazada'  =>$request->input('C_Rechazada'),
@@ -69,7 +70,7 @@ public function RechazoIn(Request $request)
                 'DocumentoNumero'    =>$request->input('N_Doc'),
                 'InspectorNombre'    =>$request->input('Inspector'),
                 'Observaciones'      =>$request->input('Observaciones'),
-           
+                    
         
             ]
         );
@@ -168,15 +169,20 @@ else{
         else
         {
             Excel::create('Siz_Calidad_Reporte_Rechazo '.$hoy = date("d/m/Y").'', function($excel)use($rechazo) {
-             
                //Header
                 $excel->sheet('Hoja 1', function($sheet) use($rechazo){
                 //$sheet->margeCells('A1:F5');     
+                 
                 $sheet->row(2, [
                    '', 'Fecha Revision', 'Proveedor', 'Codigo de Material', 'Descripcion de material', 'Cantidad aceptada', 'Cantidad Rechazada',
                     'Cantidad Revisada','Nombre del Inspector','No.Factura'
-                ]);
-
+                         
+                                ]); 
+                $sheet->row(1, function($row) {
+                    $row->setBackground('#df0101');
+                    $row->setFontWeight('bold');
+                    $row->setAlignment('center');
+                });
                //Datos 
         foreach($rechazo as $R => $Rec) {
             $sheet->row($R+4, [
@@ -237,5 +243,5 @@ else{
       //dd($DelRechazo);
       return view('Mod07_Calidad.Historial',['VerHistorial'=>$VerHistorial,'actividades' => $actividades, 'ultimo' => count($actividades)]);
      }
-
+ 
 }

@@ -36,8 +36,8 @@ class HomeController extends Controller
         $id_user=Auth::user()->U_EmpGiro;
         $noticias=DB::select(DB::raw("SELECT * FROM Siz_Noticias WHERE Destinatario='$id_user'and Leido='N'"));
         $user = Auth::user();
-        $actividades = $user->getTareas();
-        return view('homeIndex',   ['actividades' => $actividades,'noticias' => $noticias,'id_user' => $id_user, 'ultimo' => count($actividades)]);
+        $actividades = $user->getTareas();        
+        return view('homeIndex',   ['actividades' => $actividades,'noticias' => $noticias,'id_user' => $id_user, 'ultimo' => count($actividades), 'isAdmin'=> User::isAdmin()]);
    
     }
 

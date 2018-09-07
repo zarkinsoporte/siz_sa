@@ -220,6 +220,9 @@ Route::post('home/TRASLADO ÷ AREAS/{id}', 'Mod01_ProduccionController@getOP');
 //la siguiente ruta avanza la orden //
 Route::post('home/traslados/avanzar', 'Mod01_ProduccionController@avanzarOP');
 Route::post('home/traslados/Reprocesos', 'Mod01_ProduccionController@Retroceso');
+Route::get('AvanzarEst', 'Mod01_ProduccionController@Avanzar');
+Route::post('AvancePorEst', 'Mod01_ProduccionController@Avanzar');
+//rutas notificaiones de noticias
 Route::post('/', 'HomeController@index');
 Route::get('Mod01_Produccion/Noticias','HomeController@create');
 Route::get('leido/{id}', 'HomeController@UPT_Noticias');
@@ -240,7 +243,7 @@ Route::get('admin/aux', function(){
     ->get();
 dd($menus);
 });
-
+///RUTAS CALIDAD-RECHAZO
 Route::get('home/NUEVO RECHAZO', 'Mod07_CalidadController@Rechazo');
 Route::post('RechazosNuevo', 'Mod07_CalidadController@RechazoIn');
 Route::get('Mod07_Calidad/Mod_Rechazo/{id}/{mensaje}', 'Mod07_CalidadController@Mod_Rechazo');
@@ -255,3 +258,9 @@ Route::get('borrado/{id}', 'Mod07_CalidadController@UPT_Cancelado');
 Route::post('/borrado', 'Mod07_CalidadController@UPT_Cancelado');
 Route::get('home/HISTORIAL', 'Mod07_CalidadController@Historial');
 Route::post('/excel', 'Mod07_CalidadController@excel');
+
+
+Route::get('beto', function(){
+    dd(OP::find('132173'));
+    dd(OP::onFirstEstacion('132173'));
+});

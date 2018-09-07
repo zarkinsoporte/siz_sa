@@ -42,13 +42,26 @@
                                 </div>
                                 <div class="panel-body">                               
                                     <h5>Usuario: {{$t_user->firstName.' '.$t_user->lastName}} &nbsp;&nbsp;<a href="{!! url('home/TRASLADO ÷ AREAS') !!}">Cambiar Usuario</a>  </h5>                                                       
-                                    <h5>Control de Piso: {{$t_user->U_EmpGiro}}</h5>                                   
+                                    <h5>Control de Piso: {{$t_user->U_EmpGiro}}</h5>
+
                                     @if(Session::get('usertraslados') == 1)
                                         {!! Form::open(['url' => 'home/TRASLADO ÷ AREAS/'.$t_user->U_EmpGiro, 'method' => 'POST']) !!}
-                                        <label for="op" class="control-label" >Introduce Orden de Produccion:</label>
-                                        <input autofocus type="number" name="op" id="op" min="1" max="9999999999" required>
-                                    
-                                    
+                                        <fieldset>
+                                        <div>
+                                            <input type="radio" name="AvanceEst" id="op" value="1" checked>
+                                            <label for="op" class="control-label" >Introduce Orden de Produccion:</label>
+                                            <input autofocus type="number" name="op" id="op" min="1" max="9999999999" required>
+                                        </div>
+                                        <div>
+                                            <input type="radio" name="AvanceEst" id="OP_us" value="2">
+                                            <label for="avanzarEst"class="control-label" >Avanzar por Estación :</label>
+                                            <select  class="form-control" name="OP_us" id="OP_us">
+                                     @foreach($rutasConNombres as $key => $value)
+                                                <option  class="col-md-6"value="{{$key}}">{{$value}}</option>
+                                            @endforeach
+                                        </select>
+                                        </div>
+                                        </fieldset>
                                      @else
                                        {!! Form::open(['url' => 'home/TRASLADO ÷ AREAS/', 'method' => 'POST']) !!}
                                        <input type="text" hidden name="send" value="send">

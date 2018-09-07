@@ -96,8 +96,23 @@ class User extends Model implements AuthenticatableContract,
         return $actividades;
     }
 
-    public static function getEstaciones($id){
-
-    }
+    public static function isAdmin(){
+        $admin=DB::table('HTM1')->where('empID',Auth::user()->empID)->first();
+    
+        if(isset($admin)){
+            if($admin->teamID==1)
+            {
+                return true;
+            }
+            else
+            {           
+                return false;
+            }            
+        }
+        else
+        {           
+            return false;
+        }
+       }
 
 }

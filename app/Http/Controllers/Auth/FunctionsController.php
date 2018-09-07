@@ -17,7 +17,7 @@ class FunctionsController extends Controller
 
 $validator = Validator::make($request->all(), [
     'userId' => 'required',
-    'password' => 'required|regex:/\D{2}\d{3}/|confirmed',
+    'password' => 'required|confirmed',  //regex:/\D{2}\d{3}/
     'password_confirmation' => 'required',
 ]);
 if ($validator->fails()) {

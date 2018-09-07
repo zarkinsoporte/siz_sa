@@ -108,7 +108,7 @@
                                             <label for="password" class="col-md-12 control-label">Id de Usuario:</label>
                                             <input type="text" name="userId" class="form-control" id="userId" value="" readonly/>
                                             <label for="password" class="col-md-12 control-label">Ingresa la nueva Contraseña:</label>
-                                            <input id="password" type="password" class="form-control" name="password" required maxlength="6">
+                                            <input id="password" type="password" class="form-control" name="password" required maxlength="20">
                                         </div>
                                     </div>
 

@@ -20,7 +20,7 @@ preg_match_all('!\d+!', $str, $matches);
 print_r($matches);
 
 -->
-<script>
+<script>  
     window.Laravel = {!! json_encode([
             'csrfToken' => csrf_token(),
         ]) !!};

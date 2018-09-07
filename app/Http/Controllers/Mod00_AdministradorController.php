@@ -45,7 +45,8 @@ class Mod00_AdministradorController extends Controller
      */
     public function index()
     {
-        if ($user = Auth::user()->U_EmpGiro == 246){
+       
+        if (User::isAdmin()){
             return view('Mod00_Administrador.admin');
         }else{
 

@@ -98,11 +98,18 @@ $index = 0;
                     @endif
 
 @endforeach
-@if (Auth::user()->U_EmpGiro==246)
-                    <li>
-                        <a href="{!! url('/MOD00-ADMINISTRADOR') !!}">Administrador</a>
-                    </li>
+
+
+
+
+@if(isset($isAdmin))
+@if ($isAdmin)
+<li>
+    <a href="{!! url('/MOD00-ADMINISTRADOR') !!}">Administrador</a>
+</li>
 @endif
+@endif
+
 
                 @include('partials.section-navbar')
         </ul>

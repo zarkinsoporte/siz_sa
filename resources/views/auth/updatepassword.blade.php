@@ -85,7 +85,7 @@ print_r($matches);
                                 <label class="control-label" for="password">Escribe tu contraseña:</label>
                                 <div class="input-group">
                                     <input type="password" min="0" id="password" name="password" class="form-control" style="color: white" value="{{old('id')}}" required autofocus
-                                    data-toggle="tooltip" data-placement="bottom" title="La Contraseña debe tener 2 letras primero y 3 numeros"> 
+                                    data-toggle="tooltip" data-placement="bottom" maxlength="20"> 
                                 </input><span class="input-group-btn">
                                       </span>
                                 </div>
@@ -93,7 +93,7 @@ print_r($matches);
                             <div class="form-group label-floating">
                                 <label class="control-label" for="password_confirmation">Confirma contraseña:</label>
                                 <div class="input-group">
-                                    <input type="password" id="password_confirmation" name="password_confirmation" class="form-control"  style="color: white"  required>
+                                    <input type="password" id="password_confirmation" name="password_confirmation" class="form-control"  style="color: white"  required maxlength="20">
                                     <span class="input-group-btn">
                                         <button type="submit" class="btn btn-fab btn-fab-mini">
                                           <i class="material-icons">send</i>

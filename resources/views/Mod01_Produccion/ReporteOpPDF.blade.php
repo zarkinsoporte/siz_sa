@@ -63,7 +63,9 @@
         <tbody>
         <tr>
       <td colspan="5" align="center" bgcolor="#fff">
+            @if(count($data)>0)
       <b><?php echo  $data[0]->CompanyName?></b><br>    
+     
       <b>Mod06-Producción</b>
       <h3>Historial por OP</h3></td>
       </tr>
@@ -75,7 +77,20 @@
             </tr>
             <tr>
             <th align="center">Descripción:</th>
-            <td align="center"colspan="4"><?php echo $data[0]->ItemCode ?> - <?php echo $data[0]->ItemName ?></td>    
+            <td align="center"colspan="4"><?php echo $data[0]->ItemCode ?> - <?php echo $data[0]->ItemName ?></td>   
+        @else           
+        <b>Mod06-Producción</b>
+        <h3>Historial por OP</h3></td>
+        </tr>
+              <tr>
+              <th align="center">Orden de fabricación:</th>
+              <td align="center"colspan="1"><?php echo $op ?></td>         
+              <th align="center">V S:</th>
+              </tr>
+              <tr>
+              <th align="center">Descripción:</th>
+              <td align="center"colspan="4">La orden no tiene historial</td>
+            @endif 
         </tbody>
     </thead> 
     </table>
@@ -91,6 +106,7 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @if(count($data)>0)
                     @foreach ($data as $rep)
                         <tr>                            
                             <td scope="row">
@@ -106,7 +122,8 @@
                                 {{ $rep->U_CANTIDAD }}
                             </td>
                         </tr>    
-                    @endforeach 
+                    @endforeach ´
+                    @endif
                     </tbody>
                 </table>
         </div>
@@ -117,6 +134,7 @@
 </div>
 <!-- /#page-wrapper -->
 </div>
+@if(count($data)>0)
 <footer>
 <script type="text/php">
  $text = 'Pagina: {PAGE_NUM} / {PAGE_COUNT}';
@@ -130,6 +148,7 @@
  $pdf->page_text(35, 23, $empresa, $font, 9);
 </script> 
 </footer>
+@endif
 </div>
 
 </body>

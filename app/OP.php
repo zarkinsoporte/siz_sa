@@ -104,8 +104,34 @@ return $data1;
        }
    }
 
+   public static function onFirstEstacion($Code){
+    $i = array_search(OP::find($Code)->U_CT, self::getRuta(OP::find($Code)->U_DocEntry));
 
-   public  static  function avanzarEstacion($Code, $estacionesUsuario){
+    if ($i>=count(self::getRuta(OP::find($Code)->U_DocEntry))){
+        $i=$i-1;
+    }
+
+    $rs = DB::select('select * from [@PL_RUTAS] where U_Orden ='. self::getRuta(OP::find($Code)->U_DocEntry)[$i]);
+    $estacionActual = null;
+    foreach ($rs as $r) {
+        $estacionActual =  $r->Code;
+    }
+
+    $rs1 = DB::select('select u_Ruta from OWOR where DocEntry ='. OP::find($Code)->U_DocEntry);
+    //dd($rs);
+    foreach ($rs1 as $r) {
+        $ruta = explode(",", $r->u_Ruta);
+        if($ruta[0]==$estacionActual){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+   }
+
+   public  static  function avanzarEstacion($Code, $estacionesUsuario){ // habilitar o desabilitar boton
        $rutas = explode(",", $estacionesUsuario);
 
        if (array_search(OP::find($Code)->U_CT, $rutas) !== FALSE)
