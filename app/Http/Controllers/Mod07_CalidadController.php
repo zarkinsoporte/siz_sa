@@ -70,6 +70,7 @@ public function RechazoIn(Request $request)
                 'DocumentoNumero'    =>$request->input('N_Doc'),
                 'InspectorNombre'    =>$request->input('Inspector'),
                 'Observaciones'      =>$request->input('Observaciones'),
+                'Borrado'            =>'N'
                     
         
             ]
@@ -168,32 +169,22 @@ else{
         }
         else
         {
-            Excel::create('Siz_Calidad_Reporte_Rechazo '.$hoy = date("d/m/Y").'', function($excel)use($rechazo) {
+            Excel::load('Siz_Calidad_Reporte_Rechazos.xlsx' ,function($excel)use($rechazo) {
                //Header
-                $excel->sheet('Hoja 1', function($sheet) use($rechazo){
-                //$sheet->margeCells('A1:F5');     
-                 
-                $sheet->row(2, [
-                   '', 'Fecha Revision', 'Proveedor', 'Codigo de Material', 'Descripcion de material', 'Cantidad aceptada', 'Cantidad Rechazada',
-                    'Cantidad Revisada','Nombre del Inspector','No.Factura'
-                         
-                                ]); 
-                $sheet->row(1, function($row) {
-                    $row->setBackground('#df0101');
-                    $row->setFontWeight('bold');
-                    $row->setAlignment('center');
-                });
-               //Datos 
+                $excel->sheet('Hoja1', function($sheet) use($rechazo){
+
         foreach($rechazo as $R => $Rec) {
-            $sheet->row($R+4, [
+            $sheet->row($R+11, [
                 "        ",
-             $Rec->fechaRevision,
+            date('d/m/Y',strtotime($Rec->fechaRevision)),
              $Rec->proveedorNombre, 
              $Rec->materialCodigo, 
              $Rec->materialDescripcion, 
+             $Rec->cantidadRecibida,
              $Rec->cantidadAceptada,
              $Rec->cantidadRechazada,
              $Rec->cantidadRevisada,
+             $Rec->cantidadAceptada /$Rec->cantidadRecibida * 100,
              $Rec->InspectorNombre,
              $Rec->DocumentoNumero 
              
@@ -243,5 +234,5 @@ else{
       //dd($DelRechazo);
       return view('Mod07_Calidad.Historial',['VerHistorial'=>$VerHistorial,'actividades' => $actividades, 'ultimo' => count($actividades)]);
      }
- 
+
 }

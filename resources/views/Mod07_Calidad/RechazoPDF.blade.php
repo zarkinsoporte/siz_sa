@@ -68,7 +68,7 @@
                          <td colspan="5" align="center" bgcolor="#fff">
                          <b><?php echo $sociedad ?></b><br>    
                          <b>Mod07-Calidad</b>
-                         <h3>Reporte de Rechazos</h3></td>
+                         <h3>Recepción de Materiales</h3></td>
                          </tr>
                          </thead>
                          <tbody>
@@ -176,7 +176,7 @@
 <script type="text/php">
  $text = 'Pagina: {PAGE_NUM} / {PAGE_COUNT}';
  $date = 'Fecha de impresion : <?php echo $hoy = date("d-m-Y H:i:s");?>';
- $tittle = 'Siz_Calidad_Reporte_Rechazo.Pdf';
+ $tittle = 'Siz_Calidad_Recepcion_Materiales.Pdf';
  $font = $fontMetrics->get_font("Arial, Helvetica, sans-serif", "normal");
  $pdf->page_text(40, 580, $text, $font, 9);
  $pdf->page_text(603, 23, $date, $font, 9);

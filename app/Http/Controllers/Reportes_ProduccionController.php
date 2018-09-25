@@ -13,7 +13,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use Session;
 use Auth;
+use Dompdf\Dompdf;
 use Lava;
+ini_set('max_execution_time', 60);
 class Reportes_ProduccionController extends Controller
 {
     /**
@@ -105,8 +107,15 @@ class Reportes_ProduccionController extends Controller
                 }
 
 
-                Session::flash('Ocultamodal', 1);
-                return view('Mod01_Produccion.produccionGeneral', ['actividades' => $actividades, 'ultimo' => count($actividades), 'ofs' => $finalarray, 'departamento' => $departamento, 'fechaI' => $fechaI, 'fechaF' => $fechaF, 'tvs' => 0, 'cant'=>0]);
+                //Session::flash('Ocultamodal', 1);
+                $pdf = \PDF::loadView('Mod01_Produccion.ReporteProduccionPDF', ['ofs' => $finalarray, 'departamento' => $departamento, 'fechaI' => $fechaI, 'fechaF' => $fechaF, 'tvs' => 0, 'cant'=>0]);
+  //$pdf->set_paper('A3','landscape'); //Changed A4 to A3  
+        
+  return $pdf->stream();
+                //dd($pdf);
+               return $pdf->setOptions(['isPhpEnabled'=>true])->download('Siz_Producción_Estacion_OP.Pdf');
+
+                return view('Mod01_Produccion.ReporteProduccionPDF', ['ofs' => $finalarray, 'departamento' => $departamento, 'fechaI' => $fechaI, 'fechaF' => $fechaF, 'tvs' => 0, 'cant'=>0]);
             }else{
                 Session::flash('Ocultamodal', false);
                 return view('Mod01_Produccion.produccionGeneral', ['actividades' => $actividades, 'ultimo' => count($actividades)]);

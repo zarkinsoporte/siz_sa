@@ -49,7 +49,7 @@
                                         <fieldset>
                                         <div>
                                             <input type="radio" name="AvanceEst" id="op" value="1" checked>
-                                            <label for="op" class="control-label" >Introduce Orden de Produccion:</label>
+                                            <label for="op" class="control-label" >Introduce Orden de Producción:</label>
                                             <input autofocus type="number" name="op" id="op" min="1" max="9999999999" required>
                                         </div>
                                         <div>
@@ -386,9 +386,9 @@ switch ($t_user->position) {
 
 
 
-            <div class="dropdown">
-            <label  for="message-text" class="control-label"  >Estaciones Anteriores</label>
-            <select class="form-control" name="selectestaciones" id="selectestaciones" required></select>    
+    <div class="dropdown">
+    <label  for="message-text" class="control-label"  >Estaciones Anteriores</label>
+    <select class="form-control" name="selectestaciones" id="selectestaciones" required></select>    
 </div>
 
 
@@ -413,7 +413,7 @@ switch ($t_user->position) {
                     
                 <div>
                 <label for="message-text" class="control-label" value="Nota">Nota</label>
-                <textarea class="form-control" name="nota"id="message-text"  required></textarea>
+                <textarea class="form-control" name="nota" id="message-text"  required maxlength="115"></textarea>
 </div>
 </div>
          <div class="modal-footer">

@@ -9,7 +9,7 @@
 <div class="col-lg-8 col-md-9 col-xs-10">
     <div class="hidden-lg"><br><br></div>
         <h3 class="page-header">
-           Captura de Rechazos
+           Recepcion de Materiales
             <small>Calidad</small>
         </h3>
         <div class="visible-lg">

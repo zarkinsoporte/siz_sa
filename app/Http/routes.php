@@ -222,6 +222,7 @@ Route::post('home/traslados/avanzar', 'Mod01_ProduccionController@avanzarOP');
 Route::post('home/traslados/Reprocesos', 'Mod01_ProduccionController@Retroceso');
 Route::get('AvanzarEst', 'Mod01_ProduccionController@Avanzar');
 Route::post('AvancePorEst', 'Mod01_ProduccionController@Avanzar');
+Route::get('datatables.Ordenes', 'Mod01_ProduccionController@DataOrden')->name('datatables.Ordenes');
 //rutas notificaiones de noticias
 Route::post('/', 'HomeController@index');
 Route::get('Mod01_Produccion/Noticias','HomeController@create');
@@ -261,6 +262,6 @@ Route::post('/excel', 'Mod07_CalidadController@excel');
 
 
 Route::get('beto', function(){
-    dd(OP::find('132173'));
+    dd(OP::find('129422'));
     dd(OP::onFirstEstacion('132173'));
 });

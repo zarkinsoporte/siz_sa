@@ -63,7 +63,7 @@ class Mod01_ProduccionController extends Controller
         OHEM.firstName + ' ' + OHEM.lastName ,
          DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)),[@CP_LOGOF].U_DocEntry  
         ,OWOR.ItemCode , OITM.ItemName        
-ORDER BY FechaF,[@CP_LOGOF].U_CT") );
+ORDER BY [@CP_LOGOF].U_CT, FechaF, Empleado") );
         //dd($GraficaOrden);
     
         $data=array(
@@ -272,7 +272,7 @@ ORDER BY FechaF,[@CP_LOGOF].U_CT") );
              
         foreach ($Codes as $code) {
 
-if ($code->U_Recibido > $code->U_Procesado || OP::onFirstEstacion($code->Code) && ($code->U_Recibido>=1)){
+if ($code->U_Recibido > $code->U_Procesado || OP::onFirstEstacion($code->Code) && ($code->U_Recibido>=0)){
 
 
 
@@ -409,15 +409,17 @@ if ($code->U_Recibido > $code->U_Procesado || OP::onFirstEstacion($code->Code) &
         return redirect()->back()->withErrors(array('message' => 'La OP '.Input::get('op').' no existe.'));
     }
 
-else{
+else{ 
     $user = Auth::user();
     $actividades = $user->getTareas();
     $EstacionOrden = DB::table('OWOR')
     ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
-    ->leftJoin('@CP_OF', '@CP_OF.U_DocEntry', '=', 'OWOR.DocEntry') 
+    ->leftJoin('@CP_OF', '@CP_OF.U_DocEntry', '=', 'OWOR.DocEntry')
+    ->leftJoin('OCRD','OCRD.CardCode','=','OWOR.CardCode')
+    ->leftJoin('@CP_LOGOT','@CP_LOGOT.U_OP','=','OWOR.DocEntry') 
     ->select('OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden', 'OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
-        'OWOR.PlannedQty', '@CP_OF.U_Recibido', '@CP_OF.U_Procesado')
-        ->where('U_CT',$stawer)->get();
+        'OWOR.PlannedQty',  'OCRD.CardName','OWOR.PostDate', 'OWOR.DueDate','@CP_LOGOT.U_FechaHora')
+        ->where('@CP_OF.U_CT',$stawer)->get();
         return view('Mod01_Produccion.AvanzarEst', ['EstacionOrden'=>$EstacionOrden,'actividades' => $actividades, 'ultimo' => count($actividades)]);
 }
     }
@@ -766,12 +768,14 @@ if($Actual > $cant_r){
   $user= User::find($Num_Nomina->No_Nomina);  
   $correo  = utf8_encode ($user['email'].'@zarkin.com');
   //dd($correo,$user);
-  Mail::send('Emails.Reprocesos',[ 'Nombre_Destino'=>$Nombre_Destino,'Nombre_Actual'=>$Nombre_Actual,'autorizo'=>$autorizo,'dt'=> date('d/M/Y h:m:s'),
-  'No_Nomina'=>$No_Nomina ,'Nom_User'=>$Nom_User,'orden'=>$orden,
-  'cant_r'=>$cant_r,'Est_act'=>$Est_act,'Est_ant'=>$Est_ant,'reason'=>$reason,'nota'=>$nota,'leido'=>$leido],function($msj) use($correo){
-  $msj-> subject  ('Notificaciones SIZ');//ASUNTO DEL CORREO
-  $msj-> to($correo);//Correo del destinatario  
-  });  
+        if(strlen($correo > 11)){
+            Mail::send('Emails.Reprocesos',[ 'Nombre_Destino'=>$Nombre_Destino,'Nombre_Actual'=>$Nombre_Actual,'autorizo'=>$autorizo,'dt'=> date('d/M/Y h:m:s'),
+            'No_Nomina'=>$No_Nomina ,'Nom_User'=>$Nom_User,'orden'=>$orden,
+            'cant_r'=>$cant_r,'Est_act'=>$Est_act,'Est_ant'=>$Est_ant,'reason'=>$reason,'nota'=>$nota,'leido'=>$leido],function($msj) use($correo){
+            $msj-> subject  ('Notificaciones SIZ');//ASUNTO DEL CORREO
+            $msj-> to($correo);//Correo del destinatario  
+            });  
+        }
   }   
 //-----------------Refresca a la vista-------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
  Session::flash('mensaje', 'Reproceso Realizado!!...
@@ -790,11 +794,26 @@ return redirect()->back();
 
 public function Avanzar(Request $request)
 {
+    $ruts1 = DB::table('@PL_RUTAS')->value('Name');
+    dd($ruts1);
     $user = Auth::user();
     $actividades = $user->getTareas();
     return view('Mod01_Produccion.AvanzarEst',
     ['order'=>$order,
     'actividades' => $actividades, 
     'ultimo' => count($actividades)]);
+}
+public function DataOrden($Estacion)
+{
+    $stawer=Input::get('OP_us');
+    $AvanceEst=Input::get('AvanceEst');
+    $user = Auth::user();
+    $actividades = $user->getTareas();
+    $EstacionOrden = DB::table('OWOR')
+    ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
+    ->leftJoin('@CP_OF', '@CP_OF.U_DocEntry', '=', 'OWOR.DocEntry') 
+    ->select('OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden', 'OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
+        'OWOR.PlannedQty', '@CP_OF.U_Recibido', '@CP_OF.U_Procesado')
+        ->where('U_CT',$stawer)->get();
 }
 }

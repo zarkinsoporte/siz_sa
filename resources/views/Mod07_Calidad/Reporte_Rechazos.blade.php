@@ -10,7 +10,7 @@
                         <div class="col-lg-12">
                             <h3 class="page-header">
                                 Salotto SA DE CV
-                                <small>Reporte de Rechazos</small>
+                                <small>Recepción de Materiales</small>
                             </h3>
                            
                                                       
@@ -39,7 +39,7 @@
            <div class="modal-content" >
               <div class="modal-header">
 
-                   <h4 class="modal-title" id="pwModalLabel">Reporte de Rechazos</h4>
+                   <h4 class="modal-title" id="pwModalLabel">Reporte de Materiales</h4>
               </div>
               {!! Form::open(['url' => 'pdfRechazo', 'method' => 'POST']) !!}
 

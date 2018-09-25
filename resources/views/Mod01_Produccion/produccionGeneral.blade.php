@@ -139,15 +139,7 @@
                                                 <option value="166 Limpieza">166 Limpieza</option>
                                                 <option value="169 Inspeccion Tapiceria">169 Inspeccion Tapiceria</option>
                                                 <option value="172 Empaque">172 Empaque</option>
-                                                <option value="175 Inspeccion Final">175 Inspeccion Final</option>
-                                                <option value="200 Ordenes en Planeación">200 Ordenes en Planeación</option>
-                                                <option value="203 Programa de Mantas">203 Programa de Mantas</option>
-                                                <option value="206 Trazo">206 Trazo</option>
-                                                <option value="209 Tendido">209 Tendido</option>
-                                                <option value="212 Corte de Tela">212 Corte de Tela</option>
-                                                <option value="215 Separar y Marcar">215 Separar y Marcar</option>
-                                                <option value="218 Costura Mantas">218 Costura Mantas</option>
-                                                <option value="221 Inspeccion Mantas">221 Inspeccion Mantas</option>
+                                                <option value="175 Inspeccion Final">175 Inspeccion Final</option>                                               
                                             </select>
                                         </div>
 
@@ -161,7 +153,7 @@
                                             </div>
                                         </div>
                                         &nbsp;&nbsp;&nbsp;
-                                        <input id="submit" name="submit" type="submit" value="Generar" onclick="mostrar();"  class="btn btn-primary"/>
+                                        <input formtarget="_blank" id="submit" name="submit" type="submit" value="Generar" onclick="mostrar();"  class="btn btn-primary"/>
 
                                         <a type="button" class="btn btn-default"  href="{!!url('home')!!}">Cancelar</a>
                                     </div>
