@@ -9,100 +9,100 @@
 | It's a breeze. Simply tell Laravel the URIs it should respond to
 | and give it the controller to call when that URI is requested.
 |
-*/
+ */
 use App\Grupo;
-use App\Modelos\MOD01\TAREA_MENU;
 use App\Modelos\MOD01\LOGOF;
 use App\Modelos\MOD01\MODULOS_GRUPO_SIZ;
+use App\Modelos\MOD01\TAREA_MENU;
 use App\OP;
 use Illuminate\Support\Facades\DB;
-Route::get('/','HomeController@index');
+Route::get('/', 'HomeController@index');
 Route::get('/home',
-[
-    'as' => 'home',
-    'uses' => 'HomeController@index'
-]);
-Route::get('/pruebas', function(){
+    [
+        'as' => 'home',
+        'uses' => 'HomeController@index',
+    ]);
+Route::get('/pruebas', function () {
     return view('Mod00_Administrador.pruebas');
 });
 /*
 |--------------------------------------------------------------------------
 | Administrator Routes
 |--------------------------------------------------------------------------
-*/
+ */
 /*
 |--------------------------------------------------------------------------
 | Authentication Routes
 |--------------------------------------------------------------------------
-*/
+ */
 Route::get('auth/login', 'Auth\AuthController@getLogin');
 Route::get('login', 'Auth\AuthController@getLogin');
-Route::post('auth/login', ['as' =>'auth/login', 'uses' => 'Auth\AuthController@postLogin']);
+Route::post('auth/login', ['as' => 'auth/login', 'uses' => 'Auth\AuthController@postLogin']);
 Route::get('auth/logout', ['as' => 'auth/logout', 'uses' => 'Auth\AuthController@getLogout']);
-Route::post('passwordUpdate',  ['as' => 'passwordUpdate', 'uses' =>'Auth\FunctionsController@cambioPasswordUsers']);
+Route::post('passwordUpdate', ['as' => 'passwordUpdate', 'uses' => 'Auth\FunctionsController@cambioPasswordUsers']);
 Route::get('viewpassword', ['as' => 'viewpassword', 'uses' => 'Auth\FunctionsController@viewpassword']);
 /*
 |--------------------------------------------------------------------------
 | MOD00-ADMINISTRADOR Routes
 |--------------------------------------------------------------------------
-*/
-Route::get('MOD00-ADMINISTRADOR','Mod00_AdministradorController@index');
+ */
+Route::get('MOD00-ADMINISTRADOR', 'Mod00_AdministradorController@index');
 Route::get('orden/{code}', function ($code) {
 //    $orden = DB::table('@CP_LOGOF')->where('Code', $code)->first();
-//    return $orden->U_DocEntry;
+    //    return $orden->U_DocEntry;
 
-    $Codes = OP::where('U_DocEntry', '60987' )->get();
+    $Codes = OP::where('U_DocEntry', '60987')->get();
 
 //dd($Codes);
     $index = 0;
-    foreach ($Codes as $code){
-        $index = $index+1;
-        $order =  DB::table('OWOR')
+    foreach ($Codes as $code) {
+        $index = $index + 1;
+        $order = DB::table('OWOR')
             ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
-            ->leftJoin('@CP_OF', '@CP_OF.U_DocEntry','=', 'OWOR.DocEntry')
-            ->select(DB::raw( OP::getEstacionActual($code->Code).' AS U_CT_ACT'), DB::raw( OP::getEstacionSiguiente($code->Code).' AS U_CT_SIG'),
-                'OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden','OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
+            ->leftJoin('@CP_OF', '@CP_OF.U_DocEntry', '=', 'OWOR.DocEntry')
+            ->select(DB::raw(OP::getEstacionActual($code->Code) . ' AS U_CT_ACT'), DB::raw(OP::getEstacionSiguiente($code->Code) . ' AS U_CT_SIG'),
+                'OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden', 'OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
                 'OWOR.PlannedQty', '@CP_OF.U_Recibido', '@CP_OF.U_Procesado')
             ->where('@CP_OF.Code', $code->Code)->get();
-        if ($index == 1){
+        if ($index == 1) {
             $one = DB::table('OWOR')
                 ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
-                ->leftJoin('@CP_OF', '@CP_OF.U_DocEntry','=', 'OWOR.DocEntry')
-                ->select(DB::raw( OP::getEstacionActual($code->Code).' AS U_CT_ACT'), DB::raw( OP::getEstacionSiguiente($code->Code).' AS U_CT_SIG'),
-                    'OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden','OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
+                ->leftJoin('@CP_OF', '@CP_OF.U_DocEntry', '=', 'OWOR.DocEntry')
+                ->select(DB::raw(OP::getEstacionActual($code->Code) . ' AS U_CT_ACT'), DB::raw(OP::getEstacionSiguiente($code->Code) . ' AS U_CT_SIG'),
+                    'OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden', 'OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
                     'OWOR.PlannedQty', '@CP_OF.U_Recibido', '@CP_OF.U_Procesado')
                 ->where('@CP_OF.Code', $code->Code)->get();
-        }else{
+        } else {
 
             $one = //array_merge($one, $order) ; //
             $one->merge($order);
             //dd($one);
         }
     }
-  //  $order = OP::find('492418');
+    //  $order = OP::find('492418');
     return $one;
 });
-route::get('setpassword', function (){
+route::get('setpassword', function () {
     try {
         $password = Hash::make('1234');
         DB::table('dbo.OHEM')
-            ->where('U_EmpGiro', 1349 )
+            ->where('U_EmpGiro', 1349)
             ->update(['U_CP_Password' => $password]);
-    } catch(\Exception $e) {
-        echo  $e->getMessage();
+    } catch (\Exception $e) {
+        echo $e->getMessage();
     }
 
     echo 'hecho';
 });
-Route::post('cambio.password',   'Mod00_AdministradorController@cambiopassword');
+Route::post('cambio.password', 'Mod00_AdministradorController@cambiopassword');
 
 Route::get('admin/users', 'Mod00_AdministradorController@allUsers');
 Route::get('users/edit/{empid}', 'Mod00_AdministradorController@editUser');
-Route::get('admin/detalle-depto/{depto}','Mod00_AdministradorController@showUsers');
+Route::get('admin/detalle-depto/{depto}', 'Mod00_AdministradorController@showUsers');
 Route::get('datatables.showusers', 'Mod00_AdministradorController@DataShowUsers')->name('datatables.showusers');
 //--nuevas rutas 27/08/2018
-Route::get('admin/plantilla/{depto}','Mod00_AdministradorController@PlantillaExcel');
-Route::get('admin/Plantilla_PDF/{depto}','Mod00_AdministradorController@Plantilla_PDF');
+Route::get('admin/plantilla/{depto}', 'Mod00_AdministradorController@PlantillaExcel');
+Route::get('admin/Plantilla_PDF/{depto}', 'Mod00_AdministradorController@Plantilla_PDF');
 
 //Rutas del Módulo de inventarios
 Route::get('admin/altaInventario', 'Mod00_AdministradorController@altaInventario');
@@ -123,26 +123,26 @@ Route::post('admin/mod_inv2', 'Mod00_AdministradorController@mod_inv2');
 Route::get('admin/generarPdf/{id}', 'Mod00_AdministradorController@generarPdf');
 
 Route::get('controlPiso', 'Mod01_ProduccionController@estacionSiguiente');
-Route::get('grupo/{id}', function ($id){
-  Grupo::getInfo($id);
+Route::get('grupo/{id}', function ($id) {
+    Grupo::getInfo($id);
 });
 Route::get('admin/grupos/{id}', 'Mod00_AdministradorController@editgrupos');
 Route::post('admin/createModulo/{id}', 'Mod00_AdministradorController@createModulo');
 Route::post('admin/createMenu/{id}', 'Mod00_AdministradorController@createMenu');
-Route::post('admin/createTarea/{id_grupo}', 'Mod00_AdministradorController@createTarea');//si se usa
+Route::post('admin/createTarea/{id_grupo}', 'Mod00_AdministradorController@createTarea'); //si se usa
 Route::get('admin/grupos/delete_modulo/{grupo}/{id}', 'Mod00_AdministradorController@deleteModulo');
 Route::get('admin/grupos/conf_modulo/{grupo}/{id}', 'Mod00_AdministradorController@confModulo');
 Route::get('admin/grupos/conf_modulo/{grupo}/quitar-tarea/{id}', 'Mod00_AdministradorController@deleteTarea');
-Route::get('help', function(){
+Route::get('help', function () {
 
-    $produccion =  DB::select('SELECT "CP_ProdTerminada"."orden", "CP_ProdTerminada"."Pedido", "CP_ProdTerminada"."Codigo",
- "CP_ProdTerminada"."modelo", "CP_ProdTerminada"."VS", "CP_ProdTerminada"."fecha", 
- "CP_ProdTerminada"."Name", "CP_ProdTerminada"."CardName", "CP_ProdTerminada"."Semana", 
- "CP_ProdTerminada"."U_Tiempo", "CP_ProdTerminada"."Cantidad", "CP_ProdTerminada"."TVS", 
+    $produccion = DB::select('SELECT "CP_ProdTerminada"."orden", "CP_ProdTerminada"."Pedido", "CP_ProdTerminada"."Codigo",
+ "CP_ProdTerminada"."modelo", "CP_ProdTerminada"."VS", "CP_ProdTerminada"."fecha",
+ "CP_ProdTerminada"."Name", "CP_ProdTerminada"."CardName", "CP_ProdTerminada"."Semana",
+ "CP_ProdTerminada"."U_Tiempo", "CP_ProdTerminada"."Cantidad", "CP_ProdTerminada"."TVS",
  "CP_ProdTerminada"."TTiempo"
  FROM   "FUSIONL"."dbo"."CP_ProdTerminada" "CP_ProdTerminada"
- WHERE  ("CP_ProdTerminada"."fecha">=\'12/12/2017\' AND 
- "CP_ProdTerminada"."fecha"<=\'12/12/2017\') AND 
+ WHERE  ("CP_ProdTerminada"."fecha">=\'12/12/2017\' AND
+ "CP_ProdTerminada"."fecha"<=\'12/12/2017\') AND
  ("CP_ProdTerminada"."Name"= (\'175 Inspeccion Final\')  OR "CP_ProdTerminada"."Name"= (CASE
  WHEN  \'175 Inspeccion Final\' like \'175%\' THEN N\'08 Inspeccionar Empaque\'
  END))
@@ -153,30 +153,30 @@ Route::get('help', function(){
     dd(date('Y-m-d H:i:s'));
     $index = 1;
     $log = LOGOF::where('id', 1000)->first();
-   // dd($log);
-//    $newCode = new OP();
-//    $newCode->Code =12121212;
-//    $newCode->save();
-//    $varOP = OP::find(12121212);
-    $consecutivo =  DB::select('SELECT TOP 1 Code FROM  [FUSIONL2].[dbo].[@CP_LOGOT] ORDER BY  U_FechaHora DESC');
+    // dd($log);
+    //    $newCode = new OP();
+    //    $newCode->Code =12121212;
+    //    $newCode->save();
+    //    $varOP = OP::find(12121212);
+    $consecutivo = DB::select('SELECT TOP 1 Code FROM  [FUSIONL2].[dbo].[@CP_LOGOT] ORDER BY  U_FechaHora DESC');
     //$consecutivo = ((int)$users->Code);
-echo $consecutivo[0]->Code;
-   // echo $log->U_CT;
+    echo $consecutivo[0]->Code;
+    // echo $log->U_CT;
 
 });
 Route::get('datatable/{idGrup}/{idMod}', 'Mod00_AdministradorController@confModulo');
 Route::get('datatables.data', 'Mod00_AdministradorController@anyData')->name('datatables.data');
-Route::get('getAutocomplete', function(){
+Route::get('getAutocomplete', function () {
     return view('Mod07_Calidad.RechazoFrame');
 })->name('getAutocomplete');
 
-Route::get('search',array('as'=>'search','uses'=>'Mod07_CalidadController@search'));
-Route::get('autocomplete',array('as'=>'autocomplete','uses'=>'Mod07_CalidadController@autocomplete'));
+Route::get('search', array('as' => 'search', 'uses' => 'Mod07_CalidadController@search'));
+Route::get('autocomplete', array('as' => 'autocomplete', 'uses' => 'Mod07_CalidadController@autocomplete'));
 /*
 |--------------------------------------------------------------------------
 |NOTICIAS Y NOTIFICACIONES 'BRAYAN'
 |--------------------------------------------------------------------------
-*/
+ */
 Route::get('admin/Nueva', 'Mod00_AdministradorController@Noticia');
 Route::post('admin/Nueva', 'Mod00_AdministradorController@Noticia2');
 Route::get('admin/Notificaciones', 'Mod00_AdministradorController@Notificacion');
@@ -190,18 +190,18 @@ Route::post('admin/delete_Noti/', 'Mod00_AdministradorController@delete_Noti');
 |--------------------------------------------------------------------------
 | Finaliza Rutas Noticias y Notificaciones
 |--------------------------------------------------------------------------
-*/
+ */
 
-Route::get('updateprivilegio','Mod00_AdministradorController@updateprivilegio');
-Route::get('dropdown', function(){
-         return TAREA_MENU::where('id_menu_item',Input::get('option'))
-             ->lists('name', 'id');
-  });
+Route::get('updateprivilegio', 'Mod00_AdministradorController@updateprivilegio');
+Route::get('dropdown', function () {
+    return TAREA_MENU::where('id_menu_item', Input::get('option'))
+        ->lists('name', 'id');
+});
 
-Route::get('switch', function (){
-   $vava = MODULOS_GRUPO_SIZ::find(2);
-   $vava->id_menu = null;
-   $vava->save();
+Route::get('switch', function () {
+    $vava = MODULOS_GRUPO_SIZ::find(2);
+    $vava->id_menu = null;
+    $vava->save();
     var_dump(count(MODULOS_GRUPO_SIZ::find(1)));
 });
 Route::post('nuevatarea', 'Mod00_AdministradorController@nuevatarea');
@@ -210,9 +210,9 @@ Route::post('nuevatarea', 'Mod00_AdministradorController@nuevatarea');
 |--------------------------------------------------------------------------
 | MOD01-PRODUCCION Routes
 |--------------------------------------------------------------------------
-*/
-Route::get('home/R. PROD. GRAL.','Reportes_ProduccionController@produccion1');
-Route::post('home/R. PROD. GRAL.','Reportes_ProduccionController@produccion1');
+ */
+Route::get('home/R. PROD. GRAL.', 'Reportes_ProduccionController@produccion1');
+Route::post('home/R. PROD. GRAL.', 'Reportes_ProduccionController@produccion1');
 Route::get('home/TRASLADO ÷ AREAS', 'Mod01_ProduccionController@traslados');
 Route::post('home/TRASLADO ÷ AREAS', 'Mod01_ProduccionController@traslados');
 Route::get('home/TRASLADO ÷ AREAS/{id}', 'Mod01_ProduccionController@getOP');
@@ -220,31 +220,28 @@ Route::post('home/TRASLADO ÷ AREAS/{id}', 'Mod01_ProduccionController@getOP');
 //la siguiente ruta avanza la orden //
 Route::post('home/traslados/avanzar', 'Mod01_ProduccionController@avanzarOP');
 Route::post('home/traslados/Reprocesos', 'Mod01_ProduccionController@Retroceso');
-Route::get('AvanzarEst', 'Mod01_ProduccionController@Avanzar');
-Route::post('AvancePorEst', 'Mod01_ProduccionController@Avanzar');
-Route::get('datatables.Ordenes', 'Mod01_ProduccionController@DataOrden')->name('datatables.Ordenes');
-//rutas notificaiones de noticias
 Route::post('/', 'HomeController@index');
-Route::get('Mod01_Produccion/Noticias','HomeController@create');
+Route::get('Mod01_Produccion/Noticias', 'HomeController@create');
 Route::get('leido/{id}', 'HomeController@UPT_Noticias');
 Route::post('/leido', 'HomeController@UPT_Noticias');
 
 // PDF de Historial por OP
 Route::get('home/ReporteOpPDF/{op}', 'Mod01_ProduccionController@ReporteOpPDF');
 Route::get('home/ReporteMaterialesPDF/{op}', 'Mod01_ProduccionController@ReporteMaterialesPDF');
+Route::get('home/ReporteProduccionPDF', 'Reportes_ProduccionController@ReporteProduccionPDF');
 
-Route::get('admin/aux', function(){
-    $menus = MODULOS_GRUPO_SIZ::where('Siz_Modulos_Grupo.id_modulo',2)
-    ->where('Siz_Modulos_Grupo.id_grupo', 2)
-    ->whereNotNull('id_menu')
-    ->whereNotNull('id_tarea')
-    ->leftjoin('Siz_Menu_Item', 'Siz_Modulos_Grupo.id_menu', '=', 'Siz_Menu_Item.id')
-    ->leftjoin('Siz_Tarea_menu', 'Siz_Modulos_Grupo.id_tarea', '=', 'Siz_Tarea_menu.id')
-    ->select('Siz_Modulos_Grupo.*', 'Siz_Menu_Item.name as menu', 'Siz_Tarea_menu.name as tarea')
-    ->get();
-dd($menus);
+Route::get('admin/aux', function () {
+    $menus = MODULOS_GRUPO_SIZ::where('Siz_Modulos_Grupo.id_modulo', 2)
+        ->where('Siz_Modulos_Grupo.id_grupo', 2)
+        ->whereNotNull('id_menu')
+        ->whereNotNull('id_tarea')
+        ->leftjoin('Siz_Menu_Item', 'Siz_Modulos_Grupo.id_menu', '=', 'Siz_Menu_Item.id')
+        ->leftjoin('Siz_Tarea_menu', 'Siz_Modulos_Grupo.id_tarea', '=', 'Siz_Tarea_menu.id')
+        ->select('Siz_Modulos_Grupo.*', 'Siz_Menu_Item.name as menu', 'Siz_Tarea_menu.name as tarea')
+        ->get();
+    dd($menus);
 });
-///RUTAS CALIDAD-RECHAZO
+
 Route::get('home/NUEVO RECHAZO', 'Mod07_CalidadController@Rechazo');
 Route::post('RechazosNuevo', 'Mod07_CalidadController@RechazoIn');
 Route::get('Mod07_Calidad/Mod_Rechazo/{id}/{mensaje}', 'Mod07_CalidadController@Mod_Rechazo');
@@ -260,8 +257,42 @@ Route::post('/borrado', 'Mod07_CalidadController@UPT_Cancelado');
 Route::get('home/HISTORIAL', 'Mod07_CalidadController@Historial');
 Route::post('/excel', 'Mod07_CalidadController@excel');
 
+//RUTAS DE RECURSOS HUMANOS
+Route::get('home/CALCULO DE BONOS', 'Mod10_RhController@parametrosmodal');
+//Route::get('home/rh/reportes/bonos','Mod10_RhController@calculoBonos');
+Route::post('home/rh/reportes/bonos', 'Mod10_RhController@calculoBonos');
+Route::get('home/PARAMETROS BONOS', 'Mod10_RhController@setParametrosBonos');
+Route::get('home/rh/reportes/bonosPdf', 'Mod10_RhController@bonosPdf');
+Route::get('home/BONOS CORTE','Mod10_RhController@bonosCorte' );
+Route::post('home/rh/reportes/bonosCorte', 'Mod10_RhController@calculoBonosCorte');
 
-Route::get('beto', function(){
-    dd(OP::find('129422'));
-    dd(OP::onFirstEstacion('132173'));
+Route::get('home/test', function(){
+    $departamento = '175 Inspeccion Final';
+                //  $fecha = explode(" - ",$request->input('date_range'));
+                //$dt = date('d-m-Y H:i:s');
+                $fechaI = Date('d-m-y', strtotime(str_replace('-', '/', '2018-07-17 00:00:00.000')));
+                $fechaF = Date('d-m-y', strtotime(str_replace('-', '/', '2018-07-19 00:00:00.000')));
+    $produccion = DB::select('SELECT "CP_ProdTerminada"."orden", "CP_ProdTerminada"."Pedido", "CP_ProdTerminada"."Codigo",
+ "CP_ProdTerminada"."modelo", "CP_ProdTerminada"."VS", "CP_ProdTerminada"."fecha",
+ "CP_ProdTerminada"."CardName", 
+ "CP_ProdTerminada"."Cantidad", "CP_ProdTerminada"."TVS"
+ FROM   "CP_ProdTerminada" "CP_ProdTerminada"
+ WHERE  ("CP_ProdTerminada"."fecha">=\'' . $fechaI . '\' AND
+ "CP_ProdTerminada"."fecha"<=\'' . $fechaF . '\') AND
+ ("CP_ProdTerminada"."Name"= (\'' . $departamento . '\')  OR "CP_ProdTerminada"."Name"= (CASE
+ WHEN  \'' . $departamento . '\' like \'112%\' THEN N\'01 Corte de Piel\'
+ WHEN  \'' . $departamento . '\' like \'115%\' THEN N\'02 Inspeccionar Piel\'
+ WHEN  \'' . $departamento . '\' like \'118%\' THEN N\'02 Pegar.\'
+ WHEN  \'' . $departamento . '\' like \'121%\' THEN N\'03 Anaquel Costura.\'
+ WHEN  \'' . $departamento . '\' like \'133%\' THEN N\'03 Costura completa.\'
+ WHEN  \'' . $departamento . '\' like \'136%\' THEN N\'04 Inspeccionar Costura\'
+ WHEN  \'' . $departamento . '\' like \'139%\' THEN N\'139 Series Incompletas Costura\'
+ WHEN  \'' . $departamento . '\' like \'145%\' THEN N\'05 Cojineria\'
+ WHEN  \'' . $departamento . '\' like \'148%\' THEN N\'06 Funda Terminada\'
+ WHEN  \'' . $departamento . '\' like \'151%\' THEN N\'07 Kitting\'
+ WHEN  \'' . $departamento . '\' like \'157%\' THEN N\'07 Tapizar y Empaque\'
+ WHEN  \'' . $departamento . '\' like \'175%\' THEN N\'08 Inspeccionar Empaque\'
+ END))
+ ORDER BY "CP_ProdTerminada"."CardName", "CP_ProdTerminada"."orden"');
+dd($produccion);
 });

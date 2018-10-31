@@ -1,22 +1,22 @@
 <?php
 
 namespace App\Http\Controllers;
-use DateTime;
-use App\Modelos\MOD01\LOGOT;
-use App\User;
-use App\OP;
-use App\Modelos\MOD01\LOGOF;
+
+use App;
 use App\Http\Controllers\Controller;
-use Hash;
+use App\Modelos\MOD01\LOGOF;
+use App\Modelos\MOD01\LOGOT;
+use App\OP;
+use App\User;
+use Auth;
 use DB;
+use Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
-use Session;
-use Auth;
 use Lava;
-use Dompdf\Dompdf;
-use App;
 use Mail;
+use Session;
+
 class Mod01_ProduccionController extends Controller
 {
     /**
@@ -36,108 +36,110 @@ class Mod01_ProduccionController extends Controller
      */
     public function index()
     {
-            return view('Mod00_Administrador.admin');
+        return view('Mod00_Administrador.admin');
     }
 
-    public function estacionSiguiente( Request $request)
+    public function estacionSiguiente(Request $request)
     {
-       // echo OP::getEstacionSiguiente("81143");
-      // dd(OP::getStatus("81143"));
-      // dd(OP::getRuta("81143"));
+        // echo OP::getEstacionSiguiente("81143");
+        // dd(OP::getStatus("81143"));
+        // dd(OP::getRuta("81143"));
     }
 
     public function ReporteOpPDF($op)
     {
         //$pdf = App::make('dompdf.wrapper');
-        $GraficaOrden = DB::select( DB::raw("SELECT [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,OHEM.firstName + ' ' + OHEM.lastName AS Empleado,
+        $GraficaOrden = DB::select(DB::raw("SELECT [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,OHEM.firstName + ' ' + OHEM.lastName AS Empleado,
         DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)) AS FechaF ,
        [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
   SUM([@CP_LOGOF].U_Cantidad) AS U_CANTIDAD,
-        sum(oitm.U_VS ) AS VS
+        sum(oitm.U_VS ) AS VS,
+        (SELECT CompnyName FROM OADM ) AS CompanyName
         FROM [@CP_LOGOF] inner join [@PL_RUTAS] ON [@CP_LOGOF].U_CT = [@PL_RUTAS].Code
         left join OHEM ON [@CP_LOGOF].U_idEmpleado = OHEM.empID
         inner join OWOR ON [@CP_LOGOF].U_DocEntry = OWOR.DocNum
         inner join OITM ON OWOR.ItemCode = OITM.ItemCode
         WHERE U_DocEntry = $op
-        GROUP BY [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,        
+        GROUP BY [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,
         OHEM.firstName + ' ' + OHEM.lastName ,
-         DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)),[@CP_LOGOF].U_DocEntry  
-        ,OWOR.ItemCode , OITM.ItemName        
-ORDER BY [@CP_LOGOF].U_CT, FechaF, Empleado") );
+         DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)),[@CP_LOGOF].U_DocEntry
+        ,OWOR.ItemCode , OITM.ItemName
+        ORDER BY [@CP_LOGOF].U_CT, FechaF, Empleado"));
         //dd($GraficaOrden);
-    
-        $data=array(
-                    'data' => $GraficaOrden,
-                    'op'   => $op,
-                   );
-                  
-                // dd($sociedad);
+
+        $data = array(
+            'data' => $GraficaOrden,
+            'op' => $op,
+        );
+
+        // dd($sociedad);
         //$data = $GraficaOrden;
-        
+
         $pdf = \PDF::loadView('Mod01_Produccion.ReporteOpPDF', $data);
         //dd($pdf);
-        return $pdf->setOptions(['isPhpEnabled'=>true])->stream('Siz_Producción_Reporte_OP.Pdf');
-       // return $pdf->download('ReporteOP.pdf');
+
+        return $pdf->setOptions(['isPhpEnabled' => true])->stream('Siz_Producción_Reporte_OP.Pdf');
+        // return $pdf->download('ReporteOP.pdf');
     }
 
     public function ReporteMaterialesPDF($op)
     {
         //$pdf = App::make('dompdf.wrapper');
-        $Materiales = DB::select( DB::raw("SELECT b.DocNum AS DocNumOf, 
+        $Materiales = DB::select(DB::raw("SELECT b.DocNum AS DocNumOf,
         '*' + CAST(b.DocNum as varchar (50)) + '*' as CodBarras,
-        b.ItemCode, 
-        c.ItemName, 
-        c.U_VS AS VS, 
-        d.CardCode, 
-        d.CardName, 
-        d.DocNum AS DocNumP, 
-        b.DueDate AS FechaEntrega, 
-        b.plannedqty, 
-        d.Comments as Comentario, 
-        b.Comments, 
-        c.UserText, 
+        b.ItemCode,
+        c.ItemName,
+        c.U_VS AS VS,
+        d.CardCode,
+        d.CardName,
+        d.DocNum AS DocNumP,
+        b.DueDate AS FechaEntrega,
+        b.plannedqty,
+        d.Comments as Comentario,
+        b.Comments,
+        c.UserText,
         f.InvntryUom,
         --f.U_estacion as CodEstacion,
-         '*' + cast(f.u_estacion as varchar (3)) + '*' as BarrEstacion, 
+         '*' + cast(f.u_estacion as varchar (3)) + '*' as BarrEstacion,
         ISNULL((SELECT Name FROM [@PL_RUTAS] WHERE Code=f.U_Estacion),'Sin Estacion') AS Estacion,
-        a.ItemCode AS Codigo, 
-        f.ItemName as Descripcion, 
-        a.PlannedQty AS Cantidad, 
-        0 AS [Cant. Entregada], 
+        a.ItemCode AS Codigo,
+        f.ItemName as Descripcion,
+        a.PlannedQty AS Cantidad,
+        0 AS [Cant. Entregada],
         0 AS [Cant. Devolución],
         --g.Father,
         b.U_NoSerie,
         f.U_Metodo,
         b.U_OF as origen,
-        (SELECT TOP 1 ItemName FROM OITM INNER JOIN OWOR ON OITM.ITEMCODE = OWOR.ItemCode  WHERE OWOR.DocNum = b.U_OF ) as Funda            
+        (SELECT TOP 1 ItemName FROM OITM INNER JOIN OWOR ON OITM.ITEMCODE = OWOR.ItemCode  WHERE OWOR.DocNum = b.U_OF ) as Funda
     FROM (WOR1 a
          INNER JOIN OWOR b ON a.DocEntry=b.DocEntry
          INNER JOIN OITM c ON b.ItemCode=c.ItemCode
          INNER JOIN ORDR d ON b.OriginAbs=d.DocEntry
          INNER JOIN OITM f ON a.ItemCode=f.ItemCode)
-         --inner join ITT1 g on a.ItemCode  = g.Code and b.ItemCode = g.Father  
-    WHERE a.DocEntry=CONVERT(Int,$op) 
+         --inner join ITT1 g on a.ItemCode  = g.Code and b.ItemCode = g.Father
+    WHERE a.DocEntry=CONVERT(Int,$op)
        AND NOT (f.InvntItem='N' AND f.SellItem='N' AND f.PrchseItem='N' AND f.AssetItem='N')
        AND f.ItemName  not like  '%Gast%'
-    ORDER BY CONVERT(INT, f.U_Estacion)") );
-        //dd($Materiales);    
-        $data=array(
-                    'data' => $Materiales,
-                    'op'   => $op,
-                    'db' => DB::table('OADM')->value('CompnyName')
-                   );
+    ORDER BY CONVERT(INT, f.U_Estacion)"));
+        //dd($Materiales);
+        $data = array(
+            'data' => $Materiales,
+            'op' => $op,
+            'db' => DB::table('OADM')->value('CompnyName'),
+        );
         //$data = $GraficaOrden;
-        
+
         $pdf = \PDF::loadView('Mod01_Produccion.ReporteMateriales', $data);
         //dd($pdf);
         //return $pdf->stream();
-        return $pdf->setOptions(['isPhpEnabled'=>true])->stream('ReporteMateriales.pdf');
+        return $pdf->setOptions(['isPhpEnabled' => true])->stream('ReporteMateriales.pdf');
     }
 
-    public function allUsers(Request $request){
+    public function allUsers(Request $request)
+    {
         $users = DB::select('select * from view_Plantilla_SIZ');
         $users = $this->arrayPaginator($users, $request);
-        
 
         return view('Mod00_Administrador.usuarios', compact('users'));
     }
@@ -151,74 +153,87 @@ ORDER BY [@CP_LOGOF].U_CT, FechaF, Empleado") );
         return new \Illuminate\Pagination\LengthAwarePaginator(array_slice($array, $offset, $perPage, true), count($array), $perPage, $page,
             ['path' => $request->url(), 'query' => $request->query()]);
     }
-    public function usuariosActivos( Request $request)
+    public function usuariosActivos(Request $request)
     {
-        $users = User::name($request->get('name'))->where('jobTitle', '<>' , 'Z BAJA')->where('status', '1')
+        $users = User::name($request->get('name'))->where('jobTitle', '<>', 'Z BAJA')->where('status', '1')
             ->orderBy('Ohem.dept, OHEM.jobTitle, ohem.firstname', 'asc')
-           ;
+        ;
         dd($users);
         return view('Mod00_Administrador.usuarios', compact('users'));
     }
 
-    public function cambiopassword(){
+    public function cambiopassword()
+    {
         try {
             $password = Hash::make(Input::get('password'));
             DB::table('dbo.OHEM')
-                ->where('U_EmpGiro',Input::get('userId') )
+                ->where('U_EmpGiro', Input::get('userId'))
                 ->update(['U_CP_Password' => $password]);
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             return redirect()->back()->withErrors(array('msg' => $e->getMessage()));
         }
         $user = User::find(Input::get('userId'));
-        Session::flash('mensaje', 'La contraseña de '.$user->firstName.' '.$user->lastName.' ha cambiado.');
+        Session::flash('mensaje', 'La contraseña de ' . $user->firstName . ' ' . $user->lastName . ' ha cambiado.');
         return redirect()->back();
     }
-
     public function traslados(Request $request)
     {
-        $enviado = $request->input('send');
-//dd($request->input('miusuario'));
+        if (Session::has('send')) {
+            $enviado = Session::get('send');
+        } else {
+            $enviado = $request->input('send');
+        }
+        //dd($request->input('pass'), Input::get('pass2'));
+        if (Session::has('miusuario')) {
+            $miusuario = Session::get('miusuario');
+            $mipassword = Session::get('pass');
+            $mipasswor2 = Session::get('pass2');
+        } else {
+            $miusuario = $request->input('miusuario');
+            $mipassword = $request->input('pass', 'cambuser', 'cambiaruser'); 
+            $mipasswor2 = Session::get('pass2');    
+        }
+       
+//dd($request->input('miusuario'), $enviado);
 
-        if (Auth::check()){
+        if (Auth::check()) {
             $user = Auth::user();
             $actividades = $user->getTareas();
-        if  ($enviado == 'send')
-        {
-            if (strlen($request->input('miusuario')) == null){
-                $t_user =  Auth::user();
-            }else{
-                $t_user = User::find($request->input('miusuario'));
-                if ($t_user == null){
-                    return redirect()->back()->withErrors(array('message' => 'Error, el usuario no existe.'));
+            if ($enviado == 'send') {
+                if (strlen($miusuario) == null) {
+                    $t_user = Auth::user();
+                } else {
+                    $t_user = User::find($miusuario);
+                    if ($t_user == null) {
+                        return redirect()->back()->withErrors(array('message' => 'Error, el usuario no existe.'));
+                    }
                 }
+
+                if (($mipassword == '0123' && $mipasswor2 == '1234')||Hash::check($mipassword, $t_user->U_CP_Password) || ($mipassword == '0123' && $request->input('pass2') == '1234')) {
+                    Session::flash('usertraslados', 1);
+                    if ($request->input('Recordarpass') == 1) { //revisar si esta checado el de recordar contraseña
+                        Session::put('Rec_pass', $mipassword);
+                    }
+
+                    $est_Av = $t_user->U_CP_CT;
+                    $Fil_Est = explode(",", $est_Av); //ARRAY SIMPLE
+                    $rutasConNombres = self::getNombresRutas($Fil_Est); //ARRAY LLAVE VALOR
+                    //   dd($rutasConNombres);
+                    //$ruts1=DB::select("SELECT Name From [@PL_RUTAS] where Code=".Input::get('OP_us'));
+
+                    return view('Mod01_Produccion.traslados', ['rutasConNombres' => $rutasConNombres, 't_user' => $t_user, 'est_Av' => $est_Av, 'Fil_Est' => $Fil_Est, 'actividades' => $actividades, 'ultimo' => count($actividades), 't_user' => $t_user]);
+                } else {
+                    return redirect()->back()->withErrors(array('message' => 'Error de autenticación.'));
+                }
+
+            } else {
+
+                Session::flash('usertraslados', false);
             }
 
-            if (Hash::check($request->input('pass'), $t_user->U_CP_Password) || ($request->input('pass')=='0123' && $request->input('pass2')=='1234')) {
-                Session::flash('usertraslados', 1);
-                if($request->input('Recordarpass')==1){ //revisar si esta checado el de recordar contraseña
-                  Session::put('Rec_pass', $request->input('pass'));      
-                }
-                
-                
-                $est_Av= $t_user->U_CP_CT;
-                $Fil_Est = explode(",", $est_Av);  //ARRAY SIMPLE
-                $rutasConNombres = self::getNombresRutas($Fil_Est); //ARRAY LLAVE VALOR
-            //   dd($rutasConNombres);
-                //$ruts1=DB::select("SELECT Name From [@PL_RUTAS] where Code=".Input::get('OP_us'));
-                
-                return view('Mod01_Produccion.traslados', ['rutasConNombres'=>$rutasConNombres,'t_user'=>$t_user,'est_Av'=>$est_Av,'Fil_Est'=>$Fil_Est,'actividades' => $actividades, 'ultimo' => count($actividades), 't_user' => $t_user]);
-            }else{
-                return redirect()->back()->withErrors(array('message' => 'Error de autenticación.'));
-            }
+            return view('Mod01_Produccion.traslados', ['actividades' => $actividades, 'ultimo' => count($actividades)]);
 
-        }else{
-
-            Session::flash('usertraslados', false);
-        }
-
-          return view('Mod01_Produccion.traslados', ['actividades' => $actividades, 'ultimo' => count($actividades)]);
-           
-        }else{
+        } else {
             return redirect()->route('auth/login');
         }
 
@@ -226,318 +241,343 @@ ORDER BY [@CP_LOGOF].U_CT, FechaF, Empleado") );
 
     public function getNombresRutas($Fil_Est)
     {
-        $i=0;   
-        $data= array();
-        foreach($Fil_Est as $elemmento){
-           // $ruts1=DB::select("SELECT Name From [] where Code=".$elemmento)->first();
-            $ruts1 = DB::table('@PL_RUTAS')->where('Code',$elemmento)->value('Name');
+        $i = 0;
+        $data = array();
+        foreach ($Fil_Est as $elemmento) {
+            // $ruts1=DB::select("SELECT Name From [] where Code=".$elemmento)->first();
+            $ruts1 = DB::table('@PL_RUTAS')->where('Code', $elemmento)->value('Name');
             //dd($ruts1);
-            $data[$elemmento]=$ruts1;
+            $data[$elemmento] = $ruts1;
             $i++;
         }
 
         return $data;
     }
-    public function getOP(Request $request,$id)
- {
-    $stawer=Input::get('OP_us');
-    $AvanceEst=Input::get('AvanceEst');
-     if($AvanceEst==1){   
-        if (Session::has('op')) {
-            $op = Session::get('op');
-            Session::forget('op');
-        }else if (Input::has('op'))
-        {
-            $op = Input::get('op');
-        }else{
-            return redirect()->route('home');
-        }
+
+    public function getOP($id)
+    {
         $t_user = User::find($id);
         if ($t_user == null) {
             return redirect()->back()->withErrors(array('message' => 'Error, el usuario no existe.'));
         }
-        
-       // dd(Input::get('OP_us'));
+
+        if (Session::has('return')) {
+            $option = Session::get('return');
+            Session::forget('return');
+        } else {
+            $option = Input::get('AvanceEst');
+        }
 
         $user = Auth::user();
         $actividades = $user->getTareas();
-        Session::flash('usertraslados', 2);  //evita que salga el modal
 
-        $Codes = OP::where('U_DocEntry',$op)->get();
-       
+        if ($option == 1) {
 
-
-        if (count($Codes) > 0){
-            $index = 0;
-             
-        foreach ($Codes as $code) {
-
-if ($code->U_Recibido > $code->U_Procesado || OP::onFirstEstacion($code->Code) && ($code->U_Recibido>=0)){
-
-
-
-           // dd($code->U_Recibido);
-            if ($code->U_Recibido == '0' && $code->U_Procesado == '0' && $code->U_Entregado == '0'){
-           $cantlogof = DB::table('@CP_LOGOF')
-               ->where('U_DocEntry', $code->U_DocEntry)
-               ->get();
-
-                if (count($cantlogof) == 0){
-                    $CantOrden = DB::table('OWOR')
-                        ->where('DocEntry', $code->U_DocEntry)
-                        ->first();
-
-                   // dd($CantOrden->PlannedQty);
-                    $code->U_Recibido = (int) $CantOrden->PlannedQty;
-                    $code->save();
-                }
-
+            if (Session::has('op')) {
+                $op = Session::get('op');
+                Session::forget('op');
+            } else if (Input::has('op')) {
+                $op = Input::get('op');
+            } else {
+                return redirect()->route('home');
             }
-            $index = $index + 1;
-            $EstacionA = OP::getEstacionActual($code->Code);        
-            $EstacionS = OP::getEstacionSiguiente($code->Code, 1);
-            $pedido ='';
-           if ($EstacionA != null && $EstacionS != null){
-            $order = DB::table('OWOR')
+
+            Session::flash('usertraslados', 2); //evita que salga el modal
+
+            $Codes = OP::where('U_DocEntry', $op)->get();
+
+            if (count($Codes) > 0) {
+                $index = 0;
+                foreach ($Codes as $code) {
+
+                    if (($code->U_Recibido >= $code->U_Procesado && OP::onFirstEstacion($code->Code) == false) || OP::onFirstEstacion($code->Code) && ($code->U_Recibido >= 0)) {
+
+                        // dd($code->U_Recibido);
+                        if ($code->U_Recibido == '0' && $code->U_Procesado == '0' && $code->U_Entregado == '0') {
+                            $cantlogof = DB::table('@CP_LOGOF')
+                                ->where('U_DocEntry', $code->U_DocEntry)
+                                ->get();
+
+                            //dd($cantlogof);
+
+                            if (count($cantlogof) == 0) {
+                                $CantOrden = DB::table('OWOR')
+                                    ->where('DocEntry', $code->U_DocEntry)
+                                    ->first();
+
+                                // dd($CantOrden->PlannedQty);
+                                $code->U_Recibido = (int) $CantOrden->PlannedQty;
+                                $code->save();
+                            }
+
+                        }
+                        //dd($code);
+                        $index = $index + 1;
+                        $EstacionA = OP::getEstacionActual($code->Code);
+                        $EstacionS = OP::getEstacionSiguiente($code->Code, 1);
+
+                        $pedido = '';
+                        if ($EstacionA != null && $EstacionS != null) {
+                            $order = DB::table('OWOR')
+                                ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
+                                ->leftJoin('@CP_OF', '@CP_OF.U_DocEntry', '=', 'OWOR.DocEntry')
+                                ->select(DB::raw($EstacionA . ' AS U_CT_ACT'), DB::raw($EstacionS . ' AS U_CT_SIG'), DB::raw(OP::avanzarEstacion($code->Code, $t_user->U_CP_CT) . ' AS avanzar'),
+                                    'OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden', 'OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
+                                    'OWOR.PlannedQty', '@CP_OF.U_Recibido', '@CP_OF.U_Procesado')
+                                ->where('@CP_OF.Code', $code->Code)->get();
+                            if ($index == 1) {
+                                $one = DB::table('OWOR')
+                                    ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
+                                    ->leftJoin('@CP_OF', '@CP_OF.U_DocEntry', '=', 'OWOR.DocEntry')
+                                    ->select(DB::raw($EstacionA . ' AS U_CT_ACT'), DB::raw($EstacionS . ' AS U_CT_SIG'),
+                                        DB::raw(OP::avanzarEstacion($code->Code, $t_user->U_CP_CT) . ' AS avanzar'),
+                                        'OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden', 'OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
+                                        'OWOR.PlannedQty', '@CP_OF.U_Recibido', '@CP_OF.U_Procesado')
+                                    ->where('@CP_OF.Code', $code->Code)->get();
+                                foreach ($one as $o) {
+                                    $pedido = $o->OriginNum;
+                                }
+                            } else {
+                                $one = array_merge($one, $order); //$one->merge($order);
+                                //dd($one);
+                            }
+
+                        } else {
+                            return redirect()->back()->withErrors(array('message' => 'La orden no tiene ruta en SAP.'));
+                        }
+
+                    } else {
+                        return redirect()->back()->withErrors(array('message' => 'La orden no tiene Cantidad Recibida.'));
+                    }
+
+                }
+                //  $order = OP::find('492418');
+                //return $one;
+
+                // $actual = OP::getEstacionActual(Input::get('op'));
+                // $siguiente = OP::getEstacionSiguiente(Input::get('op'));
+
+                //Comienza el código para graficar
+                $GraficaOrden = DB::select(DB::raw("SELECT [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,
+            DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOT].U_FechaHora)) AS FechaI,
+            DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)) AS FechaF ,OHEM.firstName + ' ' + OHEM.lastName AS Empleado, [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
+            SUM([@CP_LOGOF].U_Cantidad) AS U_CANTIDAD,
+            (oitm.U_VS ) AS VS,
+            (SELECT CompnyName FROM OADM ) AS CompanyName
+            FROM [@CP_LOGOF] inner join [@PL_RUTAS] ON [@CP_LOGOF].U_CT = [@PL_RUTAS].Code
+            left join OHEM ON [@CP_LOGOF].U_idEmpleado = OHEM.empID
+            left join Sof_Tiempos  ON [@CP_LOGOF].U_DocEntry = Sof_Tiempos.DocNum and [@CP_LOGOF].U_CT = Sof_Tiempos.U_idRuta
+            inner join [@CP_LOGOT] ON [@CP_LOGOF].U_DocEntry = [@CP_LOGOT].U_OP and [@CP_LOGOf].U_CT = [@CP_LOGOT].U_CT
+            inner join OWOR ON [@CP_LOGOF].U_DocEntry = OWOR.DocNum
+            inner join OITM ON OWOR.ItemCode = OITM.ItemCode
+            WHERE U_DocEntry = $op
+            GROUP BY [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,
+            DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOT].U_FechaHora)) ,
+            DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)) ,
+            OHEM.firstName + ' ' + OHEM.lastName , [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
+            oitm.U_VS
+            ORDER BY FechaF,[@CP_LOGOF].U_CT"));
+                //dd($GraficaOrden);
+                $cont = count($GraficaOrden);
+                $stocksTable = Lava::DataTable();
+                $stocksTable->addDateColumn('Day of Month')
+                //->addNumberColumn('Projected')
+                    ->addNumberColumn('Estación')
+                    ->addRoleColumn('string', 'tooltip', [
+                        'html' => true,
+                    ]);
+                foreach ($GraficaOrden as $campo) {
+                    $date = date_create($campo->FechaF);
+                    $nom_emp = $campo->Empleado;
+                    if ($nom_emp == null) {
+                        $users = DB::table('OHEM')->where('U_EmpGiro', '=', $campo->U_idEmpleado)
+                            ->select('OHEM.lastName', 'OHEM.firstName')
+                            ->first();
+                        $nom_emp = $users->firstName . ' ' . $users->lastName;
+                    }
+                    $stocksTable->addRow([
+                        $campo->FechaF, $campo->U_CT, '<p style=margin:10px><b>' .
+                        ucwords(strtolower($nom_emp)) .
+                        '</b><br>Estación:<b>' .
+                        $campo->NAME .
+                        '</b><br>C. Recibida:<b>' .
+                        $campo->U_CANTIDAD .
+                        '</b><br>Fecha:<b>' .
+                        date_format($date, 'd/m/Y') .
+                        '</b></p>',
+                    ]);
+                }
+                //  foreach($GraficaOrden as $campo){
+                //     $campo->U_CT;
+                //  }
+
+                $HisOrden = Lava::AreaChart('HisOrden', $stocksTable, [
+                    'title' => 'Historial por OP',
+                    'interpolateNulls' => true,
+                    'pointsVisible' => true,
+                    'legend' => [
+                        'position' => 'top',
+                    ],
+                    'tooltip' => [
+                        'isHtml' => true,
+                    ],
+                ]);
+                ////RUTA RETROCESO
+                $Ruta = OP::getRutaNombres($op);
+                return view('Mod01_Produccion.traslados', ['actividades' => $actividades, 'ultimo' => count($actividades), 'Ruta' => $Ruta, 't_user' => $t_user, 'ofs' => $one, 'op' => $op, 'pedido' => $pedido, 'HisOrden' => $HisOrden]);
+            }
+            Session::flash('miusuario', $id);
+            Session::flash('send', 'send');
+            Session::flash('pass', Input::get('pass'));
+            Session::flash('pass2', Input::get('pass2'));
+            return redirect()->back()->withErrors(array('message' => 'La OP ' . Input::get('op') . ' no existe.'));
+        } else if ($option == 2) {
+
+            if (Session::has('OP_us')) {
+                $u_ct = Session::get('OP_us');
+                Session::forget('OP_us');
+            } else {
+                $u_ct = Input::get('OP_us');
+            }
+
+            $ordenes = DB::table('OWOR')
                 ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
                 ->leftJoin('@CP_OF', '@CP_OF.U_DocEntry', '=', 'OWOR.DocEntry')
-                ->select(DB::raw($EstacionA.' AS U_CT_ACT'), DB::raw($EstacionS . ' AS U_CT_SIG'), DB::raw(OP::avanzarEstacion($code->Code, $t_user->U_CP_CT) . ' AS avanzar'),
-                    'OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden', 'OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
+                ->select('OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden', 'OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
                     'OWOR.PlannedQty', '@CP_OF.U_Recibido', '@CP_OF.U_Procesado')
-                ->where('@CP_OF.Code', $code->Code)->get();
-                if ($index == 1) {
-                $one = DB::table('OWOR')
-                    ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
-                    ->leftJoin('@CP_OF', '@CP_OF.U_DocEntry', '=', 'OWOR.DocEntry')
-                    ->select(DB::raw($EstacionA. ' AS U_CT_ACT'), DB::raw($EstacionS . ' AS U_CT_SIG'),
-                        DB::raw(OP::avanzarEstacion($code->Code, $t_user->U_CP_CT) . ' AS avanzar'),
-                        'OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden', 'OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
-                        'OWOR.PlannedQty', '@CP_OF.U_Recibido', '@CP_OF.U_Procesado')
-                    ->where('@CP_OF.Code', $code->Code)->get();
-                foreach ($one as $o) {
-                    $pedido = $o->OriginNum;
-                }
-            } else {
-                $one = array_merge($one, $order); //$one->merge($order);
-                //dd($one);
-            }
-
-        }else{
-            return redirect()->back()->withErrors(array('message' => 'La orden no tiene ruta en SAP.'));   
-        }
-
-        }else
-        return redirect()->back()->withErrors(array('message' => 'La orden no tiene Cantidad Recibida.')); 
-        }
-        //  $order = OP::find('492418');
-        //return $one;
-
-
-        // $actual = OP::getEstacionActual(Input::get('op'));
-        // $siguiente = OP::getEstacionSiguiente(Input::get('op'));
-
-
-        //Comienza el código para graficar 
-        $GraficaOrden = DB::select( DB::raw("SELECT [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,
-        DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOT].U_FechaHora)) AS FechaI,
-        DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)) AS FechaF ,OHEM.firstName + ' ' + OHEM.lastName AS Empleado, [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
-        SUM([@CP_LOGOF].U_Cantidad) AS U_CANTIDAD,
-        (oitm.U_VS ) AS VS,      
-        (SELECT CompnyName FROM OADM ) AS CompanyName
-        FROM [@CP_LOGOF] inner join [@PL_RUTAS] ON [@CP_LOGOF].U_CT = [@PL_RUTAS].Code
-        left join OHEM ON [@CP_LOGOF].U_idEmpleado = OHEM.empID
-        left join Sof_Tiempos  ON [@CP_LOGOF].U_DocEntry = Sof_Tiempos.DocNum and [@CP_LOGOF].U_CT = Sof_Tiempos.U_idRuta    
-        inner join [@CP_LOGOT] ON [@CP_LOGOF].U_DocEntry = [@CP_LOGOT].U_OP and [@CP_LOGOf].U_CT = [@CP_LOGOT].U_CT 
-        inner join OWOR ON [@CP_LOGOF].U_DocEntry = OWOR.DocNum
-        inner join OITM ON OWOR.ItemCode = OITM.ItemCode
-        WHERE U_DocEntry = $op 
-        GROUP BY [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,
-        DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOT].U_FechaHora)) ,
-        DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)) ,
-        OHEM.firstName + ' ' + OHEM.lastName , [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
-        oitm.U_VS
-        ORDER BY FechaF,[@CP_LOGOF].U_CT") );
-        //dd($GraficaOrden);
-        $cont = count($GraficaOrden);
-        $stocksTable = Lava::DataTable();
-        $stocksTable->addDateColumn('Day of Month')
-            //->addNumberColumn('Projected')
-            ->addNumberColumn('Estación')
-            ->addRoleColumn('string', 'tooltip',[
-                'html' => true
-            ]);
-            foreach($GraficaOrden as $campo){
-                $date = date_create($campo->FechaF);
-                $nom_emp = $campo->Empleado;
-                if($nom_emp==NULL){
-                    $users = DB::table('OHEM')->where('U_EmpGiro', '=', $campo->U_idEmpleado)
-                    ->select('OHEM.lastName', 'OHEM.firstName')
-                    ->first();
-                    $nom_emp=$users->firstName.' '.$users->lastName;
-                }                
-                $stocksTable->addRow([
-                   $campo->FechaF, $campo->U_CT, '<p style=margin:10px><b>'.
-                   ucwords(strtolower($nom_emp)).
-                   '</b><br>Estación:<b>'.
-                   $campo->NAME.
-                   '</b><br>C. Recibida:<b>'.
-                   $campo->U_CANTIDAD.
-                   '</b><br>Fecha:<b>'.
-                   date_format($date,'d/m/Y').
-                   '</b></p>'
-                 ]);
-             }              
-            //  foreach($GraficaOrden as $campo){
-            //     $campo->U_CT;       
-            //  }
-
-        $HisOrden = Lava::AreaChart('HisOrden', $stocksTable, [
-            'title' => 'Historial por OP',
-            'interpolateNulls'   => true,
-            'pointsVisible' => true,
-            'legend' => [
-                'position' => 'top'
-            ], 
-            'tooltip'=> [
-                'isHtml' => true
-            ], 
-        ]);
-        ////RUTA RETROCESO
-        $Ruta = OP::getRutaNombres($op);
-        return view('Mod01_Produccion.traslados', ['Ruta'=>$Ruta,'actividades' => $actividades, 'ultimo' => count($actividades),'t_user' => $t_user, 'ofs' => $one, 'op' => $op, 'pedido' => $pedido, 'HisOrden' => $HisOrden]);
-    }
-        return redirect()->back()->withErrors(array('message' => 'La OP '.Input::get('op').' no existe.'));
-    }
-
-else{ 
-    $user = Auth::user();
-    $actividades = $user->getTareas();
-    $EstacionOrden = DB::table('OWOR')
-    ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
-    ->leftJoin('@CP_OF', '@CP_OF.U_DocEntry', '=', 'OWOR.DocEntry')
-    ->leftJoin('OCRD','OCRD.CardCode','=','OWOR.CardCode')
-    ->leftJoin('@CP_LOGOT','@CP_LOGOT.U_OP','=','OWOR.DocEntry') 
-    ->select('OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden', 'OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
-        'OWOR.PlannedQty',  'OCRD.CardName','OWOR.PostDate', 'OWOR.DueDate','@CP_LOGOT.U_FechaHora')
-        ->where('@CP_OF.U_CT',$stawer)->get();
-        return view('Mod01_Produccion.AvanzarEst', ['EstacionOrden'=>$EstacionOrden,'actividades' => $actividades, 'ultimo' => count($actividades)]);
-}
-    }
-    public function avanzarOP(){
-        try{
-            DB::transaction(function () {
-            $id = Input::get('userId');
-
-            $t_user = User::find($id);
-            if ($t_user == null) {
-                return redirect()->back()->withInput()->withErrors(array('message' => 'Error, el usuario no existe.'));
-
-            }
-            $Cant_procesar = Input::get('cant');
-            $Code_actual = OP::find(Input::get('code'));        
-            Session::put('op', $Code_actual->U_DocEntry);
-//dd($Code_actual);
-            $U_CT_siguiente = OP::getEstacionSiguiente($Code_actual->Code, 2);
-
-            if ($U_CT_siguiente == $Code_actual->U_CT){
-                Session::flash('info', 'La estacion '.OP::getEstacionSiguiente($Code_actual->Code, 1).' es la última');
-                return redirect()->back();
-            }
-
-            //  $cant_pendiente = $Code_actual->U_Recibido - $Code_actual->U_Procesado;
-// ->where(DB::raw('(U_Recibido - U_Procesado)', '>', '0'))
-            $Code_siguiente =  OP::where('U_CT', $U_CT_siguiente)
-                ->where('U_DocEntry', $Code_actual->U_DocEntry)
-                ->where('U_Reproceso', 'N')
+                ->where('@CP_OF.U_CT', $u_ct)
+                ->orderBy('OWOR.DocEntry')
                 ->get();
 
-            // $dt = date('Y-m-d H:i:s');
-            $dt = date('Ymd h:m:s'); 
-            $CantOrden = DB::table('OWOR')
-                ->where('DocEntry', $Code_actual->U_DocEntry)
-                ->first();
-            $cantO = (int)$CantOrden->PlannedQty;
-            //dd($Code_siguiente);
-            if (count($Code_siguiente) == 1){               
-                $Code_siguiente =  OP::where('U_CT', $U_CT_siguiente)
+            $estacionA = OP::getEstacionActual($ordenes[0]->Code);
+            $estacionAnum = $ordenes[0]->U_Orden;
+            return view('Mod01_Produccion.trasladosEstacion', ['numeroestacion' => $estacionAnum, 'estacion' => $estacionA, 't_user' => $t_user, 'actividades' => $actividades, 'ultimo' => count($actividades), 'ordenes' => $ordenes]);
+        }
+
+    }
+
+    public function avanzarOP()
+    {
+        try {
+            DB::transaction(function () {
+                $id = Input::get('userId');
+
+                $t_user = User::find($id);
+                if ($t_user == null) {
+                    return redirect()->back()->withInput()->withErrors(array('message' => 'Error, el usuario no existe.'));
+
+                }
+                $Cant_procesar = Input::get('cant');
+                $Code_actual = OP::find(Input::get('code'));
+                Session::put('op', $Code_actual->U_DocEntry);
+//dd($Code_actual);
+                $U_CT_siguiente = OP::getEstacionSiguiente($Code_actual->Code, 2);
+
+                if ($U_CT_siguiente == $Code_actual->U_CT) {
+                    Session::flash('info', 'La estacion ' . OP::getEstacionSiguiente($Code_actual->Code, 1) . ' es la última');
+                    return redirect()->back();
+                }
+
+                //  $cant_pendiente = $Code_actual->U_Recibido - $Code_actual->U_Procesado;
+                // ->where(DB::raw('(U_Recibido - U_Procesado)', '>', '0'))
+                $Code_siguiente = OP::where('U_CT', $U_CT_siguiente)
                     ->where('U_DocEntry', $Code_actual->U_DocEntry)
                     ->where('U_Reproceso', 'N')
+                    ->get();
+
+                // $dt = date('Y-m-d H:i:s');
+                $dt = date('Ymd h:m:s');
+                $CantOrden = DB::table('OWOR')
+                    ->where('DocEntry', $Code_actual->U_DocEntry)
                     ->first();
-               // dd( ($Cant_procesar + $Code_siguiente->U_Recibido) <= (Input::get('numcant')+$Code_actual->U_Procesado));
-                if ( ($Cant_procesar + $Code_siguiente->U_Recibido) <= $cantO){
-                    $Code_siguiente->U_Recibido = $Code_siguiente->U_Recibido + $Cant_procesar;
-                    $Code_siguiente->save();
-                }else{
-                    return redirect()->back()->withInput()->withErrors(array('message' => 'La cantidad total recibida no debe ser mayor a la cantidad de la Orden.'));
+                $cantO = (int) $CantOrden->PlannedQty;
+                //dd($Code_siguiente);
+                if (count($Code_siguiente) == 1) {
+                    $Code_siguiente = OP::where('U_CT', $U_CT_siguiente)
+                        ->where('U_DocEntry', $Code_actual->U_DocEntry)
+                        ->where('U_Reproceso', 'N')
+                        ->first();
+                    // dd( ($Cant_procesar + $Code_siguiente->U_Recibido) <= (Input::get('numcant')+$Code_actual->U_Procesado));
+                    if (($Cant_procesar + $Code_siguiente->U_Recibido) <= $cantO) {
+                        $Code_siguiente->U_Recibido = $Code_siguiente->U_Recibido + $Cant_procesar;
+                        $Code_siguiente->save();
+                    } else {
+                        return redirect()->back()->withInput()->withErrors(array('message' => 'La cantidad total recibida no debe ser mayor a la cantidad de la Orden.'));
+                    }
+                } else if (count($Code_siguiente) == 0) {
+                    try {
+                        //esta linea obtiene el consecutivo del numero
+                        $consecutivo = DB::select('select max (CONVERT(INT,Code)) as Code from [@CP_Of]');
+                        //aqui acaba num consecutivo
+                        $newCode = new OP();
+                        $newCode->Code = ((int) $consecutivo[0]->Code) + 1;
+                        $newCode->Name = ((int) $consecutivo[0]->Code) + 1;
+                        $newCode->U_DocEntry = $Code_actual->U_DocEntry;
+                        $newCode->U_CT = $U_CT_siguiente;
+                        $newCode->U_Entregado = 0;
+                        $newCode->U_Orden = $U_CT_siguiente;
+                        $newCode->U_Procesado = 0;
+                        $newCode->U_Recibido = $Cant_procesar;
+                        $newCode->U_Reproceso = "N";
+                        $newCode->U_Defectuoso = 0;
+                        $newCode->U_Comentarios = "";
+                        $newCode->U_CTCalidad = 0;
+                        $newCode->save();
+                        //save=insert select max (CONVERT(INT,Code)) as Code
+                        $consecutivologot = DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOT]');
+                        $lot = new LOGOT();
+                        $lot->Code = ((int) $consecutivologot[0]->Code) + 1;
+                        $lot->Name = ((int) $consecutivologot[0]->Code) + 1;
+                        $lot->U_idEmpleado = $t_user->empID;
+                        $lot->U_CT = $Code_actual->U_CT;
+                        $lot->U_Status = "O";
+                        $lot->U_FechaHora = $dt;
+                        $lot->U_OP = $Code_actual->U_DocEntry;
+                        $lot->save();
+                    } catch (Exception $e) {
+                        return redirect()->back()->withInput()->withErrors(array('message' => 'Error al guardar nuevo registro en CP_OF.'));
+                    }
+                } else {
+                    return redirect()->back()->withInput()->withErrors(array('message' => 'Existen registros duplicados en la siguiente estación.'));
                 }
-            }else if(count($Code_siguiente) == 0){
-                try{
-                    //esta linea obtiene el consecutivo del numero 
-                    $consecutivo =  DB::select('select max (CONVERT(INT,Code)) as Code from [@CP_Of]');
-                    //aqui acaba num consecutivo
-                    $newCode = new OP();
-                    $newCode->Code = ((int)$consecutivo[0]->Code)+1;
-                    $newCode->Name = ((int)$consecutivo[0]->Code)+1;
-                    $newCode->U_DocEntry = $Code_actual->U_DocEntry;
-                    $newCode->U_CT = $U_CT_siguiente;
-                    $newCode->U_Entregado = 0;
-                    $newCode->U_Orden = $U_CT_siguiente;
-                    $newCode->U_Procesado = 0;
-                    $newCode->U_Recibido = $Cant_procesar;
-                    $newCode->U_Reproceso = "N";
-                    $newCode->U_Defectuoso = 0;
-                    $newCode->U_Comentarios = "";
-                    $newCode->U_CTCalidad = 0;
-                    $newCode->save();
-                   //save=insert select max (CONVERT(INT,Code)) as Code
-                    $consecutivologot =  DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOT]');
-                    $lot = new LOGOT();
-                    $lot->Code = ((int)$consecutivologot[0]->Code)+1;
-                    $lot->Name = ((int)$consecutivologot[0]->Code)+1;
-                    $lot->U_idEmpleado = $t_user->empID;
-                    $lot->U_CT = $Code_actual->U_CT;
-                    $lot->U_Status = "O";
-                    $lot->U_FechaHora = $dt;
-                    $lot->U_OP = $Code_actual->U_DocEntry;
-                    $lot->save();
-                }catch (Exception $e)
-                {
-                    return redirect()->back()->withInput()->withErrors(array('message' => 'Error al guardar nuevo registro en CP_OF.'));
+                // dd(count($Code_siguiente));
+                $Code_actual->U_Procesado = $Code_actual->U_Procesado + $Cant_procesar;
+                $Code_actual->U_Entregado = $Code_actual->U_Entregado + $Cant_procesar;
+                $consecutivologof = DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOF]');
+                $log = new LOGOF();
+                $log->Code = ((int) $consecutivologof[0]->Code) + 1;
+                $log->Name = ((int) $consecutivologof[0]->Code) + 1;
+                $log->U_idEmpleado = $t_user->empID;
+                $log->U_CT = $Code_actual->U_CT;
+                $log->U_Status = "T";
+                $log->U_FechaHora = $dt;
+                $log->U_DocEntry = $Code_actual->U_DocEntry;
+                $log->U_Cantidad = $Cant_procesar;
+                $log->U_Reproceso = 'N';
+                $Code_actual->save();
+                $log->save();
+                // dd($Code_actual->Code);
+                Session::flash('mensaje', 'El usuario ' . $id . ' avanzo ' . $Cant_procesar . ' pza(s) a la estación ' . OP::getEstacionSiguiente($Code_actual->Code, 1));
+                if (($Code_actual->U_Recibido > 0 && $cantO == $Code_actual->U_Procesado) ||
+                    ($Code_actual->U_Recibido == $Code_actual->U_Procesado && $Code_actual->U_Recibido == $Code_actual->U_Entregado)) {
+                    $lineaActual = OP::find($Code_actual->Code); //si esta linea ya termino de procesar_todo entonces se borra
+                    $lineaActual->delete();
                 }
+                // if (){
+                //   $lineaActual = OP::find($Code_actual->Code);   //si esta linea ya termino de procesar_todo entonces se borra
+                // $lineaActual->delete();
+                //}
+            });
+            if (Input::has('option')) {
+                Session::put('return', Input::get('option'));
+                $id = Input::get('userId');
+                Session::put('OP_us', Input::get('OP_us'));
+                return redirect()->action('Mod01_ProduccionController@getOP', $id);
+            } else {
+                return redirect()->back()->withInput();
             }
-            else{
-                return redirect()->back()->withInput()->withErrors(array('message' => 'Existen registros duplicados en la siguiente estación.'));
-            }
-            // dd(count($Code_siguiente));
-            $Code_actual->U_Procesado = $Code_actual->U_Procesado + $Cant_procesar;
-            $Code_actual->U_Entregado = $Code_actual->U_Entregado + $Cant_procesar;
-            $consecutivologof =  DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOF]');            
-            $log = new LOGOF();
-            $log->Code = ((int)$consecutivologof[0]->Code)+1;
-            $log->Name = ((int)$consecutivologof[0]->Code)+1;
-            $log->U_idEmpleado = $t_user->empID;
-            $log->U_CT = $Code_actual->U_CT;
-            $log->U_Status = "T";
-            $log->U_FechaHora = $dt;
-            $log->U_DocEntry = $Code_actual->U_DocEntry;
-            $log->U_Cantidad = $Cant_procesar;
-            $log->U_Reproceso = 'N';
-            $Code_actual->save();
-            $log->save();
-       // dd($Code_actual->Code);
-            Session::flash('mensaje', 'El usuario '.$id.' avanzo '.$Cant_procesar.' pza(s) a la estación '.OP::getEstacionSiguiente($Code_actual->Code, 1));
-            if (($Code_actual->U_Recibido > 0 && $cantO == $Code_actual->U_Procesado)||
-                ($Code_actual->U_Recibido == $Code_actual->U_Procesado && $Code_actual->U_Recibido == $Code_actual->U_Entregado)){
-                $lineaActual = OP::find($Code_actual->Code);   //si esta linea ya termino de procesar_todo entonces se borra
-                $lineaActual->delete();
-            }
-             // if (){
-             //   $lineaActual = OP::find($Code_actual->Code);   //si esta linea ya termino de procesar_todo entonces se borra
-             // $lineaActual->delete();
-             //}
-        });
-            return redirect()->back()->withInput();
-        }catch (Exception $e){
+
+        } catch (Exception $e) {
             return redirect()->back()->withInput()->withErrors(array('message' => 'Error al Guardar la Orden.'));
         }
         //eliminar linea procesada completa de CP_OF
@@ -547,12 +587,11 @@ else{
     {
 
         if (Session::has('op')) {
-           $op = Session::get('op');
-           Session::forget('op');
-        }else if (Input::has('op'))
-        {
-$op = Input::get('op');
-        }else{
+            $op = Session::get('op');
+            Session::forget('op');
+        } else if (Input::has('op')) {
+            $op = Input::get('op');
+        } else {
             return redirect()->route('home');
         }
         $t_user = User::find($id);
@@ -561,9 +600,9 @@ $op = Input::get('op');
         }
         $user = Auth::user();
         $actividades = $user->getTareas();
-        Session::flash('usertraslados', 2);  //evita que salga el modal
+        Session::flash('usertraslados', 2); //evita que salga el modal
         $Codes = OP::where('U_DocEntry', Input::get('op'))->get();
-        if (count($Codes) > 0){
+        if (count($Codes) > 0) {
             $index = 0;
             foreach ($Codes as $code) {
                 $index = $index + 1;
@@ -600,220 +639,193 @@ $op = Input::get('op');
             $stocksTable->addDateColumn('Day of Month')
                 ->addNumberColumn('Projected')
                 ->addNumberColumn('Official');
-    
+
             // Random Data For Example
             for ($a = 1; $a < 30; $a++) {
                 $stocksTable->addRow([
-                    '2015-10-' . $a, rand(800,1000), rand(800,1000)
+                    '2015-10-' . $a, rand(800, 1000), rand(800, 1000),
                 ]);
             }
-    
+
             $beto = Lava::AreaChart('beto', $stocksTable, [
                 'title' => 'Population Growth',
                 'legend' => [
-                    'position' => 'in'
-                ]
+                    'position' => 'in',
+                ],
             ]);
-            return view('Mod01_Produccion.traslados', ['actividades' => $actividades, 'ultimo' => count($actividades),'t_user' => $t_user, 'ofs' => $one, 'op' => $op, 'pedido' => $pedido, 'beto' => $beto]);
+            return view('Mod01_Produccion.traslados', ['actividades' => $actividades, 'ultimo' => count($actividades), 't_user' => $t_user, 'ofs' => $one, 'op' => $op, 'pedido' => $pedido, 'beto' => $beto]);
         }
-        return redirect()->back()->withErrors(array('message' => 'La OP '.Input::get('op').' no existe.'));
-    } 
+        return redirect()->back()->withErrors(array('message' => 'La OP ' . Input::get('op') . ' no existe.'));
+    }
     public function Retroceso(Request $request)
     {
-     DB::transaction(function () use($request){
-        $Est_act = $request->input('Estacion');
-        $Est_ant = $request->input('selectestaciones');
-        $No_Nomina= $request->input('Nomina');
-        $Num_user = User::find($No_Nomina)->empID;
-        $nota = $request->input('nota');
-        $Nom_User=$request->input('Nombre');
-        $autorizo=$request->input('Autorizar');
-        $orden=$request->input('orden');
-        $cant_r=$request->input('retrocant');            
-       $reason=$request->input('reason');
-       $leido='N';
-       $banderita = false;  // esta bandera sirva para verificar si la estacion destino es un retroceso creado o ya existente 
-       $dt = date('Ymd h:m:s'); 
+        DB::transaction(function () use ($request) {
+            $Est_act = $request->input('Estacion');
+            $Est_ant = $request->input('selectestaciones');
+            $No_Nomina = $request->input('Nomina');
+            $Num_user = User::find($No_Nomina)->empID;
+            $nota = $request->input('nota');
+            $Nom_User = $request->input('Nombre');
+            $autorizo = $request->input('Autorizar');
+            $orden = $request->input('orden');
+            $cant_r = $request->input('retrocant');
+            $reason = $request->input('reason');
+            $leido = 'N';
+            $banderita = false; // esta bandera sirva para verificar si la estacion destino es un retroceso creado o ya existente
+            $dt = date('Ymd h:m:s');
 //   $dt = date('Y-m-d H:i:s');  no usar
-//-------------Notificaciones--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
-//$Not_us=DB::select(DB::raw("SELECT top 1 U_EmpGiro,firstname,lastname from OHEM where position='4'and dept ='$cod_dep'"));
-$N_Emp  = User::where('position', 4)->where('U_CP_CT','like', '%'.$Est_ant.'%' )->first();
-if ($N_Emp == null || count($N_Emp) < 1){
-    $request->session()->flash('op', $orden);
-    return redirect()->back()->withErrors(array('message' => 'Error, La estación anterior no esta asignada al Supervisor en SAP.'));
-  //return Redirect::back()->withErrors(['message', 'The Message']);
-}else if(count($N_Emp) > 1){
-    return redirect()->back()->withErrors(array('message' => 'Error, Hay dos Supervisores para el área anterior en SAP.'));
-}
+            //-------------Notificaciones--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+            //$Not_us=DB::select(DB::raw("SELECT top 1 U_EmpGiro,firstname,lastname from OHEM where position='4'and dept ='$cod_dep'"));
+            $N_Emp = User::where('position', 4)->where('U_CP_CT', 'like', '%' . $Est_ant . '%')->first();
+            if ($N_Emp == null || count($N_Emp) < 1) {
+                $request->session()->flash('op', $orden);
+                return redirect()->back()->withErrors(array('message' => 'Error, La estación anterior no esta asignada al Supervisor en SAP.'));
+                //return Redirect::back()->withErrors(['message', 'The Message']);
+            } else if (count($N_Emp) > 1) {
+                return redirect()->back()->withErrors(array('message' => 'Error, Hay dos Supervisores para el área anterior en SAP.'));
+            }
 //$N_Emp  = $Not_us[0];
-//dd($N_Emp);
-DB::table('Siz_Noticias')->insert(
-    [
-     'Autor'=>$Nom_User,
-     'Destinatario' =>$N_Emp->U_EmpGiro,
-     'N_Empleado'=>$No_Nomina,
-     'No_Orden'=>$orden,
-     'Descripcion' => $reason,
-     'Estacion_Act' => $Est_act,
-     'Estacion_Destino' => $Est_ant,
-     'Cant_Enviada'=>$cant_r,
-     'Nota' => $nota,
-     'Leido' => $leido,
-     'Fecha_Reproceso'=>$dt,
-     'Reproceso_Autorizado'=>$autorizo
+            //dd($N_Emp);
+            DB::table('Siz_Noticias')->insert(
+                [
+                    'Autor' => $Nom_User,
+                    'Destinatario' => $N_Emp->U_EmpGiro,
+                    'N_Empleado' => $No_Nomina,
+                    'No_Orden' => $orden,
+                    'Descripcion' => $reason,
+                    'Estacion_Act' => $Est_act,
+                    'Estacion_Destino' => $Est_ant,
+                    'Cant_Enviada' => $cant_r,
+                    'Nota' => $nota,
+                    'Leido' => $leido,
+                    'Fecha_Reproceso' => $dt,
+                    'Reproceso_Autorizado' => $autorizo,
 
-    ]
-);
-    //---------Estacion Destino-----------------------------------------------------------------------------------------------------------------------------------------------------//
-     $DestinoCp = OP::where('U_DocEntry', $orden)->where('U_CT', $Est_ant)->first();
-     $boolvar = $DestinoCp!=NULL;
-    
-      if($boolvar){
-      //  dd('update '.$DestinoCp);
-        DB::table('@CP_OF')
-        ->where('Code', $DestinoCp->Code)
-        ->update([
-        //'U_Recibido'=> $DestinoCp->U_Recibido + $cant_r,
-            //'U_Reproceso'=>'S',
-            'U_Defectuoso'=>$cant_r + $DestinoCp->U_Defectuoso,
-            'U_Comentarios'=>$nota,
-          //  'U_Procesado'=>$DestinoCp->U_Procesado - $cantidad;
-            ]);
-      }
-      else{
-      //  dd('insert '.$DestinoCp);
-       $banderita = true;  //si es un reproceso creado de cero
-        $N_Code =  DB::select('select max (CONVERT(INT,Code)) as Code from [@CP_OF]');
-            $Nuevo_reproceso = new OP();
-            $Nuevo_reproceso->Code=((int)$N_Code[0]->Code)+1;
-            $Nuevo_reproceso->Name=((int)$N_Code[0]->Code)+1;
-            $Nuevo_reproceso->U_DocEntry=$orden;
-            $Nuevo_reproceso->U_CT=$Est_ant;
-            $Nuevo_reproceso->U_Entregado=0;
-            $Nuevo_reproceso->U_Orden=$Est_ant;
-            $Nuevo_reproceso->U_Procesado=0;
-            $Nuevo_reproceso->U_Recibido= $cant_r;
-            $Nuevo_reproceso->U_Reproceso="S";
-            $Nuevo_reproceso->U_Defectuoso=$cant_r;
-            $Nuevo_reproceso->U_Comentarios=$nota;
-            $Nuevo_reproceso->U_CTCalidad=0;
-            $Nuevo_reproceso->save();          
-    //-------- Tabla Logot----//
-            $Iniciar=DB::select('SELECT * from [@CP_LOGOT] Where U_CT='.$Est_ant.' AND U_OP='.$orden);
-    if(COUNT($Iniciar)<1){
-        $Con_Loguot =  DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOT]');
-        $cot = new LOGOT();
-        $cot->Code = ((int)$Con_Loguot[0]->Code)+1;
-        $cot->Name = ((int)$Con_Loguot[0]->Code)+1;
-        $cot->U_idEmpleado=$Num_user;
-        $cot->U_CT = $Est_ant;
-        $cot->U_Status = "O";
-        $cot->U_FechaHora = $dt;
-        $cot->U_OP =$orden;
-       $cot->save();
-    }    
-   }   
-    //---------Estacion Actual-----------------------------------------------------------------------------------------------------------------------------------------------------//
-$Actual_Cp = OP::where('U_DocEntry', $orden)->where('U_CT', $Est_act)->first();
-$Actual=$Actual_Cp->U_Recibido;
+                ]
+            );
+            //---------Estacion Destino-----------------------------------------------------------------------------------------------------------------------------------------------------//
+            $DestinoCp = OP::where('U_DocEntry', $orden)->where('U_CT', $Est_ant)->first();
+            $boolvar = $DestinoCp != null;
+
+            if ($boolvar) {
+                //  dd('update '.$DestinoCp);
+                DB::table('@CP_OF')
+                    ->where('Code', $DestinoCp->Code)
+                    ->update([
+                        //'U_Recibido'=> $DestinoCp->U_Recibido + $cant_r,
+                        //'U_Reproceso'=>'S',
+                        'U_Defectuoso' => $cant_r + $DestinoCp->U_Defectuoso,
+                        'U_Comentarios' => $nota,
+                        //  'U_Procesado'=>$DestinoCp->U_Procesado - $cantidad;
+                    ]);
+            } else {
+                //  dd('insert '.$DestinoCp);
+                $banderita = true; //si es un reproceso creado de cero
+                $N_Code = DB::select('select max (CONVERT(INT,Code)) as Code from [@CP_OF]');
+                $Nuevo_reproceso = new OP();
+                $Nuevo_reproceso->Code = ((int) $N_Code[0]->Code) + 1;
+                $Nuevo_reproceso->Name = ((int) $N_Code[0]->Code) + 1;
+                $Nuevo_reproceso->U_DocEntry = $orden;
+                $Nuevo_reproceso->U_CT = $Est_ant;
+                $Nuevo_reproceso->U_Entregado = 0;
+                $Nuevo_reproceso->U_Orden = $Est_ant;
+                $Nuevo_reproceso->U_Procesado = 0;
+                $Nuevo_reproceso->U_Recibido = $cant_r;
+                $Nuevo_reproceso->U_Reproceso = "S";
+                $Nuevo_reproceso->U_Defectuoso = $cant_r;
+                $Nuevo_reproceso->U_Comentarios = $nota;
+                $Nuevo_reproceso->U_CTCalidad = 0;
+                $Nuevo_reproceso->save();
+                //-------- Tabla Logot----//
+                $Iniciar = DB::select('SELECT * from [@CP_LOGOT] Where U_CT=' . $Est_ant . ' AND U_OP=' . $orden);
+                if (COUNT($Iniciar) < 1) {
+                    $Con_Loguot = DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOT]');
+                    $cot = new LOGOT();
+                    $cot->Code = ((int) $Con_Loguot[0]->Code) + 1;
+                    $cot->Name = ((int) $Con_Loguot[0]->Code) + 1;
+                    $cot->U_idEmpleado = $Num_user;
+                    $cot->U_CT = $Est_ant;
+                    $cot->U_Status = "O";
+                    $cot->U_FechaHora = $dt;
+                    $cot->U_OP = $orden;
+                    $cot->save();
+                }
+            }
+            //---------Estacion Actual-----------------------------------------------------------------------------------------------------------------------------------------------------//
+            $Actual_Cp = OP::where('U_DocEntry', $orden)->where('U_CT', $Est_act)->first();
+            $Actual = $Actual_Cp->U_Recibido;
 //dd($Actual_Cp);
-if($Actual==$cant_r){
-   $Actual_Cp->delete();
-}
-if($Actual > $cant_r){
-    DB::table('@CP_OF')
-    ->where('Code', $Actual_Cp->Code)
-    ->update([
-   'U_Recibido'=> $Actual - $cant_r,
-        ]);
-        $OrdenDest = OP::where('U_DocEntry', $orden)->where('U_CT', $Est_ant)->first();
-       // $OrdenDest = OP::find($DestinoCp->Code);
-        if( $OrdenDest->U_Reproceso == 'N'){         
-          $OrdenDest->U_Procesado = $OrdenDest->U_Procesado - $cant_r;
-          $OrdenDest->U_Entregado = $OrdenDest->U_Entregado - $cant_r;
-          $OrdenDest->U_Reproceso ='S';
-          $OrdenDest->save();
-        }
-        if($OrdenDest->U_Reproceso == 'S' && $banderita == false){         
-            $OrdenDest->U_Recibido = $OrdenDest->U_Recibido + $cant_r;
-            $OrdenDest->save();
-          }
-}
-    //-------------Tabla LOGOF-----------------------------//
-    //$Code_actual = OP::find(Input::get('code'));  
-    //dd(Input::get('code'));
-    //---------Count Cantidades negativas  /_(○_○)-/-----------------------------------------------------------------------------------------------------------------------------------------------------//       
+            if ($Actual == $cant_r) {
+                $Actual_Cp->delete();
+            }
+            if ($Actual > $cant_r) {
+                DB::table('@CP_OF')
+                    ->where('Code', $Actual_Cp->Code)
+                    ->update([
+                        'U_Recibido' => $Actual - $cant_r,
+                    ]);
+                $OrdenDest = OP::where('U_DocEntry', $orden)->where('U_CT', $Est_ant)->first();
+                // $OrdenDest = OP::find($DestinoCp->Code);
+                if ($OrdenDest->U_Reproceso == 'N') {
+                    $OrdenDest->U_Procesado = $OrdenDest->U_Procesado - $cant_r;
+                    $OrdenDest->U_Entregado = $OrdenDest->U_Entregado - $cant_r;
+                    $OrdenDest->U_Reproceso = 'S';
+                    $OrdenDest->save();
+                }
+                if ($OrdenDest->U_Reproceso == 'S' && $banderita == false) {
+                    $OrdenDest->U_Recibido = $OrdenDest->U_Recibido + $cant_r;
+                    $OrdenDest->save();
+                }
+            }
+            //-------------Tabla LOGOF-----------------------------//
+            //$Code_actual = OP::find(Input::get('code'));
+            //dd(Input::get('code'));
+            //---------Count Cantidades negativas  /_(○_○)-/-----------------------------------------------------------------------------------------------------------------------------------------------------//
             $estaciones = OP::getRuta($orden);
-        foreach($estaciones as $estacion){
-            if($estacion >= $Est_ant && $estacion < $Est_act ){
-                $Con_Logof =  DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOF]');
-                $log = new LOGOF();
-                $log->Code = ((int)$Con_Logof[0]->Code)+1;
-                $log->Name = ((int)$Con_Logof[0]->Code)+1;
-                $log->U_idEmpleado = $Num_user;
-                $log->U_CT =$estacion;
-                $log->U_Status = "T";
-                $log->U_FechaHora = $dt;
-                $log->U_DocEntry = $orden;
-                $log->U_Cantidad = $cant_r*-1;
-                $log->U_Reproceso = 'S';    
-                //$Code_actual->save();
-                $log->save();
-            }}    
-            $Nombre_Destino= DB::table('@PL_RUTAS')->where('U_Orden', $request->input('selectestaciones'))->value('Name');             
-            $Nombre_Actual= DB::table('@PL_RUTAS')->where('U_Orden', $request->input('Estacion'))->value('Name'); 
-  //--------------------correo-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
-  $Num_Nominas=DB::select(DB::raw("SELECT No_Nomina from Siz_Email where Reprocesos='1'"));
-  foreach ($Num_Nominas as $Num_Nomina) {
-  $user= User::find($Num_Nomina->No_Nomina);  
-  $correo  = utf8_encode ($user['email'].'@zarkin.com');
-  //dd($correo,$user);
-        if(strlen($correo > 11)){
-            Mail::send('Emails.Reprocesos',[ 'Nombre_Destino'=>$Nombre_Destino,'Nombre_Actual'=>$Nombre_Actual,'autorizo'=>$autorizo,'dt'=> date('d/M/Y h:m:s'),
-            'No_Nomina'=>$No_Nomina ,'Nom_User'=>$Nom_User,'orden'=>$orden,
-            'cant_r'=>$cant_r,'Est_act'=>$Est_act,'Est_ant'=>$Est_ant,'reason'=>$reason,'nota'=>$nota,'leido'=>$leido],function($msj) use($correo){
-            $msj-> subject  ('Notificaciones SIZ');//ASUNTO DEL CORREO
-            $msj-> to($correo);//Correo del destinatario  
-            });  
-        }
-  }   
+            foreach ($estaciones as $estacion) {
+                if ($estacion >= $Est_ant && $estacion < $Est_act) {
+                    $Con_Logof = DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOF]');
+                    $log = new LOGOF();
+                    $log->Code = ((int) $Con_Logof[0]->Code) + 1;
+                    $log->Name = ((int) $Con_Logof[0]->Code) + 1;
+                    $log->U_idEmpleado = $Num_user;
+                    $log->U_CT = $estacion;
+                    $log->U_Status = "T";
+                    $log->U_FechaHora = $dt;
+                    $log->U_DocEntry = $orden;
+                    $log->U_Cantidad = $cant_r * -1;
+                    $log->U_Reproceso = 'S';
+                    //$Code_actual->save();
+                    $log->save();
+                }}
+            $Nombre_Destino = DB::table('@PL_RUTAS')->where('U_Orden', $request->input('selectestaciones'))->value('Name');
+            $Nombre_Actual = DB::table('@PL_RUTAS')->where('U_Orden', $request->input('Estacion'))->value('Name');
+            //--------------------correo-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+            $Num_Nominas = DB::select(DB::raw("SELECT No_Nomina from Siz_Email where Reprocesos='1'"));
+            foreach ($Num_Nominas as $Num_Nomina) {
+                $user = User::find($Num_Nomina->No_Nomina);
+                $correo = utf8_encode($user['email'] . '@zarkin.com');
+                if (strlen($correo) > 10) {
+                    Mail::send('Emails.Reprocesos', ['Nombre_Destino' => $Nombre_Destino, 'Nombre_Actual' => $Nombre_Actual, 'autorizo' => $autorizo, 'dt' => date('d/M/Y h:m:s'),
+                        'No_Nomina' => $No_Nomina, 'Nom_User' => $Nom_User, 'orden' => $orden,
+                        'cant_r' => $cant_r, 'Est_act' => $Est_act, 'Est_ant' => $Est_ant, 'reason' => $reason, 'nota' => $nota, 'leido' => $leido], function ($msj) use ($correo) {
+                        $msj->subject('Notificaciones SIZ'); //ASUNTO DEL CORREO
+                        $msj->to($correo); //Correo del destinatario
+                    });
+                }
+            }
 //-----------------Refresca a la vista-------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
- Session::flash('mensaje', 'Reproceso Realizado!!...
- De :'.$Nombre_Actual.'
- A:'.$Nombre_Destino.'
- Supervisor:' .$N_Emp->firstName. ' ' .$N_Emp->lastName.'
- Autorizado por:  '.$autorizo.'');
+            Session::flash('mensaje', 'Reproceso Realizado!!...
+ De :' . $Nombre_Actual . '
+ A:' . $Nombre_Destino . '
+ Supervisor:' . $N_Emp->firstName . ' ' . $N_Emp->lastName . '
+ Autorizado por:  ' . $autorizo . '');
 
- Session::flash('op', $orden);
+            Session::flash('op', $orden);
 
-}
-);   
-return redirect()->back(); 
+        }
+        );
+        return redirect()->back();
 //return redirect()->back()->withErrors(array('message' => 'Error, Consulte con el Administrador de SIZ, por que no se llevo a cabo el retroceso.'));
-}
-
-public function Avanzar(Request $request)
-{
-    $ruts1 = DB::table('@PL_RUTAS')->value('Name');
-    dd($ruts1);
-    $user = Auth::user();
-    $actividades = $user->getTareas();
-    return view('Mod01_Produccion.AvanzarEst',
-    ['order'=>$order,
-    'actividades' => $actividades, 
-    'ultimo' => count($actividades)]);
-}
-public function DataOrden($Estacion)
-{
-    $stawer=Input::get('OP_us');
-    $AvanceEst=Input::get('AvanceEst');
-    $user = Auth::user();
-    $actividades = $user->getTareas();
-    $EstacionOrden = DB::table('OWOR')
-    ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
-    ->leftJoin('@CP_OF', '@CP_OF.U_DocEntry', '=', 'OWOR.DocEntry') 
-    ->select('OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden', 'OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
-        'OWOR.PlannedQty', '@CP_OF.U_Recibido', '@CP_OF.U_Procesado')
-        ->where('U_CT',$stawer)->get();
-}
+    }
 }

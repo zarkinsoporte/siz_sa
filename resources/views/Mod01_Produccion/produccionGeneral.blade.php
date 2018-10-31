@@ -18,10 +18,14 @@
                             @endif
                         </div>
                     </div>
-                    <!-- /.row -->
+                    <div class="col-md-6 col-md-offset-9">
+                      <a class="btn btn-danger btn-sm" href="ReporteProduccionPDF" target="_blank"><i class="fa fa-file-pdf-o"></i>  Descarga PDF</a>
+                      </div>
+                 <!-- /.row -->
                     <div class="row">
-
-                        <div class="col-md-12 ">
+                    <div class="text-right">
+                    </div>
+                        <div class="col-md-12">
                             @include('partials.alertas')
                             <div id="login" data-field-id="{{Session::get('Ocultamodal') }}" >
                             </div>
@@ -29,12 +33,12 @@
                             @if(Session::has('Ocultamodal') && Session::get('Ocultamodal')>0)
                                 @foreach ($ofs as $clave => $valor)
                                     <div class="row">
-                                        <div style="overflow-x:auto" class="col-md-12">
+                                        <div style="overflow-x:auto;" class="col-md-12">
+
                                             <table id="usuarios" class="table table-striped table-bordered table-condensed">
                                                 <thead>
                                                 <h5>{{$clave}}</h5>
                                                 <tr>
-
                                                     <th>Fecha</th>
                                                     <th>Orden</th>
                                                     <th>Pedido</th>
@@ -43,22 +47,21 @@
                                                     <th>VS</th>
                                                     <th>Cantidad</th>
                                                     <th>Total VS</th>
-
                                                 </tr>
                                                 </thead>
                                                 @foreach ($valor as $val)
                                                     <tr>
-                                                        <?php   $tvs = $tvs + $val['TVS'];
-                                                        $cant = $cant + $val['Cantidad'];
-                                                        ?>
-                                                        <td style="font-size: 10px; width: 8%"> {{substr($val['fecha'],0,10)}} </td>
-                                                        <td style="font-size: 10px; width: 6%"> {{$val['orden']}} </td>
-                                                        <td style="font-size: 10px; width: 6%"> {{$val['Pedido']}} </td>
-                                                        <td style="font-size: 10px; width: 8%"> {{$val['Codigo']}} </td>
-                                                        <td style="font-size: 10px; width: 51%"> {{$val['modelo']}} </td>
-                                                        <td style="font-size: 10px; width: 8%"> {{$val['VS']}} </td>
-                                                        <td style="font-size: 10px; width: 5%"> {{$val['Cantidad']}} </td>
-                                                        <td style="font-size: 10px; width: 8%"> {{$val['TVS']}} </td>
+                                                        <?php $tvs = $tvs + $val['TVS'];
+$cant = $cant + $val['Cantidad'];
+?>
+                                                        <td style="font-size: 10px; width: 8% padding-bottom: 0px; padding-top: 0px;" > {{substr($val['fecha'],0,10)}} </td>
+                                                        <td style="font-size: 10px; width: 6% padding-bottom: 0px; padding-top: 0px;"> {{$val['orden']}} </td>
+                                                        <td style="font-size: 10px; width: 6% padding-bottom: 0px; padding-top: 0px;"> {{$val['Pedido']}} </td>
+                                                        <td style="font-size: 10px; width: 8% padding-bottom: 0px; padding-top: 0px;"> {{$val['Codigo']}} </td>
+                                                        <td style="font-size: 10px; width: 51% padding-bottom: 0px; padding-top: 0px;"> {{$val['modelo']}} </td>
+                                                        <td style="font-size: 10px; width: 8% padding-bottom: 0px; padding-top: 0px;"> {{$val['VS']}} </td>
+                                                        <td style="font-size: 10px; width: 5% padding-bottom: 0px; padding-top: 0px;"> {{$val['Cantidad']}} </td>
+                                                        <td style="font-size: 10px; width: 8% padding-bottom: 0px; padding-top: 0px;"> {{$val['TVS']}} </td>
                                                     </tr>
                                                 @endforeach
                                             </table>
@@ -109,7 +112,7 @@
                                             Hasta:<input type="date" id="FechaFa" name="FechaFa" class="form-control" >
 
                                         </div>
-                                     
+
 
                                         <div class="form-group">
                                             <label for="dep" class="control-label">Departamento:</label>
@@ -139,7 +142,15 @@
                                                 <option value="166 Limpieza">166 Limpieza</option>
                                                 <option value="169 Inspeccion Tapiceria">169 Inspeccion Tapiceria</option>
                                                 <option value="172 Empaque">172 Empaque</option>
-                                                <option value="175 Inspeccion Final">175 Inspeccion Final</option>                                               
+                                                <option value="175 Inspeccion Final">175 Inspeccion Final</option>
+                                                <option value="200 Ordenes en Planeación">200 Ordenes en Planeación</option>
+                                                <option value="203 Programa de Mantas">203 Programa de Mantas</option>
+                                                <option value="206 Trazo">206 Trazo</option>
+                                                <option value="209 Tendido">209 Tendido</option>
+                                                <option value="212 Corte de Tela">212 Corte de Tela</option>
+                                                <option value="215 Separar y Marcar">215 Separar y Marcar</option>
+                                                <option value="218 Costura Mantas">218 Costura Mantas</option>
+                                                <option value="221 Inspeccion Mantas">221 Inspeccion Mantas</option>
                                             </select>
                                         </div>
 
@@ -153,7 +164,7 @@
                                             </div>
                                         </div>
                                         &nbsp;&nbsp;&nbsp;
-                                        <input formtarget="_blank" id="submit" name="submit" type="submit" value="Generar" onclick="mostrar();"  class="btn btn-primary"/>
+                                        <input id="submit" name="submit" type="submit" value="Generar" onclick="mostrar();"  class="btn btn-primary"/>
 
                                         <a type="button" class="btn btn-default"  href="{!!url('home')!!}">Cancelar</a>
                                     </div>

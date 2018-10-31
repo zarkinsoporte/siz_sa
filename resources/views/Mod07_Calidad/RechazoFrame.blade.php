@@ -152,7 +152,7 @@ iframe[seamless] {
   </div>
   <div class="autocomplete form-group col-sm-3 col-md-3">
     <label for="exampleFormControlTextarea1">Cantidad  Total Recibida</label>
-    <input type="number"  class="form-control" ng-model="n4"id="C_Recibida" name="C_Recibida" step=".01" required > 
+    <input type="number"  class="form-control" ng-model="n4"id="C_Recibida" name="C_Recibida" step=".01" min="1" required > 
   </div>
   <div class="autocomplete form-group col-sm-2 col-md-2">
     <label for="exampleFormControlTextarea1">Porcentaje de Aceptados</label>
