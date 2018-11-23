@@ -26,7 +26,7 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'mysql'),
+    'default' => 'sqlsrv',
 
     /*
     |--------------------------------------------------------------------------
@@ -77,12 +77,12 @@ return [
 
         'sqlsrv' => [
             'driver'   => 'sqlsrv',
-            'host'     => env('DB_HOST', 'localhost'),
-            'database' => env('DB_DATABASE', 'forge'),
-            'username' => env('DB_USERNAME', 'forge'),
-            'password' => env('DB_PASSWORD', ''),
-            'charset'  => 'utf8',
-            'prefix'   => '',
+            'host'     => env('DB_HOST', 'server-sapbo'),
+            'port'     => '1433',
+            'database' => 'Pruebas',
+            'username' => 'sa',
+            'password' => 'B1Admin',
+            'charset'  => 'utf8',            
             'pooling'  => 0,
         ],
 

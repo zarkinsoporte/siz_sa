@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Session\Store;
 class SessionTimeout {
     protected $session;
-    protected $timeout=1200;
+    protected $timeout=1460;
     public function __construct(Store $session){
         $this->session=$session;
     }
@@ -33,6 +33,6 @@ class SessionTimeout {
 
     protected function getTimeOut()
     {
-        return (env('TIMEOUT')) ?: $this->timeout;
+        return $this->timeout;
     }
 }

@@ -40,8 +40,8 @@ class CreateActividadUsers extends Migration
      */
     public function down()
     {
-        Schema::drop('Siz_Modulos_Grupo');
+     /*   Schema::drop('Siz_Modulos_Grupo');
         Schema::drop('Siz_Menu_Item');
-        Schema::drop('Siz_Tarea_menu');
+        Schema::drop('Siz_Tarea_menu');*/
     }
 }

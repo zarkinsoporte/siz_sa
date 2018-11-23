@@ -116,6 +116,7 @@ class Mod00_AdministradorController extends Controller
     {
         $users = DB::table('Siz_View_Plantilla_Personal')
         ->where('Depto', 'like', '%'.$clave.'%')->get();
+        
         Excel::create('Siz_Plantilla_Personal '.$clave.' - '.$hoy = date("d/m/Y").'', function($excel)use($users) {
                  
             //Header
@@ -126,7 +127,8 @@ class Mod00_AdministradorController extends Controller
              ]);
             //Datos 
      foreach($users as $U => $P_user) {
-            $sheet->row($U+4, [
+            $sheet->row($U+4, 
+            [
                 '',
           $P_user->firstName,
           $P_user->lastName, 
@@ -134,8 +136,7 @@ class Mod00_AdministradorController extends Controller
           $P_user->dept, 
           $P_user->U_CP_CT,
           $P_user->jobTitle,
- 
- ]);	
+            ]);	
              }         
          });
           

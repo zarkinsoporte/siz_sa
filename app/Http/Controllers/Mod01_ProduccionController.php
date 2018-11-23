@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Input;
 use Lava;
 use Mail;
 use Session;
+use Maatwebsite\Excel\Facades\Excel;
 
 class Mod01_ProduccionController extends Controller
 {
@@ -208,7 +209,7 @@ class Mod01_ProduccionController extends Controller
                         return redirect()->back()->withErrors(array('message' => 'Error, el usuario no existe.'));
                     }
                 }
-
+                
                 if (($mipassword == '0123' && $mipasswor2 == '1234')||Hash::check($mipassword, $t_user->U_CP_Password) || ($mipassword == '0123' && $request->input('pass2') == '1234')) {
                     Session::flash('usertraslados', 1);
                     if ($request->input('Recordarpass') == 1) { //revisar si esta checado el de recordar contraseña
@@ -218,7 +219,7 @@ class Mod01_ProduccionController extends Controller
                     $est_Av = $t_user->U_CP_CT;
                     $Fil_Est = explode(",", $est_Av); //ARRAY SIMPLE
                     $rutasConNombres = self::getNombresRutas($Fil_Est); //ARRAY LLAVE VALOR
-                    //   dd($rutasConNombres);
+                     
                     //$ruts1=DB::select("SELECT Name From [@PL_RUTAS] where Code=".Input::get('OP_us'));
 
                     return view('Mod01_Produccion.traslados', ['rutasConNombres' => $rutasConNombres, 't_user' => $t_user, 'est_Av' => $est_Av, 'Fil_Est' => $Fil_Est, 'actividades' => $actividades, 'ultimo' => count($actividades), 't_user' => $t_user]);
@@ -574,8 +575,11 @@ class Mod01_ProduccionController extends Controller
                 Session::put('OP_us', Input::get('OP_us'));
                 return redirect()->action('Mod01_ProduccionController@getOP', $id);
             } else {
-                return redirect()->back()->withInput();
+                Session::put('return', 1);
+                $id = Input::get('userId');              
+                return redirect()->action('Mod01_ProduccionController@getOP', $id);  
             }
+
 
         } catch (Exception $e) {
             return redirect()->back()->withInput()->withErrors(array('message' => 'Error al Guardar la Orden.'));
@@ -821,11 +825,209 @@ class Mod01_ProduccionController extends Controller
  Supervisor:' . $N_Emp->firstName . ' ' . $N_Emp->lastName . '
  Autorizado por:  ' . $autorizo . '');
 
-            Session::flash('op', $orden);
-
+            Session::flash('op', $orden);            
         }
         );
-        return redirect()->back();
+        Session::put('return', 1);          
+        return redirect()->action('Mod01_ProduccionController@getOP', $request->input('Nomina'));
+        
 //return redirect()->back()->withErrors(array('message' => 'Error, Consulte con el Administrador de SIZ, por que no se llevo a cabo el retroceso.'));
     }
+//--------------------112-Reporte-Corte-de-Piel---------------------
+public function repCortePiel()
+{
+if (Auth::check()) {
+            $user = Auth::user();
+            $actividades = $user->getTareas();
+            $data = 0;
+ if (Input::has('enviado')){
+           $fechaI = Date('d-m-y', strtotime(str_replace('-', '/', Input::get('FechIn'))));
+           $fechaF = Date('d-m-y', strtotime(str_replace('-', '/', input::get('FechaFa'))));
+    $detInsPiel= DB::select(DB::raw("select  OWOR.DocNum, sum(WOR1.IssuedQty) as Usado ,OWOR.ItemCode , OHEM.firstName 
+                AS LOGISTICA,OHEM.middleName AS APELLIDO  , (a.u_vs * OWOR.PlannedQty ) as u_vs ,OITM.ItmsGrpCod, OWOR.closedate  , a.itemname ,  sum(WOR1.IssuedQty*OITM.AvgPrice) 
+                as mUsado  , (vwsof_pieles1.cantidad * OWOR.PlannedQty) as Teorico , (vwsof_pieles1.monto * OWOR.PlannedQty) as mTeorico,
+                SUBSTRING(owor.itemcode,9,5) as piel, (select TOP 1 OH.firstName from [@CP_LOGOF] LF INNER JOIN OHEM OH ON LF.U_idEmpleado = OH.empID WHERE (LF.U_CT =1 or LF.U_CT =112)
+                AND LF.U_DocEntry = OWOR.DocNum ) AS firstName, LOF.FECHA,(select TOP 1 OH.middleName from [@CP_LOGOF] LF 
+                INNER JOIN OHEM OH ON LF.U_idEmpleado = OH.empID WHERE (LF.U_CT =1 or LF.U_CT =112) AND LF.U_DocEntry = OWOR.DocNum ) AS middleName  from WOR1 inner join OWOR on OWOR.DocEntry = WOR1.DocEntry 
+                inner join OITM on OITM.ItemCode = WOR1.ItemCode inner join OITM a on a.ItemCode = OWOR.itemcode inner join vwSof_Pieles1 on vwSof_Pieles1.father = OWOR.ItemCode 
+                INNER JOIN (SELECT U_DocEntry , sum(U_Cantidad) as Cantidad, U_idEmpleado,  DATEADD(dd, 0, DATEDIFF(dd, 0, U_FechaHora)) AS FECHA 
+                FROM [@CP_LOGOF] WHERE (U_CT = 3 or U_CT=115)  group by U_DocEntry , U_idEmpleado, DATEADD(dd, 0, DATEDIFF(dd, 0, U_FechaHora))  ) LOF ON LOF.U_DocEntry = OWOR.DocNum inner join OHEM on OHEM.empID =  LOF.U_idEmpleado 
+                where OITM.ItmsGrpCod = 113 and DATEADD(dd, 0, DATEDIFF(dd, 0, LOF.Fecha)) between '". $fechaI ."' and '". $fechaF ."'  group by OITM.ItmsGrpCod ,OHEM.firstName, 
+                OHEM.middleName , OWOR.ItemCode , a.u_vs ,OWOR.DocNum , OWOR.closedate , a.itemname , vwsof_pieles1.cantidad, vwsof_pieles1.monto, OWOR.PlannedQty,LOF.FECHA order by LOF.FECHA, OWOR.DocNum"));
+    foreach($detInsPiel as $dip){
+        $model = explode('-', $dip->ItemCode);
+        try{
+           $model[1];
+        }catch(Exception $e){
+           dd($model);
+        }
+    }
+    
+                $detCorte = DB::select(DB::raw("select  OWOR.DocNum, sum(WOR1.IssuedQty) as Usado ,OWOR.ItemCode , OHEM.firstName AS LOGISTICA,OHEM.middleName AS APELLIDO  , (a.u_vs * OWOR.PlannedQty )
+                as u_vs ,OITM.ItmsGrpCod, OWOR.closedate  , a.itemname ,  sum(WOR1.IssuedQty*OITM.AvgPrice) 
+                as mUsado  , (vwsof_pieles1.cantidad * OWOR.PlannedQty) as Teorico , (vwsof_pieles1.monto * OWOR.PlannedQty) as mTeorico, 
+                SUBSTRING(owor.itemcode,9,5) as piel, (select TOP 1 OH.firstName from [@CP_LOGOF] LF INNER JOIN OHEM OH ON LF.U_idEmpleado = OH.empID
+                WHERE (LF.U_CT =1 or LF.U_CT =112) AND LF.U_DocEntry = OWOR.DocNum   ) AS firstName, LOF.FECHA,(select TOP 1 OH.middleName
+                from [@CP_LOGOF] LF INNER JOIN OHEM OH ON LF.U_idEmpleado = OH.empID WHERE (LF.U_CT =1 or LF.U_CT =112)AND LF.U_DocEntry = OWOR.DocNum   )
+                AS middleName  from WOR1 inner join OWOR on OWOR.DocEntry = WOR1.DocEntry inner join OITM on OITM.ItemCode = WOR1.ItemCode inner join OITM a 
+                on a.ItemCode = OWOR.itemcode inner join vwSof_Pieles1 on vwSof_Pieles1.father = OWOR.ItemCode 
+                 INNER JOIN (SELECT U_DocEntry , sum(U_Cantidad) as Cantidad, U_idEmpleado,  DATEADD(dd, 0, DATEDIFF(dd, 0, U_FechaHora)) AS FECHA 
+                 FROM [@CP_LOGOF] WHERE (U_CT = 1 or U_CT=112)  group by U_DocEntry , U_idEmpleado, DATEADD(dd, 0, DATEDIFF(dd, 0, U_FechaHora))  ) 
+                LOF ON LOF.U_DocEntry = OWOR.DocNum inner join OHEM on OHEM.empID =  LOF.U_idEmpleado
+                where OITM.ItmsGrpCod = 113 and DATEADD(dd, 0, DATEDIFF(dd, 0, LOF.Fecha)) between '". $fechaI ."' and '". $fechaF ."' group by OITM.ItmsGrpCod ,OHEM.firstName,
+                OHEM.middleName , OWOR.ItemCode , a.u_vs ,OWOR.DocNum , OWOR.closedate , a.itemname , vwsof_pieles1.cantidad, vwsof_pieles1.monto, OWOR.PlannedQty,LOF.FECHA order by LOF.FECHA, OWOR.DocNum"));
+    $detPegado = DB::select(DB::raw("select  OWOR.DocNum, sum(WOR1.IssuedQty) as Usado ,OWOR.ItemCode , OHEM.firstName AS LOGISTICA,OHEM.middleName AS APELLIDO  , (a.u_vs * OWOR.PlannedQty )
+                as u_vs ,OITM.ItmsGrpCod, OWOR.closedate  , a.itemname ,  sum(WOR1.IssuedQty*OITM.AvgPrice) 
+                as mUsado  , (vwsof_pieles1.cantidad * OWOR.PlannedQty) as Teorico , (vwsof_pieles1.monto * OWOR.PlannedQty) as mTeorico, 
+                SUBSTRING(owor.itemcode,9,5) as piel, (select TOP 1 OH.firstName from [@CP_LOGOF] LF INNER JOIN OHEM OH ON LF.U_idEmpleado = OH.empID 
+                WHERE (LF.U_CT =1 or LF.U_CT =112) AND LF.U_DocEntry = OWOR.DocNum   ) AS firstName, LOF.FECHA,(select TOP 1 OH.middleName from [@CP_LOGOF] LF INNER JOIN OHEM OH 
+                ON LF.U_idEmpleado = OH.empID WHERE (LF.U_CT =1 or LF.U_CT =112) AND LF.U_DocEntry = OWOR.DocNum   ) AS middleName  from WOR1 inner join OWOR 
+                on OWOR.DocEntry = WOR1.DocEntry inner join OITM on OITM.ItemCode = WOR1.ItemCode inner join OITM a on a.ItemCode = OWOR.itemcode inner join vwSof_Pieles1 on vwSof_Pieles1.father = OWOR.ItemCode 
+                INNER JOIN (SELECT U_DocEntry , sum(U_Cantidad) as Cantidad, U_idEmpleado,  DATEADD(dd, 0, DATEDIFF(dd, 0, U_FechaHora)) AS FECHA 
+                FROM [@CP_LOGOF] WHERE (U_CT = 4 or U_CT=118) group by U_DocEntry , U_idEmpleado, DATEADD(dd, 0, DATEDIFF(dd, 0, U_FechaHora))  ) LOF ON LOF.U_DocEntry = OWOR.DocNum inner join OHEM
+                on OHEM.empID =  LOF.U_idEmpleado where OITM.ItmsGrpCod = 113 and DATEADD(dd, 0, DATEDIFF(dd, 0, LOF.Fecha)) between  '". $fechaI ."' and '". $fechaF ."' group by OITM.ItmsGrpCod ,OHEM.firstName, 
+                OHEM.middleName , OWOR.ItemCode , a.u_vs ,OWOR.DocNum , OWOR.closedate , a.itemname , vwsof_pieles1.cantidad, vwsof_pieles1.monto, OWOR.PlannedQty,LOF.FECHA order by LOF.FECHA, OWOR.DocNum"));
+    $data = [
+                    'semana'=>Input::get('semana'),
+                    'detInsPiel' => $detInsPiel,
+                    'detCorte' => $detCorte,
+                    'detPegado' => $detPegado,
+                   'fechaI' => $fechaI,
+                    'fechaF' => $fechaF,
+                   // 'Usado' => $Usado,
+                   // 'Teorico' => $Teorico,
+                   // 'inspeccion' => $inspeccion,
+                    //'pegado' => $pegado,
+                    'enviado' =>true,
+                    'actividades' => $actividades,
+                    'ultimo' => count($actividades),  
+                    'departamento' => '112 Corte de Piel'
+                    ,'semana' => '' 
+                ];
+   //dd($detCorte);            
+ }else{
+    $data = [
+        'semana'=>Input::get('semana'),
+        //'detInsPiel' => $detInsPiel,
+       // 'inspeccion' => $inspeccion,
+        //'pegado' => $pegado,
+        'enviado' =>false,
+        /*'fechaI' => $fechaI,
+        'fechaf' => $fechaF,*/
+        'actividades' => $actividades,
+        'ultimo' => count($actividades)  
+        ,'semana' => '' 
+    ];
+ }           
+Session::put('Rep112', $data);
+return view('Mod01_Produccion.ReporteCortePiel', $data);
+} else {
+return redirect()->route('auth/login');
+}
+}
+public function repCortePielExl(){
+    if(Session::has ('Rep112')){          
+        $data=Session::get('Rep112');
+        Excel::create('Siz_Rep_CortePiel' . ' - ' . $hoy = date("d/m/Y").'', function($excel)use($data) {
+         
+         $excel->sheet('Hoja 1', function($sheet) use($data){
+            //$sheet->margeCells('A1:F5');     
+            $sheet->row(2, [
+                'REPORTE','Orden Prod','Cortador','Código','Modelo','VS','Cant. Teorica Piel','$ Teorico'
+                ,'Cant. Usada Piel','$ Usado','Diferencia dm2','Diferencia',
+                'Desperdicio /Mura','Fecha de Inspeccion','Dia Semana','Semana','Modelo','Acabado'
+            ]);
+           //Datos    
+           $fila = 3; 
+           
+        foreach ( $data['detInsPiel'] as $detInsPiel){
+            $date=date_create($detInsPiel->FECHA);         
+            $model = explode('-', $detInsPiel->ItemCode);
+            $date=date_create($detInsPiel->FECHA);
+            $dias = array("7","1","2","3","4","5","6");
+            $sheet->row($fila, 
+            [
+                'Inspeccion',
+                $detInsPiel->DocNum,
+                $detInsPiel->firstName,
+                $detInsPiel->ItemCode,
+                $detInsPiel->itemname,
+                number_format($detInsPiel->u_vs,2),
+                number_format($detInsPiel->Teorico,2),
+                "$ ".number_format($detInsPiel->mTeorico,2),
+                number_format($detInsPiel->Usado,2),
+                "$ ".number_format($detInsPiel->mUsado,2),
+                number_format($detInsPiel->Usado - $detInsPiel->Teorico,2),
+                number_format($detInsPiel->Usado / $detInsPiel->Teorico,2),
+                number_format($detInsPiel->mUsado - $detInsPiel->mTeorico,2),
+                date_format($date, 'd-m-Y'),
+                $dias[date_format($date, 'w')],
+                date_format($date, 'W'),
+                $model[0]."".$model[1],
+                $model[2]            
+                ]);	
+                $fila ++;
+            }
+               foreach ( $data['detCorte'] as $detCorte){
+                $date=date_create($detCorte->FECHA);         
+                $model = explode('-', $detCorte->ItemCode);
+                $date=date_create($detCorte->FECHA);
+                $dias = array("7","1","2","3","4","5","6");
+                    $sheet->row($fila, 
+                    [
+                     'Corte',
+                       $detCorte->DocNum,
+                       $detCorte->firstName,
+                       $detCorte->ItemCode,
+                       $detCorte->itemname,
+                       number_format($detCorte->u_vs,2),
+                       number_format($detCorte->Teorico,2),
+                       "$ ".number_format($detCorte->mTeorico,2),
+                       number_format($detCorte->Usado,2),
+                       "$ ".number_format($detCorte->mUsado,2),
+                       number_format($detCorte->Usado - $detCorte->Teorico,2),
+                       number_format($detCorte->Usado / $detCorte->Teorico,2),
+                       number_format($detCorte->mUsado - $detInsPiel->mTeorico,2),
+                       date_format($date, 'd-m-Y'),
+                       $dias[date_format($date, 'w')],
+                       date_format($date, 'W'),
+                       $model[0]."".$model[1],
+                       $model[2]  
+                        ]);	
+                        $fila ++;
+                    }
+                        foreach ( $data['detPegado'] as $detPegado){
+                            $date=date_create($detPegado->FECHA);         
+                            $model = explode('-', $detPegado->ItemCode);
+                            $date=date_create($detPegado->FECHA);
+                            $dias = array("7","1","2","3","4","5","6");
+                            $sheet->row($fila, 
+                            [
+                                'Pegado',
+                                $detPegado->DocNum,
+                                $detPegado->firstName,
+                                $detPegado->ItemCode,
+                                $detPegado->itemname,
+                                number_format($detPegado->u_vs,2),
+                                number_format($detPegado->Teorico,2),
+                                "$ ".number_format($detPegado->mTeorico,2),
+                                number_format($detPegado->Usado,2),
+                                "$ ".number_format($detPegado->mUsado,2),
+                                number_format($detPegado->Usado - $detPegado->Teorico,2),
+                                number_format($detPegado->Usado / $detPegado->Teorico,2),
+                                number_format($detPegado->mUsado - $detPegado->mTeorico,2),
+                                date_format($date, 'd-m-Y'),
+                                $dias[date_format($date, 'w')],
+                                date_format($date, 'W'),
+                                $model[0]."".$model[1],
+                                $model[2]  
+                                ]);	
+                                $fila ++;
+        }
+});         
+})->export('xlsx');
+       }else {
+    return redirect()->action('Mod01_ProduccionController@repCortePiel');
+}
+}
 }

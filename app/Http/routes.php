@@ -16,6 +16,8 @@ use App\Modelos\MOD01\MODULOS_GRUPO_SIZ;
 use App\Modelos\MOD01\TAREA_MENU;
 use App\OP;
 use Illuminate\Support\Facades\DB;
+use App\User;
+
 Route::get('/', 'HomeController@index');
 Route::get('/home',
     [
@@ -23,7 +25,34 @@ Route::get('/home',
         'uses' => 'HomeController@index',
     ]);
 Route::get('/pruebas', function () {
-    return view('Mod00_Administrador.pruebas');
+    $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
+  $vCmp->DbServerType="6"; 
+$vCmp->server = "SERVER-SAPBO";
+$vCmp->LicenseServer = "SERVER-SAPBO:30000";
+$vCmp->CompanyDB = "Pruebas";
+$vCmp->username = "manager";
+$vCmp->password = "aqnlaaepp";
+$vCmp->DbUserName = "sa";
+$vCmp->DbPassword = "B1Admin";
+$vCmp->UseTrusted = false;
+
+//$vCmp->language = "ln_English";
+
+//$vCmp->UseTrusted = true;
+
+$lRetCode = $vCmp->Connect;
+//dd($lRetCode);
+
+echo '<br>';
+
+$vItem = $vCmp->GetBusinessObject("4");
+
+$RetVal = $vItem->GetByKey("71000");
+
+echo $vItem->Itemname;
+
+dd($vCmp->GetLastErrorDescription());
+    //return view('Mod00_Administrador.pruebas');
 });
 /*
 |--------------------------------------------------------------------------
@@ -100,7 +129,7 @@ Route::get('admin/users', 'Mod00_AdministradorController@allUsers');
 Route::get('users/edit/{empid}', 'Mod00_AdministradorController@editUser');
 Route::get('admin/detalle-depto/{depto}', 'Mod00_AdministradorController@showUsers');
 Route::get('datatables.showusers', 'Mod00_AdministradorController@DataShowUsers')->name('datatables.showusers');
-//--nuevas rutas 27/08/2018
+//--nuevas rutas 27/08/2018');
 Route::get('admin/plantilla/{depto}', 'Mod00_AdministradorController@PlantillaExcel');
 Route::get('admin/Plantilla_PDF/{depto}', 'Mod00_AdministradorController@Plantilla_PDF');
 
@@ -231,15 +260,7 @@ Route::get('home/ReporteMaterialesPDF/{op}', 'Mod01_ProduccionController@Reporte
 Route::get('home/ReporteProduccionPDF', 'Reportes_ProduccionController@ReporteProduccionPDF');
 
 Route::get('admin/aux', function () {
-    $menus = MODULOS_GRUPO_SIZ::where('Siz_Modulos_Grupo.id_modulo', 2)
-        ->where('Siz_Modulos_Grupo.id_grupo', 2)
-        ->whereNotNull('id_menu')
-        ->whereNotNull('id_tarea')
-        ->leftjoin('Siz_Menu_Item', 'Siz_Modulos_Grupo.id_menu', '=', 'Siz_Menu_Item.id')
-        ->leftjoin('Siz_Tarea_menu', 'Siz_Modulos_Grupo.id_tarea', '=', 'Siz_Tarea_menu.id')
-        ->select('Siz_Modulos_Grupo.*', 'Siz_Menu_Item.name as menu', 'Siz_Tarea_menu.name as tarea')
-        ->get();
-    dd($menus);
+   dd(User::isProductionUser());
 });
 
 Route::get('home/NUEVO RECHAZO', 'Mod07_CalidadController@Rechazo');
@@ -256,8 +277,20 @@ Route::get('borrado/{id}', 'Mod07_CalidadController@UPT_Cancelado');
 Route::post('/borrado', 'Mod07_CalidadController@UPT_Cancelado');
 Route::get('home/HISTORIAL', 'Mod07_CalidadController@Historial');
 Route::post('/excel', 'Mod07_CalidadController@excel');
+////reporte calidad
+Route::get('home/CALIDAD POR DEPTO','Mod07_CalidadController@repCalidad' );
+Route::post('home/CALIDAD POR DEPTO','Mod07_CalidadController@repCalidad2' );
 
-//RUTAS DE RECURSOS HUMANOS
+//RUTAS 112-CORTE PIEL///
+Route::get('home/112 CORTE DE PIEL','Mod01_ProduccionController@repCortePiel' );
+Route::post('home/112 CORTE DE PIEL','Mod01_ProduccionController@repCortePiel' );
+Route::post('home/reporte/DetinsPiel', 'Mod01_ProduccionController@repCortePiel');
+Route::get('home/repCortePielExl', 'Mod01_ProduccionController@repCortePielExl');
+//
+//-------------------------//
+//RUTAS DE RECURSOS HUMANOS//---------------------------------------------------------
+//-------------------------//
+//
 Route::get('home/CALCULO DE BONOS', 'Mod10_RhController@parametrosmodal');
 //Route::get('home/rh/reportes/bonos','Mod10_RhController@calculoBonos');
 Route::post('home/rh/reportes/bonos', 'Mod10_RhController@calculoBonos');
@@ -265,34 +298,14 @@ Route::get('home/PARAMETROS BONOS', 'Mod10_RhController@setParametrosBonos');
 Route::get('home/rh/reportes/bonosPdf', 'Mod10_RhController@bonosPdf');
 Route::get('home/BONOS CORTE','Mod10_RhController@bonosCorte' );
 Route::post('home/rh/reportes/bonosCorte', 'Mod10_RhController@calculoBonosCorte');
-
-Route::get('home/test', function(){
-    $departamento = '175 Inspeccion Final';
-                //  $fecha = explode(" - ",$request->input('date_range'));
-                //$dt = date('d-m-Y H:i:s');
-                $fechaI = Date('d-m-y', strtotime(str_replace('-', '/', '2018-07-17 00:00:00.000')));
-                $fechaF = Date('d-m-y', strtotime(str_replace('-', '/', '2018-07-19 00:00:00.000')));
-    $produccion = DB::select('SELECT "CP_ProdTerminada"."orden", "CP_ProdTerminada"."Pedido", "CP_ProdTerminada"."Codigo",
- "CP_ProdTerminada"."modelo", "CP_ProdTerminada"."VS", "CP_ProdTerminada"."fecha",
- "CP_ProdTerminada"."CardName", 
- "CP_ProdTerminada"."Cantidad", "CP_ProdTerminada"."TVS"
- FROM   "CP_ProdTerminada" "CP_ProdTerminada"
- WHERE  ("CP_ProdTerminada"."fecha">=\'' . $fechaI . '\' AND
- "CP_ProdTerminada"."fecha"<=\'' . $fechaF . '\') AND
- ("CP_ProdTerminada"."Name"= (\'' . $departamento . '\')  OR "CP_ProdTerminada"."Name"= (CASE
- WHEN  \'' . $departamento . '\' like \'112%\' THEN N\'01 Corte de Piel\'
- WHEN  \'' . $departamento . '\' like \'115%\' THEN N\'02 Inspeccionar Piel\'
- WHEN  \'' . $departamento . '\' like \'118%\' THEN N\'02 Pegar.\'
- WHEN  \'' . $departamento . '\' like \'121%\' THEN N\'03 Anaquel Costura.\'
- WHEN  \'' . $departamento . '\' like \'133%\' THEN N\'03 Costura completa.\'
- WHEN  \'' . $departamento . '\' like \'136%\' THEN N\'04 Inspeccionar Costura\'
- WHEN  \'' . $departamento . '\' like \'139%\' THEN N\'139 Series Incompletas Costura\'
- WHEN  \'' . $departamento . '\' like \'145%\' THEN N\'05 Cojineria\'
- WHEN  \'' . $departamento . '\' like \'148%\' THEN N\'06 Funda Terminada\'
- WHEN  \'' . $departamento . '\' like \'151%\' THEN N\'07 Kitting\'
- WHEN  \'' . $departamento . '\' like \'157%\' THEN N\'07 Tapizar y Empaque\'
- WHEN  \'' . $departamento . '\' like \'175%\' THEN N\'08 Inspeccionar Empaque\'
- END))
- ORDER BY "CP_ProdTerminada"."CardName", "CP_ProdTerminada"."orden"');
-dd($produccion);
-});
+Route::get('home/rh/reportes/bonoscortePdf', 'Mod10_RhController@bonoscortePdf');
+Route::get('home/rh/reportes/bonoscorteEXL', 'Mod10_RhController@bonoscorteEXL');
+//
+//-------------------------//
+//RUTAS DE COMPRAS//---------------------------------------------------------
+//-------------------------//
+//
+Route::get('home/PEDIDOS CSV', 'Mod03_ComprasController@pedidosCsv');
+Route::post('home/PEDIDOS CSV', 'Mod03_ComprasController@postPedidosCsv');
+Route::get('home/desPedidosCsv', 'Mod03_ComprasController@desPedidosCsv');
+Route::get('home/PedidosCsvPDF', 'Mod03_ComprasController@PedidosCsvPDF');

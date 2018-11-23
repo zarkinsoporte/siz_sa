@@ -28,7 +28,10 @@
                 <div class="alert alert-info">
                     <strong>Bienvenido  ! </strong>Usted tiene <strong>{{Count($noticias)}} </strong> tareas por realizar
                 </div>
- 
+                <blockquote class="trello-board-compact">
+                        <a href="https://trello.com/b/1Res600w/zarkin">Trello Zarkin</a>
+                      </blockquote>
+                      <script src="https://p.trellocdn.com/embed.min.js"></script>
 <a href="Mod01_Produccion/Noticias" button class="btn btn-primary" type="button">
  <div class="glyphicon glyphicon-envelope">  </div> Notificaciones   <span class="badge badge-danger"> {{Count($noticias)}}</span>
 </button></a>

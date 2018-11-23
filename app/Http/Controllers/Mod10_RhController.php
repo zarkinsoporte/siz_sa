@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Route;
 use Session;
-
+use Maatwebsite\Excel\Facades\Excel;
 //Fin DOMPDF
 
 class Mod10_RhController extends Controller
@@ -121,12 +121,31 @@ class Mod10_RhController extends Controller
             //-------------TERMINA BONOS PRODUCTIVIDAD-------------------------------------------------
              */
             //INICIA BONOS DE CALIDAD
-            $ca_cor = $request->input('ca_cor');
-            $ca_cos = $request->input('ca_cos');
-            $ca_coj = $request->input('ca_coj');
-            $ca_tap = $request->input('ca_tap');
-            $ca_car = $request->input('ca_car');
-            $ca_gt = $request->input('ca_gt');
+            $values = DB::table('Siz_Calidad_Depto')
+                        ->where('semana', Input::get('semana'))
+                        ->first();
+                        
+            if(count($values)<1){
+                return redirect()->back()->withErrors(array('message' => 'Calidad no ha capturado la semana '.Input::get('semana')));
+            }                        
+            $suma = 0;
+            $ca_cor = $values->CorteIn;
+            $suma += $ca_cor;
+            $ca_cos = $values->CostIn;
+            $suma += $ca_cos;
+            $ca_coj = $values->CojiIn;
+            $suma += $ca_coj;
+            $ca_tap = $values->TapIn;
+            $suma += $ca_tap;
+            $ca_car = $values->CarpIn;
+            $suma += $ca_car;
+            $ca_gt = $suma/5;
+            // $ca_cor = $request->input('ca_cor');
+            // $ca_cos = $request->input('ca_cos');
+            // $ca_coj = $request->input('ca_coj');
+            // $ca_tap = $request->input('ca_tap');
+            // $ca_car = $request->input('ca_car');
+            // $ca_gt = $request->input('ca_gt');
 //------------------------------------------------------------------------------------
             $calidadCorte = Self::getBono('3', 'Supervisor Corte', $ca_cor);
 //------------------------------------------------------------------------------------
@@ -158,6 +177,7 @@ class Mod10_RhController extends Controller
                 'ca_gt' => $calidadGerente,
                 'enviado' => true,
                 'semana' => Input::get('semana')];
+
             $request->session()->put('values', $values);
 
             return view('Mod10_Rh.ReporteBonos', $values);
@@ -249,12 +269,6 @@ class Mod10_RhController extends Controller
             return view('Mod10_Rh.bonoscorte',
                 ['actividades' => $actividades,
                     'ultimo' => count($actividades),
-                    /*'dataGerente' => 0, 'dataCorte' => 0,
-                    'dataCostura' => 0, 'dataCojineria' => 0,
-                    'dataTapiceria' => 0, 'dataCarpinteria' => 0,
-                    /*'mo_cor' => 0, 'mo_cos' => 0, 'mo_tap' => 0,*/
-                    /*'ca_cor' => 0, 'ca_cos' => 0, 'ca_coj' => 0,
-                    'ca_tap' => 0, 'ca_car' => 0, 'ca_gt' => 0,*/
                     'enviado' => false,
                     'semana' => ''
                    ]
@@ -329,10 +343,71 @@ class Mod10_RhController extends Controller
                 'actividades' => $actividades,
                 'ultimo' => count($actividades)   
             ];
-        
+            Session::put('corteData', $data);
             return view('Mod10_Rh.BonosCorte', $data);
         } else {
             return redirect()->route('auth/login');
         }
     }
+    public function bonoscortePdf()
+    {
+        $pdf = \PDF::loadView('Mod10_Rh.bonosCortePDF', Session::get('corteData'));
+        $pdf->setOptions(['isPhpEnabled' => true]);
+        return $pdf->stream('Siz_Bonos_Corte' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
+    }
+    public function bonoscorteEXL(){
+       if(Session::has ('corteData')){          
+        $data=Session::get('corteData');
+        Excel::create('Siz_Bonos_Corte' . ' - ' . $hoy = date("d/m/Y").'', function($excel)use($data) {
+         
+         $excel->sheet('Hoja 1', function($sheet) use($data){
+            //$sheet->margeCells('A1:F5');     
+            $sheet->row(2, [
+               'Actividad','No.Nomina','Nombre','Apellido','Destajo','Bono' 
+            ]);
+           //Datos    
+           $fila = 3;     
+        foreach ( $data['cortadores'] as $cortador){
+            $sheet->row($fila, 
+            [
+                'CORTADOR',
+                $cortador->U_EmpGiro,
+                $cortador->firstName,
+                $cortador->lastName,
+                $cortador->Usado,
+                $cortador->bono,
+                ]);	
+                $fila ++;
+            }
+                foreach ( $data['inspeccion'] as $inspeccion){
+                    $sheet->row($fila, 
+                    [
+                        'INSPECTOR',
+                        $inspeccion->U_EmpGiro,
+                        $inspeccion->firstName,
+                        $inspeccion->lastName,
+                        $inspeccion->U_VS,
+                        $inspeccion->bono,
+                        ]);	
+                        $fila ++;
+                    }
+                        foreach ( $data['pegado'] as $pegado){
+                            $sheet->row($fila, 
+                            [
+                                'PEGADOR',
+                                $pegado->U_EmpGiro,
+                                $pegado->firstName,
+                                $pegado->lastName,
+                                $pegado->U_VS,
+                                $pegado->bono,
+                                ]);	
+                                $fila ++;
+        }
+});         
+})->export('xlsx');
+       }else {
+    return redirect()->action('Mod10_RhController@bonosCorte');
+}
+}
+
 }

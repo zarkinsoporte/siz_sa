@@ -47,17 +47,30 @@
                                     @if(Session::get('usertraslados') == 1)
                                         {!! Form::open(['url' => 'home/TRASLADO ÷ AREAS/'.$t_user->U_EmpGiro, 'method' => 'POST']) !!}
                                         <fieldset>
-                                        <div>
-                                            <input type="radio" name="AvanceEst" id="op" value="1" checked>
-                                            <label for="op" class="control-label" >Introduce Orden de Producción:</label>
-                                            <input autofocus type="number" name="op" id="op" min="1" max="9999999999">
+                                        <div class="col-md-6">                                           
+
+                                            <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="AvanceEst" id="op" value="1" checked>
+                                                    <label class="form-check-label" for="op">
+                                                            Orden de Producción:
+                                                    </label>
+                                                   
+                                            </div> 
+                                            <input class="form-control" autofocus type="number" name="op" id="op_input" min="1" max="9999999999">                                                                                                                                         
                                             <input id="pass" hidden type="password" name="pass" value="0123">
                                             <input id="pass2" hidden type="password" name="pass2" value="1234">
                                         </div>
-                                        <div>
-                                            <input type="radio" name="AvanceEst" id="OP_us" value="2">
-                                            <label for="avanzarEst"class="control-label" >Avanzar por Estación :</label>
-                                            <select  class="form-control" name="OP_us" id="OP_us">
+                                        <div class="col-md-6">
+                                                <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="AvanceEst" id="OP_us" value="2">
+                                                        <label class="form-check-label" for="OP_us">
+                                                                Avanzar por Estación
+                                                        </label>
+                                                       
+
+                                                      </div>
+                                                                                        
+                                            <select  class="form-control" name="OP_us" id="OP_input">
                                      @foreach($rutasConNombres as $key => $value)
                                                 <option  class="col-md-6"value="{{$key}}">{{$value}}</option>
                                             @endforeach
@@ -487,7 +500,20 @@ if (isset($HisOrden)) {
 
 @section('homescript')
 
-
+shortcut.add("O", 
+	function() { 
+        document.getElementById("op").checked = true;
+        document.getElementById("op_input").focus();
+	}, 
+	{ 'type':'keydown', 'propagate':false, 'target':document} 
+    );
+    shortcut.add("A", 
+	function() { 
+        document.getElementById("OP_us").checked = true;
+        document.getElementById("OP_input").focus();
+	}, 
+	{ 'type':'keydown', 'propagate':false, 'target':document} 
+    );
     var myuser = $('#login').data("field-id");
 
     if(myuser == false){
@@ -578,4 +604,8 @@ function mostrar(){
         $("#ocultar").show();
         $('#miusuario').attr('required', 'required');
     };
+
+     
+}
+
 </script>

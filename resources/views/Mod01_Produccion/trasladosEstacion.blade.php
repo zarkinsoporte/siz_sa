@@ -54,29 +54,31 @@
                          <table id="usuarios" class="table table-striped table-bordered table-condensed">
                                     <thead>
                                     <tr>
+                                            <?php
+
+                                            switch ($t_user->position) {
+                                                case '4'; //Supervisor SAP
+                                                    break;
+                                                case '3'; //Operador SAP
+                                                    ?>
+                                               <th>Avanzar OP</th>
+                                            <?php
+                                            break;
+                                                case '1'; //Gerencia SAP
+                                                    ?>
+                                            <th>Avanzar OP</th>
+                                            <?php
+                                            break;
+                                            }
+                                            ?>   
+
                                         <th>Orden de Producción</th>
                                         <th>Descripción</th>
                                         <th>Reproceso</th>
                                         <th>Cantidad</th>
                                         <th>Cantidad Recibida</th>
                                         <th>Procesado</th>
-                                        <?php
-
-switch ($t_user->position) {
-    case '4'; //Supervisor SAP
-        break;
-    case '3'; //Operador SAP
-        ?>
-   <th>Avanzar OP</th>
-<?php
-break;
-    case '1'; //Gerencia SAP
-        ?>
-<th>Avanzar OP</th>
-<?php
-break;
-}
-?>                    
+                                                         
       </tr>
          </thead>
                                     <tbody>
@@ -90,35 +92,35 @@ break;
                                     <i class="fa fa-edit" aria-hidden="true"></i>
                                     </a>
                                         </td>--}}
+                                        <?php
+                                        switch ($t_user->position) {
+                                            case '4'; //Supervisor SAP
+                                                break;
+                                            case '3'; //Operador SAP
+                                                ?>
+                                        <!--Boton Avanzar-->
+                                        <td> <a class="btn btn-success" data-toggle="modal" data-target="#cantidad" data-whatever="{{$orden->Code}}" data-whatever2="{{$orden->U_Recibido - $orden->U_Procesado}}"><i class="fa fa-send-o" aria-hidden="true">   Avanzar</i>
+                                            </a> 
                                         </td>
+                                        <?php
+                                        break;
+                                            case '1'; //Gerencia SAP 1 pruebas
+                                                ?>
+                                         <!--Boton Avanzar-->
+                                        <td> <a class="btn btn-success" data-toggle="modal" data-target="#cantidad" data-whatever="{{$orden->Code}}" data-whatever2="{{$orden->U_Recibido - $orden->U_Procesado}}"><i class="fa fa-send-o" aria-hidden="true">   Avanzar</i>
+                                            </a> 
+                                        </td>
+                                        <?php
+                                        break;
+                                        }
+                                        ?>
                                         <td> {{$orden->DocEntry}} </td>
                                         <td> {{$orden->ItemName}} </td>
                                         <td> {{$orden->U_Reproceso}} </td>
                                         <td> {{number_format($orden->PlannedQty,0)}} </td>
                                         <td> {{$orden->U_Recibido}} </td>
                                         <td> {{$orden->U_Procesado}} </td>
- <?php
-switch ($t_user->position) {
-    case '4'; //Supervisor SAP
-        break;
-    case '3'; //Operador SAP
-        ?>
-<!--Boton Avanzar-->
-<td> <a class="btn btn-success" data-toggle="modal" data-target="#cantidad" data-whatever="{{$orden->Code}}" data-whatever2="{{$orden->U_Recibido - $orden->U_Procesado}}"><i class="fa fa-send-o" aria-hidden="true">   Avanzar</i>
-    </a> 
-</td>
-<?php
-break;
-    case '1'; //Gerencia SAP 1 pruebas
-        ?>
- <!--Boton Avanzar-->
-<td> <a class="btn btn-success" data-toggle="modal" data-target="#cantidad" data-whatever="{{$orden->Code}}" data-whatever2="{{$orden->U_Recibido - $orden->U_Procesado}}"><i class="fa fa-send-o" aria-hidden="true">   Avanzar</i>
-    </a> 
-</td>
-<?php
-break;
-}
-?>
+ 
     </tr>
                                 @endforeach
                         

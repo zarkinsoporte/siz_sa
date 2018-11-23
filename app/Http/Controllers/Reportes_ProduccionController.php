@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use Session;
 
+
 ini_set('max_execution_time', 90);
 class Reportes_ProduccionController extends Controller
 {

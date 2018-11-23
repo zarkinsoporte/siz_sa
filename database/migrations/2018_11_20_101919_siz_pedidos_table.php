@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateGrupoSizTable extends Migration
+class SizPedidosTable extends Migration
 {
     /**
      * Run the migrations.
@@ -12,13 +12,12 @@ class CreateGrupoSizTable extends Migration
      */
     public function up()
     {
-       /* Schema::create('Siz_Modulo', function (Blueprint $table) {
+        Schema::create('Siz_Pedidos_Csv', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('name');
-            $table->string('descripcion');
+            $table->string('usuario',50);
+            $table->integer('pedido'); 
             $table->timestamps();
-        });*/
-
+        });
     }
 
     /**
@@ -26,9 +25,8 @@ class CreateGrupoSizTable extends Migration
      *
      * @return void
      */
- public function down()
-{
-    //Schema::drop('Siz_Modulo');
-}
-
+    public function down()
+    {
+        Schema::drop('Siz_Pedidos_Csv');
+    }
 }

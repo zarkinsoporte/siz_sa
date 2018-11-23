@@ -11,7 +11,7 @@ use Input;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
-
+use Session;
 class AuthController extends Controller
 {
     /*
@@ -78,9 +78,16 @@ class AuthController extends Controller
             try {
                 if (Auth::attempt(['U_EmpGiro' => $request->get('id'), 'password'   => $request->get('password'), 'status' => 1])) {
                     //dd($request->all());
-    
-                    return redirect()->intended('home');
-    
+                    if(User::isProductionUser()){
+                     
+                       Session::flash('send', 'send');
+                       Session::flash('miusuario', '');
+                       Session::flash('pass', '0123');
+                       Session::flash('pass2', '1234');
+                       return redirect()->action('Mod01_ProduccionController@traslados');   
+                    }else{
+                       return redirect()->intended('home');
+                    }
                 }else{
                     return redirect($this->loginPath())
                         ->withInput($request->only($this->loginUsername(), 'remember'))

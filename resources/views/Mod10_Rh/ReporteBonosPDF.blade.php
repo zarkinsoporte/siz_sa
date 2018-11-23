@@ -79,7 +79,7 @@
 <div class="row">
 <div class="col-md-10">
 <h3>Producción</h3>
-    <table border="1px" class="table table-striped">
+    <table border="1px" class="table table-striped ">
                  <tr>
                     <th>Empleado:</th>
                     <td>{{$dataGerente[0]}}</td>

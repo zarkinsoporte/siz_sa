@@ -22,7 +22,7 @@ use App;
 //use Pdf;
 //Fin DOMPDF
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Support\Facades\Validator;
 use Datatables;
 class Mod07_CalidadController extends Controller
 {
@@ -234,5 +234,61 @@ else{
       //dd($DelRechazo);
       return view('Mod07_Calidad.Historial',['VerHistorial'=>$VerHistorial,'actividades' => $actividades, 'ultimo' => count($actividades)]);
      }
+ public function repCalidad2(){
+    if (Auth::check()) {
+        $user = Auth::user();
+        $actividades = $user->getTareas();      
+        //anio_in
+       // dd(Input::all());
+        $valid = Validator::make(Input::all(), [
+            'anio_in' => 'required' ,
+            'semana_in' => 'required|unique:Siz_Calidad_Depto,Semana',
+            'cor_in'=> 'required',
+            'cos_in'=> 'required',
+            'coj_in'=> 'required',
+            'tap_in'=> 'required',
+            'car_in'=> 'required',
+        ]);
 
+        if ($valid->fails()) {
+            return redirect()->back()
+                        ->withErrors($valid)
+                        ->withInput();
+        }
+        DB::table('Siz_Calidad_Depto')
+        ->insert(
+            [
+                'anio'   => Input::get('anio_in'),
+                'Semana' => Input::get('semana_in'),
+                'CorteIn'=> Input::get('cor_in'),
+                'CostIn' => Input::get('cos_in'),
+                'CojiIn' => Input::get('coj_in'),
+                'TapIn'  => Input::get('tap_in'),
+                'CarpIn' => Input::get('car_in'),           
+            ]
+            );
+     
+            return redirect()->back();
+    } else {
+        return redirect()->route('auth/login');
+    }
+}
+public function repCalidad(){
+    if (Auth::check()) {
+        $user = Auth::user();
+        $actividades = $user->getTareas();      
+$Indatos = DB::table('Siz_Calidad_Depto')->orderBy('Semana','asc')->get();
+
+         return view('Mod07_Calidad.CalidadDepto',
+             ['actividades' => $actividades,
+                 'ultimo' => count($actividades),
+                 'enviado' => false,
+                 'semana_in' => '',
+                 'Indatos' => $Indatos
+                ]
+             );
+    } else {
+        return redirect()->route('auth/login');
+    }
+}
 }

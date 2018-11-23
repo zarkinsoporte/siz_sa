@@ -127,23 +127,26 @@
         <h3></h3>
     <!-- Modal -->
     <div class="modal fade " id="pass" role="dialog">
-                <div class="modal-dialog modal-md" role="document">
+                <div class="modal-dialog modal-sm" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-
-                            <h4 class="modal-title" id="pwModalLabel">Introduce los valores.</h4>
                         </div>
                         {!! Form::open(['url' => 'home/rh/reportes/bonos', 'method' => 'POST']) !!}
-                        <div class="modal-body">
+                    <div class="modal-body">
                         <div class="form-group">
-                            <h4>Semana</h4>
+                            <h2 style="text-align: center;">Semana</h2>
+                            <div class="row">
+                                <div class="col-md-12">
+                                        @include('partials.alertas')
+                                  </div>       
+                             </div>          
                            <div class="row">
-                                        <div class="col-md-2">
-                                        <input name="semana" type="number" class="form-control" required autofocus min="1" max="52" value="{{date("W", strtotime("-1 week"))}}">
-                                        </div>
+                                <div class="col-md-4 col-md-offset-4">
+                                  <input name="semana" type="number" class="form-control" required autofocus min="1" max="{{date("W", strtotime("now"))}}" value="{{date("W", strtotime("now"))}}">
+                                </div>
                            </div>
                         <br>
-                            <h4>Parámetros Calidad</h4>
+                           <!-- <h4>Parámetros Calidad</h4>
                             <div class="row">
 
                                     <div class="col-md-4">
@@ -173,22 +176,16 @@
                                             <label>Gerente Producción</label>
                                             <input name="ca_gt" type="number" class="form-control" required min="1">
                                     </div>
-                            </div>
-
-                        </div>
-
-                        </div>
+                            </div>-->          
                         <div class="modal-footer">
-
-
                             <button type="submit" class="btn btn-primary">Entrar</button>
                             <a type="button" class="btn btn-default"  href="{!!url('home')!!}">Cancelar</a>
                         </div>
-                        {!! Form::close() !!}
-                    </div>
+                        </div>
                 </div>
-            </div><!-- /modal -->
-
+            </div>
+    </div>
+         {!! Form::close() !!}
 @endsection
 
 @section('homescript')

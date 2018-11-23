@@ -153,6 +153,7 @@ src="https://code.jquery.com/jquery-3.2.1.js">
 {!! Html::script('assets/js/bootstrap.min.js') !!}
 <!--<script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>-->
 {!! Html::script('assets/js/moment.min.js') !!}
+{!! Html::script('assets/js/shortcut.js') !!}
 <!-- Include Date Range Picker -->
 
 
