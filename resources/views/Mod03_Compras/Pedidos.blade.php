@@ -4,54 +4,59 @@
 
             <!-- Page Heading -->
             <div class="row">
-
-                    <div class="visible-xs"><br><br></div>
-                                      
-                       <div class= "col-md-10 col-sm-7 hidden-xs hidden-sm">
+                    <div class="visible-xs"><br><br></div>                                      
+                       <div class= "col-md-11 col-sm-7 hidden-xs hidden-sm">
                             <h3 class="page-header">
                                     Descarga de Orden de Compra 
                                     <small>Compras</small>   
                                   </h3> 
                         <ol class="breadcrumb">
                         <li>
-                            <i class="fa fa-dashboard"></i>  <a href="{!! url('home') !!}">Inicio</a>
+                            <i class="fa fa-dashboard"></i><a href="{!! url('home') !!}"> Inicio</a>
                         </li>
                     </ol>
                  </div>
             </div> 
 {!! Form::open(['url' => 'home/PEDIDOS CSV', 'method' => 'POST']) !!} 
 <div class="row">
-    <div class="col-md-10">
+    <div class="col-md-11">
             @include('partials.alertas')
       </div>       
- </div>                          
-   
+ </div>                           
  <div class="row">
         <div class="col-md-2">
-            <h4 class="">Número de O.C:</h4>
+            <h4>Número de O.C:</h4>
         </div>    
-    <div class="col-md-2">
-            <div class="">
-            
-            <input name="NumOC" type="number" class="form-control" required min ="1">                                                  
-            
+       <div class="col-md-2">
+          <input name="NumOC" type="number" class="form-control" required min ="1" autofocus>                                                      
        </div> 
-        </div>
       <div class="col-md-2">
             <button type="submit" class="btn btn-primary">Consultar</button></div> 
- </div>          
+      </div>     
+ </div>     
     {!! Form::close() !!} 
     <br>
     @if (isset($pedido))
-    <?php $date=date_create($pedido[0]->FechOC); 
+    <?php 
+            $date=date_create($pedido[0]->FechOC);         
+            $fecha_actual = strtotime(date("d-m-Y H:i:00",time()));
+            $fecha_entrada = strtotime($pedido[0]->FechOC);
      ?>
     <div class="row">
         <div class="col-md-8">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h1 class="panel-title">Información de la Orden de Compra: {{$pedido[0]->NumOC}}</h1>
+                    <b>Información de la Orden de Compra: {{$pedido[0]->NumOC}}</b> 
                 </div>
-                <div class="panel-body">
+                <div class="panel-body"> 
+                    @if($pedido[0]->CANCELED == 'Y')
+                    <h5>Estatus de la Orden: Cancelada</h5>
+                    @elseif($pedido[0]->DocStatus == 'O') 
+                    <h5>Estatus de la Orden: Abierta</h5>
+                    @else
+                    <h5>Estatus de la Orden: Cerrada</h5>
+                    @endif
+                    <h5>Líneas del Documento:  {{count($pedido)}}</h5>                            
                     <h5>Fecha de Orden:  {{date_format($date, 'd-m-Y')}}</h5>
                     <h5>Proveedor:  {{$pedido[0]->CodeProv.'  '.$pedido[0]->NombProv}}</h5>
                     <h5>Elaboro:  {{$pedido[0]->Elaboro}}</h5>
@@ -63,8 +68,14 @@
         <div class="row">
         <div  class= "col-md-11"> 
                  <div class="text-right">
-                     <a  class="btn btn-warning btn-sm"  href="desPedidosCsv"><i class="fa fa-file-text"></i>  Descarga CSV</a>
-                     <a class="btn btn-danger btn-sm"  href="PedidosCsvPDF" target="_blank"><i class="fa fa-file-pdf-o"></i> PDF</a>
+                        @if($fecha_entrada>=$fecha_actual)                                     
+                        <a  class="btn btn-primary btn-sm"  href="desPedidosCsv"><i class="fa fa-file-text"></i>  CSV</a>
+                        @else                        
+                        <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#csv">
+                           <i class="fa fa-file-text"></i>  CSV
+                         </button>
+                         @endif
+                        <a class="btn btn-danger btn-sm"  href="PedidosCsvPDF" target="_blank"><i class="fa fa-file-pdf-o"></i>  PDF</a>                    
                     </div>
                  </div>
             </div>
@@ -77,28 +88,34 @@
                     <tr>
                         <th style="text-align: center;">Código</th>
                         <th style="text-align: center;">Descripción</th>
-                        <th style="text-align: center;">Versión</th>
+                        <th style="text-align: center;">UM</th>
                         <th style="text-align: center;">Cantidad Total</th>
                         <th style="text-align: center;">Cant. Pendiente</th>
-                        <th style="text-align: center;">Entrega</th>
-                        <th style="text-align: center;">Precio Unitario</th>      
-                        <th style="text-align: center;">Moneda</th>     
+                        <th style="text-align: center;">Precio Unitario</th>                                             
+                        <th style="text-align: center;">Total</th>  
+                        <th style="text-align: center;">Entrega</th>      
                     </tr>
                  </thead>
                <tbody>     
+               <?php 
+                    $suma=0;
+                     ?>
             @foreach ($pedido as $pedi)
                     <tr>
                     <?php 
                      $dat=date_create($pedido[0]->FechEnt); 
+                     $total= $pedi->CantPend * $pedi->Price;
+                     $suma = $suma + $total;
+                     $moneda = $pedi->Currency;                    
                      ?>
                         <td style="text-align: center;">{{$pedi->Codigo}}</td>
                         <td>{{$pedi->Descrip}}</td>
-                        <td style="text-align: center;" >{{$pedi->ValidComm}}</td>
+                        <td style="text-align: center;">{{$pedi->BuyUnitMsr}}</td>
                         <td style="text-align: center;">{{number_format($pedi->CantTl,2)}}</td>
                         <td style="text-align: center;">{{number_format($pedi->CantPend,2)}}</td>
-                        <td style="text-align: center;">{{date_format($dat, 'd-m-Y')}}</td>
-                        <td style="text-align: center;">{{"$ ".number_format($pedi->Price,4)}}</td>
-                        <td style="text-align: center;">{{$pedi->Currency}}</td>                                                    
+                        <td style="text-align: right;">{{number_format($pedi->Price,4)}} {{$pedi->Currency}}</td>
+                        <td style="text-align: right;">{{number_format($total,2)." ".$moneda}}</td>     
+                        <td style="text-align: center;">{{date_format($dat, 'd-m-Y')}}</td>                                                   
                     </tr>
             @endforeach
             </tbody>
@@ -106,55 +123,52 @@
     </div>
    </div>  
 </div>
-            <br> 
-             <!--<div class="row">
-                    <div class="col-md-10">
-                        <h3>Calidad</h3>
-                            <table>
-                                         <tr>
-                                            <th>Empleado:</th>
-                                            <td>{{0}}</td>
-                                          </tr>
-                                          <tr>
-                                            <th>% de Calidad:</th>
-                                            <td>{{0}}</td>
-                                          </tr>
-                                          <tr>
-                                            <th>Bono:</th>
-                                            <td>{{0}}</td>
-                                          </tr>
+<div class="row">
+<div class="col-md-11">
+    <table  style="width: auto; position: relative; float: right;"class="table table-condensed">
+    <tr> <th style="text-align: center;">Totales</th></tr>
+     <tr> <td style="text-align: right;">Subtotal: {{number_format($suma,2)." ".$moneda}}</td></tr>
+     <tr><td  style="text-align: right;">Impuesto: {{number_format($suma * 0.16,2)." ".$moneda}}</td></tr>
+      <tr><td  style="text-align: right;">Total: {{number_format(($suma * 0.16) + $suma,2)." ".$moneda}}</td></tr>
+    </table>
+    </div>  
+   </div>  
 
-                                </table>
-                    </div>  /.col md 
-                </div> /.row 
-            <div class="row">
-            <div class="col-md-10">
-                <h3>Totales</h3>
-                    <table>
-                                 <tr>
-                                    <th>Empleado:</th>
-                                    <td>{{0}}</td>
-                                     <td>{{0}}</td>
-                                     <td>{{0}}</td> 
-                                     <td>{{0}}</td>
-                                      <td>{{0}}</td>
-                                  </tr>
-                                  <tr>
-                                    <th>Total Bono:</th>
-                                    <td>{{0}}</td>
-                                  </tr>
-                        </table>
+
+ <div class="modal fade" id="csv" role="dialog" >
+    <div class="modal-dialog modal-sm" role="document">
+        {!! Form::open(['url' => 'home/desPedidosCsv', 'method' => 'GET']) !!}
+        <div class="modal-content" >
+
+            <div class="modal-header" >
+
+                <h4 class="modal-title" id="pwModalLabel" style="text-align: center;">¡Aviso!</h4>
             </div>
+
+            <div class="modal-body">
+
+                Orden creada el día {{date_format($date, 'd-m-Y')}}, desea generar archivo CSV
+            </div>
+            <div class="modal-footer">
+                <input id="submit" name="submit" type="submit" value="Procesar" onclick="ocultaModal();"  class="btn btn-primary"/>
+                <button type="button" class="btn btn-default" data-dismiss="modal" aria-label="Close">Cancelar</button>
+            </div>
+
         </div>
-        <h3></h3>-->
-                    </div>
-    </div>    
-                   
-           
- @endif
+        {!! Form::close() !!}
+    </div>
+</div><!-- /modal -->
+    
+@endif <!-- /isset -->
 
 @endsection
+<script>
 
+    function ocultaModal(){
+        $("#csv").modal("hide")
+    };
+
+</script>
 @section('homescript')
 window.TrelloBoards.load(document, { allAnchors: false });
 @endsection

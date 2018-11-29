@@ -101,10 +101,11 @@ class Reportes_ProduccionController extends Controller
                 //dd(($finalarray['CASTRO HERRERA ALEJANDRO ISAAC'][0]['orden']));
                 $values = ['actividades' => $actividades, 'ultimo' => count($actividades), 'ofs' => $finalarray, 'departamento' => $departamento, 'fechaI' => $fechaI, 'fechaF' => $fechaF, 'tvs' => 0, 'cant' => 0];
                 Session::flash('Ocultamodal', 1);
+                dd($produccion);             
                 Session::put('values', $produccion);
                 return view('Mod01_Produccion.produccionGeneral', $values);
                 $compiled = view('Mod01_Produccion.produccionGeneral', $values)->render();
-                dd($compiled);
+              
             } else {
                 Session::flash('Ocultamodal', false);
                 return view('Mod01_Produccion.produccionGeneral', ['actividades' => $actividades, 'ultimo' => count($actividades)]);

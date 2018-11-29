@@ -42,27 +42,26 @@ public function postPedidosCsv()
 {
     if (Auth::check()) {
         $user = Auth::user();
-        $actividades = $user->getTareas();   
-         
-$pedido = DB::select(DB::raw("SELECT OITM.ValidComm,OPOR.DocNum as NumOC, OPOR.DocDate as FechOC, OPOR.CardCode as CodeProv, OPOR.CardName as NombProv, POR1.ItemCode as Codigo, POR1.Dscription as Descrip, POR1.Quantity as CantTl, POR1.OpenQty as CantPend, POR1.ShipDate as FechEnt, OSLP.SlpName as Elaboro, 'ARTICULOS' as TipoOC, UFD1.Descr as Comprador, case when datediff(day,POR1.ShipDate, getdate()) >  0 and datediff(day,POR1.ShipDate, getdate()) < 9 then 'A-08 dias' when datediff(day,POR1.ShipDate, getdate()) >  8 and datediff(day,POR1.ShipDate, getdate()) < 16 then 'A-15 dias' 
-                                when datediff(day,POR1.ShipDate, getdate()) > 15 and datediff(day,POR1.ShipDate, getdate()) < 31 then 'A-30 dias' when datediff(day,POR1.ShipDate, getdate()) > 30 and datediff(day,POR1.ShipDate, getdate()) < 61 then 'A-60 dias' when datediff(day,POR1.ShipDate, getdate()) > 60 and datediff(day,POR1.ShipDate, getdate()) < 91 then 'A-90 dias' when datediff(day,POR1.ShipDate, getdate()) > 90 then 'A-MAS dias' End as Grupo, 1 as QtyMat, OPOR.Comments , POR1.Price, POR1.Currency FROM OPOR INNER JOIN POR1 ON OPOR.DocEntry = POR1.DocEntry LEFT JOIN OITM ON POR1.ItemCode = OITM.ItemCode 
-                                INNER JOIN OSLP on OSLP.SlpCode= POR1.SlpCode LEFT JOIN UFD1 on OITM.U_Comprador= UFD1.FldValue and UFD1.TableID='OITM' and UFD1.FieldID=10 
-                                WHERE POR1.LineStatus <> 'C' and POR1.ItemCode is not null and DocNum = ".Input::get('NumOC')." Union all 
-                                SELECT OITM.ValidComm, OPOR.DocNum as NumOC, OPOR.DocDate as FechOC, OPOR.CardCode as CodeProv, OPOR.CardName as NombProv, POR1.ItemCode as Codigo, POR1.Dscription as Descrip, POR1.Quantity as CantTl, POR1.OpenQty as CantPend, OPOR.DocDueDate as FechEnt, OSLP.SlpName as Elaboro, 'SERVICIOS' as TipoOC, 'Libre' as Comprador, case 
-                                when datediff(day,OPOR.DocDueDate, getdate()) >  0 and datediff(day,OPOR.DocDueDate, getdate()) < 9 then 'A-08 dias' when datediff(day,OPOR.DocDueDate, getdate()) >  8 and datediff(day,OPOR.DocDueDate, getdate()) < 16 then 'A-15 dias' when datediff(day,OPOR.DocDueDate, getdate()) > 15 and datediff(day,OPOR.DocDueDate, getdate()) < 31 then 'A-30 dias' when datediff(day,OPOR.DocDueDate, getdate()) > 30 and datediff(day,OPOR.DocDueDate, getdate()) < 61 then 'A-60 dias' when datediff(day,OPOR.DocDueDate, getdate()) > 60 and datediff(day,OPOR.DocDueDate, getdate()) < 91 then 'A-90 dias' 
-                                when datediff(day,OPOR.DocDueDate, getdate()) > 90 then 'A-MAS dias' End as Grupo, 1 as QtyMat, OPOR.Comments, POR1.Price, POR1.Currency FROM OPOR INNER JOIN POR1 ON OPOR.DocEntry = POR1.DocEntry LEFT JOIN OITM ON POR1.ItemCode = OITM.ItemCode INNER JOIN OSLP on OSLP.SlpCode= POR1.SlpCode 
-                                WHERE POR1.LineStatus <> 'C' and POR1.ItemCode is null and DocNum = " .Input::get('NumOC'). " ORDER BY FechEnt, NombProv, Descrip"));
+        $actividades = $user->getTareas();    
+$pedido = DB::select(DB::raw("SELECT POR1.LineStatus, OITM.BuyUnitMsr, OPOR.CANCELED, OPOR.DocStatus, OITM.ValidComm,OPOR.DocNum as NumOC, OPOR.DocDate as FechOC, OPOR.CardCode as CodeProv, OPOR.CardName as NombProv, POR1.ItemCode as Codigo, POR1.Dscription as Descrip, POR1.Quantity as CantTl, POR1.OpenQty as CantPend, POR1.ShipDate as FechEnt, OSLP.SlpName as Elaboro, 'ARTICULOS' as TipoOC, UFD1.Descr as Comprador, case when datediff(day,POR1.ShipDate, getdate()) >  0 and datediff(day,POR1.ShipDate, getdate()) < 9 then 'A-08 dias' when datediff(day,POR1.ShipDate, getdate()) >  8 and datediff(day,POR1.ShipDate, getdate()) < 16 then 'A-15 dias' 
+         when datediff(day,POR1.ShipDate, getdate()) > 15 and datediff(day,POR1.ShipDate, getdate()) < 31 then 'A-30 dias' when datediff(day,POR1.ShipDate, getdate()) > 30 and datediff(day,POR1.ShipDate, getdate()) < 61 then 'A-60 dias' when datediff(day,POR1.ShipDate, getdate()) > 60 and datediff(day,POR1.ShipDate, getdate()) < 91 then 'A-90 dias' when datediff(day,POR1.ShipDate, getdate()) > 90 then 'A-MAS dias' End as Grupo, 1 as QtyMat, OPOR.Comments , POR1.Price, POR1.Currency FROM OPOR INNER JOIN POR1 ON OPOR.DocEntry = POR1.DocEntry LEFT JOIN OITM ON POR1.ItemCode = OITM.ItemCode 
+         INNER JOIN OSLP on OSLP.SlpCode= POR1.SlpCode LEFT JOIN UFD1 on OITM.U_Comprador= UFD1.FldValue and UFD1.TableID='OITM' and UFD1.FieldID=10 
+         WHERE   POR1.ItemCode is not null and DocNum = " .Input::get('NumOC'). " Union all 
+         SELECT POR1.LineStatus, OITM.BuyUnitMsr, OPOR.CANCELED, OPOR.DocStatus, OITM.ValidComm, OPOR.DocNum as NumOC, OPOR.DocDate as FechOC, OPOR.CardCode as CodeProv, OPOR.CardName as NombProv, POR1.ItemCode as Codigo, POR1.Dscription as Descrip, POR1.Quantity as CantTl, POR1.OpenQty as CantPend, OPOR.DocDueDate as FechEnt, OSLP.SlpName as Elaboro, 'SERVICIOS' as TipoOC, 'Libre' as Comprador, case 
+         when datediff(day,OPOR.DocDueDate, getdate()) >  0 and datediff(day,OPOR.DocDueDate, getdate()) < 9 then 'A-08 dias' when datediff(day,OPOR.DocDueDate, getdate()) >  8 and datediff(day,OPOR.DocDueDate, getdate()) < 16 then 'A-15 dias' when datediff(day,OPOR.DocDueDate, getdate()) > 15 and datediff(day,OPOR.DocDueDate, getdate()) < 31 then 'A-30 dias' when datediff(day,OPOR.DocDueDate, getdate()) > 30 and datediff(day,OPOR.DocDueDate, getdate()) < 61 then 'A-60 dias' when datediff(day,OPOR.DocDueDate, getdate()) > 60 and datediff(day,OPOR.DocDueDate, getdate()) < 91 then 'A-90 dias' 
+         when datediff(day,OPOR.DocDueDate, getdate()) > 90 then 'A-MAS dias' End as Grupo, 1 as QtyMat, OPOR.Comments, POR1.Price, POR1.Currency FROM OPOR INNER JOIN POR1 ON OPOR.DocEntry = POR1.DocEntry LEFT JOIN OITM ON POR1.ItemCode = OITM.ItemCode INNER JOIN OSLP on OSLP.SlpCode= POR1.SlpCode 
+         WHERE    POR1.ItemCode is null and DocNum = " .Input::get('NumOC'). "ORDER BY  CantPend desc, Descrip"));
 //dd($pedido); 
  if (count($pedido)>0){
   
   $datas = ['actividades' => $actividades,
                  'ultimo' => count($actividades),            
-                 'pedido' => $pedido
+                 'pedido' => $pedido,
  ];
  Session::put('OrdenCompra', $datas);
     return view('Mod03_Compras.Pedidos', $datas);
 }else{
-    return redirect()->back()->withErrors(array('message' => 'La orden no existe o no esta abierta.'));
+    return redirect()->back()->withErrors(array('message' => 'La orden no existe.'));
 }
     } else {
         return redirect()->route('auth/login');
@@ -70,6 +69,7 @@ $pedido = DB::select(DB::raw("SELECT OITM.ValidComm,OPOR.DocNum as NumOC, OPOR.D
 }
 public function desPedidosCsv()
 {
+   try{
     if(Session::has ('OrdenCompra')){          
         $datas=Session::get('OrdenCompra');
         Excel::create('Siz_Orden_Compra' . ' - ' . $hoy = date("d/m/Y").'', function($excel)use($datas) {
@@ -82,6 +82,7 @@ public function desPedidosCsv()
         foreach ( $datas['pedido'] as $pedi){
             $date=date_create($pedi->FechOC);
             $dat=date_create($pedi->FechEnt); 
+          if($pedi->LineStatus == 'O'){
             $sheet->row($fila, 
             [
                 $pedi->NumOC,
@@ -95,13 +96,19 @@ public function desPedidosCsv()
                 date_format($date, 'd-m-Y'),          
                 date_format($dat, 'd-m-Y')          
                 ]);	
+          }
+
                 $fila ++;
             }
 });         
 })->download('csv');
+return  redirect()->back();
        }else {
-    return redirect()->action('Mod03_ComprasController@postPedidosCsv');
+    return redirect()->back()->withErrors(array('message' => 'No se almaceno correctamente la OC.'));
 }
+   }catch(Exception $e){
+    return redirect()->back()->withErrors(array('message' => 'Error al descargar archivo CSV'));
+   }
 }
 public function PedidosCsvPDF()
 {

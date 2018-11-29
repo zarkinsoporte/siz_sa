@@ -50,66 +50,70 @@
                         font-size:100%;
                     }
                 #header  {position: fixed; margin-top:2px; }
-                #content {position: relative; top:17%}
-
+                #content {position: relative; top:10%}
+                tr:nth-child(even) {background-color: #f2f2f2;}
             </style>
         </head>
 <body>
 <div id="header" >
 <img src="images/Mod01_Produccion/siz1.png" >
 <!--empieza encabezado, continua cuerpo-->
-            <table border="1px" class="table table-striped">
-                <thead class="thead-dark">
+            <table border="1px">
+               
                         <tr>
                          <td colspan="6" align="center" bgcolor="#fff">
                          <b><?php echo 'SALOTTO S.A. de C.V.'; ?></b><br>
                          <b>Producción</b>
                          <h3>Reporte de Producción General</h3>
                          </tr>
-                         </thead>
+                      
 </table>
 </div>
+
 <div id="content">
-     <table id="usuarios" >
-            <?php foreach ($array as $val) {?>
+     <table id="usuarios" border="1px" class="table table-bordered">
+            <thead>
+                    <tr>
+                            <th style="font-size: 9px; width: 9%">Fecha</th>
+                            <th style="font-size: 9px; width: 6%">Orden</th> 
+                            <th style="font-size: 9px; width: 4%">Pedido</th>
+                            <th style="font-size: 9px; width: 11%">Código</th>
+                            <th style="font-size: 9px; width: 51%">Modelo</th> 
+                            <th style="font-size: 9px; width: 8%">VS</th>
+                            <th style="font-size: 9px; width: 3%">Cant</th> 
+                            <th style="font-size: 9px; width: 8%">TVS</th>
+                     </tr>                   
+                </thead>    
+            <?php foreach ($array as $val) {
+             // $tcant=$tcant+$val->Cantidad;
+              //  $tval=$tval+$val->TVS;?>
+                             
 <!--Cuerpo o datos de la tabla
 <div class="row">
-<div style="overflow-x:auto;" class="col-md-12">
-<table border="1px" class="table table-bordered">-->
+<div style="overflow-x:auto;" class="col-md-12"> </div>-->
+
                  <tr>
-                    <td style="font-size: 10px; width: 8% padding-bottom: 0px; padding-top: 0px; padding-left: 0px; padding-right: 0px;" > {{substr($val->fecha,0,10)}} </td>
-                    <td style="font-size: 10px; width: 6% padding-bottom: 0px; padding-top: 0px; padding-left: 0px; padding-right: 0px;"> {{$val->orden}} </td>
-                    <td style="font-size: 10px; width: 4% padding-bottom: 0px; padding-top: 0px; padding-left: 0px; padding-right: 0px;"> {{$val->Pedido}} </td>
-                    <td style="font-size: 10px; width: 11% padding-bottom: 0px; padding-top: 0px; padding-left: 0px; padding-right: 0px;"> {{$val->Codigo}} </td>
-                    <td style="font-size: 10px; width: 52% padding-bottom: 0px; padding-top: 0px; padding-left: 0px; padding-right: 0px;"> {{$val->modelo}} </td>
-                    <td style="font-size: 10px; width: 8% padding-bottom: 0px; padding-top: 0px; padding-left: 0px; padding-right: 0px;"> {{$val->VS}} </td>
-                    <td style="font-size: 10px; width: 3% padding-bottom: 0px; padding-top: 0px; padding-left: 0px; padding-right: 0px;"> {{$val->Cantidad}} </td>
-                    <td style="font-size: 10px; width: 8% padding-bottom: 0px; padding-top: 0px; padding-left: 0px; padding-right: 0px;"> {{$val->TVS}} </td>
+                    <td style="font-size: 9px; width: 9% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;" > {{substr($val->fecha,0,10)}} </td>
+                    <td style="font-size: 9px; width: 6% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{$val->orden}} </td>
+                    <td style="font-size: 9px; width: 4% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{$val->Pedido}} </td>
+                    <td style="font-size: 9px; width: 11% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{$val->Codigo}} </td>
+                    <td style="font-size: 9px; width: 51% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{$val->modelo}} </td>
+                    <td style="font-size: 9px; width: 8% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{$val->VS}} </td>
+                    <td style="font-size: 9px; width: 3% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{$val->Cantidad}} </td>
+                    <td style="font-size: 9px; width: 8% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{$val->TVS}} </td>
+                    </tr>
              <?php }?>
- </div>
+            </table>
+            <br>
+    <table  border= "1px"  style="width: auto;" align="right">
+    <tr>
+    <th style="text-align: center;">Total Cantidad</th>
+    <th style="text-align: center;">Total VS</th></tr>
+    <tr>
+    <td style="text-align: center;">0</td>  
+    <td style="text-align: center;">0</td></tr>  
 </table>
-</table>
-<table id="totales" >
-        <thead >
-        <h5>Totales</h5>
-        <tr>
-            <th>Total Cantidad</th>
-            <th>Total VS</th>
-        </tr>
-        </thead>
-<tbody>
-     <tr>
-            <td style="font-size: 10px">0</td>
-            <td style="font-size: 10px">0</td>
-
-        </tr>
-</tbody>
-
-
-    </table>
 </div>
-
-
                 <footer>
                 <script type="text/php">
                 $text = 'Pagina: {PAGE_NUM} / {PAGE_COUNT}';
@@ -124,6 +128,5 @@
                 </script>
         </footer>
      @yield('subcontent-01')
-
 </body>
 </html>

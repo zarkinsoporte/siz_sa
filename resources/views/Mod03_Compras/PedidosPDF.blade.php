@@ -8,7 +8,7 @@
 
             <!-- CSRF Token -->
             <meta name="csrf-token" content="{{ csrf_token() }}">
-            <title>{{ 'Plantilla de Personal' }}</title>
+            <title>{{ 'Ordenes de Compras' }}</title>
                 <style>
                 /*
                 Generic Styling, for Desktops/Laptops
@@ -30,11 +30,11 @@
                     font-weight: bold;
                     color: black;
                     font-family: 'Helvetica';
-                    font-size:80%;
+                    font-size:70%;
                 }
                 td{
                     font-family: 'Helvetica';
-                    font-size:80%;
+                    font-size:70%;
                 }
 
                     img{
@@ -50,8 +50,7 @@
                         font-size:100%;
                     }
                 #header  {position: fixed; margin-top:1px; }
-                #content {position: relative; top:17%}
-
+                #content {position: relative; top:10%}
             </style>
         </head>
 <body>
@@ -66,106 +65,87 @@
                     <br><small>LERMA, ESTADO DE MÉXICO</small>
                     <br><small>C.P. 52004</small>
                     <br><small>R.F.C. SAL1701094N6</small>
-                    <h2>ORDEN DE COMPRA</h2>
+                    <!--<h3>ORDEN DE COMPRA</h3>-->
                     </td>                                          
             </table>
-@if (isset($pedido))
-    <?php $date=date_create($pedido[0]->FechOC); 
-     ?>
-    
- <h4>Orden de Compra Número: {{$pedido[0]->NumOC}}</h4>
- 
-    <table border= "1px" style="width: auto;">
-                <tbody>
-                            <tr>
-                                <td width="11%">Fecha de Orden:</td>
-                                <td width="50%"> {{date_format($date, 'd-m-Y')}}</td>                              
-                                </tr>
-                            <tr>
-                                <td>Proveedor:</td>
-                                <td>{{$pedido[0]->CodeProv.'  '.$pedido[0]->NombProv}}</td>
-                            </tr>
-                            <tr>
-                                <td>Contacto:</td>
-                                <td>{{$pedido[0]->Elaboro}}</td>
-                            </tr>
-                            <tr>
-                                <td>Comentarios:</td>
-                                <td>{{$pedido[0]->Comments}}</td>                    
-                            </tr>
-                            <td>&nbsp;</td>
-                        </tbody>                     
-                    </table>                                            
+            </div>
+<div id="content">
+  @if (isset($pedido))
+  <br>
+  <?php $date=date_create($pedido[0]->FechOC);?> 
+
+<table>
+    <td style="text-align: right;">Fecha de Orden: {{date_format($date, 'd-m-Y')}} </td>   
+  </table> 
+<h4>{{$pedido[0]->CodeProv.'  '.$pedido[0]->NombProv}}</h4>
+                    
+ <h3 style="text-align: center;">Orden de Compra {{$pedido[0]->NumOC}}@if($pedido[0]->CANCELED == 'Y')
+                   <small>(Cancelada)</small>
+                    @elseif($pedido[0]->DocStatus == 'O') 
+                    <small>(Abierta)</small>
+                    @else
+                    <small>(Cerrada)</small>
+                    @endif                        </h3>                 
     <table border= "1px">
                     <tr>
                         <th style="text-align: center;">Código</th>
                         <th style="text-align: center;">Descripción</th>
-                        <th style="text-align: center;">Versión</th>
+                        <th style="text-align: center;">UM</th>
                         <th style="text-align: center;">Cantidad Total</th>
                         <th style="text-align: center;">Cant. Pendiente</th>
-                        <th style="text-align: center;">Entrega</th>
-                        <th style="text-align: center;">Precio Unitario</th>      
-                        <th style="text-align: center;">Moneda</th>    
-                    </tr>   
+                        <th style="text-align: center;">Precio Unitario</th>                                             
+                        <th style="text-align: center;">Total</th>  
+                        <th style="text-align: center;">Entrega</th>  
+                    </tr> 
+                    <?php 
+                    $suma=0;
+                     ?>
             @foreach ($pedido as $pedi)
                     <tr>
                     <?php 
-                     $dat=date_create($pedido[0]->FechEnt); 
+                     $dat=date_create($pedido[0]->FechEnt);                  
+                     $total= $pedi->CantPend * $pedi->Price;
+                     $suma = $suma + $total;
+                     $moneda = $pedi->Currency;                    
                      ?>
                         <td style="text-align: center;">{{$pedi->Codigo}}</td>
                         <td>{{$pedi->Descrip}}</td>
-                        <td style="text-align: center;">{{$pedi->ValidComm}}</td>
+                        <td style="text-align: center;">{{$pedi->BuyUnitMsr}}</td>
                         <td style="text-align: center;">{{number_format($pedi->CantTl,2)}}</td>
                         <td style="text-align: center;">{{number_format($pedi->CantPend,2)}}</td>
-                        <td style="text-align: center;">{{date_format($dat, 'd-m-Y')}}</td>
-                        <td style="text-align: center;">{{"$ ".number_format($pedi->Price,4)}}</td>
-                        <td style="text-align: center;">{{$pedi->Currency}}</td>                                                   
+                        <td style="text-align: right;">{{number_format($pedi->Price,4)}} {{$pedi->Currency}}</td>
+                        <td style="text-align: right;">{{number_format($total,2)." ".$moneda}}</td>     
+                        <td style="text-align: center;">{{date_format($dat, 'd-m-Y')}}</td>                     
                     </tr>
             @endforeach
     </table>
-    @endif
-             <!--<div class="row">
-                    <div class="col-md-10">
-                        <h3>Calidad</h3>
-                            <table>
-                                         <tr>
-                                            <th>Empleado:</th>
-                                            <td>{{0}}</td>
-                                          </tr>
-                                          <tr>
-                                            <th>% de Calidad:</th>
-                                            <td>{{0}}</td>
-                                          </tr>
-                                          <tr>
-                                            <th>Bono:</th>
-                                            <td>{{0}}</td>
-                                          </tr>
-
-                                </table>
-                    </div>  /.col md 
-                </div> /.row 
-            <div class="row">
-            <div class="col-md-10">
-                <h3>Totales</h3>
-                    <table>
-                                 <tr>
-                                    <th>Empleado:</th>
-                                    <td>{{0}}</td>
-                                     <td>{{0}}</td>
-                                     <td>{{0}}</td> 
-                                     <td>{{0}}</td>
-                                      <td>{{0}}</td>
-                                  </tr>
-                                  <tr>
-                                    <th>Total Bono:</th>
-                                    <td>{{0}}</td>
-                                  </tr>
-                        </table>
-            </div>
-        </div>
-        <h3></h3>-->
-                 
- 
+    <br>
+    <br>
+    <table  border= "1px"  style="width: auto;" align="right">
+    <tr>
+    <th style="text-align: center;">TOTALES</th></tr>
+    <tr>
+    <td  style="text-align: right;">Subtotal: {{number_format($suma,2)." ".$moneda}}</td>  </tr>
+    <tr>
+    <td style="text-align: right;">Impuesto: {{number_format($suma * 0.16,2)." ".$moneda}}</td>  </tr>
+    <tr>
+    <td  style="text-align: right;"> Total: {{number_format(($suma * 0.16) + $suma,2)." ".$moneda}}</td>
+    </tr>   
+</table>
+    
+    <table  style="width: auto;">
+                            <tr>
+                                <td>Contacto: </td>
+                                <td>{{$pedido[0]->Elaboro}}</td>
+                            </tr>
+                            <tr>
+                                <td>Comentarios: </td>
+                                <td>{{$pedido[0]->Comments}}</td>                    
+                            </tr>
+                        </tbody>                     
+                    </table>     
+                    @endif     
+                    </div>
  <footer>
                 <script type="text/php">
                 $text = 'Pagina: {PAGE_NUM} / {PAGE_COUNT}';
@@ -179,8 +159,7 @@
                 $pdf->page_text(40, 23, $empresa, $font, 9);
                 </script>
         </footer>
-     @yield('subcontent-01')
-
+        @yield('subcontent-01')   
+        
 </body>
-
 </html>
