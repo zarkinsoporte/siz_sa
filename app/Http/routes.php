@@ -245,8 +245,8 @@ Route::post('nuevatarea', 'Mod00_AdministradorController@nuevatarea');
 | MOD01-PRODUCCION Routes
 |--------------------------------------------------------------------------
  */
-Route::get('home/R. PROD. GRAL.', 'Reportes_ProduccionController@produccion1');
-Route::post('home/R. PROD. GRAL.', 'Reportes_ProduccionController@produccion1');
+Route::get('home/REPORTE PRODUCCION', 'Reportes_ProduccionController@produccion1');
+Route::post('home/REPORTE PRODUCCION', 'Reportes_ProduccionController@produccion1');
 Route::get('home/TRASLADO ÷ AREAS', [
     'as' => 'traslado', 'uses' =>'Mod01_ProduccionController@traslados']);
 Route::post('home/TRASLADO ÷ AREAS', 'Mod01_ProduccionController@traslados');

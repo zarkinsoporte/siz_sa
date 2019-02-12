@@ -505,7 +505,7 @@ if($Code_actual->U_CT == '106'){
     ->value('WOR1.IssuedQty');
 
 if($consumido < 1 || is_null($consumido)){
-Session::flash('info', 'Esta orden necesita primero que le carges Piel en SAP');
+Session::flash('error', 'Esta orden necesita primero que le carges Piel en SAP');
 return redirect()->back();
 }else{
     DB::table('OWOR')
@@ -522,7 +522,7 @@ return redirect()->back();
 
 //DETERMINA SI LA ORDEN DE PRODUCCION LLEGO A LA ULTIMA ESTACION
 if ($U_CT_siguiente == $Code_actual->U_CT) {
-    Session::flash('info', 'La estacion ' . OP::getEstacionSiguiente($Code_actual->Code, 1) . ' es la última');
+    Session::flash('error', 'La estacion ' . OP::getEstacionSiguiente($Code_actual->Code, 1) . ' es la última');
     return redirect()->back();
 }
 
@@ -720,7 +720,7 @@ if ($U_CT_siguiente == $Code_actual->U_CT) {
             ->value('WOR1.IssuedQty');
             //Para retorcesos de estas estaciones, verificar si tiene algo de piel la orden
         if($consumido <> 0){
-        Session::flash('info', 'Esta orden necesita primero que le quites Piel en SAP');
+        Session::flash('error', 'Esta orden necesita primero que le quites Piel en SAP');
         Session::put('return', 1);
         Session::put('op', $orden);          
         return redirect()->action('Mod01_ProduccionController@getOP', $request->input('Nomina'));
@@ -740,7 +740,7 @@ if ($U_CT_siguiente == $Code_actual->U_CT) {
                 $TotaldeCodigos = OP::where('U_DocEntry', $orden)->get();
                
                 if (count($TotaldeCodigos) != 1) {
-                    Session::flash('info', 'La orden completa debe estar en 106 Preparado de Entrega de Piel. ');
+                    Session::flash('error', 'La orden completa debe estar en 106 Preparado de Entrega de Piel. ');
                     Session::put('return', 1);
                     Session::put('op', $orden);          
                     return redirect()->action('Mod01_ProduccionController@getOP', $request->input('Nomina'));
@@ -762,7 +762,7 @@ if ($U_CT_siguiente == $Code_actual->U_CT) {
                //return redirect()->back();
 return redirect()->route('home');
             }else{
-                Session::flash('info', 'El planeador es el unico que puede quitar las ordenes de piso');
+                Session::flash('error', 'El planeador es el unico que puede quitar las ordenes de piso');
                 Session::put('return', 1);
                 Session::put('op', $orden);          
                 return redirect()->action('Mod01_ProduccionController@getOP', $request->input('Nomina'));
