@@ -9,7 +9,7 @@
                     <div class="row">
                         <div class="col-lg-12">
                             <h3 class="page-header">
-                                Salotto SA DE CV
+                                {{env('EMPRESA_NAME')}}
                                 <small>Recepción de Materiales</small>
                             </h3>
                            
@@ -39,7 +39,7 @@
            <div class="modal-content" >
               <div class="modal-header">
 
-                   <h4 class="modal-title" id="pwModalLabel">Reporte de Materiales</h4>
+                   <h4 class="modal-title" id="pwModalLabel">Reporte de Materiales<small><i data-placement="right" data-toggle="tooltip" class="glyphicon glyphicon-question-sign"  title="Ayuda Shift+F1"></i></small></h4>
               </div>
               {!! Form::open(['url' => 'pdfRechazo', 'method' => 'POST']) !!}
 
@@ -154,7 +154,11 @@
                         keyboard: false
                         }
                         );
-
+                        document.onkeyup = function(e) {
+         if (e.shiftKey && e.which == 112) {
+    window.open("ayudas_pdf/AyM07_02.pdf","_blank");
+  } 
+};
                     @endsection
 
                     <script>

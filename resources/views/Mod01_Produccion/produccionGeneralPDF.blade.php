@@ -7,7 +7,7 @@
             <meta name="viewport" content="width=device-width, initial-scale=1">
             <!-- CSRF Token -->
             <meta name="csrf-token" content="{{ csrf_token() }}">
-            <title>{{ 'Plantilla de Personal' }}</title>
+            <title>{{ 'Reporte de Producción' }}</title>
                 <style>
                 /*
                 Generic Styling, for Desktops/Laptops
@@ -58,21 +58,98 @@
 <div id="header" >
 <img src="images/Mod01_Produccion/siz1.png" >
 <!--empieza encabezado, continua cuerpo-->
-            <table border="1px">
-               
+            <table border="1px">               
                         <tr>
                          <td colspan="6" align="center" bgcolor="#fff">
-                         <b><?php echo 'SALOTTO S.A. de C.V.'; ?></b><br>
-                         <b>Producción</b>
-                         <h3>Reporte de Producción General</h3>
+                         <b>{{'SALOTTO S.A. de C.V.'}}</b><br>
+                         <font size="2">
+                                <b>Reporte de Producción General</b><br>
+                                {{$fecha}} <br><br>
+                                <b>{{$depto}}</b>    
+                        </font>                           
+                        </td>
                          </tr>
                       
 </table>
 </div>
-
 <div id="content">
-     <table id="usuarios" border="1px" class="table table-bordered">
-            <thead>
+<?php
+$index = 0;
+$sumacant = 0;
+$sumatvs = 0;
+$sumatcant = 0;
+$sumattvs = 0;
+?>
+@foreach ($valores as $val)
+@if($index == 0)
+<?php
+    $cliente = $val->CardName; 
+    $sumacant=$val->Cantidad;
+    $sumatvs=$val->TVS; 
+?>
+<h5>{{$cliente}}</h5>
+     <table id="usuarios" border="1px" class="table table-striped">
+                <tr>
+                    <th style="font-size: 9px; width: 9%">Fecha</th>
+                    <th style="font-size: 9px; width: 6%">Orden</th> 
+                    <th style="font-size: 9px; width: 4%">Pedido</th>
+                    <th style="font-size: 9px; width: 11%">Código</th>
+                    <th style="font-size: 9px; width: 51%">Modelo</th> 
+                    <th style="font-size: 9px; width: 8%">VS</th>
+                    <th style="font-size: 9px; width: 3%">Cant</th> 
+                    <th style="font-size: 9px; width: 8%">TVS</th>
+                 </tr>                      
+                 <tr>
+                        <td style="font-size: 9px; width: 9% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;" > {{substr($val->fecha,0,10)}} </td>
+                        <td style="font-size: 9px; width: 6% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{$val->orden}} </td>
+                        <td style="font-size: 9px; width: 4% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{$val->Pedido}} </td>
+                        <td style="font-size: 9px; width: 11% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{$val->Codigo}} </td>
+                        <td style="font-size: 9px; width: 51% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{$val->modelo}} </td>
+                        <td style="font-size: 9px; width: 8% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{number_format($val->VS, 4, '.', ',')}} </td>
+                        <td style="font-size: 9px; width: 3% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{$val->Cantidad}} </td>
+                        <td style="font-size: 9px; width: 8% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{number_format($val->TVS, 4, '.', ',')}} </td>
+                        </tr>
+@elseif($cliente == $val->CardName) 
+<?php
+   $sumacant+=$val->Cantidad;
+    $sumatvs+=$val->TVS;     
+?>
+               <tr>
+                    <td style="font-size: 9px; width: 9% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;" > {{substr($val->fecha,0,10)}} </td>
+                    <td style="font-size: 9px; width: 6% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{$val->orden}} </td>
+                    <td style="font-size: 9px; width: 4% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{$val->Pedido}} </td>
+                    <td style="font-size: 9px; width: 11% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{$val->Codigo}} </td>
+                    <td style="font-size: 9px; width: 51% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{$val->modelo}} </td>
+                    <td style="font-size: 9px; width: 8% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{number_format($val->VS, 4, '.', ',')}} </td>
+                    <td style="font-size: 9px; width: 3% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{$val->Cantidad}} </td>
+                    <td style="font-size: 9px; width: 8% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{number_format($val->TVS, 4, '.', ',')}} </td>
+                    </tr>               
+@else
+    </table>
+    <div style="margin-right:4px; margin-top:4px">
+        <table  border= "1px"  style="width: auto;" align="right" >
+            <tr>
+            <th style="font-size: 9px; width: 9%; padding-left: 2px; padding-right: 2px;" style="text-align: center;">Suma Cantidad</th>
+            <th  style="font-size: 9px; width: 6%; padding-left: 2px; padding-right: 2px;"style="text-align: center;">suma TVS</th></tr>
+            <tr>
+            <td style="font-size: 9px; width: 9% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;" style="text-align: center;">{{$sumacant}}</td>  
+            <td style="font-size: 9px; width: 6% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;" style="text-align: center;">{{number_format($sumatvs, 4, '.', ',')}}</td></tr>  
+        </table>
+    </div>
+<br>
+<?php
+ 
+    $cliente = $val->CardName;   
+    $sumatcant=$sumatcant+$sumacant;
+   $sumattvs=$sumattvs+$sumatvs;  
+   $sumacant=0;
+  $sumatvs=0;
+  $sumacant=$val->Cantidad;
+    $sumatvs=$val->TVS; 
+?>
+<h5>{{$cliente}}</h5>
+                <table id="usuarios" border="1px" class="table table-bordered"> 
+                <thead>
                     <tr>
                             <th style="font-size: 9px; width: 9%">Fecha</th>
                             <th style="font-size: 9px; width: 6%">Orden</th> 
@@ -83,37 +160,53 @@
                             <th style="font-size: 9px; width: 3%">Cant</th> 
                             <th style="font-size: 9px; width: 8%">TVS</th>
                      </tr>                   
-                </thead>    
-            <?php foreach ($array as $val) {
-             // $tcant=$tcant+$val->Cantidad;
-              //  $tval=$tval+$val->TVS;?>
-                             
-<!--Cuerpo o datos de la tabla
-<div class="row">
-<div style="overflow-x:auto;" class="col-md-12"> </div>-->
-
-                 <tr>
+                </thead>     <tr>
                     <td style="font-size: 9px; width: 9% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;" > {{substr($val->fecha,0,10)}} </td>
                     <td style="font-size: 9px; width: 6% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{$val->orden}} </td>
                     <td style="font-size: 9px; width: 4% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{$val->Pedido}} </td>
                     <td style="font-size: 9px; width: 11% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{$val->Codigo}} </td>
                     <td style="font-size: 9px; width: 51% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{$val->modelo}} </td>
-                    <td style="font-size: 9px; width: 8% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{$val->VS}} </td>
+                    <td style="font-size: 9px; width: 8% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{number_format($val->VS, 4, '.', ',')}} </td>
                     <td style="font-size: 9px; width: 3% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{$val->Cantidad}} </td>
-                    <td style="font-size: 9px; width: 8% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{$val->TVS}} </td>
+                    <td style="font-size: 9px; width: 8% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;"> {{number_format($val->TVS, 4, '.', ',')}} </td>
                     </tr>
-             <?php }?>
-            </table>
-            <br>
-    <table  border= "1px"  style="width: auto;" align="right">
-    <tr>
-    <th style="text-align: center;">Total Cantidad</th>
-    <th style="text-align: center;">Total VS</th></tr>
-    <tr>
-    <td style="text-align: center;">0</td>  
-    <td style="text-align: center;">0</td></tr>  
+                    @endif
+ @if($index == count($valores)-1)
 </table>
-</div>
+  <div  style="margin-right:4px; margin-top:4px">
+    <table  border= "1px"  style="width: auto;" align="right">
+        <tr>
+           <th style="font-size: 9px; width: 9%; padding-left: 2px; padding-right: 2px;" style="text-align: center;">Suma Cantidad</th>
+           <th  style="font-size: 9px; width: 6%; padding-left: 2px; padding-right: 2px;"style="text-align: center;">Suma TVS</th></tr>
+       <tr>
+            <td style="font-size: 9px; width: 9% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;" style="text-align: center;">{{$sumacant}}</td>  
+           <td  style="font-size: 9px; width: 6% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;" style="text-align: center;">{{number_format($sumatvs, 4, '.', ',')}}</td></tr>  
+   </table>
+  </div>
+  <?php
+   $sumatcant=$sumatcant+$sumacant;
+   $sumattvs=$sumattvs+$sumatvs;  
+?>
+  @endif
+   <?php
+$index++;
+   ?>
+    @endforeach 
+   
+   <br><br>
+
+    <div  style="margin-right:4px; margin-top:4px" align="right">
+            <h6>Totales del Documento:</h6>
+        <table  border= "1px"  style="width: auto;" align="right">
+
+            <tr>
+               <th style="font-size: 9px; width: 9%; padding-left: 2px; padding-right: 2px;" style="text-align: center;">Cantidad Total</th>
+               <th  style="font-size: 9px; width: 6%; padding-left: 2px; padding-right: 2px;"style="text-align: center;">VS Total</th></tr>
+           <tr>
+                <td style="font-size: 9px; width: 9% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;" style="text-align: center;">{{$sumatcant}}</td>  
+               <td  style="font-size: 9px; width: 6% padding-bottom: 0px; padding-top: 0px; padding-left: 2px; padding-right: 2px;" style="text-align: center;">{{number_format($sumattvs, 4, '.', ',')}}</td></tr>  
+       </table>
+      </div>
                 <footer>
                 <script type="text/php">
                 $text = 'Pagina: {PAGE_NUM} / {PAGE_COUNT}';

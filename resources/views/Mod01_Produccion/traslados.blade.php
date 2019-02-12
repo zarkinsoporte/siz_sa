@@ -10,7 +10,7 @@
                 <div class="hidden-lg"><br><br></div>
                     <h3 class="page-header">
                         Traslados
-                        <small>Producción</small>
+                        <small>Producción  <i data-placement="right" data-toggle="tooltip" class="glyphicon glyphicon-question-sign"  title="Ayuda Shift+F1"></i></small> 
                     </h3>
                     <div class="visible-lg">
                     <ol class="breadcrumb">
@@ -71,7 +71,7 @@
                                                       </div>
                                                                                         
                                             <select  class="form-control" name="OP_us" id="OP_input">
-                                     @foreach($rutasConNombres as $key => $value)
+                                            @foreach($rutasConNombres as $key => $value)
                                                 <option  class="col-md-6"value="{{$key}}">{{$value}}</option>
                                             @endforeach
                                         </select>
@@ -114,7 +114,7 @@
                                          <h5>Pedido: {{$pedido}}
                                         </div>
                                         <div class="col-md-6">
-                                         <a href="../ReporteOpPDF/{{$op}}" target="_blank" class="btn btn-primary"><i class="glyphicon glyphicon-save"></i> Historial de Producción</a> </h4> <br><br>
+                                         <a href="../ReporteOpPDF/{{$op}}" target="_blank" class="btn btn-primary"><i class="glyphicon glyphicon-save"></i> Historial</a> </h4> <br><br>
                                         <a href="../ReporteMaterialesPDF/{{$op}}" target="_blank" class="btn btn-primary"><i class="glyphicon glyphicon-save"></i> Materiales</Center></a></h4>
                                         </div>
                                        </div>
@@ -160,6 +160,17 @@
 <?php
 
 switch ($t_user->position) {
+    case '6'; //Planeador
+    ?>
+    <th>Retroceder OP</th>
+    <th>Avanzar OP</th>
+    <?php
+    break;
+    case '5'; //Almacén de piel
+    ?>
+    <th>Retroceder OP</th><th>Avanzar OP</th>
+    <?php
+    break;
     case '4'; //Supervisor SAP
         break;
     case '3'; //Operador SAP
@@ -199,8 +210,43 @@ break;
                                             <td> {{$of->U_CT_SIG}} </td>
 
 <?php
-
+$aux = 'disabled';
 switch ($t_user->position) {
+    case '6'; //Planeador
+    ?> <!--Boton Retroceder--> 
+       @if($of->U_Orden == '106') 
+       <?php
+        $aux = '';
+        ?>
+       @endif 
+       <td> <a class="btn btn-danger {{$aux}}" data-toggle="modal"
+data-target="#Retroceder" class="btn btn-info btn-lg" data-codem="{{$of->U_Orden}}" data-recibido="{{$of->U_Recibido - $of->U_Procesado}}">
+       <i class="fa fa-mail-reply-all" aria-hidden="1">   Retroceder</i>
+       </a> </td>
+<!--Boton Avanzar-->
+        <td> <a class="btn btn-success {{$of->avanzar}}" data-toggle="modal"
+        data-target="#cantidad" data-whatever="{{$of->Code}}"
+        data-whatever2="{{$of->U_Recibido - $of->U_Procesado}}">
+        <i class="fa fa-send-o" aria-hidden="true">   Avanzar</i>
+        </a> </td>
+    <?php   
+    break;        
+    case '5'; //Almacén de 
+    ?> <!--Boton Retroceder--> 
+       @if($of->U_Orden == '109') 
+       <td> <a class="btn btn-danger" data-toggle="modal"
+       data-target="#Retroceder" class="btn btn-info btn-lg" data-codem="{{$of->U_Orden}}" data-recibido="{{$of->U_Recibido - $of->U_Procesado}}">
+       <i class="fa fa-mail-reply-all" aria-hidden="1">  Retroceder</i>
+       </a> </td>
+       @endif
+<!--Boton Avanzar-->
+        <td> <a class="btn btn-success {{$of->avanzar}}" data-toggle="modal"
+        data-target="#cantidad" data-whatever="{{$of->Code}}"
+        data-whatever2="{{$of->U_Recibido - $of->U_Procesado}}">
+        <i class="fa fa-send-o" aria-hidden="true">   Avanzar</i>
+        </a> </td>
+    <?php   
+    break;                
     case '4'; //Supervisor SAP
         break;
     case '3'; //Operador SAP
@@ -267,12 +313,12 @@ break;
                                     @include('partials.alertas')
                                     <div id="hiddendiv" style="display: none">
                                         <label for="miusuario" class="control-label">Usuario:</label>
-                                        <input id="miusuario" type="number" class="form-control" name="miusuario" minlength="3" maxlength="5">
+                                        <input autofocus id="miusuario" type="number" class="form-control" name="miusuario" minlength="1">
                                         <br>
                                     </div>
                                     @if(Session::has('usertraslados'))
                                     <label for="pass" class="control-label">Contraseña:</label>
-                                    <input autofocus id="pass" type="password" class="form-control" name="pass" required minlength="3" maxlength="10" value="{{Session::get('Rec_pass')}}">
+                                    <input autofocus id="pass" type="password" class="form-control" name="pass" required minlength="1" value="{{Session::get('Rec_pass')}}">
                                     @endif
                                     <input type="checkbox" name="Recordarpass">Recordar contraseña<br>
 
@@ -281,9 +327,7 @@ break;
 
                         </div>
                         <div class="modal-footer">
-
-                            <a  id="mostrar" onclick="mostrar()">Cambiar usuario</a>
-                            <a  id="ocultar" onclick="ocultar()" style="display: none">Regresar</a>
+                        <a  href="" data-toggle="modal" data-target="#cambuser"id="mostrar" onclick="mostrar()">Cambiar Usuario</a>
                             &nbsp;&nbsp;&nbsp;
                             <button type="submit" class="btn btn-primary">Entrar</button>
                             <a type="button" class="btn btn-default"  href="{!!url('home')!!}">Cancelar</a>
@@ -297,36 +341,30 @@ break;
                 <div class="modal-dialog modal-md" role="document">
                     <div class="modal-content" style=" background-color: rgb(189, 217, 254)">
                         <div class="modal-header" style="background-color: rgb(198,221,254)">
-
                             <h4 class="modal-title" id="pwModalLabel">Cambiar Usuario</h4>
                         </div>
                         {!! Form::open(['url' => 'home/TRASLADO ÷ AREAS', 'method' => 'POST']) !!}
                         <div class="modal-body image">
-
                             <input type="text" hidden name="send" value="send">
                             <br>
                             <div class="row">
                                 <div class="col-md-2 col-md-offset-1 col-xs-5 col-xs-offset-1">
-
-                                    <img src= "{{ URL::asset('images/Mod01_Produccion/password.png')}}"
-                                         alt="">
+                                    <img src= "{{ URL::asset('images/Mod01_Produccion/password.png')}}"alt="">
                                 </div>
                                 <div class="col-md-6 col-md-offset-1 col-xs-5">
                                     @include('partials.alertas')
                                     <div id="hiddendiv">
                                     <label for="miusuario" class="control-label">Usuario:</label>
-                                    <input id="miusuario" type="number" class="form-control" name="miusuario" required minlength="3" maxlength="5">
+                                    <input autofocus id="miusuario" type="number" class="form-control" name="miusuario" required minlength="1">
                                     <br>
                                     </div>
                                     @if(Session::has('usertraslados'))
                                     <label for="pass" class="control-label">Contraseña:</label>
-                                    <input autofocus id="pass" type="password" class="form-control" name="pass" required minlength="3" maxlength="10" value="{{Session::get('Rec_pass')}}">
+                                    <input autofocus id="pass" type="password" class="form-control" name="pass" required minlength="1" value="{{Session::get('Rec_pass')}}">
                                     @endif
                                     <input type="checkbox" name="Recordarpass">Recordar contraseña<br>
-
                                 </div>
                             </div>
-
                         </div>
                         <div class="modal-footer">
                             &nbsp;&nbsp;&nbsp;
@@ -435,10 +473,6 @@ break;
 
 @endif
 
-
-
-
-
     <div class="dropdown">
     <label  for="message-text" class="control-label"  >Estaciones Anteriores</label>
     <select class="form-control" name="selectestaciones" id="selectestaciones" required></select>
@@ -490,16 +524,10 @@ if (isset($HisOrden)) {
     ?>
 <?php
 }
-
 ?>
 <div id="chart"></div>
-
-
-
 @endsection
-
 @section('homescript')
-
 shortcut.add("O", 
 	function() { 
         document.getElementById("op").checked = true;
@@ -514,8 +542,12 @@ shortcut.add("O",
 	}, 
 	{ 'type':'keydown', 'propagate':false, 'target':document} 
     );
+    document.onkeyup = function(e) {
+   if (e.shiftKey && e.which == 112) {
+    window.open("ayudas_pdf/AyM01_01.pdf","_blank");
+  } 
+};
     var myuser = $('#login').data("field-id");
-
     if(myuser == false){
             $('#pass').modal(
             {
@@ -567,8 +599,14 @@ shortcut.add("O",
 if (isset($Ruta)) {
     for ($i = 0; $i < count($Ruta); $i++) {
         ?>
-    if( '<?php echo $Ruta[$i][0]; ?>' < codejs){
+    if( '<?php echo $Ruta[$i][0]; ?>' < codejs && '<?php echo $Ruta[$i][0]; ?>' > "106"){
          $('#selectestaciones').append($('<option></option>').val(<?php echo $Ruta[$i][0]; ?>).html("<?php echo $Ruta[$i][1]; ?>"));
+    } 
+    if('<?php echo $Ruta[$i][0]; ?>' == "106" && '<?php echo $t_user->position ?>' == "5"){
+        $('#selectestaciones').append($('<option></option>').val(<?php echo $Ruta[$i][0]; ?>).html("<?php echo $Ruta[$i][1]; ?>"));
+    }
+    if('<?php echo $Ruta[$i][0]; ?>' == "100" && '<?php echo $t_user->position ?>' == "6"){
+        $('#selectestaciones').append($('<option></option>').val(<?php echo $Ruta[$i][0]; ?>).html("<?php echo $Ruta[$i][1]; ?>"));
     }
     <?php
 }

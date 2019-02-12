@@ -19,9 +19,6 @@
                         <li>
                             <i class="fa fa-dashboard">  <a href="{!! url('home') !!}">Inicio</a></i>
                         </li>
-                        <li>
-                            <i class= "fa fa-archive"> <a href="traslados">Traslados</a></i>
-                    </ol>
                     </div>
                 </div>
             </div>

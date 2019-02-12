@@ -99,7 +99,9 @@
                 </div>
                 <!-- Top Menu Items -->
                 <ul class="nav navbar-right top-nav hidden-xs">
-
+                    <li>
+                    <a href="{!! url('Mod01_Produccion/Noticias') !!}"><i class="fa fa-bell"></i> <span class="badge badge-danger"> {{Auth::user()->getCountNotificacion()}}</span></a>
+                    </li>  
                     <li class="dropdown">
 
                     @if (Auth::guest())

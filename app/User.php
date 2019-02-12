@@ -139,5 +139,24 @@ class User extends Model implements AuthenticatableContract,
             return false;
         }
        }
+       public static function getUserType($empId){
+        $admin=DB::table('OHEM')
+        ->where('OHEM.empID', $empId)
+        ->select('Ohem.position')
+        ->first();
+   
+        if(isset($admin)){
+            return $admin->position;     
+        }
+        else
+        {           
+            return false;
+        }
+       }
+       public static function getCountNotificacion(){
+        $id_user=Auth::user()->U_EmpGiro;
+        $noticias=DB::select(DB::raw("SELECT * FROM Siz_Noticias WHERE Destinatario='$id_user'and Leido='N'"));     
+        return count($noticias);
+       }
 
 }

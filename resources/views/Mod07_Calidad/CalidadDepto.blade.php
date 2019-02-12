@@ -8,7 +8,7 @@
                     <div class="visible-xs"><br><br></div>
                     <h4 class="page-header">
                       CALIDAD EN PRODUCCIÓN  
-                      <small>Semana: {{date("W", strtotime("now"))}}</small>   
+                      <small>Semana: {{date("W", strtotime("now"))}} <i data-placement="right" data-toggle="tooltip" class="glyphicon glyphicon-question-sign"  title="Ayuda Shift+F1"></i></small>   
                     </h4>
                     <div id="login" data-field-id="{{$enviado}}" >
                        <div class= "col-lg-6.5 col-md-12 col-sm-7 hidden-xs hidden-sm">
@@ -30,7 +30,7 @@
             <div class="row">
                       <div class="form-group col-md-3">
                          <label>Corte</label>
-                         <input name="cor_in" type="number" class="form-control" required min = "1" value="{{ old('cor_in') }}">
+                         <input name="cor_in" type="number" class="form-control" required min = "1" autofocus value="{{ old('cor_in') }}">
                         </div>
                       <div class="form-group col-md-3">
                           <label>Costura</label>
@@ -56,7 +56,7 @@
                       </div>           
                       <div class="form-group col-md-2">
                             <label>Año</label>
-                            <input name="anio_in" type="number" class="form-control" readonly required autofocus value="{{date("Y")}}">
+                            <input name="anio_in" type="number" class="form-control" readonly value="{{date("Y")}}">
                        </div>
                 </div>
   <div class="row">
@@ -80,26 +80,26 @@
             <table  class="table table-striped header-fixed">
                     <thead class="thead-dark">
                                  <tr>
-                                                    <th>Semana</th>
-                                                    <th>Corte</th>
-                                                    <th>Costura</th>
-                                                    <th>Cojineria</th>
-                                                    <th>Tapiceria</th>
-                                                    <th>Carpinteria</th>      
-                                                    <th>Año</th>                                              
+                                                    <th style="text-align: center;">Semana</th>
+                                                    <th style="text-align: center;">Corte</th>
+                                                    <th style="text-align: center;">Costura</th>
+                                                    <th style="text-align: center;">Cojineria</th>
+                                                    <th style="text-align: center;">Tapiceria</th>
+                                                    <th style="text-align: center;">Carpinteria</th>      
+                                                    <th style="text-align: center;">Año</th>                                              
                                   </tr>
                                   </thead>
                     <tbody> 
                        
                     @foreach ($Indatos as $Indato)
                                   <tr>
-                                                        <th scope="row">{{$Indato->Semana}}</th>
-                                                        <td >{{$Indato->CorteIn}}</td>
-                                                        <td > {{$Indato->CostIn}}</td>
-                                                        <td > {{$Indato->CojiIn}}</td>
-                                                        <td > {{$Indato->TapIn}}</td>
-                                                        <td > {{$Indato->CarpIn}}</td>
-                                                        <td > {{$Indato->anio}}</td>                                                    
+                                                        <th style="text-align: center;" scope="row">{{$Indato->Semana}}</th>
+                                                        <td style="text-align: center;">{{$Indato->CorteIn}}</td>
+                                                        <td style="text-align: center;"> {{$Indato->CostIn}}</td>
+                                                        <td style="text-align: center;"> {{$Indato->CojiIn}}</td>
+                                                        <td style="text-align: center;"> {{$Indato->TapIn}}</td>
+                                                        <td style="text-align: center;"> {{$Indato->CarpIn}}</td>
+                                                        <td style="text-align: center;"> {{$Indato->anio}}</td>                                                    
                                                     </tr>
                         @endforeach
               
@@ -114,4 +114,11 @@
 @endsection
 @section('homescript')
 window.TrelloBoards.load(document, { allAnchors: false });
+@section('homescript')
+document.onkeyup = function(e) {
+   if (e.shiftKey && e.which == 112) {
+    window.open("ayudas_pdf/AyM07_03.pdf","_blank");
+  } 
+};
+@endsection
 @endsection

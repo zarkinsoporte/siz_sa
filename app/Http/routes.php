@@ -17,16 +17,20 @@ use App\Modelos\MOD01\TAREA_MENU;
 use App\OP;
 use Illuminate\Support\Facades\DB;
 use App\User;
-
+use App\SAP;
 Route::get('/', 'HomeController@index');
 Route::get('/home',
     [
         'as' => 'home',
         'uses' => 'HomeController@index',
     ]);
+Route::get('/p', function(){
+   echo User::getUserType('5');
+});
+
 Route::get('/pruebas', function () {
-    $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
-  $vCmp->DbServerType="6"; 
+$vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
+$vCmp->DbServerType="6"; 
 $vCmp->server = "SERVER-SAPBO";
 $vCmp->LicenseServer = "SERVER-SAPBO:30000";
 $vCmp->CompanyDB = "Pruebas";
@@ -35,23 +39,24 @@ $vCmp->password = "aqnlaaepp";
 $vCmp->DbUserName = "sa";
 $vCmp->DbPassword = "B1Admin";
 $vCmp->UseTrusted = false;
-
-//$vCmp->language = "ln_English";
-
-//$vCmp->UseTrusted = true;
-
+$vCmp->language = "6";
 $lRetCode = $vCmp->Connect;
 //dd($lRetCode);
-
+echo $vCmp->GetLastErrorDescription();
+echo 'iniciada';
 echo '<br>';
-
-$vItem = $vCmp->GetBusinessObject("4");
-
-$RetVal = $vItem->GetByKey("71000");
-
-echo $vItem->Itemname;
-
-dd($vCmp->GetLastErrorDescription());
+$vItem = $vCmp->GetBusinessObject("202");
+$RetVal = $vItem->GetByKey("19848");
+echo $vItem->ProductionOrderStatus;
+echo '<br>';
+$vItem->ProductionOrderStatus = 1;
+$vItem->Update;
+//if ($vCmp->InTransaction){
+    //$vCmp->EndTransaction();
+ //   dd('cerrada');
+//}
+echo $vCmp->GetLastErrorDescription();
+echo $vItem->ProductionOrderStatus;
     //return view('Mod00_Administrador.pruebas');
 });
 /*
@@ -242,13 +247,15 @@ Route::post('nuevatarea', 'Mod00_AdministradorController@nuevatarea');
  */
 Route::get('home/R. PROD. GRAL.', 'Reportes_ProduccionController@produccion1');
 Route::post('home/R. PROD. GRAL.', 'Reportes_ProduccionController@produccion1');
-Route::get('home/TRASLADO ÷ AREAS', 'Mod01_ProduccionController@traslados');
+Route::get('home/TRASLADO ÷ AREAS', [
+    'as' => 'traslado', 'uses' =>'Mod01_ProduccionController@traslados']);
 Route::post('home/TRASLADO ÷ AREAS', 'Mod01_ProduccionController@traslados');
 Route::get('home/TRASLADO ÷ AREAS/{id}', 'Mod01_ProduccionController@getOP');
 Route::post('home/TRASLADO ÷ AREAS/{id}', 'Mod01_ProduccionController@getOP');
 //la siguiente ruta avanza la orden //
 Route::post('home/traslados/avanzar', 'Mod01_ProduccionController@avanzarOP');
 Route::post('home/traslados/Reprocesos', 'Mod01_ProduccionController@Retroceso');
+//Route::get('home/traslados/Reprocesos', 'Mod01_ProduccionController@getOP');
 Route::post('/', 'HomeController@index');
 Route::get('Mod01_Produccion/Noticias', 'HomeController@create');
 Route::get('leido/{id}', 'HomeController@UPT_Noticias');
@@ -258,6 +265,7 @@ Route::post('/leido', 'HomeController@UPT_Noticias');
 Route::get('home/ReporteOpPDF/{op}', 'Mod01_ProduccionController@ReporteOpPDF');
 Route::get('home/ReporteMaterialesPDF/{op}', 'Mod01_ProduccionController@ReporteMaterialesPDF');
 Route::get('home/ReporteProduccionPDF', 'Reportes_ProduccionController@ReporteProduccionPDF');
+Route::get('home/ReporteProduccionEXL', 'Reportes_ProduccionController@ReporteProduccionEXL');
 
 Route::get('admin/aux', function () {
    dd(User::isProductionUser());
@@ -295,17 +303,23 @@ Route::get('home/CALCULO DE BONOS', 'Mod10_RhController@parametrosmodal');
 //Route::get('home/rh/reportes/bonos','Mod10_RhController@calculoBonos');
 Route::post('home/rh/reportes/bonos', 'Mod10_RhController@calculoBonos');
 Route::get('home/PARAMETROS BONOS', 'Mod10_RhController@setParametrosBonos');
+Route::post('home/PARAMETROS BONOS', 'Mod10_RhController@setParametrosBonos2');
 Route::get('home/rh/reportes/bonosPdf', 'Mod10_RhController@bonosPdf');
 Route::get('home/BONOS CORTE','Mod10_RhController@bonosCorte' );
 Route::post('home/rh/reportes/bonosCorte', 'Mod10_RhController@calculoBonosCorte');
 Route::get('home/rh/reportes/bonoscortePdf', 'Mod10_RhController@bonoscortePdf');
 Route::get('home/rh/reportes/bonoscorteEXL', 'Mod10_RhController@bonoscorteEXL');
+Route::get('home/mod_parametro/{id}', 'Mod10_RhController@mod_parametro');
+Route::post('home/mod_parametro2/{id}', 'Mod10_RhController@mod_parametro2');
+Route::get('home/delete_parametro/{id}', 'Mod10_RhController@delete_parametro');
 //
 //-------------------------//
 //RUTAS DE COMPRAS//---------------------------------------------------------
 //-------------------------//
 //
-Route::get('home/PEDIDOS CSV', 'Mod03_ComprasController@pedidosCsv');
-Route::post('home/PEDIDOS CSV', 'Mod03_ComprasController@postPedidosCsv');
+Route::get('home/CONSULTA OC', 'Mod03_ComprasController@pedidosCsv');
+Route::post('home/CONSULTA OC', 'Mod03_ComprasController@postPedidosCsv');
 Route::get('home/desPedidosCsv', 'Mod03_ComprasController@desPedidosCsv');
 Route::get('home/PedidosCsvPDF', 'Mod03_ComprasController@PedidosCsvPDF');
+///Ruta Ayudas
+Route::get('home/ayudas_pdf/{PdfName}', 'HomeController@showPdf');

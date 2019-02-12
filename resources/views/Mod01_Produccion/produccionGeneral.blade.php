@@ -7,33 +7,34 @@
 
                     <!-- Page Heading -->
                     <div class="row">
-                        <div class="col-lg-12">
+                        <div class="col-md-11">
                             <h3 class="page-header">
-                                Salotto SA DE CV
-                                <small>Reporte de Producción</small>
+                                {{'Reporte de Producción'}}
+                                <small>Producción</small>
                             </h3>
-                            @if(Session::has('Ocultamodal') && Session::get('Ocultamodal')>0)
-                                <h6>Fecha: del {{$fechaI}} al {{$fechaF}}</h6>
-                                <h4> {{$departamento}}</h4>
-                            @endif
+                            @if(Session::has('Ocultamodal') && Session::get('Ocultamodal')>0)                                
+                                <h3> {{$departamento}}</h3>
+                                <h5>Fecha: del {{$fechaI}} al {{$fechaF}}</h5>                      
                         </div>
                     </div>
-                    <div class="col-md-6 col-md-offset-9">
-                      <a class="btn btn-danger btn-sm" href="ReporteProduccionPDF" target="_blank"><i class="fa fa-file-pdf-o"></i>  Descarga PDF</a>
-                      </div>
+                    <div class="row">
+                        <div class="col-md-4 col-md-offset-8">
+                            <a class="btn btn-danger btn-sm" href="ReporteProduccionPDF" target="_blank"><i class="fa fa-file-pdf-o"></i> Reporte PDF</a>                                    
+                            <a class="btn btn-success btn-sm" href="ReporteProduccionEXL"><i class="fa fa-file-excel-o"></i> Reporte XLS</a>                                    
+                    </div>                         
+                    </div>   @endif
                  <!-- /.row -->
                     <div class="row">
-                    <div class="text-right">
-                    </div>
-                        <div class="col-md-12">
-                            @include('partials.alertas')
+                
                             <div id="login" data-field-id="{{Session::get('Ocultamodal') }}" >
                             </div>
 
                             @if(Session::has('Ocultamodal') && Session::get('Ocultamodal')>0)
-                                @foreach ($ofs as $clave => $valor)
-                                    <div class="row">
-                                        <div style="overflow-x:auto;" class="col-md-12">
+                               
+                            <div class="row">
+                                    <div style="overflow-x:auto;" class="col-md-11">
+                                        @foreach ($ofs as $clave => $valor)
+                                  
 
                                             <table id="usuarios" class="table table-striped table-bordered table-condensed">
                                                 <thead>
@@ -70,8 +71,8 @@ $cant = $cant + $val['Cantidad'];
                                         </div></div>
 
                                     <div class="row">
-                                        <div style="overflow-x:auto" class="col-md-6 col-md-offset-6">
-                                            <table id="usuarios" class="table table-striped table-bordered table-condensed">
+                                        <div style="overflow-x:auto" class="col-md-5 col-md-offset-6">
+                                            <table id="totales" class="table table-striped table-bordered table-condensed">
                                                 <thead >
                                                 <h5>Totales</h5>
                                                 <tr>
@@ -110,10 +111,7 @@ $cant = $cant + $val['Cantidad'];
                                             <label for="date_range" class="control-label">Rango de Fechas:</label><br>
                                             Desde:<input type="date" id="FechIn" name="FechIn" class="form-control" >
                                             Hasta:<input type="date" id="FechaFa" name="FechaFa" class="form-control" >
-
                                         </div>
-
-
                                         <div class="form-group">
                                             <label for="dep" class="control-label">Departamento:</label>
                                             <select class="form-control" id="dep" name="dep" required>
@@ -172,8 +170,6 @@ $cant = $cant + $val['Cantidad'];
                                 </div>
                             </div>
                         </div><!-- /modal -->
-
-
                         <!--  cantidadModal -->
                         <div class="modal fade" id="cantidad" role="dialog" >
                             <div class="modal-dialog modal-sm" role="document">

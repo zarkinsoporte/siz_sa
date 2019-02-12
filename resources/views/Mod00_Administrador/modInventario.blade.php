@@ -47,7 +47,7 @@
              {!! Form::open(['url' => 'admin/mod_inv2', 'method' => 'POST']) !!}
                 <div class="form-group">
                     <label for="NombreEquipo">Nombre Equipo</label>
-                    <input type="text" name="nombre_equipo" class="form-control"value="{{ $inventario[0]->nombre_equipo }}" required>
+                    <input type="text" name="nombre_equipo" class="form-control" value="{{ $inventario[0]->nombre_equipo }}" required>
                 </div>
                 <div class="form-group">
                     <label for="NombreUsuario">Nombre Usuario</label>

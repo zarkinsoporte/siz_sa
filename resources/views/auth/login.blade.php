@@ -44,6 +44,14 @@ print_r($matches);
     <link rel="icon" href="imagen/IconoZain.png" sizes="32x32" ><link rel="icon"
 
 </head>
+<style> 
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+input[type=number] { -moz-appearance:textfield; }
+</style>
 <body class="container-fluid" style=" background-image: url({{ URL::asset('images/fondo.jpg') }});
         background-repeat:no-repeat;
         background-size:cover;

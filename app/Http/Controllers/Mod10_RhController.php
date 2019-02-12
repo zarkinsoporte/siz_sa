@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Route;
 use Session;
 use Maatwebsite\Excel\Facades\Excel;
 //Fin DOMPDF
+use Illuminate\Support\Facades\Validator;
+use Datatables;
 
 class Mod10_RhController extends Controller
 {
@@ -206,19 +208,92 @@ class Mod10_RhController extends Controller
 
         return $Bono;
     }
+ public function setParametrosBonos(){
+        if (Auth::check()) {
+            $user = Auth::user();
+            $actividades = $user->getTareas();    
+$Ndatos = DB::table('Siz_Parametros_Bonos')
+            ->orderBy('tipoBono','asc')
+            ->get(); 
+    return view('Mod10_Rh.NuevoParametroBono', 
+    ['actividades' => $actividades, 
+    'ultimo' => count($actividades),
+ 'enviado' => false,
+ 'Ndatos' => $Ndatos
+    ]);
+} else {
+    return redirect()->route('auth/login');
+}
+}
+    public function setParametrosBonos2(){
 
-    public function setParametrosBonos()
-    {
         if (Auth::check()) {
             $user = Auth::user();
             $actividades = $user->getTareas();
-
-            return view('Mod10_Rh.NuevoParametroBono', ['actividades' => $actividades, 'ultimo' => count($actividades)]);
+DB::table('Siz_Parametros_Bonos')
+            ->insert(
+                [
+                    'tipoBono'=> Input::get('tbono_in'),
+                    'VSMin' => Input::get('rango_in'),
+                    'VSMax'=> Input::get('rango_fin'),
+                    'bono' => Input::get('bono_mxn'),
+                    'tipoEmpleado' => Input::get('tipo_emp'),  
+                    'UM' => Input::get('uni_med')        
+                ]);
+Session::flash('mensaje', 'Se enviaron los Parametros'); 
+            return redirect()->back();
         } else {
             return redirect()->route('auth/login');
         }
+    }  
+    public function mod_parametro($id){
+            $user = Auth::user();
+            $actividades = $user->getTareas();
+$PBono = DB::table('Siz_Parametros_Bonos')
+   
+            ->select('Siz_Parametros_Bonos.id as id_Par', 'Siz_Parametros_Bonos.*')
+            ->where('Siz_Parametros_Bonos.id', '=',$id)
+            ->orderBy('id_Par')
+            ->get();
+//dd($PBono[0]->tipoBono);    
+return view('Mod10_Rh.ModparametroBono',compact('PBono', 'id'), 
+['actividades' => $actividades, 
+'ultimo' => count($actividades)
+]);
+{
+return redirect()->route('home/PARAMETROS BONOS');
+}
+ }
+public function mod_parametro2($id, Request $request){
+try{
+    DB::table('Siz_Parametros_Bonos')
+    ->where("id", "=", $id)
+    ->update(
+           [
+                'tipoBono'=> $request->input('tbono_in'),
+                'VSMin' => $request->input('rango_in'),
+                'VSMax'=> $request->input('rango_fin'),
+                'bono' => $request->input('bono_mxn'),
+                'tipoEmpleado' => $request->input('tipo_emp'),  
+                'UM' => $request->input('uni_med') 
+           ]
+    ); 
+ Session::flash('mensaje', 'Se modifico correctamente');
+    return $this->setParametrosBonos();
+}catch(Exception $e){
+ Session::flash('error', 'ocurrio un error durante la actualizacion de este parámetro');
+    return $this->setParametrosBonos();
+}
+      
     }
-
+    public function delete_parametro($id)
+    {
+        $eliminar = DB::table('Siz_Parametros_Bonos')
+        ->where('id', '=', $id)
+        ->delete();
+        Session::flash('mensaje', 'Se elimino correctamente');
+        return redirect()->back();
+    }
     public function getBono($tipoBono, $tipoEmpleado, $mo)
     {
         $rss = DB::table('Siz_Parametros_Bonos')
@@ -277,8 +352,7 @@ class Mod10_RhController extends Controller
             return redirect()->route('auth/login');
         }
     }
-
-    public function calculoBonosCorte()
+public function calculoBonosCorte()
     {
         if (Auth::check()) {
             $user = Auth::user();

@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Modelos\MOD01\LOGOF;
 use App\Modelos\MOD01\LOGOT;
 use App\OP;
+use App\SAP;
 use App\User;
 use Auth;
 use DB;
@@ -53,7 +54,7 @@ class Mod01_ProduccionController extends Controller
         $GraficaOrden = DB::select(DB::raw("SELECT [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,OHEM.firstName + ' ' + OHEM.lastName AS Empleado,
         DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)) AS FechaF ,
        [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
-  SUM([@CP_LOGOF].U_Cantidad) AS U_CANTIDAD,
+        SUM([@CP_LOGOF].U_Cantidad) AS U_CANTIDAD,
         sum(oitm.U_VS ) AS VS,
         (SELECT CompnyName FROM OADM ) AS CompanyName
         FROM [@CP_LOGOF] inner join [@PL_RUTAS] ON [@CP_LOGOF].U_CT = [@PL_RUTAS].Code
@@ -179,6 +180,8 @@ class Mod01_ProduccionController extends Controller
     }
     public function traslados(Request $request)
     {
+       
+        //zzarkin
         if (Session::has('send')) {
             $enviado = Session::get('send');
         } else {
@@ -200,6 +203,7 @@ class Mod01_ProduccionController extends Controller
         if (Auth::check()) {
             $user = Auth::user();
             $actividades = $user->getTareas();
+       
             if ($enviado == 'send') {
                 if (strlen($miusuario) == null) {
                     $t_user = Auth::user();
@@ -258,6 +262,7 @@ class Mod01_ProduccionController extends Controller
     public function getOP($id)
     {
         $t_user = User::find($id);
+     
         if ($t_user == null) {
             return redirect()->back()->withErrors(array('message' => 'Error, el usuario no existe.'));
         }
@@ -281,6 +286,7 @@ class Mod01_ProduccionController extends Controller
                 $op = Input::get('op');
             } else {
                 return redirect()->route('home');
+                //dd('getOPss');
             }
 
             Session::flash('usertraslados', 2); //evita que salga el modal
@@ -449,16 +455,16 @@ class Mod01_ProduccionController extends Controller
                 ->where('@CP_OF.U_CT', $u_ct)
                 ->orderBy('OWOR.DocEntry')
                 ->get();
-
-            $estacionA = OP::getEstacionActual($ordenes[0]->Code);
-            $estacionAnum = $ordenes[0]->U_Orden;
+            
+            $estacionA = (count($ordenes) == 0)? $u_ct : OP::getEstacionActual($ordenes[0]->Code);
+            $estacionAnum = (count($ordenes) == 0)? $u_ct: $ordenes[0]->U_Orden;
             return view('Mod01_Produccion.trasladosEstacion', ['numeroestacion' => $estacionAnum, 'estacion' => $estacionA, 't_user' => $t_user, 'actividades' => $actividades, 'ultimo' => count($actividades), 'ordenes' => $ordenes]);
         }
 
     }
 
     public function avanzarOP()
-    {
+    {             
         try {
             DB::transaction(function () {
                 $id = Input::get('userId');
@@ -471,13 +477,54 @@ class Mod01_ProduccionController extends Controller
                 $Cant_procesar = Input::get('cant');
                 $Code_actual = OP::find(Input::get('code'));
                 Session::put('op', $Code_actual->U_DocEntry);
-//dd($Code_actual);
-                $U_CT_siguiente = OP::getEstacionSiguiente($Code_actual->Code, 2);
+                $U_CT_siguiente = OP::getEstacionSiguiente($Code_actual->Code, 2); //obtiene la estacion siguiente formato numero
 
-                if ($U_CT_siguiente == $Code_actual->U_CT) {
-                    Session::flash('info', 'La estacion ' . OP::getEstacionSiguiente($Code_actual->Code, 1) . ' es la última');
-                    return redirect()->back();
-                }
+$dt = date('Ymd h:m:s');
+//AVANCE DE OP (NO PIEL)
+//Cuando una orden se libera en planeación revisamos si se le cargara piel 106 (revisando su ruta), 
+//en caso de que no lleve piel, entonces le cambiamos en status y le colocamos la fecha de inicio.
+//casco: 400 armado - 300 habilitado ()
+if($Code_actual->U_CT == '100' && OP::ContieneRuta($Code_actual->U_DocEntry, '106') == false){
+    DB::table('OWOR')
+        ->where('DocEntry', '=', $Code_actual->U_DocEntry)
+        ->update(['U_Status' =>  '06', 'U_Entrega_Piel' => $dt]);
+        //cambiar a liberado SAP
+      // $r = SAP::ProductionOrderStatus($Code_actual->U_DocEntry, 1);
+      // if(!$r){
+     //   Session::flash('info', 'La orden no pudo liberarse en Sap');
+    //    }
+}
+//TERMINA AVANCE DE OP (NO PIEL)
+//AVANCE DE OP (PIEL)
+//Se modifica status y fecha, necesitamosrevisar que tenga piel.
+if($Code_actual->U_CT == '106'){
+    $consumido = DB::table('WOR1')
+    ->leftJoin('OITM','WOR1.ItemCode', '=', 'OITM.ItemCode')
+    ->where('OITM.ItmsGrpCod', '=', 113)
+    ->where('WOR1.DocEntry', '=', $Code_actual->U_DocEntry)
+    ->value('WOR1.IssuedQty');
+
+if($consumido < 1 || is_null($consumido)){
+Session::flash('info', 'Esta orden necesita primero que le carges Piel en SAP');
+return redirect()->back();
+}else{
+    DB::table('OWOR')
+        ->where('DocEntry', '=', $Code_actual->U_DocEntry)
+        ->update(['U_Status' =>  '06', 'U_Entrega_Piel' => $dt]);
+    //cambiar a liberado SAP
+   // $r = SAP::ProductionOrderStatus($Code_actual->U_DocEntry, 1);
+  //  if(!$r){
+  //      Session::flash('info', 'La orden no pudo liberarse en Sap');
+  //  }
+}
+}
+//TERMINA AVANCE DE OP (PIEL)
+
+//DETERMINA SI LA ORDEN DE PRODUCCION LLEGO A LA ULTIMA ESTACION
+if ($U_CT_siguiente == $Code_actual->U_CT) {
+    Session::flash('info', 'La estacion ' . OP::getEstacionSiguiente($Code_actual->Code, 1) . ' es la última');
+    return redirect()->back();
+}
 
                 //  $cant_pendiente = $Code_actual->U_Recibido - $Code_actual->U_Procesado;
                 // ->where(DB::raw('(U_Recibido - U_Procesado)', '>', '0'))
@@ -485,9 +532,7 @@ class Mod01_ProduccionController extends Controller
                     ->where('U_DocEntry', $Code_actual->U_DocEntry)
                     ->where('U_Reproceso', 'N')
                     ->get();
-
-                // $dt = date('Y-m-d H:i:s');
-                $dt = date('Ymd h:m:s');
+                
                 $CantOrden = DB::table('OWOR')
                     ->where('DocEntry', $Code_actual->U_DocEntry)
                     ->first();
@@ -663,23 +708,86 @@ class Mod01_ProduccionController extends Controller
     }
     public function Retroceso(Request $request)
     {
-        DB::transaction(function () use ($request) {
-            $Est_act = $request->input('Estacion');
-            $Est_ant = $request->input('selectestaciones');
-            $No_Nomina = $request->input('Nomina');
+        $Est_act = $request->input('Estacion');
+        $orden = $request->input('orden');
+        $No_Nomina = $request->input('Nomina');
+
+        if($Est_act == '109'||$Est_act =='106'){
+            $consumido = DB::table('WOR1')
+            ->leftJoin('OITM','WOR1.ItemCode', '=', 'OITM.ItemCode')
+            ->where('OITM.ItmsGrpCod', '=', 113)
+            ->where('WOR1.DocEntry', '=', $orden)
+            ->value('WOR1.IssuedQty');
+            //Para retorcesos de estas estaciones, verificar si tiene algo de piel la orden
+        if($consumido <> 0){
+        Session::flash('info', 'Esta orden necesita primero que le quites Piel en SAP');
+        Session::put('return', 1);
+        Session::put('op', $orden);          
+        return redirect()->action('Mod01_ProduccionController@getOP', $request->input('Nomina'));
+        }else{
+            DB::table('OWOR')
+                ->where('DocEntry', '=', $orden)
+                ->update(['U_Status' =>  null, 'U_Entrega_Piel' => null]); 
+        }
+        }
+
+        if($Est_act =='106'){
+            //inicia retroceso 106
+            //1.- verificamos si es Planeador el usuario
+            $t_user = User::find($No_Nomina);
+            if ($t_user->position == 6){
+                //2.- verificamos que el total de la cantidad se encuentre en esta estación
+                $TotaldeCodigos = OP::where('U_DocEntry', $orden)->get();
+               
+                if (count($TotaldeCodigos) != 1) {
+                    Session::flash('info', 'La orden completa debe estar en 106 Preparado de Entrega de Piel. ');
+                    Session::put('return', 1);
+                    Session::put('op', $orden);          
+                    return redirect()->action('Mod01_ProduccionController@getOP', $request->input('Nomina'));
+                } 
+                $user = Auth::user();
+                $actividades = $user->getTareas(); 
+                $est_Av = $t_user->U_CP_CT; //estaciones que el usuario puede avanzar
+                $Fil_Est = explode(",", $est_Av); //ARRAY SIMPLE  
+                $rutasConNombres = self::getNombresRutas($Fil_Est); //le pasamos las rutas y nos regresa las rutas con nombre
+                Session::flash('usertraslados', 1);
+                Session::flash('mensaje', 'La orden ' . $orden . ' ha sido retirada de control de piso.');
+                DB::transaction(function () use($orden) {
+                  DB::table('@CP_OF')->where('U_DocEntry', '=', $orden)->delete();
+                  DB::table('@CP_LOGOF')->where('U_DocEntry', '=', $orden)->delete(); 
+                  DB::table('@CP_LOGOT')->where('U_OP', '=', $orden)->delete();
+                });
+                SAP::ProductionOrderStatus($orden, 0);
+               // return view('Mod01_Produccion.traslados', ['rutasConNombres' => $rutasConNombres, 't_user' => $t_user, 'actividades' => $actividades, 'ultimo' => count($actividades)]); 
+               //return redirect()->back();
+return redirect()->route('home');
+            }else{
+                Session::flash('info', 'El planeador es el unico que puede quitar las ordenes de piso');
+                Session::put('return', 1);
+                Session::put('op', $orden);          
+                return redirect()->action('Mod01_ProduccionController@getOP', $request->input('Nomina'));
+            }
+            
+           //fin retroceso 106
+        }else{ //Inicia else retorceso todas
+             DB::transaction(function () use ($request, $No_Nomina, $orden, $Est_act) {        
+            $Est_ant = $request->input('selectestaciones');            
             $Num_user = User::find($No_Nomina)->empID;
             $nota = $request->input('nota');
             $Nom_User = $request->input('Nombre');
-            $autorizo = $request->input('Autorizar');
-            $orden = $request->input('orden');
+            $autorizo = $request->input('Autorizar');           
             $cant_r = $request->input('retrocant');
             $reason = $request->input('reason');
             $leido = 'N';
-            $banderita = false; // esta bandera sirva para verificar si la estacion destino es un retroceso creado o ya existente
+            $banderita = false; // esta banbbgdera sirva para verificar si la estacion destino es un retroceso creado o ya existente
             $dt = date('Ymd h:m:s');
-//   $dt = date('Y-m-d H:i:s');  no usar
-            //-------------Notificaciones--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
-            //$Not_us=DB::select(DB::raw("SELECT top 1 U_EmpGiro,firstname,lastname from OHEM where position='4'and dept ='$cod_dep'"));
+//$dt = date('Y-m-d H:i:s');  no usar
+//$Code_actual = OP::find(Input::get('code'));
+//Session::put('op', $Code_actual->U_DocEntry);
+// $dt = date('Y-m-d H:i:s');
+//$dt = date('Ymd h:m:s');
+//-------------Notificaciones--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+ //$Not_us=DB::select(DB::raw("SELECT top 1 U_EmpGiro,firstname,lastname from OHEM where position='4'and dept ='$cod_dep'"));
             $N_Emp = User::where('position', 4)->where('U_CP_CT', 'like', '%' . $Est_ant . '%')->first();
             if ($N_Emp == null || count($N_Emp) < 1) {
                 $request->session()->flash('op', $orden);
@@ -687,9 +795,7 @@ class Mod01_ProduccionController extends Controller
                 //return Redirect::back()->withErrors(['message', 'The Message']);
             } else if (count($N_Emp) > 1) {
                 return redirect()->back()->withErrors(array('message' => 'Error, Hay dos Supervisores para el área anterior en SAP.'));
-            }
-//$N_Emp  = $Not_us[0];
-            //dd($N_Emp);
+            }                       
             DB::table('Siz_Noticias')->insert(
                 [
                     'Autor' => $Nom_User,
@@ -825,12 +931,13 @@ class Mod01_ProduccionController extends Controller
  Supervisor:' . $N_Emp->firstName . ' ' . $N_Emp->lastName . '
  Autorizado por:  ' . $autorizo . '');
 
-            Session::flash('op', $orden);            
+            Session::flash('op', $orden); 
+            Session::put('return', 1);                               
         }
-        );
-        Session::put('return', 1);          
+        );// fin transaccion
         return redirect()->action('Mod01_ProduccionController@getOP', $request->input('Nomina'));
-        
+        }//fin else Retrocesos todas
+               
 //return redirect()->back()->withErrors(array('message' => 'Error, Consulte con el Administrador de SIZ, por que no se llevo a cabo el retroceso.'));
     }
 //--------------------112-Reporte-Corte-de-Piel---------------------

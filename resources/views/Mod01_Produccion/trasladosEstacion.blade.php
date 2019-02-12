@@ -25,18 +25,19 @@
             <div class="row">
                 <div class="col-md-12 ">
                     @include('partials.alertas')
-
+                    
                     <div id="login" data-field-id="{{Session::get('usertraslados') }}" >
                     </div>
+                    
                     @if(Session::has('usertraslados') && Session::get('usertraslados')>0)  
                     @endif                
                         <div class="col-md-6">
                             <div class="panel panel-default">
                                 <div class="panel-heading">
-                                <h3 class="panel-title">Estacion {{$estacion}}</h3>
+                                <h3 class="panel-title">Estación {{$estacion}}</h3>
                                 </div>
                                 <div class="panel-body">
-                                    <h5>Usuario para el traslado: {{$t_user->firstName.' '.$t_user->lastName}} &nbsp;&nbsp;<a href="" data-toggle="modal" data-target="#cambiaruser">Cambiar Usuario</a> </h5>
+                                    <h5>Usuario para el traslado: {{$t_user->firstName.' '.$t_user->lastName}} &nbsp;&nbsp;<a href="" data-toggle="modal" data-target="#cambuser">Cambiar Usuario</a> </h5>
                                     <h5>Control de Piso número: {{$t_user->U_EmpGiro}}</h5>   
                                    
                                        
@@ -131,43 +132,37 @@
             </div>  <!-- end row -->
             
             <!-- Modal -->
-            <div class="modal fade" id="cambiaruser" role="dialog" >
+            <div class="modal fade" id="cambuser" role="dialog" >
                 <div class="modal-dialog modal-md" role="document">
                     <div class="modal-content" style=" background-color: rgb(189, 217, 254)">
                         <div class="modal-header" style="background-color: rgb(198,221,254)">
-
                             <h4 class="modal-title" id="pwModalLabel">Cambiar Usuario</h4>
                         </div>
                         {!! Form::open(['url' => 'home/TRASLADO ÷ AREAS', 'method' => 'POST']) !!}
                         <div class="modal-body image">
-
                             <input type="text" hidden name="send" value="send">
                             <br>
                             <div class="row">
                                 <div class="col-md-2 col-md-offset-1 col-xs-5 col-xs-offset-1">
-
-                                    <img src= "{{ URL::asset('images/Mod01_Produccion/password.png')}}"
-                                         alt="">
+                                    <img src= "{{ URL::asset('images/Mod01_Produccion/password.png')}}" alt="">
                                 </div>
                                 <div class="col-md-6 col-md-offset-1 col-xs-5">
-                                    @include('partials.alertas-modal')
+                                    @include('partials.alertas')
                                     <div id="hiddendiv">
                                         <label for="miusuario" class="control-label">Usuario:</label>
-                                        <input id="miusuario" type="number" class="form-control" name="miusuario" required minlength="3" maxlength="5">
+                                        <input autofocus id="miusuario" type="number" class="form-control" name="miusuario" required minlength="1">
                                         <label for="pass" class="control-label">Contraseña:</label>
-                                    <input autofocus id="pass" type="password" class="form-control" name="pass" required minlength="3" maxlength="10" value="{{Session::get('Rec_pass')}}">
+                                    <input id="pass" type="password" class="form-control" name="pass" required minlength="1" value="{{Session::get('Rec_pass')}}">
                                     <br>
                                     </div>
                                     <input type="checkbox" name="Recordarpass">Recordar contraseña<br>
-
                                 </div>
                             </div>
-
                         </div>
                         <div class="modal-footer">
                             &nbsp;&nbsp;&nbsp;
                             <button type="submit" class="btn btn-primary">Entrar</button>
-                            <a type="button" class="btn btn-default"  href="" data-toggle="modal" data-target="#cambiaruser">Cancelar</a>
+                            <a type="button" class="btn btn-default"  href="" data-toggle="modal" data-target="#cambuser">Cancelar</a>
                         </div>
                         {!! Form::close() !!}
                     </div>

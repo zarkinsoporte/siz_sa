@@ -14,6 +14,7 @@ use DB;
 use App\OP;
 use App\User;
 use Mail;
+use Response;
 
 class HomeController extends Controller
 {
@@ -30,15 +31,8 @@ class HomeController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        
-        $actividades = $user->getTareas();
-       // dd($id_not);
-        $id_user=Auth::user()->U_EmpGiro;
-        $noticias=DB::select(DB::raw("SELECT * FROM Siz_Noticias WHERE Destinatario='$id_user'and Leido='N'"));
-        $user = Auth::user();
-        $actividades = $user->getTareas();        
-        return view('homeIndex',   ['actividades' => $actividades,'noticias' => $noticias,'id_user' => $id_user, 'ultimo' => count($actividades), 'isAdmin'=> User::isAdmin()]);
-   
+        $actividades = $user->getTareas();     
+        return view('homeIndex',   ['actividades' => $actividades, 'ultimo' => count($actividades), 'isAdmin'=> User::isAdmin()]);
     }
 
     public function UPT_Noticias($id){
@@ -69,6 +63,14 @@ class HomeController extends Controller
       return view('Mod01_Produccion/Noticias', ['actividades' => $actividades,'noticias' => $noticias,'id_user' => $id_user, 'ultimo' => count($actividades)]);
     }
 
+    public function showPdf($PdfName){
+        $filename = "assets\\ayudas_pdf\\".$PdfName;
+        $path = public_path($filename);
+         return Response::make(file_get_contents($path), 200, [
+            'Content-Type' => 'application/pdf',
+             'Content-Disposition' => 'inline; filename="'.$filename.'"'
+         ]);
+    }
     /**
      * Store a newly created resource in storage.
      *

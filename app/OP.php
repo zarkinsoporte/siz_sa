@@ -14,10 +14,15 @@ class OP extends Model
     public static function getRuta($docEntry){
     $rs = DB::select('select u_Ruta from OWOR where DocEntry ='. $docEntry);
     //dd($rs);
+    // "100,106,109,112"  
+    //[100,106,109]  
     foreach ($rs as $r) {
         $ruta = explode(",", $r->u_Ruta);
         return $ruta;
     }
+   }
+   public static function ContieneRuta($docEntry, $ruta){
+   return in_array ($ruta , self::getRuta($docEntry));
    }
    public static function getRutaNombres($docEntry){
     $rs = DB::select('select u_Ruta from OWOR where DocEntry ='. $docEntry);

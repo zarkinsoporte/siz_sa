@@ -10,7 +10,7 @@
     <div class="hidden-lg"><br><br></div>
         <h3 class="page-header">
            Recepcion de Materiales
-            <small>Calidad</small>
+            <small>Calidad <i data-placement="right" data-toggle="tooltip" class="glyphicon glyphicon-question-sign"  title="Ayuda Shift+F1"></i></small>
         </h3>
         <div class="visible-lg">
         <ol class="breadcrumb">
@@ -29,8 +29,12 @@
 @include('partials.alertas')
 <iframe class="col-md-9 " scrolling="yes" height="150%" src="{!! url('getAutocomplete') !!}" frameborder="0"></iframe>
 @endsection
-@section ('homescript2')
-
+@section ('homescript')
+document.onkeyup = function(e) {
+   if (e.shiftKey && e.which == 112) {
+    window.open("ayudas_pdf/AyM07_01.pdf","_blank");
+  } 
+};
 @endsection
 
 <script>

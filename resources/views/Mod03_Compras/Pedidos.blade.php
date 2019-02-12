@@ -4,25 +4,27 @@
 
             <!-- Page Heading -->
             <div class="row">
-                    <div class="visible-xs"><br><br></div>                                      
+
+                    <div class="visible-xs"><br><br></div>
+                                      
                        <div class= "col-md-11 col-sm-7 hidden-xs hidden-sm">
                             <h3 class="page-header">
                                     Descarga de Orden de Compra 
-                                    <small>Compras</small>   
+                                    <small>Compras <i data-placement="right" data-toggle="tooltip" class="glyphicon glyphicon-question-sign"  title="Ayuda Shift+F1"></i></small>   
                                   </h3> 
                         <ol class="breadcrumb">
                         <li>
-                            <i class="fa fa-dashboard"></i><a href="{!! url('home') !!}"> Inicio</a>
+                            <i class="fa fa-dashboard"></i>  <a href="{!! url('home') !!}">Inicio</a>
                         </li>
                     </ol>
                  </div>
             </div> 
-{!! Form::open(['url' => 'home/PEDIDOS CSV', 'method' => 'POST']) !!} 
+{!! Form::open(['url' => 'home/CONSULTA OC', 'method' => 'POST']) !!} 
 <div class="row">
     <div class="col-md-11">
             @include('partials.alertas')
       </div>       
- </div>                           
+ </div>                          
  <div class="row">
         <div class="col-md-2">
             <h4>Número de O.C:</h4>
@@ -38,9 +40,9 @@
     <br>
     @if (isset($pedido))
     <?php 
-            $date=date_create($pedido[0]->FechOC);         
-            $fecha_actual = strtotime(date("d-m-Y H:i:00",time()));
-            $fecha_entrada = strtotime($pedido[0]->FechOC);
+          $date=date_create($pedido[0]->FechOC); 
+          $fecha_actual = strtotime(date("d-m-Y H:i:00",time()));
+          $fecha_entrada = strtotime($pedido[0]->FechOC);
      ?>
     <div class="row">
         <div class="col-md-8">
@@ -68,7 +70,7 @@
         <div class="row">
         <div  class= "col-md-11"> 
                  <div class="text-right">
-                        @if($fecha_entrada>=$fecha_actual)                                     
+                   @if($fecha_entrada>=$fecha_actual) 
                         <a  class="btn btn-primary btn-sm"  href="desPedidosCsv"><i class="fa fa-file-text"></i>  CSV</a>
                         @else                        
                         <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#csv">
@@ -129,7 +131,7 @@
     <tr> <th style="text-align: center;">Totales</th></tr>
      <tr> <td style="text-align: right;">Subtotal: {{number_format($suma,2)." ".$moneda}}</td></tr>
      <tr><td  style="text-align: right;">Impuesto: {{number_format($suma * 0.16,2)." ".$moneda}}</td></tr>
-      <tr><td  style="text-align: right;">Total: {{number_format(($suma * 0.16) + $suma,2)." ".$moneda}}</td></tr>
+      <tr><td  style="text-align: right;"> Total: {{number_format(($suma * 0.16) + $suma,2)." ".$moneda}}</td></tr>
     </table>
     </div>  
    </div>  
@@ -139,9 +141,7 @@
     <div class="modal-dialog modal-sm" role="document">
         {!! Form::open(['url' => 'home/desPedidosCsv', 'method' => 'GET']) !!}
         <div class="modal-content" >
-
             <div class="modal-header" >
-
                 <h4 class="modal-title" id="pwModalLabel" style="text-align: center;">¡Aviso!</h4>
             </div>
 
@@ -170,5 +170,9 @@
 
 </script>
 @section('homescript')
-window.TrelloBoards.load(document, { allAnchors: false });
+document.onkeyup = function(e) {
+   if (e.shiftKey && e.which == 112) {
+    window.open("ayudas_pdf/AyM03_01.pdf","_blank");
+  } 
+};
 @endsection
