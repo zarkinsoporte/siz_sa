@@ -100,7 +100,7 @@ $cant = $cant + $val['Cantidad'];
 
                                         <h4 class="modal-title" id="pwModalLabel">Reporte de producción</h4>
                                     </div>
-                                    {!! Form::open(['url' => 'home/R. PROD. GRAL.', 'method' => 'POST']) !!}
+                                    {!! Form::open(['url' => 'home/REPORTE PRODUCCION', 'method' => 'POST']) !!}
 
                                     <div class="modal-body">
                                         <input type="text" hidden name="send" value="send">

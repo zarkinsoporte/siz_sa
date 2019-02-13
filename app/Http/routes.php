@@ -267,8 +267,8 @@ Route::get('home/ReporteMaterialesPDF/{op}', 'Mod01_ProduccionController@Reporte
 Route::get('home/ReporteProduccionPDF', 'Reportes_ProduccionController@ReporteProduccionPDF');
 Route::get('home/ReporteProduccionEXL', 'Reportes_ProduccionController@ReporteProduccionEXL');
 
-Route::get('admin/aux', function () {
-   dd(User::isProductionUser());
+Route::get('/p', function () {
+  return DB::getDatabaseName();
 });
 
 Route::get('home/NUEVO RECHAZO', 'Mod07_CalidadController@Rechazo');

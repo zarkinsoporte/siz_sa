@@ -528,20 +528,7 @@ if (isset($HisOrden)) {
 <div id="chart"></div>
 @endsection
 @section('homescript')
-shortcut.add("O", 
-	function() { 
-        document.getElementById("op").checked = true;
-        document.getElementById("op_input").focus();
-	}, 
-	{ 'type':'keydown', 'propagate':false, 'target':document} 
-    );
-    shortcut.add("A", 
-	function() { 
-        document.getElementById("OP_us").checked = true;
-        document.getElementById("OP_input").focus();
-	}, 
-	{ 'type':'keydown', 'propagate':false, 'target':document} 
-    );
+
     document.onkeyup = function(e) {
    if (e.shiftKey && e.which == 112) {
     window.open("ayudas_pdf/AyM01_01.pdf","_blank");
