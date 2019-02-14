@@ -225,7 +225,8 @@ $produccion = DB::select('SELECT "CP_ProdTerminada"."orden", "CP_ProdTerminada".
          DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)),[@CP_LOGOF].U_DocEntry
         ,OWOR.ItemCode , OITM.ItemName
         ORDER BY [@CP_LOGOF].U_CT, FechaF, Empleado"));
-        //dd($consulta);
+     Session::put('rephistorial', $consulta);
+
         $info = OP::getInfoOwor($op);
         switch ($info->Status) {
             case "P":
@@ -255,12 +256,40 @@ $produccion = DB::select('SELECT "CP_ProdTerminada"."orden", "CP_ProdTerminada".
     }
     }
 
-    public function historialOPPDF(){
-
-    }
-
     public function historialOPXLS(){
-
+        if(Session::has ('rephistorial')){          
+            $values=Session::get('rephistorial');
+            if(count($values) == 0){
+                return redirect()->back()->withErrors(array('message' => '!!Sin registros!!')); 
+            }
+            Excel::create('Siz_Reporte_HistorialOP' . ' - ' . $hoy = date("d/m/Y").'', function($excel)use($values) {
+             $excel->sheet('Hoja 1', function($sheet) use($values){
+                //$sheet->margeCells('A1:F5');     
+                $sheet->row(1, [
+                    'Código: '. $values[0]->ItemCode, 'Descripción: '. $values[0]->ItemName
+                 ]);
+                $sheet->row(3, [
+                   'Fecha','Estación','Empleado','Cantidad'
+                ]);
+               //Datos    
+               $fila = 4;     
+            foreach ( $values as $fil){
+              //  $tvs= $tvs + $produccion->TVS;
+                //$cant = $cant + $produccion->Cantidad;
+                $sheet->row($fila, 
+                [                
+                   substr($fil->FechaF,0,10),
+                   $fil->NAME,
+                   $fil->Empleado,
+                   $fil->U_CANTIDAD
+                    ]);	
+                    $fila ++;
+                }
+    });         
+    })->export('xlsx');
+           }else {
+            return redirect()->route('auth/login');
+    }
     }
 
     public function materialesOP(Request $request){
@@ -337,11 +366,40 @@ $produccion = DB::select('SELECT "CP_ProdTerminada"."orden", "CP_ProdTerminada".
     }
     }
 
-    public function materialesOPPDF(){
-
-    }
-
     public function materialesOPXLS(){
-        
+        if(Session::has ('repP')){          
+            $values=Session::get('repP');
+            Excel::create('Siz_Reporte_Produccion_General' . ' - ' . $hoy = date("d/m/Y").'', function($excel)use($values) {
+             $excel->sheet('Hoja 1', function($sheet) use($values){
+                //$sheet->margeCells('A1:F5');     
+                $sheet->row(1, [
+                   'Cliente','Fecha','Orden','Pedido','Código','Modelo','VS','Cantidad','Total VS'
+                ]);
+               //Datos    
+               $fila = 2;     
+            foreach ( $values['produccion'] as $produccion){
+              //  $tvs= $tvs + $produccion->TVS;
+                //$cant = $cant + $produccion->Cantidad;
+                $sheet->row($fila, 
+                [
+                  $produccion->CardName,    
+                   substr($produccion->fecha,0,10),
+                   $produccion->orden,
+                   $produccion->Pedido,
+                   $produccion->Codigo,
+                   $produccion->modelo,
+                   $produccion->VS,
+                   $produccion->Cantidad,
+                   $produccion->TVS,
+                 //  $produccion->cant,
+                   //$produccion->tvs,
+                    ]);	
+                    $fila ++;
+                }
+    });         
+    })->export('xlsx');
+           }else {
+            return redirect()->route('auth/login');
+    }
     }    
 }
