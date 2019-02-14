@@ -158,7 +158,7 @@ Route::get('home/reporte/historialXLS', 'Reportes_ProduccionController@historial
 //REPORTE DE MATERIALES X OP
 Route::get('home/MATERIALES OP', 'Reportes_ProduccionController@showModal');
 Route::post('home/reporte/MATERIALES OP', 'Reportes_ProduccionController@materialesOP');
-Route::get('home/ReporteProduccionEXL', 'Reportes_ProduccionController@ReporteProduccionEXL');
+Route::get('home/reporte/materialesXLS', 'Reportes_ProduccionController@materialesOPXLS');
 /*
 |--------------------------------------------------------------------------
 | MOD07-CALIDAD Routes

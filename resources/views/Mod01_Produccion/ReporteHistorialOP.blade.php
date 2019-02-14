@@ -21,7 +21,7 @@
                     <div class="row">
                         <div class="col-md-4 col-md-offset-8">                                                                                                     
                             <a href="../ReporteOpPDF/{{$op}}" target="_blank" class="btn btn-danger"><i class="fa fa-file-pdf-o"></i> Reporte PDF</a> 
-                            <a class="btn btn-success btn-sm" href="historialXLS"><i class="fa fa-file-excel-o"></i> Reporte XLS</a>                                    
+                            <a class="btn btn-success" href="historialXLS"><i class="fa fa-file-excel-o"></i> Reporte XLS</a>                                    
                     </div>                         
                     </div>   
                  <!-- /.row -->

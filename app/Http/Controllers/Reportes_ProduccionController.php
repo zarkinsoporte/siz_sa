@@ -278,11 +278,11 @@ $produccion = DB::select('SELECT "CP_ProdTerminada"."orden", "CP_ProdTerminada".
                 //$cant = $cant + $produccion->Cantidad;
                 $sheet->row($fila, 
                 [                
-                   substr($fil->FechaF,0,10),
+                   date('d-m-Y', strtotime($fil->FechaF)),                                                     
                    $fil->NAME,
                    $fil->Empleado,
                    $fil->U_CANTIDAD
-                    ]);	
+                ]);	
                     $fila ++;
                 }
     });         
@@ -336,7 +336,9 @@ $produccion = DB::select('SELECT "CP_ProdTerminada"."orden", "CP_ProdTerminada".
        AND f.ItemName  not like  '%Gast%'
     ORDER BY CONVERT(INT, f.U_Estacion)"));
         //dd($consulta);
+        Session::put('repmateriales', $consulta);
         $info = OP::getInfoOwor($op);
+        Session::put('repinfo', $info);
         switch ($info->Status) {
             case "P":
                $status = 'Planificada';
@@ -367,33 +369,36 @@ $produccion = DB::select('SELECT "CP_ProdTerminada"."orden", "CP_ProdTerminada".
     }
 
     public function materialesOPXLS(){
-        if(Session::has ('repP')){          
-            $values=Session::get('repP');
-            Excel::create('Siz_Reporte_Produccion_General' . ' - ' . $hoy = date("d/m/Y").'', function($excel)use($values) {
-             $excel->sheet('Hoja 1', function($sheet) use($values){
+        if(Session::has ('repmateriales')){          
+            $values=Session::get('repmateriales');
+            //dd($values);
+            $info = Session::get('repinfo');
+            if(count($values) == 0){
+                return redirect()->back()->withErrors(array('message' => '!!Sin registros!!')); 
+            }
+            Excel::create('Siz_Reporte_MaterialesOP' . ' - ' . $hoy = date("d/m/Y").'', function($excel)use($values, $info) {
+             $excel->sheet('Hoja 1', function($sheet) use($values, $info){
                 //$sheet->margeCells('A1:F5');     
                 $sheet->row(1, [
-                   'Cliente','Fecha','Orden','Pedido','Código','Modelo','VS','Cantidad','Total VS'
+                    'Código: '. $info->ItemCode, 'Descripción: '. $info->ItemName
+                 ]);
+                $sheet->row(3, [
+                   'Fecha de Entrega', 'Estación', 'Código','Descripción','UM', 'Solicitada'
                 ]);
                //Datos    
-               $fila = 2;     
-            foreach ( $values['produccion'] as $produccion){
+               $fila = 4;     
+            foreach ( $values as $fil){
               //  $tvs= $tvs + $produccion->TVS;
                 //$cant = $cant + $produccion->Cantidad;
                 $sheet->row($fila, 
-                [
-                  $produccion->CardName,    
-                   substr($produccion->fecha,0,10),
-                   $produccion->orden,
-                   $produccion->Pedido,
-                   $produccion->Codigo,
-                   $produccion->modelo,
-                   $produccion->VS,
-                   $produccion->Cantidad,
-                   $produccion->TVS,
-                 //  $produccion->cant,
-                   //$produccion->tvs,
-                    ]);	
+                [                  
+                   date('d-m-Y', strtotime($fil->FechaEntrega)),
+                   $fil->Estacion,                                   
+                   $fil->Codigo,
+                   $fil->Descripcion,
+                   $fil->InvntryUom,
+                   number_format($fil->Cantidad,2)
+                ]);	
                     $fila ++;
                 }
     });         
