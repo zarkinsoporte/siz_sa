@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\User;
+use App\OP;
 use Auth;
 use DB;
 use Illuminate\Http\Request;
@@ -170,4 +171,105 @@ $produccion = DB::select('SELECT "CP_ProdTerminada"."orden", "CP_ProdTerminada".
             return redirect()->route('auth/login');
     }
     }
+
+    public function showModal(Request $request){
+       
+        $nombre = str_replace('%20', ' ', explode('/',$request->path())[1]);
+
+        switch ($nombre) {
+            case "HISTORIAL OP":
+                $fechas = false;                
+                $fieldOtroNumber = 'OP';
+                $fieldOtroText = '';
+                break;
+            case 1:
+               
+                break;         
+            default:
+                $fechas = false; 
+                $fieldOtroNumber = ''; //se usa por ejemplo para el valor de OP              
+                $fieldOtroText = '';
+        }
+        
+
+        if (Auth::check()) {
+            $user = Auth::user();
+            $actividades = $user->getTareas();
+            return view('Mod01_Produccion.modalParametros', ['actividades' => $actividades, 'ultimo' => count($actividades), 'nombre'=>$nombre, 'fieldOtroNumber'=> $fieldOtroNumber, 'fieldOtroText'=> $fieldOtroText, 'fechas'=> $fechas] );
+        }else {
+            return redirect()->route('auth/login');
+        }
+    }
+
+    public function historialOP(Request $request){
+        if (Auth::check()) {
+            $user = Auth::user();
+            $actividades = $user->getTareas();
+       
+        $op = $request->input('fieldOtroNumber');
+        $consulta = DB::select(DB::raw("SELECT [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,OHEM.firstName + ' ' + OHEM.lastName AS Empleado,
+        DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)) AS FechaF ,
+       [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
+        SUM([@CP_LOGOF].U_Cantidad) AS U_CANTIDAD,
+        sum(oitm.U_VS ) AS VS,
+        (SELECT CompnyName FROM OADM ) AS CompanyName
+        FROM [@CP_LOGOF] inner join [@PL_RUTAS] ON [@CP_LOGOF].U_CT = [@PL_RUTAS].Code
+        left join OHEM ON [@CP_LOGOF].U_idEmpleado = OHEM.empID
+        inner join OWOR ON [@CP_LOGOF].U_DocEntry = OWOR.DocNum
+        inner join OITM ON OWOR.ItemCode = OITM.ItemCode
+        WHERE U_DocEntry = $op
+        GROUP BY [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,
+        OHEM.firstName + ' ' + OHEM.lastName ,
+         DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)),[@CP_LOGOF].U_DocEntry
+        ,OWOR.ItemCode , OITM.ItemName
+        ORDER BY [@CP_LOGOF].U_CT, FechaF, Empleado"));
+        //dd($consulta);
+        $info = OP::getInfoOwor($op);
+        switch ($info->Status) {
+            case "P":
+               $status = 'Planificada';
+                break;
+            case "R": 
+               $status = 'Liberada';
+                break;         
+            case "L": 
+               $status = 'Cerrada';
+                break;         
+            case "C": 
+               $status = 'Cancelada';
+                break;         
+        }
+        $data = array(
+            'data' => $consulta,
+            'op' => $op,
+            'actividades' => $actividades,
+            'ultimo' => count($actividades),
+            'info' => $info,
+            'status' => $status
+        );
+        return view('Mod01_Produccion.ReporteHistorialOP', $data);   
+    }else {
+        return redirect()->route('auth/login');
+    }
+    }
+
+    public function historialOPPDF(){
+
+    }
+
+    public function historialOPXLS(){
+
+    }
+
+    public function materialesOP(Request $request){
+
+    }
+
+    public function materialesOPPDF(){
+
+    }
+
+    public function materialesOPXLS(){
+        
+    }    
 }

@@ -147,5 +147,15 @@ return $data1;
        }
    }
 
+   public static function getInfoOwor($op){
+   $rs = DB::table('OWOR')    
+    ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
+    ->leftJoin('OCRD', 'OCRD.CardCode','=', 'OWOR.CardCode')
+    ->select('OWOR.ItemCode', 'OWOR.Status', 'OWOR.CardCode', 'OWOR.OriginNum as pedido',
+    'OITM.ItemName', 'OCRD.CardName')
+    ->where('OWOR.DocEntry', $op)->first();
+   
+    return $rs;
 
+   }
 }

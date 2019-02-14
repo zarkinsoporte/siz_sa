@@ -71,6 +71,14 @@ class HomeController extends Controller
              'Content-Disposition' => 'inline; filename="'.$filename.'"'
          ]);
     }
+    public function showPdf2($r0, $PdfName){
+        $filename = "assets\\ayudas_pdf\\".$PdfName;
+        $path = public_path($filename);
+         return Response::make(file_get_contents($path), 200, [
+            'Content-Type' => 'application/pdf',
+             'Content-Disposition' => 'inline; filename="'.$filename.'"'
+         ]);
+    }
     /**
      * Store a newly created resource in storage.
      *

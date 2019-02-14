@@ -18,47 +18,14 @@ use App\OP;
 use Illuminate\Support\Facades\DB;
 use App\User;
 use App\SAP;
+
 Route::get('/', 'HomeController@index');
 Route::get('/home',
     [
         'as' => 'home',
         'uses' => 'HomeController@index',
     ]);
-Route::get('/p', function(){
-   echo User::getUserType('5');
-});
 
-Route::get('/pruebas', function () {
-$vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
-$vCmp->DbServerType="6"; 
-$vCmp->server = "SERVER-SAPBO";
-$vCmp->LicenseServer = "SERVER-SAPBO:30000";
-$vCmp->CompanyDB = "Pruebas";
-$vCmp->username = "manager";
-$vCmp->password = "aqnlaaepp";
-$vCmp->DbUserName = "sa";
-$vCmp->DbPassword = "B1Admin";
-$vCmp->UseTrusted = false;
-$vCmp->language = "6";
-$lRetCode = $vCmp->Connect;
-//dd($lRetCode);
-echo $vCmp->GetLastErrorDescription();
-echo 'iniciada';
-echo '<br>';
-$vItem = $vCmp->GetBusinessObject("202");
-$RetVal = $vItem->GetByKey("19848");
-echo $vItem->ProductionOrderStatus;
-echo '<br>';
-$vItem->ProductionOrderStatus = 1;
-$vItem->Update;
-//if ($vCmp->InTransaction){
-    //$vCmp->EndTransaction();
- //   dd('cerrada');
-//}
-echo $vCmp->GetLastErrorDescription();
-echo $vItem->ProductionOrderStatus;
-    //return view('Mod00_Administrador.pruebas');
-});
 /*
 |--------------------------------------------------------------------------
 | Administrator Routes
@@ -81,62 +48,13 @@ Route::get('viewpassword', ['as' => 'viewpassword', 'uses' => 'Auth\FunctionsCon
 |--------------------------------------------------------------------------
  */
 Route::get('MOD00-ADMINISTRADOR', 'Mod00_AdministradorController@index');
-Route::get('orden/{code}', function ($code) {
-//    $orden = DB::table('@CP_LOGOF')->where('Code', $code)->first();
-    //    return $orden->U_DocEntry;
-
-    $Codes = OP::where('U_DocEntry', '60987')->get();
-
-//dd($Codes);
-    $index = 0;
-    foreach ($Codes as $code) {
-        $index = $index + 1;
-        $order = DB::table('OWOR')
-            ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
-            ->leftJoin('@CP_OF', '@CP_OF.U_DocEntry', '=', 'OWOR.DocEntry')
-            ->select(DB::raw(OP::getEstacionActual($code->Code) . ' AS U_CT_ACT'), DB::raw(OP::getEstacionSiguiente($code->Code) . ' AS U_CT_SIG'),
-                'OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden', 'OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
-                'OWOR.PlannedQty', '@CP_OF.U_Recibido', '@CP_OF.U_Procesado')
-            ->where('@CP_OF.Code', $code->Code)->get();
-        if ($index == 1) {
-            $one = DB::table('OWOR')
-                ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
-                ->leftJoin('@CP_OF', '@CP_OF.U_DocEntry', '=', 'OWOR.DocEntry')
-                ->select(DB::raw(OP::getEstacionActual($code->Code) . ' AS U_CT_ACT'), DB::raw(OP::getEstacionSiguiente($code->Code) . ' AS U_CT_SIG'),
-                    'OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden', 'OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
-                    'OWOR.PlannedQty', '@CP_OF.U_Recibido', '@CP_OF.U_Procesado')
-                ->where('@CP_OF.Code', $code->Code)->get();
-        } else {
-
-            $one = //array_merge($one, $order) ; //
-            $one->merge($order);
-            //dd($one);
-        }
-    }
-    //  $order = OP::find('492418');
-    return $one;
-});
-route::get('setpassword', function () {
-    try {
-        $password = Hash::make('1234');
-        DB::table('dbo.OHEM')
-            ->where('U_EmpGiro', 1349)
-            ->update(['U_CP_Password' => $password]);
-    } catch (\Exception $e) {
-        echo $e->getMessage();
-    }
-
-    echo 'hecho';
-});
-Route::post('cambio.password', 'Mod00_AdministradorController@cambiopassword');
-
 Route::get('admin/users', 'Mod00_AdministradorController@allUsers');
-Route::get('users/edit/{empid}', 'Mod00_AdministradorController@editUser');
 Route::get('admin/detalle-depto/{depto}', 'Mod00_AdministradorController@showUsers');
-Route::get('datatables.showusers', 'Mod00_AdministradorController@DataShowUsers')->name('datatables.showusers');
-//--nuevas rutas 27/08/2018');
 Route::get('admin/plantilla/{depto}', 'Mod00_AdministradorController@PlantillaExcel');
 Route::get('admin/Plantilla_PDF/{depto}', 'Mod00_AdministradorController@Plantilla_PDF');
+Route::get('datatables.showusers', 'Mod00_AdministradorController@DataShowUsers')->name('datatables.showusers');
+Route::get('users/edit/{empid}', 'Mod00_AdministradorController@editUser');
+Route::post('cambio.password', 'Mod00_AdministradorController@cambiopassword');
 
 //Rutas del Módulo de inventarios
 Route::get('admin/altaInventario', 'Mod00_AdministradorController@altaInventario');
@@ -155,11 +73,6 @@ Route::get('admin/mod_mon/{id}/{mensaje}', 'Mod00_AdministradorController@mod_mo
 Route::post('admin/mod_mon2', 'Mod00_AdministradorController@mod_mon2');
 Route::post('admin/mod_inv2', 'Mod00_AdministradorController@mod_inv2');
 Route::get('admin/generarPdf/{id}', 'Mod00_AdministradorController@generarPdf');
-
-Route::get('controlPiso', 'Mod01_ProduccionController@estacionSiguiente');
-Route::get('grupo/{id}', function ($id) {
-    Grupo::getInfo($id);
-});
 Route::get('admin/grupos/{id}', 'Mod00_AdministradorController@editgrupos');
 Route::post('admin/createModulo/{id}', 'Mod00_AdministradorController@createModulo');
 Route::post('admin/createMenu/{id}', 'Mod00_AdministradorController@createMenu');
@@ -167,37 +80,7 @@ Route::post('admin/createTarea/{id_grupo}', 'Mod00_AdministradorController@creat
 Route::get('admin/grupos/delete_modulo/{grupo}/{id}', 'Mod00_AdministradorController@deleteModulo');
 Route::get('admin/grupos/conf_modulo/{grupo}/{id}', 'Mod00_AdministradorController@confModulo');
 Route::get('admin/grupos/conf_modulo/{grupo}/quitar-tarea/{id}', 'Mod00_AdministradorController@deleteTarea');
-Route::get('help', function () {
 
-    $produccion = DB::select('SELECT "CP_ProdTerminada"."orden", "CP_ProdTerminada"."Pedido", "CP_ProdTerminada"."Codigo",
- "CP_ProdTerminada"."modelo", "CP_ProdTerminada"."VS", "CP_ProdTerminada"."fecha",
- "CP_ProdTerminada"."Name", "CP_ProdTerminada"."CardName", "CP_ProdTerminada"."Semana",
- "CP_ProdTerminada"."U_Tiempo", "CP_ProdTerminada"."Cantidad", "CP_ProdTerminada"."TVS",
- "CP_ProdTerminada"."TTiempo"
- FROM   "FUSIONL"."dbo"."CP_ProdTerminada" "CP_ProdTerminada"
- WHERE  ("CP_ProdTerminada"."fecha">=\'12/12/2017\' AND
- "CP_ProdTerminada"."fecha"<=\'12/12/2017\') AND
- ("CP_ProdTerminada"."Name"= (\'175 Inspeccion Final\')  OR "CP_ProdTerminada"."Name"= (CASE
- WHEN  \'175 Inspeccion Final\' like \'175%\' THEN N\'08 Inspeccionar Empaque\'
- END))
- ');
-
-    print_r($produccion);
-
-    dd(date('Y-m-d H:i:s'));
-    $index = 1;
-    $log = LOGOF::where('id', 1000)->first();
-    // dd($log);
-    //    $newCode = new OP();
-    //    $newCode->Code =12121212;
-    //    $newCode->save();
-    //    $varOP = OP::find(12121212);
-    $consecutivo = DB::select('SELECT TOP 1 Code FROM  [FUSIONL2].[dbo].[@CP_LOGOT] ORDER BY  U_FechaHora DESC');
-    //$consecutivo = ((int)$users->Code);
-    echo $consecutivo[0]->Code;
-    // echo $log->U_CT;
-
-});
 Route::get('datatable/{idGrup}/{idMod}', 'Mod00_AdministradorController@confModulo');
 Route::get('datatables.data', 'Mod00_AdministradorController@anyData')->name('datatables.data');
 Route::get('getAutocomplete', function () {
@@ -245,8 +128,7 @@ Route::post('nuevatarea', 'Mod00_AdministradorController@nuevatarea');
 | MOD01-PRODUCCION Routes
 |--------------------------------------------------------------------------
  */
-Route::get('home/REPORTE PRODUCCION', 'Reportes_ProduccionController@produccion1');
-Route::post('home/REPORTE PRODUCCION', 'Reportes_ProduccionController@produccion1');
+
 Route::get('home/TRASLADO ÷ AREAS', [
     'as' => 'traslado', 'uses' =>'Mod01_ProduccionController@traslados']);
 Route::post('home/TRASLADO ÷ AREAS', 'Mod01_ProduccionController@traslados');
@@ -261,16 +143,25 @@ Route::get('Mod01_Produccion/Noticias', 'HomeController@create');
 Route::get('leido/{id}', 'HomeController@UPT_Noticias');
 Route::post('/leido', 'HomeController@UPT_Noticias');
 
-// PDF de Historial por OP
+//REPORTE DE PRODUCCION
+Route::get('home/REPORTE PRODUCCION', 'Reportes_ProduccionController@produccion1');
+Route::post('home/REPORTE PRODUCCION', 'Reportes_ProduccionController@produccion1');
+//PDF de Historial por OP
 Route::get('home/ReporteOpPDF/{op}', 'Mod01_ProduccionController@ReporteOpPDF');
 Route::get('home/ReporteMaterialesPDF/{op}', 'Mod01_ProduccionController@ReporteMaterialesPDF');
 Route::get('home/ReporteProduccionPDF', 'Reportes_ProduccionController@ReporteProduccionPDF');
 Route::get('home/ReporteProduccionEXL', 'Reportes_ProduccionController@ReporteProduccionEXL');
-
-Route::get('/p', function () {
-  return DB::getDatabaseName();
-});
-
+//REPORTE DE HISTORIAL X OP
+Route::get('home/HISTORIAL OP', 'Reportes_ProduccionController@showModal');
+Route::post('home/reporte/HISTORIAL OP', 'Reportes_ProduccionController@historialOP');
+//REPORTE DE MATERIALES X OP
+Route::get('home/MATERIALES OP', 'Reportes_ProduccionController@produccion1');
+Route::post('home/MATERIALES OP', 'Reportes_ProduccionController@produccion1');
+/*
+|--------------------------------------------------------------------------
+| MOD07-CALIDAD Routes
+|--------------------------------------------------------------------------
+ */
 Route::get('home/NUEVO RECHAZO', 'Mod07_CalidadController@Rechazo');
 Route::post('RechazosNuevo', 'Mod07_CalidadController@RechazoIn');
 Route::get('Mod07_Calidad/Mod_Rechazo/{id}/{mensaje}', 'Mod07_CalidadController@Mod_Rechazo');
@@ -289,7 +180,7 @@ Route::post('/excel', 'Mod07_CalidadController@excel');
 Route::get('home/CALIDAD POR DEPTO','Mod07_CalidadController@repCalidad' );
 Route::post('home/CALIDAD POR DEPTO','Mod07_CalidadController@repCalidad2' );
 
-//RUTAS 112-CORTE PIEL///
+//REPORTE 112-CORTE PIEL///
 Route::get('home/112 CORTE DE PIEL','Mod01_ProduccionController@repCortePiel' );
 Route::post('home/112 CORTE DE PIEL','Mod01_ProduccionController@repCortePiel' );
 Route::post('home/reporte/DetinsPiel', 'Mod01_ProduccionController@repCortePiel');
@@ -323,3 +214,57 @@ Route::get('home/desPedidosCsv', 'Mod03_ComprasController@desPedidosCsv');
 Route::get('home/PedidosCsvPDF', 'Mod03_ComprasController@PedidosCsvPDF');
 ///Ruta Ayudas
 Route::get('home/ayudas_pdf/{PdfName}', 'HomeController@showPdf');
+Route::get('home/{r0}/ayudas_pdf/{PdfName}', 'HomeController@showPdf2');
+//Route::get('home/ayudas_pdf/{r1}/{PdfName}', 'HomeController@showPdf');
+//Route::get('home/ayudas_pdf/{r1}/{r2}/{PdfName}', 'HomeController@showPdf');
+
+
+
+ 
+ Route::get('/pruebas', function () {
+ $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
+ $vCmp->DbServerType="6"; 
+ $vCmp->server = "SERVER-SAPBO";
+ $vCmp->LicenseServer = "SERVER-SAPBO:30000";
+ $vCmp->CompanyDB = "Pruebas";
+ $vCmp->username = "manager";
+ $vCmp->password = "aqnlaaepp";
+ $vCmp->DbUserName = "sa";
+ $vCmp->DbPassword = "B1Admin";
+ $vCmp->UseTrusted = false;
+ $vCmp->language = "6";
+ $lRetCode = $vCmp->Connect;
+ //dd($lRetCode);
+ echo $vCmp->GetLastErrorDescription();
+ echo 'iniciada';
+ echo '<br>';
+ $vItem = $vCmp->GetBusinessObject("202");
+ $RetVal = $vItem->GetByKey("19848");
+ echo $vItem->ProductionOrderStatus;
+ echo '<br>';
+ $vItem->ProductionOrderStatus = 1;
+ $vItem->Update;
+ //if ($vCmp->InTransaction){
+     //$vCmp->EndTransaction();
+  //   dd('cerrada');
+ //}
+ echo $vCmp->GetLastErrorDescription();
+ echo $vItem->ProductionOrderStatus;
+     //return view('Mod00_Administrador.pruebas');
+ });
+ Route::get('setpassword', function () {
+    try {
+        $password = Hash::make('1234');
+        DB::table('dbo.OHEM')
+            ->where('U_EmpGiro', 1349)
+            ->update(['U_CP_Password' => $password]);
+    } catch (\Exception $e) {
+        echo $e->getMessage();
+    }
+
+    echo 'hecho';
+});
+ Route::get('/p', function () {
+      dd(OP::getInfoOwor('15385'));
+    return DB::getDatabaseName();
+  });
