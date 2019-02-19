@@ -14,7 +14,7 @@
                 <div >
                     <div class="visible-xs"><br><br></div>
                     <h3 class="page-header">
-                        Usuarios
+                        Módulo Administrador
                     </h3>
                     
                        <div class= "col-lg-12 col-md-12 col-sm-12">
@@ -25,7 +25,7 @@
                             <i class="fa fa-dashboard"></i>  <a href="{!! url('home') !!}">Inicio</a>
                         </li>
                         <li>
-                            <i class="fa fa-archive"></i> <a href="admin/users">Usuarios</a>
+                            <i class="fa fa-archive"></i> <a href="admin/users">Administrador</a>
                        </li>
                     </ol>
                 </div>

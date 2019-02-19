@@ -479,7 +479,7 @@ class Mod01_ProduccionController extends Controller
                 Session::put('op', $Code_actual->U_DocEntry);
                 $U_CT_siguiente = OP::getEstacionSiguiente($Code_actual->Code, 2); //obtiene la estacion siguiente formato numero
 
-$dt = date('Ymd h:m:s');
+$dt = date('Ymd h:i');
 //AVANCE DE OP (NO PIEL)
 //Cuando una orden se libera en planeación revisamos si se le cargara piel 106 (revisando su ruta), 
 //en caso de que no lleve piel, entonces le cambiamos en status y le colocamos la fecha de inicio.
@@ -497,6 +497,7 @@ if($Code_actual->U_CT == '100' && OP::ContieneRuta($Code_actual->U_DocEntry, '10
 //TERMINA AVANCE DE OP (NO PIEL)
 //AVANCE DE OP (PIEL)
 //Se modifica status y fecha, necesitamosrevisar que tenga piel.
+
 if($Code_actual->U_CT == '106'){
     $consumido = DB::table('WOR1')
     ->leftJoin('OITM','WOR1.ItemCode', '=', 'OITM.ItemCode')
@@ -505,8 +506,7 @@ if($Code_actual->U_CT == '106'){
     ->value('WOR1.IssuedQty');
 
 if($consumido < 1 || is_null($consumido)){
-Session::flash('error', 'Esta orden necesita primero que le carges Piel en SAP');
-return redirect()->back();
+return redirect()->back()->withErrors(array('message' => 'Esta orden necesita primero que le carges Piel en SAP'));
 }else{
     DB::table('OWOR')
         ->where('DocEntry', '=', $Code_actual->U_DocEntry)
@@ -518,12 +518,12 @@ return redirect()->back();
   //  }
 }
 }
+
 //TERMINA AVANCE DE OP (PIEL)
 
 //DETERMINA SI LA ORDEN DE PRODUCCION LLEGO A LA ULTIMA ESTACION
 if ($U_CT_siguiente == $Code_actual->U_CT) {
-    Session::flash('error', 'La estacion ' . OP::getEstacionSiguiente($Code_actual->Code, 1) . ' es la última');
-    return redirect()->back();
+    return redirect()->back()->withErrors(array('message' => 'La estacion ' . OP::getEstacionSiguiente($Code_actual->Code, 1) . ' es la última'));
 }
 
                 //  $cant_pendiente = $Code_actual->U_Recibido - $Code_actual->U_Procesado;

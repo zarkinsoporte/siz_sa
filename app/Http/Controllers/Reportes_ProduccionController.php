@@ -406,5 +406,33 @@ $produccion = DB::select('SELECT "CP_ProdTerminada"."orden", "CP_ProdTerminada".
            }else {
             return redirect()->route('auth/login');
     }
-    }    
+    }
+    
+    public function backorder(){
+        if (Auth::check()) {
+            $user = Auth::user();
+            $actividades = $user->getTareas();
+            
+            set_time_limit(0);
+            $query = 'EXEC SP_AsignaCascoAFunda';
+            $query = '(' . $query . ') back';
+            \DB::table(\DB::raw($query))->chunk(100, function($rows){
+               dd($rows);
+            });
+         
+        dd($consulta);
+        
+        
+        $data = array(
+            'data' => $consulta,
+            'op' => $op,
+            'actividades' => $actividades,
+            'ultimo' => count($actividades),
+            'db' => DB::getDatabaseName(),            
+        );
+        return view('Mod01_Produccion.ReporteBackOrder', $data);   
+    }else {
+        return redirect()->route('auth/login');
+    }
+    }
 }

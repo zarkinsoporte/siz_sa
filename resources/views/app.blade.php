@@ -20,8 +20,8 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="http://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">      
     <link rel="shortcut icon" href="images/favicons/IconZrk.ico" type="image/x-icon" >
-    <link rel="icon" href="imagen/favicons/IconoZain.png" sizes="32x32" ><link rel="icon"
 
+    <script data-require="jquery" data-semver="2.0.3" src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -32,9 +32,7 @@
 {!! Html::style('assets/css/bootstrap.css') !!}
 {!! Html::style('assets/css/bootstrap-switch.min.css') !!}
 {!! Html::style('assets/css/bootstrap-switch.css') !!}
-
-{!! Html::style('assets/css/font-awesome.css') !!}
-
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" type="text/css">
 {!! Html::style('assets/css/sb-admin.css') !!}
 {!! Html::style('assets/css/responsive.css') !!}
 
@@ -137,11 +135,6 @@
 
 
 </body>
-
-
-<script
-src="https://code.jquery.com/jquery-3.2.1.js">
-</script>
        
  {!! Html::script('assets/js/bootstrap-datepicker.js') !!}
  {!! Html::script('assets/js/bootstrap-datepicker.es.min.js') !!}

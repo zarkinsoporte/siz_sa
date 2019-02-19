@@ -168,7 +168,8 @@ switch ($t_user->position) {
     break;
     case '5'; //Almacén de piel
     ?>
-    <th>Retroceder OP</th><th>Avanzar OP</th>
+    <th>Retroceder OP</th>
+    <th>Avanzar OP</th>
     <?php
     break;
     case '4'; //Supervisor SAP
@@ -232,13 +233,18 @@ data-target="#Retroceder" class="btn btn-info btn-lg" data-codem="{{$of->U_Orden
     <?php   
     break;        
     case '5'; //Almacén de 
+       $desabilitarretroceso = '';
     ?> <!--Boton Retroceder--> 
-       @if($of->U_Orden == '109') 
-       <td> <a class="btn btn-danger" data-toggle="modal"
+       @if($of->U_Orden !== '109') 
+       <?php   
+        $desabilitarretroceso = 'disabled';
+       ?>
+       @endif
+       <td> <a class="btn btn-danger {{ $desabilitarretroceso}}" data-toggle="modal"
        data-target="#Retroceder" class="btn btn-info btn-lg" data-codem="{{$of->U_Orden}}" data-recibido="{{$of->U_Recibido - $of->U_Procesado}}">
        <i class="fa fa-mail-reply-all" aria-hidden="1">  Retroceder</i>
        </a> </td>
-       @endif
+      
 <!--Boton Avanzar-->
         <td> <a class="btn btn-success {{$of->avanzar}}" data-toggle="modal"
         data-target="#cantidad" data-whatever="{{$of->Code}}"

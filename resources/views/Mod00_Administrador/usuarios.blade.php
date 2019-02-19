@@ -107,7 +107,7 @@
                         </div>
                     </div>
                 </div>
-                <script data-require="jquery@*" data-semver="2.0.3" src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+               
                 <script type="text/javascript" >
                     $(document).ready(function (event) {
 
