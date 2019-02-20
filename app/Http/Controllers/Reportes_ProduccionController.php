@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers;
+
 use App\Http\Controllers\Controller;
 use App\User;
 use App\OP;
@@ -9,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use Session;
 use Maatwebsite\Excel\Facades\Excel;
-
+use Datatables;
 ini_set('max_execution_time', 90);
 class Reportes_ProduccionController extends Controller
 {
@@ -40,17 +41,17 @@ class Reportes_ProduccionController extends Controller
         if (Auth::check()) {
             $user = Auth::user();
             $actividades = $user->getTareas();
-    
-                  if ($enviado == 'send') {
+
+            if ($enviado == 'send') {
                 $departamento = $request->input('dep');
                 //  $fecha = explode(" - ",$request->input('date_range'));
                 //$dt = date('d-m-Y H:i:s');
                 $fechaI = Date('d-m-y', strtotime(str_replace('-', '/', $request->input('FechIn'))));
-                $fechaF = Date('d-m-y', strtotime(str_replace('-', '/', $request->input('FechaFa'))));  
+                $fechaF = Date('d-m-y', strtotime(str_replace('-', '/', $request->input('FechaFa'))));
                 $fecha_desde = strtotime($request->input('FechIn'));
                 $fecha_hasta = strtotime($request->input('FechaFa'));
-if($fecha_hasta>=$fecha_desde){  
-$clientes = DB::select('SELECT CardName from  "CP_ProdTerminada" WHERE  (fecha>=\'' . $fechaI . '\' AND
+                if ($fecha_hasta >= $fecha_desde) {
+                    $clientes = DB::select('SELECT CardName from  "CP_ProdTerminada" WHERE  (fecha>=\'' . $fechaI . '\' AND
   fecha<=\'' . $fechaF . '\') AND
  (Name= (\'' . $departamento . '\')  OR Name= (CASE
  WHEN  \'' . $departamento . '\' like \'112%\' THEN N\'01 Corte de Piel\'
@@ -67,7 +68,7 @@ $clientes = DB::select('SELECT CardName from  "CP_ProdTerminada" WHERE  (fecha>=
  WHEN  \'' . $departamento . '\' like \'175%\' THEN N\'08 Inspeccionar Empaque\'
  END))
  GROUP BY CardName, fecha, Name');
-$produccion = DB::select('SELECT "CP_ProdTerminada"."orden", "CP_ProdTerminada"."Pedido", "CP_ProdTerminada"."Codigo",
+                    $produccion = DB::select('SELECT "CP_ProdTerminada"."orden", "CP_ProdTerminada"."Pedido", "CP_ProdTerminada"."Codigo",
  "CP_ProdTerminada"."modelo", "CP_ProdTerminada"."VS", "CP_ProdTerminada"."fecha",
  "CP_ProdTerminada"."CardName", 
  "CP_ProdTerminada"."Cantidad", "CP_ProdTerminada"."TVS"
@@ -89,9 +90,9 @@ $produccion = DB::select('SELECT "CP_ProdTerminada"."orden", "CP_ProdTerminada".
  WHEN  \'' . $departamento . '\' like \'175%\' THEN N\'08 Inspeccionar Empaque\'
  END))
  ORDER BY "CP_ProdTerminada"."CardName", "CP_ProdTerminada"."orden"');
-}else {
-    return redirect()->back()->withErrors(array('message' => 'de rango de Fechas'));
-  }
+                } else {
+                    return redirect()->back()->withErrors(array('message' => 'de rango de Fechas'));
+                }
                 $result = json_decode(json_encode($produccion), true);
                 $finalarray = [];
                 foreach ($clientes as $client) {
@@ -101,15 +102,15 @@ $produccion = DB::select('SELECT "CP_ProdTerminada"."orden", "CP_ProdTerminada".
                     $finalarray[$client->CardName] = $miarray;
                 }
                 //dd(($finalarray['CASTRO HERRERA ALEJANDRO ISAAC'][0]['orden']));
-                $values = ['produccion'=>$produccion,'actividades' => $actividades, 'ultimo' => count($actividades), 'ofs' => $finalarray, 'departamento' => $departamento, 'fechaI' => $fechaI, 'fechaF' => $fechaF, 'tvs' => 0, 'cant' => 0];
+                $values = ['produccion' => $produccion, 'actividades' => $actividades, 'ultimo' => count($actividades), 'ofs' => $finalarray, 'departamento' => $departamento, 'fechaI' => $fechaI, 'fechaF' => $fechaF, 'tvs' => 0, 'cant' => 0];
                 Session::flash('Ocultamodal', 1);
                 //dd($produccion);
-                $pdf_array=[
-                     $produccion,
-                     'del día '.$fechaI.' al '.$fechaF,
-                     $departamento
-                ];      
-                Session::put('repP', $values);      
+                $pdf_array = [
+                    $produccion,
+                    'del día ' . $fechaI . ' al ' . $fechaF,
+                    $departamento
+                ];
+                Session::put('repP', $values);
                 Session::put('pdf_array', $pdf_array);
                 return view('Mod01_Produccion.produccionGeneral', $values);
                 $compiled = view('Mod01_Produccion.produccionGeneral', $values)->render();
@@ -117,7 +118,6 @@ $produccion = DB::select('SELECT "CP_ProdTerminada"."orden", "CP_ProdTerminada".
                 Session::flash('Ocultamodal', false);
                 return view('Mod01_Produccion.produccionGeneral', ['actividades' => $actividades, 'ultimo' => count($actividades)]);
             }
-
         } else {
             return redirect()->route('auth/login');
         }
@@ -131,85 +131,89 @@ $produccion = DB::select('SELECT "CP_ProdTerminada"."orden", "CP_ProdTerminada".
         $pdf = \PDF::loadView('Mod01_Produccion.produccionGeneralPDF', compact('valores', 'fecha', 'depto'));
         //$pdf = new FPDF('L', 'mm', 'A4');
         $pdf->setOptions(['isPhpEnabled' => true]);
-//        Session::forget('values');
+        //        Session::forget('values');
         return $pdf->stream('Siz_Reporte_Produccion ' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
     }
     public function ReporteProduccionEXL()
     {
-        if(Session::has ('repP')){          
-            $values=Session::get('repP');
-            Excel::create('Siz_Reporte_Produccion_General' . ' - ' . $hoy = date("d/m/Y").'', function($excel)use($values) {
-             $excel->sheet('Hoja 1', function($sheet) use($values){
-                //$sheet->margeCells('A1:F5');     
-                $sheet->row(1, [
-                   'Cliente','Fecha','Orden','Pedido','Código','Modelo','VS','Cantidad','Total VS'
-                ]);
-               //Datos    
-               $fila = 2;     
-            foreach ( $values['produccion'] as $produccion){
-              //  $tvs= $tvs + $produccion->TVS;
-                //$cant = $cant + $produccion->Cantidad;
-                $sheet->row($fila, 
-                [
-                  $produccion->CardName,    
-                   substr($produccion->fecha,0,10),
-                   $produccion->orden,
-                   $produccion->Pedido,
-                   $produccion->Codigo,
-                   $produccion->modelo,
-                   $produccion->VS,
-                   $produccion->Cantidad,
-                   $produccion->TVS,
-                 //  $produccion->cant,
-                   //$produccion->tvs,
-                    ]);	
-                    $fila ++;
-                }
-    });         
-    })->export('xlsx');
-           }else {
+        if (Session::has('repP')) {
+            $values = Session::get('repP');
+            Excel::create('Siz_Reporte_Produccion_General' . ' - ' . $hoy = date("d/m/Y") . '', function ($excel) use ($values) {
+                $excel->sheet('Hoja 1', function ($sheet) use ($values) {
+                    //$sheet->margeCells('A1:F5');     
+                    $sheet->row(1, [
+                        'Cliente', 'Fecha', 'Orden', 'Pedido', 'Código', 'Modelo', 'VS', 'Cantidad', 'Total VS'
+                    ]);
+                    //Datos    
+                    $fila = 2;
+                    foreach ($values['produccion'] as $produccion) {
+                        //  $tvs= $tvs + $produccion->TVS;
+                        //$cant = $cant + $produccion->Cantidad;
+                        $sheet->row(
+                            $fila,
+                            [
+                                $produccion->CardName,
+                                substr($produccion->fecha, 0, 10),
+                                $produccion->orden,
+                                $produccion->Pedido,
+                                $produccion->Codigo,
+                                $produccion->modelo,
+                                $produccion->VS,
+                                $produccion->Cantidad,
+                                $produccion->TVS,
+                                //  $produccion->cant,
+                                //$produccion->tvs,
+                            ]
+                        );
+                        $fila++;
+                    }
+                });
+            })->export('xlsx');
+        } else {
             return redirect()->route('auth/login');
-    }
+        }
     }
 
-    public function showModal(Request $request){
-       
-        $nombre = str_replace('%20', ' ', explode('/',$request->path())[1]);
+    public function showModal(Request $request)
+    {
+
+        $nombre = str_replace('%20', ' ', explode('/', $request->path())[1]);
 
         switch ($nombre) {
             case "HISTORIAL OP":
-                $fechas = false;                
+                $fechas = false;
                 $fieldOtroNumber = 'OP';
                 $fieldOtroText = '';
                 break;
             case "MATERIALES OP":
-                $fechas = false;                
+                $fechas = false;
                 $fieldOtroNumber = 'OP';
                 $fieldOtroText = '';
-                break;         
+                break;
             default:
-                $fechas = false; 
+                $fechas = false;
                 $fieldOtroNumber = ''; //se usa por ejemplo para el valor de OP              
                 $fieldOtroText = '';
         }
-        
+
 
         if (Auth::check()) {
             $user = Auth::user();
             $actividades = $user->getTareas();
-            return view('Mod01_Produccion.modalParametros', ['actividades' => $actividades, 'ultimo' => count($actividades), 'nombre'=>$nombre, 'fieldOtroNumber'=> $fieldOtroNumber, 'fieldOtroText'=> $fieldOtroText, 'fechas'=> $fechas] );
-        }else {
+            return view('Mod01_Produccion.modalParametros', ['actividades' => $actividades, 'ultimo' => count($actividades), 'nombre' => $nombre, 'fieldOtroNumber' => $fieldOtroNumber, 'fieldOtroText' => $fieldOtroText, 'fechas' => $fechas]);
+        } else {
             return redirect()->route('auth/login');
         }
     }
 
-    public function historialOP(Request $request){
+    public function historialOP(Request $request)
+    {
         if (Auth::check()) {
             $user = Auth::user();
             $actividades = $user->getTareas();
-       
-        $op = $request->input('fieldOtroNumber');
-        $consulta = DB::select(DB::raw("SELECT [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,OHEM.firstName + ' ' + OHEM.lastName AS Empleado,
+
+            $op = $request->input('fieldOtroNumber');
+            $consulta = DB::select(DB::raw("SELECT [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,OHEM.firstName + ' ' + OHEM.lastName AS Empleado,
         DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)) AS FechaF ,
        [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
         SUM([@CP_LOGOF].U_Cantidad) AS U_CANTIDAD,
@@ -225,80 +229,84 @@ $produccion = DB::select('SELECT "CP_ProdTerminada"."orden", "CP_ProdTerminada".
          DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)),[@CP_LOGOF].U_DocEntry
         ,OWOR.ItemCode , OITM.ItemName
         ORDER BY [@CP_LOGOF].U_CT, FechaF, Empleado"));
-     Session::put('rephistorial', $consulta);
+            Session::put('rephistorial', $consulta);
 
-        $info = OP::getInfoOwor($op);
-        switch ($info->Status) {
-            case "P":
-               $status = 'Planificada';
-                break;
-            case "R": 
-               $status = 'Liberada';
-                break;         
-            case "L": 
-               $status = 'Cerrada';
-                break;         
-            case "C": 
-               $status = 'Cancelada';
-                break;         
-        }
-        $data = array(
-            'data' => $consulta,
-            'op' => $op,
-            'actividades' => $actividades,
-            'ultimo' => count($actividades),
-            'info' => $info,
-            'status' => $status
-        );
-        return view('Mod01_Produccion.ReporteHistorialOP', $data);   
-    }else {
-        return redirect()->route('auth/login');
-    }
-    }
-
-    public function historialOPXLS(){
-        if(Session::has ('rephistorial')){          
-            $values=Session::get('rephistorial');
-            if(count($values) == 0){
-                return redirect()->back()->withErrors(array('message' => '!!Sin registros!!')); 
+            $info = OP::getInfoOwor($op);
+            switch ($info->Status) {
+                case "P":
+                    $status = 'Planificada';
+                    break;
+                case "R":
+                    $status = 'Liberada';
+                    break;
+                case "L":
+                    $status = 'Cerrada';
+                    break;
+                case "C":
+                    $status = 'Cancelada';
+                    break;
             }
-            Excel::create('Siz_Reporte_HistorialOP' . ' - ' . $hoy = date("d/m/Y").'', function($excel)use($values) {
-             $excel->sheet('Hoja 1', function($sheet) use($values){
-                //$sheet->margeCells('A1:F5');     
-                $sheet->row(1, [
-                    'Código: '. $values[0]->ItemCode, 'Descripción: '. $values[0]->ItemName
-                 ]);
-                $sheet->row(3, [
-                   'Fecha','Estación','Empleado','Cantidad'
-                ]);
-               //Datos    
-               $fila = 4;     
-            foreach ( $values as $fil){
-              //  $tvs= $tvs + $produccion->TVS;
-                //$cant = $cant + $produccion->Cantidad;
-                $sheet->row($fila, 
-                [                
-                   date('d-m-Y', strtotime($fil->FechaF)),                                                     
-                   $fil->NAME,
-                   $fil->Empleado,
-                   $fil->U_CANTIDAD
-                ]);	
-                    $fila ++;
-                }
-    });         
-    })->export('xlsx');
-           }else {
+            $data = array(
+                'data' => $consulta,
+                'op' => $op,
+                'actividades' => $actividades,
+                'ultimo' => count($actividades),
+                'info' => $info,
+                'status' => $status
+            );
+            return view('Mod01_Produccion.ReporteHistorialOP', $data);
+        } else {
             return redirect()->route('auth/login');
-    }
+        }
     }
 
-    public function materialesOP(Request $request){
+    public function historialOPXLS()
+    {
+        if (Session::has('rephistorial')) {
+            $values = Session::get('rephistorial');
+            if (count($values) == 0) {
+                return redirect()->back()->withErrors(array('message' => '!!Sin registros!!'));
+            }
+            Excel::create('Siz_Reporte_HistorialOP' . ' - ' . $hoy = date("d/m/Y") . '', function ($excel) use ($values) {
+                $excel->sheet('Hoja 1', function ($sheet) use ($values) {
+                    //$sheet->margeCells('A1:F5');     
+                    $sheet->row(1, [
+                        'Código: ' . $values[0]->ItemCode, 'Descripción: ' . $values[0]->ItemName
+                    ]);
+                    $sheet->row(3, [
+                        'Fecha', 'Estación', 'Empleado', 'Cantidad'
+                    ]);
+                    //Datos    
+                    $fila = 4;
+                    foreach ($values as $fil) {
+                        //  $tvs= $tvs + $produccion->TVS;
+                        //$cant = $cant + $produccion->Cantidad;
+                        $sheet->row(
+                            $fila,
+                            [
+                                date('d-m-Y', strtotime($fil->FechaF)),
+                                $fil->NAME,
+                                $fil->Empleado,
+                                $fil->U_CANTIDAD
+                            ]
+                        );
+                        $fila++;
+                    }
+                });
+            })->export('xlsx');
+        } else {
+            return redirect()->route('auth/login');
+        }
+    }
+
+    public function materialesOP(Request $request)
+    {
         if (Auth::check()) {
             $user = Auth::user();
             $actividades = $user->getTareas();
-       
-        $op = $request->input('fieldOtroNumber');
-        $consulta = DB::select(DB::raw("SELECT b.DocNum AS DocNumOf,
+
+            $op = $request->input('fieldOtroNumber');
+            $consulta = DB::select(DB::raw("SELECT b.DocNum AS DocNumOf,
         '*' + CAST(b.DocNum as varchar (50)) + '*' as CodBarras,
         b.ItemCode,
         c.ItemName,
@@ -335,104 +343,100 @@ $produccion = DB::select('SELECT "CP_ProdTerminada"."orden", "CP_ProdTerminada".
        AND NOT (f.InvntItem='N' AND f.SellItem='N' AND f.PrchseItem='N' AND f.AssetItem='N')
        AND f.ItemName  not like  '%Gast%'
     ORDER BY CONVERT(INT, f.U_Estacion)"));
-        //dd($consulta);
-        Session::put('repmateriales', $consulta);
-        $info = OP::getInfoOwor($op);
-        Session::put('repinfo', $info);
-        switch ($info->Status) {
-            case "P":
-               $status = 'Planificada';
-                break;
-            case "R": 
-               $status = 'Liberada';
-                break;         
-            case "L": 
-               $status = 'Cerrada';
-                break;         
-            case "C": 
-               $status = 'Cancelada';
-                break;         
+            //dd($consulta);
+            Session::put('repmateriales', $consulta);
+            $info = OP::getInfoOwor($op);
+            Session::put('repinfo', $info);
+            switch ($info->Status) {
+                case "P":
+                    $status = 'Planificada';
+                    break;
+                case "R":
+                    $status = 'Liberada';
+                    break;
+                case "L":
+                    $status = 'Cerrada';
+                    break;
+                case "C":
+                    $status = 'Cancelada';
+                    break;
+            }
+            $data = array(
+                'data' => $consulta,
+                'op' => $op,
+                'actividades' => $actividades,
+                'ultimo' => count($actividades),
+                'db' => DB::getDatabaseName(),
+                'info' => $info,
+                'status' => $status
+            );
+            return view('Mod01_Produccion.ReporteMaterialesOP', $data);
+        } else {
+            return redirect()->route('auth/login');
         }
-        $data = array(
-            'data' => $consulta,
-            'op' => $op,
-            'actividades' => $actividades,
-            'ultimo' => count($actividades),
-            'db' => DB::getDatabaseName(),
-            'info' => $info,
-            'status' => $status
-        );
-        return view('Mod01_Produccion.ReporteMaterialesOP', $data);   
-    }else {
-        return redirect()->route('auth/login');
-    }
     }
 
-    public function materialesOPXLS(){
-        if(Session::has ('repmateriales')){          
-            $values=Session::get('repmateriales');
+    public function materialesOPXLS()
+    {
+        if (Session::has('repmateriales')) {
+            $values = Session::get('repmateriales');
             //dd($values);
             $info = Session::get('repinfo');
-            if(count($values) == 0){
-                return redirect()->back()->withErrors(array('message' => '!!Sin registros!!')); 
+            if (count($values) == 0) {
+                return redirect()->back()->withErrors(array('message' => '!!Sin registros!!'));
             }
-            Excel::create('Siz_Reporte_MaterialesOP' . ' - ' . $hoy = date("d/m/Y").'', function($excel)use($values, $info) {
-             $excel->sheet('Hoja 1', function($sheet) use($values, $info){
-                //$sheet->margeCells('A1:F5');     
-                $sheet->row(1, [
-                    'Código: '. $info->ItemCode, 'Descripción: '. $info->ItemName
-                 ]);
-                $sheet->row(3, [
-                   'Fecha de Entrega', 'Estación', 'Código','Descripción','UM', 'Solicitada'
-                ]);
-               //Datos    
-               $fila = 4;     
-            foreach ( $values as $fil){
-              //  $tvs= $tvs + $produccion->TVS;
-                //$cant = $cant + $produccion->Cantidad;
-                $sheet->row($fila, 
-                [                  
-                   date('d-m-Y', strtotime($fil->FechaEntrega)),
-                   $fil->Estacion,                                   
-                   $fil->Codigo,
-                   $fil->Descripcion,
-                   $fil->InvntryUom,
-                   number_format($fil->Cantidad,2)
-                ]);	
-                    $fila ++;
-                }
-    });         
-    })->export('xlsx');
-           }else {
+            Excel::create('Siz_Reporte_MaterialesOP' . ' - ' . $hoy = date("d/m/Y") . '', function ($excel) use ($values, $info) {
+                $excel->sheet('Hoja 1', function ($sheet) use ($values, $info) {
+                    //$sheet->margeCells('A1:F5');     
+                    $sheet->row(1, [
+                        'Código: ' . $info->ItemCode, 'Descripción: ' . $info->ItemName
+                    ]);
+                    $sheet->row(3, [
+                        'Fecha de Entrega', 'Estación', 'Código', 'Descripción', 'UM', 'Solicitada'
+                    ]);
+                    //Datos    
+                    $fila = 4;
+                    foreach ($values as $fil) {
+                        //  $tvs= $tvs + $produccion->TVS;
+                        //$cant = $cant + $produccion->Cantidad;
+                        $sheet->row(
+                            $fila,
+                            [
+                                date('d-m-Y', strtotime($fil->FechaEntrega)),
+                                $fil->Estacion,
+                                $fil->Codigo,
+                                $fil->Descripcion,
+                                $fil->InvntryUom,
+                                number_format($fil->Cantidad, 2)
+                            ]
+                        );
+                        $fila++;
+                    }
+                });
+            })->export('xlsx');
+        } else {
             return redirect()->route('auth/login');
+        }
     }
+
+    public function backorder()
+    {
+        if (Auth::check()) {            
+                $user = Auth::user();
+                $actividades = $user->getTareas(); 
+                $ultimo = count($actividades);
+            return view('Mod01_Produccion.ReporteBackOrder', compact('user', 'actividades', 'ultimo'));
+        } else {
+            return redirect()->route('auth/login');
+        }
     }
-    
-    public function backorder(){
-        if (Auth::check()) {
-            $user = Auth::user();
-            $actividades = $user->getTareas();
-            
-            set_time_limit(0);
-            $query = 'EXEC SP_AsignaCascoAFunda';
-            $query = '(' . $query . ') back';
-            \DB::table(\DB::raw($query))->chunk(100, function($rows){
-               dd($rows);
-            });
-         
-        dd($consulta);
-        
-        
-        $data = array(
-            'data' => $consulta,
-            'op' => $op,
-            'actividades' => $actividades,
-            'ultimo' => count($actividades),
-            'db' => DB::getDatabaseName(),            
-        );
-        return view('Mod01_Produccion.ReporteBackOrder', $data);   
-    }else {
-        return redirect()->route('auth/login');
-    }
+    public function DataShowbackorder()
+    {
+        $bo =  DB::table('Vw_BackOrderExcel')
+        ->select('OP', 'Pedido', 'fechapedido', 'OC', 'd_proc', 'no_serie', 'cliente', 'codigo1', 'codigo3', 'Descripcion',
+		'Cantidad', 'VSind', 'VS', 'destacion', 'U_GRUPO', 'Secue', 'SecOT', 'SEMANA2', 'fentrega',
+		'fechaentregapedido', 'SEMANA3', 'u_fproduccion', 'prioridad', 'comments', 'u_especial', 'modelo');        
+
+        return Datatables::of($bo)->make(true);
     }
 }

@@ -50,9 +50,11 @@ Route::get('viewpassword', ['as' => 'viewpassword', 'uses' => 'Auth\FunctionsCon
 Route::get('MOD00-ADMINISTRADOR', 'Mod00_AdministradorController@index');
 Route::get('admin/users', 'Mod00_AdministradorController@allUsers');
 Route::get('admin/detalle-depto/{depto}', 'Mod00_AdministradorController@showUsers');
+Route::get('BACK ORDER', 'Reportes_ProduccionController@backorder');
 Route::get('admin/plantilla/{depto}', 'Mod00_AdministradorController@PlantillaExcel');
 Route::get('admin/Plantilla_PDF/{depto}', 'Mod00_AdministradorController@Plantilla_PDF');
 Route::get('datatables.showusers', 'Mod00_AdministradorController@DataShowUsers')->name('datatables.showusers');
+Route::get('datatables.showbackorder', 'Reportes_ProduccionController@DataShowbackorder')->name('datatables.showbackorder');
 Route::get('users/edit/{empid}', 'Mod00_AdministradorController@editUser');
 Route::post('cambio.password', 'Mod00_AdministradorController@cambiopassword');
 
@@ -159,6 +161,8 @@ Route::get('home/reporte/historialXLS', 'Reportes_ProduccionController@historial
 Route::get('home/MATERIALES OP', 'Reportes_ProduccionController@showModal');
 Route::post('home/reporte/MATERIALES OP', 'Reportes_ProduccionController@materialesOP');
 Route::get('home/reporte/materialesXLS', 'Reportes_ProduccionController@materialesOPXLS');
+//REPORTE BACK ORDER
+Route::get('home/BACK ORDER', 'Reportes_ProduccionController@backorder');
 /*
 |--------------------------------------------------------------------------
 | MOD07-CALIDAD Routes
@@ -224,34 +228,34 @@ Route::get('home/{r0}/ayudas_pdf/{PdfName}', 'HomeController@showPdf2');
 
  
  Route::get('/pruebas', function () {
- $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
- $vCmp->DbServerType="6"; 
- $vCmp->server = "SERVER-SAPBO";
- $vCmp->LicenseServer = "SERVER-SAPBO:30000";
- $vCmp->CompanyDB = "Pruebas";
- $vCmp->username = "manager";
- $vCmp->password = "aqnlaaepp";
- $vCmp->DbUserName = "sa";
- $vCmp->DbPassword = "B1Admin";
- $vCmp->UseTrusted = false;
- $vCmp->language = "6";
- $lRetCode = $vCmp->Connect;
- //dd($lRetCode);
- echo $vCmp->GetLastErrorDescription();
- echo 'iniciada';
- echo '<br>';
- $vItem = $vCmp->GetBusinessObject("202");
- $RetVal = $vItem->GetByKey("19848");
- echo $vItem->ProductionOrderStatus;
- echo '<br>';
- $vItem->ProductionOrderStatus = 1;
- $vItem->Update;
- //if ($vCmp->InTransaction){
-     //$vCmp->EndTransaction();
-  //   dd('cerrada');
- //}
- echo $vCmp->GetLastErrorDescription();
- echo $vItem->ProductionOrderStatus;
+//  $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
+//  $vCmp->DbServerType="6"; 
+//  $vCmp->server = "SERVER-SAPBO";
+//  $vCmp->LicenseServer = "SERVER-SAPBO:30000";
+//  $vCmp->CompanyDB = "Pruebas";
+//  $vCmp->username = "manager";
+//  $vCmp->password = "aqnlaaepp";
+//  $vCmp->DbUserName = "sa";
+//  $vCmp->DbPassword = "B1Admin";
+//  $vCmp->UseTrusted = false;
+//  $vCmp->language = "6";
+//  $lRetCode = $vCmp->Connect;
+//  //dd($lRetCode);
+//  echo $vCmp->GetLastErrorDescription();
+//  echo 'iniciada';
+//  echo '<br>';
+//  $vItem = $vCmp->GetBusinessObject("202");
+//  $RetVal = $vItem->GetByKey("19848");
+//  echo $vItem->ProductionOrderStatus;
+//  echo '<br>';
+//  $vItem->ProductionOrderStatus = 1;
+//  $vItem->Update;
+//  //if ($vCmp->InTransaction){
+//      //$vCmp->EndTransaction();
+//   //   dd('cerrada');
+//  //}
+//  echo $vCmp->GetLastErrorDescription();
+//  echo $vItem->ProductionOrderStatus;
      //return view('Mod00_Administrador.pruebas');
  });
  Route::get('setpassword', function () {
@@ -267,6 +271,6 @@ Route::get('home/{r0}/ayudas_pdf/{PdfName}', 'HomeController@showPdf2');
     echo 'hecho';
 });
  Route::get('/p', function () {
-      dd(OP::getInfoOwor('15385'));
+    
     return DB::getDatabaseName();
   });

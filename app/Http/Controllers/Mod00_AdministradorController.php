@@ -83,8 +83,12 @@ class Mod00_AdministradorController extends Controller
 
     public function showUsers($depto)
     {
-
-        return view('Mod00_Administrador.usuariosDepto', compact('depto'));
+        if (Auth::check()) {
+            return view('Mod00_Administrador.usuariosDepto', compact('depto'));
+            }else{
+                return redirect()->route('auth/login');
+            }
+        
     }
     public function DataShowUsers(Request $request)
     {
@@ -708,13 +712,13 @@ public function Noticia()
     {
         DB::table('Siz_Noticias')->insert(
             [
-             'Autor'=>$Nom_User,
-             'Destinatario' =>$N_Emp->U_EmpGiro, 
-             'Descripcion' => $reason,
-             'Estacion_Act' => $Est_act,
-             'Estacion_Destino' => $Est_ant,
-             'Cant_Enviada'=>$cant_r,
-             'Nota' => $nota,
+            //  'Autor'=>$Nom_User,
+            //  'Destinatario' =>$N_Emp->U_EmpGiro, 
+            //  'Descripcion' => $reason,
+            //  'Estacion_Act' => $Est_act,
+            //  'Estacion_Destino' => $Est_ant,
+            //  'Cant_Enviada'=>$cant_r,
+            //  'Nota' => $nota,
              //'Leido' => 'si' ,
         
             ]
