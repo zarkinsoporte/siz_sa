@@ -432,11 +432,79 @@ class Reportes_ProduccionController extends Controller
     }
     public function DataShowbackorder()
     {
-        $bo =  DB::table('Vw_BackOrderExcel')
-        ->select('OP', 'Pedido', 'fechapedido', 'OC', 'd_proc', 'no_serie', 'cliente', 'codigo1', 'codigo3', 'Descripcion',
-		'Cantidad', 'VSind', 'VS', 'destacion', 'U_GRUPO', 'Secue', 'SecOT', 'SEMANA2', 'fentrega',
-		'fechaentregapedido', 'SEMANA3', 'u_fproduccion', 'prioridad', 'comments', 'u_especial', 'modelo');        
-
-        return Datatables::of($bo)->make(true);
+        // $bo =  DB::table('Vw_BackOrderExcel')
+        // ->select('OP', 'Pedido', 'fechapedido', 'OC', 'd_proc', 'no_serie', 'cliente', 'codigo1', 'codigo3', 'Descripcion',
+		// 'Cantidad', 'VSind', 'VS', 'destacion', 'U_GRUPO', 'Secue', 'SecOT', 'SEMANA2', 'fentrega',
+		// 'fechaentregapedido', 'SEMANA3', 'u_fproduccion', 'prioridad', 'comments', 'u_especial', 'modelo');        
+        $rowsBo = DB::table('SIZ_View_ReporteBO');
+         
+        return Datatables::of($rowsBo)
+        ->addColumn('Funda', function ($rowbo) {
+            if(is_null ($rowbo->prefunda)){
+                if(is_null ($rowbo->U_Entrega_Piel)){
+                    if(is_null ($rowbo->U_Status)){
+                        return '00 Por Programar';                    
+                    }else{
+                        $valuefunda = '00 Por Programar';
+                        switch ($rowbo->U_Status) {
+                            case "01":
+                                $valuefunda = '00 Detenido Ventas';
+                                break;
+                            case "02":
+                                $valuefunda = '00 Falta Inf.';
+                                break;
+                            case "03":
+                                $valuefunda = '00 Falta Mat.';
+                                break;
+                            case "04":
+                                $valuefunda = '00 Revision Piel';
+                                break;
+                            case "05":
+                                $valuefunda = '00 Por Ordenar Mat.';
+                                break;
+                            case "06":
+                                $valuefunda = '00 Proceso';
+                                break;                       
+                        }
+                        return $valuefunda;
+                    }
+                }else {
+                    return 'Sin liberar';
+                } //end_2do_if           
+            }else {
+                if (($rowbo->CodFunda == 1 || $rowbo->CodFunda == 2) && (is_null ($rowbo->U_Entrega_Piel))) {
+                    if(is_null ($rowbo->U_Status)){
+                        return '00 Por Programar';    
+                    }else{
+                        $valuefunda = '00 Por Programar';
+                        switch ($rowbo->U_Status) {
+                            case "01":
+                                $valuefunda = '00 Detenido Ventas';
+                                break;
+                            case "02":
+                                $valuefunda = '00 Falta Inf.';
+                                break;
+                            case "03":
+                                $valuefunda = '00 Falta Mat.';
+                                break;
+                            case "04":
+                                $valuefunda = '00 Revision Piel';
+                                break;
+                            case "05":
+                                $valuefunda = '00 Por Ordenar Mat.';
+                                break;
+                            case "06":
+                                $valuefunda = '00 Proceso';
+                                break;                       
+                        }
+                        return $valuefunda;
+                    }
+                }else{
+                    return $rowbo->prefunda;
+                }
+            }//end_1er_if
+        }
+        )
+        ->make(true);
     }
 }

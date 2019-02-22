@@ -1,6 +1,17 @@
 @extends('home') 
 @section('homecontent')
-
+<style>
+th { font-size: 12px; }
+td { font-size: 11px; }
+th, td { white-space: nowrap; }
+div.container {
+	min-width: 980px;
+	margin: 0 auto;
+}
+div.ColVis {
+        float: left;
+    }
+</style>
 
 <div class="container">
 
@@ -14,46 +25,42 @@
 
             <!-- <h5>Fecha & hora: {{date('d-m-Y h:i a', strtotime("now"))}}</h5> -->
         </div>
-    </div>
-    <div class="row">
-        <div class="col-md-4 col-md-offset-8">
-            <a href="../ReporteMaterialesPDF/" target="_blank" class="btn btn-danger"><i class="fa fa-file-pdf-o"></i> Reporte PDF</a>
-            <a class="btn btn-success" href="materialesXLS"><i class="fa fa-file-excel-o"></i> Reporte XLS</a>
-        </div>
-    </div>
+    </div>   
     <br>
     <!-- /.row -->
     <div class="row">
-        <div class="col-md-12">
-            <table  id="tbackorder">
-                <thead class="thead-dark">
+        <div class="container">
+            <table  id="tbackorder" class="display">
+                <thead >
                     <tr>
                         <th>OP</th>
                         <th>Pedido</th>
-                        <th>fechapedido</th>
+                        <th>F.pedido</th>
                         <th>OC</th>
-                        <th>d_proc</th>
-                        <th>no_serie</th>
-                        <th>cliente</th>
-                        <th>codigo1</th>
-                        <th>codigo3</th>
-                        <th>Descripcion</th>
-                        <th>Cantidad</th>
-                        <th>VSind</th>
-                        <th>VS</th>
-                        <th>destacion</th>
-                        <th>U_GRUPO</th>
+                        <th>D_proc</th>
+                        <th>No_serie</th>
+                        <th>Cliente</th>
+                        <th>Modelo</th>
+                        <th>Acabado</th>
+                        <th>Descripción</th>
+                        <th>Cant</th>
+                        <th>%</th>
+                        <th>Total %</th>
+                        <th>Funda</th>
+                        <th>Dias CT</th>
+                        <th>Prg. Piel</th>
                         <th>Secue</th>
-                        <th>SecOT</th>
-                        <th>SEMANA2</th>
-                        <th>fentrega</th>
-                        <th>fechaentregapedido</th>
-                        <th>SEMANA3</th>
-                        <th>u_fproduccion</th>
-                        <th>prioridad</th>
-                        <th>comments</th>
-                        <th>u_especial</th>
-                        <th>modelo</th>
+                        <th>Sec OT</th>
+                        <th>Sem-C</th>
+                        <th>F.Compras</th>
+                        <th>F.Ventas</th>
+                        <th>Sem-P</th>
+                        <th>F.Produc.</th>
+                        <th>Prioridad</th>
+                        <th>Desv</th>
+                        <th>Notas</th>
+                        <th>Especiales</th>
+                        <th>Nom Modelo</th>
                     </tr>
                 </thead>
             </table>
@@ -65,11 +72,65 @@
 @endsection
  
 @section('homescript')
-$('#tbackorder').DataTable({
-    orderCellsTop: true,
-    fixedHeader: true,
+$('#tbackorder thead tr').clone(true).appendTo( '#tbackorder thead' );
+
+$('#tbackorder thead tr:eq(1) th').each( function (i) {
+    var title = $(this).text();
+    $(this).html( '<input style="color: black;"  type="text" placeholder="Filtro '+title+'" />' );
+   
+    $( 'input', this ).on( 'keyup change', function () {       
+            
+            if ( table.column(i).search() !== this.value ) {
+                table
+                    .column(i)
+                    .search(this.value, true, false)
+                    .columns.adjust()
+                    .draw();
+            } 
+                
+    } );
+} );
+
+var table = $('#tbackorder').DataTable({
+    dom: 'Bfrtip',
+    buttons: [
+        'copy', 'excel',  {
+            text: 'Pdf',
+            action: function ( e, dt, node, config ) {
+                table
+                
+                .draw();
+            },           
+        },
+        {
+            text: 'Columnas',
+            extend: 'colvis',
+            postfixButtons: [                                  
+                {
+                    text: 'Restaurar columnas',
+                    extend: 'colvisRestore',     
+                }             
+                ]
+        },
+        {
+            text: 'Imprimir',
+            extend: 'print',
+            exportOptions: {
+                columns: ':visible'
+            }
+        },
+       
+    ],
+   
+    orderCellsTop: true,    
+    scrollY:        "300px",
+    "pageLength": 50,
+    scrollX:        true,
+    scrollCollapse: true,
+    paging:         true,
+   
     processing: true,
-    serverSide: true,
+    
     deferRender:    true,
     ajax: {
         url: '{!! route('datatables.showbackorder') !!}',
@@ -82,39 +143,51 @@ $('#tbackorder').DataTable({
 
         { data: 'OP', name:  'OP'},
         { data: 'Pedido', name: 'Pedido'},
-        { data: 'fechapedido', name:  'fechapedido'},
+        { data: 'FechaPedido', name:  'FechaPedido'},
         { data: 'OC', name: 'OC'},
-        { data: 'd_proc', name: 'd_proc'},
-        { data: 'no_serie', name: 'no_serie'},
-        { data: 'cliente', name:  'cliente'},
+        { data: 'D_PROC', name: 'D_PROC'},
+        { data: 'NO_SERIE', name: 'NO_SERIE'},
+        { data: 'CLIENTE', name:  'CLIENTE'},
         { data: 'codigo1', name: 'codigo1'},
         { data: 'codigo3', name:  'codigo3'},
         { data: 'Descripcion', name:  'Descripcion'},
-        { data:'Cantidad', name:  'Cantidad'},
+        { data: 'Cant', name:  'Cantidad'},
         { data: 'VSind', name:  'VSind' },
         { data: 'VS', name:  'VS'},
-        { data: 'destacion', name:  'destacion' },
-        { data: 'U_GRUPO', name: 'U_GRUPO' },
+        { data: 'Funda', name:  'Funda'},
+        { data: 'DEstacion', name:  'DEstacion' },
+        { data: 'U_Grupo', name: 'U_Grupo' },
         { data: 'Secue', name:  'Secue'},
         { data: 'SecOT', name:  'SecOT' },
         { data: 'SEMANA2', name:  'SEMANA2'},
         { data: 'fentrega', name:  'fentrega'},
-        { data:'fechaentregapedido', name:  'fechaentregapedido'},
+        { data: 'fechaentregapedido', name:  'fechaentregapedido'},
         { data: 'SEMANA3', name:  'SEMANA3'},
         { data: 'u_fproduccion', name:  'u_fproduccion'},
-        { data: 'prioridad', name:  'prioridad'},
-        { data: 'comments', name:  'comments'},
-        { data: 'u_especial', name:  'u_especial'},
-        { data: 'modelo', name: 'modelo'}
+        { data: 'Prioridad', name:  'Prioridad'},
+        { data: 'Desv', name:  'Desv'},
+        { data: 'Comments', name:  'Comments'},
+        { data: 'U_Especial', name:  'U_Especial'},
+        { data: 'Modelo', name: 'Modelo'}
     ],
     "language": {
         "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
     },
- 
+    columnDefs: [
+        { width: 80, targets: 2 },
+        { width: 80, targets: 3 },
+        { width: 100, targets: 6 },
+        { width: 150, targets: 9 },
+        { width: 80, targets: 13 },
+        { width: 150, targets: 25 },
+        { width: 150, targets: 27 },
+    ],
+    fixedColumns: true
 });
 @endsection
 
-
+<script>
+</script>
 
 
 
