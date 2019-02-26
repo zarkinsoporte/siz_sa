@@ -14,7 +14,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
+  
     <!-- Material Design fonts -->
     <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -22,10 +22,12 @@
     <link rel="shortcut icon" href="images/favicons/IconZrk.ico" type="image/x-icon" >
                                                          
     <script data-require="jquery" data-semver="3.3.1" src=" https://code.jquery.com/jquery-3.3.1.js"></script>
+    
     <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/fixedcolumns/3.2.6/js/dataTables.fixedColumns.min.js"></script>
-    <script src="https://cdn.datatables.net/fixedheader/3.1.5/js/dataTables.fixedHeader.min.js"></script>
+    <script src="https://cdn.datatables.net/fixedcolumns/3.2.6/js/fixedColumns.bootstrap.min.js"></script>
     <script src=" https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script src=" https://cdn.datatables.net/fixedcolumns/3.2.6/js/dataTables.fixedColumns.min.js"></script>
+    <script src=" https://cdn.datatables.net/buttons/1.5.2/js/buttons.bootstrap.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.flash.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
@@ -36,13 +38,17 @@
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
-
+        <script src=" https://cdn.datatables.net/buttons/1.5.2/js/buttons.bootstrap.min.js"></script>
+            <script src=" https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css
     <![endif]-->
 {!! Html::style('assets/css/bootstrap.css') !!}
 {!! Html::style('assets/css/bootstrap-switch.min.css') !!}
 {!! Html::style('assets/css/bootstrap-switch.css') !!}
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" type="text/css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css" type="text/css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap.min.css" type="text/css">
+<link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/3.2.6/css/fixedColumns.bootstrap.min.css" type="text/css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.bootstrap.min.css" type="text/css">
 {!! Html::style('assets/css/sb-admin.css') !!}
 {!! Html::style('assets/css/responsive.css') !!}
 
@@ -79,6 +85,18 @@ float: right;
 text-align: right;
 visibility: hidden;
 }
+
+li.dt-button.active a,
+
+li.dt-button.active a:focus{
+	color: #337ab6;
+	background-color: transparent;
+	font-weight: bold;
+}
+li.dt-button.active a::before{
+	content: '✔ ';
+}
+
     </style>
 
 
@@ -156,11 +174,7 @@ visibility: hidden;
 
 
 </body>
-       
- {!! Html::script('assets/js/bootstrap-datepicker.js') !!}
- {!! Html::script('assets/js/bootstrap-datepicker.es.min.js') !!}
  
-
 {!! Html::script('assets/js/bootstrap-switch.js') !!}
 
 <!--<script src="//cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>-->
