@@ -1,5 +1,4 @@
 <?php
-
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -18,14 +17,13 @@ use App\OP;
 use Illuminate\Support\Facades\DB;
 use App\User;
 use App\SAP;
-
+use Illuminate\Http\Request;
 Route::get('/', 'HomeController@index');
 Route::get('/home',
     [
         'as' => 'home',
         'uses' => 'HomeController@index',
     ]);
-
 /*
 |--------------------------------------------------------------------------
 | Administrator Routes
@@ -57,7 +55,6 @@ Route::get('datatables.showusers', 'Mod00_AdministradorController@DataShowUsers'
 Route::get('datatables.showbackorder', 'Reportes_ProduccionController@DataShowbackorder')->name('datatables.showbackorder');
 Route::get('users/edit/{empid}', 'Mod00_AdministradorController@editUser');
 Route::post('cambio.password', 'Mod00_AdministradorController@cambiopassword');
-
 //Rutas del Módulo de inventarios
 Route::get('admin/altaInventario', 'Mod00_AdministradorController@altaInventario');
 Route::post('admin/altaInventario', 'Mod00_AdministradorController@altaInventario2');
@@ -82,13 +79,11 @@ Route::post('admin/createTarea/{id_grupo}', 'Mod00_AdministradorController@creat
 Route::get('admin/grupos/delete_modulo/{grupo}/{id}', 'Mod00_AdministradorController@deleteModulo');
 Route::get('admin/grupos/conf_modulo/{grupo}/{id}', 'Mod00_AdministradorController@confModulo');
 Route::get('admin/grupos/conf_modulo/{grupo}/quitar-tarea/{id}', 'Mod00_AdministradorController@deleteTarea');
-
 Route::get('datatable/{idGrup}/{idMod}', 'Mod00_AdministradorController@confModulo');
 Route::get('datatables.data', 'Mod00_AdministradorController@anyData')->name('datatables.data');
 Route::get('getAutocomplete', function () {
     return view('Mod07_Calidad.RechazoFrame');
 })->name('getAutocomplete');
-
 Route::get('search', array('as' => 'search', 'uses' => 'Mod07_CalidadController@search'));
 Route::get('autocomplete', array('as' => 'autocomplete', 'uses' => 'Mod07_CalidadController@autocomplete'));
 /*
@@ -110,13 +105,11 @@ Route::post('admin/delete_Noti/', 'Mod00_AdministradorController@delete_Noti');
 | Finaliza Rutas Noticias y Notificaciones
 |--------------------------------------------------------------------------
  */
-
 Route::get('updateprivilegio', 'Mod00_AdministradorController@updateprivilegio');
 Route::get('dropdown', function () {
     return TAREA_MENU::where('id_menu_item', Input::get('option'))
         ->lists('name', 'id');
 });
-
 Route::get('switch', function () {
     $vava = MODULOS_GRUPO_SIZ::find(2);
     $vava->id_menu = null;
@@ -124,13 +117,11 @@ Route::get('switch', function () {
     var_dump(count(MODULOS_GRUPO_SIZ::find(1)));
 });
 Route::post('nuevatarea', 'Mod00_AdministradorController@nuevatarea');
-
 /*
 |--------------------------------------------------------------------------
 | MOD01-PRODUCCION Routes
 |--------------------------------------------------------------------------
  */
-
 Route::get('home/TRASLADO ÷ AREAS', [
     'as' => 'traslado', 'uses' =>'Mod01_ProduccionController@traslados']);
 Route::post('home/TRASLADO ÷ AREAS', 'Mod01_ProduccionController@traslados');
@@ -144,7 +135,6 @@ Route::post('/', 'HomeController@index');
 Route::get('Mod01_Produccion/Noticias', 'HomeController@create');
 Route::get('leido/{id}', 'HomeController@UPT_Noticias');
 Route::post('/leido', 'HomeController@UPT_Noticias');
-
 //REPORTE DE PRODUCCION
 Route::get('home/REPORTE PRODUCCION', 'Reportes_ProduccionController@produccion1');
 Route::post('home/REPORTE PRODUCCION', 'Reportes_ProduccionController@produccion1');
@@ -185,7 +175,6 @@ Route::post('/excel', 'Mod07_CalidadController@excel');
 ////reporte calidad
 Route::get('home/CALIDAD POR DEPTO','Mod07_CalidadController@repCalidad' );
 Route::post('home/CALIDAD POR DEPTO','Mod07_CalidadController@repCalidad2' );
-
 //REPORTE 112-CORTE PIEL///
 Route::get('home/112 CORTE DE PIEL','Mod01_ProduccionController@repCortePiel' );
 Route::post('home/112 CORTE DE PIEL','Mod01_ProduccionController@repCortePiel' );
@@ -223,9 +212,6 @@ Route::get('home/ayudas_pdf/{PdfName}', 'HomeController@showPdf');
 Route::get('home/{r0}/ayudas_pdf/{PdfName}', 'HomeController@showPdf2');
 //Route::get('home/ayudas_pdf/{r1}/{PdfName}', 'HomeController@showPdf');
 //Route::get('home/ayudas_pdf/{r1}/{r2}/{PdfName}', 'HomeController@showPdf');
-
-
-
  
  Route::get('/pruebas', function () {
 //  $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
@@ -267,10 +253,19 @@ Route::get('home/{r0}/ayudas_pdf/{PdfName}', 'HomeController@showPdf2');
     } catch (\Exception $e) {
         echo $e->getMessage();
     }
-
     echo 'hecho';
 });
- Route::get('/p', function () {
-    
-    return DB::getDatabaseName();
+ Route::post('home/hola', function (Request $request) {
+   // $user_email = "<script>document.write(localStorage.getItem('email'));</script>";
+   
+   Session::put('miarr',Input::get('arr'));
+   
   });
+  Route::get('home/hola', function (Request $request) {
+    // $user_email = "<script>document.write(localStorage.getItem('email'));</script>";
+    
+    dd(json_decode(stripslashes(Session::get('miarr'))));
+ 
+    
+ 
+   });
