@@ -28,7 +28,7 @@ div.ColVis {
        
     </div>  
     <div class="alert alert-info" role="alert">
-        ¡Importante!  Para un mejor rendimiento del menu de botones, aplica primero un filtro al BackOrder.
+        ¡Importante!  Para un mejor rendimiento de las descargas, aplicar filtros al BackOrder.
      </div> 
   
     <!-- /.row -->
@@ -245,5 +245,5 @@ var table = $('#tbackorder').DataTable({
 document.onkeyup = function(e) {
    if (e.shiftKey && e.which == 112) {
     window.open("ayudas_pdf/AyM00_00.pdf","_blank");
-  } }
+  } 
 </script>
