@@ -72,6 +72,12 @@ div.ColVis {
 @endsection
  
 @section('homescript')
+
+document.onkeyup = function(e) {
+   if (e.shiftKey && e.which == 112) {
+    window.open("ayudas_pdf/AyM00_00.pdf","_blank");
+  } 
+
 $('#tbackorder thead tr').clone(true).appendTo( '#tbackorder thead' );
 
 $('#tbackorder thead tr:eq(1) th').each( function (i) {
