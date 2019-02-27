@@ -242,4 +242,8 @@ var table = $('#tbackorder').DataTable({
 @endsection
 
 <script>
+document.onkeyup = function(e) {
+   if (e.shiftKey && e.which == 112) {
+    window.open("ayudas_pdf/AyM00_00.pdf","_blank");
+  } }
 </script>
