@@ -18,7 +18,6 @@ use App\OP;
 use Illuminate\Support\Facades\DB;
 use App\User;
 use App\SAP;
-use Illuminate\Http\Request;
 
 Route::get('/', 'HomeController@index');
 Route::get('/home',
@@ -271,19 +270,7 @@ Route::get('home/{r0}/ayudas_pdf/{PdfName}', 'HomeController@showPdf2');
 
     echo 'hecho';
 });
- Route::post('home/hola', function (Request $request) {
-   // $user_email = "<script>document.write(localStorage.getItem('email'));</script>";
-   
-   Session::put('miarr',Input::get('arr'));
-
-   
-
+ Route::get('/p', function () {
+    
+    return DB::getDatabaseName();
   });
-  Route::get('home/hola', function (Request $request) {
-    // $user_email = "<script>document.write(localStorage.getItem('email'));</script>";
-    
-    dd(json_decode(stripslashes(Session::get('miarr'))));
- 
-    
- 
-   });
