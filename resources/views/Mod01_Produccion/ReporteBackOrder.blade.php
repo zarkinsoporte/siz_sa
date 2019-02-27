@@ -127,9 +127,29 @@ var table = $('#tbackorder').DataTable({
             buttons: [
                 {
                     text: 'Ventas',                   
-                    action: function ( e, dt, node, config ) {
-                        window.open('hola','_blank');
-                    },           
+                    action: function ( e, dt, node, config ) {                                
+                         var data=table.rows( { filter : 'applied'} ).data().toArray();
+                          
+                         var json = JSON.stringify( data );
+                       // sessionStorage.setItem( 'arr' , json );
+
+                         //var url = 'hola?arr=' + json;
+                         //window.location.href = 'hola';
+                         $.ajax({
+                            type:'POST',
+                            url:'hola',
+                            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                            
+                            data: {
+                                "_token": "{{ csrf_token() }}",
+                                "arr": json
+                                },
+                                success:function(data){
+                                    window.location.href = 'hola';
+                            }
+                         });
+                     }
+                       
                 },
                 {
                     text: 'Planeación',                    

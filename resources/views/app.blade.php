@@ -7,7 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- CSRF Token -->
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <meta name="csrf-token" content="{{ Session::token() }}"> 
 
     <title>{{ env('EMPRESA_NAME')}}</title>
     <!-- Styles -->
@@ -21,8 +22,9 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">      
     <link rel="shortcut icon" href="images/favicons/IconZrk.ico" type="image/x-icon" >
                                                          
-    <script data-require="jquery" data-semver="3.3.1" src=" https://code.jquery.com/jquery-3.3.1.js"></script>
-    
+    <script data-require="jquery" data-semver="3.3.1" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>  
+
     <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/fixedcolumns/3.2.6/js/fixedColumns.bootstrap.min.js"></script>
     <script src=" https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
