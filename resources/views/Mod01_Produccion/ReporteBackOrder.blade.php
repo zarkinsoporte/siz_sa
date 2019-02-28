@@ -132,24 +132,18 @@ var table = $('#tbackorder').DataTable({
                 {
                     text: 'Ventas',                   
                     action: function ( e, dt, node, config ) {                                
-                         var data=table.rows( { filter : 'applied'} ).data().toArray();
-                          
+                         var data=table.rows( { filter : 'applied'} ).data().toArray();               
                          var json = JSON.stringify( data );
-                       // sessionStorage.setItem( 'arr' , json );
-
-                         //var url = 'hola?arr=' + json;
-                         //window.location.href = 'hola';
                          $.ajax({
                             type:'POST',
-                            url:'hola',
-                            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                            
+                            url:'reporte/backorderPDF',
+                            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},                            
                             data: {
                                 "_token": "{{ csrf_token() }}",
                                 "arr": json
                                 },
                                 success:function(data){
-                                    window.location.href = 'hola';
+                                    window.open('reporte/backorderVentasPDF', '_blank')                                   
                             }
                          });
                      }
@@ -158,7 +152,20 @@ var table = $('#tbackorder').DataTable({
                 {
                     text: 'Planeación',                    
                     action: function ( e, dt, node, config ) {
-                        window.open('hola','_blank');
+                        var data=table.rows( { filter : 'applied'} ).data().toArray();               
+                        var json = JSON.stringify( data );
+                        $.ajax({
+                           type:'POST',
+                           url:'reporte/backorderPDF',
+                           headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},                            
+                           data: {
+                               "_token": "{{ csrf_token() }}",
+                               "arr": json
+                               },
+                               success:function(data){
+                                   window.location.href = 'reporte/backorderPlaneaPDF';
+                           }
+                        });
                     },           
                 },
             ]
@@ -214,8 +221,8 @@ var table = $('#tbackorder').DataTable({
         { data: 'Secue', name:  'Secue'},
         { data: 'SecOT', name:  'SecOT' },
         { data: 'SEMANA2', name:  'SEMANA2'},
-        { data: 'fentrega', name:  'fentrega'},
-        { data: 'fechaentregapedido', name:  'fechaentregapedido'},
+        { data: 'fentrega', name:  'fentrega'},//fCompras
+        { data: 'fechaentregapedido', name:  'fechaentregapedido'},//fVentas
         { data: 'SEMANA3', name:  'SEMANA3'},
         { data: 'u_fproduccion', name:  'u_fproduccion'},
         { data: 'Prioridad', name:  'Prioridad'},

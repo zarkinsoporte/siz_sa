@@ -255,17 +255,6 @@ Route::get('home/{r0}/ayudas_pdf/{PdfName}', 'HomeController@showPdf2');
     }
     echo 'hecho';
 });
- Route::post('home/hola', function (Request $request) {
-   // $user_email = "<script>document.write(localStorage.getItem('email'));</script>";
-   
-   Session::put('miarr',Input::get('arr'));
-   
-  });
-  Route::get('home/hola', function (Request $request) {
-    // $user_email = "<script>document.write(localStorage.getItem('email'));</script>";
-    
-    dd(json_decode(stripslashes(Session::get('miarr'))));
- 
-    
- 
-   });
+  Route::post('home/reporte/backorderPDF', 'Reportes_ProduccionController@backOrderAjaxToSession');
+  Route::get('home/reporte/backorderVentasPDF', 'Reportes_ProduccionController@ReporteBackOrderVentasPDF');
+  Route::get('home/reporte/backorderPlaneaPDF', 'Reportes_ProduccionController@ReporteBackOrderPlaneaPDF');

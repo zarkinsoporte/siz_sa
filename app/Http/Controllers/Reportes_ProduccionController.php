@@ -507,4 +507,24 @@ class Reportes_ProduccionController extends Controller
         )
         ->make(true);
     }
+    public function backOrderAjaxToSession(){
+        //ajax nos envia los registros del datatable que el usuario filtro y los alamcenamos en la session
+        //formato JSON
+        Session::put('miarr',Input::get('arr'));   
+    }
+    public function ReporteBackOrderVentasPDF()
+    {           
+        $data = json_decode(stripslashes(Session::get('miarr')));      
+        $pdf = \PDF::loadView('Mod01_Produccion.ReporteBackOrderPDF_Ventas', compact('data'));
+        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
+        return $pdf->stream('Siz_Reporte_BackOrderV ' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
+    }
+    public function ReporteBackOrderPlaneaPDF()
+    {   
+        $data = json_decode(stripslashes(Session::get('miarr')));
+        $pdf = \PDF::loadView('Mod01_Produccion.ReporteBackOrderPDF_Planea', compact('data'));
+        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
+        return $pdf->stream('Siz_Reporte_BackOrderP ' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
+    }
+
 }
