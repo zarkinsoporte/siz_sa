@@ -1,25 +1,9 @@
-﻿<!-- Styles -->
-<!-- Material Design fonts -->
-<!--<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">-->
-{!! Html::style('assets/css/family=reboto.css') !!}
-
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+﻿<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 {!! Html::style('assets/css/bootstrap.css') !!}
 {!! Html::style('assets/css/myMaterial-design.css') !!}
-{!! Html::style('assets/css/ripples.css') !!}
-{!! Html::style('assets/css/font-awesome.css') !!}
 {!! Html::style('assets/css/site_global.css?crc=443350757.css') !!}
 {!! Html::style('assets/css/index.css?crc=3185328.css') !!}
 
-<!-- Scripts -->
-<!-- 
-number bindec ( string $binary_string )
-
-$str = 'In My Cart : 11 12 items';
-preg_match_all('!\d+!', $str, $matches);
-print_r($matches);
-
--->
 <script>  
     window.Laravel = {!! json_encode([
             'csrfToken' => csrf_token(),
@@ -45,12 +29,11 @@ print_r($matches);
 
 </head>
 <style> 
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
+input[type=number]::-webkit-inner-spin-button{ 
   -webkit-appearance: none; 
   margin: 0; 
 }
-input[type=number] { -moz-appearance:textfield; }
+
 </style>
 <body class="container-fluid" style=" background-image: url({{ URL::asset('images/fondo.jpg') }});
         background-repeat:no-repeat;
@@ -100,7 +83,7 @@ input[type=number] { -moz-appearance:textfield; }
                             <div class="form-group label-floating">
                                 <label class="control-label" for="id">No. Nómina:</label>
                                 <div class="input-group">
-                                    <input type="number" min="0" id="id" name="id" class="form-control" style="color: white" value="{{old('id')}}" required autofocus>
+                                    <input type="number" min="0" id="id" name="id" class="form-control" style="color: white" value="{{old('id')}}" required autofocus autocomplete="off">
                                     <span class="input-group-btn">
 
                                       </span>
@@ -133,20 +116,10 @@ input[type=number] { -moz-appearance:textfield; }
 </div>
 <!-- Other scripts -->
 
-<!-- RequireJS script -->
-<script src="siz/public/js/require.js?crc=244322403" type="text/javascript" async data-main="siz/public/js/museconfig.js?crc=36584860" onload="if (requirejs) requirejs.onError = function(requireType, requireModule) { if (requireType && requireType.toString && requireType.toString().indexOf && 0 <= requireType.toString().indexOf('#scripterror')) window.Muse.assets.check(); }" onerror="window.Muse.assets.check();"></script>
+
 </body>
 </html>
 
 <!-- Scripts -->
-{!! Html::script('assets/js/jquery.min.js') !!}
-{!! Html::script('assets/js/bootstrap.js') !!}
-{!! Html::script('assets/js/material.js') !!}
-{!! Html::script('assets/js/ripples.js') !!}
-<script>
-    $(document).ready(function (event) {
 
-        $.material.init();
-    });
-</script>
 
