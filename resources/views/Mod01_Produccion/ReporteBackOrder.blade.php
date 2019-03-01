@@ -169,7 +169,7 @@ var table = $('#tbackorder').DataTable({
                                "arr": json
                                },
                                success:function(data){
-                                   window.location.href = 'reporte/backorderPlaneaPDF';
+                                  window.open('reporte/backorderPlaneaPDF', '_blank');          
                            }
                         });
                     },           
