@@ -11,6 +11,12 @@ div.container {
 div.ColVis {
         float: left;
     }
+    .DTFC_LeftBodyWrapper{
+        margin-top: 82px;
+    }
+    .DTFC_LeftHeadWrapper {
+    display:none;
+    }
 </style>
 
 <div class="container">
