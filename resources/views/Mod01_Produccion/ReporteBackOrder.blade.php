@@ -100,6 +100,13 @@ $('#tbackorder thead tr:eq(1) th').each( function (i) {
                 
     } );
 } );
+var meses = new Array ("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
+var diasSemana = new Array("Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado");
+var f=new Date();
+var hours = f.getHours();
+var ampm = hours >= 12 ? 'pm' : 'am';
+var fecha = 'ACTUALIZADO: '+ diasSemana[f.getDay()] + ', ' + f.getDate() + ' de ' + meses[f.getMonth()] + ' del ' + f.getFullYear()+', A LAS '+hours+":"+f.getMinutes()+ ' ' + ampm; 
+var f = fecha.toUpperCase();
 
 var table = $('#tbackorder').DataTable({
     dom: 'Bfrtip',
@@ -120,12 +127,15 @@ var table = $('#tbackorder').DataTable({
             extend: 'copy',    
             exportOptions: {
                 columns: ':visible',                
-            }                  
+            }             
         },
         {
             text: '<i class="fa fa-file-excel-o"></i> Excel',
             className: "btn-success",
-            extend: 'excel', 
+            extend: 'excelHtml5',
+            message: "SALOTTO S.A. DE C.V.\n",
+            messagetwo: "BACK ORDER PROGRAMADO.\n",
+            messagethree: f,
             exportOptions: {
                 columns: ':visible',                
             }          
@@ -238,7 +248,15 @@ var table = $('#tbackorder').DataTable({
         { data: 'Modelo', name: 'Modelo'}
     ],
     "language": {
-        "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+        "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json",
+        buttons: {
+            copyTitle: 'Copiar al portapapeles',
+            copyKeys: 'Presiona <i>ctrl</i> + <i>C</i> para copiar o la tecla <i>Esc</i> para continuar.',
+            copySuccess: {
+                _: '%d filas copiadas',
+                1: '1 fila copiada'
+            }
+        }
     },
     columnDefs: [
         { width: 80, targets: 2 },

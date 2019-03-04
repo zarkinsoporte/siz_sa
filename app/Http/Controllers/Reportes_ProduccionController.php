@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Input;
 use Session;
 use Maatwebsite\Excel\Facades\Excel;
 use Datatables;
-ini_set('max_execution_time', 90);
+ini_set('max_execution_time', 360);
 class Reportes_ProduccionController extends Controller
 {
     /**

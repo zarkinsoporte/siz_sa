@@ -48,11 +48,9 @@ Route::get('viewpassword', ['as' => 'viewpassword', 'uses' => 'Auth\FunctionsCon
 Route::get('MOD00-ADMINISTRADOR', 'Mod00_AdministradorController@index');
 Route::get('admin/users', 'Mod00_AdministradorController@allUsers');
 Route::get('admin/detalle-depto/{depto}', 'Mod00_AdministradorController@showUsers');
-Route::get('BACK ORDER', 'Reportes_ProduccionController@backorder');
 Route::get('admin/plantilla/{depto}', 'Mod00_AdministradorController@PlantillaExcel');
 Route::get('admin/Plantilla_PDF/{depto}', 'Mod00_AdministradorController@Plantilla_PDF');
 Route::get('datatables.showusers', 'Mod00_AdministradorController@DataShowUsers')->name('datatables.showusers');
-Route::get('datatables.showbackorder', 'Reportes_ProduccionController@DataShowbackorder')->name('datatables.showbackorder');
 Route::get('users/edit/{empid}', 'Mod00_AdministradorController@editUser');
 Route::post('cambio.password', 'Mod00_AdministradorController@cambiopassword');
 //Rutas del Módulo de inventarios
@@ -81,11 +79,7 @@ Route::get('admin/grupos/conf_modulo/{grupo}/{id}', 'Mod00_AdministradorControll
 Route::get('admin/grupos/conf_modulo/{grupo}/quitar-tarea/{id}', 'Mod00_AdministradorController@deleteTarea');
 Route::get('datatable/{idGrup}/{idMod}', 'Mod00_AdministradorController@confModulo');
 Route::get('datatables.data', 'Mod00_AdministradorController@anyData')->name('datatables.data');
-Route::get('getAutocomplete', function () {
-    return view('Mod07_Calidad.RechazoFrame');
-})->name('getAutocomplete');
-Route::get('search', array('as' => 'search', 'uses' => 'Mod07_CalidadController@search'));
-Route::get('autocomplete', array('as' => 'autocomplete', 'uses' => 'Mod07_CalidadController@autocomplete'));
+
 /*
 |--------------------------------------------------------------------------
 |NOTICIAS Y NOTIFICACIONES 'BRAYAN'
@@ -100,11 +94,8 @@ Route::post('admin/Mod_Noti2/', 'Mod00_AdministradorController@Mod_Noti2');
 Route::get('admin/delete_Noti/{id}', 'Mod00_AdministradorController@delete_Noti');
 Route::post('admin/delete_Noti/', 'Mod00_AdministradorController@delete_Noti');
 //Route::get('admin/Nueva', 'Mod00_AdministradorController@Show');
-/*
-|--------------------------------------------------------------------------
-| Finaliza Rutas Noticias y Notificaciones
-|--------------------------------------------------------------------------
- */
+
+
 Route::get('updateprivilegio', 'Mod00_AdministradorController@updateprivilegio');
 Route::get('dropdown', function () {
     return TAREA_MENU::where('id_menu_item', Input::get('option'))
@@ -138,6 +129,11 @@ Route::post('/leido', 'HomeController@UPT_Noticias');
 //REPORTE DE PRODUCCION
 Route::get('home/REPORTE PRODUCCION', 'Reportes_ProduccionController@produccion1');
 Route::post('home/REPORTE PRODUCCION', 'Reportes_ProduccionController@produccion1');
+//REPORTE 112-CORTE PIEL///
+Route::get('home/112 CORTE DE PIEL','Mod01_ProduccionController@repCortePiel' );
+Route::post('home/112 CORTE DE PIEL','Mod01_ProduccionController@repCortePiel' );
+Route::post('home/reporte/DetinsPiel', 'Mod01_ProduccionController@repCortePiel');
+Route::get('home/repCortePielExl', 'Mod01_ProduccionController@repCortePielExl');
 //PDF de Historial por OP
 Route::get('home/ReporteOpPDF/{op}', 'Mod01_ProduccionController@ReporteOpPDF');
 Route::get('home/ReporteMaterialesPDF/{op}', 'Mod01_ProduccionController@ReporteMaterialesPDF');
@@ -153,6 +149,10 @@ Route::post('home/reporte/MATERIALES OP', 'Reportes_ProduccionController@materia
 Route::get('home/reporte/materialesXLS', 'Reportes_ProduccionController@materialesOPXLS');
 //REPORTE BACK ORDER
 Route::get('home/BACK ORDER', 'Reportes_ProduccionController@backorder');
+Route::get('datatables.showbackorder', 'Reportes_ProduccionController@DataShowbackorder')->name('datatables.showbackorder');
+Route::post('home/reporte/backorderPDF', 'Reportes_ProduccionController@backOrderAjaxToSession');
+Route::get('home/reporte/backorderVentasPDF', 'Reportes_ProduccionController@ReporteBackOrderVentasPDF');
+Route::get('home/reporte/backorderPlaneaPDF', 'Reportes_ProduccionController@ReporteBackOrderPlaneaPDF');
 /*
 |--------------------------------------------------------------------------
 | MOD07-CALIDAD Routes
@@ -175,11 +175,11 @@ Route::post('/excel', 'Mod07_CalidadController@excel');
 ////reporte calidad
 Route::get('home/CALIDAD POR DEPTO','Mod07_CalidadController@repCalidad' );
 Route::post('home/CALIDAD POR DEPTO','Mod07_CalidadController@repCalidad2' );
-//REPORTE 112-CORTE PIEL///
-Route::get('home/112 CORTE DE PIEL','Mod01_ProduccionController@repCortePiel' );
-Route::post('home/112 CORTE DE PIEL','Mod01_ProduccionController@repCortePiel' );
-Route::post('home/reporte/DetinsPiel', 'Mod01_ProduccionController@repCortePiel');
-Route::get('home/repCortePielExl', 'Mod01_ProduccionController@repCortePielExl');
+Route::get('getAutocomplete', function () {
+    return view('Mod07_Calidad.RechazoFrame');
+})->name('getAutocomplete');
+Route::get('search', array('as' => 'search', 'uses' => 'Mod07_CalidadController@search'));
+Route::get('autocomplete', array('as' => 'autocomplete', 'uses' => 'Mod07_CalidadController@autocomplete'));
 //
 //-------------------------//
 //RUTAS DE RECURSOS HUMANOS//---------------------------------------------------------
@@ -255,6 +255,4 @@ Route::get('home/{r0}/ayudas_pdf/{PdfName}', 'HomeController@showPdf2');
     }
     echo 'hecho';
 });
-  Route::post('home/reporte/backorderPDF', 'Reportes_ProduccionController@backOrderAjaxToSession');
-  Route::get('home/reporte/backorderVentasPDF', 'Reportes_ProduccionController@ReporteBackOrderVentasPDF');
-  Route::get('home/reporte/backorderPlaneaPDF', 'Reportes_ProduccionController@ReporteBackOrderPlaneaPDF');
+ 
