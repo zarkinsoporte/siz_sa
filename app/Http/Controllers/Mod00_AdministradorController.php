@@ -299,7 +299,7 @@ dd($user);
                     ->first();
                   //dd(count($tarea));
                 if  (count($nueva_tarea) == 1){
-                    return redirect()->back()->withErrors(array('message' => 'La tarea ya existe.'));
+                    return redirect()->back()->withInput()->withErrors(array('message' => 'La tarea ya existe.'));
                 }else{
                     $modulo = new MODULOS_GRUPO_SIZ();
                     $modulo->id_grupo = $id_grupo;
@@ -484,31 +484,36 @@ dd($user);
 
     public function inventario()
     {
-        //Realizamos la consulta nuevamente
+        if (Auth::check()) {            
+        return view('Mod00_Administrador.inventario'); 
+        } else {
+            return redirect()->route('auth/login');
+        }   
+    }
+    public function DataInventario(){
+       if(Auth::check()){
+            //Realizamos la consulta nuevamente
         $inventario = DB::table('Siz_Inventario')
-            ->join('Siz_Monitores', 'Siz_Inventario.monitor', '=', 'Siz_Monitores.id')
-            ->select('Siz_Inventario.id as id_inv', 'Siz_Inventario.*', 'Siz_Monitores.id as id_mon', 'Siz_Monitores.*')
-            ->where('Siz_Inventario.activo', '=',1)
-            ->orderBy('numero_equipo')
-            ->get();
-        $monitores  = DB::table('Siz_Monitores')->get();
+        ->join('Siz_Monitores', 'Siz_Inventario.monitor', '=', 'Siz_Monitores.id')
+        ->select('Siz_Inventario.id as id_inv', 'Siz_Inventario.*', 'Siz_Monitores.id as id_mon', 'Siz_Monitores.*')
+        ->where('Siz_Inventario.obsoleto', '=',1);       
 
-        foreach ($inventario as $inv_campo) {
-                    $nombre_usuario = explode(".", $inv_campo->correo);
-                    $nombre   = strtoupper($nombre_usuario[0]);
-                    $apellido = explode("@", $apellido = $nombre_usuario[1]);
-                    $apellido = strtoupper($apellido[0]);
-                   
-                    if($nombre_usuario[1]!="com" && $inv_campo->nombre_usuario==NULL){    
-                        $act_usr = DB::table('Siz_Inventario')
-                            ->where('id', $inv_campo->id_inv)
-                            ->update(['nombre_usuario' => $nombre." ".$apellido ]);
-                        //dd($nombre_usuario[0]);
-                    }
 
-        }
 
-        return view('Mod00_Administrador.inventario', compact('inventario', 'monitores'));    
+    return Datatables::of($inventario)
+    ->addColumn('action', function ($i) {
+       
+        return   ' <a href="generarPdf/'.$i->id_inv.'" class="btn btn-default"><i class="fa fa-file-pdf-o"data-toggle="tooltip" data-placement="top" title="Tooltip on top"></i></a>
+        <a href="mark_obs/'.$i->id_inv.'" class="btn btn-default"><i class="fa fa-recycle"></i></a>
+        <a href="mod_inv/'.$i->id_inv.'" class="btn btn-warning"><i class="fa fa-pencil-square"></i></a>
+        ';
+    }
+    )
+    ->make(true);
+
+       }else{
+           return redirect()->route('auth/login');
+       }
     }
 
     public function mark_obs($id)
@@ -517,7 +522,7 @@ dd($user);
         $act_inv = DB::table('Siz_Inventario')
             ->where("id", "=", "$id")
             ->update([
-                'activo' => '0'
+                'obsoleto' => '0'
             ]);
         //dd($act_inv);     
         //Realizamos la consulta nuevamente
@@ -531,7 +536,7 @@ dd($user);
         $act_inv = DB::table('Siz_Inventario')
             ->where("id", "=", "$id")
             ->update([
-                'activo' => '1'
+                'obsoleto' => '1'
             ]);
         //dd($act_inv);     
         //Realizamos la consulta nuevamente
@@ -560,7 +565,6 @@ dd($user);
 
     public function altaInventario( Request $request)
     {
-        //$monitores = DB::table('Siz_Monitores')->get();
         $monitores = DB::select( DB::raw("SELECT Siz_Monitores.id AS id_mon, nombre_monitor FROM Siz_Monitores LEFT JOIN Siz_Inventario ON Siz_Monitores.id = Siz_Inventario.monitor WHERE Siz_Inventario.monitor IS NULL AND Siz_Monitores.id !='1'") );
         return view('Mod00_Administrador.altaInventario', compact('monitores'));   
     }
@@ -609,29 +613,45 @@ dd($user);
         return view('Mod00_Administrador.monitores')->with('monitores', $monitores);
     }
 
-    public function altaInventario2(Request $request)
-    {
-        $tiempo_vida = $request->input('tiempo_vida');    
-        $fecha = date('Y-m-j');
-        $nuevafecha = strtotime ( "+$tiempo_vida year" , strtotime ( $fecha ) ) ;
-        $nuevafecha = date ( 'Y-m-j' , $nuevafecha );
-        //Insertamos el monitor en la DB
-        DB::table('Siz_Inventario')->insert(
-            [
-             'nombre_equipo' => $request->input('nombre_equipo'),
-             'nombre_usuario' => $request->input('nombre_usuario'),
-             'correo' => $request->input('correo'), 
-             'numero_equipo' => $request->input('numero_equipo'),
-             'tipo_equipo' => $request->input('tipo_equipo'),
-             'fecha_alta' => date("Y-m-d"),
-             'fecha_baja' => $nuevafecha,
-             'monitor' => $request->input('monitor'),
-             'Fecha_mantenimiento' => $request->input('mantenimiento'),
-             'activo'=> 1
-            ]
-        );
-        //Realizamos la consulta nuevamente
-        return redirect('admin/inventario');
+    public function saveInventario(Request $request)
+    {         
+        //Insertamos en la DB
+        try{
+            DB::table('Siz_Inventario')->insert(
+                [
+                 'numero_equipo' => $request->input('numero_equipo'),
+                 'nombre_equipo' => $request->input('nombre_equipo'),
+                 'nombre_usuario' => $request->input('nombre_usuario'),
+                 'correo' => $request->input('correo'), 
+                 'correo_password' => $request->input('correo_password'), 
+                 'monitor' => $request->input('monitor'),
+                 'estatus' => $request->input('estatus'),
+                 'ubicacion' => $request->input('ubicacion'),
+                 'area' => $request->input('area'),             
+                 'noserie' => $request->input('serie'),
+                 'marca' => $request->input('marca'),
+                 'modelo' => $request->input('modelo'),
+                 'procesador' => $request->input('procesador'),
+                 'velocidad' => $request->input('velocidad'),
+                 'memoria' => $request->input('memoria'),
+                 'espacio_disco' => $request->input('disco_duro'),
+                 'so' => $request->input('so'),
+                 'arquitectura' => $request->input('arquitectura'),
+                 'ofimatica' => $request->input('ofimatica'),
+                 'antivirus' => $request->input('antivirus'),
+                 'otros' => $request->input('otro'),                     
+                 'fecha_alta' => date("Y-m-d"),           
+                 'Fecha_mttoProgramado' => $request->input('mantenimiento_programado'),
+                 'Fecha_mantenimiento' => $request->input('mantenimiento_realizado'),
+                 'obsoleto'=> 1
+                ]
+            );
+            Session::flash('mensaje', 'Equipo #'.$request->input('numero_equipo').' agregado Correctamente');
+            return redirect('admin/inventario');
+        }catch(Exception $e){
+            return redirect()->back()->withErrors(array('message' => 'Error: '.$e->getMessage()."\n"));
+        }
+        
     }
 
     public function generarPdf($id)
@@ -660,18 +680,17 @@ dd($user);
         return redirect('admin/inventario');
     }
 
-    public function mod_inv($id, $mensaje)
+    public function mod_inv($id)
     {
         $inventario = DB::table('Siz_Inventario')
             ->join('Siz_Monitores', 'Siz_Inventario.monitor', '=', 'Siz_Monitores.id')
             ->select('Siz_Inventario.id as id_inv', 'Siz_Inventario.*', 'Siz_Monitores.id as id_mon', 'Siz_Monitores.*')
-            ->where('Siz_Inventario.id', '=',$id)
-            ->orderBy('id_inv')
-            ->get();
+            ->where('Siz_Inventario.id', '=',$id)            
+            ->first();
         //dd($inventario);    
-        $monitores = DB::select( DB::raw("SELECT Siz_Monitores.id AS id_mon, nombre_monitor FROM Siz_Monitores LEFT JOIN Siz_Inventario ON Siz_Monitores.id = Siz_Inventario.monitor WHERE Siz_Inventario.monitor IS NULL AND Siz_Monitores.id !='1'") );
+        $monitores = DB::select( DB::raw("SELECT Siz_Monitores.id AS id_mon, nombre_monitor FROM Siz_Monitores  WHERE Siz_Monitores.id !='1'") );
         //dd($inventario[0]->nombre_equipo);
-        return view('Mod00_Administrador.modInventario', compact('monitores', 'inventario', 'mensaje')); 
+        return view('Mod00_Administrador.modInventario', compact('monitores', 'inventario')); 
         {
             return redirect('admin/inventario');
         }
@@ -684,20 +703,35 @@ dd($user);
         ->where("id", "=", "$request->id_inv")
         ->update(
             [
+                'numero_equipo' => $request->input('numero_equipo'),
                 'nombre_equipo' => $request->input('nombre_equipo'),
                 'nombre_usuario' => $request->input('nombre_usuario'),
                 'correo' => $request->input('correo'), 
-                'numero_equipo' => $request->input('numero_equipo'),
-                'tipo_equipo' => $request->input('tipo_equipo'),
-                'fecha_alta' => $request->input('fecha_alta'),
-                'fecha_baja' => $request->input('fecha_baja'),
+                'correo_password' => $request->input('correo_password'), 
                 'monitor' => $request->input('monitor'),
-                'Fecha_mantenimiento' => $request->input('Mtto')
+                'estatus' => $request->input('estatus'),
+                'ubicacion' => $request->input('ubicacion'),
+                'area' => $request->input('area'),             
+                'noserie' => $request->input('serie'),
+                'marca' => $request->input('marca'),
+                'modelo' => $request->input('modelo'),
+                'procesador' => $request->input('procesador'),
+                'velocidad' => $request->input('velocidad'),
+                'memoria' => $request->input('memoria'),
+                'espacio_disco' => $request->input('disco_duro'),
+                'so' => $request->input('so'),
+                'arquitectura' => $request->input('arquitectura'),
+                'ofimatica' => $request->input('ofimatica'),
+                'antivirus' => $request->input('antivirus'),
+                'otros' => $request->input('otro'),                                 
+                'Fecha_mttoProgramado' => $request->input('mantenimiento_programado'),
+                'Fecha_mantenimiento' => $request->input('mantenimiento_realizado'),
+                'obsoleto'=> 1
                ]
         );
-        $id_inv = $request->id_inv;
-        $mensaje="Registro Actualizado Correctamente";
-        return $this->mod_inv($id_inv, $mensaje);
+         
+         Session::flash('mensaje', 'Registro Actualizado Correctamente');              
+         return redirect()->back();
     }
 
 //brayan
