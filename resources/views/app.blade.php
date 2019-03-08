@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">      
-    <link rel="shortcut icon" href="images/favicons/IconZrk.ico" type="image/x-icon" >
+    
                                                          
     <script data-require="jquery" data-semver="3.3.1" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>  
