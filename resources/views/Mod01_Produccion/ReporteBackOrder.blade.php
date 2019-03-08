@@ -59,8 +59,9 @@ div.ColVis {
                         <th>Funda</th>
                         <th>Dias CT</th>
                         <th>Prg. Piel</th>
-                        <th>Secue</th>
-                        <th>Sec OT</th>
+                        <th>HULE</th>
+                        <th>CASCO</th>
+                        <th>METAL</th>
                         <th>Sem-C</th>
                         <th>F.Compras</th>
                         <th>F.Ventas</th>
@@ -236,6 +237,7 @@ var table = $('#tbackorder').DataTable({
         { data: 'U_Grupo', name: 'U_Grupo' },
         { data: 'Secue', name:  'Secue'},
         { data: 'SecOT', name:  'SecOT' },
+        { data: 'METAL', name:  'METAL' },
         { data: 'SEMANA2', name:  'SEMANA2'},
         { data: 'fentrega', name:  'fentrega'},//fCompras
         { data: 'fechaentregapedido', name:  'fechaentregapedido'},//fVentas
