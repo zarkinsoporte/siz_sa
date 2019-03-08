@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\Input;
 use Session;
 use Maatwebsite\Excel\Facades\Excel;
 use Datatables;
-ini_set('max_execution_time', 90);
+ini_set("memory_limit", '512M');
+ini_set('max_execution_time', 0);
 class Reportes_ProduccionController extends Controller
 {
     /**
@@ -436,6 +437,7 @@ class Reportes_ProduccionController extends Controller
         // ->select('OP', 'Pedido', 'fechapedido', 'OC', 'd_proc', 'no_serie', 'cliente', 'codigo1', 'codigo3', 'Descripcion',
 		// 'Cantidad', 'VSind', 'VS', 'destacion', 'U_GRUPO', 'Secue', 'SecOT', 'SEMANA2', 'fentrega',
 		// 'fechaentregapedido', 'SEMANA3', 'u_fproduccion', 'prioridad', 'comments', 'u_especial', 'modelo');        
+        if (Auth::check()) {
         $rowsBo = DB::table('SIZ_View_ReporteBO');
          
         return Datatables::of($rowsBo)
@@ -506,5 +508,36 @@ class Reportes_ProduccionController extends Controller
         }
         )
         ->make(true);
+        }else {
+            return redirect()->route('auth/login');
+        }
     }
+    public function backOrderAjaxToSession(){
+        //ajax nos envia los registros del datatable que el usuario filtro y los alamcenamos en la session
+        //formato JSON
+        Session::put('miarr',Input::get('arr'));   
+    }
+    public function ReporteBackOrderVentasPDF()
+    {    
+        if (Auth::check()) {       
+        $data = json_decode(stripslashes(Session::get('miarr')));      
+        $pdf = \PDF::loadView('Mod01_Produccion.ReporteBackOrderPDF_Ventas', compact('data'));
+        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
+        return $pdf->stream('Siz_Reporte_BackOrderV ' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
+        }else {
+            return redirect()->route('auth/login');
+        }
+    }
+    public function ReporteBackOrderPlaneaPDF()
+    {   
+        if (Auth::check()) {    
+        $data = json_decode(stripslashes(Session::get('miarr')));
+        $pdf = \PDF::loadView('Mod01_Produccion.ReporteBackOrderPDF_Planea', compact('data'));
+        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
+        return $pdf->stream('Siz_Reporte_BackOrderP ' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
+        }else {
+            return redirect()->route('auth/login');
+        }
+    }
+
 }

@@ -11,6 +11,12 @@ div.container {
 div.ColVis {
         float: left;
     }
+    .DTFC_LeftBodyWrapper{
+        margin-top: 82px;
+    }
+    .DTFC_LeftHeadWrapper {
+    display:none;
+    }
 </style>
 
 <div class="container">
@@ -94,6 +100,13 @@ $('#tbackorder thead tr:eq(1) th').each( function (i) {
                 
     } );
 } );
+var meses = new Array ("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
+var diasSemana = new Array("Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado");
+var f=new Date();
+var hours = f.getHours();
+var ampm = hours >= 12 ? 'pm' : 'am';
+var fecha = 'ACTUALIZADO: '+ diasSemana[f.getDay()] + ', ' + f.getDate() + ' de ' + meses[f.getMonth()] + ' del ' + f.getFullYear()+', A LAS '+hours+":"+f.getMinutes()+ ' ' + ampm; 
+var f = fecha.toUpperCase();
 
 var table = $('#tbackorder').DataTable({
     dom: 'Bfrtip',
@@ -114,12 +127,15 @@ var table = $('#tbackorder').DataTable({
             extend: 'copy',    
             exportOptions: {
                 columns: ':visible',                
-            }                  
+            }             
         },
         {
             text: '<i class="fa fa-file-excel-o"></i> Excel',
             className: "btn-success",
-            extend: 'excel', 
+            extend: 'excelHtml5',
+            message: "SALOTTO S.A. DE C.V.\n",
+            messagetwo: "BACK ORDER PROGRAMADO.\n",
+            messagethree: f,
             exportOptions: {
                 columns: ':visible',                
             }          
@@ -132,24 +148,18 @@ var table = $('#tbackorder').DataTable({
                 {
                     text: 'Ventas',                   
                     action: function ( e, dt, node, config ) {                                
-                         var data=table.rows( { filter : 'applied'} ).data().toArray();
-                          
+                         var data=table.rows( { filter : 'applied'} ).data().toArray();               
                          var json = JSON.stringify( data );
-                       // sessionStorage.setItem( 'arr' , json );
-
-                         //var url = 'hola?arr=' + json;
-                         //window.location.href = 'hola';
                          $.ajax({
                             type:'POST',
-                            url:'hola',
-                            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                            
+                            url:'reporte/backorderPDF',
+                            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},                            
                             data: {
                                 "_token": "{{ csrf_token() }}",
                                 "arr": json
                                 },
                                 success:function(data){
-                                    window.location.href = 'hola';
+                                    window.open('reporte/backorderVentasPDF', '_blank')                                   
                             }
                          });
                      }
@@ -158,7 +168,20 @@ var table = $('#tbackorder').DataTable({
                 {
                     text: 'Planeación',                    
                     action: function ( e, dt, node, config ) {
-                        window.open('hola','_blank');
+                        var data=table.rows( { filter : 'applied'} ).data().toArray();               
+                        var json = JSON.stringify( data );
+                        $.ajax({
+                           type:'POST',
+                           url:'reporte/backorderPDF',
+                           headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},                            
+                           data: {
+                               "_token": "{{ csrf_token() }}",
+                               "arr": json
+                               },
+                               success:function(data){
+                                  window.open('reporte/backorderPlaneaPDF', '_blank');          
+                           }
+                        });
                     },           
                 },
             ]
@@ -214,8 +237,8 @@ var table = $('#tbackorder').DataTable({
         { data: 'Secue', name:  'Secue'},
         { data: 'SecOT', name:  'SecOT' },
         { data: 'SEMANA2', name:  'SEMANA2'},
-        { data: 'fentrega', name:  'fentrega'},
-        { data: 'fechaentregapedido', name:  'fechaentregapedido'},
+        { data: 'fentrega', name:  'fentrega'},//fCompras
+        { data: 'fechaentregapedido', name:  'fechaentregapedido'},//fVentas
         { data: 'SEMANA3', name:  'SEMANA3'},
         { data: 'u_fproduccion', name:  'u_fproduccion'},
         { data: 'Prioridad', name:  'Prioridad'},
@@ -225,7 +248,15 @@ var table = $('#tbackorder').DataTable({
         { data: 'Modelo', name: 'Modelo'}
     ],
     "language": {
-        "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+        "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json",
+        buttons: {
+            copyTitle: 'Copiar al portapapeles',
+            copyKeys: 'Presiona <i>ctrl</i> + <i>C</i> para copiar o la tecla <i>Esc</i> para continuar.',
+            copySuccess: {
+                _: '%d filas copiadas',
+                1: '1 fila copiada'
+            }
+        }
     },
     columnDefs: [
         { width: 80, targets: 2 },
