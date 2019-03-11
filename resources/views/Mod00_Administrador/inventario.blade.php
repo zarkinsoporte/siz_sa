@@ -89,7 +89,7 @@
                                     <th>Correo_password</th>
                                     <th>Monitor</th>
                                     <th>Estatus</th>
-                                    <th>Ubicacion</th>
+                                    <th>Ubicación</th>
                                     <th>Area</th>
                                     <th>Tipo_equipo</th>
                                     <th>No.Serie</th>
@@ -184,20 +184,20 @@ var table = $('#tinventario').DataTable({
         }, 
         {            
             text: '<i class="fa fa-file-pdf-o"></i> Pdf',           
-            className: "btn-danger",
+            className: "btn-danger",            
                     action: function ( e, dt, node, config ) {                                
                          var data=table.rows( { filter : 'applied'} ).data().toArray();               
                          var json = JSON.stringify( data );
                          $.ajax({
                             type:'POST',
-                            url:'reporte/backorderPDF',
+                            url:'reporte/inventario',
                             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},                            
                             data: {
                                 "_token": "{{ csrf_token() }}",
                                 "arr": json
                                 },
                                 success:function(data){
-                                    window.open('reporte/backorderVentasPDF', '_blank')                                   
+                                    window.open('reporte/inventarioComputoPDF', '_blank')                                   
                             }
                          });
                      }           

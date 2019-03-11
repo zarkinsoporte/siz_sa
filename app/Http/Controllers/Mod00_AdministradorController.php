@@ -804,18 +804,28 @@ public function Noticia()
     );
     Session::flash('info', 'Tu noticia se ha actualizado');
     return redirect('admin/Notificaciones'); 
-    }
-
-   
+    }   
      public function delete_noti($id_Autor){
       $eliminar = DB::table('Siz_Noticias')->where('Id', '=', $id_Autor)->delete();
     
         Session::flash('info', 'Eliminaste una noticia');
         return redirect()->back();
     }
-
-
-
-    
-//envia los datos//
+    public function backOrderAjaxToSession(){
+        //ajax nos envia los registros del datatable que el usuario filtro y los alamcenamos en la session
+        //formato JSON
+        Session::put('inve', Input::get('arr'));   
+    }
+    public function ReporteInventarioComputoPDF()
+    {   
+        if (Auth::check()) {    
+        $data = json_decode((Session::get('inve')));
+        //dd($data);
+        $pdf = \PDF::loadView('Mod00_Administrador.ReporteInventarioComputoPDF', compact('data'));
+        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
+        return $pdf->stream('Siz_Reporte_InventarioComputo ' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
+        }else {
+            return redirect()->route('auth/login');
+        }
+    }
 }

@@ -56,6 +56,8 @@ Route::post('cambio.password', 'Mod00_AdministradorController@cambiopassword');
 //Rutas del Módulo de inventarios
 Route::get('admin/inventario', 'Mod00_AdministradorController@inventario');
 Route::get('datatables.inventario', 'Mod00_AdministradorController@DataInventario')->name('datatables.inventario');
+Route::post('admin/reporte/inventario', 'Mod00_AdministradorController@backOrderAjaxToSession');
+Route::get('admin/reporte/inventarioComputoPDF', 'Mod00_AdministradorController@ReporteInventarioComputoPDF');
 
 Route::get('admin/inventarioObsoleto', 'Mod00_AdministradorController@inventarioObsoleto');
 
