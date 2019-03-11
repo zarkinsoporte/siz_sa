@@ -550,7 +550,7 @@ dd($user);
         $inventario = DB::table('Siz_Inventario')
             ->join('Siz_Monitores', 'Siz_Inventario.monitor', '=', 'Siz_Monitores.id')
             ->select('Siz_Inventario.id as id_inv', 'Siz_Inventario.*', 'Siz_Monitores.id as id_mon', 'Siz_Monitores.*')
-            ->where('Siz_Inventario.activo', '=',0)
+            ->where('Siz_Inventario.obsoleto', '=',0)
             ->get();
         $monitores  = DB::table('Siz_Monitores')->get();
         //dd($inventario);
