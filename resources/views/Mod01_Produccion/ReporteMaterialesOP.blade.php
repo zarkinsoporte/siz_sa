@@ -8,6 +8,7 @@
                     <!-- Page Heading -->
                     <div class="row">
                         <div class="col-md-11">
+                                <div class="visible-xs"><br><br></div>
                             <h3 class="page-header">
                                 {{'Reporte de Materiales OP'}}
                                 <small>Producción</small>
@@ -19,9 +20,11 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-4 col-md-offset-8">                                                                                                     
+                            <div class="col-md-12">   
+                                    <p align="right">                                                                                                      
                             <a href="../ReporteMaterialesPDF/{{$op}}" target="_blank" class="btn btn-danger"><i class="fa fa-file-pdf-o"></i> Reporte PDF</a>
                             <a class="btn btn-success" href="materialesXLS"><i class="fa fa-file-excel-o"></i> Reporte XLS</a>                                    
+                        </p>
                         </div>                         
                     </div>   
                     <br>
@@ -29,12 +32,12 @@
                     <div class="row">
                         <div class="col-md-12">
                         <table  border="1px" class="table table-striped">
-                    <thead class="thead-dark">
+                    <thead class="table-bordered table-condensed">
                     <tr>
-                        <th align="center" bgcolor="#474747" style="color:white"; scope="col">Fecha de entrega</th>
+                        <th align="center" bgcolor="#474747" style="color:white";scope="col">Fecha</th>
                         <th align="center" bgcolor="#474747" style="color:white";scope="col">Código</th>
                         <th align="center" bgcolor="#474747" style="color:white";scope="col">Descripción</th>
-                        <th align="center" bgcolor="#474747" style="color:white";scope="col">Unidad Medida</th>
+                        <th align="center" bgcolor="#474747" style="color:white";scope="col">UM</th>
                         <th align="center" bgcolor="#474747" style="color:white";scope="col">Solicitada</th>
                         </tr>
                     </thead>
@@ -58,7 +61,7 @@
                            if($EstacionO==$temporal){ 
                             ?>
                             <tr>
-                            <td scope="row">
+                            <td scope="row" width="10%">
                                <?php echo date('d-m-Y', strtotime($rep->FechaEntrega));  ?>
                             </td>
                             

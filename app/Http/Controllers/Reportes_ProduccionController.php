@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Input;
 use Session;
 use Maatwebsite\Excel\Facades\Excel;
 use Datatables;
+
 ini_set("memory_limit", '512M');
 ini_set('max_execution_time', 0);
 class Reportes_ProduccionController extends Controller
@@ -189,6 +190,16 @@ class Reportes_ProduccionController extends Controller
             case "MATERIALES OP":
                 $fechas = false;
                 $fieldOtroNumber = 'OP';
+                $fieldOtroText = '';
+                break;
+            case "ENTRADAS ALMACEN":
+                $fechas = true;
+                $fieldOtroNumber = '';
+                $fieldOtroText = '';
+                break;
+            case "PRODUCCION POR AREAS":
+                $fechas = true;
+                $fieldOtroNumber = '';
                 $fieldOtroText = '';
                 break;
             default:
@@ -536,6 +547,53 @@ class Reportes_ProduccionController extends Controller
         $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
         return $pdf->stream('Siz_Reporte_BackOrderP ' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
         }else {
+            return redirect()->route('auth/login');
+        }
+    }
+
+    public function reporteProdxAreas(){
+        if (Auth::check()) {
+            $user = Auth::user();
+            $actividades = $user->getTareas();
+            $consulta = DB::select(DB::raw("           
+                SELECT BIHR.Fecha,
+                SUM(BIHR.VS100) AS VST100,
+                SUM(BIHR.VS106) AS VST106,
+                SUM(BIHR.VS109) AS VST109,
+                SUM(BIHR.VS112) AS VST112,
+                SUM(BIHR.VS115) AS VST115,
+                SUM(BIHR.VS118) AS VST118,
+                SUM(BIHR.VS121) AS VST121,
+                SUM(BIHR.VS124) AS VST124,
+                SUM(BIHR.VS127) AS VST127,
+                SUM(BIHR.VS130) AS VST130,
+                SUM(BIHR.VS133) AS VST133,
+                SUM(BIHR.VS136) AS VST136,
+                SUM(BIHR.VS139) AS VST139,
+                SUM(BIHR.VS145) AS VST145,
+                SUM(BIHR.VS148) AS VST148,
+                SUM(BIHR.VS151) AS VST151,
+                SUM(BIHR.VS154) AS VST154,
+                SUM(BIHR.VS157) AS VST157,
+                SUM(BIHR.VS160) AS VST160,
+                SUM(BIHR.VS172) AS VST172,
+                SUM(BIHR.VS175) AS VST175,
+                SUM(BIHR.VS) AS VST
+                FROM ( SELECT [@CP_LOGOF].U_DocEntry AS OP, [@CP_LOGOF].U_CT AS AREA, RUT.Name AS RUTA, CAST([@CP_LOGOF].U_FechaHora AS DATE) AS Fecha, CAST([@CP_LOGOF].U_FechaHora AS TIME) AS Hora, OP.ItemCode AS CODIGO, A3.ItemName AS ARTICULO, [@CP_LOGOF].U_Cantidad AS CANT, A3.U_VS * [@CP_LOGOF].U_Cantidad AS VS, CASE WHEN [@CP_LOGOF].U_CT=100 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS100, CASE WHEN [@CP_LOGOF].U_CT=106 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS106, CASE WHEN [@CP_LOGOF].U_CT=109 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS109, CASE WHEN [@CP_LOGOF].U_CT=112 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS112, CASE WHEN [@CP_LOGOF].U_CT=115 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS115, CASE WHEN [@CP_LOGOF].U_CT=118 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS118, CASE WHEN [@CP_LOGOF].U_CT=121 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS121, CASE WHEN [@CP_LOGOF].U_CT=124 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS124, CASE WHEN [@CP_LOGOF].U_CT=127 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS127, CASE WHEN [@CP_LOGOF].U_CT=130 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS130, CASE WHEN [@CP_LOGOF].U_CT=133 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS133, CASE WHEN [@CP_LOGOF].U_CT=136 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS136, CASE WHEN [@CP_LOGOF].U_CT=139 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS139, CASE WHEN [@CP_LOGOF].U_CT=145 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS145, CASE WHEN [@CP_LOGOF].U_CT=148 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS148, CASE WHEN [@CP_LOGOF].U_CT=151 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS151, CASE WHEN [@CP_LOGOF].U_CT=154 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS154, CASE WHEN [@CP_LOGOF].U_CT=157 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS157, CASE WHEN [@CP_LOGOF].U_CT=160 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS160, CASE WHEN [@CP_LOGOF].U_CT=172 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS172, CASE WHEN [@CP_LOGOF].U_CT=175 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS175 FROM [@CP_LOGOF] INNER JOIN OWOR OP ON [@CP_LOGOF].U_DocEntry = OP.DocEntry inner join OITM A3 on OP.ItemCode=A3.ItemCode inner join [@PL_RUTAS] RUT on RUT.Code=[@CP_LOGOF].U_CT where  [@CP_LOGOF].U_FechaHora 
+                BETWEEN '".Input::get('FechIn')."' and '".Input::get('FechaFa')."' ) BIHR Group by BIHR.Fecha order by BIHR.Fecha
+            "));
+          
+            Session::put('repprodxareas', $consulta);      
+            $data = array(
+                'data' => $consulta,         
+                'actividades' => $actividades,
+                'ultimo' => count($actividades),
+                'db' => DB::getDatabaseName(),          
+                'fi' => Input::get('FechIn'),
+                'ff' => Input::get('FechaFa')
+            );
+            return view('Mod01_Produccion.reporteProdxAreas', $data);
+        } else {
             return redirect()->route('auth/login');
         }
     }

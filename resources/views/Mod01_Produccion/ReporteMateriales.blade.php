@@ -68,7 +68,7 @@
          <tr>
       <td colspan="5" align="center" bgcolor="#fff">
       <b><?php echo  $db?></b><br>    
-      <b>Mod06-Producción</b>
+      <b>Mod01-Producción</b>
       <h3>Reporte de Materiales</h3></td>
       </tr>
             <tr>
@@ -118,7 +118,7 @@
                               $bandera=true;
                               $EstacionO=$rep->Estacion;
                               ?>
-                              <tr><td colspan="5"align="center" bgcolor="#ccc"> <?php echo $EstacionO ?> </td></tr>
+                              <tr><td colspan="5" align="center" bgcolor="#ccc"> <?php echo $EstacionO ?> </td></tr>
 
                               <?php
                           }

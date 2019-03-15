@@ -144,7 +144,8 @@ $cant = $cant + $val['Cantidad'];
                                                 <option value="400 Ordenes en Planeación">400 Ordenes en Planeación</option>
                                                 <option value="403 Recepcion Habilitado">403 Recepcion Habilitado</option>
                                                 <option value="406 Armado">406 Armado</option>                                               
-                                                <option value="415 Pegado Hule / Terminado">415 Pegado Hule / Terminado</option>
+                                                <option value="409 Tapado de Casco">409 Tapado de Casco</option>                                               
+                                                <option value="415 Pegado Hule al Casco">415 Pegado Hule al Casco</option>
                                                 <option value="418 Entrega Casco">418 Entrega Casco</option>
                                             </select>
                                         </div>

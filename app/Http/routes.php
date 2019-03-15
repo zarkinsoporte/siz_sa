@@ -213,9 +213,26 @@ Route::get('home/CONSULTA OC', 'Mod03_ComprasController@pedidosCsv');
 Route::post('home/CONSULTA OC', 'Mod03_ComprasController@postPedidosCsv');
 Route::get('home/desPedidosCsv', 'Mod03_ComprasController@desPedidosCsv');
 Route::get('home/PedidosCsvPDF', 'Mod03_ComprasController@PedidosCsvPDF');
+//
+//-------------------------//
+//RUTAS DE MATERIALES ALMACEN//---------------------------------------------------------
+//-------------------------//
+//
+Route::get('home/ENTRADAS ALMACEN', 'Reportes_ProduccionController@showModal');
+Route::post('home/reporte/ENTRADAS ALMACEN', 'Mod04_MaterialesController@reporteEntradasAlmacen');
+Route::get('home/reporte/ENTRADAS ALMACEN', 'Mod04_MaterialesController@reporteEntradasAlmacenPDF');
+Route::get('home/reporte/entradasalmacenXLS', 'Mod04_MaterialesController@entradasalmacenXLS');
 ///Ruta Ayudas
 Route::get('home/ayudas_pdf/{PdfName}', 'HomeController@showPdf');
 Route::get('home/{r0}/ayudas_pdf/{PdfName}', 'HomeController@showPdf2');
+//
+//-------------------------//
+//RUTAS DE PRODUCCION POR AREAS//---------------------------------------------------------
+//-------------------------//
+//
+Route::get('home/PRODUCCION POR AREAS', 'Reportes_ProduccionController@showModal');
+Route::post('home/reporte/PRODUCCION POR AREAS', 'Reportes_ProduccionController@reporteProdxAreas');
+Route::get('home/reporte/PRODUCCION POR AREAS', 'Reportes_ProduccionControllerr@reporteProdxAreasPDF');
 //Route::get('home/ayudas_pdf/{r1}/{PdfName}', 'HomeController@showPdf');
 //Route::get('home/ayudas_pdf/{r1}/{r2}/{PdfName}', 'HomeController@showPdf');
  

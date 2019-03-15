@@ -9,7 +9,7 @@
                     <div class="row">
                         <div class="col-md-11">
                             <h3 class="page-header">
-                                {{'Reporte '.$nombre }}
+                                {{$nombre }}
                                 <small>Producción</small>
                             </h3>      
                            
@@ -25,7 +25,7 @@
                                 <div class="modal-content" >
                                     <div class="modal-header">
 
-                                        <h4 class="modal-title" id="pwModalLabel">Reporte {{$nombre}}</h4>
+                                        <h4 class="modal-title" id="pwModalLabel">{{$nombre}}</h4>
                                     </div>
                                     {!! Form::open(['url' => 'home/reporte/'.$nombre, 'method' => 'POST']) !!}
 
@@ -37,18 +37,18 @@
                                         @if($fechas == true)
                                         <div class="form-group">                                        
                                             <label for="date_range" class="control-label">Rango de Fechas:</label><br>
-                                            Desde:<input type="date" id="FechIn" name="FechIn" class="form-control" autofocus>
-                                            Hasta:<input type="date" id="FechaFa" name="FechaFa" class="form-control" >
+                                            Desde:<input type="date" id="FechIn" name="FechIn" class="form-control" autofocus required>
+                                            Hasta:<input type="date" id="FechaFa" name="FechaFa" class="form-control" required>
                                         </div>
                                         @endif
                                         @if($fieldOtroNumber <> '')                                    
                                         <div class="form-group">
-                                        Escribe {{$fieldOtroNumber}}:<input type="number" id="fieldOtroNumber" name="fieldOtroNumber" class="form-control" autofocus>
+                                        Escribe {{$fieldOtroNumber}}:<input type="number" id="fieldOtroNumber" name="fieldOtroNumber" class="form-control" autofocus required>
                                         </div>
                                         @endif
                                         @if($fieldOtroText <> '')                                    
                                         <div class="form-group">
-                                        Escribe {{$fieldOtroText}}:<input type="text" id="fieldOtroText" name="fieldOtroText" class="form-control" autofocus>
+                                        Escribe {{$fieldOtroText}}:<input type="text" id="fieldOtroText" name="fieldOtroText" class="form-control" autofocus required>
                                         </div>
                                         @endif
 

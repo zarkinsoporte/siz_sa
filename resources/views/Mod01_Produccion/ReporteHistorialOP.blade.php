@@ -8,6 +8,7 @@
                     <!-- Page Heading -->
                     <div class="row">
                         <div class="col-md-11">
+                                <div class="visible-xs"><br><br></div>
                             <h3 class="page-header">
                                 {{'Reporte de Historial x OP'}}
                                 <small>Producción</small>
@@ -19,16 +20,18 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-4 col-md-offset-8">                                                                                                     
+                            <div class="col-md-12">   
+                                    <p align="right">                                                                                                     
                             <a href="../ReporteOpPDF/{{$op}}" target="_blank" class="btn btn-danger"><i class="fa fa-file-pdf-o"></i> Reporte PDF</a> 
                             <a class="btn btn-success" href="historialXLS"><i class="fa fa-file-excel-o"></i> Reporte XLS</a>                                    
-                    </div>                         
+                    </p>
+                        </div>                         
                     </div>   
                  <!-- /.row -->
                     <div class="row">
                         <div class="col-md-12">
                         <table  border="1px"class="table table-striped">
-                    <thead class="table table-striped table-bordered table-condensed" >
+                    <thead class="table-bordered table-condensed" >
                         <tr>                      
                         <th align="center" bgcolor="#474747" style="color:white";scope="col">Fecha</th>
                         <th align="center" bgcolor="#474747" style="color:white"; scope="col">Estación</th>

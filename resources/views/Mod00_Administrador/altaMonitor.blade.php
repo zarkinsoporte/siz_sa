@@ -13,9 +13,7 @@
             <div> 
                     <h3 class="page-header">
                         Alta de Monitores
-                    </h3>
-                    <div>
-                </div>
+                    </h3>                   
                     <div class= "col-lg-6.5 col-md-8 col-sm-5">
                         <div class="hidden-xs">
                         <div class="hidden-sm">
