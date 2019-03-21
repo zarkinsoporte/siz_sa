@@ -22,6 +22,17 @@ class AppHelper
         return $inputs;
       }
 
+    public function rebuiltArrayString($first, $arr, $field)
+    {
+      $pila = array_pluck($arr, $field);
+      if($first <> ''){
+        $pila = array_prepend($pila, $first);
+      }
+      $pila = array_replace($pila,
+                            array_fill_keys(array_keys($pila, null),'0')
+      );     
+      return $pila;      
+    }
      public static function instance()
      {
          return new AppHelper();

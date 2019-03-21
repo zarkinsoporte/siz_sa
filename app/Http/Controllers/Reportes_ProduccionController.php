@@ -554,7 +554,7 @@ class Reportes_ProduccionController extends Controller
     public function reporteProdxAreas(){
         if (Auth::check()) {
             $user = Auth::user();
-            $actividades = $user->getTareas();
+            $actividades = $user->getTareas();           
             $consulta = DB::select(DB::raw("           
                 SELECT BIHR.Fecha,
                 SUM(BIHR.VS100) AS VST100,
@@ -580,22 +580,219 @@ class Reportes_ProduccionController extends Controller
                 SUM(BIHR.VS175) AS VST175,
                 SUM(BIHR.VS) AS VST
                 FROM ( SELECT [@CP_LOGOF].U_DocEntry AS OP, [@CP_LOGOF].U_CT AS AREA, RUT.Name AS RUTA, CAST([@CP_LOGOF].U_FechaHora AS DATE) AS Fecha, CAST([@CP_LOGOF].U_FechaHora AS TIME) AS Hora, OP.ItemCode AS CODIGO, A3.ItemName AS ARTICULO, [@CP_LOGOF].U_Cantidad AS CANT, A3.U_VS * [@CP_LOGOF].U_Cantidad AS VS, CASE WHEN [@CP_LOGOF].U_CT=100 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS100, CASE WHEN [@CP_LOGOF].U_CT=106 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS106, CASE WHEN [@CP_LOGOF].U_CT=109 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS109, CASE WHEN [@CP_LOGOF].U_CT=112 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS112, CASE WHEN [@CP_LOGOF].U_CT=115 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS115, CASE WHEN [@CP_LOGOF].U_CT=118 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS118, CASE WHEN [@CP_LOGOF].U_CT=121 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS121, CASE WHEN [@CP_LOGOF].U_CT=124 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS124, CASE WHEN [@CP_LOGOF].U_CT=127 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS127, CASE WHEN [@CP_LOGOF].U_CT=130 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS130, CASE WHEN [@CP_LOGOF].U_CT=133 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS133, CASE WHEN [@CP_LOGOF].U_CT=136 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS136, CASE WHEN [@CP_LOGOF].U_CT=139 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS139, CASE WHEN [@CP_LOGOF].U_CT=145 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS145, CASE WHEN [@CP_LOGOF].U_CT=148 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS148, CASE WHEN [@CP_LOGOF].U_CT=151 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS151, CASE WHEN [@CP_LOGOF].U_CT=154 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS154, CASE WHEN [@CP_LOGOF].U_CT=157 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS157, CASE WHEN [@CP_LOGOF].U_CT=160 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS160, CASE WHEN [@CP_LOGOF].U_CT=172 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS172, CASE WHEN [@CP_LOGOF].U_CT=175 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS175 FROM [@CP_LOGOF] INNER JOIN OWOR OP ON [@CP_LOGOF].U_DocEntry = OP.DocEntry inner join OITM A3 on OP.ItemCode=A3.ItemCode inner join [@PL_RUTAS] RUT on RUT.Code=[@CP_LOGOF].U_CT where  [@CP_LOGOF].U_FechaHora 
-                BETWEEN '".Input::get('FechIn')."' and '".Input::get('FechaFa')."' ) BIHR Group by BIHR.Fecha order by BIHR.Fecha
+                BETWEEN '".Input::get('FechIn').' 00:00'."' and '".Input::get('FechaFa').' 23:59:59'."' ) BIHR Group by BIHR.Fecha order by BIHR.Fecha
             "));
-          
-            Session::put('repprodxareas', $consulta);      
-            $data = array(
-                'data' => $consulta,         
-                'actividades' => $actividades,
-                'ultimo' => count($actividades),
-                'db' => DB::getDatabaseName(),          
+            $consulta2 = DB::select(DB::raw("           
+            SELECT T2.SVS FROM ( SELECT Code FROM [@PL_RUTAS] WHERE U_Estatus = 'A' AND Code <= '175' ) T1 LEFT JOIN ( SELECT CodFunda, SUM( VS) as SVS FROM SIZ_View_ReporteBO WHERE u_status= '06' and CodFunda is not null Group By CodFunda ) T2 ON T1.Code = T2.CodFunda Order By Code 
+            "));
+            
+            $consulta3 =  DB::select(DB::raw("
+            Select BIHR.Fecha,
+            SUM(BIHR.VS400) as VST400, 
+            SUM(BIHR.VS403) as VST403, 
+            SUM(BIHR.VS406) as VST406,
+			SUM(BIHR.VS409) as VST409, 
+            SUM(BIHR.VS415) as VST415, 
+            SUM(BIHR.VS418) as VST418 
+            from ( Select  [@CP_LOGOF].U_DocEntry as OP, [@CP_LOGOF].U_CT as AREA, RUT.Name AS RUTA, CAST([@CP_LOGOF].U_FechaHora as DATE) as Fecha, CAST([@CP_LOGOF].U_FechaHora as TIME) as Hora, OP.ItemCode as CODIGO, A3.ItemName as ARTICULO, [@CP_LOGOF].U_Cantidad as CANT, A3.U_VS as VS,
+			 CASE When [@CP_LOGOF].U_CT=400 then A3.U_VS * [@CP_LOGOF].U_Cantidad else 0 end AS VS400, 
+			 CASE When [@CP_LOGOF].U_CT=403 then A3.U_VS * [@CP_LOGOF].U_Cantidad else 0 end AS VS403, 
+			 CASE When [@CP_LOGOF].U_CT=406 then A3.U_VS * [@CP_LOGOF].U_Cantidad else 0 end AS VS406, 
+			 CASE When [@CP_LOGOF].U_CT=409 then A3.U_VS * [@CP_LOGOF].U_Cantidad else 0 end AS VS409, 
+			 CASE When [@CP_LOGOF].U_CT=415 then A3.U_VS * [@CP_LOGOF].U_Cantidad else 0 end AS VS415, 
+			 CASE When [@CP_LOGOF].U_CT=418 then A3.U_VS * [@CP_LOGOF].U_Cantidad else 0 end AS VS418 
+			 from [@CP_LOGOF] inner join OWOR OP on [@CP_LOGOF].U_DocEntry = OP.DocEntry inner join OITM A3 on OP.ItemCode=A3.ItemCode inner join [@PL_RUTAS] RUT on RUT.Code=[@CP_LOGOF].U_CT where  CAST([@CP_LOGOF].U_FechaHora AS DATE) 
+            BETWEEN '".Input::get('FechIn').' 00:00'."' and '".Input::get('FechaFa').' 23:59:59'."' ) BIHR Group by BIHR.Fecha order by BIHR.Fecha
+            "));
+            $consulta4 =  DB::select(DB::raw("
+            Select TRA_CAS.FECHA AS Fecha, 
+            SUM(TRA_CAS.ENT_CARP) AS S_CARP, 
+            SUM(TRA_CAS.ENT_TRAS) AS S_TRAS, 
+            SUM(TRA_CAS.ENT_KITT) AS S_KITT, 
+            SUM(TRA_CAS.ENT_TAPI) AS S_TAPI, 
+            SUM(TRA_CAS.VST) AS S_VST 
+            From (Select    CAST(OWTR.DocDate AS DATE) AS FECHA, OWTR.DocEntry AS T_NUM, WTR1.ItemCode AS CODE, OITM.ItemName AS DESCRIPCION, OITM.U_TipoMat AS TIPO, WTR1.Quantity AS CANT, OITM.U_VS AS VS, (WTR1.Quantity * OITM.U_VS) AS VST, OWTR.Filler AS ALM_SALE, WTR1.WhsCode AS ALM_ENTR, OUSR.U_NAME AS REALIZO, CASE When OWTR.Filler = 'APT-PA' and  WTR1.WhsCode = 'APG-PA' then (WTR1.Quantity * OITM.U_VS) else 0 end AS ENT_CARP, CASE When OWTR.Filler = 'APG-PA' and  WTR1.WhsCode = 'AMP-TR' then (WTR1.Quantity * OITM.U_VS) else 0 end AS ENT_TRAS, 
+            CASE When OWTR.Filler = 'AMP-TR' and  WTR1.WhsCode = 'APP-ST' then (WTR1.Quantity * OITM.U_VS) else 0 end AS ENT_KITT, CASE When OWTR.Filler = 'APP-ST' and  WTR1.WhsCode = 'APG-ST' then (WTR1.Quantity * OITM.U_VS) else 0 end AS ENT_TAPI from OWTR Inner Join WTR1 on OWTR.DocEntry = WTR1.DocEntry Inner Join OITM on WTR1.ItemCode = OITM.ItemCode Inner join OUSR on OWTR.UserSign=OUSR.USERID  Where  OITM.U_TipoMat = 'CA' and CAST(OWTR.DocDate AS DATE) 
+            BETWEEN '".Input::get('FechIn').' 00:00'."' and '".Input::get('FechaFa').' 23:59:59'."' ) TRA_CAS Group by TRA_CAS.FECHA Order by TRA_CAS.FECHA
+            "));
+            $consulta5 =  DB::select(DB::raw("
+            Select SUM(AL_CAS.EX_CARP) AS T_CARP, 
+            SUM(AL_CAS.EX_ALMA) AS T_ALMA, 
+            SUM(AL_CAS.EX_CAMI) AS T_CAMI, 
+            SUM(AL_CAS.EX_KITT) AS T_KITT, 
+            SUM(AL_CAS.EX_TAPI) AS T_TAPI, 
+            SUM(AL_CAS.EX_GUAD) AS T_GUAD, 
+            SUM(AL_CAS.VST) AS T_TOTAL 
+            From ( Select   OITW.ItemCode AS CODE, OITM.ItemName AS DESCRIPCION, OITM.U_TipoMat AS TIPO, OITW.OnHand AS CANT, OITM.U_VS AS VS, (OITW.OnHand * OITM.U_VS) AS VST, OITW.WhsCode AS ALMACEN, CASE When OITW.WhsCode = 'APT-PA' then (OITW.OnHand * OITM.U_VS) else 0 end AS EX_CARP, CASE When OITW.WhsCode = 'APG-PA' then (OITW.OnHand * OITM.U_VS) else 0 end AS EX_ALMA, CASE When OITW.WhsCode = 'AMP-TR' then (OITW.OnHand * OITM.U_VS) else 0 end AS EX_CAMI, CASE When OITW.WhsCode = 'APP-ST' then (OITW.OnHand * OITM.U_VS) else 0 end AS EX_KITT, 
+            CASE When OITW.WhsCode = 'APG-ST' then (OITW.OnHand * OITM.U_VS) else 0 end AS EX_TAPI, CASE When OITW.WhsCode = 'AMG-FE' then (OITW.OnHand * OITM.U_VS) else 0 end AS EX_GUAD From OITW Inner Join OITM on OITW.ItemCode = OITM.ItemCode Where  OITM.U_TipoMat = 'CA' and OITW.OnHand > 0 ) AL_CAS
+            "));
+                  
+            $data = array('data' => $consulta, 'data2' => $consulta2, 'data3' => $consulta3, 'data4' => $consulta4, 'data5' => $consulta5, 'actividades' => $actividades, 'ultimo' => count($actividades), 'db' => DB::getDatabaseName(), 'fi' => Input::get('FechIn'), 'ff' => Input::get('FechaFa') );
+            $dataSesion = array(                
+                'data' => $consulta,
+                'data2' => $consulta2,         
+                'data3' => $consulta3,         
+                'data4' => $consulta4,         
+                'data5' => $consulta5,                        
                 'fi' => Input::get('FechIn'),
                 'ff' => Input::get('FechaFa')
             );
+            Session::put('repprodxareas', $dataSesion);
             return view('Mod01_Produccion.reporteProdxAreas', $data);
         } else {
             return redirect()->route('auth/login');
         }
+    }
+    public function reporteProdxAreasPDF()
+    {   
+        if (Auth::check()) {    
+        $repprodxareas = Session::get('repprodxareas');
+                     
+        $data = $repprodxareas['data'];
+        $data2 = $repprodxareas['data2'];
+        $data3 = $repprodxareas['data3'];
+        $data4 = $repprodxareas['data4'];
+        $data5 = $repprodxareas['data5'];
+        $fi = $repprodxareas['fi'];
+        $ff = $repprodxareas['ff'];
+       
+        $pdf = \PDF::loadView('Mod01_Produccion.reporteProdxAreasPDF', compact('data', 'data2', 'data3', 'data4', 'data5', 'fi', 'ff'));
+        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
+        return $pdf->stream('Siz_Reporte_ProdxAreas ' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
+        }else {
+            return redirect()->route('auth/login');
+        }
+    }
+
+    public function produccionxareasXLS()
+    {
+        if (Auth::check()) {    
+            $repprodxareas = Session::get('repprodxareas');                                                          
+            if (count($repprodxareas['data']) == 0) {
+                return redirect()->back()->withErrors(array('message' => '!!Sin registros!!'));
+            }
+            $info = env('EMPRESA_NAME').', SA de CV';
+            Excel::create('Siz_Reporte_ProdxAreas' . ' - ' . $hoy = date("d/m/Y") . '', function ($excel) use ($repprodxareas, $info) {
+                $count = 0;
+                $count2 = 0;
+                $count3 = 0;
+                $excel->sheet('Hoja 1', function ($sheet) use ($repprodxareas, $info) {
+                    $data = $repprodxareas['data'];
+                    $data2 = $repprodxareas['data2'];
+                    $data3 = $repprodxareas['data3'];
+                    $data4 = $repprodxareas['data4'];
+                    $data5 = $repprodxareas['data5'];
+                    $fi = $repprodxareas['fi'];
+                    $ff = $repprodxareas['ff'];                    
+                    
+                    $sheet->row(1, [
+                        $info
+                    ]);
+                    $sheet->row(2, [
+                        'REPORTE PRODUCCION POR AREAS'
+                    ]);
+                    $sheet->row(3, [
+                        'DEL: '.\AppHelper::instance()->getHumanDate($fi).' AL '.\AppHelper::instance()->getHumanDate($ff)
+                    ]);
+                    $sheet->row(4, [
+                        'ACTUALIZADO: '.date('d-m-Y h:i a', strtotime("now"))
+                    ]);
+                    $sheet->row(5, [
+                       'REPORTE DE FUNDAS'
+                    ]);
+                    $sheet->row(6, [
+                        'Fecha','Ordenes en Planeación','Preparado Entrega','Anaquel Corte','Corte de Piel','Inspección de Corte','Pegado de Costura','Anaquel Costura','Costura Recta','Armado de Costura','Pespunte o Doble','Terminado de Costura','Inspeccionar Costura','Series Incompletas','Acojinado','Fundas Terminadas','Kitting','Enfundado Tapiz','Tapizar','Armado de Tapiz','Empaque','Inspeccion Final'
+                    ]);
+                    //Datos     
+                    $fila = 7;
+                    foreach ($data as $rep) {
+                        $sheet->row(
+                            $fila,
+                            [
+                                \AppHelper::instance()->getHumanDate($rep->Fecha),
+                                number_format($rep->VST100,2), number_format($rep->VST106,2), number_format($rep->VST109,2), number_format($rep->VST112,2), number_format($rep->VST115,2), number_format($rep->VST118,2), number_format($rep->VST121,2), number_format($rep->VST124,2), number_format($rep->VST127,2), number_format($rep->VST130,2), number_format($rep->VST133,2), number_format($rep->VST136,2), number_format($rep->VST139,2), number_format($rep->VST145,2), number_format($rep->VST148,2), number_format($rep->VST151,2), number_format($rep->VST154,2), number_format($rep->VST157,2), number_format($rep->VST160,2), number_format($rep->VST172,2), number_format($rep->VST175,2),
+                            ]
+                        );
+                        $fila++;
+                    }
+                    $count = $fila-1; 
+                    $sheet->row($fila++, [
+                        'SUMA DE FUNDAS','=SUM(B7:B'.$count.')','=SUM(C7:C'.$count.')','=SUM(D7:D'.$count.')','=SUM(E7:E'.$count.')','=SUM(F7:F'.$count.')',
+                        '=SUM(G7:G'.$count.')','=SUM(H7:H'.$count.')','=SUM(I7:I'.$count.')','=SUM(J7:J'.$count.')','=SUM(K7:K'.$count.')','=SUM(L7:L'.$count.')',
+                        '=SUM(M7:M'.$count.')','=SUM(N7:N'.$count.')','=SUM(O7:O'.$count.')','=SUM(P7:P'.$count.')','=SUM(Q7:Q'.$count.')','=SUM(R7:R'.$count.')',
+                        '=SUM(S7:S'.$count.')','=SUM(T7:T'.$count.')','=SUM(U7:U'.$count.')','=SUM(V7:V'.$count.')' ]);   
+                                  
+                    $sheet->row($fila++,
+                        \AppHelper::instance()->rebuiltArrayString('INVENTARIO', $data2, 'SVS')
+                    );
+                    $fila++;
+                    $sheet->row($fila++, [
+                        'REPORTE DE CASCOS'
+                    ]);
+                    $sheet->row($fila++, [
+                        'Fecha', 'Planeación',	'Habilitado',	'Armado',	'Tapado',	'Pegado',	'Entrega',
+                    ]);
+                    
+                    $fila_ini = $fila;
+                    foreach ($data3 as $rep) {
+                        $sheet->row(
+                            $fila,
+                            [
+                                \AppHelper::instance()->getHumanDate($rep->Fecha),
+                                number_format($rep->VST400,2), number_format($rep->VST403,2), number_format($rep->VST406,2),
+                                 number_format($rep->VST409,2), number_format($rep->VST415,2), number_format($rep->VST418,2),                                 
+                            ]
+                        );
+                        $fila++;
+                    }
+                    $count = $fila-1; 
+                    $sheet->row($fila++, [
+                        'SUMA DE CASCOS','=SUM(B'.$fila_ini.':B'.$count.')','=SUM(C'.$fila_ini.':C'.$count.')','=SUM(D'.$fila_ini.':D'.$count.')','=SUM(E'.$fila_ini.':E'.$count.')','=SUM(F'.$fila_ini.':F'.$count.')',
+                        '=SUM(G'.$fila_ini.':G'.$count.')',]);
+                    $fila++;
+                    $sheet->row($fila++, [
+                        'MOVIMIENTOS DE CASCOS'
+                    ]);    
+                    $sheet->row($fila++, [
+                        'Fecha', 'Carpinteria',	'Almacén',	'Camión',	'Kitting',	'Tapiz',	'Ajuste',
+                    ]);
+                    $fila_ini2 = $fila;
+                    foreach ($data4 as $rep) {
+                        $sheet->row(
+                            $fila,
+                            [
+                                \AppHelper::instance()->getHumanDate($rep->Fecha),
+                                number_format($rep->S_CARP,2), number_format($rep->S_TRAS,2), number_format($rep->S_KITT,2),
+                                 number_format($rep->S_TAPI,2), number_format(0,2), number_format((($rep->S_TAPI + $rep->S_KITT + $rep->S_TRAS + $rep->S_CARP)*-1) + $rep->S_VST  ,2),                                 
+                            ]
+                        );
+                        $fila++;
+                    }
+                    $count2 = $fila-1; 
+                    $sheet->row($fila++, [
+                        'SUMA DE CASCOS','=SUM(B'.$fila_ini2.':B'.$count2.')','=SUM(C'.$fila_ini2.':C'.$count2.')','=SUM(D'.$fila_ini2.':D'.$count2.')','=SUM(E'.$fila_ini2.':E'.$count2.')','=SUM(F'.$fila_ini2.':F'.$count2.')',
+                        '=SUM(G'.$fila_ini2.':G'.$count2.')',]);
+                           
+                    foreach ($data5 as $rep) {
+                        $sheet->row(
+                            $fila,
+                            [
+                                'INVENTARIO DE CASCO',
+                                number_format($rep->T_CARP,2), number_format($rep->T_ALMA,2), number_format($rep->T_CAMI,2),
+                                 number_format($rep->T_KITT,2), number_format($rep->T_TAPI,2),                                  
+                            ]
+                        );
+                        $fila++;
+                    }    
+                });
+                $from = "A1"; // or any value
+                $to = "V6"; // or any value
+                $excel->getActiveSheet()->getStyle("$from:$to")->getFont()->setBold( true );                
+               // $excel->getActiveSheet()->setAutoFilter('A5:V5');
+            })->export('xlsx');
+            }else {
+                return redirect()->route('auth/login');
+            }
     }
 
 }

@@ -232,9 +232,8 @@ Route::get('home/{r0}/ayudas_pdf/{PdfName}', 'HomeController@showPdf2');
 //
 Route::get('home/PRODUCCION POR AREAS', 'Reportes_ProduccionController@showModal');
 Route::post('home/reporte/PRODUCCION POR AREAS', 'Reportes_ProduccionController@reporteProdxAreas');
-Route::get('home/reporte/PRODUCCION POR AREAS', 'Reportes_ProduccionControllerr@reporteProdxAreasPDF');
-//Route::get('home/ayudas_pdf/{r1}/{PdfName}', 'HomeController@showPdf');
-//Route::get('home/ayudas_pdf/{r1}/{r2}/{PdfName}', 'HomeController@showPdf');
+Route::get('home/reporte/PRODUCCION POR AREAS', 'Reportes_ProduccionController@reporteProdxAreasPDF');
+Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@produccionxareasXLS');
  
  Route::get('/pruebas', function () {
 //  $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
