@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Input;
 use Session;
 use Maatwebsite\Excel\Facades\Excel;
 use Datatables;
+use Carbon\Carbon;
 
 ini_set("memory_limit", '512M');
 ini_set('max_execution_time', 0);
@@ -794,5 +795,52 @@ class Reportes_ProduccionController extends Controller
                 return redirect()->route('auth/login');
             }
     }
-
+    public function backorderCasco()
+    {                               
+        if (Auth::check()) {            
+                $user = Auth::user();
+                $actividades = $user->getTareas(); 
+                $ultimo = count($actividades);
+            return view('Mod01_Produccion.ReporteBackOrderCasco', compact('user', 'actividades', 'ultimo'));
+        } else {
+            return redirect()->route('auth/login');
+        }
+    }
+    public function DataShowbackorderCasco()
+    {             
+        if (Auth::check()) {
+        $rowsBo = DB::table('SIZ_View_ReporteBOCasco')->where('proceso', '>', 0)->orWhere('poriniciar', '>', 0);
+         
+        return Datatables::of($rowsBo)
+        ->addColumn('diasproc', function ($rowbo) {
+             $cDate = Carbon::parse($rowbo->U_Entrega_Piel);
+             return $cDate->diffInDays();
+        })
+        ->addColumn('totalproc', function ($rowbo) {            
+            return ($rowbo->PorIniciar + $rowbo->Habilitado + $rowbo->Armado + $rowbo->Preparado + $rowbo->Inspeccion);
+        })
+        ->addColumn('totalvs', function ($rowbo) {            
+            return ($rowbo->U_VS * ($rowbo->PorIniciar + $rowbo->Habilitado + $rowbo->Armado + $rowbo->Preparado + $rowbo->Inspeccion));
+        })
+        ->make(true);
+        }else {
+            return redirect()->route('auth/login');
+        }
+    }
+    public function backOrderAjaxToSession_(){
+        //ajax nos envia los registros del datatable que el usuario filtro y los alamcenamos en la session
+        //formato JSON
+        Session::put('miarr',Input::get('arr'));   
+    }
+    public function ReporteBackOrderCascoPDF()
+    {    
+        if (Auth::check()) {       
+        $data = json_decode(stripslashes(Session::get('miarr')));      
+        $pdf = \PDF::loadView('Mod01_Produccion.ReporteBackOrderPDF_Ventas', compact('data'));
+        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
+        return $pdf->stream('Siz_Reporte_BackOrderV ' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
+        }else {
+            return redirect()->route('auth/login');
+        }
+    }
 }

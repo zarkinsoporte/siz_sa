@@ -5,8 +5,7 @@
         position: relative;
         min-width: 90%;
         margin-left: 10px;
-        z-index: 1;        
-        overflow: scroll;
+ 
     }
 
     .table-scroll thead th {
