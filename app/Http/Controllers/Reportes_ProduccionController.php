@@ -820,7 +820,14 @@ class Reportes_ProduccionController extends Controller
             return ($rowbo->PorIniciar + $rowbo->Habilitado + $rowbo->Armado + $rowbo->Preparado + $rowbo->Inspeccion);
         })
         ->addColumn('totalvs', function ($rowbo) {            
-            return ($rowbo->U_VS * ($rowbo->PorIniciar + $rowbo->Habilitado + $rowbo->Armado + $rowbo->Preparado + $rowbo->Inspeccion));
+            return number_format(($rowbo->U_VS * 
+            ($rowbo->PorIniciar + $rowbo->Habilitado + $rowbo->Armado + $rowbo->Preparado + $rowbo->Inspeccion)),2);
+        })
+        ->addColumn('uvs', function ($rowbo) {            
+            return number_format($rowbo->U_VS,2);
+        })
+        ->addColumn('xiniciar', function ($rowbo) {            
+            return  number_format($rowbo->PorIniciar,0);         
         })
         ->make(true);
         }else {

@@ -17,6 +17,7 @@ div.ColVis {
     .DTFC_LeftHeadWrapper {
     display:none;
     }
+    
 </style>
 
 <div class="container">
@@ -33,7 +34,7 @@ div.ColVis {
         </div>
        
     </div>  
-    <div class="alert alert-info" role="alert">
+    <div  id="infoMessage" class="alert alert-info" role="alert">
         ¡Importante!  Para un mejor rendimiento de las descargas, aplicar filtros al BackOrder.
      </div> 
   
@@ -58,10 +59,31 @@ div.ColVis {
                         <th>Tapado (409)</th>
                         <th>Pegado Hule (415)</th>
                         <th>Entrega Casco (418)</th>
-                        <th>VS</th>
-                        <th>Total VS</th>                       
+                        <th>Valor Sala (pza)</th>
+                        <th>Total Valor Sala</th>                       
                     </tr>
                 </thead>
+                <tbody>
+                </tbody>
+                <tfoot>
+                  <tr>
+                   <th>TOTALES</th>
+                   <th></th>
+                   <th></th>
+                   <th></th>
+                   <th></th>
+                   <th></th>
+                   <th></th>
+                   <th></th>
+                   <th></th>
+                   <th></th>
+                   <th></th>
+                   <th></th>
+                   <th></th>
+                   <th></th>
+                   <th></th>
+                  </tr>
+                </tfoot>
             </table>
         </div>
     </div>
@@ -97,6 +119,7 @@ var fecha = 'ACTUALIZADO: '+ diasSemana[f.getDay()] + ', ' + f.getDate() + ' de 
 var f = fecha.toUpperCase();
 
 var table = $('#tbackorder').DataTable({
+    "order": [[ 1, "asc" ]],
     dom: 'Bfrtip',
     buttons: [
         {
@@ -181,21 +204,25 @@ var table = $('#tbackorder').DataTable({
         // { data: 'action', name: 'action', orderable: false, searchable: false}
 
         { data: 'DocNum', name:  'DocNum', orderable: true, searchable: true},
-        { data: 'DueDate', name: 'DueDate'},
+        { data: 'DueDate', name: 'DueDate',
+        render: function(data){   
+            var d = new Date(data);               
+            return moment(d).format("DD-MM-YYYY");
+        }},
         { data: 'diasproc', name:  'diasproc'},
         { data: 'U_OT', name: 'U_OT'},
         { data: 'ItemCode', name: 'ItemCode'},
 
         { data: 'ItemName', name: 'ItemName'},
         { data: 'totalproc', name:  'totalproc'},
-        { data: 'PorIniciar', name: 'PorIniciar'},
+        { data: 'xiniciar', name: 'xiniciar'},
         { data: 'Habilitado', name:  'Habilitado'},
         { data: 'Armado', name:  'Armado'},
 
         { data: 'Tapado', name:  'Tapado'},
         { data: 'Preparado', name:  'Preparado' },
         { data: 'Inspeccion', name:  'Inspeccion'},
-        { data: 'U_VS', name:  'U_VS'},
+        { data: 'uvs', name:  'uvs'},
         { data: 'totalvs', name:  'totalvs' },
 
     ],
@@ -212,9 +239,68 @@ var table = $('#tbackorder').DataTable({
     },
     columnDefs: [
     
-    ],
-    //revision
-  
+    ],   
+    "footerCallback": function ( row, data, start, end, display ) {
+        var api = this.api(), data;
+
+        // Remove the formatting to get integer data for summation
+        var intVal = function ( i ) {
+            return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                        i : 0;
+        };
+
+        // Total over all pages for VS
+        total = api
+            .column( 13)
+            .data()
+            .reduce( function (a, b) {
+                return intVal(a) + intVal(b);
+            }, 0 );
+
+        // Total over this page for VS
+        pageTotal = api
+            .column( 13, { page: 'current'} )
+            .data()
+            .reduce( function (a, b) {
+                return intVal(a) + intVal(b);
+            }, 0 );
+
+        // Update footer for VS
+        //.toLocaleString("es-MX",{style:"currency", currency:"MXN"}) //example to format a number to Mexican Pesos
+        //var n = 1234567.22
+        //alert(n.toLocaleString("es-MX",{style:"currency", currency:"MXN"}))
+
+        var pageT = pageTotal.toLocaleString("es-MX", {maximumFractionDigits:2})
+        var totalf = total.toLocaleString("es-MX", {maximumFractionDigits:2})
+        $( api.column( 13 ).footer() ).html(
+            pageT + ' (' + totalf + ')'
+        );
+
+
+        // Total over all pages for TVS
+        total = api
+            .column( 14)
+            .data()
+            .reduce( function (a, b) {
+                return intVal(a) + intVal(b);
+            }, 0 );
+
+        // Total over this page for TVS
+        pageTotal = api
+            .column( 14, { page: 'current'} )
+            .data()
+            .reduce( function (a, b) {
+                return intVal(a) + intVal(b);
+            }, 0 );
+    
+        var pageT = pageTotal.toLocaleString("es-MX", {maximumFractionDigits:2})
+        var totalf = total.toLocaleString("es-MX", {maximumFractionDigits:2})
+        $( api.column( 14 ).footer() ).html(
+            pageT + ' (' + totalf + ')'
+        );
+    }
 });
 @endsection
 
@@ -223,5 +309,6 @@ document.onkeyup = function(e) {
    if (e.shiftKey && e.which == 112) {
     window.open("ayudas_pdf/AyM01_24.pdf","_blank");
   }
-  } 
+  }
+ 
 </script>

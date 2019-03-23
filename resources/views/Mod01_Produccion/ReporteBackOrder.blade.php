@@ -33,7 +33,7 @@ div.ColVis {
         </div>
        
     </div>  
-    <div class="alert alert-info" role="alert">
+    <div id="infoMessage" class="alert alert-info" role="alert">
         ¡Importante!  Para un mejor rendimiento de las descargas, aplicar filtros al BackOrder.
      </div> 
   

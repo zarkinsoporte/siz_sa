@@ -188,7 +188,10 @@ li.dt-button.active a::before{
     $(document).ready(function (event) {
             $('.toggle').bootstrapSwitch();
 $('.dropdown-toggle').dropdown();
-        @yield('script')
+        @yield('script');
+        setTimeout(function() {
+    $('#infoMessage').fadeOut('fast');
+}, 5000); // <-- time in milliseconds
     });
 </script>
   
