@@ -149,7 +149,7 @@
                                 </td>
                               
                             </tr>
-                            @endforeach ´ @endif
+                            @endforeach  @endif
                         </tbody>
                     </table>
 

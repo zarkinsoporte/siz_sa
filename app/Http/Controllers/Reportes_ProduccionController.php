@@ -524,6 +524,9 @@ class Reportes_ProduccionController extends Controller
             return redirect()->route('auth/login');
         }
     }
+    public function AjaxToSession($id) {
+        Session::put( $id, Input::get('arr') );
+    }
     public function backOrderAjaxToSession(){
         //ajax nos envia los registros del datatable que el usuario filtro y los alamcenamos en la session
         //formato JSON
@@ -536,7 +539,7 @@ class Reportes_ProduccionController extends Controller
         $pdf = \PDF::loadView('Mod01_Produccion.ReporteBackOrderPDF_Ventas', compact('data'));
         $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
         return $pdf->stream('Siz_Reporte_BackOrderV ' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
-        }else {
+        } else {
             return redirect()->route('auth/login');
         }
     }
@@ -844,10 +847,11 @@ class Reportes_ProduccionController extends Controller
     public function ReporteBackOrderCascoPDF()
     {    
         if (Auth::check()) {       
-        $data = json_decode(stripslashes(Session::get('miarr')));      
-        $pdf = \PDF::loadView('Mod01_Produccion.ReporteBackOrderPDF_Ventas', compact('data'));
+        $data = json_decode(stripslashes(Session::get('bocasco')));      
+       
+        $pdf = \PDF::loadView('Mod01_Produccion.ReporteBackOrderCascoPDF', compact('data'));
         $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
-        return $pdf->stream('Siz_Reporte_BackOrderV ' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
+        return $pdf->stream('Siz_Reporte_BackOrderCasco ' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
         }else {
             return redirect()->route('auth/login');
         }

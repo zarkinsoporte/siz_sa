@@ -159,7 +159,7 @@ var table = $('#tbackorder').DataTable({
                          var json = JSON.stringify( data );
                          $.ajax({
                             type:'POST',
-                            url:'reporte/backorderCascoPDF',
+                            url:'reporte/ajaxtosession/bocasco',
                             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},                            
                             data: {
                                 "_token": "{{ csrf_token() }}",

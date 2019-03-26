@@ -22,9 +22,10 @@
         th {
             color: white;
             font-weight: bold;
-            color: black;
+            color: white;
             font-family: 'Helvetica';
             font-size: 65%;
+            background-color: #474747;
         }
 
         td {
@@ -56,7 +57,14 @@
 
         #content {
             position: relative;
-            top: 11%
+            top: 14%
+        }
+        table, th, td {
+            text-align: center;
+            border: 1px solid black;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2
         }
     </style>
 </head>
@@ -72,7 +80,7 @@
                     <td colspan="6" align="center" bgcolor="#fff">
                         <b>{{env('EMPRESA_NAME')}}, S.A de C.V.</b><br>
 
-                        <b>Reporte de BackOrder Casco</b>
+                        <b>Mod01 - Producción</b>
                         <h2>Programa de Armado de Casco</h2>                       
                     </td>
 
@@ -83,90 +91,105 @@
     </div>
         <!--Cuerpo o datos de la tabla-->
         <div id="content">
-            <div class="row">                
-                    <table border="1px" class="table table-striped">
-                        <thead class="table table-striped table-bordered table-condensed">
+                <table  id="tbackorder" class="display">
+                        <thead >
                             <tr>
-                                <th align="center" bgcolor="#474747" style="color:white" ;scope="col">OP</th>
-                                <th align="center" bgcolor="#474747" style="color:white" ;scope="col">Pedido</th>
-                                <th align="center" bgcolor="#474747" style="color:white" ;scope="col">No. Serie</th>                                
-                                <th align="center" bgcolor="#474747" style="color:white" ;scope="col">Nombre del Cliente</th>
-                                <th align="center" bgcolor="#474747" style="color:white" ;scope="col">Modelo</th>
-
-                                <th align="center" bgcolor="#474747" style="color:white" ;scope="col">Acabado</th>
-                                <th align="center" bgcolor="#474747" style="color:white" ;scope="col">Descripción</th>
-                                <th align="center" bgcolor="#474747" style="color:white" ;scope="col">Cant</th>
-                                <th align="center" bgcolor="#474747" style="color:white" ;scope="col">%</th>
-                                <th align="center" bgcolor="#474747" style="color:white" ;scope="col">Total %</th>
-
-                                <th align="center" bgcolor="#474747" style="color:white" ;scope="col">Funda</th>
-                                <th align="center" bgcolor="#474747" style="color:white" ;scope="col">Dias A.</th>
-                                <th align="center" bgcolor="#474747" style="color:white" ;scope="col">F. Compra</th>
-                                <th align="center" bgcolor="#474747" style="color:white" ;scope="col">F. Venta</th>
-                                <th align="center" bgcolor="#474747" style="color:white" ;scope="col">F. Produc</th>
+                                <th>Orden Casco</th>
+                                <th>Fecha Prog.</th>
+                                <th>Dias Proc.</th>
+                                <th>Orden Trabajo</th>
+                                <th>Código</th>
+        
+                                <th>Descripción</th>
+                                <th>En Proceso</th>
+                                <th>Planea (400)</th>
+                                <th>Habilitado (403)</th>
+                                <th>Armado (406)</th>
+        
+                                <th>Tapado (409)</th>
+                                <th>Pegado Hule (415)</th>
+                                <th>Entrega Casco (418)</th>
+                                <th>VS</th>
+                                <th>Total VS</th>                       
                             </tr>
                         </thead>
                         <tbody>
-                            @if(count($data)>0) 
-                            @foreach ($data as $rep)
-                            <tr>
-                                <td align="center" scope="row">
-                                    {{$rep->OP}}
-                                </td>
-                                <td align="center" scope="row">
-                                    {{$rep->Pedido}}
-                                </td>
-                                <td align="center" scope="row">
-                                    {{$rep->NO_SERIE}}
-                                </td>
-                                <td align="center" scope="row">
-                                    {{$rep->CLIENTE}}
-                                </td>
-                                <td align="center" scope="row">
-                                    {{$rep->codigo1}}
-                                </td>
-
-                                <td align="center" scope="row">
-                                    {{$rep->codigo3}}
-                                </td>
-                                <td align="center" scope="row">
-                                    {{$rep->Descripcion}}
-                                </td>
-                                <td align="center" scope="row">
-                                    {{$rep->Cant}}
-                                </td>
-                                <td align="center" scope="row">
-                                    {{$rep->VSind}}
-                                </td>
-                                <td align="center" scope="row">
-                                    {{$rep->VS}}
-                                </td>
-
-                                <td align="center" scope="row">
-                                    {{$rep->Funda}}
-                                </td>
-                                <td align="center" scope="row">
-                                    {{$rep->DEstacion}}
-                                </td>
-                                <td align="center" scope="row">
-                                    {{$rep->fentrega}}
-                                </td>
-                                <td align="center" scope="row">
-                                    {{$rep->fechaentregapedido}}
-                                </td>
-                                <td align="center" scope="row">
-                                    {{$rep->u_fproduccion}}
-                                </td>
-                              
-                            </tr>
-                            @endforeach ´ @endif
+                                @if(count($data)>0) 
+                                @foreach ($data as $rep)
+                                <tr>
+                                    <td align="center" scope="row">
+                                        {{$rep->DocNum}}
+                                    </td>
+                                    <td align="center" scope="row">
+                                        {{date('d-m-Y', strtotime($rep->DueDate))}}
+                                        
+                                    </td>
+                                    <td align="center" scope="row">
+                                        {{$rep->diasproc}}
+                                    </td>
+                                    <td align="center" scope="row">
+                                        {{$rep->U_OT}}
+                                    </td>
+                                    <td align="center" scope="row">
+                                        {{$rep->ItemCode}}
+                                    </td>
+    
+                                    <td align="center" scope="row">
+                                        {{$rep->ItemName}}
+                                    </td>
+                                    <td align="center" scope="row">
+                                        {{$rep->totalproc}}
+                                    </td>
+                                    <td align="center" scope="row">
+                                        {{$rep->xiniciar}}
+                                    </td>
+                                    <td align="center" scope="row">
+                                        {{$rep->Habilitado}}
+                                    </td>
+                                    <td align="center" scope="row">
+                                        {{$rep->Armado}}
+                                    </td>
+    
+                                    <td align="center" scope="row">
+                                        {{$rep->Tapado}}
+                                    </td>
+                                    <td align="center" scope="row">
+                                        {{$rep->Preparado}}
+                                    </td>
+                                    <td align="center" scope="row">
+                                        {{$rep->Inspeccion}}
+                                    </td>
+                                    <td align="center" scope="row">
+                                        {{$rep->uvs}}
+                                    </td>
+                                    <td align="center" scope="row">
+                                        {{$rep->totalvs}}
+                                    </td>
+                                  
+                                </tr>
+                                @endforeach  @endif
                         </tbody>
+                        <tfoot>
+                          <tr>
+                           <th>TOTALES</th>
+                           <th></th>
+                           <th></th>
+                           <th></th>
+                           <th></th>
+                           <th></th>
+                           <th></th>
+                           <th></th>
+                           <th></th>
+                           <th></th>
+                           <th></th>
+                           <th></th>
+                           <th></th>
+                           <th></th>
+                           <th></th>
+                          </tr>
+                        </tfoot>
                     </table>
-
-
-
-                </div>
-                </div>
+        </div>
 
 
                 <footer>
@@ -176,13 +199,13 @@
                         $empresa = 'Sociedad: <?php echo 'SALOTTO S.A. de C.V.'; ?>';
                         $date = 'Fecha de impresion:  <?php echo $hoy = date("d-m-Y H:i:s"); ?>';
                         $text = 'Pagina: {PAGE_NUM} / {PAGE_COUNT}'; 
-                        $tittle = 'Siz_Reporte_BackOrderP.Pdf'; 
+                        $tittle = 'Siz_Reporte_BackOrderCasco.Pdf'; 
                         
                         $pdf->page_text(40, 23, $empresa, $font, 9);
                         $pdf->page_text(585, 23, $date, $font, 9);  
 
-                        $pdf->page_text(35, 565, $text, $font, 9);                         
-                        $pdf->page_text(620, 565, $tittle, $font, 9);                                                 
+                        $pdf->page_text(35, 580, $text, $font, 9);                         
+                        $pdf->page_text(620, 580, $tittle, $font, 9);                                                 
                     </script>
                 </footer>
                 @yield('subcontent-01')

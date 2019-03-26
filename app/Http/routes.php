@@ -165,6 +165,7 @@ Route::get('home/BACK ORDER CASCO', 'Reportes_ProduccionController@backorderCasc
 Route::get('datatables.showbackordercasco', 'Reportes_ProduccionController@DataShowbackorderCasco')->name('datatables.showbackordercasco');
 Route::post('home/reporte/backorderCascoPDF', 'Reportes_ProduccionController@backOrderAjaxToSession');
 Route::get('home/reporte/backorderCascoPDF', 'Reportes_ProduccionController@ReporteBackOrderCascoPDF');
+Route::post('home/reporte/ajaxtosession/{id}', 'Reportes_ProduccionController@AjaxToSession');
 /*
 |--------------------------------------------------------------------------
 | MOD07-CALIDAD Routes
