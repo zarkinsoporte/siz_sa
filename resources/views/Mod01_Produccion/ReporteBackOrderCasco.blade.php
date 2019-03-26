@@ -59,7 +59,7 @@ div.ColVis {
                         <th>Tapado (409)</th>
                         <th>Pegado Hule (415)</th>
                         <th>Entrega Casco (418)</th>
-                        <th>Valor Sala (pza)</th>
+                        <th>VS</th>
                         <th>Total Valor Sala</th>                       
                     </tr>
                 </thead>
@@ -153,20 +153,20 @@ var table = $('#tbackorder').DataTable({
         }, 
         {
             text: '<i class="fa fa-file-pdf-o"></i> Pdf',           
-            className: "btn-danger",            
+            className: "btn-danger disabled",            
                     action: function ( e, dt, node, config ) {                                
                          var data=table.rows( { filter : 'applied'} ).data().toArray();               
                          var json = JSON.stringify( data );
                          $.ajax({
                             type:'POST',
-                            url:'reporte/inventario',
+                            url:'reporte/backorderCascoPDF',
                             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},                            
                             data: {
                                 "_token": "{{ csrf_token() }}",
                                 "arr": json
                                 },
                                 success:function(data){
-                                    window.open('reporte/inventarioComputoPDF', '_blank')                                   
+                                    window.open('reporte/backorderCascoPDF', '_blank')                                   
                             }
                          });
                      }         
@@ -253,7 +253,7 @@ var table = $('#tbackorder').DataTable({
 
         // Total over all pages for VS
         total = api
-            .column( 13)
+            .column( 6)
             .data()
             .reduce( function (a, b) {
                 return intVal(a) + intVal(b);
@@ -261,7 +261,7 @@ var table = $('#tbackorder').DataTable({
 
         // Total over this page for VS
         pageTotal = api
-            .column( 13, { page: 'current'} )
+            .column( 6, { page: 'current'} )
             .data()
             .reduce( function (a, b) {
                 return intVal(a) + intVal(b);
@@ -274,19 +274,138 @@ var table = $('#tbackorder').DataTable({
 
         var pageT = pageTotal.toLocaleString("es-MX", {maximumFractionDigits:2})
         var totalf = total.toLocaleString("es-MX", {maximumFractionDigits:2})
-        $( api.column( 13 ).footer() ).html(
+        $( api.column( 6 ).footer() ).html(
             pageT + ' (' + totalf + ')'
         );
 
 
-        // Total over all pages for TVS
+        ////////////// 7 
+        total = api
+            .column( 7)
+            .data()
+            .reduce( function (a, b) {
+                return intVal(a) + intVal(b);
+            }, 0 );
+        // Total over this page for TVS
+        pageTotal = api
+            .column( 7, { page: 'current'} )
+            .data()
+            .reduce( function (a, b) {
+                return intVal(a) + intVal(b);
+            }, 0 );
+        var pageT = pageTotal.toLocaleString("es-MX", {maximumFractionDigits:2})
+        var totalf = total.toLocaleString("es-MX", {maximumFractionDigits:2})
+        $( api.column( 7 ).footer() ).html(
+            pageT + ' (' + totalf + ')'
+        );//////////////////
+
+        ////////////// 8 
+        total = api
+            .column( 8)
+            .data()
+            .reduce( function (a, b) {
+                return intVal(a) + intVal(b);
+            }, 0 );
+        // Total over this page for TVS
+        pageTotal = api
+            .column( 8, { page: 'current'} )
+            .data()
+            .reduce( function (a, b) {
+                return intVal(a) + intVal(b);
+            }, 0 );
+        var pageT = pageTotal.toLocaleString("es-MX", {maximumFractionDigits:2})
+        var totalf = total.toLocaleString("es-MX", {maximumFractionDigits:2})
+        $( api.column( 8 ).footer() ).html(
+            pageT + ' (' + totalf + ')'
+        );//////////////////
+
+        ////////////// 9 
+        total = api
+            .column( 9)
+            .data()
+            .reduce( function (a, b) {
+                return intVal(a) + intVal(b);
+            }, 0 );
+        // Total over this page for TVS
+        pageTotal = api
+            .column( 9, { page: 'current'} )
+            .data()
+            .reduce( function (a, b) {
+                return intVal(a) + intVal(b);
+            }, 0 );
+        var pageT = pageTotal.toLocaleString("es-MX", {maximumFractionDigits:2})
+        var totalf = total.toLocaleString("es-MX", {maximumFractionDigits:2})
+        $( api.column( 9 ).footer() ).html(
+            pageT + ' (' + totalf + ')'
+        );//////////////////
+
+        ////////////// 10 
+        total = api
+            .column( 10)
+            .data()
+            .reduce( function (a, b) {
+                return intVal(a) + intVal(b);
+            }, 0 );
+        // Total over this page for TVS
+        pageTotal = api
+            .column( 10, { page: 'current'} )
+            .data()
+            .reduce( function (a, b) {
+                return intVal(a) + intVal(b);
+            }, 0 );
+        var pageT = pageTotal.toLocaleString("es-MX", {maximumFractionDigits:2})
+        var totalf = total.toLocaleString("es-MX", {maximumFractionDigits:2})
+        $( api.column( 10 ).footer() ).html(
+            pageT + ' (' + totalf + ')'
+        );//////////////////
+
+        ////////////// 11 
+        total = api
+            .column( 11)
+            .data()
+            .reduce( function (a, b) {
+                return intVal(a) + intVal(b);
+            }, 0 );
+        // Total over this page for TVS
+        pageTotal = api
+            .column( 11, { page: 'current'} )
+            .data()
+            .reduce( function (a, b) {
+                return intVal(a) + intVal(b);
+            }, 0 );
+        var pageT = pageTotal.toLocaleString("es-MX", {maximumFractionDigits:2})
+        var totalf = total.toLocaleString("es-MX", {maximumFractionDigits:2})
+        $( api.column( 11 ).footer() ).html(
+            pageT + ' (' + totalf + ')'
+        );//////////////////
+
+        ////////////// 12 
+        total = api
+            .column( 12)
+            .data()
+            .reduce( function (a, b) {
+                return intVal(a) + intVal(b);
+            }, 0 );
+        // Total over this page for TVS
+        pageTotal = api
+            .column( 12, { page: 'current'} )
+            .data()
+            .reduce( function (a, b) {
+                return intVal(a) + intVal(b);
+            }, 0 );
+        var pageT = pageTotal.toLocaleString("es-MX", {maximumFractionDigits:2})
+        var totalf = total.toLocaleString("es-MX", {maximumFractionDigits:2})
+        $( api.column( 12 ).footer() ).html(
+            pageT + ' (' + totalf + ')'
+        );//////////////////
+
+        ////////////// 
         total = api
             .column( 14)
             .data()
             .reduce( function (a, b) {
                 return intVal(a) + intVal(b);
             }, 0 );
-
         // Total over this page for TVS
         pageTotal = api
             .column( 14, { page: 'current'} )
@@ -294,12 +413,11 @@ var table = $('#tbackorder').DataTable({
             .reduce( function (a, b) {
                 return intVal(a) + intVal(b);
             }, 0 );
-    
         var pageT = pageTotal.toLocaleString("es-MX", {maximumFractionDigits:2})
         var totalf = total.toLocaleString("es-MX", {maximumFractionDigits:2})
         $( api.column( 14 ).footer() ).html(
             pageT + ' (' + totalf + ')'
-        );
+        );//////////////////
     }
 });
 @endsection

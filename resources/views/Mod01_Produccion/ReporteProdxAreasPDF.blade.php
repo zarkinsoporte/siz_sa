@@ -58,10 +58,9 @@
         
         }
 
-        #content {
-            margin-top: 20px;
+        #content {         
             position: relative;
-            top: 11%
+            top: 16%
         }
         table, th, td {
             text-align: center;
@@ -105,28 +104,22 @@
     
                         <thead class="table-condensed">
                             <tr class="encabezado">
-                                <th scope="col" style="min-width:150px;">Fecha</th>
+                                <th scope="col">Fecha</th>
                                 <th scope="col">Planea</th>
                                 <th scope="col">Prepa- rado</th>
                                 <th scope="col">Anaquel Corte</th>
                                 <th scope="col">Corte Piel</th>
-                                <th scope="col">Inspec. de Corte</th>
-                                <th scope="col">Pegado de Costura</th>
+
+                                <th scope="col">Inspec. Corte</th>
+                                <th scope="col">Pegado Costura</th>
                                 <th scope="col">Anaquel Costura</th>
                                 <th scope="col">Costura Recta</th>
                                 <th scope="col">Armado de Costura</th>
+
                                 <th scope="col">Pespunte o Doble</th>
                                 <th scope="col">Ter. de Costura</th>
                                 <th scope="col">Inspec. Costura</th>
-                                <th scope="col">Series Incomp.</th>
-                                <th scope="col">Acojinado</th>
-                                <th scope="col">Fundas T.</th>
-                                <th scope="col">Kitting</th>
-                                <th scope="col">Enfundado Tapiz</th>
-                                <th scope="col">Tapizar</th>
-                                <th scope="col">Armado de Tapiz</th>
-                                <th scope="col">Empaque</th>
-                                <th scope="col">Inspec. Final</th>
+                             
                             </tr>
                         </thead>
                         <tbody>
@@ -144,15 +137,7 @@
                               $sum_10 = 0;
                               $sum_11 = 0;
                               $sum_12 = 0;
-                              $sum_13 = 0;
-                              $sum_14 = 0;
-                              $sum_15 = 0;
-                              $sum_16 = 0;
-                              $sum_17 = 0;
-                              $sum_18 = 0;
-                              $sum_19 = 0;
-                              $sum_20 = 0;
-                              $sum_21 = 0;
+                            
                             ?>
                             @foreach ($data as $rep)
                              <?php
@@ -168,18 +153,10 @@
                               $sum_10 = $sum_10 + $rep->VST130;
                               $sum_11 = $sum_11 + $rep->VST133;
                               $sum_12 = $sum_12 + $rep->VST136;
-                              $sum_13 = $sum_13 + $rep->VST139;
-                              $sum_14 = $sum_14 + $rep->VST145;
-                              $sum_15 = $sum_15 + $rep->VST148;
-                              $sum_16 = $sum_16 + $rep->VST151;
-                              $sum_17 = $sum_17 + $rep->VST154;
-                              $sum_18 = $sum_18 + $rep->VST157;
-                              $sum_19 = $sum_19 + $rep->VST160;
-                              $sum_20 = $sum_20 + $rep->VST172;
-                              $sum_21 = $sum_21 + $rep->VST175;
+                             
                              ?>
                             <tr>
-                                <th id="f0" scope="row" class="table-condensed">
+                                <th id="f0" scope="row" class="table-condensed" style="min-width:200px">
                                     {{\AppHelper::instance()->getHumanDate($rep->Fecha)}}
                                 </th>
                                 <td id="f1" scope="row">
@@ -218,8 +195,109 @@
                                 <td id="f12" scope="row">
                                     {{number_format($rep->VST136,2)}}
                                 </td>
+                               
+                            </tr>
+                            @endforeach @endif
+                        </tbody>
+                        <tfoot>
+                            <tr class="total1">
+                                <th scope="row" class="table-condensed">SUMA DE FUNDAS:</th>
+                                <td>{{number_format($sum_1 , 2)}}</td>
+                                <td>{{number_format($sum_2 , 2)}}</td>
+                                <td>{{number_format($sum_3 , 2)}}</td>
+                                <td>{{number_format($sum_4 , 2)}}</td>
+                                <td>{{number_format($sum_5 , 2)}}</td>
+                                <td>{{number_format($sum_6 , 2)}}</td>
+                                <td>{{number_format($sum_7 , 2)}}</td>
+                                <td>{{number_format($sum_8 , 2)}}</td>
+                                <td>{{number_format($sum_9 , 2)}}</td>
+                                <td>{{number_format($sum_10, 2)}}</td>
+                                <td>{{number_format($sum_11, 2)}}</td>
+                                <td>{{number_format($sum_12, 2)}}</td>
+                              
+                            </tr>
+                            <tr  class="encabezado">
+                                <th scope="row" class="table-condensed">INVENTARIO:</th>
+                                @for ($i = 0; $i < 12; $i++)                                                    
+                                <td scope="row">
+                                    {{number_format($data2[$i]->SVS,2)}}
+                                </td>                             
+                            @endfor                                     
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <table class="table table-striped main-table" style="margin-bottom:0px">
+                    
+                    </table>
+                
+                </div>
+            </div>
+            <div id="t1" class="col-md-11 table-scroll">
+                <div class="pane">
+                    <table id="main-table" class="table table-striped main-table" style="margin-bottom:0px">
+    
+                        <thead class="table-condensed">
+                            <tr class="encabezado">
+                                <th scope="col" style="min-width:150px;">Fecha</th>                                
+                                <th scope="col">Series Incomp.</th>
+                                <th scope="col">Pegado Delcrón</th>
+
+                                <th scope="col">Llenado Cojin</th>
+                                <th scope="col">Acojinado</th>
+                                <th scope="col">Fundas T.</th>
+                                <th scope="col">Kitting</th>
+                                <th scope="col">Enfundado Tapiz</th>
+
+                                <th scope="col">Tapizar</th>
+                                <th scope="col">Armado de Tapiz</th>
+                                <th scope="col">Empaque</th>
+                                <th scope="col">Inspec. Final</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if(count($data)>0)                             
+                            <?php
+                             
+                              $sum_13 = 0;
+                              $sum_14 = 0;
+                              $sum_15 = 0;
+                              $sum_16 = 0;
+                              $sum_17 = 0;
+                              $sum_18 = 0;
+                              $sum_19 = 0;
+                              $sum_20 = 0;
+                              $sum_21 = 0;
+                              $sum_22 = 0;
+                              $sum_23 = 0;
+                            ?>
+                            @foreach ($data as $rep)
+                             <?php
+                         
+                              $sum_13 = $sum_13 + $rep->VST139;
+                              $sum_14 = $sum_14 + $rep->VST140;
+                              $sum_15 = $sum_15 + $rep->VST142;
+                              $sum_16 = $sum_16 + $rep->VST145;
+                              $sum_17 = $sum_17 + $rep->VST148;
+                              $sum_18 = $sum_18 + $rep->VST151;
+                              $sum_19 = $sum_19 + $rep->VST154;
+                              $sum_20 = $sum_20 + $rep->VST157;
+                              $sum_21 = $sum_21 + $rep->VST160;
+                              $sum_22 = $sum_22 + $rep->VST172;
+                              $sum_23 = $sum_23 + $rep->VST175;
+                             ?>
+                            <tr>
+                                <th id="f0" scope="row" class="" style="min-width:100px">
+                                    {{\AppHelper::instance()->getHumanDate($rep->Fecha)}}
+                                </th>
+                             
                                 <td id="f13" scope="row">
                                     {{number_format($rep->VST139,2)}}
+                                </td>
+                                <td id="f13" scope="row">
+                                    {{number_format($rep->VST140,2)}}
+                                </td>
+                                <td id="f13" scope="row">
+                                    {{number_format($rep->VST142,2)}}
                                 </td>
                                 <td id="f14" scope="row">
                                     {{number_format($rep->VST145,2)}}
@@ -250,19 +328,7 @@
                         </tbody>
                         <tfoot>
                             <tr class="total1">
-                                <th scope="row" class="table-condensed">SUMA DE FUNDAS:</th>
-                                <td>{{number_format($sum_1 , 2)}}</td>
-                                <td>{{number_format($sum_2 , 2)}}</td>
-                                <td>{{number_format($sum_3 , 2)}}</td>
-                                <td>{{number_format($sum_4 , 2)}}</td>
-                                <td>{{number_format($sum_5 , 2)}}</td>
-                                <td>{{number_format($sum_6 , 2)}}</td>
-                                <td>{{number_format($sum_7 , 2)}}</td>
-                                <td>{{number_format($sum_8 , 2)}}</td>
-                                <td>{{number_format($sum_9 , 2)}}</td>
-                                <td>{{number_format($sum_10, 2)}}</td>
-                                <td>{{number_format($sum_11, 2)}}</td>
-                                <td>{{number_format($sum_12, 2)}}</td>
+                                <th scope="row" class="table-condensed">SUMA DE FUNDAS:</th>                               
                                 <td>{{number_format($sum_13, 2)}}</td>
                                 <td>{{number_format($sum_14, 2)}}</td>
                                 <td>{{number_format($sum_15, 2)}}</td>
@@ -272,14 +338,17 @@
                                 <td>{{number_format($sum_19, 2)}}</td>
                                 <td>{{number_format($sum_20, 2)}}</td>
                                 <td>{{number_format($sum_21, 2)}}</td>
+                                <td>{{number_format($sum_22, 2)}}</td>
+                                <td>{{number_format($sum_23, 2)}}</td>
                             </tr>
                             <tr  class="encabezado">
                                 <th scope="row" class="table-condensed">INVENTARIO:</th>
-                                @foreach ($data2 as $item)                          
-                                    <td scope="row">
-                                        {{number_format($item->SVS,2)}}
-                                    </td>                             
-                                @endforeach                                          
+                               
+                                @for ($i = 12; $i < count($data2); $i++)                                                    
+                                <td scope="row">
+                                    {{number_format($data2[$i]->SVS,2)}}
+                                </td>                             
+                            @endfor                                           
                             </tr>
                         </tfoot>
                     </table>
@@ -493,8 +562,8 @@
                 $pdf->page_text(40, 23, $empresa, $font, 9);
                 $pdf->page_text(585, 23, $date, $font, 9);  
 
-                $pdf->page_text(35, 565, $text, $font, 9);                         
-                $pdf->page_text(620, 565, $tittle, $font, 9);                                                 
+                $pdf->page_text(35, 580, $text, $font, 9);                         
+                $pdf->page_text(620, 580, $tittle, $font, 9);                                                 
             </script>
     </footer>
     @yield('subcontent-01')

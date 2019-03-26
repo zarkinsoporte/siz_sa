@@ -49,7 +49,7 @@
   <div class="text-right">                      
 <a  class="btn btn-success btn-sm" href="plantilla/{{$clave}}"> <i class="fa fa-file-excel-o"></i>
 </a>
-<a class="btn btn-danger btn-sm" href="Plantilla_PDF/{{$clave}}"><i class="fa fa-file-pdf-o"></i></a>  
+<a class="btn btn-danger btn-sm" href="Plantilla_PDF/{{$clave}}" target="_blank"><i class="fa fa-file-pdf-o"></i></a>  
                       
                            <a href="detalle-depto/{{$clave}}">Ver detalles <i class="fa fa-arrow-circle-right"></i></a>
                        </div>

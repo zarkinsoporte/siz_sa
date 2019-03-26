@@ -557,30 +557,32 @@ class Reportes_ProduccionController extends Controller
             $user = Auth::user();
             $actividades = $user->getTareas();           
             $consulta = DB::select(DB::raw("           
-                SELECT BIHR.Fecha,
-                SUM(BIHR.VS100) AS VST100,
-                SUM(BIHR.VS106) AS VST106,
-                SUM(BIHR.VS109) AS VST109,
-                SUM(BIHR.VS112) AS VST112,
-                SUM(BIHR.VS115) AS VST115,
-                SUM(BIHR.VS118) AS VST118,
-                SUM(BIHR.VS121) AS VST121,
-                SUM(BIHR.VS124) AS VST124,
-                SUM(BIHR.VS127) AS VST127,
-                SUM(BIHR.VS130) AS VST130,
-                SUM(BIHR.VS133) AS VST133,
-                SUM(BIHR.VS136) AS VST136,
-                SUM(BIHR.VS139) AS VST139,
-                SUM(BIHR.VS145) AS VST145,
-                SUM(BIHR.VS148) AS VST148,
-                SUM(BIHR.VS151) AS VST151,
-                SUM(BIHR.VS154) AS VST154,
-                SUM(BIHR.VS157) AS VST157,
-                SUM(BIHR.VS160) AS VST160,
-                SUM(BIHR.VS172) AS VST172,
-                SUM(BIHR.VS175) AS VST175,
-                SUM(BIHR.VS) AS VST
-                FROM ( SELECT [@CP_LOGOF].U_DocEntry AS OP, [@CP_LOGOF].U_CT AS AREA, RUT.Name AS RUTA, CAST([@CP_LOGOF].U_FechaHora AS DATE) AS Fecha, CAST([@CP_LOGOF].U_FechaHora AS TIME) AS Hora, OP.ItemCode AS CODIGO, A3.ItemName AS ARTICULO, [@CP_LOGOF].U_Cantidad AS CANT, A3.U_VS * [@CP_LOGOF].U_Cantidad AS VS, CASE WHEN [@CP_LOGOF].U_CT=100 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS100, CASE WHEN [@CP_LOGOF].U_CT=106 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS106, CASE WHEN [@CP_LOGOF].U_CT=109 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS109, CASE WHEN [@CP_LOGOF].U_CT=112 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS112, CASE WHEN [@CP_LOGOF].U_CT=115 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS115, CASE WHEN [@CP_LOGOF].U_CT=118 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS118, CASE WHEN [@CP_LOGOF].U_CT=121 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS121, CASE WHEN [@CP_LOGOF].U_CT=124 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS124, CASE WHEN [@CP_LOGOF].U_CT=127 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS127, CASE WHEN [@CP_LOGOF].U_CT=130 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS130, CASE WHEN [@CP_LOGOF].U_CT=133 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS133, CASE WHEN [@CP_LOGOF].U_CT=136 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS136, CASE WHEN [@CP_LOGOF].U_CT=139 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS139, CASE WHEN [@CP_LOGOF].U_CT=145 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS145, CASE WHEN [@CP_LOGOF].U_CT=148 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS148, CASE WHEN [@CP_LOGOF].U_CT=151 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS151, CASE WHEN [@CP_LOGOF].U_CT=154 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS154, CASE WHEN [@CP_LOGOF].U_CT=157 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS157, CASE WHEN [@CP_LOGOF].U_CT=160 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS160, CASE WHEN [@CP_LOGOF].U_CT=172 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS172, CASE WHEN [@CP_LOGOF].U_CT=175 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS175 FROM [@CP_LOGOF] INNER JOIN OWOR OP ON [@CP_LOGOF].U_DocEntry = OP.DocEntry inner join OITM A3 on OP.ItemCode=A3.ItemCode inner join [@PL_RUTAS] RUT on RUT.Code=[@CP_LOGOF].U_CT where  [@CP_LOGOF].U_FechaHora 
+            SELECT BIHR.Fecha,
+            SUM(BIHR.VS100) AS VST100,
+            SUM(BIHR.VS106) AS VST106,
+            SUM(BIHR.VS109) AS VST109,
+            SUM(BIHR.VS112) AS VST112,
+            SUM(BIHR.VS115) AS VST115,
+            SUM(BIHR.VS118) AS VST118,
+            SUM(BIHR.VS121) AS VST121,
+            SUM(BIHR.VS124) AS VST124,
+            SUM(BIHR.VS127) AS VST127,
+            SUM(BIHR.VS130) AS VST130,
+            SUM(BIHR.VS133) AS VST133,
+            SUM(BIHR.VS136) AS VST136,
+            SUM(BIHR.VS139) AS VST139,
+            SUM(BIHR.VS140) AS VST140,
+            SUM(BIHR.VS142) AS VST142,
+            SUM(BIHR.VS145) AS VST145,
+            SUM(BIHR.VS148) AS VST148,
+            SUM(BIHR.VS151) AS VST151,
+            SUM(BIHR.VS154) AS VST154,
+            SUM(BIHR.VS157) AS VST157,
+            SUM(BIHR.VS160) AS VST160,
+            SUM(BIHR.VS172) AS VST172,
+            SUM(BIHR.VS175) AS VST175,
+            SUM(BIHR.VS) AS VST
+            FROM ( SELECT [@CP_LOGOF].U_DocEntry AS OP, [@CP_LOGOF].U_CT AS AREA, RUT.Name AS RUTA, CAST([@CP_LOGOF].U_FechaHora AS DATE) AS Fecha, CAST([@CP_LOGOF].U_FechaHora AS TIME) AS Hora, OP.ItemCode AS CODIGO, A3.ItemName AS ARTICULO, [@CP_LOGOF].U_Cantidad AS CANT, A3.U_VS * [@CP_LOGOF].U_Cantidad AS VS, CASE WHEN [@CP_LOGOF].U_CT=100 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS100, CASE WHEN [@CP_LOGOF].U_CT=106 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS106, CASE WHEN [@CP_LOGOF].U_CT=109 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS109, CASE WHEN [@CP_LOGOF].U_CT=112 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS112, CASE WHEN [@CP_LOGOF].U_CT=115 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS115, CASE WHEN [@CP_LOGOF].U_CT=118 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS118, CASE WHEN [@CP_LOGOF].U_CT=121 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS121, CASE WHEN [@CP_LOGOF].U_CT=124 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS124, CASE WHEN [@CP_LOGOF].U_CT=127 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS127, CASE WHEN [@CP_LOGOF].U_CT=130 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS130, CASE WHEN [@CP_LOGOF].U_CT=133 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS133, CASE WHEN [@CP_LOGOF].U_CT=136 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS136, CASE WHEN [@CP_LOGOF].U_CT=139 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS139, CASE WHEN [@CP_LOGOF].U_CT=140 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS140, CASE WHEN [@CP_LOGOF].U_CT=142 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS142, CASE WHEN [@CP_LOGOF].U_CT=145 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS145, CASE WHEN [@CP_LOGOF].U_CT=148 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS148, CASE WHEN [@CP_LOGOF].U_CT=151 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS151, CASE WHEN [@CP_LOGOF].U_CT=154 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS154, CASE WHEN [@CP_LOGOF].U_CT=157 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS157, CASE WHEN [@CP_LOGOF].U_CT=160 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS160, CASE WHEN [@CP_LOGOF].U_CT=172 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS172, CASE WHEN [@CP_LOGOF].U_CT=175 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS175 FROM [@CP_LOGOF] INNER JOIN OWOR OP ON [@CP_LOGOF].U_DocEntry = OP.DocEntry inner join OITM A3 on OP.ItemCode=A3.ItemCode inner join [@PL_RUTAS] RUT on RUT.Code=[@CP_LOGOF].U_CT where  [@CP_LOGOF].U_FechaHora 
                 BETWEEN '".Input::get('FechIn').' 00:00'."' and '".Input::get('FechaFa').' 23:59:59'."' ) BIHR Group by BIHR.Fecha order by BIHR.Fecha
             "));
             $consulta2 = DB::select(DB::raw("           
@@ -702,7 +704,7 @@ class Reportes_ProduccionController extends Controller
                        'REPORTE DE FUNDAS'
                     ]);
                     $sheet->row(6, [
-                        'Fecha','Ordenes en Planeación','Preparado Entrega','Anaquel Corte','Corte de Piel','Inspección de Corte','Pegado de Costura','Anaquel Costura','Costura Recta','Armado de Costura','Pespunte o Doble','Terminado de Costura','Inspeccionar Costura','Series Incompletas','Acojinado','Fundas Terminadas','Kitting','Enfundado Tapiz','Tapizar','Armado de Tapiz','Empaque','Inspeccion Final'
+                        'Fecha','Ordenes en Planeación','Preparado Entrega','Anaquel Corte','Corte de Piel','Inspección de Corte','Pegado de Costura','Anaquel Costura','Costura Recta','Armado de Costura','Pespunte o Doble','Terminado de Costura','Inspeccionar Costura','Series Incompletas', 'Pegado de Delcrón', 'Llenado de Cojin', 'Acojinado','Fundas Terminadas','Kitting','Enfundado Tapiz','Tapizar','Armado de Tapiz','Empaque','Inspeccion Final'
                     ]);
                     //Datos     
                     $fila = 7;
@@ -711,7 +713,7 @@ class Reportes_ProduccionController extends Controller
                             $fila,
                             [
                                 \AppHelper::instance()->getHumanDate($rep->Fecha),
-                                number_format($rep->VST100,2), number_format($rep->VST106,2), number_format($rep->VST109,2), number_format($rep->VST112,2), number_format($rep->VST115,2), number_format($rep->VST118,2), number_format($rep->VST121,2), number_format($rep->VST124,2), number_format($rep->VST127,2), number_format($rep->VST130,2), number_format($rep->VST133,2), number_format($rep->VST136,2), number_format($rep->VST139,2), number_format($rep->VST145,2), number_format($rep->VST148,2), number_format($rep->VST151,2), number_format($rep->VST154,2), number_format($rep->VST157,2), number_format($rep->VST160,2), number_format($rep->VST172,2), number_format($rep->VST175,2),
+                                number_format($rep->VST100,2), number_format($rep->VST106,2), number_format($rep->VST109,2), number_format($rep->VST112,2), number_format($rep->VST115,2), number_format($rep->VST118,2), number_format($rep->VST121,2), number_format($rep->VST124,2), number_format($rep->VST127,2), number_format($rep->VST130,2), number_format($rep->VST133,2), number_format($rep->VST136,2), number_format($rep->VST139,2), number_format($rep->VST140,2), number_format($rep->VST142,2), number_format($rep->VST145,2), number_format($rep->VST148,2), number_format($rep->VST151,2), number_format($rep->VST154,2), number_format($rep->VST157,2), number_format($rep->VST160,2), number_format($rep->VST172,2), number_format($rep->VST175,2),
                             ]
                         );
                         $fila++;
@@ -721,7 +723,7 @@ class Reportes_ProduccionController extends Controller
                         'SUMA DE FUNDAS','=SUM(B7:B'.$count.')','=SUM(C7:C'.$count.')','=SUM(D7:D'.$count.')','=SUM(E7:E'.$count.')','=SUM(F7:F'.$count.')',
                         '=SUM(G7:G'.$count.')','=SUM(H7:H'.$count.')','=SUM(I7:I'.$count.')','=SUM(J7:J'.$count.')','=SUM(K7:K'.$count.')','=SUM(L7:L'.$count.')',
                         '=SUM(M7:M'.$count.')','=SUM(N7:N'.$count.')','=SUM(O7:O'.$count.')','=SUM(P7:P'.$count.')','=SUM(Q7:Q'.$count.')','=SUM(R7:R'.$count.')',
-                        '=SUM(S7:S'.$count.')','=SUM(T7:T'.$count.')','=SUM(U7:U'.$count.')','=SUM(V7:V'.$count.')' ]);   
+                        '=SUM(S7:S'.$count.')','=SUM(T7:T'.$count.')','=SUM(U7:U'.$count.')','=SUM(V7:V'.$count.')','=SUM(W7:W'.$count.')','=SUM(X7:X'.$count.')' ]);   
                                   
                     $sheet->row($fila++,
                         \AppHelper::instance()->rebuiltArrayString('INVENTARIO', $data2, 'SVS')
@@ -787,7 +789,7 @@ class Reportes_ProduccionController extends Controller
                     }    
                 });
                 $from = "A1"; // or any value
-                $to = "V6"; // or any value
+                $to = "X6"; // or any value
                 $excel->getActiveSheet()->getStyle("$from:$to")->getFont()->setBold( true );                
                // $excel->getActiveSheet()->setAutoFilter('A5:V5');
             })->export('xlsx');

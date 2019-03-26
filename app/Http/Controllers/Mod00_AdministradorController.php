@@ -107,7 +107,8 @@ class Mod00_AdministradorController extends Controller
            public function Plantilla_PDF($clave)
 {
     $users = DB::table('Siz_View_Plantilla_Personal')
-    ->where('Depto', 'like', '%'.$clave.'%')->get();
+    ->where('Depto', 'like', '%'.$clave.'%')->orderBy('jobTitle')->get();
+  
     $sociedad=DB::table('OADM')->value('CompnyName');
     $pdf = \PDF::loadView('Mod00_Administrador.PlantillaPDF',compact('users','sociedad','clave'));
     $pdf->setOptions(['isPhpEnabled'=>true]);

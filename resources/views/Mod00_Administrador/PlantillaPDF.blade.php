@@ -66,7 +66,7 @@
                         <tr>
                          <td colspan="6" align="center" bgcolor="#fff">
                          <b><?php echo $sociedad ?></b><br>    
-                         <b>Administración</b>
+                         <b>Mod00 - Administrador</b>
                          <h3>Plantilla de Personal</h3>
                          <h3>{{$clave}}</h3></td>
 
@@ -78,22 +78,22 @@
     <table  border="1px" class="table table-striped">
         <THead class="thead-dark">
   <tr>
+                <th>Funciones</th>
                 <th>Nombre</th>
                 <th>Apellido</th>
                 <th>No. Nomina</th>
                 <th>Estaciones</th>
-                <th>Funciones</th>
                 </tr>
         </THead><TBody>
         @foreach($users as $P_user)
          
             <tr>              
+                <td>{{$P_user->jobTitle}}</td>                
                 <td>{{$P_user->firstName}}</td>
                 <td>{{$P_user->lastName}}</td>
                 <td>{{$P_user->U_EmpGiro}}</td>
                 <td>{{$P_user->U_CP_CT}}</td>
-                <td>{{$P_user->jobTitle}}</td>
-                </tr>
+            </tr>
            
          @endforeach
          </TBody>

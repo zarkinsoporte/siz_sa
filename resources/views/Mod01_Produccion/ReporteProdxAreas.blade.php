@@ -92,6 +92,8 @@
                             <th scope="col">Terminado de Costura</th>
                             <th scope="col">Inspeccionar Costura</th>
                             <th scope="col">Series Incompletas</th>
+                            <th scope="col">Pegado Delcrón</th>
+                            <th scope="col">Llenado Cojin</th>
                             <th scope="col">Acojinado</th>
                             <th scope="col">Fundas Terminadas</th>
                             <th scope="col">Kitting</th>
@@ -147,6 +149,12 @@
                             <td id="f13" scope="row">
                                 {{number_format($rep->VST139,2)}}
                             </td>
+                            <td id="f13" scope="row">
+                                {{number_format($rep->VST140,2)}}
+                            </td>
+                            <td id="f13" scope="row">
+                                {{number_format($rep->VST142,2)}}
+                            </td>
                             <td id="f14" scope="row">
                                 {{number_format($rep->VST145,2)}}
                             </td>
@@ -177,6 +185,8 @@
                     <tfoot>
                         <tr class="total1">
                             <th scope="row" class="table-condensed">SUMA DE FUNDAS:</th>
+                            <td>0</td>
+                            <td>0</td>
                             <td>0</td>
                             <td>0</td>
                             <td>0</td>
@@ -380,7 +390,7 @@ CalcularTotal();
 <script>
     function CalcularTotal()
     {
-        var totals = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        var totals = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         var $filas= $("#t1 tr:not('.total1, .encabezado')");
         $filas.each(function() {
             $(this).find('td').each(function(i) {       

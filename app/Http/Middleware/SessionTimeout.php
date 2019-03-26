@@ -2,6 +2,7 @@
 use Closure;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Session\Store;
+use DB;
 class SessionTimeout {
     protected $session;
     protected $timeout=1460;
@@ -24,6 +25,7 @@ class SessionTimeout {
         elseif(time() - $this->session->get('lastActivityTime') > $this->getTimeOut()){
 
             $this->session->forget('lastActivityTime');
+            DB::disconnect('sqlsrv');
             Auth::logout();
             return redirect('auth/login')->withErrors(['la sesión se ha cerrado por inactividad']);
         }

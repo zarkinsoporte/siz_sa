@@ -129,6 +129,7 @@ $cant = $cant + $val['Cantidad'];
                                                 <option value="133 Terminado de Costura">133 Terminado de Costura</option>
                                                 <option value="136 Inspeccionar Costura">136 Inspeccionar Costura</option>
                                                 <option value="139 Series Incompletas Costura">139 Series Incompletas Costura</option>
+                                                <option value="140 Pegado de Delcrón">140 Pegado de Delcrón</option>
                                                 <option value="142 Llenado del Cojin">142 Llenado del Cojin</option>
                                                 <option value="145 Acojinado">145 Acojinado</option>
                                                 <option value="148 Fundas Terminadas">148 Fundas Terminadas</option>
