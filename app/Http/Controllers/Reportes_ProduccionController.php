@@ -678,7 +678,7 @@ class Reportes_ProduccionController extends Controller
         $fi = $repprodxareas['fi'];
         $ff = $repprodxareas['ff'];
        
-        $pdf = \PDF::loadView('Mod01_Produccion.reporteProdxAreasPDF', compact('data', 'data2', 'data3', 'data4', 'data5', 'fi', 'ff'));
+        $pdf = \PDF::loadView('Mod01_Produccion.reporteProdxAreasPDF', compact('data', 'data2', 'data3', 'data4', 'data5', 'data6', 'fi', 'ff'));
         $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
         return $pdf->stream('Siz_Reporte_ProdxAreas ' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
         }else {
