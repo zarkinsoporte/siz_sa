@@ -624,34 +624,37 @@ class Reportes_ProduccionController extends Controller
                 "));
                 
                 $consulta5 =  DB::select(DB::raw("
-                SELECT SUM(AL_CAS.EX_CARP) AS T_CARP,
-                SUM(AL_CAS.EX_ALMA) AS T_ALMA,
-                SUM(AL_CAS.EX_CAMI) AS T_CAMI,
-                SUM(AL_CAS.EX_KITT) AS T_KITT,
-                 (SELECT SUM(OITM.U_VS)
-                    FROM OINM
-                    INNER JOIN OITM ON OINM.ItemCode=OITM.ItemCode
-                    WHERE U_TipoMat = 'CA'
-                         AND (OINM.JrnlMemo LIKE 'Emis%'
-                           OR OINM.JrnlMemo LIKE 'Reci%')
-                         AND OINM.CreateDate BETWEEN '".date('d-m-Y', strtotime(Input::get('FechIn'))).' 00:00'."' and '".date('d-m-Y', strtotime(Input::get('FechaFa'))).' 23:59:59'."' )
-                                    AS T_TAPIZ,
-                SUM(AL_CAS.EX_GUAD) AS T_GUAD,
-                SUM(AL_CAS.VST) AS T_TOTAL
-                FROM (SELECT OITW.ItemCode AS CODE, OITM.ItemName AS DESCRIPCION, OITM.U_TipoMat AS TIPO, OITW.OnHand AS CANT, OITM.U_VS AS VS, (OITW.OnHand * OITM.U_VS) AS VST, OITW.WhsCode AS ALMACEN, CASE WHEN OITW.WhsCode = 'APT-PA' THEN (OITW.OnHand * OITM.U_VS) ELSE 0 END AS EX_CARP, CASE WHEN OITW.WhsCode = 'APG-PA' THEN (OITW.OnHand * OITM.U_VS) ELSE 0 END AS EX_ALMA, CASE WHEN OITW.WhsCode = 'AMP-TR' THEN (OITW.OnHand * OITM.U_VS) ELSE 0 END AS EX_CAMI, CASE WHEN OITW.WhsCode = 'APP-ST' THEN (OITW.OnHand * OITM.U_VS) ELSE 0 END AS EX_KITT, CASE WHEN OITW.WhsCode = 'AMG-FE' THEN (OITW.OnHand * OITM.U_VS) ELSE 0 END AS EX_GUAD FROM OITW INNER JOIN OITM ON OITW.ItemCode = OITM.ItemCode WHERE OITM.U_TipoMat = 'CA' AND OITW.OnHand > 0 ) AL_CAS
+                Select SUM(AL_CAS.EX_CARP) AS T_CARP, 
+                SUM(AL_CAS.EX_ALMA) AS T_ALMA, 
+                SUM(AL_CAS.EX_CAMI) AS T_CAMI, 
+                SUM(AL_CAS.EX_KITT) AS T_KITT, 
+                SUM(AL_CAS.EX_TAPI) AS T_TAPIZ, 
+                SUM(AL_CAS.EX_GUAD) AS T_GUAD, 
+                SUM(AL_CAS.VST) AS T_TOTAL 
+                From ( Select   OITW.ItemCode AS CODE, OITM.ItemName AS DESCRIPCION, OITM.U_TipoMat AS TIPO, OITW.OnHand AS CANT, OITM.U_VS AS VS, (OITW.OnHand * OITM.U_VS) AS VST, OITW.WhsCode AS ALMACEN, CASE When OITW.WhsCode = 'APT-PA' then (OITW.OnHand * OITM.U_VS) else 0 end AS EX_CARP, CASE When OITW.WhsCode = 'APG-PA' then (OITW.OnHand * OITM.U_VS) else 0 end AS EX_ALMA, CASE When OITW.WhsCode = 'AMP-TR' then (OITW.OnHand * OITM.U_VS) else 0 end AS EX_CAMI, CASE When OITW.WhsCode = 'APP-ST' then (OITW.OnHand * OITM.U_VS) else 0 end AS EX_KITT, 
+                CASE When OITW.WhsCode = 'APG-ST' then (OITW.OnHand * OITM.U_VS) else 0 end AS EX_TAPI, CASE When OITW.WhsCode = 'AMG-FE' then (OITW.OnHand * OITM.U_VS) else 0 end AS EX_GUAD From OITW Inner Join OITM on OITW.ItemCode = OITM.ItemCode Where  OITM.U_TipoMat = 'CA' and OITW.OnHand > 0 ) AL_CAS
                 "));
             }else{
                 $consulta2 = '';
                 $consulta5 = '';
             }           
-                  
-            $data = array('data' => $consulta, 'data2' => $consulta2, 'data3' => $consulta3, 'data4' => $consulta4, 'data5' => $consulta5, 'actividades' => $actividades, 'ultimo' => count($actividades), 'db' => DB::getDatabaseName(), 'fi' => Input::get('FechIn'), 'ff' => Input::get('FechaFa') );
+             $consulta6 =  DB::select(DB::raw("
+             Select SUM(OITM.U_VS) AS CONSUMO
+             from OINM 
+             inner join OITM on OINM.ItemCode=OITM.ItemCode  
+             where U_TipoMat = 'CA'
+             and (OINM.JrnlMemo like 'Emis%' or  OINM.JrnlMemo like 'Reci%') 
+             and OINM.CreateDate  between  '".date('d-m-Y', strtotime(Input::get('FechIn'))).' 00:00'."' and '".date('d-m-Y', strtotime(Input::get('FechaFa'))).' 23:59:59'."' 
+             ")); 
+     
+            $data = array('data' => $consulta, 'data2' => $consulta2, 'data3' => $consulta3, 'data4' => $consulta4, 'data5' => $consulta5,  'data6' => $consulta6[0]->CONSUMO, 'actividades' => $actividades, 'ultimo' => count($actividades), 'db' => DB::getDatabaseName(), 'fi' => Input::get('FechIn'), 'ff' => Input::get('FechaFa') );
             $dataSesion = array(                
                 'data' => $consulta,
                 'data2' => $consulta2,         
                 'data3' => $consulta3,         
                 'data4' => $consulta4,         
                 'data5' => $consulta5,                        
+                'data6' => $consulta6[0]->CONSUMO,                        
                 'fi' => Input::get('FechIn'),
                 'ff' => Input::get('FechaFa')
             );
@@ -700,6 +703,7 @@ class Reportes_ProduccionController extends Controller
                     $data3 = $repprodxareas['data3'];
                     $data4 = $repprodxareas['data4'];
                     $data5 = $repprodxareas['data5'];
+                    $data6 = $repprodxareas['data6'];
                     $fi = $repprodxareas['fi'];
                     $ff = $repprodxareas['ff'];                    
                     
@@ -789,7 +793,7 @@ class Reportes_ProduccionController extends Controller
                     }
                     $count2 = $fila-1; 
                     $sheet->row($fila++, [
-                        'SUMA DE CASCOS','=SUM(B'.$fila_ini2.':B'.$count2.')','=SUM(C'.$fila_ini2.':C'.$count2.')','=SUM(D'.$fila_ini2.':D'.$count2.')','=SUM(E'.$fila_ini2.':E'.$count2.')','=SUM(F'.$fila_ini2.':F'.$count2.')',
+                        'SUMA DE CASCOS','=SUM(B'.$fila_ini2.':B'.$count2.')','=SUM(C'.$fila_ini2.':C'.$count2.')','=SUM(D'.$fila_ini2.':D'.$count2.')','=SUM(E'.$fila_ini2.':E'.$count2.')', $data6,
                         '=SUM(G'.$fila_ini2.':G'.$count2.')',]);
                     
                  if (strtotime($ff) == strtotime(date("Y-m-d"))){ 

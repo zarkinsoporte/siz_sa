@@ -519,7 +519,7 @@
                                         <td>{{number_format($sum_2, 2) }}</td>
                                         <td>{{number_format($sum_3, 2) }}</td>
                                         <td>{{number_format($sum_4, 2) }}</td>
-                                        <td>{{number_format(0, 2) }}</td>
+                                        <td>{{number_format($data6, 2) }}</td>
                                         <td>{{number_format($sum_5, 2) }}</td>
                                        
                                     </tr>

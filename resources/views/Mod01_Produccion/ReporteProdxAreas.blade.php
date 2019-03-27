@@ -335,12 +335,12 @@
                             </tbody>
                             <tfoot>
                                 <tr class="total3">
-                                    <th scope="row" class="table-condensed">SUMA DE CASCOS:</th>
+                                    <th scope="row" class="table-condensed" >SUMA DE CASCOS:</th>
                                     <td>0</td>
                                     <td>0</td>
                                     <td>0</td>
                                     <td>0</td>
-                                    <td>0</td>
+                                    <td class="manual">{{number_format($data6, 2) }}</td>
                                     <td>0</td>
                                    
                                 </tr>
@@ -413,12 +413,18 @@ CalcularTotal();
         totals = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         $filas= $("#t3 tr:not('.total3, .encabezado')");
         $filas.each(function() {
-            $(this).find('td').each(function(i) {       
-                totals[i] += parseFloat($(this).html());        
+            $(this).find('td').each(function(i) {                                 
+                    totals[i] += parseFloat($(this).html());                                              
             });
         });
         $(".total3 td").each(function(i) {
-            $(this).html(totals[i].toFixed(2));
+            console.log(i + ' - ' + totals[i].toFixed(2) + (i == 4)); 
+            if (i == 4){
+                 
+            }else{
+                $(this).html(totals[i].toFixed(2));
+            }
+           
         });
     }
     function mostrar()
