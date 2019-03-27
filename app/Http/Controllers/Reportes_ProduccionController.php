@@ -674,6 +674,7 @@ class Reportes_ProduccionController extends Controller
         $data3 = $repprodxareas['data3'];
         $data4 = $repprodxareas['data4'];
         $data5 = $repprodxareas['data5'];
+        $data6 = $repprodxareas['data6'];
         $fi = $repprodxareas['fi'];
         $ff = $repprodxareas['ff'];
        
