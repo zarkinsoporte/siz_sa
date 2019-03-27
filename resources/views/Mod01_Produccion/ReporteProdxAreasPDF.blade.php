@@ -385,7 +385,7 @@
                                     <th scope="col">Armado</th>
                                     <th scope="col">Tapado</th>
                                     <th scope="col">Pegado</th>
-                                    <th scope="col">Entrega</th>                              
+                                    <th scope="col">Inspección Casco</th>                              
                                 </tr>
                             </thead>
                             <tbody>
@@ -460,7 +460,7 @@
                                 <thead class="table-condensed">
                                     <tr class="encabezado">
                                         <th scope="col" style="min-width:150px;">Fecha</th>
-                                        <th scope="col">Carpintería</th>
+                                        <th scope="col">Aduana Carpintería</th>
                                         <th scope="col">Almacén</th>
                                         <th scope="col">Camión</th>
                                         <th scope="col">Kitting</th>
@@ -540,10 +540,10 @@
                                                         {{number_format($item->T_KITT,2)}}
                                                     </td>                             
                                                     <td scope="row">
-                                                        {{number_format($item->T_TAPI,2)}}
+                                                        {{number_format($item->T_TAPIZ,2)}}
                                                     </td>                             
                                                     <td scope="row">
-                                                    NA
+                                                    {{''}}
                                                     </td>                             
                                                 @endforeach                                          
                                             </tr>

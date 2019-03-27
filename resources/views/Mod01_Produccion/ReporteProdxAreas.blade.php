@@ -7,7 +7,6 @@
         margin-left: 10px;
  
     }
-
     .table-scroll thead th {
         background: #333;
         color: #fff;
@@ -36,16 +35,13 @@
     tfoot th:first-child {
         z-index: 5;
     }
-
     .pane {
         overflow: auto;
         max-height: 300px;
-    }
-    
+    }    
 </style>
 
 <div class="container">
-
     <!-- Page Heading -->
     <div class="row">
         <div class="col-md-11">
@@ -55,9 +51,7 @@
                 <small>Producción</small>
             </h3>
             <h3></h3>
-            <h4><b>Del:</b> {{\AppHelper::instance()->getHumanDate($fi)}} <b>al:</b> {{\AppHelper::instance()->getHumanDate($ff)}}</h4>                    
-    
-            <!-- <h5>Fecha & hora: {{date('d-m-Y h:i a', strtotime("now"))}}</h5> -->
+            <h4><b>Del:</b> {{\AppHelper::instance()->getHumanDate($fi)}} <b>al:</b> {{\AppHelper::instance()->getHumanDate($ff)}}</h4>                                  
         </div>
     </div>
     <div class="row">
@@ -246,7 +240,7 @@
                                 <th scope="col">Armado</th>
                                 <th scope="col">Tapado</th>
                                 <th scope="col">Pegado</th>
-                                <th scope="col">Entrega</th>                              
+                                <th scope="col">Inspección Casco</th>                              
                             </tr>
                         </thead>
                         <tbody>
@@ -304,7 +298,7 @@
                             <thead class="table-condensed">
                                 <tr class="encabezado">
                                     <th scope="col" style="min-width:150px;">Fecha</th>
-                                    <th scope="col">Carpintería</th>
+                                    <th scope="col">Aduana Carpintería</th>
                                     <th scope="col">Almacén</th>
                                     <th scope="col">Camión</th>
                                     <th scope="col">Kitting</th>
@@ -367,7 +361,7 @@
                                                         {{number_format($item->T_KITT,2)}}
                                                     </td>                             
                                                     <td scope="row">
-                                                        {{number_format($item->T_TAPI,2)}}
+                                                        {{number_format($item->T_TAPIZ,2)}}
                                                     </td>                             
                                                     <td scope="row">
                                                     

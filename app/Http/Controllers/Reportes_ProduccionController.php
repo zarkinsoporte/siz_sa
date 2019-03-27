@@ -588,10 +588,7 @@ class Reportes_ProduccionController extends Controller
             FROM ( SELECT [@CP_LOGOF].U_DocEntry AS OP, [@CP_LOGOF].U_CT AS AREA, RUT.Name AS RUTA, CAST([@CP_LOGOF].U_FechaHora AS DATE) AS Fecha, CAST([@CP_LOGOF].U_FechaHora AS TIME) AS Hora, OP.ItemCode AS CODIGO, A3.ItemName AS ARTICULO, [@CP_LOGOF].U_Cantidad AS CANT, A3.U_VS * [@CP_LOGOF].U_Cantidad AS VS, CASE WHEN [@CP_LOGOF].U_CT=100 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS100, CASE WHEN [@CP_LOGOF].U_CT=106 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS106, CASE WHEN [@CP_LOGOF].U_CT=109 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS109, CASE WHEN [@CP_LOGOF].U_CT=112 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS112, CASE WHEN [@CP_LOGOF].U_CT=115 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS115, CASE WHEN [@CP_LOGOF].U_CT=118 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS118, CASE WHEN [@CP_LOGOF].U_CT=121 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS121, CASE WHEN [@CP_LOGOF].U_CT=124 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS124, CASE WHEN [@CP_LOGOF].U_CT=127 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS127, CASE WHEN [@CP_LOGOF].U_CT=130 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS130, CASE WHEN [@CP_LOGOF].U_CT=133 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS133, CASE WHEN [@CP_LOGOF].U_CT=136 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS136, CASE WHEN [@CP_LOGOF].U_CT=139 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS139, CASE WHEN [@CP_LOGOF].U_CT=140 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS140, CASE WHEN [@CP_LOGOF].U_CT=142 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS142, CASE WHEN [@CP_LOGOF].U_CT=145 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS145, CASE WHEN [@CP_LOGOF].U_CT=148 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS148, CASE WHEN [@CP_LOGOF].U_CT=151 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS151, CASE WHEN [@CP_LOGOF].U_CT=154 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS154, CASE WHEN [@CP_LOGOF].U_CT=157 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS157, CASE WHEN [@CP_LOGOF].U_CT=160 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS160, CASE WHEN [@CP_LOGOF].U_CT=172 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS172, CASE WHEN [@CP_LOGOF].U_CT=175 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS175 FROM [@CP_LOGOF] INNER JOIN OWOR OP ON [@CP_LOGOF].U_DocEntry = OP.DocEntry inner join OITM A3 on OP.ItemCode=A3.ItemCode inner join [@PL_RUTAS] RUT on RUT.Code=[@CP_LOGOF].U_CT where  [@CP_LOGOF].U_FechaHora 
             BETWEEN '".date('d-m-Y', strtotime(Input::get('FechIn'))).' 00:00'."' and '".date('d-m-Y', strtotime(Input::get('FechaFa'))).' 23:59:59'."' ) BIHR Group by BIHR.Fecha order by BIHR.Fecha
             "));
-            $consulta2 = DB::select(DB::raw("           
-            SELECT T2.SVS FROM ( SELECT Code FROM [@PL_RUTAS] WHERE U_Estatus = 'A' AND Code <= '175' ) T1 LEFT JOIN ( SELECT CodFunda, SUM( VS) as SVS FROM SIZ_View_ReporteBO WHERE u_status= '06' and CodFunda is not null Group By CodFunda ) T2 ON T1.Code = T2.CodFunda Order By Code 
-            "));
-            
+           
             $consulta3 =  DB::select(DB::raw("
             Select BIHR.Fecha,
             SUM(BIHR.VS400) as VST400, 
@@ -621,17 +618,32 @@ class Reportes_ProduccionController extends Controller
             CASE When OWTR.Filler = 'AMP-TR' and  WTR1.WhsCode = 'APP-ST' then (WTR1.Quantity * OITM.U_VS) else 0 end AS ENT_KITT, CASE When OWTR.Filler = 'APP-ST' and  WTR1.WhsCode = 'APG-ST' then (WTR1.Quantity * OITM.U_VS) else 0 end AS ENT_TAPI from OWTR Inner Join WTR1 on OWTR.DocEntry = WTR1.DocEntry Inner Join OITM on WTR1.ItemCode = OITM.ItemCode Inner join OUSR on OWTR.UserSign=OUSR.USERID  Where  OITM.U_TipoMat = 'CA' and CAST(OWTR.DocDate AS DATE) 
             BETWEEN '".date('d-m-Y', strtotime(Input::get('FechIn'))).' 00:00'."' and '".date('d-m-Y', strtotime(Input::get('FechaFa'))).' 23:59:59'."' ) TRA_CAS Group by TRA_CAS.FECHA Order by TRA_CAS.FECHA
             "));
-            $consulta5 =  DB::select(DB::raw("
-            Select SUM(AL_CAS.EX_CARP) AS T_CARP, 
-            SUM(AL_CAS.EX_ALMA) AS T_ALMA, 
-            SUM(AL_CAS.EX_CAMI) AS T_CAMI, 
-            SUM(AL_CAS.EX_KITT) AS T_KITT, 
-            SUM(AL_CAS.EX_TAPI) AS T_TAPI, 
-            SUM(AL_CAS.EX_GUAD) AS T_GUAD, 
-            SUM(AL_CAS.VST) AS T_TOTAL 
-            From ( Select   OITW.ItemCode AS CODE, OITM.ItemName AS DESCRIPCION, OITM.U_TipoMat AS TIPO, OITW.OnHand AS CANT, OITM.U_VS AS VS, (OITW.OnHand * OITM.U_VS) AS VST, OITW.WhsCode AS ALMACEN, CASE When OITW.WhsCode = 'APT-PA' then (OITW.OnHand * OITM.U_VS) else 0 end AS EX_CARP, CASE When OITW.WhsCode = 'APG-PA' then (OITW.OnHand * OITM.U_VS) else 0 end AS EX_ALMA, CASE When OITW.WhsCode = 'AMP-TR' then (OITW.OnHand * OITM.U_VS) else 0 end AS EX_CAMI, CASE When OITW.WhsCode = 'APP-ST' then (OITW.OnHand * OITM.U_VS) else 0 end AS EX_KITT, 
-            CASE When OITW.WhsCode = 'APG-ST' then (OITW.OnHand * OITM.U_VS) else 0 end AS EX_TAPI, CASE When OITW.WhsCode = 'AMG-FE' then (OITW.OnHand * OITM.U_VS) else 0 end AS EX_GUAD From OITW Inner Join OITM on OITW.ItemCode = OITM.ItemCode Where  OITM.U_TipoMat = 'CA' and OITW.OnHand > 0 ) AL_CAS
-            "));
+            if (strtotime(Input::get('FechaFa')) == strtotime(date("Y-m-d"))){
+                $consulta2 = DB::select(DB::raw("           
+                SELECT T2.SVS FROM ( SELECT Code FROM [@PL_RUTAS] WHERE U_Estatus = 'A' AND Code <= '175' ) T1 LEFT JOIN ( SELECT CodFunda, SUM( VS) as SVS FROM SIZ_View_ReporteBO WHERE u_status= '06' and CodFunda is not null Group By CodFunda ) T2 ON T1.Code = T2.CodFunda Order By Code 
+                "));
+                
+                $consulta5 =  DB::select(DB::raw("
+                SELECT SUM(AL_CAS.EX_CARP) AS T_CARP,
+                SUM(AL_CAS.EX_ALMA) AS T_ALMA,
+                SUM(AL_CAS.EX_CAMI) AS T_CAMI,
+                SUM(AL_CAS.EX_KITT) AS T_KITT,
+                 (SELECT SUM(OITM.U_VS)
+                    FROM OINM
+                    INNER JOIN OITM ON OINM.ItemCode=OITM.ItemCode
+                    WHERE U_TipoMat = 'CA'
+                         AND (OINM.JrnlMemo LIKE 'Emis%'
+                           OR OINM.JrnlMemo LIKE 'Reci%')
+                         AND OINM.CreateDate BETWEEN '".date('d-m-Y', strtotime(Input::get('FechIn'))).' 00:00'."' and '".date('d-m-Y', strtotime(Input::get('FechaFa'))).' 23:59:59'."' )
+                                    AS T_TAPIZ,
+                SUM(AL_CAS.EX_GUAD) AS T_GUAD,
+                SUM(AL_CAS.VST) AS T_TOTAL
+                FROM (SELECT OITW.ItemCode AS CODE, OITM.ItemName AS DESCRIPCION, OITM.U_TipoMat AS TIPO, OITW.OnHand AS CANT, OITM.U_VS AS VS, (OITW.OnHand * OITM.U_VS) AS VST, OITW.WhsCode AS ALMACEN, CASE WHEN OITW.WhsCode = 'APT-PA' THEN (OITW.OnHand * OITM.U_VS) ELSE 0 END AS EX_CARP, CASE WHEN OITW.WhsCode = 'APG-PA' THEN (OITW.OnHand * OITM.U_VS) ELSE 0 END AS EX_ALMA, CASE WHEN OITW.WhsCode = 'AMP-TR' THEN (OITW.OnHand * OITM.U_VS) ELSE 0 END AS EX_CAMI, CASE WHEN OITW.WhsCode = 'APP-ST' THEN (OITW.OnHand * OITM.U_VS) ELSE 0 END AS EX_KITT, CASE WHEN OITW.WhsCode = 'AMG-FE' THEN (OITW.OnHand * OITM.U_VS) ELSE 0 END AS EX_GUAD FROM OITW INNER JOIN OITM ON OITW.ItemCode = OITM.ItemCode WHERE OITM.U_TipoMat = 'CA' AND OITW.OnHand > 0 ) AL_CAS
+                "));
+            }else{
+                $consulta2 = '';
+                $consulta5 = '';
+            }           
                   
             $data = array('data' => $consulta, 'data2' => $consulta2, 'data3' => $consulta3, 'data4' => $consulta4, 'data5' => $consulta5, 'actividades' => $actividades, 'ultimo' => count($actividades), 'db' => DB::getDatabaseName(), 'fi' => Input::get('FechIn'), 'ff' => Input::get('FechaFa') );
             $dataSesion = array(                
