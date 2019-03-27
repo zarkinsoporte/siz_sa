@@ -739,16 +739,17 @@ class Reportes_ProduccionController extends Controller
                         '=SUM(G7:G'.$count.')','=SUM(H7:H'.$count.')','=SUM(I7:I'.$count.')','=SUM(J7:J'.$count.')','=SUM(K7:K'.$count.')','=SUM(L7:L'.$count.')',
                         '=SUM(M7:M'.$count.')','=SUM(N7:N'.$count.')','=SUM(O7:O'.$count.')','=SUM(P7:P'.$count.')','=SUM(Q7:Q'.$count.')','=SUM(R7:R'.$count.')',
                         '=SUM(S7:S'.$count.')','=SUM(T7:T'.$count.')','=SUM(U7:U'.$count.')','=SUM(V7:V'.$count.')','=SUM(W7:W'.$count.')','=SUM(X7:X'.$count.')' ]);   
-                                  
+                 if (strtotime($ff) == strtotime(date("Y-m-d"))){             
                     $sheet->row($fila++,
                         \AppHelper::instance()->rebuiltArrayString('INVENTARIO', $data2, 'SVS')
                     );
+                  }
                     $fila++;
                     $sheet->row($fila++, [
                         'REPORTE DE CASCOS'
                     ]);
                     $sheet->row($fila++, [
-                        'Fecha', 'Planeación',	'Habilitado',	'Armado',	'Tapado',	'Pegado',	'Entrega',
+                        'Fecha', 'Planeación',	'Habilitado',	'Armado',	'Tapado',	'Pegado',	'Inspección Casco',
                     ]);
                     
                     $fila_ini = $fila;
@@ -772,7 +773,7 @@ class Reportes_ProduccionController extends Controller
                         'MOVIMIENTOS DE CASCOS'
                     ]);    
                     $sheet->row($fila++, [
-                        'Fecha', 'Carpinteria',	'Almacén',	'Camión',	'Kitting',	'Tapiz',	'Ajuste',
+                        'Fecha', 'Aduana Carpinteria',	'Almacén',	'Camión',	'Kitting',	'Tapiz',	'Ajuste',
                     ]);
                     $fila_ini2 = $fila;
                     foreach ($data4 as $rep) {
@@ -790,7 +791,8 @@ class Reportes_ProduccionController extends Controller
                     $sheet->row($fila++, [
                         'SUMA DE CASCOS','=SUM(B'.$fila_ini2.':B'.$count2.')','=SUM(C'.$fila_ini2.':C'.$count2.')','=SUM(D'.$fila_ini2.':D'.$count2.')','=SUM(E'.$fila_ini2.':E'.$count2.')','=SUM(F'.$fila_ini2.':F'.$count2.')',
                         '=SUM(G'.$fila_ini2.':G'.$count2.')',]);
-                           
+                    
+                 if (strtotime($ff) == strtotime(date("Y-m-d"))){ 
                     foreach ($data5 as $rep) {
                         $sheet->row(
                             $fila,
@@ -801,7 +803,8 @@ class Reportes_ProduccionController extends Controller
                             ]
                         );
                         $fila++;
-                    }    
+                    }  
+                }
                 });
                 $from = "A1"; // or any value
                 $to = "X6"; // or any value
