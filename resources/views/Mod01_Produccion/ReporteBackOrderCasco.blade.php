@@ -153,7 +153,7 @@ var table = $('#tbackorder').DataTable({
         }, 
         {
             text: '<i class="fa fa-file-pdf-o"></i> Pdf',           
-            className: "btn-danger disabled",            
+            className: "btn-danger",            
                     action: function ( e, dt, node, config ) {                                
                          var data=table.rows( { filter : 'applied'} ).data().toArray();               
                          var json = JSON.stringify( data );

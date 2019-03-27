@@ -115,7 +115,27 @@
                         </thead>
                         <tbody>
                                 @if(count($data)>0) 
+                                <?php
+                                $sum_1 = 0;
+                                $sum_2 = 0;
+                                $sum_3 = 0;
+                                $sum_4 = 0;
+                                $sum_5 = 0;
+                                $sum_6 = 0;
+                                $sum_7 = 0;
+                                $sum_8 = 0;                                                          
+                              ?>
                                 @foreach ($data as $rep)
+                                <?php
+                                $sum_1 = $sum_1  + $rep->totalproc;
+                                $sum_2 = $sum_2  + $rep->xiniciar;
+                                $sum_3 = $sum_3  + $rep->Habilitado;
+                                $sum_4 = $sum_4  + $rep->Armado;
+                                $sum_5 = $sum_5  + $rep->Tapado;
+                                $sum_6 = $sum_6  + $rep->Preparado;
+                                $sum_7 = $sum_7  + $rep->Inspeccion;
+                                $sum_8 = $sum_8  + $rep->totalvs;                               
+                               ?>
                                 <tr>
                                     <td align="center" scope="row">
                                         {{$rep->DocNum}}
@@ -171,21 +191,22 @@
                         </tbody>
                         <tfoot>
                           <tr>
-                           <th>TOTALES</th>
+                           <th>TOTALES ({{count($data)}})</th>
                            <th></th>
                            <th></th>
                            <th></th>
                            <th></th>
+
                            <th></th>
+                           <th>{{number_format($sum_1, 2) }}</th>
+                           <th>{{number_format($sum_2, 2) }}</th>
+                           <th>{{number_format($sum_3, 2) }}</th>
+                           <th>{{number_format($sum_4, 2) }}</th>
+                           <th>{{number_format($sum_5, 2) }}</th>
+                           <th>{{number_format($sum_6, 2) }}</th>
+                           <th>{{number_format($sum_7, 2) }}</th>
                            <th></th>
-                           <th></th>
-                           <th></th>
-                           <th></th>
-                           <th></th>
-                           <th></th>
-                           <th></th>
-                           <th></th>
-                           <th></th>
+                           <th>{{number_format($sum_8, 2) }}</th>
                           </tr>
                         </tfoot>
                     </table>

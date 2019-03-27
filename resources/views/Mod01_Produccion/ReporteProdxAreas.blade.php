@@ -55,8 +55,8 @@
                 <small>Producción</small>
             </h3>
             <h3></h3>
-            <h4><b>Del:</b> {{\AppHelper::instance()->getHumanDate($fi)}} <b>al:</b> {{\AppHelper::instance()->getHumanDate($ff)}}</h4>
-
+            <h4><b>Del:</b> {{\AppHelper::instance()->getHumanDate($fi)}} <b>al:</b> {{\AppHelper::instance()->getHumanDate($ff)}}</h4>                    
+    
             <!-- <h5>Fecha & hora: {{date('d-m-Y h:i a', strtotime("now"))}}</h5> -->
         </div>
     </div>
@@ -209,14 +209,16 @@
                             <td>0</td>
                             <td>0</td>
                         </tr>
-                        <tr  class="encabezado">
-                            <th scope="row" class="table-condensed">INVENTARIO:</th>
-                            @foreach ($data2 as $item)                          
-                                <td scope="row">
-                                    {{number_format($item->SVS,2)}}
-                                </td>                             
-                            @endforeach                                          
-                        </tr>
+                        @if (strtotime($ff) == strtotime(date("Y-m-d"))) 
+                            <tr  class="encabezado">
+                                <th scope="row" class="table-condensed">INVENTARIO:</th>
+                                @foreach ($data2 as $item)                          
+                                    <td scope="row">
+                                        {{number_format($item->SVS,2)}}
+                                    </td>                             
+                                @endforeach                                          
+                            </tr>
+                        @endif
                     </tfoot>
                 </table>
                 <table class="table table-striped main-table" style="margin-bottom:0px">
@@ -348,29 +350,31 @@
                                     <td>0</td>
                                    
                                 </tr>
-                                <tr  class="encabezado">
-                                        <th scope="row" class="table-condensed">INVENTARIO CASCO:</th>
-                                        @foreach ($data5 as $item)                          
-                                            <td scope="row">
-                                                {{number_format($item->T_CARP,2)}}
-                                            </td>                             
-                                            <td scope="row">
-                                                {{number_format($item->T_ALMA,2)}}
-                                            </td>                             
-                                            <td scope="row">
-                                                {{number_format($item->T_CAMI,2)}}
-                                            </td>                             
-                                            <td scope="row">
-                                                {{number_format($item->T_KITT,2)}}
-                                            </td>                             
-                                            <td scope="row">
-                                                {{number_format($item->T_TAPI,2)}}
-                                            </td>                             
-                                            <td scope="row">
-                                               
-                                            </td>                             
-                                        @endforeach                                          
-                                    </tr>
+                                @if (strtotime($ff) == strtotime(date("Y-m-d"))) 
+                                        <tr  class="encabezado">
+                                                <th scope="row" class="table-condensed">INVENTARIO CASCO:</th>
+                                                @foreach ($data5 as $item)                          
+                                                    <td scope="row">
+                                                        {{number_format($item->T_CARP,2)}}
+                                                    </td>                             
+                                                    <td scope="row">
+                                                        {{number_format($item->T_ALMA,2)}}
+                                                    </td>                             
+                                                    <td scope="row">
+                                                        {{number_format($item->T_CAMI,2)}}
+                                                    </td>                             
+                                                    <td scope="row">
+                                                        {{number_format($item->T_KITT,2)}}
+                                                    </td>                             
+                                                    <td scope="row">
+                                                        {{number_format($item->T_TAPI,2)}}
+                                                    </td>                             
+                                                    <td scope="row">
+                                                    
+                                                    </td>                             
+                                                @endforeach                                          
+                                            </tr>
+                                    @endif
                             </tfoot>
                         </table>
                     </div>
