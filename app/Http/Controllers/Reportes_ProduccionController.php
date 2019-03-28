@@ -639,22 +639,23 @@ class Reportes_ProduccionController extends Controller
                 $consulta5 = '';
             }           
              $consulta6 =  DB::select(DB::raw("
-             Select SUM(OITM.U_VS) AS CONSUMO
-             from OINM 
-             inner join OITM on OINM.ItemCode=OITM.ItemCode  
-             where U_TipoMat = 'CA'
-             and (OINM.JrnlMemo like 'Emis%' or  OINM.JrnlMemo like 'Reci%') 
-             and OINM.CreateDate  between  '".date('d-m-Y', strtotime(Input::get('FechIn'))).' 00:00'."' and '".date('d-m-Y', strtotime(Input::get('FechaFa'))).' 23:59:59'."' 
+             Select SUM(OITM.U_VS) Consumo
+            from OINM 
+            inner join OITM on OINM.ItemCode=OITM.ItemCode  
+            where U_TipoMat = 'CA'
+            and (OINM.JrnlMemo like 'Emis%' or  OINM.JrnlMemo like 'Reci%') 
+             and OINM.CreateDate  between  '".date('d-m-Y', strtotime(Input::get('FechIn'))).' 00:00'."' and '".date('d-m-Y', strtotime(Input::get('FechaFa'))).' 23:59:59'." ' 
+              GROUP BY OINM.CreateDate order by OINM.CreateDate
              ")); 
      
-            $data = array('data' => $consulta, 'data2' => $consulta2, 'data3' => $consulta3, 'data4' => $consulta4, 'data5' => $consulta5,  'data6' => $consulta6[0]->CONSUMO, 'actividades' => $actividades, 'ultimo' => count($actividades), 'db' => DB::getDatabaseName(), 'fi' => Input::get('FechIn'), 'ff' => Input::get('FechaFa') );
+            $data = array('data' => $consulta, 'data2' => $consulta2, 'data3' => $consulta3, 'data4' => $consulta4, 'data5' => $consulta5,  'data6' => $consulta6, 'actividades' => $actividades, 'ultimo' => count($actividades), 'db' => DB::getDatabaseName(), 'fi' => Input::get('FechIn'), 'ff' => Input::get('FechaFa') );
             $dataSesion = array(                
                 'data' => $consulta,
                 'data2' => $consulta2,         
                 'data3' => $consulta3,         
                 'data4' => $consulta4,         
                 'data5' => $consulta5,                        
-                'data6' => $consulta6[0]->CONSUMO,                        
+                'data6' => $consulta6,                        
                 'fi' => Input::get('FechIn'),
                 'ff' => Input::get('FechaFa')
             );
@@ -781,20 +782,23 @@ class Reportes_ProduccionController extends Controller
                         'Fecha', 'Aduana Carpinteria',	'Almacén',	'Camión',	'Kitting',	'Tapiz',	'Ajuste',
                     ]);
                     $fila_ini2 = $fila;
+                    $index=0;
                     foreach ($data4 as $rep) {
                         $sheet->row(
                             $fila,
                             [
                                 \AppHelper::instance()->getHumanDate($rep->Fecha),
                                 number_format($rep->S_CARP,2), number_format($rep->S_TRAS,2), number_format($rep->S_KITT,2),
-                                 number_format($rep->S_TAPI,2), number_format(0,2), number_format((($rep->S_TAPI + $rep->S_KITT + $rep->S_TRAS + $rep->S_CARP)*-1) + $rep->S_VST  ,2),                                 
+                                number_format($rep->S_TAPI,2), number_format($data6[$index]->Consumo,2),
+                                number_format((($rep->S_TAPI + $rep->S_KITT + $rep->S_TRAS + $rep->S_CARP)*-1) + $rep->S_VST  ,2),                                 
                             ]
                         );
                         $fila++;
+                        $index++;
                     }
                     $count2 = $fila-1; 
                     $sheet->row($fila++, [
-                        'SUMA DE CASCOS','=SUM(B'.$fila_ini2.':B'.$count2.')','=SUM(C'.$fila_ini2.':C'.$count2.')','=SUM(D'.$fila_ini2.':D'.$count2.')','=SUM(E'.$fila_ini2.':E'.$count2.')', $data6,
+                        'SUMA DE CASCOS','=SUM(B'.$fila_ini2.':B'.$count2.')','=SUM(C'.$fila_ini2.':C'.$count2.')','=SUM(D'.$fila_ini2.':D'.$count2.')','=SUM(E'.$fila_ini2.':E'.$count2.')', '=SUM(F'.$fila_ini2.':F'.$count2.')',
                         '=SUM(G'.$fila_ini2.':G'.$count2.')',]);
                     
                  if (strtotime($ff) == strtotime(date("Y-m-d"))){ 

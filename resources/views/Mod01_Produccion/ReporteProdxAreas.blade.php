@@ -307,7 +307,12 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @if(count($data4)>0) @foreach ($data4 as $rep4)
+                                
+                                @if(count($data4)>0) 
+                                <?php
+                                $index = 0;
+                                ?>
+                                @foreach ($data4 as $rep4)
                                 <tr>
                                     <th id="f0" scope="row" class="table-condensed">
                                         {{\AppHelper::instance()->getHumanDate($rep4->Fecha)}}
@@ -325,12 +330,15 @@
                                         {{number_format($rep4->S_TAPI,2)}}
                                     </td>
                                     <td id="f5" scope="row">
-                                        0.00
+                                        {{number_format($data6[$index]->Consumo,2)}}
                                     </td>
                                     <td  scope="row">
                                         {{number_format((($rep4->S_TAPI + $rep4->S_KITT + $rep4->S_TRAS + $rep4->S_CARP)*-1) + $rep4->S_VST  ,2)}}
                                     </td>                                                                   
                                 </tr>
+                                <?php
+                                $index++;
+                                ?>
                                 @endforeach @endif
                             </tbody>
                             <tfoot>
@@ -340,7 +348,7 @@
                                     <td>0</td>
                                     <td>0</td>
                                     <td>0</td>
-                                    <td class="manual">{{number_format($data6, 2) }}</td>
+                                    <td>0</td>
                                     <td>0</td>
                                    
                                 </tr>
@@ -417,14 +425,8 @@ CalcularTotal();
                     totals[i] += parseFloat($(this).html());                                              
             });
         });
-        $(".total3 td").each(function(i) {
-            console.log(i + ' - ' + totals[i].toFixed(2) + (i == 4)); 
-            if (i == 4){
-                 
-            }else{
-                $(this).html(totals[i].toFixed(2));
-            }
-           
+        $(".total3 td").each(function(i) {               
+                $(this).html(totals[i].toFixed(2));        
         });
     }
     function mostrar()
