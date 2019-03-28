@@ -52,9 +52,34 @@ https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap.min.css" type="text/css">
 <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/3.2.6/css/fixedColumns.bootstrap.min.css" type="text/css">
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.bootstrap.min.css" type="text/css">
-{!! Html::style('assets/css/sb-admin.css') !!}
+{!! Html::style('assets/css/sbadmin.css') !!}
 {!! Html::style('assets/css/responsive.css') !!}
-
+<style>
+.zrk-gris{
+    background-color: #4c4c4c;
+     color: white;
+}
+.zrk-teal{
+    background-color: #167170;
+    color: white;
+}
+.zrk-dimgris{
+    background-color: #736C69;
+    color: black;    
+}
+.zrk-tejelet{
+    background-color: #7D9CB2;
+    color: black;
+}
+.zrk-olivo{
+    background-color: #7D9CB2;
+    color: black;
+}
+.zrk-silver{
+    background-color: #7D9CB2;
+    color: black;
+}
+</style>
 
 
     <style>
@@ -65,13 +90,13 @@ https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css
         }
         .side-nav>li>ul>li>ul>li>a {
             display: block;
-            color: #e8e8e8;
+            color: #b5b5b5;
             padding: 8px 26px 0% 25%;
             text-decoration: none;
         }
         /* Change the link color on hover */
         .side-nav>li>ul>li>ul>li>a:hover {
-            background-color: #555;
+            background-color: #3e3e3e;
             color: white;
         }
         thead input {
@@ -111,7 +136,7 @@ li.dt-button.active a::before{
         <div id="wrapper">
 
             <!-- Navigation -->
-            <nav class="navbar navbar-inverse navbar-fixed-top"  style="background-color: #3a3327;" role="navigation">
+            <nav class="navbar navbar-inverse navbar-fixed-top"  style="background-color: #181510;" role="navigation">
                 <!-- Brand and toggle get grouped for better mobile display -->
                 <div class="navbar-header">
                     <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
@@ -128,7 +153,7 @@ li.dt-button.active a::before{
   top:  10px; 
   left: 10px;
     ">
-    <img src="{{ asset('/images/lZRK.png') }}" width="160px" height="35px"></div>
+    <img src="{{ asset('/images/lZRK2.png') }}" width="160px" height="35px"></div>
                     
                     </a>
                 </div>
@@ -140,7 +165,7 @@ li.dt-button.active a::before{
                     <li class="dropdown">
 
                     @if (Auth::guest())
-                     <a href="{{ url('/auth/login') }}" style="color: white">Login</a>
+                     <a href="{{ url('/auth/login') }}" >Login</a>
                         <!--  <li><a href="url('/register') ">Register</a></li>  -->
                     @else
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="color: white"><i class="fa fa-user"></i>

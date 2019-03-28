@@ -51,8 +51,7 @@
 }
 
 .top-nav>li {
-    display: inline-block;
-    float: left;
+    display: inline-block;  
 }
 
 .top-nav>li>a {
@@ -68,7 +67,7 @@
 .top-nav>.open>a:hover,
 .top-nav>.open>a:focus {
     color: #fff;
-    background-color: #000;
+    background-color: #3e3e3e;
 }
 
 .top-nav>.open>.dropdown-menu {
@@ -124,7 +123,7 @@ ul.alert-dropdown {
         border: none;
         border-radius: 0;
         overflow-y: auto;
-        background-color: #222;
+        background-color: #181510;
         bottom: 0;
         overflow-x: hidden;
         padding-bottom: 40px;
@@ -132,12 +131,12 @@ ul.alert-dropdown {
 
     .side-nav>li>a {
         width: 225px;
-    }
+    }    
 
     .side-nav li a:hover,
     .side-nav li a:focus {
         outline: none;
-        background-color: #000 !important;
+        background-color: #3e3e3e !important; 
     }
 }
 
@@ -151,11 +150,18 @@ ul.alert-dropdown {
     text-decoration: none;
     color: #999;
 }
-
+.side-nav>li>ul>li>ul>a:hover,
 .side-nav>li>ul>li>a:hover {
     color: #fff;
 }
 
+.side-nav>li>ul>li>ul>a{   /* actualizacion de marzo2019 */
+
+    display: block;
+    padding: 8px 50px 8px 55px;
+     color: #b5b5b5;
+     text-decoration: none;   
+}
 /* Flot Chart Containers */
 
 .flot-chart {
@@ -243,12 +249,8 @@ ul {
 
 /* Change the link color on hover */
 .side-nav>li>ul>li>ul>li>a:hover {
-    background-color: #555;
+    background-color: #3e3e3e;
     color: white;
-}
-
-.modal-body {
-    
 }
 
 .table-condensed{

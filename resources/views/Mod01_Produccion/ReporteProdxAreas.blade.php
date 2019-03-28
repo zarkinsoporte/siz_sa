@@ -7,9 +7,7 @@
         margin-left: 10px;
  
     }
-    .table-scroll thead th {
-        background: #333;
-        color: #fff;
+    .table-scroll thead th {     
         position: -webkit-sticky;
         position: sticky;
         top: 0;
@@ -19,9 +17,7 @@
     .table-scroll tfoot td {
     position: -webkit-sticky;
     position: sticky;
-    bottom: 0;
-    background: #333;
-    color: #fff;
+    bottom: 0;  
     z-index:4;
     }  
     th:first-child {
@@ -29,7 +25,7 @@
   position: sticky;
   left: 0;
   z-index: 2;
-  background: #333;
+ 
 }
     thead th:first-child,
     tfoot th:first-child {
