@@ -21,12 +21,12 @@
     z-index:4;
     }  
     th:first-child {
-  position: -webkit-sticky;
-  position: sticky;
-  left: 0;
-  z-index: 2;
- 
-}
+    position: -webkit-sticky;
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    
+    }
     thead th:first-child,
     tfoot th:first-child {
         z-index: 5;
@@ -69,35 +69,35 @@
                     <thead class="table-condensed">
                         <tr class="encabezado">
                             <th scope="col" style="min-width:150px;">Fecha</th>
-                            <th scope="col">Ordenes en Planeación</th>
-                            <th scope="col">Preparado Entrega</th>
-                            <th scope="col">Anaquel Corte</th>
-                            <th scope="col">Corte de Piel</th>
-                            <th scope="col">Inspección de Corte</th>
-                            <th scope="col">Pegado de Costura</th>
-                            <th scope="col">Anaquel Costura</th>
-                            <th scope="col">Costura Recta</th>
-                            <th scope="col">Armado de Costura</th>
-                            <th scope="col">Pespunte o Doble</th>
-                            <th scope="col">Terminado de Costura</th>
-                            <th scope="col">Inspeccionar Costura</th>
-                            <th scope="col">Series Incompletas</th>
-                            <th scope="col">Pegado Delcrón</th>
-                            <th scope="col">Llenado Cojin</th>
-                            <th scope="col">Acojinado</th>
-                            <th scope="col">Fundas Terminadas</th>
-                            <th scope="col">Kitting</th>
-                            <th scope="col">Enfundado Tapiz</th>
-                            <th scope="col">Tapizar</th>
-                            <th scope="col">Armado de Tapiz</th>
-                            <th scope="col">Empaque</th>
-                            <th scope="col">Inspeccion Final</th>
+                            <th class="zrk-teal" scope="col">Ordenes en Planeación</th>
+                            <th class="zrk-olivo" scope="col">Preparado Entrega</th>
+                            <th class="zrk-olivo" scope="col">Anaquel Corte</th>
+                            <th class="zrk-olivo" scope="col">Corte de Piel</th>
+                            <th class="zrk-olivo" scope="col">Inspección de Corte</th>
+                            <th class="zrk-olivo" scope="col">Pegado de Costura</th>
+                            <th class="zrk-olivo" scope="col">Anaquel Costura</th>
+                            <th class="zrk-tejelet" scope="col">Costura Recta</th>
+                            <th class="zrk-tejelet" scope="col">Armado de Costura</th>
+                            <th class="zrk-tejelet" scope="col">Pespunte o Doble</th>
+                            <th class="zrk-tejelet" scope="col">Terminado de Costura</th>
+                            <th class="zrk-cafe" scope="col">Inspeccionar Costura</th>
+                            <th class="zrk-cafe" scope="col">Series Incompletas</th>
+                            <th class="zrk-cafe" scope="col">Pegado Delcrón</th>
+                            <th class="zrk-cafe" scope="col">Llenado Cojin</th>
+                            <th class="zrk-cafe" scope="col">Acojinado</th>
+                            <th class="zrk-cafe" scope="col">Fundas Terminadas</th>
+                            <th class="zrk-cafe" scope="col">Kitting</th>
+                            <th class="zrk-teal" scope="col">Enfundado Tapiz</th>
+                            <th class="zrk-teal" scope="col">Tapizar</th>
+                            <th class="zrk-teal" scope="col">Armado de Tapiz</th>
+                            <th class="zrk-olivo" scope="col">Empaque</th>
+                            <th class="zrk-olivo" scope="col">Inspeccion Final</th>
                         </tr>
                     </thead>
                     <tbody>
                         @if(count($data)>0) @foreach ($data as $rep)
                         <tr>
-                            <th id="f0" scope="row" class="table-condensed">
+                            <th id="f0" scope="row" class="table-condensed zrk-dimgray">
                                 {{\AppHelper::instance()->getHumanDate($rep->Fecha)}}
                             </th>
                             <td id="f1" scope="row">
@@ -174,7 +174,7 @@
                     </tbody>
                     <tfoot>
                         <tr class="total1">
-                            <th scope="row" class="table-condensed">SUMA DE FUNDAS:</th>
+                            <th scope="row" class="table-condensed zrk-dimgray">SUMA DE FUNDAS:</th>
                             <td>0</td>
                             <td>0</td>
                             <td>0</td>
@@ -201,7 +201,7 @@
                         </tr>
                         @if (strtotime($ff) == strtotime(date("Y-m-d"))) 
                             <tr  class="encabezado">
-                                <th scope="row" class="table-condensed">INVENTARIO:</th>
+                                <th scope="row" class="table-condensed zrk-dimgray">INVENTARIO:</th>
                                 @foreach ($data2 as $item)                          
                                     <td scope="row">
                                         {{number_format($item->SVS,2)}}
@@ -242,7 +242,7 @@
                         <tbody>
                             @if(count($data3)>0) @foreach ($data3 as $rep3)
                             <tr>
-                                <th id="f0" scope="row" class="table-condensed">
+                                <th id="f0" scope="row" class="table-condensed zrk-dimgray">
                                     {{\AppHelper::instance()->getHumanDate($rep3->Fecha)}}
                                 </th>
                                 <td id="f1" scope="row">
@@ -268,7 +268,7 @@
                         </tbody>
                         <tfoot>
                             <tr class="total2">
-                                <th scope="row" class="table-condensed">SUMA DE CASCOS:</th>
+                                <th scope="row" class="table-condensed zrk-dimgray">SUMA DE CASCOS:</th>
                                 <td>0</td>
                                 <td>0</td>
                                 <td>0</td>
@@ -310,7 +310,7 @@
                                 ?>
                                 @foreach ($data4 as $rep4)
                                 <tr>
-                                    <th id="f0" scope="row" class="table-condensed">
+                                    <th id="f0" scope="row" class="table-condensed zrk-dimgray">
                                         {{\AppHelper::instance()->getHumanDate($rep4->Fecha)}}
                                     </th>
                                     <td id="f1" scope="row">
@@ -339,7 +339,7 @@
                             </tbody>
                             <tfoot>
                                 <tr class="total3">
-                                    <th scope="row" class="table-condensed" >SUMA DE CASCOS:</th>
+                                    <th scope="row" class="table-condensed zrk-dimgray" >SUMA DE CASCOS:</th>
                                     <td>0</td>
                                     <td>0</td>
                                     <td>0</td>
@@ -350,7 +350,7 @@
                                 </tr>
                                 @if (strtotime($ff) == strtotime(date("Y-m-d"))) 
                                         <tr  class="encabezado">
-                                                <th scope="row" class="table-condensed">INVENTARIO CASCO:</th>
+                                                <th scope="row" class="table-condensed zrk-dimgray">INVENTARIO CASCO:</th>
                                                 @foreach ($data5 as $item)                          
                                                     <td scope="row">
                                                         {{number_format($item->T_CARP,2)}}

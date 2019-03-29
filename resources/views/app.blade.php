@@ -63,21 +63,25 @@ https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css
     background-color: #167170;
     color: white;
 }
-.zrk-dimgris{
-    background-color: #736C69;
-    color: black;    
+.zrk-cafe{
+    background-color: #846c40;
+    color: white;    
 }
 .zrk-tejelet{
-    background-color: #7D9CB2;
-    color: black;
+    background-color: #54758d;
+    color: white;
 }
 .zrk-olivo{
-    background-color: #7D9CB2;
-    color: black;
+    background-color: #577345;
+    color: white;
 }
 .zrk-silver{
-    background-color: #7D9CB2;
+    background-color: #AFB0AE;
     color: black;
+}
+.zrk-dimgray{
+    background-color: #514d4a;
+    color: white;
 }
 </style>
 
