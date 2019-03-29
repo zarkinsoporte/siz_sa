@@ -64,7 +64,7 @@ https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css
     color: white;
 }
 .zrk-cafe{
-    background-color: #846c40;
+    background-color: #665431;
     color: white;    
 }
 .zrk-tejelet{

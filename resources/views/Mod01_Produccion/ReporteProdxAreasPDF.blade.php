@@ -74,7 +74,7 @@
             color: white;
         }
         .zrk-cafe{
-            background-color: #846c40;
+            background-color: #665431;
             color: white;    
         }
         .zrk-tejelet{
