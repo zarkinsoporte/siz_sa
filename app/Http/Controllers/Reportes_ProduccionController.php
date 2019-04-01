@@ -226,6 +226,10 @@ class Reportes_ProduccionController extends Controller
             $actividades = $user->getTareas();
 
             $op = $request->input('fieldOtroNumber');
+            $info = OP::getInfoOwor($op);
+            if(count($info)==0){
+                return redirect()->back()->withErrors(array('message' => 'OP inválida'));
+            }
             $consulta = DB::select(DB::raw("SELECT [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,OHEM.firstName + ' ' + OHEM.lastName AS Empleado,
         DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)) AS FechaF ,
        [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
@@ -244,7 +248,6 @@ class Reportes_ProduccionController extends Controller
         ORDER BY [@CP_LOGOF].U_CT, FechaF, Empleado"));
             Session::put('rephistorial', $consulta);
 
-            $info = OP::getInfoOwor($op);
             switch ($info->Status) {
                 case "P":
                     $status = 'Planificada';
@@ -317,6 +320,10 @@ class Reportes_ProduccionController extends Controller
             $actividades = $user->getTareas();
 
             $op = $request->input('fieldOtroNumber');
+            $info = OP::getInfoOwor($op);
+            if(count($info)==0){
+                return redirect()->back()->withErrors(array('message' => 'OP inválida'));
+            }
             $consulta = DB::select(DB::raw("SELECT b.DocNum AS DocNumOf,
         '*' + CAST(b.DocNum as varchar (50)) + '*' as CodBarras,
         b.ItemCode,
@@ -355,8 +362,7 @@ class Reportes_ProduccionController extends Controller
        AND f.ItemName  not like  '%Gast%'
     ORDER BY CONVERT(INT, f.U_Estacion)"));
             //dd($consulta);
-            Session::put('repmateriales', $consulta);
-            $info = OP::getInfoOwor($op);
+            Session::put('repmateriales', $consulta);           
             Session::put('repinfo', $info);
             switch ($info->Status) {
                 case "P":
