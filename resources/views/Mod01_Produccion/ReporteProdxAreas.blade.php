@@ -54,7 +54,7 @@
         <div class="col-md-11">
             <p align="right">
                 <a href="../reporte/PRODUCCION POR AREAS" target="_blank" class="btn btn-danger"><i class="fa fa-file-pdf-o"></i> Reporte PDF</a>
-                <a class="btn btn-success" href="produccionxareasXLS"><i class="fa fa-file-excel-o"></i> Reporte XLS</a>
+                <a class="btn btn-success" href="../reporte/produccionxareasXLS"><i class="fa fa-file-excel-o"></i> Reporte XLS</a>
             </p>
         </div>
     </div>

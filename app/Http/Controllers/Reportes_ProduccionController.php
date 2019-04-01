@@ -277,9 +277,7 @@ class Reportes_ProduccionController extends Controller
     {
         if (Session::has('rephistorial')) {
             $values = Session::get('rephistorial');
-            if (count($values) == 0) {
-                return redirect()->back()->withErrors(array('message' => '!!Sin registros!!'));
-            }
+            
             Excel::create('Siz_Reporte_HistorialOP' . ' - ' . $hoy = date("d/m/Y") . '', function ($excel) use ($values) {
                 $excel->sheet('Hoja 1', function ($sheet) use ($values) {
                     //$sheet->margeCells('A1:F5');     
@@ -395,9 +393,7 @@ class Reportes_ProduccionController extends Controller
             $values = Session::get('repmateriales');
             //dd($values);
             $info = Session::get('repinfo');
-            if (count($values) == 0) {
-                return redirect()->back()->withErrors(array('message' => '!!Sin registros!!'));
-            }
+           
             Excel::create('Siz_Reporte_MaterialesOP' . ' - ' . $hoy = date("d/m/Y") . '', function ($excel) use ($values, $info) {
                 $excel->sheet('Hoja 1', function ($sheet) use ($values, $info) {
                     //$sheet->margeCells('A1:F5');     
@@ -691,9 +687,7 @@ class Reportes_ProduccionController extends Controller
     {
         if (Auth::check()) {    
             $repprodxareas = Session::get('repprodxareas');                                                          
-            if (count($repprodxareas['data']) == 0) {
-                return redirect()->back()->withErrors(array('message' => '!!Sin registros!!'));
-            }
+           
             $info = env('EMPRESA_NAME').', SA de CV';
             Excel::create('Siz_Reporte_ProdxAreas' . ' - ' . $hoy = date("d/m/Y") . '', function ($excel) use ($repprodxareas, $info) {
                 $count = 0;
@@ -801,14 +795,14 @@ class Reportes_ProduccionController extends Controller
                         'SUMA DE CASCOS','=SUM(B'.$fila_ini2.':B'.$count2.')','=SUM(C'.$fila_ini2.':C'.$count2.')','=SUM(D'.$fila_ini2.':D'.$count2.')','=SUM(E'.$fila_ini2.':E'.$count2.')', '=SUM(F'.$fila_ini2.':F'.$count2.')',
                         '=SUM(G'.$fila_ini2.':G'.$count2.')',]);
                     
-                 if (strtotime($ff) == strtotime(date("Y-m-d"))){ 
+                 if (strtotime($ff) == strtotime(date("Y-m-d"))){                    
                     foreach ($data5 as $rep) {
                         $sheet->row(
                             $fila,
                             [
                                 'INVENTARIO DE CASCO',
                                 number_format($rep->T_CARP,2), number_format($rep->T_ALMA,2), number_format($rep->T_CAMI,2),
-                                 number_format($rep->T_KITT,2), number_format($rep->T_TAPI,2),                                  
+                                 number_format($rep->T_KITT,2), number_format($rep->T_TAPIZ,2),                                  
                             ]
                         );
                         $fila++;
