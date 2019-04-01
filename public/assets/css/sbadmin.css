@@ -79,7 +79,7 @@
     border-top-right-radius: 0;
     background-color: #fff;
     -webkit-box-shadow: 0 6px 12px rgba(0,0,0,.175);
-    box-shadow: 0 6px 12px rgba(0,0,0,.175);
+    box-shadow: 0 6px 12px rgba(0,0,0,.175);   
 }
 
 .top-nav>.open>.dropdown-menu>li>a {
@@ -150,11 +150,16 @@ ul.alert-dropdown {
     text-decoration: none;
     color: #999;
 }
+.nav > li > a:hover,
 .side-nav>li>ul>li>ul>a:hover,
 .side-nav>li>ul>li>a:hover {
     color: #fff;
+    text-decoration: none;
 }
-
+.nav > li > a {
+    color: #b5b5b5;
+    text-decoration: none;
+}
 .side-nav>li>ul>li>ul>a{   /* actualizacion de marzo2019 */
 
     display: block;

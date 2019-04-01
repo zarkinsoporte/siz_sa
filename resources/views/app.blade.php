@@ -191,10 +191,10 @@ li.dt-button.active a::before{
                 </ul>
 
 
-            @yield('content')
+        
 
+            </nav>    @yield('content')
 
-            </nav>
         </div>
            
 

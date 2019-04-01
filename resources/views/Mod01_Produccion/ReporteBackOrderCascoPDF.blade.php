@@ -94,8 +94,46 @@
                 <table  id="tbackorder" class="display">
                         <thead >
                             <tr>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+
+                                <th>Piezas:</th>
+                                <th>{{$totales_pzas['Proceso']}}</th>
+                                <th>{{$totales_pzas['PorIniciar']}}</th>
+                                <th>{{$totales_pzas['Habilitado']}}</th>
+                                <th>{{$totales_pzas['Armado']}}</th>
+
+                                <th>{{$totales_pzas['Tapado']}}</th>
+                                <th>{{$totales_pzas['Preparado']}}</th>
+                                <th>{{$totales_pzas['Inspeccion']}}</th>
+                                <th></th>
+                                <th></th>
+                            </tr>   
+                            <tr>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+
+                                <th>Valor Sala:</th>
+                                <th>{{$totales_vs['Proceso']}}</th>
+                                <th>{{$totales_vs['PorIniciar']}}</th>
+                                <th>{{$totales_vs['Habilitado']}}</th>
+                                <th>{{$totales_vs['Armado']}}</th>
+
+                                <th>{{$totales_vs['Tapado']}}</th>
+                                <th>{{$totales_vs['Preparado']}}</th>
+                                <th>{{$totales_vs['Inspeccion']}}</th>
+                                <th></th>
+                                <th>{{$totales_vs['Proceso']}}</th>
+                            </tr>   
+                            <tr>
                                 <th>Orden Casco</th>
-                                <th>Fecha Prog.</th>
+                                <th>Fecha Programa</th>
                                 <th>Dias Proc.</th>
                                 <th>Orden Trabajo</th>
                                 <th>Código</th>
@@ -108,34 +146,15 @@
         
                                 <th>Tapado (409)</th>
                                 <th>Pegado Hule (415)</th>
-                                <th>Entrega Casco (418)</th>
+                                <th>Inspec. Casco (418)</th>
                                 <th>VS</th>
                                 <th>Total VS</th>                       
                             </tr>
                         </thead>
                         <tbody>
                                 @if(count($data)>0) 
-                                <?php
-                                $sum_1 = 0;
-                                $sum_2 = 0;
-                                $sum_3 = 0;
-                                $sum_4 = 0;
-                                $sum_5 = 0;
-                                $sum_6 = 0;
-                                $sum_7 = 0;
-                                $sum_8 = 0;                                                          
-                              ?>
-                                @foreach ($data as $rep)
-                                <?php
-                                $sum_1 = $sum_1  + $rep->totalproc;
-                                $sum_2 = $sum_2  + $rep->xiniciar;
-                                $sum_3 = $sum_3  + $rep->Habilitado;
-                                $sum_4 = $sum_4  + $rep->Armado;
-                                $sum_5 = $sum_5  + $rep->Tapado;
-                                $sum_6 = $sum_6  + $rep->Preparado;
-                                $sum_7 = $sum_7  + $rep->Inspeccion;
-                                $sum_8 = $sum_8  + $rep->totalvs;                               
-                               ?>
+                               
+                                @foreach ($data as $rep)                           
                                 <tr>
                                     <td align="center" scope="row">
                                         {{$rep->DocNum}}
@@ -188,27 +207,7 @@
                                   
                                 </tr>
                                 @endforeach  @endif
-                        </tbody>
-                        <tfoot>
-                          <tr>
-                           <th>TOTALES ({{count($data)}})</th>
-                           <th></th>
-                           <th></th>
-                           <th></th>
-                           <th></th>
-
-                           <th></th>
-                           <th>{{number_format($sum_1, 2) }}</th>
-                           <th>{{number_format($sum_2, 2) }}</th>
-                           <th>{{number_format($sum_3, 2) }}</th>
-                           <th>{{number_format($sum_4, 2) }}</th>
-                           <th>{{number_format($sum_5, 2) }}</th>
-                           <th>{{number_format($sum_6, 2) }}</th>
-                           <th>{{number_format($sum_7, 2) }}</th>
-                           <th></th>
-                           <th>{{number_format($sum_8, 2) }}</th>
-                          </tr>
-                        </tfoot>
+                        </tbody>                        
                     </table>
         </div>
 

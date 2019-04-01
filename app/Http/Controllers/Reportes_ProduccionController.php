@@ -872,8 +872,28 @@ class Reportes_ProduccionController extends Controller
     {    
         if (Auth::check()) {       
         $data = json_decode(stripslashes(Session::get('bocasco')));      
-       
-        $pdf = \PDF::loadView('Mod01_Produccion.ReporteBackOrderCascoPDF', compact('data'));
+        
+        $totales_pzas = array('Proceso'=>0, 'PorIniciar'=>0, 'Habilitado'=>0, 'Armado'=>0, 'Tapado'=>0, 'Preparado'=>0, 'Inspeccion'=>0, 'totalvs'=>0);   
+        $totales_vs = array('Proceso'=>0, 'PorIniciar'=>0, 'Habilitado'=>0, 'Armado'=>0, 'Tapado'=>0, 'Preparado'=>0, 'Inspeccion'=>0, 'totalvs'=>0);   
+        foreach($data as $item){            
+                $totales_vs['Proceso'] += $item->Proceso * $item->uvs;
+                $totales_vs['PorIniciar'] += $item->PorIniciar * $item->uvs; 
+                $totales_vs['Habilitado'] += $item->Habilitado * $item->uvs;
+                $totales_vs['Armado'] += $item->Armado * $item->uvs;
+                $totales_vs['Tapado'] += $item->Tapado * $item->uvs;
+                $totales_vs['Preparado'] += $item->Preparado * $item->uvs;
+                $totales_vs['Inspeccion'] += $item->Inspeccion * $item->uvs;
+                               
+                $totales_pzas['Proceso'] += $item->Proceso; 
+                $totales_pzas['PorIniciar'] += $item->PorIniciar; 
+                $totales_pzas['Habilitado'] += $item->Habilitado; 
+                $totales_pzas['Armado'] += $item->Armado; 
+                $totales_pzas['Tapado'] += $item->Tapado; 
+                $totales_pzas['Preparado'] += $item->Preparado; 
+                $totales_pzas['Inspeccion'] += $item->Inspeccion; 
+                $totales_pzas['totalvs'] += $item->totalvs;           
+        }         
+        $pdf = \PDF::loadView('Mod01_Produccion.ReporteBackOrderCascoPDF', compact('data', 'totales_pzas', 'totales_vs'));
         $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
         return $pdf->stream('Siz_Reporte_BackOrderCasco ' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
         }else {
