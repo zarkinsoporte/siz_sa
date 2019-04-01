@@ -146,9 +146,7 @@
                              
                             </tr>
                         </thead>
-                        <tbody>
-                            @if(count($data)>0)                             
-                            <?php
+                        <tbody> <?php
                               $sum_1 = 0;
                               $sum_2 = 0;
                               $sum_3 = 0;
@@ -163,6 +161,8 @@
                               $sum_12 = 0;
                             
                             ?>
+                            @if(count($data)>0)                             
+                           
                             @foreach ($data as $rep)
                              <?php
                               $sum_1 = $sum_1  + $rep->VST100;
