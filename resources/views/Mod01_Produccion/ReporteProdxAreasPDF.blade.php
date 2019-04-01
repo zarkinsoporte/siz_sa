@@ -280,10 +280,8 @@
                                 <th class="zrk-olivo" scope="col">Inspec. Final</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            @if(count($data)>0)                             
-                            <?php
-                             
+                        <tbody> 
+                             <?php                             
                               $sum_13 = 0;
                               $sum_14 = 0;
                               $sum_15 = 0;
@@ -296,6 +294,8 @@
                               $sum_22 = 0;
                               $sum_23 = 0;
                             ?>
+                            @if(count($data)>0)                             
+                          
                             @foreach ($data as $rep)
                              <?php
                          
