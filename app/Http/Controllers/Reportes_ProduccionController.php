@@ -636,9 +636,17 @@ class Reportes_ProduccionController extends Controller
                 From ( Select   OITW.ItemCode AS CODE, OITM.ItemName AS DESCRIPCION, OITM.U_TipoMat AS TIPO, OITW.OnHand AS CANT, OITM.U_VS AS VS, (OITW.OnHand * OITM.U_VS) AS VST, OITW.WhsCode AS ALMACEN, CASE When OITW.WhsCode = 'APT-PA' then (OITW.OnHand * OITM.U_VS) else 0 end AS EX_CARP, CASE When OITW.WhsCode = 'APG-PA' then (OITW.OnHand * OITM.U_VS) else 0 end AS EX_ALMA, CASE When OITW.WhsCode = 'AMP-TR' then (OITW.OnHand * OITM.U_VS) else 0 end AS EX_CAMI, CASE When OITW.WhsCode = 'APP-ST' then (OITW.OnHand * OITM.U_VS) else 0 end AS EX_KITT, 
                 CASE When OITW.WhsCode = 'APG-ST' then (OITW.OnHand * OITM.U_VS) else 0 end AS EX_TAPI, CASE When OITW.WhsCode = 'AMG-FE' then (OITW.OnHand * OITM.U_VS) else 0 end AS EX_GUAD From OITW Inner Join OITM on OITW.ItemCode = OITM.ItemCode Where  OITM.U_TipoMat = 'CA' and OITW.OnHand > 0 ) AL_CAS
                 "));
+
+                $consulta7 = DB::select(DB::raw("
+                SELECT SUM(PorIniciar * U_VS) as P400, SUM(Habilitado * U_VS) as H403,
+                   SUM(Armado * U_VS) as A406, SUM(Tapado * U_VS) as T409, 
+                   SUM(Preparado * U_VS) as PR415, SUM(Inspeccion * U_VS) as I418
+                   FROM SIZ_View_ReporteBOCasco where proceso > 0 or PorIniciar > 0
+                "));
             }else{
                 $consulta2 = '';
                 $consulta5 = '';
+                $consulta7 = '';
             }           
              $consulta6 =  DB::select(DB::raw("
              Select SUM(OITM.U_VS) Consumo
@@ -648,9 +656,9 @@ class Reportes_ProduccionController extends Controller
             and (OINM.JrnlMemo like 'Emis%' or  OINM.JrnlMemo like 'Reci%') 
              and OINM.CreateDate  between  '".date('d-m-Y', strtotime(Input::get('FechIn'))).' 00:00'."' and '".date('d-m-Y', strtotime(Input::get('FechaFa'))).' 23:59:59'." ' 
               GROUP BY OINM.CreateDate order by OINM.CreateDate
-             ")); 
+             "));                        
      
-            $data = array('data' => $consulta, 'data2' => $consulta2, 'data3' => $consulta3, 'data4' => $consulta4, 'data5' => $consulta5,  'data6' => $consulta6, 'actividades' => $actividades, 'ultimo' => count($actividades), 'db' => DB::getDatabaseName(), 'fi' => Input::get('FechIn'), 'ff' => Input::get('FechaFa') );
+            $data = array('data' => $consulta, 'data2' => $consulta2, 'data3' => $consulta3, 'data4' => $consulta4, 'data5' => $consulta5,  'data6' => $consulta6, 'data7' => $consulta7, 'actividades' => $actividades, 'ultimo' => count($actividades), 'db' => DB::getDatabaseName(), 'fi' => Input::get('FechIn'), 'ff' => Input::get('FechaFa') );
             $dataSesion = array(                
                 'data' => $consulta,
                 'data2' => $consulta2,         
@@ -658,6 +666,7 @@ class Reportes_ProduccionController extends Controller
                 'data4' => $consulta4,         
                 'data5' => $consulta5,                        
                 'data6' => $consulta6,                        
+                'data7' => $consulta7,                        
                 'fi' => Input::get('FechIn'),
                 'ff' => Input::get('FechaFa')
             );
@@ -678,10 +687,11 @@ class Reportes_ProduccionController extends Controller
         $data4 = $repprodxareas['data4'];
         $data5 = $repprodxareas['data5'];
         $data6 = $repprodxareas['data6'];
+        $data7 = $repprodxareas['data7'];
         $fi = $repprodxareas['fi'];
         $ff = $repprodxareas['ff'];
        
-        $pdf = \PDF::loadView('Mod01_Produccion.reporteProdxAreasPDF', compact('data', 'data2', 'data3', 'data4', 'data5', 'data6', 'fi', 'ff'));
+        $pdf = \PDF::loadView('Mod01_Produccion.reporteProdxAreasPDF', compact('data', 'data2', 'data3', 'data4', 'data5', 'data6', 'data7', 'fi', 'ff'));
         $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
         return $pdf->stream('Siz_Reporte_ProdxAreas ' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
         }else {
@@ -706,6 +716,7 @@ class Reportes_ProduccionController extends Controller
                     $data4 = $repprodxareas['data4'];
                     $data5 = $repprodxareas['data5'];
                     $data6 = $repprodxareas['data6'];
+                    $data7 = $repprodxareas['data7'];
                     $fi = $repprodxareas['fi'];
                     $ff = $repprodxareas['ff'];                    
                     
@@ -774,7 +785,14 @@ class Reportes_ProduccionController extends Controller
                     $sheet->row($fila++, [
                         'SUMA DE CASCOS','=SUM(B'.$fila_ini.':B'.$count.')','=SUM(C'.$fila_ini.':C'.$count.')','=SUM(D'.$fila_ini.':D'.$count.')','=SUM(E'.$fila_ini.':E'.$count.')','=SUM(F'.$fila_ini.':F'.$count.')',
                         '=SUM(G'.$fila_ini.':G'.$count.')',]);
-                    $fila++;
+                        if (strtotime($ff) == strtotime(date("Y-m-d"))){ 
+                            foreach ($data7 as $rep) {            
+                                    $sheet->row($fila++,                                    
+                                    ['INVENTARIO', $rep->P400, $rep->H403, $rep->A406, $rep->T409, $rep->PR415, $rep->I418]                                    
+                                    );
+                                }
+                          }
+                        $fila++;
                     $sheet->row($fila++, [
                         'MOVIMIENTOS DE CASCOS'
                     ]);    

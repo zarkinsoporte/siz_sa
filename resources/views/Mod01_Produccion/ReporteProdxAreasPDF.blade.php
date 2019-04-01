@@ -462,6 +462,31 @@
                                     <td>{{number_format($sum_5, 2) }}</td>
                                     <td>{{number_format($sum_6, 2) }}</td>                                
                                 </tr>
+                                  @if (strtotime($ff) == strtotime(date("Y-m-d"))) 
+                                        <tr  class="encabezado">
+                                                <th scope="row" class="table-condensed zrk-dimgray">INVENTARIO:</th>
+                                                @foreach ($data7 as $item)                          
+                                                    <td scope="row">
+                                                        {{number_format($item->P400,2)}}
+                                                    </td>                             
+                                                    <td scope="row">
+                                                        {{number_format($item->H403,2)}}
+                                                    </td>                             
+                                                    <td scope="row">
+                                                        {{number_format($item->A406,2)}}
+                                                    </td>                             
+                                                    <td scope="row">
+                                                        {{number_format($item->T409,2)}}
+                                                    </td>                             
+                                                    <td scope="row">
+                                                        {{number_format($item->PR415,2)}}
+                                                    </td>                             
+                                                    <td scope="row">
+                                                       {{number_format($item->I418, 2)}}
+                                                    </td>                             
+                                                @endforeach                                          
+                                            </tr>
+                                    @endif
                             </tfoot>
                         </table>
                     </div>
