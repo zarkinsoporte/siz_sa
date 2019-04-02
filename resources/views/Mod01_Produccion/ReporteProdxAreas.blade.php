@@ -329,10 +329,7 @@
                             </thead>
                             <tbody>
                                 
-                                @if(count($data4)>0) 
-                                <?php
-                                $index = 0;
-                                ?>
+                                @if(count($data4)>0)                             
                                 @foreach ($data4 as $rep4)
                                 <tr>
                                     <th id="f0" scope="row" class="table-condensed zrk-dimgray">
@@ -351,15 +348,12 @@
                                         {{number_format($rep4->S_TAPI,2)}}
                                     </td>
                                     <td id="f5" scope="row">
-                                        {{number_format($data6[$index]->Consumo,2)}}
+                                        {{number_format($rep4->Consumo,2)}}
                                     </td>
                                     <td  scope="row">
                                         {{number_format((($rep4->S_TAPI + $rep4->S_KITT + $rep4->S_TRAS + $rep4->S_CARP)*-1) + $rep4->S_VST  ,2)}}
                                     </td>                                                                   
-                                </tr>
-                                <?php
-                                $index++;
-                                ?>
+                                </tr>                              
                                 @endforeach @endif
                             </tbody>
                             <tfoot>
