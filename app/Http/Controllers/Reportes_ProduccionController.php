@@ -615,8 +615,19 @@ class Reportes_ProduccionController extends Controller
             SUM(TRA_CAS.ENT_TRAS) AS S_TRAS, 
             SUM(TRA_CAS.ENT_KITT) AS S_KITT, 
             SUM(TRA_CAS.ENT_TAPI) AS S_TAPI, 
+			(Select CASE WHEN SUM(OITM.U_VS) IS NULL THEN 0 ELSE SUM(OITM.U_VS) END 
+            from OINM 
+            inner join OITM on OINM.ItemCode=OITM.ItemCode  
+            where U_TipoMat = 'CA'
+            and (OINM.JrnlMemo like 'Emis%' or  OINM.JrnlMemo like 'Reci%') 
+             and OINM.CreateDate = TRA_CAS.FECHA) as Consumo,
             SUM(TRA_CAS.VST) AS S_VST 
-            From (Select    CAST(OWTR.DocDate AS DATE) AS FECHA, OWTR.DocEntry AS T_NUM, WTR1.ItemCode AS CODE, OITM.ItemName AS DESCRIPCION, OITM.U_TipoMat AS TIPO, WTR1.Quantity AS CANT, OITM.U_VS AS VS, (WTR1.Quantity * OITM.U_VS) AS VST, OWTR.Filler AS ALM_SALE, WTR1.WhsCode AS ALM_ENTR, OUSR.U_NAME AS REALIZO, CASE When OWTR.Filler = 'APT-PA' and  WTR1.WhsCode = 'APG-PA' then (WTR1.Quantity * OITM.U_VS) else 0 end AS ENT_CARP, CASE When OWTR.Filler = 'APG-PA' and  WTR1.WhsCode = 'AMP-TR' then (WTR1.Quantity * OITM.U_VS) else 0 end AS ENT_TRAS, 
+            From (Select    CAST(OWTR.DocDate AS DATE) AS FECHA, 
+			OWTR.DocEntry AS T_NUM, WTR1.ItemCode AS CODE, OITM.ItemName AS DESCRIPCION,
+			 OITM.U_TipoMat AS TIPO, WTR1.Quantity AS CANT, OITM.U_VS AS VS, 
+			 (WTR1.Quantity * OITM.U_VS) AS VST, 
+			 OWTR.Filler AS ALM_SALE, WTR1.WhsCode AS ALM_ENTR, 
+			 OUSR.U_NAME AS REALIZO, CASE When OWTR.Filler = 'APT-PA' and  WTR1.WhsCode = 'APG-PA' then (WTR1.Quantity * OITM.U_VS) else 0 end AS ENT_CARP, CASE When OWTR.Filler = 'APG-PA' and  WTR1.WhsCode = 'AMP-TR' then (WTR1.Quantity * OITM.U_VS) else 0 end AS ENT_TRAS, 
             CASE When OWTR.Filler = 'AMP-TR' and  WTR1.WhsCode = 'APP-ST' then (WTR1.Quantity * OITM.U_VS) else 0 end AS ENT_KITT, CASE When OWTR.Filler = 'APP-ST' and  WTR1.WhsCode = 'APG-ST' then (WTR1.Quantity * OITM.U_VS) else 0 end AS ENT_TAPI from OWTR Inner Join WTR1 on OWTR.DocEntry = WTR1.DocEntry Inner Join OITM on WTR1.ItemCode = OITM.ItemCode Inner join OUSR on OWTR.UserSign=OUSR.USERID  Where  OITM.U_TipoMat = 'CA' and CAST(OWTR.DocDate AS DATE) 
             BETWEEN '".date('d-m-Y', strtotime(Input::get('FechIn'))).' 00:00'."' and '".date('d-m-Y', strtotime(Input::get('FechaFa'))).' 23:59:59'."' ) TRA_CAS Group by TRA_CAS.FECHA Order by TRA_CAS.FECHA
             "));
@@ -647,29 +658,21 @@ class Reportes_ProduccionController extends Controller
                 $consulta2 = '';
                 $consulta5 = '';
                 $consulta7 = '';
-            }           
-             $consulta6 =  DB::select(DB::raw("
-             Select SUM(OITM.U_VS) Consumo
-            from OINM 
-            inner join OITM on OINM.ItemCode=OITM.ItemCode  
-            where U_TipoMat = 'CA'
-            and (OINM.JrnlMemo like 'Emis%' or  OINM.JrnlMemo like 'Reci%') 
-             and OINM.CreateDate  between  '".date('d-m-Y', strtotime(Input::get('FechIn'))).' 00:00'."' and '".date('d-m-Y', strtotime(Input::get('FechaFa'))).' 23:59:59'." ' 
-              GROUP BY OINM.CreateDate order by OINM.CreateDate
-             "));                        
+            }                                     
      
-            $data = array('data' => $consulta, 'data2' => $consulta2, 'data3' => $consulta3, 'data4' => $consulta4, 'data5' => $consulta5,  'data6' => $consulta6, 'data7' => $consulta7, 'actividades' => $actividades, 'ultimo' => count($actividades), 'db' => DB::getDatabaseName(), 'fi' => Input::get('FechIn'), 'ff' => Input::get('FechaFa') );
+            $data = array('data' => $consulta, 'data2' => $consulta2, 'data3' => $consulta3, 'data4' => $consulta4, 'data5' => $consulta5, 'data7' => $consulta7, 'actividades' => $actividades, 'ultimo' => count($actividades), 'db' => DB::getDatabaseName(), 'fi' => Input::get('FechIn'), 'ff' => Input::get('FechaFa') );
             $dataSesion = array(                
                 'data' => $consulta,
                 'data2' => $consulta2,         
                 'data3' => $consulta3,         
                 'data4' => $consulta4,         
                 'data5' => $consulta5,                        
-                'data6' => $consulta6,                        
+                                   
                 'data7' => $consulta7,                        
                 'fi' => Input::get('FechIn'),
                 'ff' => Input::get('FechaFa')
             );
+        
             Session::put('repprodxareas', $dataSesion);
             return view('Mod01_Produccion.reporteProdxAreas', $data);
         } else {
@@ -686,12 +689,12 @@ class Reportes_ProduccionController extends Controller
         $data3 = $repprodxareas['data3'];
         $data4 = $repprodxareas['data4'];
         $data5 = $repprodxareas['data5'];
-        $data6 = $repprodxareas['data6'];
+      
         $data7 = $repprodxareas['data7'];
         $fi = $repprodxareas['fi'];
         $ff = $repprodxareas['ff'];
        
-        $pdf = \PDF::loadView('Mod01_Produccion.reporteProdxAreasPDF', compact('data', 'data2', 'data3', 'data4', 'data5', 'data6', 'data7', 'fi', 'ff'));
+        $pdf = \PDF::loadView('Mod01_Produccion.reporteProdxAreasPDF', compact('data', 'data2', 'data3', 'data4', 'data5', 'data7', 'fi', 'ff'));
         $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
         return $pdf->stream('Siz_Reporte_ProdxAreas ' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
         }else {
@@ -715,7 +718,7 @@ class Reportes_ProduccionController extends Controller
                     $data3 = $repprodxareas['data3'];
                     $data4 = $repprodxareas['data4'];
                     $data5 = $repprodxareas['data5'];
-                    $data6 = $repprodxareas['data6'];
+                   
                     $data7 = $repprodxareas['data7'];
                     $fi = $repprodxareas['fi'];
                     $ff = $repprodxareas['ff'];                    
@@ -800,19 +803,18 @@ class Reportes_ProduccionController extends Controller
                         'Fecha', 'Aduana Carpinteria',	'Almacén',	'Camión',	'Kitting',	'Tapiz',	'Ajuste',
                     ]);
                     $fila_ini2 = $fila;
-                    $index=0;
+                  
                     foreach ($data4 as $rep) {
                         $sheet->row(
                             $fila,
                             [
                                 \AppHelper::instance()->getHumanDate($rep->Fecha),
                                 number_format($rep->S_CARP,2), number_format($rep->S_TRAS,2), number_format($rep->S_KITT,2),
-                                number_format($rep->S_TAPI,2), number_format($data6[$index]->Consumo,2),
+                                number_format($rep->S_TAPI,2), number_format($rep->Consumo,2),
                                 number_format((($rep->S_TAPI + $rep->S_KITT + $rep->S_TRAS + $rep->S_CARP)*-1) + $rep->S_VST  ,2),                                 
                             ]
                         );
-                        $fila++;
-                        $index++;
+                        $fila++;                   
                     }
                     $count2 = $fila-1; 
                     $sheet->row($fila++, [

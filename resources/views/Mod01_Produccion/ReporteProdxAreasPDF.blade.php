@@ -522,7 +522,7 @@
                                     $sum_4 = 0;
                                     $sum_5 = 0;
                                     $sum_6 = 0;
-                                    $index = 0;
+                                 
                                 ?>
                                    
                                 @foreach ($data4 as $rep4)
@@ -531,7 +531,7 @@
                                     $sum_2 = $sum_2  + $rep4->S_TRAS;
                                     $sum_3 = $sum_3  + $rep4->S_KITT;
                                     $sum_4 = $sum_4  + $rep4->S_TAPI;
-                                    $sum_6 = $sum_6  + $data6[$index]->Consumo;
+                                    $sum_6 = $sum_6  + $rep4->Consumo;
                                     $sum_5 = $sum_5  + ((($rep4->S_TAPI + $rep4->S_KITT + $rep4->S_TRAS + $rep4->S_CARP)*-1) + $rep4->S_VST);
                                     
                                     ?> <tr>
@@ -551,15 +551,12 @@
                                             {{number_format($rep4->S_TAPI,2)}}
                                         </td>
                                         <td id="f5" scope="row">
-                                            {{number_format($data6[$index]->Consumo,2)}}
+                                            {{number_format($rep4->Consumo,2)}}
                                         </td>
                                         <td  scope="row">
                                             {{number_format((($rep4->S_TAPI + $rep4->S_KITT + $rep4->S_TRAS + $rep4->S_CARP)*-1) + $rep4->S_VST  ,2)}}
                                         </td>                                                                   
-                                    </tr>
-                                    <?php
-                                    $index++;
-                                    ?>
+                                    </tr>                                 
                                     @endforeach @endif
                                 </tbody>
                                 <tfoot>
