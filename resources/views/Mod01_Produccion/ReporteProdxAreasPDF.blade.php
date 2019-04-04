@@ -67,7 +67,7 @@
             border: 1px solid black;
         }
         tr:nth-child(even) {
-            background-color: #f2f2f2
+            background-color: #f2f2f2;
         }
         .zrk-teal{
             background-color: #167170;
@@ -88,6 +88,12 @@
         .zrk-dimgray{
             background-color: #514d4a;
             color: white;
+        }
+        .zrk-gamal{
+            background-color: #8EB4F3; color: white;
+        }
+        .zrk-gamalobs{
+            background-color: #2352A0; color: white;
         }
     </style>
 </head>
@@ -129,20 +135,20 @@
                         <thead class="table-condensed">
                             <tr class="encabezado">
                                 <th scope="col">Fecha</th>
-                                <th class="zrk-teal" scope="col">Planea</th>
-                                <th class="zrk-olivo" scope="col">Prepa- rado</th>
-                                <th class="zrk-olivo" scope="col">Anaquel Corte</th>
+                                <th class="zrk-teal" scope="col">Planeación</th>
+                                <th class="zrk-teal" scope="col">Preparado Entrega</th>
+                                <th class="zrk-tejelet" scope="col">Anaquel Corte</th>
                                 <th class="zrk-olivo" scope="col">Corte Piel</th>
 
-                                <th class="zrk-olivo" scope="col">Inspec. Corte</th>
+                                <th class="zrk-olivo" scope="col">Inspección Corte</th>
                                 <th class="zrk-olivo" scope="col">Pegado Costura</th>
-                                <th class="zrk-olivo" scope="col">Anaquel Costura</th>
-                                <th class="zrk-tejelet" scope="col">Costura Recta</th>
-                                <th class="zrk-tejelet" scope="col">Armado de Costura</th>
+                                <th class="zrk-tejelet" scope="col">Anaquel Costura</th>
+                                <th class="zrk-cafe" scope="col">Costura Recta</th>
+                                <th class="zrk-cafe" scope="col">Armado de Costura</th>
 
-                                <th class="zrk-tejelet" scope="col">Pespunte o Doble</th>
-                                <th class="zrk-tejelet" scope="col">Ter. de Costura</th>
-                                <th class="zrk-cafe" scope="col">Inspec. Costura</th>
+                                <th class="zrk-cafe" scope="col">Pespunte o Doble</th>
+                                <th class="zrk-cafe" scope="col">Terminado de Costura</th>
+                                <th class="zrk-cafe" scope="col">Inspección Costura</th>
                              
                             </tr>
                         </thead>
@@ -180,7 +186,7 @@
                              
                              ?>
                             <tr>
-                                <th id="f0" scope="row" class="table-condensed zrk-dimgray" style="min-width:200px">
+                                <th id="f0" scope="row" class="table-condensed" style="min-width:200px">
                                     {{\AppHelper::instance()->getHumanDate($rep->Fecha)}}
                                 </th>
                                 <td id="f1" scope="row">
@@ -225,26 +231,26 @@
                         </tbody>
                         <tfoot>
                             <tr class="total1">
-                                <th scope="row" class="table-condensed zrk-dimgray">SUMA DE FUNDAS:</th>
-                                <td>{{number_format($sum_1 , 2)}}</td>
-                                <td>{{number_format($sum_2 , 2)}}</td>
-                                <td>{{number_format($sum_3 , 2)}}</td>
-                                <td>{{number_format($sum_4 , 2)}}</td>
-                                <td>{{number_format($sum_5 , 2)}}</td>
-                                <td>{{number_format($sum_6 , 2)}}</td>
-                                <td>{{number_format($sum_7 , 2)}}</td>
-                                <td>{{number_format($sum_8 , 2)}}</td>
-                                <td>{{number_format($sum_9 , 2)}}</td>
-                                <td>{{number_format($sum_10, 2)}}</td>
-                                <td>{{number_format($sum_11, 2)}}</td>
-                                <td>{{number_format($sum_12, 2)}}</td>
+                                <th scope="row" class="table-condensed">SUMA DE FUNDAS:</th>
+                                <td class="zrk-gamal">{{number_format($sum_1 , 2)}}</td>
+                                <td class="zrk-gamal">{{number_format($sum_2 , 2)}}</td>
+                                <td class="zrk-gamal">{{number_format($sum_3 , 2)}}</td>
+                                <td class="zrk-gamal">{{number_format($sum_4 , 2)}}</td>
+                                <td class="zrk-gamal">{{number_format($sum_5 , 2)}}</td>
+                                <td class="zrk-gamal">{{number_format($sum_6 , 2)}}</td>
+                                <td class="zrk-gamal">{{number_format($sum_7 , 2)}}</td>
+                                <td class="zrk-gamal">{{number_format($sum_8 , 2)}}</td>
+                                <td class="zrk-gamal">{{number_format($sum_9 , 2)}}</td>
+                                <td class="zrk-gamal">{{number_format($sum_10, 2)}}</td>
+                                <td class="zrk-gamal">{{number_format($sum_11, 2)}}</td>
+                                <td class="zrk-gamal">{{number_format($sum_12, 2)}}</td>
                               
                             </tr>
                             @if (strtotime($ff) == strtotime(date("Y-m-d"))) 
                                 <tr  class="encabezado">
-                                    <th scope="row" class="table-condensed zrk-dimgray">INVENTARIO:</th>
+                                    <th scope="row" class="table-condensed">INVENTARIO:</th>
                                     @for ($i = 0; $i < 12; $i++)                                                    
-                                    <td scope="row">
+                                    <td scope="row" class="zrk-gamalobs">
                                         {{number_format($data2[$i]->SVS,2)}}
                                     </td>                             
                                 @endfor                                     
@@ -266,18 +272,18 @@
                             <tr class="encabezado">
                                 <th scope="col" style="min-width:150px;">Fecha</th>                                
                                 <th class="zrk-cafe" scope="col">Series Incompletas</th>
-                                <th class="zrk-cafe" scope="col">Pegado Delcrón</th>
+                                <th class="zrk-teal" scope="col">Pegado Delcrón</th>
 
-                                <th class="zrk-cafe" scope="col">Llenado Cojin</th>
-                                <th class="zrk-cafe" scope="col">Acojinado</th>
-                                <th class="zrk-cafe" scope="col">Fundas T.</th>
-                                <th class="zrk-cafe" scope="col">Kitting</th>
-                                <th class="zrk-teal" scope="col">Enfundado Tapiz</th>
+                                <th class="zrk-teal" scope="col">Llenado Cojin</th>
+                                <th class="zrk-teal" scope="col">Acojinado</th>
+                                <th class="zrk-tejelet" scope="col">Fundas Terminadas</th>
+                                <th class="zrk-tejelet" scope="col">Kitting</th>
+                                <th class="zrk-olivo" scope="col">Enfundado Tapiz</th>
 
-                                <th class="zrk-teal" scope="col">Tapizar</th>
-                                <th class="zrk-teal" scope="col">Armado de Tapiz</th>
-                                <th class="zrk-olivo" scope="col">Empaque</th>
-                                <th class="zrk-olivo" scope="col">Inspec. Final</th>
+                                <th class="zrk-olivo" scope="col">Tapizar</th>
+                                <th class="zrk-olivo" scope="col">Armado de Tapiz</th>
+                                <th class="zrk-tejelet" scope="col">Empaque</th>
+                                <th class="zrk-tejelet" scope="col">Inspeción Final</th>
                             </tr>
                         </thead>
                         <tbody> 
@@ -312,7 +318,7 @@
                               $sum_23 = $sum_23 + $rep->VST175;
                              ?>
                             <tr>
-                                <th id="f0" scope="row" class="table-condensed zrk-dimgray">
+                                <th id="f0" scope="row" class="table-condensed">
                                     {{\AppHelper::instance()->getHumanDate($rep->Fecha)}}
                                 </th>
                              
@@ -354,25 +360,25 @@
                         </tbody>
                         <tfoot>
                             <tr class="total1">
-                                <th scope="row" class="table-condensed zrk-dimgray">SUMA DE FUNDAS:</th>                               
-                                <td>{{number_format($sum_13, 2)}}</td>
-                                <td>{{number_format($sum_14, 2)}}</td>
-                                <td>{{number_format($sum_15, 2)}}</td>
-                                <td>{{number_format($sum_16, 2)}}</td>
-                                <td>{{number_format($sum_17, 2)}}</td>
-                                <td>{{number_format($sum_18, 2)}}</td>
-                                <td>{{number_format($sum_19, 2)}}</td>
-                                <td>{{number_format($sum_20, 2)}}</td>
-                                <td>{{number_format($sum_21, 2)}}</td>
-                                <td>{{number_format($sum_22, 2)}}</td>
-                                <td>{{number_format($sum_23, 2)}}</td>
+                                <th scope="row" class="table-condensed">SUMA DE FUNDAS:</th>                               
+                                <td class="zrk-gamal">{{number_format($sum_13, 2)}}</td>
+                                <td class="zrk-gamal">{{number_format($sum_14, 2)}}</td>
+                                <td class="zrk-gamal">{{number_format($sum_15, 2)}}</td>
+                                <td class="zrk-gamal">{{number_format($sum_16, 2)}}</td>
+                                <td class="zrk-gamal">{{number_format($sum_17, 2)}}</td>
+                                <td class="zrk-gamal">{{number_format($sum_18, 2)}}</td>
+                                <td class="zrk-gamal">{{number_format($sum_19, 2)}}</td>
+                                <td class="zrk-gamal">{{number_format($sum_20, 2)}}</td>
+                                <td class="zrk-gamal">{{number_format($sum_21, 2)}}</td>
+                                <td class="zrk-gamal">{{number_format($sum_22, 2)}}</td>
+                                <td class="zrk-gamal">{{number_format($sum_23, 2)}}</td>
                             </tr>
                             @if (strtotime($ff) == strtotime(date("Y-m-d"))) 
                                 <tr  class="encabezado">
-                                    <th scope="row" class="table-condensed zrk-dimgray">INVENTARIO:</th>
+                                    <th scope="row" class="table-condensed">INVENTARIO:</th>
                                 
                                     @for ($i = 12; $i < count($data2); $i++)                                                    
-                                    <td scope="row">
+                                    <td scope="row" class="zrk-gamalobs">
                                         {{number_format($data2[$i]->SVS,2)}}
                                     </td>                             
                                 @endfor                                           
@@ -428,7 +434,7 @@
                                     $sum_6 = $sum_6  + $rep3->VST418;
                                 ?>
                                 <tr>
-                                    <th id="f0" scope="row" class="table-condensed zrk-dimgray">
+                                    <th id="f0" scope="row" class="table-condensed">
                                         {{\AppHelper::instance()->getHumanDate($rep3->Fecha)}}
                                     </th>
                                     <td id="f1" scope="row">
@@ -454,34 +460,34 @@
                             </tbody>
                             <tfoot>
                                 <tr class="total2">
-                                    <th scope="row" class="table-condensed zrk-dimgray">SUMA DE CASCOS:</th>
-                                    <td>{{number_format($sum_1, 2) }}</td>
-                                    <td>{{number_format($sum_2, 2) }}</td>
-                                    <td>{{number_format($sum_3, 2) }}</td>
-                                    <td>{{number_format($sum_4, 2) }}</td>
-                                    <td>{{number_format($sum_5, 2) }}</td>
-                                    <td>{{number_format($sum_6, 2) }}</td>                                
+                                    <th scope="row" class="table-condensed">SUMA DE CASCOS:</th>
+                                    <td class="zrk-gamal">{{number_format($sum_1, 2) }}</td>
+                                    <td class="zrk-gamal">{{number_format($sum_2, 2) }}</td>
+                                    <td class="zrk-gamal">{{number_format($sum_3, 2) }}</td>
+                                    <td class="zrk-gamal">{{number_format($sum_4, 2) }}</td>
+                                    <td class="zrk-gamal">{{number_format($sum_5, 2) }}</td>
+                                    <td class="zrk-gamal">{{number_format($sum_6, 2) }}</td>                                
                                 </tr>
                                   @if (strtotime($ff) == strtotime(date("Y-m-d"))) 
                                         <tr  class="encabezado">
-                                                <th scope="row" class="table-condensed zrk-dimgray">INVENTARIO:</th>
+                                                <th scope="row" class="table-condensed">INVENTARIO:</th>
                                                 @foreach ($data7 as $item)                          
-                                                    <td scope="row">
+                                                    <td class="zrk-gamalobs" scope="row">
                                                         {{number_format($item->P400,2)}}
                                                     </td>                             
-                                                    <td scope="row">
+                                                    <td class="zrk-gamalobs" scope="row">
                                                         {{number_format($item->H403,2)}}
                                                     </td>                             
-                                                    <td scope="row">
+                                                    <td class="zrk-gamalobs" scope="row">
                                                         {{number_format($item->A406,2)}}
                                                     </td>                             
-                                                    <td scope="row">
+                                                    <td class="zrk-gamalobs" scope="row">
                                                         {{number_format($item->T409,2)}}
                                                     </td>                             
-                                                    <td scope="row">
+                                                    <td class="zrk-gamalobs" scope="row">
                                                         {{number_format($item->PR415,2)}}
                                                     </td>                             
-                                                    <td scope="row">
+                                                    <td class="zrk-gamalobs" scope="row">
                                                        {{number_format($item->I418, 2)}}
                                                     </td>                             
                                                 @endforeach                                          
@@ -535,7 +541,7 @@
                                     $sum_5 = $sum_5  + ((($rep4->S_TAPI + $rep4->S_KITT + $rep4->S_TRAS + $rep4->S_CARP)*-1) + $rep4->S_VST);
                                     
                                     ?> <tr>
-                                        <th id="f0" scope="row" class="table-condensed zrk-dimgray">
+                                        <th id="f0" scope="row" class="table-condensed">
                                             {{\AppHelper::instance()->getHumanDate($rep4->Fecha)}}
                                         </th>
                                         <td id="f1" scope="row">
@@ -561,35 +567,35 @@
                                 </tbody>
                                 <tfoot>
                                     <tr class="total3">
-                                        <th scope="row" class="table-condensed zrk-dimgray">SUMA DE CASCOS:</th>
-                                        <td>{{number_format($sum_1, 2) }}</td>
-                                        <td>{{number_format($sum_2, 2) }}</td>
-                                        <td>{{number_format($sum_3, 2) }}</td>
-                                        <td>{{number_format($sum_4, 2) }}</td>
-                                        <td>{{number_format($sum_6, 2) }}</td>
-                                        <td>{{number_format($sum_5, 2) }}</td>
+                                        <th scope="row" class="table-condensed">SUMA DE CASCOS:</th>
+                                        <td class="zrk-gamal">{{number_format($sum_1, 2) }}</td>
+                                        <td class="zrk-gamal">{{number_format($sum_2, 2) }}</td>
+                                        <td class="zrk-gamal">{{number_format($sum_3, 2) }}</td>
+                                        <td class="zrk-gamal">{{number_format($sum_4, 2) }}</td>
+                                        <td class="zrk-gamal">{{number_format($sum_6, 2) }}</td>
+                                        <td class="zrk-gamal">{{number_format($sum_5, 2) }}</td>
                                        
                                     </tr>
                                     @if (strtotime($ff) == strtotime(date("Y-m-d"))) 
                                              <tr  class="encabezado">
-                                                <th scope="row" class="table-condensed zrk-dimgray">INVENTARIO CASCO:</th>
+                                                <th scope="row" class="table-condensed">INVENTARIO CASCO:</th>
                                                 @foreach ($data5 as $item)                          
-                                                    <td scope="row">
+                                                    <td class="zrk-gamalobs" scope="row">
                                                         {{number_format($item->T_CARP,2)}}
                                                     </td>                             
-                                                    <td scope="row">
+                                                    <td class="zrk-gamalobs" scope="row">
                                                         {{number_format($item->T_ALMA,2)}}
                                                     </td>                             
-                                                    <td scope="row">
+                                                    <td class="zrk-gamalobs" scope="row">
                                                         {{number_format($item->T_CAMI,2)}}
                                                     </td>                             
-                                                    <td scope="row">
+                                                    <td class="zrk-gamalobs" scope="row">
                                                         {{number_format($item->T_KITT,2)}}
                                                     </td>                             
-                                                    <td scope="row">
+                                                    <td class="zrk-gamalobs" scope="row">
                                                         {{number_format($item->T_TAPIZ,2)}}
                                                     </td>                             
-                                                    <td scope="row">
+                                                    <td class="zrk-gamalobs" scope="row">
                                                     {{''}}
                                                     </td>                             
                                                 @endforeach                                          

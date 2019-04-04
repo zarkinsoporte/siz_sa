@@ -206,7 +206,7 @@ var table = $('#tbackorder').DataTable({
         { data: 'DocNum', name:  'DocNum', orderable: true, searchable: true},
         { data: 'DueDate', name: 'DueDate',
         render: function(data){   
-            var d = new Date(data);               
+            var d = new Date(data.split(' ')[0]);             
             return moment(d).format("DD-MM-YYYY");
         }},
         { data: 'diasproc', name:  'diasproc'},

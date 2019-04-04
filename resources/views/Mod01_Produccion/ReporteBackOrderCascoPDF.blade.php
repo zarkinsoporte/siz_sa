@@ -3,11 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- CSRF Token -->
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
     <title>BO Casco</title>
     <style>
         /*
@@ -140,7 +136,7 @@
         
                                 <th>Descripción</th>
                                 <th>En Proceso</th>
-                                <th>Planea (400)</th>
+                                <th>Planeación (400)</th>
                                 <th>Habilitado (403)</th>
                                 <th>Armado (406)</th>
         
