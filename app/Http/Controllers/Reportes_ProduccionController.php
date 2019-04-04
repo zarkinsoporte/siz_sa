@@ -470,7 +470,7 @@ class Reportes_ProduccionController extends Controller
                                 $valuefunda = '00 Falta Inf.';
                                 break;
                             case "03":
-                                $valuefunda = '00 Falta Mat.';
+                                $valuefunda = '00 Falta Piel.';
                                 break;
                             case "04":
                                 $valuefunda = '00 Revision Piel';
@@ -501,7 +501,7 @@ class Reportes_ProduccionController extends Controller
                                 $valuefunda = '00 Falta Inf.';
                                 break;
                             case "03":
-                                $valuefunda = '00 Falta Mat.';
+                                $valuefunda = '00 Falta Piel.';
                                 break;
                             case "04":
                                 $valuefunda = '00 Revision Piel';
