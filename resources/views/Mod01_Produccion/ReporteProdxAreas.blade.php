@@ -69,29 +69,33 @@
                     <thead class="table-condensed">
                         <tr class="encabezado">
                             <th scope="col" style="min-width:150px;">Fecha</th>
-                            <th class="zrk-teal" scope="col">Ordenes en Planeación</th>
-                            <th class="zrk-olivo" scope="col">Preparado Entrega</th>
-                            <th class="zrk-olivo" scope="col">Anaquel Corte</th>
-                            <th class="zrk-olivo" scope="col">Corte de Piel</th>
-                            <th class="zrk-olivo" scope="col">Inspección de Corte</th>
-                            <th class="zrk-olivo" scope="col">Pegado de Costura</th>
-                            <th class="zrk-olivo" scope="col">Anaquel Costura</th>
-                            <th class="zrk-tejelet" scope="col">Costura Recta</th>
-                            <th class="zrk-tejelet" scope="col">Armado de Costura</th>
-                            <th class="zrk-tejelet" scope="col">Pespunte o Doble</th>
-                            <th class="zrk-tejelet" scope="col">Terminado de Costura</th>
-                            <th class="zrk-cafe" scope="col">Inspeccionar Costura</th>
+                            <th class="zrk-teal" scope="col">Planeación</th>
+                            <th class="zrk-teal" scope="col">Preparado Entrega</th>
+                            <th class="zrk-tejelet" scope="col">Anaquel Corte</th>
+                            <th class="zrk-olivo" scope="col">Corte Piel</th>
+                            
+                            <th class="zrk-olivo" scope="col">Inspección Corte</th>
+                            <th class="zrk-olivo" scope="col">Pegado Costura</th>
+                            <th class="zrk-tejelet" scope="col">Anaquel Costura</th>
+                            <th class="zrk-cafe" scope="col">Costura Recta</th>
+                            <th class="zrk-cafe" scope="col">Armado de Costura</th>
+                            
+                            <th class="zrk-cafe" scope="col">Pespunte o Doble</th>
+                            <th class="zrk-cafe" scope="col">Terminado de Costura</th>
+                            <th class="zrk-cafe" scope="col">Inspección Costura</th>
                             <th class="zrk-cafe" scope="col">Series Incompletas</th>
-                            <th class="zrk-cafe" scope="col">Pegado Delcrón</th>
-                            <th class="zrk-cafe" scope="col">Llenado Cojin</th>
-                            <th class="zrk-cafe" scope="col">Acojinado</th>
-                            <th class="zrk-cafe" scope="col">Fundas Terminadas</th>
-                            <th class="zrk-cafe" scope="col">Kitting</th>
-                            <th class="zrk-teal" scope="col">Enfundado Tapiz</th>
-                            <th class="zrk-teal" scope="col">Tapizar</th>
-                            <th class="zrk-teal" scope="col">Armado de Tapiz</th>
-                            <th class="zrk-olivo" scope="col">Empaque</th>
-                            <th class="zrk-olivo" scope="col">Inspeccion Final</th>
+                            <th class="zrk-teal" scope="col">Pegado Delcrón</th>
+
+                            <th class="zrk-teal" scope="col">Llenado Cojin</th>
+                            <th class="zrk-teal" scope="col">Acojinado</th>
+                            <th class="zrk-tejelet" scope="col">Fundas Terminadas</th>
+                            <th class="zrk-tejelet" scope="col">Kitting</th>
+                            <th class="zrk-olivo" scope="col">Enfundado Tapiz</th>
+
+                            <th class="zrk-olivo" scope="col">Tapizar</th>
+                            <th class="zrk-olivo" scope="col">Armado de Tapiz</th>
+                            <th class="zrk-tejelet" scope="col">Empaque</th>
+                            <th class="zrk-tejelet" scope="col">Inspeción Final</th>
                         </tr>
                     </thead>
                     <tbody>

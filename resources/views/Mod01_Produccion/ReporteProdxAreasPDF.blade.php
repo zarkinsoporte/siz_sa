@@ -44,7 +44,7 @@
 
         h5 {
             font-family: 'Helvetica';
-            margin-bottom: 0;            
+            margin-bottom: 15;            
         }     
 
         .fz{
@@ -90,7 +90,7 @@
             color: white;
         }
         .zrk-gamal{
-            background-color: #8EB4F3; color: white;
+            background-color: #78866B; color: white;
         }
         .zrk-gamalobs{
             background-color: #2352A0; color: white;
