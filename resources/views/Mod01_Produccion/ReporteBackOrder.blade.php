@@ -133,12 +133,19 @@ var table = $('#tbackorder').DataTable({
         {
             text: '<i class="fa fa-file-excel-o"></i> Excel',
             className: "btn-success",
-            extend: 'excelHtml5',
-            message: "SALOTTO S.A. DE C.V.\n",
-            messagetwo: "BACK ORDER PROGRAMADO.\n",
-            messagethree: f,
-            exportOptions: {
-                columns: ':visible',                
+            action: function ( e, dt, node, config ) { 
+                var data=table.rows( { filter : 'applied'} ).data().toArray(); 
+                var json = JSON.stringify( data );
+                $.ajax({ 
+                    type:'POST', 
+                    url:'reporte/backorderPDF', 
+                    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                    data: { "_token": "{{ csrf_token() }}", "arr": json }, 
+                    success:
+                        function(data){ 
+                            window.location.href = 'reporte/backorderXLS';
+                        } 
+                }); 
             }          
         }, 
         {

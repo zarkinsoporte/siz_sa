@@ -548,15 +548,31 @@ class Reportes_ProduccionController extends Controller
     public function ReporteBackOrderPlaneaPDF()
     {   
         if (Auth::check()) {    
-        $data = json_decode(stripslashes(Session::get('miarr')));
-        $pdf = \PDF::loadView('Mod01_Produccion.ReporteBackOrderPDF_Planea', compact('data'));
-        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
+            $data = json_decode(stripslashes(Session::get('miarr')));
+            $pdf = \PDF::loadView('Mod01_Produccion.ReporteBackOrderPDF_Planea', compact('data'));
+            $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
         return $pdf->stream('Siz_Reporte_BackOrderP ' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
         }else {
             return redirect()->route('auth/login');
         }
     }
-
+    public function ReporteBackOrderXLS(){
+        $path = public_path().'/assets/plantillas_excel/Mod_01/SIZ_bo.xlsx';
+        $data = json_decode(stripslashes(Session::get('miarr')));
+        Excel::load($path, function($excel) use($data){
+                $excel->sheet('B.O.', function($sheet) use($data){
+                $index = 6;    
+                foreach($data as $row) {
+                    $sheet->row($index, [
+                    $row->OP, $row->Pedido, $row->FechaPedido, $row->OC, $row->D_PROC, $row->NO_SERIE, $row->CLIENTE, $row->codigo1, $row->codigo3, $row->Descripcion, $row->Cant, $row->VSind, $row->VS, $row->Funda, $row->DEstacion, $row->U_Grupo, $row->Secue, $row->SecOT, $row->METAL, $row->SEMANA2, $row->fentrega, $row->fechaentregapedido, $row->SEMANA3, $row->u_fproduccion, $row->Prioridad, $row->Desv, $row->Comments, $row->U_Especial, $row->Modelo
+                    ]);	
+                    $index++;
+                }         
+            });
+        })
+        ->setFilename('SIZ Back Order Programado SALOTTO')
+        ->export('xlsx');  
+    }
     public function reporteProdxAreas(){
         if (Auth::check()) {
             $user = Auth::user();

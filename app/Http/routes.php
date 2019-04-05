@@ -159,12 +159,13 @@ Route::get('datatables.showbackorder', 'Reportes_ProduccionController@DataShowba
 Route::post('home/reporte/backorderPDF', 'Reportes_ProduccionController@backOrderAjaxToSession');
 Route::get('home/reporte/backorderVentasPDF', 'Reportes_ProduccionController@ReporteBackOrderVentasPDF');
 Route::get('home/reporte/backorderPlaneaPDF', 'Reportes_ProduccionController@ReporteBackOrderPlaneaPDF');
+Route::get('home/reporte/backorderXLS', 'Reportes_ProduccionController@ReporteBackOrderXLS');
 //RPORTE BACK ORDER CASCO
-//REPORTE BACK ORDER
 Route::get('home/BACK ORDER CASCO', 'Reportes_ProduccionController@backorderCasco');
 Route::get('datatables.showbackordercasco', 'Reportes_ProduccionController@DataShowbackorderCasco')->name('datatables.showbackordercasco');
-Route::post('home/reporte/backorderCascoPDF', 'Reportes_ProduccionController@backOrderAjaxToSession');
+
 Route::get('home/reporte/backorderCascoPDF', 'Reportes_ProduccionController@ReporteBackOrderCascoPDF');
+//Ruta generica para guardar ajaxtoSession
 Route::post('home/reporte/ajaxtosession/{id}', 'Reportes_ProduccionController@AjaxToSession');
 /*
 |--------------------------------------------------------------------------
