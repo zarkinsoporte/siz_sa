@@ -135,13 +135,13 @@ class Reportes_ProduccionController extends Controller
         //$pdf = new FPDF('L', 'mm', 'A4');
         $pdf->setOptions(['isPhpEnabled' => true]);
         //        Session::forget('values');
-        return $pdf->stream('Siz_Reporte_Produccion ' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
+        return $pdf->stream('Siz_Reporte_Produccion ' . ' - ' .date("d/m/Y") . '.Pdf');
     }
     public function ReporteProduccionEXL()
     {
         if (Session::has('repP')) {
             $values = Session::get('repP');
-            Excel::create('Siz_Reporte_Produccion_General' . ' - ' . $hoy = date("d/m/Y") . '', function ($excel) use ($values) {
+            Excel::create('Siz_Reporte_Produccion_General' . ' - ' .date("d/m/Y") . '', function ($excel) use ($values) {
                 $excel->sheet('Hoja 1', function ($sheet) use ($values) {
                     //$sheet->margeCells('A1:F5');     
                     $sheet->row(1, [
@@ -281,7 +281,7 @@ class Reportes_ProduccionController extends Controller
         if (Session::has('rephistorial')) {
             $values = Session::get('rephistorial');
             
-            Excel::create('Siz_Reporte_HistorialOP' . ' - ' . $hoy = date("d/m/Y") . '', function ($excel) use ($values) {
+            Excel::create('Siz_Reporte_HistorialOP' . ' - ' .date("d/m/Y") . '', function ($excel) use ($values) {
                 $excel->sheet('Hoja 1', function ($sheet) use ($values) {
                     //$sheet->margeCells('A1:F5');     
                     $sheet->row(1, [
@@ -400,7 +400,7 @@ class Reportes_ProduccionController extends Controller
             //dd($values);
             $info = Session::get('repinfo');
            
-            Excel::create('Siz_Reporte_MaterialesOP' . ' - ' . $hoy = date("d/m/Y") . '', function ($excel) use ($values, $info) {
+            Excel::create('Siz_Reporte_MaterialesOP' . ' - ' .date("d/m/Y") . '', function ($excel) use ($values, $info) {
                 $excel->sheet('Hoja 1', function ($sheet) use ($values, $info) {
                     //$sheet->margeCells('A1:F5');     
                     $sheet->row(1, [
@@ -540,7 +540,7 @@ class Reportes_ProduccionController extends Controller
         $data = json_decode(stripslashes(Session::get('miarr')));      
         $pdf = \PDF::loadView('Mod01_Produccion.ReporteBackOrderPDF_Ventas', compact('data'));
         $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
-        return $pdf->stream('Siz_Reporte_BackOrderV ' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
+        return $pdf->stream('Siz_Reporte_BackOrderV ' . ' - ' .date("d/m/Y") . '.Pdf');
         } else {
             return redirect()->route('auth/login');
         }
@@ -551,7 +551,7 @@ class Reportes_ProduccionController extends Controller
             $data = json_decode(stripslashes(Session::get('miarr')));
             $pdf = \PDF::loadView('Mod01_Produccion.ReporteBackOrderPDF_Planea', compact('data'));
             $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
-        return $pdf->stream('Siz_Reporte_BackOrderP ' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
+        return $pdf->stream('Siz_Reporte_BackOrderP ' . ' - ' .date("d/m/Y") . '.Pdf');
         }else {
             return redirect()->route('auth/login');
         }
@@ -563,11 +563,9 @@ class Reportes_ProduccionController extends Controller
                 $excel->sheet('B.O.', function($sheet) use($data){
                 
                 $sheet->cell('A4', function ($cell) {
-                    // manipulate the cell
-                    $cell->setValue(\AppHelper::instance()->getHumanDate( date("Y-m-d H:i:s")));
+                    $cell->setValue(\AppHelper::instance()->getHumanDate(date("Y-m-d H:i:s")));
                 });
                 $sheet->cell('N4', function ($cell) {
-                    // manipulate the cell
                     $cell->setValue( date("H:i:s"));
                 });
                     $index = 6;    
@@ -721,7 +719,7 @@ class Reportes_ProduccionController extends Controller
        
         $pdf = \PDF::loadView('Mod01_Produccion.reporteProdxAreasPDF', compact('data', 'data2', 'data3', 'data4', 'data5', 'data7', 'fi', 'ff'));
         $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
-        return $pdf->stream('Siz_Reporte_ProdxAreas ' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
+        return $pdf->stream('Siz_Reporte_ProdxAreas ' . ' - ' .date("d/m/Y") . '.Pdf');
         }else {
             return redirect()->route('auth/login');
         }
@@ -729,44 +727,38 @@ class Reportes_ProduccionController extends Controller
 
     public function produccionxareasXLS()
     {
-        if (Auth::check()) {    
-            $repprodxareas = Session::get('repprodxareas');                                                          
-           
-            $info = env('EMPRESA_NAME').', SA de CV';
-            Excel::create('Siz_Reporte_ProdxAreas' . ' - ' . $hoy = date("d/m/Y") . '', function ($excel) use ($repprodxareas, $info) {
-                $count = 0;
-                $count2 = 0;
-                $count3 = 0;
-                $excel->sheet('Hoja 1', function ($sheet) use ($repprodxareas, $info) {
+        if (Auth::check()) {
+            $path = public_path() . '/assets/plantillas_excel/Mod_01/SIZ_resumenxareas.xlsx';
+            $repprodxareas = Session::get('repprodxareas');    
+            Excel::load($path, function($excel) use($repprodxareas){   
+                $excel->sheet('Produccion', function ($sheet) use ($repprodxareas) { 
+                    $count = 0;
+                    $count2 = 0;
                     $data = $repprodxareas['data'];
                     $data2 = $repprodxareas['data2'];
                     $data3 = $repprodxareas['data3'];
                     $data4 = $repprodxareas['data4'];
                     $data5 = $repprodxareas['data5'];
-                   
                     $data7 = $repprodxareas['data7'];
                     $fi = $repprodxareas['fi'];
-                    $ff = $repprodxareas['ff'];                    
+                    $ff = $repprodxareas['ff'];
+
+                    $sheet->cell('C4', function ($cell) {//fecha
+                        $cell->setValue(\AppHelper::instance()->getHumanDate(date("Y-m-d H:i:s")));
+                    });
+                    $sheet->cell('T4', function ($cell) {//hora
+                        $cell->setValue(date("H:i:s"));
+                    });
+                    $sheet->cell('C5', function ($cell) use ($fi) {
+                        $cell->setValue(\AppHelper::instance()->getHumanDate($fi));
+                    });
+                    $sheet->cell('L5', function ($cell) use ($ff){
+                        $cell->setValue(\AppHelper::instance()->getHumanDate($ff));
+                    });
                     
-                    $sheet->row(1, [
-                        $info
-                    ]);
-                    $sheet->row(2, [
-                        'REPORTE PRODUCCION POR AREAS'
-                    ]);
-                    $sheet->row(3, [
-                        'DEL: '.\AppHelper::instance()->getHumanDate($fi).' AL '.\AppHelper::instance()->getHumanDate($ff)
-                    ]);
-                    $sheet->row(4, [
-                        'ACTUALIZADO: '.date('d-m-Y h:i a', strtotime("now"))
-                    ]);
-                    $sheet->row(5, [
-                       'REPORTE DE FUNDAS'
-                    ]);
-                    $sheet->row(6, [
-                        'Fecha','Ordenes en Planeación','Preparado Entrega','Anaquel Corte','Corte de Piel','Inspección de Corte','Pegado de Costura','Anaquel Costura','Costura Recta','Armado de Costura','Pespunte o Doble','Terminado de Costura','Inspeccionar Costura','Series Incompletas', 'Pegado de Delcrón', 'Llenado de Cojin', 'Acojinado','Fundas Terminadas','Kitting','Enfundado Tapiz','Tapizar','Armado de Tapiz','Empaque','Inspeccion Final'
-                    ]);
-                    //Datos     
+                    /*
+                    INICIA REPORTE DE FUNDAS
+                    */
                     $fila = 7;
                     foreach ($data as $rep) {
                         $sheet->row(
@@ -783,20 +775,45 @@ class Reportes_ProduccionController extends Controller
                         'SUMA DE FUNDAS','=SUM(B7:B'.$count.')','=SUM(C7:C'.$count.')','=SUM(D7:D'.$count.')','=SUM(E7:E'.$count.')','=SUM(F7:F'.$count.')',
                         '=SUM(G7:G'.$count.')','=SUM(H7:H'.$count.')','=SUM(I7:I'.$count.')','=SUM(J7:J'.$count.')','=SUM(K7:K'.$count.')','=SUM(L7:L'.$count.')',
                         '=SUM(M7:M'.$count.')','=SUM(N7:N'.$count.')','=SUM(O7:O'.$count.')','=SUM(P7:P'.$count.')','=SUM(Q7:Q'.$count.')','=SUM(R7:R'.$count.')',
-                        '=SUM(S7:S'.$count.')','=SUM(T7:T'.$count.')','=SUM(U7:U'.$count.')','=SUM(V7:V'.$count.')','=SUM(W7:W'.$count.')','=SUM(X7:X'.$count.')' ]);   
-                 if (strtotime($ff) == strtotime(date("Y-m-d"))){             
-                    $sheet->row($fila++,
-                        \AppHelper::instance()->rebuiltArrayString('INVENTARIO', $data2, 'SVS')
-                    );
+                        '=SUM(S7:S'.$count.')','=SUM(T7:T'.$count.')','=SUM(U7:U'.$count.')','=SUM(V7:V'.$count.')','=SUM(W7:W'.$count.')','=SUM(X7:X'.$count.')' ]);
+                   
+                    $sheet->cell('A7:A'.($count+1), function ($cells) { 
+                        $cells
+                        ->setFontColor('#ffffff')
+                        ->setBackground('#333333');
+                    });
+                    $sheet->cell('B'.($count + 1).':X'.($count + 1), function ($cells) { 
+                        $cells
+                            ->setFontColor('#ffffff')
+                            ->setBackground('#78866B');
+                    });
+                        if (strtotime($ff) == strtotime(date("Y-m-d"))){             
+                            $sheet->row($fila++,
+                                \AppHelper::instance()->rebuiltArrayString('INVENTARIO', $data2, 'SVS')
+                            );
+                            $sheet->cell('A'.($fila - 1), function ($cells) { 
+                                $cells
+                                    ->setFontColor('#ffffff')
+                                    ->setBackground('#333333');
+                            });
+                            $sheet->cell('B' . ($fila - 1) . ':X' . ($fila - 1), function ($cells) { 
+                                $cells
+                                    ->setFontColor('#ffffff')
+                                    ->setBackground('#2352A0');
+                            });
                   }
+                  /*
+                  INICIA REPORTE DE CASCO
+                  */
                     $fila++;
                     $sheet->row($fila++, [
-                        'REPORTE DE CASCOS'
+                        'REPORTE DE CASCOS', 'Planeación',	'Habilitado',	'Armado',	'Tapado',	'Pegado',	'Inspección Casco',
                     ]);
-                    $sheet->row($fila++, [
-                        'Fecha', 'Planeación',	'Habilitado',	'Armado',	'Tapado',	'Pegado',	'Inspección Casco',
-                    ]);
-                    
+                    $sheet->cell('A' . ($fila - 1) . ':G' . ($fila - 1), function ($cells) {
+                        $cells
+                            ->setFontColor('#ffffff')
+                            ->setBackground('#333333');
+                    });
                     $fila_ini = $fila;
                     foreach ($data3 as $rep) {
                         $sheet->row(
@@ -813,22 +830,45 @@ class Reportes_ProduccionController extends Controller
                     $sheet->row($fila++, [
                         'SUMA DE CASCOS','=SUM(B'.$fila_ini.':B'.$count.')','=SUM(C'.$fila_ini.':C'.$count.')','=SUM(D'.$fila_ini.':D'.$count.')','=SUM(E'.$fila_ini.':E'.$count.')','=SUM(F'.$fila_ini.':F'.$count.')',
                         '=SUM(G'.$fila_ini.':G'.$count.')',]);
+                    $sheet->cell( 'A' . ($fila_ini) . ':A' . ($count + 1), function ($cells) {
+                        $cells
+                            ->setFontColor('#ffffff')
+                            ->setBackground('#333333');
+                    });
+                    $sheet->cell('B' . ($count + 1) . ':G' . ($count + 1), function ($cells) {
+                        $cells
+                            ->setFontColor('#ffffff')
+                            ->setBackground('#78866B');
+                    });
+
                         if (strtotime($ff) == strtotime(date("Y-m-d"))){ 
                             foreach ($data7 as $rep) {            
                                     $sheet->row($fila++,                                    
                                     ['INVENTARIO', $rep->P400, $rep->H403, $rep->A406, $rep->T409, $rep->PR415, $rep->I418]                                    
                                     );
                                 }
+                        $sheet->cell('A' . ($fila - 1), function ($cells) {
+                            $cells
+                                ->setFontColor('#ffffff')
+                                ->setBackground('#333333');
+                        });
+                        $sheet->cell('B' . ($fila - 1) . ':G' . ($fila - 1), function ($cells) {
+                            $cells
+                                ->setFontColor('#ffffff')
+                                ->setBackground('#2352A0');
+                        });
                           }
                         $fila++;
+                   
                     $sheet->row($fila++, [
-                        'MOVIMIENTOS DE CASCOS'
-                    ]);    
-                    $sheet->row($fila++, [
-                        'Fecha', 'Aduana Carpinteria',	'Almacén',	'Camión',	'Kitting',	'Tapiz',	'Ajuste',
+                        'MOVIMIENTOS DE CASCOS', 'Aduana Carpinteria',	'Almacén',	'Camión',	'Kitting',	'Tapiz',	'Ajuste',
                     ]);
+                    $sheet->cell('A' . ($fila - 1) . ':G' . ($fila - 1), function ($cells) {
+                        $cells
+                            ->setFontColor('#ffffff')
+                            ->setBackground('#333333');
+                    });
                     $fila_ini2 = $fila;
-                  
                     foreach ($data4 as $rep) {
                         $sheet->row(
                             $fila,
@@ -845,7 +885,16 @@ class Reportes_ProduccionController extends Controller
                     $sheet->row($fila++, [
                         'SUMA DE CASCOS','=SUM(B'.$fila_ini2.':B'.$count2.')','=SUM(C'.$fila_ini2.':C'.$count2.')','=SUM(D'.$fila_ini2.':D'.$count2.')','=SUM(E'.$fila_ini2.':E'.$count2.')', '=SUM(F'.$fila_ini2.':F'.$count2.')',
                         '=SUM(G'.$fila_ini2.':G'.$count2.')',]);
-                    
+                    $sheet->cell('A' . ($fila_ini2) . ':A' . ($count2 + 1), function ($cells) {
+                        $cells
+                            ->setFontColor('#ffffff')
+                            ->setBackground('#333333');
+                    });
+                    $sheet->cell('B' . ($count2 + 1) . ':G' . ($count2 + 1), function ($cells) {
+                        $cells
+                            ->setFontColor('#ffffff')
+                            ->setBackground('#78866B');
+                    });
                  if (strtotime($ff) == strtotime(date("Y-m-d"))){                    
                     foreach ($data5 as $rep) {
                         $sheet->row(
@@ -857,14 +906,26 @@ class Reportes_ProduccionController extends Controller
                             ]
                         );
                         $fila++;
-                    }  
+                    }
+                        $sheet->cell('A' . ($fila - 1), function ($cells) {
+                            $cells
+                                ->setFontColor('#ffffff')
+                                ->setBackground('#333333');
+                        });
+                        $sheet->cell('B' . ($fila - 1) . ':G' . ($fila - 1), function ($cells) {
+                            $cells
+                                ->setFontColor('#ffffff')
+                                ->setBackground('#2352A0');
+                        });  
                 }
                 });
-                $from = "A1"; // or any value
-                $to = "X6"; // or any value
-                $excel->getActiveSheet()->getStyle("$from:$to")->getFont()->setBold( true );                
+               // $from = "A1"; // or any value
+               // $to = "X6"; // or any value
+               // $excel->getActiveSheet()->getStyle("$from:$to")->getFont()->setBold( true );                
                // $excel->getActiveSheet()->setAutoFilter('A5:V5');
-            })->export('xlsx');
+            })
+                ->setFilename('SIZ Resumen de Producción por Areas')
+                ->export('xlsx');
             }else {
                 return redirect()->route('auth/login');
             }
@@ -940,7 +1001,7 @@ class Reportes_ProduccionController extends Controller
         }         
         $pdf = \PDF::loadView('Mod01_Produccion.ReporteBackOrderCascoPDF', compact('data', 'totales_pzas', 'totales_vs'));
         $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
-        return $pdf->stream('Siz_Reporte_BackOrderCasco ' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
+        return $pdf->stream('Siz_Reporte_BackOrderCasco ' . ' - ' .date("d/m/Y") . '.Pdf');
         }else {
             return redirect()->route('auth/login');
         }
