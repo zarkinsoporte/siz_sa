@@ -561,7 +561,16 @@ class Reportes_ProduccionController extends Controller
         $data = json_decode(stripslashes(Session::get('miarr')));
         Excel::load($path, function($excel) use($data){
                 $excel->sheet('B.O.', function($sheet) use($data){
-                $index = 6;    
+                
+                $sheet->cell('A4', function ($cell) {
+                    // manipulate the cell
+                    $cell->setValue(\AppHelper::instance()->getHumanDate( date("Y-m-d H:i:s")));
+                });
+                $sheet->cell('N4', function ($cell) {
+                    // manipulate the cell
+                    $cell->setValue( date("H:i:s"));
+                });
+                    $index = 6;    
                 foreach($data as $row) {
                     $sheet->row($index, [
                     $row->OP, $row->Pedido, $row->FechaPedido, $row->OC, $row->D_PROC, $row->NO_SERIE, $row->CLIENTE, $row->codigo1, $row->codigo3, $row->Descripcion, $row->Cant, $row->VSind, $row->VS, $row->Funda, $row->DEstacion, $row->U_Grupo, $row->Secue, $row->SecOT, $row->METAL, $row->SEMANA2, $row->fentrega, $row->fechaentregapedido, $row->SEMANA3, $row->u_fproduccion, $row->Prioridad, $row->Desv, $row->Comments, $row->U_Especial, $row->Modelo
@@ -571,7 +580,7 @@ class Reportes_ProduccionController extends Controller
             });
         })
         ->setFilename('SIZ Back Order Programado SALOTTO')
-        ->export('xlsx');  
+        ->export('xlsx');
     }
     public function reporteProdxAreas(){
         if (Auth::check()) {
