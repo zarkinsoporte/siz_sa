@@ -430,3 +430,11 @@ document.onkeyup = function(e) {
   }
  
 </script>
+<script>
+    document.onkeyup = function(e) {
+   if (e.shiftKey && e.which == 112) {
+    window.open("ayudas_pdf/AyM01_26.pdf","_blank");
+  }
+  }
+
+</script>

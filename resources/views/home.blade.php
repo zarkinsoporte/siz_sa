@@ -2,12 +2,12 @@
 <style>
         td {
             font-family: 'Helvetica';
-            font-size: 70%;
+            font-size: 12px;
         }
 
         th {
             font-family: 'Helvetica';
-            font-size: 90%;
+            font-size: 12px;
         }
     </style>
 @section('content')
