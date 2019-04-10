@@ -632,7 +632,7 @@ class Reportes_ProduccionController extends Controller
 			 from [@CP_LOGOF] inner join OWOR OP on [@CP_LOGOF].U_DocEntry = OP.DocEntry inner join OITM A3 on OP.ItemCode=A3.ItemCode inner join [@PL_RUTAS] RUT on RUT.Code=[@CP_LOGOF].U_CT where  CAST([@CP_LOGOF].U_FechaHora AS DATE) 
              BETWEEN '".date('d-m-Y', strtotime(Input::get('FechIn'))).' 00:00'."' and '".date('d-m-Y', strtotime(Input::get('FechaFa'))).' 23:59:59'."' ) BIHR Group by BIHR.Fecha order by BIHR.Fecha
             "));
-            $consulta4 =  DB::select(DB::raw("
+            $consulta4 =  DB::select(DB::raw( "
             Select TRA_CAS.FECHA AS Fecha, 
             SUM(TRA_CAS.ENT_CARP) AS S_CARP, 
             SUM(TRA_CAS.ENT_TRAS) AS S_TRAS, 
@@ -641,9 +641,9 @@ class Reportes_ProduccionController extends Controller
 			(Select CASE WHEN SUM(OITM.U_VS) IS NULL THEN 0 ELSE SUM(OITM.U_VS) END 
             from OINM 
             inner join OITM on OINM.ItemCode=OITM.ItemCode  
-            where U_TipoMat = 'CA'
+            where U_TipoMat = 'CA' and OINM.Warehouse = 'APG-ST'
             and (OINM.JrnlMemo like 'Emis%' or  OINM.JrnlMemo like 'Reci%') 
-             and OINM.CreateDate = TRA_CAS.FECHA) as Consumo,
+             and CAST (OINM.CreateDate AS DATE) = TRA_CAS.FECHA) as Consumo,
             SUM(TRA_CAS.VST) AS S_VST 
             From (Select    CAST(OWTR.DocDate AS DATE) AS FECHA, 
 			OWTR.DocEntry AS T_NUM, WTR1.ItemCode AS CODE, OITM.ItemName AS DESCRIPCION,

@@ -84,8 +84,8 @@ $sumattvs = 0;
 @if($index == 0)
 <?php
     $cliente = $val->CardName; 
-    $sumacant=$val->Cantidad;
-    $sumatvs=$val->TVS; 
+    $sumacant = $val->Cantidad;
+    $sumatvs = $val->TVS; 
 ?>
 <h5>{{$cliente}}</h5>
      <table id="usuarios" border="1px" class="table table-striped">
