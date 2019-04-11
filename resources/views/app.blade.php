@@ -94,6 +94,14 @@ https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css
     background-color: #514d4a;
     color: white;
 }
+.zrk-gris-claro{
+    background-color: #eeeeee;
+    color: black;
+}
+.zrk-silver-w{
+    background-color: #656565;
+    color: white;
+}
 </style>
 
 
