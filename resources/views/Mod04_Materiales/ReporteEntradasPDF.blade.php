@@ -142,6 +142,7 @@
                         <?php
                                 $DocN = $rep->DocNum; 
                                 $totalEntrada = $rep->LineTotal + $rep->VatSum;
+                                $moneda = $rep->DocCur;
                             ?>
                             <thead class="table-condensed">
                                 <tr>
@@ -218,7 +219,7 @@
                                 @elseif($DocN == $rep->DocNum)
                                 <?php
                 $totalEntrada += $rep->LineTotal + $rep->VatSum;
-                $moneda = $rep->DocCur;
+                
             ?>
                                     <tr>
                                         <td style="width:60px" class="zrk-gris-claro" scope="row">
@@ -252,6 +253,7 @@
                                     <?php
             $DocN = $rep->DocNum;
             $totalEntrada = $rep->LineTotal + $rep->VatSum;
+            $moneda = $rep->DocCur;
         ?>
 
                                         <tr>
