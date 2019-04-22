@@ -1,15 +1,4 @@
 @extends('app')
-<style>
-        td {
-            font-family: 'Helvetica';
-            font-size: 12px;
-        }
-
-        th {
-            font-family: 'Helvetica';
-            font-size: 12px;
-        }
-    </style>
 @section('content')
 
 <?php
@@ -128,6 +117,35 @@ $index = 0;
     </nav>
 
     <div id="page-wrapper2">
+        <style>
+            td {
+                font-family: 'Helvetica';
+                font-size: 12px;
+            }
+
+            th {
+                font-family: 'Helvetica';
+                font-size: 12px;
+            }
+            .btn-group>.btn {
+                float: none;
+            }
+            .btn {
+                border-radius: 4px;
+            }
+            .btn-group>.btn:not(:first-child):not(:last-child):not(.dropdown-toggle) {
+                border-radius: 4px;
+            }
+            .btn-group>.btn:first-child:not(:last-child):not(.dropdown-toggle) {
+                border-top-right-radius: 4px;
+                border-bottom-right-radius: 4px;
+            }
+            .btn-group>.btn:last-child:not(:first-child),
+            .btn-group>.dropdown-toggle:not(:first-child) {
+                border-top-left-radius: 4px;
+                border-bottom-left-radius: 4px;
+            }
+        </style>
         @yield('homecontent')
 
         <!-- /.container-fluid -->
