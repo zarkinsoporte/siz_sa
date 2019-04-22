@@ -197,17 +197,18 @@ public function entradasPDF()
     {
         $path = public_path() . '/assets/plantillas_excel/Mod_01/SIZ_entradas.xlsx';
         $data = json_decode(Session::get('entradas'));
-        
-       
-        
-        Excel::load($path, function ($excel) use ($data) {
-            $excel->sheet('MP', function ($sheet) use ($data) {
+        $fechas_entradas = Session::get('fechas_entradas');
+        $fecha = 'Del: '. \AppHelper::instance()->getHumanDate(array_get($fechas_entradas, 'fi')).' al: '.
+                \AppHelper::instance()->getHumanDate(array_get($fechas_entradas, 'ff'));
+
+                Excel::load($path, function ($excel) use ($data, $fecha) {
+            $excel->sheet('MP', function ($sheet) use ($data, $fecha) {
 
                 $sheet->cell('C4', function ($cell) {
-                    $cell->setValue(\AppHelper::instance()->getHumanDate(date("Y-m-d H:i:s")));
+                    $cell->setValue(\AppHelper::instance()->getHumanDate(date("Y-m-d H:i:s")).' '. date("H:i:s"));
                 });
-                $sheet->cell('C5', function ($cell) {
-                    $cell->setValue(date("H:i:s"));
+                $sheet->cell('C5', function ($cell) use ($fecha) {
+                    $cell->setValue($fecha);
                 });
                 $index = 7;
                 foreach ($data as $row) {

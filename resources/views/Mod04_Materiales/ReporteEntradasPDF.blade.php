@@ -154,7 +154,7 @@
                                 <tr>
                                     <th style="width:60px" class="zrk-gris-claro">Código</th>
                                     <th style="width:450px" class="zrk-gris-claro" colspan="2">Descripción</th>
-                                    <th  class="zrk-gris-claro">Cantidad</th>
+                                    <th class="zrk-gris-claro">Cantidad</th>
                                     <th style="width:70px" class="zrk-gris-claro">Precio</th>
                                     <th style="width:70px" class="zrk-gris-claro">Monto</th>
                                     <th style="width:70px" class="zrk-gris-claro">IVA</th>
