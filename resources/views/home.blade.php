@@ -122,7 +122,6 @@ $index = 0;
                 font-family: 'Helvetica';
                 font-size: 12px;
             }
-
             th {
                 font-family: 'Helvetica';
                 font-size: 12px;
