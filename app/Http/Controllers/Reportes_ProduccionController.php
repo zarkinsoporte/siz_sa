@@ -633,26 +633,21 @@ class Reportes_ProduccionController extends Controller
              BETWEEN '".date('d-m-Y', strtotime(Input::get('FechIn'))).' 00:00'."' and '".date('d-m-Y', strtotime(Input::get('FechaFa'))).' 23:59:59'."' ) BIHR Group by BIHR.Fecha order by BIHR.Fecha
             "));
             $consulta4 =  DB::select(DB::raw( "
-            Select TRA_CAS.FECHA AS Fecha, 
-            SUM(TRA_CAS.ENT_CARP) AS S_CARP, 
-            SUM(TRA_CAS.ENT_TRAS) AS S_TRAS, 
-            SUM(TRA_CAS.ENT_KITT) AS S_KITT, 
-            SUM(TRA_CAS.ENT_TAPI) AS S_TAPI, 
-			(Select CASE WHEN SUM(OITM.U_VS) IS NULL THEN 0 ELSE SUM(OITM.U_VS) END 
-            from OINM 
-            inner join OITM on OINM.ItemCode=OITM.ItemCode  
-            where U_TipoMat = 'CA' and OINM.Warehouse = 'APG-ST'
-            and (OINM.JrnlMemo like 'Emis%' or  OINM.JrnlMemo like 'Reci%') 
-             and CAST (OINM.CreateDate AS DATE) = TRA_CAS.FECHA) as Consumo,
-            SUM(TRA_CAS.VST) AS S_VST 
-            From (Select    CAST(OWTR.DocDate AS DATE) AS FECHA, 
-			OWTR.DocEntry AS T_NUM, WTR1.ItemCode AS CODE, OITM.ItemName AS DESCRIPCION,
-			 OITM.U_TipoMat AS TIPO, WTR1.Quantity AS CANT, OITM.U_VS AS VS, 
-			 (WTR1.Quantity * OITM.U_VS) AS VST, 
-			 OWTR.Filler AS ALM_SALE, WTR1.WhsCode AS ALM_ENTR, 
-			 OUSR.U_NAME AS REALIZO, CASE When OWTR.Filler = 'APT-PA' and  WTR1.WhsCode = 'APG-PA' then (WTR1.Quantity * OITM.U_VS) else 0 end AS ENT_CARP, CASE When OWTR.Filler = 'APG-PA' and  WTR1.WhsCode = 'AMP-TR' then (WTR1.Quantity * OITM.U_VS) else 0 end AS ENT_TRAS, 
-            CASE When OWTR.Filler = 'AMP-TR' and  WTR1.WhsCode = 'APP-ST' then (WTR1.Quantity * OITM.U_VS) else 0 end AS ENT_KITT, CASE When OWTR.Filler = 'APP-ST' and  WTR1.WhsCode = 'APG-ST' then (WTR1.Quantity * OITM.U_VS) else 0 end AS ENT_TAPI from OWTR Inner Join WTR1 on OWTR.DocEntry = WTR1.DocEntry Inner Join OITM on WTR1.ItemCode = OITM.ItemCode Inner join OUSR on OWTR.UserSign=OUSR.USERID  Where  OITM.U_TipoMat = 'CA' and CAST(OWTR.DocDate AS DATE) 
-            BETWEEN '".date('d-m-Y', strtotime(Input::get('FechIn'))).' 00:00'."' and '".date('d-m-Y', strtotime(Input::get('FechaFa'))).' 23:59:59'."' ) TRA_CAS Group by TRA_CAS.FECHA Order by TRA_CAS.FECHA
+           Select   CASE WHEN TRA_CAS.FECHA IS NULL THEN c.FECHA_CONSUMO ELSE TRA_CAS.FECHA END AS Fecha,
+                    CASE WHEN SUM(TRA_CAS.ENT_CARP) IS NULL THEN 0 ELSE SUM(TRA_CAS.ENT_CARP) END AS S_CARP, 
+                    CASE WHEN SUM(TRA_CAS.ENT_TRAS) IS NULL THEN 0 ELSE SUM(TRA_CAS.ENT_TRAS) END AS S_TRAS, 
+                    CASE WHEN SUM(TRA_CAS.ENT_KITT) IS NULL THEN 0 ELSE SUM(TRA_CAS.ENT_KITT) END AS S_KITT, 
+                    CASE WHEN SUM(TRA_CAS.ENT_TAPI) IS NULL THEN 0 ELSE SUM(TRA_CAS.ENT_TAPI) END AS S_TAPI, 
+                    CASE WHEN c.Consumo IS NULL THEN 0 ELSE c.Consumo END AS Consumo,
+                    CASE WHEN SUM(TRA_CAS.VST) IS NULL THEN 0 ELSE SUM(TRA_CAS.VST) END AS S_VST 
+            From (Select    CAST(OWTR.DocDate AS DATE) AS FECHA, OWTR.DocEntry AS T_NUM, WTR1.ItemCode AS CODE, OITM.ItemName AS DESCRIPCION, OITM.U_TipoMat AS TIPO, WTR1.Quantity AS CANT, OITM.U_VS AS VS, (WTR1.Quantity * OITM.U_VS) AS VST, OWTR.Filler AS ALM_SALE, WTR1.WhsCode AS ALM_ENTR, OUSR.U_NAME AS REALIZO, CASE When OWTR.Filler = 'APT-PA' and  WTR1.WhsCode = 'APG-PA' then (WTR1.Quantity * OITM.U_VS) else 0 end AS ENT_CARP, CASE When OWTR.Filler = 'APG-PA' and  WTR1.WhsCode = 'AMP-TR' then (WTR1.Quantity * OITM.U_VS) else 0 end AS ENT_TRAS, CASE When OWTR.Filler = 'AMP-TR' and  WTR1.WhsCode = 'APP-ST' then (WTR1.Quantity * OITM.U_VS) else 0 end AS ENT_KITT, CASE When OWTR.Filler = 'APP-ST' and  WTR1.WhsCode = 'APG-ST' then (WTR1.Quantity * OITM.U_VS) else 0 end AS ENT_TAPI from OWTR Inner Join WTR1 on OWTR.DocEntry = WTR1.DocEntry Inner Join OITM on WTR1.ItemCode = OITM.ItemCode Inner join OUSR on OWTR.UserSign=OUSR.USERID  Where  OITM.U_TipoMat = 'CA' and CAST(OWTR.DocDate AS DATE) 
+            BETWEEN '" . date('d-m-Y', strtotime(Input::get('FechIn'))) . ' 00:00' . "' and '" . date('d-m-Y', strtotime(Input::get('FechaFa'))) . ' 23:59:59' . "' 
+             group by OWTR.DocDate, OWTR.DocEntry, WTR1.ItemCode, OITM.ItemName ,OITM.U_TipoMat, WTR1.Quantity, OITM.U_VS, OWTR.Filler, WTR1.WhsCode, OUSR.U_NAME) TRA_CAS
+            FULL OUTER JOIN 
+            (Select CASE WHEN SUM(OITM.U_VS) IS NULL THEN 0 ELSE SUM(OITM.U_VS) END Consumo, CAST(DocDate AS DATE) AS FECHA_CONSUMO from OINM inner join OITM on OINM.ItemCode=OITM.ItemCode where U_TipoMat = 'CA' and OINM.Warehouse = 'APG-ST' and (OINM.JrnlMemo like 'Emis%' or  OINM.JrnlMemo like 'Reci%') and CAST(DocDate AS DATE) 
+            BETWEEN '" . date('d-m-Y', strtotime(Input::get('FechIn'))) . ' 00:00' . "' and '" . date('d-m-Y', strtotime(Input::get('FechaFa'))) . ' 23:59:59' . "' 
+             group by DocDate) c on c.FECHA_CONSUMO = TRA_CAS.fecha
+            group by TRA_CAS.FECHA, c.FECHA_CONSUMO, c.Consumo Order by FECHA
             "));
             if (strtotime(Input::get('FechaFa')) == strtotime(date("Y-m-d"))){
                 $consulta2 = DB::select(DB::raw("           

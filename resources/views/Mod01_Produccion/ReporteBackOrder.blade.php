@@ -1,21 +1,27 @@
 @extends('home') 
 @section('homecontent')
 <style>
-th { font-size: 12px; }
-td { font-size: 11px; }
-th, td { white-space: nowrap; }
-div.container {
-	min-width: 980px;
-	margin: 0 auto;
-}
-div.ColVis {
-        float: left;
+    th { font-size: 12px; }
+    td { font-size: 11px; }
+    th, td { white-space: nowrap; }
+    div.container {
+        min-width: 980px;
+        margin: 0 auto;
+    }
+    th:first-child {
+        position: -webkit-sticky;
+        position: sticky;
+        left: 0;
+        z-index: 5;
+    }
+    table.dataTable thead .sorting_asc{
+        position: sticky;
     }
     .DTFC_LeftBodyWrapper{
         margin-top: 82px;
     }
     .DTFC_LeftHeadWrapper {
-    display:none;
+        display:none;
     }
 </style>
 
@@ -40,10 +46,10 @@ div.ColVis {
     <!-- /.row -->
     <div class="row">
         <div class="container">
-            <table  id="tbackorder" class="display">
+            <table  id="tbackorder" class="table-scroll display">
                 <thead >
                     <tr>
-                        <th>OP</th>
+                        <th class="estatico"><i>OP</i></label></th>
                         <th>Pedido</th>
                         <th>F.pedido</th>
                         <th>OC</th>
@@ -73,6 +79,7 @@ div.ColVis {
                         <th>Especiales</th>
                         <th>Nom Modelo</th>
                     </tr>
+                   
                 </thead>
             </table>
         </div>
@@ -99,8 +106,11 @@ $('#tbackorder thead tr:eq(1) th').each( function (i) {
                     .draw();
             } 
                 
-    } );
+    } );    
 } );
+
+
+
 var meses = new Array ("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
 var diasSemana = new Array("Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado");
 var f=new Date();
@@ -213,7 +223,7 @@ var table = $('#tbackorder').DataTable({
     scrollX:        true,
     scrollCollapse: true,
     paging:         true,
-    fixedColumns:   true,
+   fixedColumns: true,
     processing: true,
     
     deferRender:    true,
@@ -279,10 +289,14 @@ var table = $('#tbackorder').DataTable({
     //revision
   
 });
+
+     
 @endsection
 
 <script>
 document.onkeyup = function(e) {
+  
+
    if (e.shiftKey && e.which == 112) {
     window.open("ayudas_pdf/AyM01_24.pdf","_blank");
   }

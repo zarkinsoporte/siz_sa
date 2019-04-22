@@ -229,7 +229,9 @@ Route::get('home/PedidosCsvPDF', 'Mod03_ComprasController@PedidosCsvPDF');
 Route::get('home/ENTRADAS ALMACEN', 'Reportes_ProduccionController@showModal');
 Route::post('home/reporte/ENTRADAS ALMACEN', 'Mod04_MaterialesController@reporteEntradasAlmacen');
 Route::get('home/reporte/ENTRADAS ALMACEN', 'Mod04_MaterialesController@reporteEntradasAlmacenPDF');
-Route::get('home/reporte/entradasalmacenXLS', 'Mod04_MaterialesController@entradasalmacenXLS');
+Route::get('home/reporte/entradasXLS', 'Mod04_MaterialesController@entradasXLS');
+Route::get('datatables.showentradasmp', 'Mod04_MaterialesController@DataShowEntradasMP')->name('datatables.showentradasmp');
+Route::get('home/reporte/entradasPDF', 'Mod04_MaterialesController@entradasPDF');
 ///Ruta Ayudas
 Route::get('home/ayudas_pdf/{PdfName}', 'HomeController@showPdf');
 Route::get('home/{r0}/ayudas_pdf/{PdfName}', 'HomeController@showPdf2');

@@ -1,31 +1,50 @@
 @extends('home') 
 @section('homecontent')
-
 <style>
-    th, td{
-        font-size: 12px;
+    th { font-size: 12px; }
+    td { font-size: 11px; }
+    th, td { white-space: nowrap; }
+    div.container {
+        min-width: 980px;
+        margin: 0 auto;
     }
-    
-    .table{
-        width: auto;
-        margin-bottom:0px;
+    th:first-child {
+        position: -webkit-sticky;
+        position: sticky;
+        left: 0;
+        z-index: 4;
     }
-    .detalle {
-     margin-left: 3%;
+    table.dataTable thead .sorting_asc{
+        position: sticky;
     }
-    .table > thead > tr > th, 
-    .table > tbody > tr > th, 
-    .table > tfoot > tr > th, 
-    .table > thead > tr > td, 
-    .table > tbody > tr > td,
-    .table > tfoot > tr > td { 
-        padding-bottom: 2px; padding-top: 2px; padding-left: 4px; padding-right: 0px;
+    .DTFC_LeftBodyWrapper{
+        margin-top: 83px;
     }
-    .total{
-        text-align: right; 
-        padding-right:4px;
+    .DTFC_LeftHeadWrapper {
+        display:none;
     }
-    
+    .btn-group {//cuando es datatables y custom buttons
+        margin-bottom: 0px; 
+      
+    }
+    .btn-group>.btn {
+        float: none;
+    }
+    .btn {
+        border-radius: 4px;
+    }
+    .btn-group>.btn:not(:first-child):not(:last-child):not(.dropdown-toggle) {
+        border-radius: 4px;
+    }
+    .btn-group>.btn:first-child:not(:last-child):not(.dropdown-toggle) {
+        border-top-right-radius: 4px;
+        border-bottom-right-radius: 4px;
+    }
+    .btn-group>.btn:last-child:not(:first-child),
+    .btn-group>.dropdown-toggle:not(:first-child) {
+        border-top-left-radius: 4px;
+        border-bottom-left-radius: 4px;
+    }
 </style>
 <div class="container">
 
@@ -36,221 +55,272 @@
                 Reporte de Materia Prima
                 <small>Entradas / Devoluciones / Notas Crédito</small>
             </h3>
-            <h4><b>Del:</b> {{\AppHelper::instance()->getHumanDate($fi)}} <b>al:</b> {{\AppHelper::instance()->getHumanDate($ff)}}</h4>
-
-            <!-- <h5>Fecha & hora: {{date('d-m-Y h:i a', strtotime("now"))}}</h5> -->
+            <h5><b>Del:</b> {{\AppHelper::instance()->getHumanDate($fi)}} <b>al:</b> {{\AppHelper::instance()->getHumanDate($ff)}}</h5>
+            <h5>Actualizado: {{date('d-m-Y h:i a', strtotime("now"))}}</h5>
+            <!-- <h5>Fecha & hora: {{\AppHelper::instance()->getHumanDate(date('d-m-Y h:i a', strtotime("now")))}}</h5> -->
         </div>
     </div>
-    <div class="row">
-        <div class="col-md-12">
-            <p align="right">
-                <a href="../reporte/ENTRADAS ALMACEN/" target="_blank" class="btn btn-danger"><i class="fa fa-file-pdf-o"></i> Reporte PDF</a>
-                <a class="btn btn-success" href="entradasalmacenXLS"><i class="fa fa-file-excel-o"></i> Reporte XLS</a>
-
-            </p>
-        </div>
-    </div>
+    
     <!-- /.row -->
     <div class="row">
-        <div class="col-md-12">
-            <table class="table table-striped" style="margin-bottom:0px">
-            @if(count($data)>0)
-            
-                <h4>Entradas (Lerma)</h4>
-                <?php
-                    $index = 0;
-                    $totalEntrada = 0;
-                    $moneda = 'MXP';
-                     
-                ?>
-                    @foreach ($data as $rep) @if($index == 0)
-                    <?php
-                        $DocN = $rep->DocNum; 
-                        $totalEntrada = $rep->LineTotal + $rep->VatSum;
-                    ?>
+        <div class="col-md-12" style="margin-top: 0px;">
+            <table id="tentradas" class="table table-striped">
                         <thead class="table-condensed">
                             <tr>
-                                <th style="width:110px" class="zrk-gris" scope="col">Entrada</th>
-                                <th style="width:120px" class="zrk-gris" scope="col">Fecha</th>
-                                <th style="width:110px" class="zrk-gris" scope="col">Cliente</th>
-                                <th style="width:457px" class="zrk-gris" scope="col" colspan="4">Razón Social</th>
-                                <th style="width:120px" class="zrk-gris" scope="col">Num. Factura</th>
+                                <th># Documento</th>
+                                <th>Documento</th>
+                                <th>Fecha</th>
+                                <th>Cliente</th>
+                                <th>Razón Social</th>
+                                <th>Num. Factura</th>
 
-                            </tr>
-                             <tr>
-                                <th style="width:60px" class="zrk-gris-claro">Código</th>
-                                <th style="width:450px" class="zrk-gris-claro" colspan="2">Descripción</th>
-                                <th style="width:57px" class="zrk-gris-claro">Cantidad</th>
-                                <th style="width:70px" class="zrk-gris-claro">Precio</th>
-                                <th style="width:70px" class="zrk-gris-claro">Monto</th>
-                                <th style="width:70px" class="zrk-gris-claro">IVA</th>
-                                <th style="width:100px" class="zrk-gris-claro">Total</th>
-                        </tr>
-                        <tr><td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td></tr>
+                                <th>Código Art.</th>
+                                <th>Descripción</th>
+                                <th>Cantidad</th>
+                                <th>Precio</th>
+                                <th>Monto</th>
+                                <th>IVA</th>
+                                <th>Total</th>
+                                <th>Moneda</th>
+                            </tr> 
+                            <tfoot>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th>Total:</th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </tfoot>
                         </thead>
-                       
-                        <tbody>
-                            <tr>
-                                <td style="width:110px" class="zrk-silver-w" scope="row">
-                                    {{$rep->DocNum}}
-                                </td>
-                                <td style="width:120px" class="zrk-silver-w" scope="row">
-                                    {{date_format(date_create($rep->DocDate), 'd-m-Y')}}
-                                </td>
-                                <td style="width:110px" class="zrk-silver-w" scope="row">
-                                    {{$rep->CardCode}}
-                                </td>
-                                <td style="width:457px" class="zrk-silver-w" scope="row" colspan="4">
-                                    {{$rep->CardName}}
-                                </td>
-                                <td style="width:120px" class="zrk-silver-w" scope="row">
-                                    {{$rep->NumAtCard}}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="width:60px" class="zrk-gris-claro" scope="row">
-                                    {{$rep->ItemCode}}
-                                </td>
-                                <td style="width:450px" class="zrk-gris-claro" scope="row" colspan="2">
-                                    {{$rep->Dscription}}
-                                </td>
-                                <td style="width:57px" class="zrk-gris-claro" scope="row">
-                                    {{$rep->Quantity*$rep->NumPerMsr}}
-                                </td>
-                                <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                    ${{number_format($rep->Price,'2', '.',',')}}
-                                </td>
-                                <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                    ${{number_format($rep->LineTotal,'2', '.',',')}}
-                                </td>
-                                <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                    ${{number_format($rep->VatSum,'2', '.',',')}}
-                                </td>
-                                <td style="width:100px" class="zrk-gris-claro" scope="row">
-                                    ${{number_format($rep->LineTotal+$rep->VatSum,'2', '.',',')}} {{$rep->DocCur}}
-                                </td>
-                            </tr>
-                       
-                        
-    @elseif($DocN == $rep->DocNum)
-    <?php
-        $totalEntrada += $rep->LineTotal + $rep->VatSum;
-        $moneda = $rep->DocCur;
-    ?>
-                        <tr>
-                           <td style="width:60px" class="zrk-gris-claro" scope="row">
-                                {{$rep->ItemCode}}
-                            </td>
-                            <td style="width:450px" class="zrk-gris-claro" scope="row" colspan="2">
-                                {{$rep->Dscription}}
-                            </td>
-                            <td style="width:57px" class="zrk-gris-claro" scope="row">
-                                {{$rep->Quantity*$rep->NumPerMsr}}
-                            </td>
-                            <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                ${{number_format($rep->Price,'2', '.',',')}}
-                            </td>
-                            <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                ${{number_format($rep->LineTotal,'2', '.',',')}}
-                            </td>
-                            <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                ${{number_format($rep->VatSum,'2', '.',',')}}
-                            </td>
-                            <td style="width:100px" class="zrk-gris-claro" scope="row">
-                                ${{number_format($rep->LineTotal+$rep->VatSum,'2', '.',',')}} {{$rep->DocCur}}
-                            </td>
-                        </tr>
-@else
-<tr>
-    
-    <td colspan="7" class="total zrk-gris-claro">Total:</td>
-    <td class="zrk-gris-claro">${{number_format($totalEntrada,'2', '.',',')}} {{$moneda}}</td>
-</tr>
-<?php
-    $DocN = $rep->DocNum;
-    $totalEntrada = $rep->LineTotal + $rep->VatSum;
-?>
-         
-                    <tr>
-                        <td style="width:110px" class="zrk-silver-w" scope="row">
-                            {{$rep->DocNum}}
-                        </td>
-                        <td style="width:120px" class="zrk-silver-w" scope="row">
-                            {{date_format(date_create($rep->DocDate), 'd-m-Y')}}
-                        </td>
-                        <td style="width:110px" class="zrk-silver-w" scope="row">
-                            {{$rep->CardCode}}
-                        </td>
-                        <td style="width:457px" class="zrk-silver-w" scope="row" colspan="4">
-                            {{$rep->CardName}}
-                        </td>
-                        <td style="width:120px" class="zrk-silver-w" scope="row">
-                            {{$rep->NumAtCard}}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="width:60px" class="zrk-gris-claro" scope="row">
-                            {{$rep->ItemCode}}
-                        </td>
-                        <td style="width:450px" class="zrk-gris-claro" scope="row" colspan="2">
-                            {{$rep->Dscription}}
-                        </td>
-                        <td style="width:57px" class="zrk-gris-claro" scope="row">
-                            {{$rep->Quantity*$rep->NumPerMsr}}
-                        </td>
-                        <td style="width:70px" class="zrk-gris-claro" scope="row">
-                            ${{number_format($rep->Price,'2', '.',',')}}
-                        </td>
-                        <td style="width:70px" class="zrk-gris-claro" scope="row">
-                            ${{number_format($rep->LineTotal,'2', '.',',')}}
-                        </td>
-                        <td style="width:70px" class="zrk-gris-claro" scope="row">
-                            ${{number_format($rep->VatSum,'2', '.',',')}}
-                        </td>
-                        <td style="width:100px" class="zrk-gris-claro" scope="row">
-                            ${{number_format($rep->LineTotal+$rep->VatSum,'2', '.',',')}} {{$rep->DocCur}}
-                        </td>
-                    </tr>
-                        @endif 
-                        
-                        @if($index == count($data)-1)
-<tr>
-
-    <td colspan="7" class="total">Total:</td>
-    <td>${{number_format($totalEntrada,'2', '.',',')}} {{$moneda}}</td>
-</tr>
-                
-                @endif
-                <?php
-$index++;
-   ?>
-                    @endforeach @endif
+                        <tbody></tbody>
                     </table>
-            </div>
+        </div> <!-- /.col-md-12 -->
 
-        </div>
-
+    </div> <!-- /.row -->
+<input hidden value="{{$fi}}" id="fi" name="fi" />
+<input hidden value="{{$ff}}" id="ff" name="ff" />
     </div>
     <!-- /.container -->
 @endsection
  
 @section('homescript')
+$('#tentradas thead tr').clone(true).appendTo( '#tentradas thead' );
+
+$('#tentradas thead tr:eq(1) th').each( function (i) {
+    var title = $(this).text();
+    $(this).html( '<input style="color: black;"  type="text" placeholder="Filtro '+title+'" />' );
+   
+    $( 'input', this ).on( 'keyup change', function () {       
+            
+            if ( table.column(i).search() !== this.value ) {
+                table
+                    .column(i)
+                    .search(this.value, true, false)                    
+                    .draw();
+            } 
+                
+    } );
+} );
+var meses = new Array ("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
+var diasSemana = new Array("Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado");
+var f=new Date();
+var hours = f.getHours();
+var ampm = hours >= 12 ? 'pm' : 'am';
+var fecha = 'ACTUALIZADO: '+ diasSemana[f.getDay()] + ', ' + f.getDate() + ' de ' + meses[f.getMonth()] + ' del ' + f.getFullYear()+', A LAS '+hours+":"+f.getMinutes()+ ' ' + ampm; 
+var f = fecha.toUpperCase();
+
+var table = $('#tentradas').DataTable({
+    "order": [[ 1, "desc" ],[0, "asc"],[2, "asc"]],
+    dom: 'Bfrtip',
+    buttons:[],
+    orderCellsTop: true,    
+    scrollY:        "300px",
+    "pageLength": 50,
+    scrollX:        true,
+    scrollCollapse: true,
+    paging:         true,
+    fixedColumns:   true,
+    processing: true,
+    deferRender:    true,
+    ajax: {
+        url: '{!! route('datatables.showentradasmp') !!}',
+        data: function (d) {
+             d.fi = $('input[name=fi]').val(); 
+             d.ff = $('input[name=ff]').val();            
+        }              
+    },
+    columns: [        
+        // { data: 'action', name: 'action', orderable: false, searchable: false}
+        { data: 'DocNum', name:  'DocNum', orderable: true, searchable: true},
+        { data: 'TIPO'},
+        { data: 'DocDate', name: 'DocDate',
+        render: function(data){   
+            var d = new Date(data.split(' ')[0]);             
+            return moment(d).format("DD-MM-YYYY");
+        }},
+        { data: 'CardCode', name:  'CardCode'},
+        { data: 'CardName', name: 'CardName'},
+        { data: 'NumAtCard', name: 'NumAtCard'},
+        { data: 'ItemCode', name: 'ItemCode'},
+        { data: 'Dscription', name:  'Dscription'},
+        { data: 'Cant', name: 'Cant'},
+        { data: 'Price', name:  'Price',
+        render: function(data){
+            var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+            return val;
+        }},
+        { data: 'LineTotal', name:  'LineTotal',
+        render: function(data){
+            var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+            return val;
+        }},
+
+        { data: 'VatSum', name:  'VatSum',
+        render: function(data){
+            var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+            return val;
+        }},
+        { data: 'TotalConIva', name:  'TotalConIva',
+        render: function(data){
+            var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+            return val;
+        }},
+       { data: 'DocCur', name: 'DocCur'},
+    ],
+    buttons: [
+        {
+            text: '<i class="fa fa-columns" aria-hidden="true"></i> Columna',
+            className: "btn btn-primary",
+            extend: 'colvis',
+            postfixButtons: [                                  
+                {
+                    text: 'Restaurar columnas',
+                    extend: 'colvisRestore',     
+                }             
+                ]
+        },
+        {
+            text: '<i class="fa fa-copy" aria-hidden="true"></i> Copy', 
+            extend: 'copy',    
+            exportOptions: {
+                columns: ':visible',                
+            }             
+        },
+        {
+            text: '<i class="fa fa-file-excel-o"></i> Excel',
+            className: "btn-success",
+            action: function ( e, dt, node, config ) {                                
+                         var data=table.rows( { filter : 'applied'} ).data().toArray();               
+                         var json = JSON.stringify( data );
+                         $.ajax({
+                            type:'POST',
+                            url:'ajaxtosession/entradas',
+                            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},                            
+                            data: {
+                                "_token": "{{ csrf_token() }}",
+                                "arr": json
+                                },
+                                success:function(data){
+                                   window.location.href = 'entradasXLS';                                   
+                            }
+                         });
+                     }         
+        }, 
+        {
+            text: '<i class="fa fa-file-pdf-o"></i> Pdf',           
+            className: "btn-danger",            
+                    action: function ( e, dt, node, config ) {                                
+                         var data=table.rows( { filter : 'applied'} ).data().toArray();               
+                         var json = JSON.stringify( data );
+                         $.ajax({
+                            type:'POST',
+                            url:'ajaxtosession/entradas',
+                            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},                            
+                            data: {
+                                "_token": "{{ csrf_token() }}",
+                                "arr": json
+                                },
+                                success:function(data){
+                                    window.open('entradasPDF', '_blank')                                   
+                            }
+                         });
+                     }         
+        },
+       
+        {
+            text: '<i class="fa fa-print"></i> Imprimir',
+           
+            extend: 'print',
+            title: 'Reporte de Back Order Casco',
+            exportOptions: {
+                columns: ':visible',                
+            }
+        },
+       
+    ],
+    "language": {
+        "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json",
+        buttons: {
+            copyTitle: 'Copiar al portapapeles',
+            copyKeys: 'Presiona <i>ctrl</i> + <i>C</i> para copiar o la tecla <i>Esc</i> para continuar.',
+            copySuccess: {
+                _: '%d filas copiadas',
+                1: '1 fila copiada'
+            }
+        }
+    },
+    columnDefs: [
+    
+    ],   
+    "footerCallback": function ( row, data, start, end, display ) {
+        var api = this.api(), data;
+
+        // Remove the formatting to get integer data for summation
+        var intVal = function ( i ) {
+            return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                        i : 0;
+        };
+
+        // Total over this page for VS
+        pageTotal = api
+            .column( 12, { page: 'current'} )
+            .data()
+            .reduce( function (a, b) {
+                return intVal(a) + intVal(b);
+            }, 0 );
+
+        // Update footer for VS
+        //.toLocaleString("es-MX",{style:"currency", currency:"MXN"}) //example to format a number to Mexican Pesos
+        //var n = 1234567.22
+        //alert(n.toLocaleString("es-MX",{style:"currency", currency:"MXN"}))
+
+        var pageT = pageTotal.toLocaleString("es-MX", {minimumFractionDigits:2})
+        
+        $( api.column( 12 ).footer() ).html(
+            '$ '+pageT
+        );
+
+
+    }
+});
 @endsection
+<script>
+    document.onkeyup = function(e) {
+   if (e.shiftKey && e.which == 112) {
+    window.open("ayudas_pdf/AYM00_00.pdf","_blank");
+  }
+  }
 
-
-
-
-
-    <script>
-        function mostrar(){
-                            $("#hiddendiv").show();
-                        };
-
-    </script>
+</script>

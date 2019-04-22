@@ -1,15 +1,21 @@
 @extends('home') 
 @section('homecontent')
 <style>
-th { font-size: 12px; }
-td { font-size: 11px; }
-th, td { white-space: nowrap; }
-div.container {
-	min-width: 980px;
-	margin: 0 auto;
-}
-div.ColVis {
-        float: left;
+    th { font-size: 12px; }
+    td { font-size: 11px; }
+    th, td { white-space: nowrap; }
+    div.container {
+        min-width: 980px;
+        margin: 0 auto;
+    }
+    th:first-child {
+        position: -webkit-sticky;
+        position: sticky;
+        left: 0;
+        z-index: 5;
+    }
+    table.dataTable thead .sorting_asc{
+        position: sticky;
     }
     .DTFC_LeftBodyWrapper{
         margin-top: 82px;
@@ -119,7 +125,7 @@ var fecha = 'ACTUALIZADO: '+ diasSemana[f.getDay()] + ', ' + f.getDate() + ' de 
 var f = fecha.toUpperCase();
 
 var table = $('#tbackorder').DataTable({
-    "order": [[ 1, "asc" ]],
+    "order": [[ 1, "asc" ],[0, "asc"]],
     dom: 'Bfrtip',
     buttons: [
         {
@@ -272,8 +278,8 @@ var table = $('#tbackorder').DataTable({
         //var n = 1234567.22
         //alert(n.toLocaleString("es-MX",{style:"currency", currency:"MXN"}))
 
-        var pageT = pageTotal.toLocaleString("es-MX", {maximumFractionDigits:2})
-        var totalf = total.toLocaleString("es-MX", {maximumFractionDigits:2})
+        var pageT = pageTotal.toLocaleString("es-MX", {minimumFractionDigits:2})
+        var totalf = total.toLocaleString("es-MX", {minimumFractionDigits:2})
         $( api.column( 6 ).footer() ).html(
             pageT + ' (' + totalf + ')'
         );
@@ -293,8 +299,8 @@ var table = $('#tbackorder').DataTable({
             .reduce( function (a, b) {
                 return intVal(a) + intVal(b);
             }, 0 );
-        var pageT = pageTotal.toLocaleString("es-MX", {maximumFractionDigits:2})
-        var totalf = total.toLocaleString("es-MX", {maximumFractionDigits:2})
+        var pageT = pageTotal.toLocaleString("es-MX", {minimumFractionDigits:2})
+        var totalf = total.toLocaleString("es-MX", {minimumFractionDigits:2})
         $( api.column( 7 ).footer() ).html(
             pageT + ' (' + totalf + ')'
         );//////////////////
@@ -313,8 +319,8 @@ var table = $('#tbackorder').DataTable({
             .reduce( function (a, b) {
                 return intVal(a) + intVal(b);
             }, 0 );
-        var pageT = pageTotal.toLocaleString("es-MX", {maximumFractionDigits:2})
-        var totalf = total.toLocaleString("es-MX", {maximumFractionDigits:2})
+        var pageT = pageTotal.toLocaleString("es-MX", {minimumFractionDigits:2})
+        var totalf = total.toLocaleString("es-MX", {minimumFractionDigits:2})
         $( api.column( 8 ).footer() ).html(
             pageT + ' (' + totalf + ')'
         );//////////////////
@@ -333,8 +339,8 @@ var table = $('#tbackorder').DataTable({
             .reduce( function (a, b) {
                 return intVal(a) + intVal(b);
             }, 0 );
-        var pageT = pageTotal.toLocaleString("es-MX", {maximumFractionDigits:2})
-        var totalf = total.toLocaleString("es-MX", {maximumFractionDigits:2})
+        var pageT = pageTotal.toLocaleString("es-MX", {minimumFractionDigits:2})
+        var totalf = total.toLocaleString("es-MX", {minimumFractionDigits:2})
         $( api.column( 9 ).footer() ).html(
             pageT + ' (' + totalf + ')'
         );//////////////////
@@ -353,8 +359,8 @@ var table = $('#tbackorder').DataTable({
             .reduce( function (a, b) {
                 return intVal(a) + intVal(b);
             }, 0 );
-        var pageT = pageTotal.toLocaleString("es-MX", {maximumFractionDigits:2})
-        var totalf = total.toLocaleString("es-MX", {maximumFractionDigits:2})
+        var pageT = pageTotal.toLocaleString("es-MX", {minimumFractionDigits:2})
+        var totalf = total.toLocaleString("es-MX", {minimumFractionDigits:2})
         $( api.column( 10 ).footer() ).html(
             pageT + ' (' + totalf + ')'
         );//////////////////
@@ -373,8 +379,8 @@ var table = $('#tbackorder').DataTable({
             .reduce( function (a, b) {
                 return intVal(a) + intVal(b);
             }, 0 );
-        var pageT = pageTotal.toLocaleString("es-MX", {maximumFractionDigits:2})
-        var totalf = total.toLocaleString("es-MX", {maximumFractionDigits:2})
+        var pageT = pageTotal.toLocaleString("es-MX", {minimumFractionDigits:2})
+        var totalf = total.toLocaleString("es-MX", {minimumFractionDigits:2})
         $( api.column( 11 ).footer() ).html(
             pageT + ' (' + totalf + ')'
         );//////////////////
@@ -393,8 +399,8 @@ var table = $('#tbackorder').DataTable({
             .reduce( function (a, b) {
                 return intVal(a) + intVal(b);
             }, 0 );
-        var pageT = pageTotal.toLocaleString("es-MX", {maximumFractionDigits:2})
-        var totalf = total.toLocaleString("es-MX", {maximumFractionDigits:2})
+        var pageT = pageTotal.toLocaleString("es-MX", {minimumFractionDigits:2})
+        var totalf = total.toLocaleString("es-MX", {minimumFractionDigits:2})
         $( api.column( 12 ).footer() ).html(
             pageT + ' (' + totalf + ')'
         );//////////////////
@@ -413,23 +419,14 @@ var table = $('#tbackorder').DataTable({
             .reduce( function (a, b) {
                 return intVal(a) + intVal(b);
             }, 0 );
-        var pageT = pageTotal.toLocaleString("es-MX", {maximumFractionDigits:2})
-        var totalf = total.toLocaleString("es-MX", {maximumFractionDigits:2})
+        var pageT = pageTotal.toLocaleString("es-MX", {minimumFractionDigits:2})
+        var totalf = total.toLocaleString("es-MX", {minimumFractionDigits:2})
         $( api.column( 14 ).footer() ).html(
             pageT + ' (' + totalf + ')'
         );//////////////////
     }
 });
 @endsection
-
-<script>
-document.onkeyup = function(e) {
-   if (e.shiftKey && e.which == 112) {
-    window.open("ayudas_pdf/AyM01_24.pdf","_blank");
-  }
-  }
- 
-</script>
 <script>
     document.onkeyup = function(e) {
    if (e.shiftKey && e.which == 112) {
