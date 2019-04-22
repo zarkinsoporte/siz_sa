@@ -261,7 +261,7 @@ var table = $('#tentradas').DataTable({
             text: '<i class="fa fa-print"></i> Imprimir',
            
             extend: 'print',
-            title: 'Reporte de Back Order Casco',
+            title: 'Reporte de Materia Prima',
             exportOptions: {
                 columns: ':visible',                
             }
