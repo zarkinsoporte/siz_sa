@@ -53,7 +53,7 @@
         <div class="col-md-11">
             <h3 class="page-header">
                 Reporte de Materia Prima
-                <small>Entradas / Devoluciones / Notas Crédito</small>
+                <small>Entradas / Devoluciones</small>
             </h3>
             <h5><b>Del:</b> {{\AppHelper::instance()->getHumanDate($fi)}} <b>al:</b> {{\AppHelper::instance()->getHumanDate($ff)}}</h5>
             <h5>Actualizado: {{date('d-m-Y h:i a', strtotime("now"))}}</h5>
