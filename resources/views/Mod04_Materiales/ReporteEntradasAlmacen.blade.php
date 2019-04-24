@@ -179,13 +179,13 @@ var table = $('#tentradas').DataTable({
             var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
             return val;
         }},
-        { data: 'LineTotal', name:  'LineTotal',
+        { data: 'LineaTotal', name:  'LineaTotal',
         render: function(data){
             var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
             return val;
         }},
 
-        { data: 'VatSum', name:  'VatSum',
+        { data: 'Iva', name:  'Iva',
         render: function(data){
             var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
             return val;

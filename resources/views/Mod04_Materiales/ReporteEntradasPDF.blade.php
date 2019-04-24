@@ -127,7 +127,7 @@
     <!--Cuerpo o datos de la tabla-->
     <div id="content">
         @if(count($entradasL)>0)
-            <div class="row"> 
+            <div class="row">
             <h4>Entradas (Lerma)</h4>
             <div class="col-md-8">
                 <table class="table table-striped" style="table-layout:fixed;">
@@ -141,7 +141,7 @@
                         @foreach ($entradasL as $rep) @if($index == 0)
                         <?php
                                 $DocN = $rep->DocNum; 
-                                $totalEntrada = $rep->LineTotal + $rep->VatSum;
+                                $totalEntrada = $rep->LineaTotal + $rep->Iva;
                                 $moneda = $rep->DocCur;
                             ?>
                             <thead class="table-condensed">
@@ -205,20 +205,20 @@
                                         ${{number_format($rep->Price,'2', '.',',')}}
                                     </td>
                                     <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                        ${{number_format($rep->LineTotal,'2', '.',',')}}
+                                        ${{number_format($rep->LineaTotal,'2', '.',',')}}
                                     </td>
                                     <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                        ${{number_format($rep->VatSum,'2', '.',',')}}
+                                        ${{number_format($rep->Iva,'2', '.',',')}}
                                     </td>
                                     <td style="width:100px" class="zrk-gris-claro" scope="row">
-                                        ${{number_format($rep->LineTotal+$rep->VatSum,'2', '.',',')}} {{$rep->DocCur}}
+                                        ${{number_format($rep->LineaTotal+$rep->Iva,'2', '.',',')}} {{$rep->DocCur}}
                                     </td>
                                 </tr>
 
 
                                 @elseif($DocN == $rep->DocNum)
                                 <?php
-                $totalEntrada += $rep->LineTotal + $rep->VatSum;
+                $totalEntrada += $rep->LineaTotal + $rep->Iva;
                 
             ?>
                                     <tr>
@@ -235,13 +235,13 @@
                                             ${{number_format($rep->Price,'2', '.',',')}}
                                         </td>
                                         <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                            ${{number_format($rep->LineTotal,'2', '.',',')}}
+                                            ${{number_format($rep->LineaTotal,'2', '.',',')}}
                                         </td>
                                         <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                            ${{number_format($rep->VatSum,'2', '.',',')}}
+                                            ${{number_format($rep->Iva,'2', '.',',')}}
                                         </td>
                                         <td style="width:100px" class="zrk-gris-claro" scope="row">
-                                            ${{number_format($rep->LineTotal+$rep->VatSum,'2', '.',',')}} {{$rep->DocCur}}
+                                            ${{number_format($rep->LineaTotal+$rep->Iva,'2', '.',',')}} {{$rep->DocCur}}
                                         </td>
                                     </tr>
                                     @else
@@ -252,7 +252,7 @@
                                     </tr>
                                     <?php
             $DocN = $rep->DocNum;
-            $totalEntrada = $rep->LineTotal + $rep->VatSum;
+            $totalEntrada = $rep->LineaTotal + $rep->Iva;
             $moneda = $rep->DocCur;
         ?>
 
@@ -287,13 +287,13 @@
                                                 ${{number_format($rep->Price,'2', '.',',')}}
                                             </td>
                                             <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                                ${{number_format($rep->LineTotal,'2', '.',',')}}
+                                                ${{number_format($rep->LineaTotal,'2', '.',',')}}
                                             </td>
                                             <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                                ${{number_format($rep->VatSum,'2', '.',',')}}
+                                                ${{number_format($rep->Iva,'2', '.',',')}}
                                             </td>
                                             <td style="width:100px" class="zrk-gris-claro" scope="row">
-                                                ${{number_format($rep->LineTotal+$rep->VatSum,'2', '.',',')}} {{$rep->DocCur}}
+                                                ${{number_format($rep->LineaTotal+$rep->Iva,'2', '.',',')}} {{$rep->DocCur}}
                                             </td>
                                         </tr>
                                         @endif @if($index == count($entradasL)-1)
@@ -316,6 +316,7 @@
 
 @if(count($entradasG)>0)
 <div class="row">
+    <div style="page-break-after: always;"></div>
     <h4>Entradas (Gdl)</h4>
     <div class="col-md-8">
         <table class="table table-striped" style="table-layout:fixed;">
@@ -329,7 +330,7 @@
                 @foreach ($entradasG as $rep) @if($index == 0)
                 <?php
                                 $DocN = $rep->DocNum; 
-                                $totalEntrada = $rep->LineTotal + $rep->VatSum;
+                                $totalEntrada = $rep->LineaTotal + $rep->Iva;
                             ?>
                     <thead class="table-condensed">
                         <tr>
@@ -392,20 +393,20 @@
                                 ${{number_format($rep->Price,'2', '.',',')}}
                             </td>
                             <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                ${{number_format($rep->LineTotal,'2', '.',',')}}
+                                ${{number_format($rep->LineaTotal,'2', '.',',')}}
                             </td>
                             <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                ${{number_format($rep->VatSum,'2', '.',',')}}
+                                ${{number_format($rep->Iva,'2', '.',',')}}
                             </td>
                             <td style="width:100px" class="zrk-gris-claro" scope="row">
-                                ${{number_format($rep->LineTotal+$rep->VatSum,'2', '.',',')}} {{$rep->DocCur}}
+                                ${{number_format($rep->LineaTotal+$rep->Iva,'2', '.',',')}} {{$rep->DocCur}}
                             </td>
                         </tr>
 
 
                         @elseif($DocN == $rep->DocNum)
                         <?php
-                $totalEntrada += $rep->LineTotal + $rep->VatSum;
+                $totalEntrada += $rep->LineaTotal + $rep->Iva;
                 $moneda = $rep->DocCur;
             ?>
                             <tr>
@@ -422,13 +423,13 @@
                                     ${{number_format($rep->Price,'2', '.',',')}}
                                 </td>
                                 <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                    ${{number_format($rep->LineTotal,'2', '.',',')}}
+                                    ${{number_format($rep->LineaTotal,'2', '.',',')}}
                                 </td>
                                 <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                    ${{number_format($rep->VatSum,'2', '.',',')}}
+                                    ${{number_format($rep->Iva,'2', '.',',')}}
                                 </td>
                                 <td style="width:100px" class="zrk-gris-claro" scope="row">
-                                    ${{number_format($rep->LineTotal+$rep->VatSum,'2', '.',',')}} {{$rep->DocCur}}
+                                    ${{number_format($rep->LineaTotal+$rep->Iva,'2', '.',',')}} {{$rep->DocCur}}
                                 </td>
                             </tr>
                             @else
@@ -439,7 +440,7 @@
                             </tr>
                             <?php
             $DocN = $rep->DocNum;
-            $totalEntrada = $rep->LineTotal + $rep->VatSum;
+            $totalEntrada = $rep->LineaTotal + $rep->Iva;
         ?>
 
                                 <tr>
@@ -473,13 +474,13 @@
                                         ${{number_format($rep->Price,'2', '.',',')}}
                                     </td>
                                     <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                        ${{number_format($rep->LineTotal,'2', '.',',')}}
+                                        ${{number_format($rep->LineaTotal,'2', '.',',')}}
                                     </td>
                                     <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                        ${{number_format($rep->VatSum,'2', '.',',')}}
+                                        ${{number_format($rep->Iva,'2', '.',',')}}
                                     </td>
                                     <td style="width:100px" class="zrk-gris-claro" scope="row">
-                                        ${{number_format($rep->LineTotal+$rep->VatSum,'2', '.',',')}} {{$rep->DocCur}}
+                                        ${{number_format($rep->LineaTotal+$rep->Iva,'2', '.',',')}} {{$rep->DocCur}}
                                     </td>
                                 </tr>
                                 @endif @if($index == count($entradasG)-1)
@@ -502,6 +503,7 @@
        
 @if(count($devoluciones)>0)
 <div class="row">
+    <div style="page-break-after: always;"></div>
     <h4>Devoluciones</h4>
     <div class="col-md-8">
         <table class="table table-striped" style="table-layout:fixed;">
@@ -515,7 +517,7 @@
                 @foreach ($devoluciones as $rep) @if($index == 0)
                 <?php
                                 $DocN = $rep->DocNum; 
-                                $totalEntrada = $rep->LineTotal + $rep->VatSum;
+                                $totalEntrada = $rep->LineaTotal + $rep->Iva;
                             ?>
                     <thead class="table-condensed">
                         <tr>
@@ -578,20 +580,20 @@
                                 ${{number_format($rep->Price,'2', '.',',')}}
                             </td>
                             <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                ${{number_format($rep->LineTotal,'2', '.',',')}}
+                                ${{number_format($rep->LineaTotal,'2', '.',',')}}
                             </td>
                             <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                ${{number_format($rep->VatSum,'2', '.',',')}}
+                                ${{number_format($rep->Iva,'2', '.',',')}}
                             </td>
                             <td style="width:100px" class="zrk-gris-claro" scope="row">
-                                ${{number_format($rep->LineTotal+$rep->VatSum,'2', '.',',')}} {{$rep->DocCur}}
+                                ${{number_format($rep->LineaTotal+$rep->Iva,'2', '.',',')}} {{$rep->DocCur}}
                             </td>
                         </tr>
 
 
                         @elseif($DocN == $rep->DocNum)
                         <?php
-                $totalEntrada += $rep->LineTotal + $rep->VatSum;
+                $totalEntrada += $rep->LineaTotal + $rep->Iva;
                 $moneda = $rep->DocCur;
             ?>
                             <tr>
@@ -608,13 +610,13 @@
                                     ${{number_format($rep->Price,'2', '.',',')}}
                                 </td>
                                 <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                    ${{number_format($rep->LineTotal,'2', '.',',')}}
+                                    ${{number_format($rep->LineaTotal,'2', '.',',')}}
                                 </td>
                                 <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                    ${{number_format($rep->VatSum,'2', '.',',')}}
+                                    ${{number_format($rep->Iva,'2', '.',',')}}
                                 </td>
                                 <td style="width:100px" class="zrk-gris-claro" scope="row">
-                                    ${{number_format($rep->LineTotal+$rep->VatSum,'2', '.',',')}} {{$rep->DocCur}}
+                                    ${{number_format($rep->LineaTotal+$rep->Iva,'2', '.',',')}} {{$rep->DocCur}}
                                 </td>
                             </tr>
                             @else
@@ -625,7 +627,7 @@
                             </tr>
                             <?php
             $DocN = $rep->DocNum;
-            $totalEntrada = $rep->LineTotal + $rep->VatSum;
+            $totalEntrada = $rep->LineaTotal + $rep->Iva;
         ?>
 
                                 <tr>
@@ -659,13 +661,13 @@
                                         ${{number_format($rep->Price,'2', '.',',')}}
                                     </td>
                                     <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                        ${{number_format($rep->LineTotal,'2', '.',',')}}
+                                        ${{number_format($rep->LineaTotal,'2', '.',',')}}
                                     </td>
                                     <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                        ${{number_format($rep->VatSum,'2', '.',',')}}
+                                        ${{number_format($rep->Iva,'2', '.',',')}}
                                     </td>
                                     <td style="width:100px" class="zrk-gris-claro" scope="row">
-                                        ${{number_format($rep->LineTotal+$rep->VatSum,'2', '.',',')}} {{$rep->DocCur}}
+                                        ${{number_format($rep->LineaTotal+$rep->Iva,'2', '.',',')}} {{$rep->DocCur}}
                                     </td>
                                 </tr>
                                 @endif @if($index == count($devoluciones)-1)
@@ -687,6 +689,7 @@
 @endif
 @if(count($notascredito)>0)
     <div class="row">
+        <div style="page-break-after: always;"></div>
         <h4>Notas de Crédito</h4>
         <div class="col-md-8">
             <table class="table table-striped" style="table-layout:fixed;">
@@ -700,7 +703,7 @@
                     @foreach ($notascredito as $rep) @if($index == 0)
                     <?php
                                     $DocN = $rep->DocNum; 
-                                    $totalEntrada = $rep->LineTotal + $rep->VatSum;
+                                    $totalEntrada = $rep->LineaTotal + $rep->Iva;
                                 ?>
                         <thead class="table-condensed">
                             <tr>
@@ -763,20 +766,20 @@
                                     ${{number_format($rep->Price,'2', '.',',')}}
                                 </td>
                                 <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                    ${{number_format($rep->LineTotal,'2', '.',',')}}
+                                    ${{number_format($rep->LineaTotal,'2', '.',',')}}
                                 </td>
                                 <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                    ${{number_format($rep->VatSum,'2', '.',',')}}
+                                    ${{number_format($rep->Iva,'2', '.',',')}}
                                 </td>
                                 <td style="width:100px" class="zrk-gris-claro" scope="row">
-                                    ${{number_format($rep->LineTotal+$rep->VatSum,'2', '.',',')}} {{$rep->DocCur}}
+                                    ${{number_format($rep->LineaTotal+$rep->Iva,'2', '.',',')}} {{$rep->DocCur}}
                                 </td>
                             </tr>
     
     
                             @elseif($DocN == $rep->DocNum)
                             <?php
-                    $totalEntrada += $rep->LineTotal + $rep->VatSum;
+                    $totalEntrada += $rep->LineaTotal + $rep->Iva;
                     $moneda = $rep->DocCur;
                 ?>
                                 <tr>
@@ -793,13 +796,13 @@
                                         ${{number_format($rep->Price,'2', '.',',')}}
                                     </td>
                                     <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                        ${{number_format($rep->LineTotal,'2', '.',',')}}
+                                        ${{number_format($rep->LineaTotal,'2', '.',',')}}
                                     </td>
                                     <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                        ${{number_format($rep->VatSum,'2', '.',',')}}
+                                        ${{number_format($rep->Iva,'2', '.',',')}}
                                     </td>
                                     <td style="width:100px" class="zrk-gris-claro" scope="row">
-                                        ${{number_format($rep->LineTotal+$rep->VatSum,'2', '.',',')}} {{$rep->DocCur}}
+                                        ${{number_format($rep->LineaTotal+$rep->Iva,'2', '.',',')}} {{$rep->DocCur}}
                                     </td>
                                 </tr>
                                 @else
@@ -810,7 +813,7 @@
                                 </tr>
                                 <?php
                 $DocN = $rep->DocNum;
-                $totalEntrada = $rep->LineTotal + $rep->VatSum;
+                $totalEntrada = $rep->LineaTotal + $rep->Iva;
             ?>
     
                                     <tr>
@@ -844,13 +847,13 @@
                                             ${{number_format($rep->Price,'2', '.',',')}}
                                         </td>
                                         <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                            ${{number_format($rep->LineTotal,'2', '.',',')}}
+                                            ${{number_format($rep->LineaTotal,'2', '.',',')}}
                                         </td>
                                         <td style="width:70px" class="zrk-gris-claro" scope="row">
-                                            ${{number_format($rep->VatSum,'2', '.',',')}}
+                                            ${{number_format($rep->Iva,'2', '.',',')}}
                                         </td>
                                         <td style="width:100px" class="zrk-gris-claro" scope="row">
-                                            ${{number_format($rep->LineTotal+$rep->VatSum,'2', '.',',')}} {{$rep->DocCur}}
+                                            ${{number_format($rep->LineaTotal+$rep->Iva,'2', '.',',')}} {{$rep->DocCur}}
                                         </td>
                                     </tr>
                                     @endif @if($index == count($notascredito)-1)
