@@ -690,7 +690,7 @@
 @if(count($notascredito)>0)
     <div class="row">
         <div style="page-break-after: always;"></div>
-        <h4>Notas de Crédito</h4>
+        <h4>Devoluciones</h4>
         <div class="col-md-8">
             <table class="table table-striped" style="table-layout:fixed;">
     
