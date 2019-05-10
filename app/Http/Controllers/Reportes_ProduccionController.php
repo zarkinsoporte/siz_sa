@@ -179,41 +179,64 @@ class Reportes_ProduccionController extends Controller
 
     public function showModal(Request $request)
     {
-
         $nombre = str_replace('%20', ' ', explode('/', $request->path())[1]);
-
+        $fechas = false;
+        $fieldOtroNumber = '';
+        $Text = '';
+        $text_selUno = '';
+        $data_selUno = [];
+        $text_selDos = '';
+        $data_selDos = [];
+        $text_selTres = '';
+        $data_selTres = [];
         switch ($nombre) {
             case "HISTORIAL OP":
-                $fechas = false;
                 $fieldOtroNumber = 'OP';
-                $fieldOtroText = '';
                 break;
             case "MATERIALES OP":
-                $fechas = false;
                 $fieldOtroNumber = 'OP';
-                $fieldOtroText = '';
                 break;
             case "ENTRADAS ALMACEN":
                 $fechas = true;
-                $fieldOtroNumber = '';
-                $fieldOtroText = '';
                 break;
             case "PRODUCCION POR AREAS":
                 $fechas = true;
-                $fieldOtroNumber = '';
-                $fieldOtroText = '';
                 break;
-            default:
-                $fechas = false;
-                $fieldOtroNumber = ''; //se usa por ejemplo para el valor de OP              
-                $fieldOtroText = '';
+            case "MRP":
+                //Select
+                       //$f->weekOfYear . '-' . $f->addWeek(2)->weekOfYear;
+                // strftime('%V', strtotime( '+1 week', $f->fechaDeEjecucion));
+                $text_selUno = 'Semana';
+                $data_selUno = ['Producción', 'Compras'];
+                $text_selDos = 'Tipo'; 
+                $data_selDos = ['Completo', 'Con Orden', 'Proyección'];
+                // if (Auth::user()->position == 6 || Auth::user()->isAdmin()) { //solo planeadores y administradores
+                //     $text_selTres = 'Acción';
+                //     $data_selTres = ['Consultar', 'Actualizar'];
+                //  }
+                break;
+                case "ACTUALIZAR MRP":
+                    $Text = "Esta a punto de actualizar el MRP. ¿Desea continuar?";
+                break;
         }
-
 
         if (Auth::check()) {
             $user = Auth::user();
             $actividades = $user->getTareas();
-            return view('Mod01_Produccion.modalParametros', ['actividades' => $actividades, 'ultimo' => count($actividades), 'nombre' => $nombre, 'fieldOtroNumber' => $fieldOtroNumber, 'fieldOtroText' => $fieldOtroText, 'fechas' => $fechas]);
+            return view('Mod01_Produccion.modalParametros', 
+            ['actividades' => $actividades, 
+            'ultimo' => count($actividades), 
+            'nombre' => $nombre, 
+            'fieldOtroNumber' => $fieldOtroNumber, 
+            'text' => $Text, 
+            'fechas' => $fechas,
+            'text_selUno' => $text_selUno,
+            'data_selUno' => $data_selUno,
+            'text_selDos' => $text_selDos,
+            'data_selDos' => $data_selDos,
+            'text_selTres' => $text_selTres,
+            'data_selTres' => $data_selTres
+            ]);
         } else {
             return redirect()->route('auth/login');
         }

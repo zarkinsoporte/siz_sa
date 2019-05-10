@@ -232,6 +232,19 @@ Route::get('home/reporte/ENTRADAS ALMACEN', 'Mod04_MaterialesController@reporteE
 Route::get('home/reporte/entradasXLS', 'Mod04_MaterialesController@entradasXLS');
 Route::get('datatables.showentradasmp', 'Mod04_MaterialesController@DataShowEntradasMP')->name('datatables.showentradasmp');
 Route::get('home/reporte/entradasPDF', 'Mod04_MaterialesController@entradasPDF');
+//
+//-------------------------//
+//RUTAS DE MRP//---------------------------------------------------------
+//-------------------------//
+//
+Route::get('home/MRP', 'Reportes_ProduccionController@showModal');
+Route::post('home/reporte/MRP', 'Mod02_PlaneacionController@reporteMRP');
+Route::get('home/reporte/mrpXLS', 'Mod02_PlaneacionController@mrpXLS');
+Route::get('datatables.showmrp', 'Mod02_PlaneacionController@DataShowMRP')->name('datatables.showmrp');
+Route::get('home/reporte/mrpPDF', 'Mod02_PlaneacionController@mrpPDF');
+
+Route::get('home/ACTUALIZAR MRP', 'Reportes_ProduccionController@showModal');
+Route::post('home/reporte/ACTUALIZAR MRP', 'Mod02_PlaneacionController@actualizaMRP');
 ///Ruta Ayudas
 Route::get('home/ayudas_pdf/{PdfName}', 'HomeController@showPdf');
 Route::get('home/{r0}/ayudas_pdf/{PdfName}', 'HomeController@showPdf2');
@@ -245,7 +258,13 @@ Route::post('home/reporte/PRODUCCION POR AREAS', 'Reportes_ProduccionController@
 Route::get('home/reporte/PRODUCCION POR AREAS', 'Reportes_ProduccionController@reporteProdxAreasPDF');
 Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@produccionxareasXLS');
  
- Route::get('/pruebas', function () {
+ Route::get('/pruebas', function (Request $request) {
+dd(
+
+$request->session()->all()
+
+);
+    
 //  $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
 //  $vCmp->DbServerType="6"; 
 //  $vCmp->server = "SERVER-SAPBO";

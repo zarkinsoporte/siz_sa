@@ -46,10 +46,10 @@
     <!-- /.row -->
     <div class="row">
         <div class="container">
-            <table  id="tbackorder" class="table-scroll display">
+            <table  id="tbackorder" class="display">
                 <thead >
                     <tr>
-                        <th class="estatico"><i>OP</i></label></th>
+                        <th><i>OP</i></label></th>
                         <th>Pedido</th>
                         <th>F.pedido</th>
                         <th>OC</th>
@@ -241,26 +241,31 @@ var table = $('#tbackorder').DataTable({
         { data: 'FechaPedido', name:  'FechaPedido'},
         { data: 'OC', name: 'OC'},
         { data: 'D_PROC', name: 'D_PROC'},
+
         { data: 'NO_SERIE', name: 'NO_SERIE'},
         { data: 'CLIENTE', name:  'CLIENTE'},
         { data: 'codigo1', name: 'codigo1'},
         { data: 'codigo3', name:  'codigo3'},
         { data: 'Descripcion', name:  'Descripcion'},
+
         { data: 'Cant', name:  'Cantidad'},
         { data: 'VSind', name:  'VSind' },
         { data: 'VS', name:  'VS'},
         { data: 'Funda', name:  'Funda'},
         { data: 'DEstacion', name:  'DEstacion' },
+
         { data: 'U_Grupo', name: 'U_Grupo' },
         { data: 'Secue', name:  'Secue'},
         { data: 'SecOT', name:  'SecOT' },
         { data: 'METAL', name:  'METAL' },
         { data: 'SEMANA2', name:  'SEMANA2'},
+
         { data: 'fentrega', name:  'fentrega'},//fCompras
         { data: 'fechaentregapedido', name:  'fechaentregapedido'},//fVentas
         { data: 'SEMANA3', name:  'SEMANA3'},
         { data: 'u_fproduccion', name:  'u_fproduccion'},
         { data: 'Prioridad', name:  'Prioridad'},
+        
         { data: 'Desv', name:  'Desv'},
         { data: 'Comments', name:  'Comments'},
         { data: 'U_Especial', name:  'U_Especial'},

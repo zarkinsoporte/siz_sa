@@ -142,7 +142,6 @@ var f = fecha.toUpperCase();
 var table = $('#tentradas').DataTable({
     "order": [[ 1, "desc" ],[0, "asc"],[2, "asc"]],
     dom: 'Bfrtip',
-    buttons:[],
     orderCellsTop: true,    
     scrollY:        "300px",
     "pageLength": 50,

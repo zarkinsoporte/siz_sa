@@ -4,5 +4,9 @@
             <strong>¡Error!  &nbsp; {{$this_error[0]}}</strong><br>
         @endforeach
     </div>
+@elseif(Session::has('mensaje'))
 
+<div class="alert alert-success" role="alert">
+    {{ Session::get('mensaje') }}
+</div>
 @endif

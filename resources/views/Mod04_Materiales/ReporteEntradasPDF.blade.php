@@ -23,7 +23,6 @@
         th {
             color: white;
             font-weight: bold;
-            color: white;
             font-family: 'Helvetica';
             font-size: 12px;
             background-color: #333333;
