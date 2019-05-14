@@ -66,6 +66,7 @@ https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.bootstrap.min.css" type="text/css">
 {!! Html::style('assets/css/sbadmin.css') !!}
 {!! Html::style('assets/css/responsive.css') !!}
+{!! Html::style('assets/css/jquery.datatables.yadcf.css') !!}
 <style>
 .zrk-gris{
     background-color: #4c4c4c;

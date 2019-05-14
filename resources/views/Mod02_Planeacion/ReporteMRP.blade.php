@@ -25,7 +25,7 @@
         position: sticky;
     }
     .DTFC_LeftBodyWrapper{
-        margin-top: 82px;
+        margin-top: 88px;
     }
     .DTFC_LeftHeadWrapper {
         display:none;
@@ -34,6 +34,20 @@
     th, td { white-space: nowrap; }
     .dataTables_wrapper .dataTables_length { /*mueve el selector de registros a visualizar*/
     float: right;
+    }
+
+    .yadcf-filter-range-number-seperator {
+    margin-left: 0px; 
+    margin-right: 10px;
+    }
+    .yadcf-filter-reset-button {
+    display: inline-block;
+    background-color: #337ab7;
+        border-color: #2e6da4;
+    }
+
+    input{
+        color: black;
     }
 </style>
 <?php
@@ -120,7 +134,7 @@ $('#tmrp thead tr').clone(true).appendTo( '#tmrp thead' );
 
 $('#tmrp thead tr:eq(1) th').each( function (i) {
     var title = $(this).text();
-    $(this).html( '<input style="color: black;"  type="text" placeholder="Filtro '+title+'" />' );
+    $(this).html( '<input type="text" placeholder="Filtro '+title+'" />' );
    
     $( 'input', this ).on( 'keyup change', function () {       
             
@@ -147,6 +161,7 @@ var table = $('#tmrp').DataTable({
     processing: true,
     deferRender:    true,
     scrollCollapse: true, 
+   // serverSide: true,
     ajax: {
         url: '{!! route('datatables.showmrp') !!}',
         data: function (d) {
@@ -385,6 +400,48 @@ var table = $('#tmrp').DataTable({
     ],   
     
 });
+
+
+yadcf.init(table,[
+{
+    column_number : [0],
+    filter_type: 'range_number',
+    filter_default_label: ["Min", "Max"],
+    filter_delay: 500
+},
+{
+    column_number : [4],
+    filter_type: 'range_number',
+    filter_default_label: ["Min", "Max"]
+},
+{
+    column_number : [5],
+    filter_type: 'range_number',
+    filter_default_label: ["Min", "Max"]
+},
+{
+    column_number : [6],
+    filter_type: 'range_number',
+    filter_default_label: ["Min", "Max"]
+},
+{
+    column_number : [21],
+    filter_type: 'range_number',
+    filter_default_label: ["Min", "Max"]
+},
+{
+    column_number : [22],
+    filter_type: 'range_number',
+    filter_default_label: ["Min", "Max"]
+},
+{
+    column_number : [28],
+    filter_type: 'range_number',
+    filter_default_label: ["Min", "Max"]
+},
+],
+);
+
 
 
 @endsection
