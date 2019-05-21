@@ -42,6 +42,7 @@
     <script src="https://cdn.datatables.net/fixedcolumns/3.2.6/js/dataTables.fixedColumns.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.bootstrap.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.flash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
     <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
@@ -66,6 +67,7 @@ https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.bootstrap.min.css" type="text/css">
 {!! Html::style('assets/css/sbadmin.css') !!}
 {!! Html::style('assets/css/responsive.css') !!}
+{!! Html::script('assets/js/headerdatatables.js') !!}
 {!! Html::style('assets/css/jquery.datatables.yadcf.css') !!}
 <style>
 .zrk-gris{

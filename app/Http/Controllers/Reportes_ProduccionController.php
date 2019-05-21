@@ -555,12 +555,12 @@ class Reportes_ProduccionController extends Controller
     public function backOrderAjaxToSession(){
         //ajax nos envia los registros del datatable que el usuario filtro y los alamcenamos en la session
         //formato JSON
-        Session::put('miarr',Input::get('arr'));   
+            Session::put('miarr',Input::get('arr')); 
     }
     public function ReporteBackOrderVentasPDF()
     {    
         if (Auth::check()) {       
-        $data = json_decode(stripslashes(Session::get('miarr')));      
+        $data = json_decode((Session::get('miarr')));      
         $pdf = \PDF::loadView('Mod01_Produccion.ReporteBackOrderPDF_Ventas', compact('data'));
         $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
         return $pdf->stream('Siz_Reporte_BackOrderV ' . ' - ' .date("d/m/Y") . '.Pdf');
@@ -571,7 +571,8 @@ class Reportes_ProduccionController extends Controller
     public function ReporteBackOrderPlaneaPDF()
     {   
         if (Auth::check()) {    
-            $data = json_decode(stripslashes(Session::get('miarr')));
+            $data = json_decode((Session::get('miarr')));
+         
             $pdf = \PDF::loadView('Mod01_Produccion.ReporteBackOrderPDF_Planea', compact('data'));
             $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
         return $pdf->stream('Siz_Reporte_BackOrderP ' . ' - ' .date("d/m/Y") . '.Pdf');
@@ -580,9 +581,10 @@ class Reportes_ProduccionController extends Controller
         }
     }
     public function ReporteBackOrderXLS(){
-        $path = public_path().'/assets/plantillas_excel/Mod_01/SIZ_bo.xlsx';
-        $data = json_decode(stripslashes(Session::get('miarr')));
-        Excel::load($path, function($excel) use($data){
+          $path = public_path().'/assets/plantillas_excel/Mod_01/SIZ_bo.xlsx';
+          $data = json_decode((Session::get('miarr')));     
+           
+           $excel=  Excel::load($path, function($excel) use($data){
                 $excel->sheet('B.O.', function($sheet) use($data){
                 
                 $sheet->cell('A4', function ($cell) {
@@ -601,7 +603,8 @@ class Reportes_ProduccionController extends Controller
             });
         })
         ->setFilename('SIZ Back Order Programado SALOTTO')
-        ->export('xlsx');
+        ->export('xlsx', [ 'Set-Cookie' => 'xlscook=done; path=/' ]);
+
     }
     public function reporteProdxAreas(){
         if (Auth::check()) {

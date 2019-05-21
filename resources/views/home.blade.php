@@ -129,7 +129,7 @@ $index = 0;
             .btn-group>.btn {
                 float: none;
             }
-            .btn {
+            .btn {//botones redondeados
                 border-radius: 4px;
             }
             .btn-group>.btn:not(:first-child):not(:last-child):not(.dropdown-toggle) {
@@ -144,6 +144,7 @@ $index = 0;
                 border-top-left-radius: 4px;
                 border-bottom-left-radius: 4px;
             }
+          
         </style>
         @yield('homecontent')
 

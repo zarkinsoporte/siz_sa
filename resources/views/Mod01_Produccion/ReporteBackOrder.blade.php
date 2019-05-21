@@ -23,6 +23,12 @@
     .DTFC_LeftHeadWrapper {
         display:none;
     }
+    div.dataTables_wrapper div.dataTables_processing {
+        width: 700px;
+        height: 100%;
+        margin-left: -35%;
+        background: linear-gradient(to right, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.95) 25%, rgba(255,255,255,0.95) 75%, rgba(255,255,255,0.2) 100%);
+}
 </style>
 
 <div class="container">
@@ -49,38 +55,46 @@
             <table  id="tbackorder" class="display">
                 <thead >
                     <tr>
-                        <th><i>OP</i></label></th>
+                        <th><i>OP</i></th>
                         <th>Pedido</th>
                         <th>F.pedido</th>
                         <th>OC</th>
-                        <th>D_proc</th>
-                        <th>No_serie</th>
-                        <th>Cliente</th>
+                        <th>D. Proc.</th>
+                       
+                        <th>No Serie</th>
+                        <th>Nombre del Cliente</th>
                         <th>Modelo</th>
                         <th>Acabado</th>
                         <th>Descripción</th>
+                       
                         <th>Cant</th>
                         <th>%</th>
                         <th>Total %</th>
                         <th>Funda</th>
-                        <th>Dias CT</th>
+                        <th>Dias Area</th>
+                       
                         <th>Prg. Piel</th>
                         <th>HULE</th>
                         <th>CASCO</th>
                         <th>METAL</th>
                         <th>Sem-C</th>
+                       
                         <th>F.Compras</th>
                         <th>F.Ventas</th>
                         <th>Sem-P</th>
                         <th>F.Produc.</th>
                         <th>Prioridad</th>
+                       
                         <th>Desv</th>
                         <th>Notas</th>
                         <th>Especiales</th>
-                        <th>Nom Modelo</th>
+                        <th>Nomb Modelo</th>
                     </tr>
                    
                 </thead>
+                <tfoot>
+                    <th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th> <th></th>
+                </tfoot>
             </table>
         </div>
     </div>
@@ -95,7 +109,7 @@ $('#tbackorder thead tr').clone(true).appendTo( '#tbackorder thead' );
 $('#tbackorder thead tr:eq(1) th').each( function (i) {
     var title = $(this).text();
     $(this).html( '<input style="color: black;"  type="text" placeholder="Filtro '+title+'" />' );
-   
+
     $( 'input', this ).on( 'keyup change', function () {       
             
             if ( table.column(i).search() !== this.value ) {
@@ -144,6 +158,8 @@ var table = $('#tbackorder').DataTable({
             text: '<i class="fa fa-file-excel-o"></i> Excel',
             className: "btn-success",
             action: function ( e, dt, node, config ) { 
+                this.text('<i class="fa fa-spinner fa-pulse fa-lg fa-fw"></i> Excel');
+                var $this = $(this);
                 var data=table.rows( { filter : 'applied'} ).data().toArray(); 
                 var json = JSON.stringify( data );
                 $.ajax({ 
@@ -151,10 +167,10 @@ var table = $('#tbackorder').DataTable({
                     url:'reporte/backorderPDF', 
                     headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                     data: { "_token": "{{ csrf_token() }}", "arr": json }, 
-                    success:
-                        function(data){ 
-                            window.location.href = 'reporte/backorderXLS';
-                        } 
+                    success:function(){
+                            window.location.href = 'reporte/backorderXLS'; 
+                    },
+                    complete: checkCookie
                 }); 
             }          
         }, 
@@ -272,7 +288,6 @@ var table = $('#tbackorder').DataTable({
         { data: 'Modelo', name: 'Modelo'}
     ],
     "language": {
-        "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json",
         buttons: {
             copyTitle: 'Copiar al portapapeles',
             copyKeys: 'Presiona <i>ctrl</i> + <i>C</i> para copiar o la tecla <i>Esc</i> para continuar.',
@@ -280,6 +295,28 @@ var table = $('#tbackorder').DataTable({
                 _: '%d filas copiadas',
                 1: '1 fila copiada'
             }
+        },
+        "sProcessing":     '<i class="fa fa-spinner fa-pulse fa-3x fa-fw" style="font-size:25px; "></i><span class="" style="font-size:25px; "><b>Procesando...</b></span> ',
+        "sLengthMenu":     "Mostrar _MENU_ registros",
+        "sZeroRecords":    "No se encontraron resultados",
+        "sEmptyTable":     "Ningún dato disponible en esta tabla",
+        "sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+        "sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0 registros",
+        "sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
+        "sInfoPostFix":    "",
+        "sSearch":         "Buscar:",
+        "sUrl":            "",
+        "sInfoThousands":  ",",
+        "sLoadingRecords": "Cargando...",
+        "oPaginate": {
+            "sFirst":    "Primero",
+            "sLast":     "Último",
+            "sNext":     "Siguiente",
+            "sPrevious": "Anterior"
+        },
+        "oAria": {
+            "sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
+            "sSortDescending": ": Activar para ordenar la columna de manera descendente"
         }
     },
     columnDefs: [
@@ -291,17 +328,80 @@ var table = $('#tbackorder').DataTable({
         { width: 150, targets: 25 },
         { width: 150, targets: 27 },
     ],
-    //revision
-  
-});
+    "footerCallback": function ( row, data, start, end, display ) {
+        var api = this.api(), data;
 
+        // Remove the formatting to get integer data for summation
+        var intVal = function ( i ) {
+            return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                        i : 0;
+        };
+
+        // Total over all filtered
+        filterTotal = api
+            .column( 10, { filter: 'applied'} )
+            .data()
+            .reduce( function (a, b) {
+                return intVal(a) + intVal(b);
+            }, 0 );
+        var filterT = filterTotal.toLocaleString("es-MX", {minimumFractionDigits:2})
+        $( api.column( 10 ).footer() ).html(
+            filterT
+        );
+       
+        filterTotal = api
+            .column( 12, { filter: 'applied'} )
+            .data()
+            .reduce( function (a, b) {
+                return intVal(a) + intVal(b);
+            }, 0 );
+        var filterT = filterTotal.toLocaleString("es-MX", {minimumFractionDigits:2})
+            $( api.column( 12).footer() ).html(
+                filterT
+            ); 
+    }//endfooter
+});//endDT
      
 @endsection
 
 <script>
-document.onkeyup = function(e) {
-  
 
+function checkCookie(){
+    var verif = setInterval(isxlscook,500,verif);
+}
+function isxlscook(verif){
+    var loadState = getCookie("xlscook");
+    if (loadState == "done"){
+        clearInterval(verif);               
+        removeWaitingSpinner();
+    }
+}
+function getCookie(cookieName){
+        var name = cookieName + "=";
+        var cookies = document.cookie
+        var cs = cookies.split(';');
+        for (var i = 0; i < cs.length; i++){
+            var c = cs[i];
+            while(c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0){
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
+function removeWaitingSpinner(){
+    delete_cookie('xlscook');
+    $( "button:contains('Excel')").html('<span><i class="fa fa-file-excel-o"></i> Excel</span>');
+
+}
+var delete_cookie = function(name) {
+    document.cookie = name + "=pendiente; Path=/"
+};
+document.onkeyup = function(e) {
    if (e.shiftKey && e.which == 112) {
     window.open("ayudas_pdf/AyM01_24.pdf","_blank");
   }

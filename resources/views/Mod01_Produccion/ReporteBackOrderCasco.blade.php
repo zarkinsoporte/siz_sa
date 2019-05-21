@@ -23,7 +23,7 @@
     .DTFC_LeftHeadWrapper {
     display:none;
     }
-    
+  
 </style>
 
 <div class="container">
@@ -160,7 +160,8 @@ var table = $('#tbackorder').DataTable({
         {
             text: '<i class="fa fa-file-pdf-o"></i> Pdf',           
             className: "btn-danger",            
-                    action: function ( e, dt, node, config ) {                                
+                    action: function ( e, dt, node, config ) {  
+                        this.text('<i class="fa fa-spinner fa-pulse fa-lg fa-fw"></i> Pdf');                              
                          var data=table.rows( { filter : 'applied'} ).data().toArray();               
                          var json = JSON.stringify( data );
                          $.ajax({
@@ -172,7 +173,7 @@ var table = $('#tbackorder').DataTable({
                                 "arr": json
                                 },
                                 success:function(data){
-                                    window.open('reporte/backorderCascoPDF', '_blank')                                   
+                                    window.open('reporte/backorderCascoPDF', '_blank');                                   
                             }
                          });
                      }         
@@ -197,8 +198,7 @@ var table = $('#tbackorder').DataTable({
     scrollCollapse: true,
     paging:         true,
     fixedColumns:   true,
-    processing: true,
-    
+    processing:true,     
     deferRender:    true,
     ajax: {
         url: '{!! route('datatables.showbackordercasco') !!}',
@@ -233,14 +233,36 @@ var table = $('#tbackorder').DataTable({
 
     ],
     "language": {
-        "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json",
-        buttons: {
+       
+       buttons: {
             copyTitle: 'Copiar al portapapeles',
             copyKeys: 'Presiona <i>ctrl</i> + <i>C</i> para copiar o la tecla <i>Esc</i> para continuar.',
             copySuccess: {
                 _: '%d filas copiadas',
                 1: '1 fila copiada'
-            }
+            } 
+        },
+        "sProcessing":     '<i class="fa fa-spinner fa-pulse fa-3x fa-fw" style="font-size:6    0px;color:#1aafb7;"></i><span class="" style="font-size:30px; color:#1aafb7;">Procesando..</span> ',
+        "sLengthMenu":     "Mostrar _MENU_ registros",
+        "sZeroRecords":    "No se encontraron resultados",
+        "sEmptyTable":     "Ningún dato disponible en esta tabla",
+        "sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+        "sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0 registros",
+        "sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
+        "sInfoPostFix":    "",
+        "sSearch":         "Buscar:",
+        "sUrl":            "",
+        "sInfoThousands":  ",",
+        "sLoadingRecords": "Cargando...",
+        "oPaginate": {
+            "sFirst":    "Primero",
+            "sLast":     "Último",
+            "sNext":     "Siguiente",
+            "sPrevious": "Anterior"
+        },
+        "oAria": {
+            "sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
+            "sSortDescending": ": Activar para ordenar la columna de manera descendente"
         }
     },
     columnDefs: [
