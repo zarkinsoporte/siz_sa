@@ -171,3 +171,74 @@ $(".DTFC_LeftHeadWrapper").find("input").on( 'keyup change', function () {
         <!-- /.row -->
         <div class="row">
             <div class="col-md-12" style="margin-top: -30px;">
+
+
+
+                {
+                "git.ignoreMissingGitWarning": true,
+                "window.zoomLevel": 1,
+                "workbench.colorTheme": "Tomorrow Night Blue",
+                "emmet.triggerExpansionOnTab": true,
+                "colorInfo.languages": [
+                {
+                "selector": "css",
+                "colors": "css"
+                },
+                {
+                "selector": "sass",
+                "colors": "css"
+                },
+                {
+                "selector": "scss",
+                "colors": "css"
+                },
+                {
+                "selector": "less",
+                "colors": "css"
+                },
+                {
+                "selector": "blade",
+                "colors": "hex"
+                }
+                
+                ],
+                "colorInfo.fields":["hex", "rgb", "preview"],
+                "vs-color-picker.autoLaunchDelay": 10,
+                "editor.autoIndent": true,
+                "emmet.includeLanguages" : {
+                "blade" : "html"
+                },
+                
+                "editor.minimap.enabled": false,
+                
+                "editor.snippetSuggestions": "top",
+                "editor.formatOnPaste": true,
+                "editor.fontFamily" : "Fira Code",
+                "editor.fontLigatures": true,
+                "blade.format.enable": true,
+                "git.enableSmartCommit": true,
+                
+                }
+
+               
+            
+           
+           
+               //PHPExcel_Cell::stringFromColumnIndex(0); worked perfectly.       
+            $column = PHPExcel_Cell::stringFromColumnIndex(45);
+            $row = 1;
+            $cell = $column.$row;
+            
+           // The $cell will give you AT1 $range = 'A1:'.$cell; So you can easily pass into the filling range like.
+            
+            $objPHPExcel->getActiveSheet()->getStyle($range)->getFill()->applyFromArray(array(
+            'type' => PHPExcel_Style_Fill::FILL_SOLID,
+            'startcolor' => array(
+            'rgb' => 'FFFF00' //Yellow
+            )
+            ));
+
+           // https://github.com/PHPOffice/PHPExcel/blob/develop/Documentation/markdown/Overview/08-Recipes.md#page-setup-scaling-options
+
+           <input hidden value="{{$fechauser}}" id="fechauser" name="fechauser" />
+        <input hidden value="{{$tipo}}" id="tipo" name="tipo" />

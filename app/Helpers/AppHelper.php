@@ -1,6 +1,7 @@
 <?php
 namespace App\Helpers;
 use Carbon\Carbon;
+use DateTime;
 class AppHelper
 {
         private $meses = array();
@@ -42,6 +43,16 @@ class AppHelper
       );     
       return $pila;      
     }
+  public function getStartAndEndWeek($week, $year)
+  {
+    //esta funcion devuelve inicio y fin de la semana
+    $dto = new DateTime();
+    $dto->setISODate($year, $week);
+    $ret['week_start'] = $dto->format('d/m/y');
+    $dto->modify('+6 days');
+    $ret['week_end'] = $dto->format('d/m/y');
+    return $ret;
+  }
      public static function instance()
      {
          return new AppHelper();

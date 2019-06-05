@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Route;
 use Session;
 use Maatwebsite\Excel\Facades\Excel;
 use Datatables;
+use Illuminate\Database\Eloquent\Collection;
+
 ini_set("memory_limit", '512M');
 ini_set('max_execution_time', 0);
 class Mod02_PlaneacionController extends Controller
@@ -33,7 +35,7 @@ public function reporteMRP()
         // if ($accion == 'Actualizar') {//se ejecuta la actualizacion de la tabla
         //     DB::update("exec SIZ_MRP");
         // }
-        $f = DB::table('SIZ_T_MRP')->first();// obtener fecha de ultima actualizacion
+        $f = DB::table('SIZ_Z_MRP')->first();// obtener fecha de ultima actualizacion
         if(isset($f)){
              $Text = 'Actualizado el: ' . \AppHelper::instance()->getHumanDate_format($f->fechaDeEjecucion, 'h:i A');
         }else{
@@ -83,33 +85,90 @@ public function actualizaMRP(){
         }
         switch ($fecha) {
             case 'Producción':
-                    $consulta = DB::table('SIZ_T_MRP')
-                        ->select(DB::raw('fechaDeEjecucion, Descr, Itemcode, ItemName, UM, ExistGDL, ExistLERMA, WIP, sum(S0) S0, sum(S1)S1, sum(S2)S2, sum(S3)S3, sum(S4)S4, sum(S5)S5, sum(S6)S6, sum(S7)S7, sum(S8)S8, sum(S9)S9, sum(S10)S10, sum(S11)S11, sum(S2)S12, sum(S13)S13, sum(S14)S14, sum(S15)S15, sum(S16)S16, sum(S17)S17, sum(S18)S18, sum(S19)S19, sum(necesidadTotal)necesidadTotal, OC, Reorden, Minimo, Maximo, TE, Costo,Proveedor, Comprador'))
-                        ->where('U_C_Orden', 'like', $tipo)
-                        ->groupBy( "fechaDeEjecucion", 'Descr', 'Itemcode', 'ItemName', 'UM', 'ExistGDL', 'ExistLERMA', 'WIP', 'Costo', 'Proveedor', 'Comprador', 'Reorden', 'Maximo', 'Minimo', 'TE', 'OC');
-      
+                    // $consulta = DB::table('SIZ_T_MRP')
+                    //     ->select(DB::raw('fechaDeEjecucion, Descr, Itemcode, ItemName, UM, ExistGDL, ExistLERMA, WIP, sum(S0) S0, sum(S1)S1, sum(S2)S2, sum(S3)S3, sum(S4)S4, sum(S5)S5, sum(S6)S6, sum(S7)S7, sum(S8)S8, sum(S9)S9, sum(S10)S10, sum(S11)S11, sum(S2)S12, sum(S13)S13, sum(S14)S14, sum(S15)S15, sum(S16)S16, sum(S17)S17, sum(S18)S18, sum(S19)S19, sum(necesidadTotal)necesidadTotal, OC, Reorden, Minimo, Maximo, TE, Costo,Proveedor, Comprador'))
+                    //     ->where('U_C_Orden', 'like', $tipo)
+                    //     ->groupBy( "fechaDeEjecucion", 'Descr', 'Itemcode', 'ItemName', 'UM', 'ExistGDL', 'ExistLERMA', 'WIP', 'Costo', 'Proveedor', 'Comprador', 'Reorden', 'Maximo', 'Minimo', 'TE', 'OC');
+                    $consulta = DB::select('exec SIZ_SP_MRP ?, ?', ['semana', $tipo]);
+                
                 break;
             case 'Compras':
-                    $consulta = DB::table('SIZ_T_MRP')
-                        ->select(DB::raw( 'fechaDeEjecucion, Descr, Itemcode, ItemName, UM, ExistGDL, ExistLERMA, WIP, sum(Sc0) S0, sum(Sc1)S1, sum(Sc2)S2, sum(Sc3)S3, sum(Sc4)S4, sum(Sc5)S5, sum(Sc6)S6, sum(Sc7)S7, sum(Sc8)S8, sum(Sc9)S9, sum(Sc10)S10, sum(Sc11)S11, sum(Sc2)S12, sum(Sc13)S13, sum(Sc14)S14, sum(Sc15)S15, sum(Sc16)S16, sum(Sc17)S17, sum(Sc18)S18, sum(Sc19)S19, sum(necesidadTotal)necesidadTotal, OC, Reorden, Minimo, Maximo, TE, Costo,Proveedor, Comprador'))
-                        ->where('U_C_Orden', 'like', $tipo)
-                        ->groupBy( "fechaDeEjecucion", 'Descr', 'Itemcode', 'ItemName', 'UM', 'ExistGDL', 'ExistLERMA', 'WIP', 'Costo', 'Proveedor', 'Comprador', 'Reorden', 'Maximo', 'Minimo', 'TE', 'OC');
-          
+                    // $consulta = DB::table('SIZ_T_MRP')
+                    //     ->select(DB::raw( 'fechaDeEjecucion, Descr, Itemcode, ItemName, UM, ExistGDL, ExistLERMA, WIP, sum(Sc0) S0, sum(Sc1)S1, sum(Sc2)S2, sum(Sc3)S3, sum(Sc4)S4, sum(Sc5)S5, sum(Sc6)S6, sum(Sc7)S7, sum(Sc8)S8, sum(Sc9)S9, sum(Sc10)S10, sum(Sc11)S11, sum(Sc2)S12, sum(Sc13)S13, sum(Sc14)S14, sum(Sc15)S15, sum(Sc16)S16, sum(Sc17)S17, sum(Sc18)S18, sum(Sc19)S19, sum(necesidadTotal)necesidadTotal, OC, Reorden, Minimo, Maximo, TE, Costo,Proveedor, Comprador'))
+                    //     ->where('U_C_Orden', 'like', $tipo)
+                    //     ->groupBy( "fechaDeEjecucion", 'Descr', 'Itemcode', 'ItemName', 'UM', 'ExistGDL', 'ExistLERMA', 'WIP', 'Costo', 'Proveedor', 'Comprador', 'Reorden', 'Maximo', 'Minimo', 'TE', 'OC');
+                    $consulta = DB::select('exec SIZ_SP_MRP ?, ?', ['semana_c', $tipo]);
                 break;
         }
-            return Datatables::of($consulta)
-                ->addColumn('Resto', function ($consulta) {
-                    return ($consulta->S13 + $consulta->S14 + $consulta->S15 + $consulta->S16 + $consulta->S17 + $consulta->S18 + $consulta->S19);
-                })
-                ->addColumn('Necesidad', function ($consulta) {
-                    return ($consulta->ExistGDL + $consulta->ExistLERMA) - $consulta->necesidadTotal;
-                })
-                ->make(true);
+        //Definimos las columnas del MRP
+        $columns = array(
+            ["data" => "Itemcode", "name" => "Código"],
+            ["data" => "ItemName", "name" => "Descripción"],
+            ["data" => "Descr", "name" => "Grupo"],
+            ["data" => "UM", "name" => "UM"],
+            ["data" => "ExistGDL", "name" => "Ext. Gdl"],
+            ["data" => "ExistLERMA", "name" => "Ext. Lerma"],
+            ["data" => "WIP", "name" => "WIP"],
+            //["data" => "", "name" => ""],            
+        );
+        //dd(array_has($consulta[0], 'ant'));
+        //Si existe Cant Anterior agregamos la columna
+        if ( array_key_exists('ant', $consulta[0]) ) {
+            array_push($columns,["data" => "ant", "name" => "Anterior"]);
+        } 
+        //Obtenemos solo las columnas numericas para agregarlas al Array Columnas
+        $numerickeys = array_where(array_keys((array)$consulta[0]), function ($key, $value) {
+                    return is_numeric($value);
+                });
+        //Antes de agregar hay que ordenar las columnas numericas obtenidas
+        sort($numerickeys);
+        //agregar columnas...  hasta 2099 usar 20, para 2100 a 2199 usar 21...
+        $string_comienzo_anio = '20';
+        foreach ($numerickeys as $value) {
+            //averiguamos cuando inicia la semana
+            $num_semana = substr($value, 2, 2);
+            $year = $string_comienzo_anio. substr($value, 0, 2);
+            $StartAndEnd=\AppHelper::instance()->getStartAndEndWeek($num_semana, $year);
+            
+            //preparamos el nombre
+            $name = 'Sem-'.$num_semana.' '.$StartAndEnd['week_start'];
+            array_push($columns,["data" => $value, "name" => $name, "defaultContent"=> ".00"]);
+        }
+       
+        //agregamos las ultimas columnas pendientes
+        array_push($columns,["data" => "necesidadTotal", "name" => "Necesidad"]);
+        array_push($columns,["data" => "Necesidad", "name" => "Disp. S/WIP"]);
+        array_push($columns,["data" => "OC", "name" => "OC", "defaultContent" => ".00"]);
+        array_push($columns,["data" => "Reorden", "name" => "P. Reorden"]);
+        array_push($columns,["data" => "Minimo", "name" => "S. Minimo"]);
+        array_push($columns,["data" => "Maximo", "name" => "S. Maximo"]);
+        array_push($columns,["data" => "TE", "name" => "T.E."]);
+        array_push($columns,["data" => "Costo", "name" => "Costo Compras"]);
+        array_push($columns,["data" => "Proveedor", "name" => "Proveedor"]);
+        array_push($columns,["data" => "Comprador", "name" => "Comprador"]);
+        
+
+
+
+        
+        
+        return response()->json(array('data'=>$consulta, 'columns'=>$columns));
+            //collect($consulta)->toJson());
+      
+            // dd( Datatables::of(collect($consulta))
+            //     // ->addColumn('Resto', function ($consulta) {
+            //     //     return ($consulta->S13 + $consulta->S14 + $consulta->S15 + $consulta->S16 + $consulta->S17 + $consulta->S18 + $consulta->S19);
+            //     // })
+            //     ->addColumn('Necesidad', function ($consulta) {
+            //         return ($consulta->ExistGDL + $consulta->ExistLERMA) - $consulta->necesidadTotal;
+            //     })  
+            //     ->make(true));
         } else {
             return redirect()->route('auth/login');
         }
     }
-   
+    
+      
     public function mrpPDF() 
     {
         $data = json_decode(Session::get('mrp'));
@@ -122,99 +181,78 @@ public function actualizaMRP(){
     public function mrpXLS()
     {
         $path = public_path() . '/assets/plantillas_excel/Mod_02/SIZ_mrps.xlsx';
-        $data = json_decode(Session::get('mrp'));
-        
-       // dd( Session::get('mrp'));
-                
-        Excel::load($path, function ($excel) use ($data) {
-            $excel->sheet('General', function ($sheet) use ($data ) {
-
+        $data = json_decode(Session::get('mrp'), true);
+        //se obtienen los nombres de las columnas
+        $name_cols = array_pluck( json_decode(Session::get('cols'), true) , ['name']);
+        //se obtienen las keys para obtener los valores de cada fila   
+        $data_cols = array_pluck(json_decode(Session::get('cols'), true), ['data']);
+        $mrp_parameter = Session::get('parameter'); 
+        Excel::load($path, function ($excel) use ($data, $name_cols, $data_cols, $mrp_parameter) {
+            $excel->sheet('General', function ($sheet) use ($data, $name_cols, $data_cols, $mrp_parameter) {
                 $sheet->cell('A4', function ($cell) {
                     $cell->setValue("Fecha de Impresión: ".\AppHelper::instance()->getHumanDate(date("Y-m-d H:i:s")).' '. date("H:i:s"));
                 });
-                
-                $fecha = \Carbon\Carbon::now();
-                $sheet->row(6, [
-                    "Grupo",
-                                "Código",
-                                "Descripción",
-                                "UM",
-                                "Exist. Gdl",
-
-                                "Exist. Lerma",
-                                "WIP",
-                                "Anterior",
-                                "Sem-".$fecha->weekOfYear,
-                                "Sem-".$fecha->addWeek(1)->weekOfYear,
+                //obtenemos primer fila y la fecha de ejecucion
+                $fechaEjecucion =$data[0][ 'fechaDeEjecucion'];
+                //se coloca titulo del archivo 
+                $sheet->cell('A2', function ($cell)  use ($mrp_parameter){
+                    $cell->setValue($mrp_parameter);
+                });
+                //se coloca fecha de Ejecucion 
+                $sheet->cell('A5', function ($cell)  use ($fechaEjecucion){
+                    $cell->setValue('Fecha de Actualización: ' . \AppHelper::instance()->getHumanDate($fechaEjecucion));
+                });                
+                //se colocan los nombres de las columnas en el xls
+                $sheet->row(6, $name_cols);
+                //obtiene la ultima columna por texto: ejem. "F"      
+                $column = \PHPExcel_Cell::stringFromColumnIndex(count($name_cols)-1);
+                //ultima celda de encabezado seria:
+                $cell = $column . '6';
+                //el rango al que quiero aplicar estilo de encabezado
+                $range = 'A6:' . $cell;
+               
+                $sheet->getStyle($range)->
+                applyFromArray(
+                    array(
+                        'fill' => array(
+                            'type' => \PHPExcel_Style_Fill::FILL_SOLID,
+                            'startcolor' => array( 'rgb' => 'C5C66F' )
+                        ),
+                        'font' => array(
+                            'name'      =>  'Arial',
+                            'size'      =>  11,
+                            'bold'      =>  true,
+                            'color' => array('rgb' => '473AC9')
+                        ),
+                        'borders' => array(
+                            'outline' => array(
+                                'style' => \PHPExcel_Style_Border::BORDER_THICK,
                                 
-                                "Sem-".$fecha->addWeek(1)->weekOfYear,
-                                "Sem-".$fecha->addWeek(1)->weekOfYear,
-                                "Sem-".$fecha->addWeek(1)->weekOfYear,
-                                "Sem-".$fecha->addWeek(1)->weekOfYear,
-                                "Sem-".$fecha->addWeek(1)->weekOfYear,
-                                
-                                "Sem-".$fecha->addWeek(1)->weekOfYear,
-                                "Sem-".$fecha->addWeek(1)->weekOfYear,
-                                "Sem-".$fecha->addWeek(1)->weekOfYear,
-                                "Sem-".$fecha->addWeek(1)->weekOfYear,
-                                "Sem-".$fecha->addWeek(1)->weekOfYear,
-                                
-                                "Resto",
-                                "Necesidad",
-                                "Disp. S/WIP",
-                                "OC",
-                                "P. Reorden",
-                                "S. Minimo",
-                                "S. Maximo",
-                                "T.E.",
-                                "Costo C",
-                                "Proveedor",
-                                "Comprador"
-                ]);
-
-                $index = 7;
+                            ),
+                        ),
+                    ));
+                $sheet->setAutoFilter($range); //esto agrega un filtro encabezados
+                $index = 7; // se inicia llenado de datos
                 foreach ($data as $row) {
-                    if ($index == 7) {
-                        $sheet->cell('A5', function ($cell) use ($row){
-                            $cell->setValue('Fecha de Actualización: ' . \AppHelper::instance()->getHumanDate( $row->fechaDeEjecucion));
-                     });
+                    //se elabora la fila de acuedo a la cantidad de columnas (de acuerdo al nombre)
+                    $fila = [];
+                    foreach ($data_cols as $key) {
+                        array_push($fila, $row[$key] ?: '0');
                     }
-                    $sheet->row($index, [
-                     $row->Descr, 
-                     $row->Itemcode,
-                     $row->ItemName,
-                     $row->UM,
-                     number_format($row->ExistGDL, '2', '.', ','),
-                     number_format($row->ExistLERMA, '2', '.', ','),
-                     number_format($row->WIP, '2', '.', ','),
-                     number_format($row->S0, '2', '.', ','),
-                     number_format($row->S1, '2', '.', ','),
-                     number_format($row->S2, '2', '.', ','),
-                     number_format($row->S3, '2', '.', ','),
-                     number_format($row->S4, '2', '.', ','),
-                     number_format($row->S5, '2', '.', ','),
-                     number_format($row->S6, '2', '.', ','),
-                     number_format($row->S7, '2', '.', ','),
-                     number_format($row->S8, '2', '.', ','),
-                     number_format($row->S9, '2', '.', ','),
-                     number_format($row->S10, '2', '.', ','),
-                     number_format($row->S11, '2', '.', ','),
-                     number_format($row->S12, '2', '.', ','),
-                     number_format($row->Resto, '2', '.', ','),
-                     number_format($row->necesidadTotal, '2', '.', ','),
-                     number_format($row->Necesidad, '2', '.', ','),
-                     number_format($row->OC, '2', '.', ','),
-                     number_format($row->Reorden, '2', '.', ','),
-                     number_format($row->Minimo, '2', '.', ','),
-                     number_format($row->Maximo, '2', '.', ','),
-                     $row->TE,
-                     $row->Costo,
-                     $row->Proveedor,
-                     $row->Comprador,
-                    
-                    ]);
+                    //se coloca la fila en el XLS
+                    $sheet->row($index, $fila);
                     $index++;
                 }
+                
+                $cant = count($data)+6; //+6 por las primeras filas
+                $sheet->getColumnDimension('B')->setAutoSize(true);//ajusta ancho de celda segun texto
+                $sheet->getColumnDimension($column)->setAutoSize(true);
+                $column2 = \PHPExcel_Cell::stringFromColumnIndex(count($name_cols) - 2);
+                $sheet->getColumnDimension($column2)->setAutoSize(true);
+                //alinear texto de estas columnas a la izquierda (se le pasa el rango de hasta donde hay datos en la columna)
+                $sheet->getStyle('B6:B'.$cant)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+                $sheet->getStyle($column.'6:'.$column.$cant)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+                $sheet->getStyle($column2.'6:'.$column2.$cant)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
             });
         })
             ->setFilename('SIZ Resumen de MRP')

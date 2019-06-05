@@ -550,7 +550,16 @@ class Reportes_ProduccionController extends Controller
         }
     }
     public function AjaxToSession($id) {
-        Session::put( $id, Input::get('arr') );
+       
+        if ($id == 'mrp') {
+            Session::put( $id, Input::get('arr') );
+            Session::put( 'cols', Input::get('cols'));
+            Session::put('parameter', Input::get('parameter'));
+        } else {
+            Session::put( $id, Input::get('arr') );
+        }
+        
+        
     }
     public function backOrderAjaxToSession(){
         //ajax nos envia los registros del datatable que el usuario filtro y los alamcenamos en la session
