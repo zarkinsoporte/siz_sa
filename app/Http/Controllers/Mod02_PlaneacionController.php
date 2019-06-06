@@ -55,7 +55,7 @@ public function reporteMRP()
 }
 
 public function actualizaMRP(){
-        DB::update("exec SIZ_MRP");
+        DB::update("exec SIZ_NEWMRP");
         
         Session::flash('mensaje', "MRP actualizado...");
         
