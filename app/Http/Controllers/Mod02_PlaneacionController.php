@@ -256,6 +256,6 @@ public function actualizaMRP(){
             });
         })
             ->setFilename('SIZ Resumen de MRP')
-            ->export('xlsx');
+           ->export('xlsx', [ 'Set-Cookie' => 'xlscook=done; path=/;' ]);
     }
 }

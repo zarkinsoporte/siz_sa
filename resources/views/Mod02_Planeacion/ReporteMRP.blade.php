@@ -49,6 +49,13 @@
     input{
         color: black;
     }
+    div.dataTables_wrapper div.dataTables_processing {
+        width: 700px;
+        height: 400px;
+        margin-left: -35%;
+        background: linear-gradient(to right, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.95) 25%, rgba(255,255,255,0.95) 75%, rgba(255,255,255,0.2) 100%);
+        z-index: 15;
+    }
 </style>
 <?php
                 $fecha = \Carbon\Carbon::now();
@@ -72,9 +79,11 @@
      </div> 
     <!-- /.row -->
     <div class="row">
+        <div id="ajax_processing" class="dataTables_wrapper">
+            <div  class="dataTables_processing" style="display: block;"><i class="fa fa-spinner fa-pulse fa-3x fa-fw" style="font-size:25px; "></i><span style="font-size:25px; "><b>Procesando...</b></span></div>
+        </div>
         
         <div class="col-md-12">
-            
             <table id="tmrp" class="stripe cell-border display" >
                         <thead class="table-condensed">
                          <tr>
@@ -94,10 +103,6 @@
 @endsection
  
 @section('homescript')
-
-
-
-
 
 var data,
 tableName= '#tmrp',
@@ -127,7 +132,7 @@ jqxhr =  $.ajax({
             //    return '<h4>' + data + '</h4>';
            // }
                     // Debug? console.log(data.columns[0]);
-          var table = $(tableName).DataTable({
+        var table = $(tableName).DataTable({
                
                 dom: 'Blrtfip',
                 orderCellsTop: true,    
@@ -164,7 +169,8 @@ jqxhr =  $.ajax({
                         text: '<i class="fa fa-file-excel-o"></i> Excel',
                         className: "btn-success",
                         action: function ( e, dt, node, config ) {
-                                             console.log("excel btn");               
+                                    this.text('<i class="fa fa-spinner fa-pulse fa-lg fa-fw"></i> Excel');             
+                                    delete_cookie('xlscook');
                                     var data=table.rows( { filter : 'applied'} ).data().toArray();               
                                     var json = JSON.stringify( data );
                                      var col = JSON.stringify(columnas);
@@ -173,35 +179,31 @@ jqxhr =  $.ajax({
                                         type:'POST',
                                         url:'ajaxtosession/mrp',
                                         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},                            
-                                        data: {
+                                        data: 
+                                        {
                                             "_token": "{{ Session::token() }}",
                                             "arr": json,
                                             "cols":  col,
                                             "parameter": "Resumen de MRP (SIZ), Necesidades de Materia Prima ("+$('input[name=fechauser]').val()+"/"+$('input[name=tipo]').val()+")"
-                                            },
-                                            success:function(data){
-                                             window.location.href = 'mrpXLS';                                   
-                                        }
+                                        },
+                                        success:function(data)
+                                        {
+                                            window.location.href = 'mrpXLS';                                   
+                                        },
+                                        
+                                        complete: checkCookie
                                     });
                                 }         
                     }, 
                     
                 ],
                 "language": {
-                    "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json",
-                    buttons: {
-                        copyTitle: 'Copiar al portapapeles',
-                        copyKeys: 'Presiona <i>ctrl</i> + <i>C</i> para copiar o la tecla <i>Esc</i> para continuar.',
-                        copySuccess: {
-                            _: '%d filas copiadas',
-                            1: '1 fila copiada'
-                        }
-                    }
+                    "url": "{{ asset('assets/lang/Spanish.json') }}",                    
                 },
-                columnDefs: [
-                    
-                   
-                ], 
+                columnDefs: [],
+                "initComplete": function( settings, json ) {
+                    $('#ajax_processing').hide();
+                } 
             });
 
             $('#tmrp thead tr:eq(1) th').each( function (i) {
@@ -274,26 +276,51 @@ jqxhr =  $.ajax({
             } else {
                 msg = 'Uncaught Error.\n' + jqXHR.responseText;
             }
-console.log(msg);
+            console.log(msg);
         }
         });
-
+                       
 
 $('#tmrp thead tr').clone(true).appendTo( '#tmrp thead' );
-
-
-
-
-
+    function checkCookie(){
+        var verif = setInterval(isxlscook,500,verif);
+    }
+    function isxlscook(verif){
+        var loadState = getCookie("xlscook");        
+        if (loadState == "done"){
+        clearInterval(verif);
+        delete_cookie('xlscook');
+        $( ".btn-success" ).html('<span><i class="fa fa-file-excel-o"></i> Excel</span>');
+        }
+    }
+    function getCookie(cookieName){
+        var name = cookieName + "=";
+        var cookies = document.cookie
+        var cs = cookies.split(';');
+        for (var i = 0; i < cs.length; i++)
+        { 
+            var c=cs[i]; 
+            while(c.charAt(0)==' ')
+            { 
+                c=c.substring(1); 
+            } 
+            if (c.indexOf(name)==0)
+            { 
+                return c.substring(name.length, c.length); 
+            } 
+        } 
+        return "" ; 
+    } 
+    var delete_cookie = function(name) {
+        document.cookie = name + "=; Path=/; expires=Thu, 18 Dec 2013 12:00:00 UTC";        
+    }; 
 @endsection
 <script>
     document.onkeyup = function(e) {
-   if (e.shiftKey && e.which == 112) {
-    window.open("ayudas_pdf/AYM00_00.pdf","_blank");
-  }
-  }
-
-
-             
-                      
+        if (e.shiftKey && e.which == 112) {
+            window.open("ayudas_pdf/AYM00_00.pdf","_blank");
+        }
+       
+    }
+    
 </script>
