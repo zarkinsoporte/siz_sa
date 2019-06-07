@@ -56,6 +56,9 @@
         background: linear-gradient(to right, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.95) 25%, rgba(255,255,255,0.95) 75%, rgba(255,255,255,0.2) 100%);
         z-index: 15;
     }
+    table { //me ayudo a que no se desfazaran las columnas en Chrome
+        table-layout: fixed;
+    }
 </style>
 <?php
                 $fecha = \Carbon\Carbon::now();
