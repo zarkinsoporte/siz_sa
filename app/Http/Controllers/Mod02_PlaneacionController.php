@@ -233,14 +233,9 @@ public function actualizaMRP(){
                 $cell = $column . '6';
                 //el rango al que quiero aplicar estilo de encabezado
                 $range = 'A6:' . $cell;
-               
                 $sheet->getStyle($range)->
                 applyFromArray(
                     array(
-                       // 'fill' => array(
-                            //'type' => \PHPExcel_Style_Fill::FILL_SOLID,
-                          //  'startcolor' => array( 'rgb' => 'C5C66F' )
-                        //),
                         'font' => array(
                             'name'      =>  'Arial',
                             'size'      =>  11,
@@ -270,14 +265,18 @@ public function actualizaMRP(){
                 
                 $cant = count($data)+6; //+6 por las primeras filas
                 $sheet->getColumnDimension('C')->setAutoSize(true);//ajusta ancho de celda segun texto
+                //ultima columna
                 $sheet->getColumnDimension($column)->setAutoSize(true);
+                //penultima columna
                 $column2 = \PHPExcel_Cell::stringFromColumnIndex(count($name_cols) - 2);
                 $sheet->getColumnDimension($column2)->setAutoSize(true);
                 
+                //formato para columnas con numeros (negativos rojo y centrados)
                 $ultima_column_numero = \PHPExcel_Cell::stringFromColumnIndex(count($name_cols) - 3);
                 $sheet->getStyle('E7:'.$ultima_column_numero.$cant)->getNumberFormat()->setFormatCode( '#,##0.00;[red]-#,##0.00');
                 $sheet->getStyle('D7:'.$ultima_column_numero.$cant)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
                
+                //relleno blanco para todas las columnas
                 $sheet->getStyle('A7:'.$column.$cant)->applyFromArray(
                         array(
                             'fill' => array(
@@ -290,7 +289,9 @@ public function actualizaMRP(){
                 
                 //alinear texto de estas columnas a la izquierda (se le pasa el rango de hasta donde hay datos en la columna)
                 $sheet->getStyle('C6:C'.$cant)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+                //ultima columna
                 $sheet->getStyle($column.'6:'.$column.$cant)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+               //penultima columna
                 $sheet->getStyle($column2.'6:'.$column2.$cant)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
             });
         })
