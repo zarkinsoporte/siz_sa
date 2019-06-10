@@ -111,10 +111,21 @@ public function actualizaMRP(){
             ["data" => "WIP", "name" => "WIP"],
             //["data" => "", "name" => ""],            
         );
+            $columns_xls = array(
+                ["data" => "Descr", "name" => "Grupo"],
+                ["data" => "Itemcode", "name" => "Código"],
+                ["data" => "ItemName", "name" => "Descripción"],
+                ["data" => "UM", "name" => "UM"],
+                ["data" => "ExistGDL", "name" => "EXISTENCIA GDL"],
+                ["data" => "ExistLERMA", "name" => "EXISTENCIA LERMA"],
+                ["data" => "WIP", "name" => "WIP"],
+                //["data" => "", "name" => ""],            
+            );
         //dd(array_has($consulta[0], 'ant'));
         //Si existe Cant Anterior agregamos la columna
         if ( array_key_exists('ant', $consulta[0]) ) {
             array_push($columns,["data" => "ant", "name" => "Anterior"]);
+            array_push($columns_xls,["data" => "ant", "name" => "Anterior"]);
         } 
         //Obtenemos solo las columnas numericas para agregarlas al Array Columnas
         $numerickeys = array_where(array_keys((array)$consulta[0]), function ($key, $value) {
@@ -133,6 +144,7 @@ public function actualizaMRP(){
             //preparamos el nombre
             $name = 'Sem-'.$num_semana.' '.$StartAndEnd['week_start'];
             array_push($columns,["data" => $value, "name" => $name, "defaultContent"=> ".00"]);
+            array_push($columns_xls,["data" => $value, "name" => $name, "defaultContent"=> ".00"]);
         }
        
         //agregamos las ultimas columnas pendientes
@@ -147,12 +159,23 @@ public function actualizaMRP(){
         array_push($columns,["data" => "Proveedor", "name" => "Proveedor"]);
         array_push($columns,["data" => "Comprador", "name" => "Comprador"]);
         
+        array_push($columns_xls,["data" => "necesidadTotal", "name" => "Necesidad"]);
+        array_push($columns_xls,["data" => "Necesidad", "name" => "Disp. S/WIP"]);
+        array_push($columns_xls,["data" => "OC", "name" => "OC", "defaultContent" => ".00"]);
+        array_push($columns_xls,["data" => "Reorden", "name" => "P. Reorden"]);
+        array_push($columns_xls,["data" => "Minimo", "name" => "S. Minimo"]);
+        array_push($columns_xls,["data" => "Maximo", "name" => "S. Maximo"]);
+        array_push($columns_xls,["data" => "TE", "name" => "T.E."]);
+        array_push($columns_xls,["data" => "Costo", "name" => "Costo Compras"]);
+        array_push($columns_xls,["data" => "Proveedor", "name" => "Proveedor"]);
+        array_push($columns_xls,["data" => "Comprador", "name" => "Comprador"]);
+        
 
 
 
         
         
-        return response()->json(array('data'=>$consulta, 'columns'=>$columns));
+        return response()->json(array('data'=>$consulta, 'columns'=>$columns, 'columnsxls'=> $columns_xls));
             //collect($consulta)->toJson());
       
             // dd( Datatables::of(collect($consulta))
@@ -180,7 +203,7 @@ public function actualizaMRP(){
 
     public function mrpXLS()
     {
-        $path = public_path() . '/assets/plantillas_excel/Mod_02/SIZ_mrps.xlsx';
+        $path = public_path() . '/assets/plantillas_excel/Mod_02/mrp.xlsx';
         $data = json_decode(Session::get('mrp'), true);
         //se obtienen los nombres de las columnas
         $name_cols = array_pluck( json_decode(Session::get('cols'), true) , ['name']);
@@ -214,10 +237,10 @@ public function actualizaMRP(){
                 $sheet->getStyle($range)->
                 applyFromArray(
                     array(
-                        'fill' => array(
-                            'type' => \PHPExcel_Style_Fill::FILL_SOLID,
-                            'startcolor' => array( 'rgb' => 'C5C66F' )
-                        ),
+                       // 'fill' => array(
+                            //'type' => \PHPExcel_Style_Fill::FILL_SOLID,
+                          //  'startcolor' => array( 'rgb' => 'C5C66F' )
+                        //),
                         'font' => array(
                             'name'      =>  'Arial',
                             'size'      =>  11,
@@ -241,16 +264,32 @@ public function actualizaMRP(){
                     }
                     //se coloca la fila en el XLS
                     $sheet->row($index, $fila);
+
                     $index++;
                 }
                 
                 $cant = count($data)+6; //+6 por las primeras filas
-                $sheet->getColumnDimension('B')->setAutoSize(true);//ajusta ancho de celda segun texto
+                $sheet->getColumnDimension('C')->setAutoSize(true);//ajusta ancho de celda segun texto
                 $sheet->getColumnDimension($column)->setAutoSize(true);
                 $column2 = \PHPExcel_Cell::stringFromColumnIndex(count($name_cols) - 2);
                 $sheet->getColumnDimension($column2)->setAutoSize(true);
+                
+                $ultima_column_numero = \PHPExcel_Cell::stringFromColumnIndex(count($name_cols) - 3);
+                $sheet->getStyle('E7:'.$ultima_column_numero.$cant)->getNumberFormat()->setFormatCode( '#,##0.00;[red]-#,##0.00');
+                $sheet->getStyle('D7:'.$ultima_column_numero.$cant)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+               
+                $sheet->getStyle('A7:'.$column.$cant)->applyFromArray(
+                        array(
+                            'fill' => array(
+                            'type' => \PHPExcel_Style_Fill::FILL_SOLID,
+                              'startcolor' => array( 'rgb' => 'FFFFFF' )
+                            ),
+                        )
+                    );
+                //$sheet->getStyle('B6:B'.$cant)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+                
                 //alinear texto de estas columnas a la izquierda (se le pasa el rango de hasta donde hay datos en la columna)
-                $sheet->getStyle('B6:B'.$cant)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+                $sheet->getStyle('C6:C'.$cant)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
                 $sheet->getStyle($column.'6:'.$column.$cant)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
                 $sheet->getStyle($column2.'6:'.$column2.$cant)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
             });

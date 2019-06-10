@@ -128,7 +128,7 @@ jqxhr =  $.ajax({
                 $(str).appendTo(tableName+'>thead>tr');
                // console.log("adding col "+ colObj.name);
             });
-            columnas = data.columns;
+            columnas = data.columnsxls;
             // Add some Render transformations to Columns
             // Not a good practice to add any of this in API/ Json side
             //data.columns[0].render = function (data, type, row) {
