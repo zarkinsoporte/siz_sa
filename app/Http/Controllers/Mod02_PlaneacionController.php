@@ -275,7 +275,18 @@ public function actualizaMRP(){
                 $ultima_column_numero = \PHPExcel_Cell::stringFromColumnIndex(count($name_cols) - 3);
                 $sheet->getStyle('E7:'.$ultima_column_numero.$cant)->getNumberFormat()->setFormatCode( '#,##0.00;[red]-#,##0.00');
                 $sheet->getStyle('D7:'.$ultima_column_numero.$cant)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-               
+                
+                //relleno encabezado semanas otro color
+                $ultima_column_sem =\PHPExcel_Cell::stringFromColumnIndex(count($name_cols) - 11);
+                $sheet->getStyle('H6:' . $ultima_column_sem . '6')->applyFromArray(
+                    array(
+                        'fill' => array(
+                            'type' => \PHPExcel_Style_Fill::FILL_SOLID,
+                            'startcolor' => array('rgb' => 'E78ABF')
+                        ),
+                    )
+                );
+
                 //relleno blanco para todas las columnas
                 $sheet->getStyle('A7:'.$column.$cant)->applyFromArray(
                         array(
