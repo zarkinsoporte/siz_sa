@@ -203,6 +203,7 @@ public function actualizaMRP(){
 
     public function mrpXLS()
     {
+        if (Auth::check()) {
         $path = public_path() . '/assets/plantillas_excel/Mod_02/mrp.xlsx';
         $data = json_decode(Session::get('mrp'), true);
         //se obtienen los nombres de las columnas
@@ -264,12 +265,15 @@ public function actualizaMRP(){
                 }
                 
                 $cant = count($data)+6; //+6 por las primeras filas
-                $sheet->getColumnDimension('C')->setAutoSize(true);//ajusta ancho de celda segun texto
+                $sheet->getColumnDimension('C')->setAutoSize(false);//ajusta ancho de celda segun texto
+                $sheet->getColumnDimension('C')->setWidth(46);
                 //ultima columna
                 $sheet->getColumnDimension($column)->setAutoSize(true);
+                
                 //penultima columna
                 $column2 = \PHPExcel_Cell::stringFromColumnIndex(count($name_cols) - 2);
-                $sheet->getColumnDimension($column2)->setAutoSize(true);
+                $sheet->getColumnDimension($column2)->setAutoSize(false);
+                $sheet->getColumnDimension($column2)->setWidth(40);
                 
                 //formato para columnas con numeros (negativos rojo y centrados)
                 $ultima_column_numero = \PHPExcel_Cell::stringFromColumnIndex(count($name_cols) - 3);
@@ -299,14 +303,17 @@ public function actualizaMRP(){
                 //$sheet->getStyle('B6:B'.$cant)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
                 
                 //alinear texto de estas columnas a la izquierda (se le pasa el rango de hasta donde hay datos en la columna)
-                $sheet->getStyle('C6:C'.$cant)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+                //$sheet->getStyle('C6:C'.$cant)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
                 //ultima columna
-                $sheet->getStyle($column.'6:'.$column.$cant)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+                //$sheet->getStyle($column.'6:'.$column.$cant)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
                //penultima columna
-                $sheet->getStyle($column2.'6:'.$column2.$cant)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+                //$sheet->getStyle($column2.'6:'.$column2.$cant)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
             });
         })
             ->setFilename('SIZ Resumen de MRP')
            ->export('xlsx', [ 'Set-Cookie' => 'xlscook=done; path=/;' ]);
+        } else {
+        return redirect()->route('auth/login');
+        }
     }
 }
