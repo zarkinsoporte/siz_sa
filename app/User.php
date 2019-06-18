@@ -91,8 +91,8 @@ class User extends Model implements AuthenticatableContract,
                 'Siz_Menu_Item.name AS menu',
                 'Siz_Tarea_menu.name AS tarea')
             ->orderBy('Siz_Modulo.name', 'asc')
-            ->orderBy('id_menu', 'asc')
-            ->orderBy('id_tarea', 'asc')
+            ->orderBy( 'Siz_Menu_Item.name', 'asc')
+            ->orderBy( 'Siz_Tarea_menu.name', 'asc')
             ->get();
         return $actividades;
     }

@@ -9,7 +9,7 @@
             <div class="visible-xs visible-sm"><br><br></div>
             <div class="col-lg-6.5 col-md-8 col-sm-7">
                 <h3 class="page-header">
-                    Modificación de Inventario {{$inventario->tipo_equipo}}
+                    Modificación de Inventario - Equipo #{{$i->numero_equipo}}
                 </h3>
             </div>
         </div>
@@ -36,206 +36,428 @@
                  @include('partials.alertas')
             </div>
         </div>
-
-
-        {{--este form tiene que enviar la informacion--}} {!! Form::open(['url' => 'admin/mod_inv2', 'method' => 'POST']) !!}
+        <style>
+            .hoverblack li>a:hover {
+                color: #000;
+                text-decoration: none;
+            }
+        
+            required {
+                color: red;
+            }
+          
+        </style>
+        {{--este form tiene que enviar la informacion--}} 
+        {!! Form::open(['url' => 'admin/mod_inv2', 'method' => 'POST']) !!}
+       <input type="hidden" name="id_inv" class="form-control" value="{{$i->id_inv}}">
         <div class="row">
-            <div class="col-md-3 col-sm-6">
-                <div class="form-group">
-                    <label for="numero_equipo">Número de Equipo</label>
-                    <input type="number" name="numero_equipo" class="form-control" placeholder="Ej 77" value="{{ $inventario->numero_equipo }}" required>
-                </div>
+        <div class="col-md-11">
+            <div class="form-group " style="display: block;">
+                <button id="saveRegistro" type="submit" class="btn btn-primary" name="saveRegistro">Actualizar</button></div>
+            <div class="" id="tab1" data-role="tab">
+                <ul class="nav nav-tabs hoverblack">
+                    <li class="active"><a href="#Registro" data-toggle="tab">Registro</a></li>
+                    <li class=""><a data-toggle="tab" href="#Usuario" id="UsuarioT">Usuario</a></li>
+                    <li class=""><a href="#Hardware" data-toggle="tab" id="HardwareT">Hardware</a></li>
+                    <li class=""><a id="SoftwareT" href="#Software" data-toggle="tab">Software</a></li>
+                    <li class=""><a id="MantenimientoT" href="#Mantenimiento" data-toggle="tab">Mantenimiento</a></li>
+                    <li class=""><a id="ControlT" href="#Control" data-toggle="tab">Control y Acceso</a></li>
+                </ul>
+    
             </div>
-            <div class="col-md-3 col-sm-6">
-                <div class="form-group">
-                    <label for="NombreEquipo">Nombre Equipo</label>
-                    <input type="text" name="nombre_equipo" class="form-control" placeholder="Ej. HP Probook 4520s" value="{{ $inventario->nombre_equipo }}"
-                        required>
-                </div>
+            <div class="tab-content" style="margin-top:10px">
+                <div role="tabpanel" class="tab-pane active" id="Registro">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <label for="numero_equipo">{{'# Equipo'}} <required>*</required></label>
+                                    <input type="number" name="numero_equipo" class="form-control"
+                                        value="{{ $i->numero_equipo }}" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <label for="estatus">Estatus <required>*</required></label>
+                                    <select class="form-control" name="estatus" value="{{ $i->estatus }}" required>
+                                        <option>ACTIVO</option>
+                                        <option>INACTIVO</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <label for="ubicacion">Ubicación <required>*</required></label>
+                                    <select class="form-control" name="ubicacion" value="{{ $i->ubicacion }}" required>
+                                        <option>LERMA OFICINAS</option>
+                                        <option>LERMA CARPINTERIA</option>
+                                        <option>GUADALAJARA</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <label for="area">Área</label>
+                                    <input type="text" name="area" class="form-control" value="{{ $i->area }}" autofocus>
+                                </div>
+                            </div>
+                        </div> <!-- /.row-->
+                        <div class="row">
+                            <div class="col-md-8 col-sm-6">
+                                <div class="form-group">
+                                    <label for="NombreEquipo">Descripción <required>*</required></label>
+                                    <input type="text" name="nombre_equipo" class="form-control"
+                                        placeholder="Ej. HP Probook 4520s" value="{{ $i->nombre_equipo }}" required>
+                                </div>
+                            </div>
+                        </div> <!-- /.row -->
+                        <div class="row">
+                            <div class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <label for="usuario_actualizacion">Usuario que Actualiza </label>
+                                    <input type="text" name="usuario_actualizacion" class="form-control" readonly
+                                        value="{{ Auth::user()->firstName.' '.Auth::user()->lastName }}">
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <label for="NombreEquipo">Fecha de Actualización</label>
+                                    <input type="text" name="fecha_actualizacion" class="form-control" readonly
+                                        value="<?php echo date('d-m-Y'); ?>">
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <label for="usuario_actualizacion">Usuario última Actualización </label>
+                                    <input type="text" name="x" class="form-control" readonly
+                                        value="{{ $i->usuario_actualizacion }}">
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <?php
+                                        
+                                        $v = date_format(date_create($i->fecha_actualizacion), 'd-m-Y')
+                                    ?>
+                                    <label for="NombreEquipo">Fecha última Actualización</label>
+                                    <input type="text" name="xx" class="form-control" readonly
+                                        value="{{ $v }}">
+                                </div>
+                            </div>
+                        </div> <!-- /.row -->
+    
+                    </div> <!-- /.container-->
+                </div> <!-- /.tabpanel-->
+    
+                <div role="tabpanel" class="tab-pane" id="Usuario">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <label for="nombre_usuario">Nombre</label>
+                                    <input type="text" name="nombre_usuario" class="form-control"
+                                        placeholder="Nombre y Apellido" value="{{ $i->nombre_usuario}}">
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <label for="Correo">Correo</label>
+                                    <input type="email" name="correo" class="form-control"
+                                        placeholder="nombre.apellido@zarkin.com" value="{{ $i->correo}}">
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <label for="correo_password">Contraseña de Correo</label>
+                                    <input type="text" name="correo_password" class="form-control"
+                                        value="{{ $i->correo_password}}">
+                                </div>
+                            </div>
+                        </div><!-- /.row-->
+                    </div><!-- /.container-->
+                </div><!-- /.tabpanel-->
+                <div role="tabpanel" class="tab-pane" id="Hardware">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-5 col-sm-6">
+                                <div class="form-group">
+                                    <label for="tipo_equipo">Tipo de Equipo <required>*</required></label>
+                                    <select class="form-control" name="tipo_equipo" value="{{ $i->tipo_equipo}}"
+                                        required>
+                                        <option>ESCRITORIO</option>
+                                        <option>LAPTOP</option>
+                                        <option>ALL IN ONE</option>
+                                        <option>SERVIDOR</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-5 col-sm-6">
+                                <div class="form-group">
+                                    <label for="monitor">Monitor</label>
+                                    <select class="form-control" name="monitor" value="{{ $i->monitor}}">
+                                        <option value="1">N/A</option>
+                                        @foreach ($monitores as $monitor)
+                                        <option value="{{ $monitor->id_mon }}">{{ $monitor->nombre_monitor }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+    
+                        </div> <!-- /.row-->
+                        <div class="row">
+                            <div class="col-md-6 col-sm-6">
+                                <div class="form-group">
+                                    <label for="serie">Serie</label>
+                                    <input type="text" name="serie" class="form-control" value="{{ $i->noserie}}">
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <label for="procesador">Procesador </label>
+                                    <input type="text" name="procesador" class="form-control"
+                                        value="{{ $i->procesador}}">
+                                </div>
+                            </div>
+                        </div><!-- /.row -->
+                        <div class="row">
+                            <div class="col-md-6 col-sm-6">
+                                <div class="form-group">
+                                    <label for="marca">Marca</label>
+                                    <input type="text" name="marca" class="form-control" value="{{ $i->marca}}">
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <label for="velocidad">Velocidad Procesador(GHZ) </label>
+                                    <input type="number" step="any" name="velocidad" class="form-control"
+                                        value="{{ $i->velocidad}}" >
+                                </div>
+                            </div>
+                        </div><!-- /.row-->
+                        <div class="row">
+                            <div class="col-md-6 col-sm-6">
+                                <div class="form-group">
+                                    <label for="modelo">Módelo</label>
+                                    <input type="text" name="modelo" class="form-control" value="{{ $i->modelo}}">
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-4">
+                                <div class="form-group">
+                                    <label for="arquitectura">Arquitectura </label>
+                                    <select class="form-control" name="arquitectura" value="{{ $i->arquitectura}}" >
+                                        <option value="X64">X64</option>
+                                        <option value="X32">X32</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div><!-- /.row-->
+                        <div class="row">
+                            <div class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <label for="memoria">Memoria RAM (GB) </label>
+                                    <input type="number" name="memoria" class="form-control" value="{{ $i->memoria}}"
+                                        >
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <label for="disco_duro">Disco Duro (GB) </label>
+                                    <input type="number" name="disco_duro" class="form-control"
+                                        value="{{ $i->espacio_disco}}" >
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <label for="electrica">Protección Eléctrica</label>
+                                    <select class="form-control" name="electrica" value="{{ $i->proteccion_electrica}}">
+                                        <option value="NO">NO</option>
+                                        <option value="SI">SI</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <label for="descripcion_electrica">Descripción (P. Eléctrica)</label>
+                                    <input type="text" name="descripcion_electrica" class="form-control"
+                                        value="{{ $i->descripcion_electrica}}">
+                                </div>
+                            </div>
+                        </div><!-- /.row-->
+                    </div> <!-- /.container-->
+                </div><!-- /.tabpanel-->
+                <div role="tabpanel" class="tab-pane" id="Software">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-6 col-sm-6">
+                                <div class="form-group">
+                                    <label for="so">SO </label>
+                                    <input type="text" name="so" class="form-control" value="{{ $i->so}}" >
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-sm-6">
+                                <div class="form-group">
+                                    <label for="l_so">Licencia SO</label>
+                                    <input type="text" name="l_so" class="form-control" value="{{ $i->l_so}}">
+                                </div>
+                            </div>
+                        </div><!-- /.row-->
+                        <div class="row">
+                            <div class="col-md-6 col-sm-6">
+                                <div class="form-group">
+                                    <label for="ofimatica">Ofimática</label>
+                                    <input type="text" name="ofimatica" class="form-control" value="{{ $i->ofimatica}}"
+                                        >
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-sm-6">
+                                <div class="form-group">
+                                    <label for="l_ofimatica">Licencia Ofimática</label>
+                                    <input type="text" name="l_ofimatica" class="form-control"
+                                        value="{{ $i->l_ofimatica}}">
+                                </div>
+                            </div>
+                        </div><!-- /.row -->
+                        <div class="row">
+                            <div class="col-md-6 col-sm-6">
+                                <div class="form-group">
+                                    <label for="antivirus">Antivirus</label>
+                                    <input type="text" name="antivirus" class="form-control" value="{{ $i->antivirus}}">
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-sm-6">
+                                <div class="form-group">
+                                    <label for="l_antivirus">Licencia Antivirus</label>
+                                    <input type="text" name="l_antivirus" class="form-control"
+                                        value="{{ $i->l_antivirus}}">
+                                </div>
+                            </div>
+                        </div><!-- /.row -->
+                        <div class="row">
+                            <div class="col-md-6 col-sm-6">
+                                <div class="form-group">
+                                    <label for="otro">Otro</label>
+                                    <input type="text" name="otro" class="form-control" value="{{ $i->otros}}">
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-sm-6">
+                                <div class="form-group">
+                                    <label for="l_otro">Licencia Otro</label>
+                                    <input type="text" name="l_otro" class="form-control" value="{{ $i->l_otros}}">
+                                </div>
+                            </div>
+                        </div><!-- /.row -->
+                    </div><!-- /.container-->
+                </div><!-- /.tabpanel-->
+                <div role="tabpanel" class="tab-pane" id="Mantenimiento">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-6 col-sm-6">
+                                <div class="form-group">
+                                    <label for="mantenimiento_programado">Próximo Mantenimiento</label>
+                                    <input type="Date" name="mantenimiento_programado" class="form-control" placeholder=""
+                                        value="{{ $i->Fecha_mttoProgramado}}">
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-sm-6">
+                                <div class="form-group">
+                                    <label for="mantenimiento_realizado">Último Mantenimiento Realizado</label>
+                                    <input type="Date" name="mantenimiento_realizado" class="form-control" placeholder=""
+                                        value="{{ $i->Fecha_mantenimiento}}">
+                                </div>
+                            </div>
+                        </div><!-- /.row -->
+                        <div class="row">
+                            <div class="col-md-6 col-sm-6">
+                                <label for="ObservacionesTec">Observaciones</label>
+                                <textarea id="ObservacionesTec" rows="2" class="form-control" data-role="textarea"
+                                    name="ObservacionesTec" data-maxwords="50" value="{{$i->Observaciones}}"></textarea>
+                            </div>
+                        </div><!-- /.row -->
+                        <br>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-6">
+                                <div class="form-group">
+                                    <label for="garantia">Garantía</label>
+                                    <select class="form-control" name="garantia" value="{{ $i->garantia}}">
+                                        <option value="VENCIDA">VENCIDA</option>
+                                        <option value="VIGENTE">VIGENTE</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-sm-6">
+                                <div class="form-group">
+                                    <label for="fecha_garantia">Vencimiento Garantía</label>
+                                    <input type="Date" name="fecha_garantia" class="form-control" placeholder=""
+                                        value="{{ $i->Fecha_garantia}}">
+                                </div>
+                            </div>
+                        </div><!-- /.row -->
+                    </div><!-- /.container-->
+                </div><!-- /.tabpanel-->
+                <div role="tabpanel" class="tab-pane" id="Control">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-6 col-sm-6">
+                                <div class="form-group">
+                                    <label for="local_user">Usuario Local </label>
+                                    <input type="text" name="local_user" class="form-control"
+                                        value="{{ $i->local_user}}">
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-sm-6">
+                                <div class="form-group">
+                                    <label for="local_pass">Contraseña Local</label>
+                                    <input type="text" name="local_pass" class="form-control"
+                                        value="{{ $i->local_pass}}">
+                                </div>
+                            </div>
+                        </div><!-- /.row -->
+                        <div class="row">
+                            <div class="col-md-6 col-sm-6">
+                                <div class="form-group">
+                                    <label for="dominio_user">Usuario Dominio</label>
+                                    <input type="text" name="dominio_user" class="form-control"
+                                        value="{{ $i->dominio_user}}">
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-sm-6">
+                                <div class="form-group">
+                                    <label for="dominio_pass">Contraseña Local</label>
+                                    <input type="text" name="dominio_pass" class="form-control"
+                                        value="{{ $i->dominio_pass}}">
+                                </div>
+                            </div>
+                        </div><!-- /.row -->
+                        <div class="row">
+                            <div class="col-md-6 col-sm-6">
+                                <div class="form-group">
+                                    <label for="antivirus_user">Usuario Antivirus </label>
+                                    <input type="text" name="antivirus_user" class="form-control"
+                                        value="{{ $i->antivirus_user}}">
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-sm-6">
+                                <div class="form-group">
+                                    <label for="antivirus_pass">Contraseña Antivirus</label>
+                                    <input type="text" name="antivirus_pass" class="form-control"
+                                        value="{{ $i->antivirus_pass}}">
+                                </div>
+                            </div>
+                        </div><!-- /.row -->
+                    </div><!-- /.container-->
+                </div><!-- /.tabpanel-->
             </div>
-            <div class="col-md-3 col-sm-6">
-                <div class="form-group">
-                    <label for="nombre_usuario">Nombre Usuario</label>
-                    <input type="text" name="nombre_usuario" class="form-control" placeholder="Nombre y Apellido" value="{{ $inventario->nombre_usuario }}"
-                        required>
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-6">
-
-                <div class="form-group">
-                    <label for="Correo">Correo</label>
-                    <input type="email" name="correo" class="form-control" placeholder="nombre.apellido@zarkin.com" value="{{ $inventario->correo }}"
-                        required>
-                </div>
-            </div>
+    
         </div>
-        <div class="row">
-            <div class="col-md-3 col-sm-6">
-                <div class="form-group">
-                    <label for="correo_password">Correo password</label>
-                    <input type="text" name="correo_password" class="form-control" value="{{ $inventario->correo_password }}" required>
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-6">
-                <div class="form-group">
-                    <label for="monitor">Monitor</label>
-                    <select class="form-control" name="monitor" value="{{ $inventario->monitor }}" required>
-                    <option value="1">N/A</option>
-                    @foreach ($monitores as $monitor)                    
-                        <option value="{{ $monitor->id_mon }}" {{$inventario->monitor==$monitor->id_mon ? 'selected' : null}}>{{ $monitor->nombre_monitor }}</option>
-                    @endforeach 
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-6">
-                <div class="form-group">
-                    <label for="estatus">Estatus</label>
-                    <select class="form-control" name="estatus" value="{{ $inventario->estatus }}" required>
-                        <option {{($inventario->estatus=='ACTIVO') ? 'selected' : ''}}>ACTIVO</option>
-                        <option {{($inventario->estatus<>'ACTIVO') ? 'selected' : ''}}>INACTIVO</option>                       
-                        </select>
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-6">
-                <div class="form-group">
-                    <label for="ubicacion">Ubicación</label>
-                    <select class="form-control" name="ubicacion" value="{{ $inventario->ubicacion }}" required>
-                        <option {{($inventario->ubicacion=='LERMA OFICINAS') ? 'selected' : ''}}>LERMA OFICINAS</option>
-                        <option {{($inventario->ubicacion=='LERMA CARPINTERIA') ? 'selected' : ''}}>LERMA CARPINTERIA</option>                       
-                        <option {{($inventario->ubicacion=='GUADALAJARA') ? 'selected' : ''}}>GUADALAJARA</option>                       
-                        </select>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-3 col-sm-6">
-                <div class="form-group">
-                    <label for="area">Área</label>
-                    <input type="text" name="area" class="form-control" value="{{ $inventario->area }}" required>
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-6">
-                <div class="form-group">
-                    <label for="tipo_equipo">Tipo de Equipo</label>
-                    <select class="form-control" name="tipo_equipo" value="{{ $inventario->tipo_equipo }}" required>
-                    <option {{($inventario->tipo_equipo=='ESCRITORIO') ? 'selected' : ''}}>ESCRITORIO</option>
-                    <option {{($inventario->tipo_equipo=='LAPTOP')? 'selected' : ''}}>LAPTOP</option>
-                    <option {{($inventario->tipo_equipo=='ALL IN ONE') ? 'selected' : ''}}>ALL IN ONE</option>
-                    <option {{($inventario->tipo_equipo=='SERVIDOR') ? 'selected' : ''}}>SERVIDOR</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-6">
-                <div class="form-group">
-                    <label for="serie">Serie</label>
-                    <input type="text" name="serie" class="form-control" value="{{ $inventario->noserie }}" required>
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-6">
-                <div class="form-group">
-                    <label for="marca">Marca</label>
-                    <input type="text" name="marca" class="form-control" value="{{ $inventario->marca }}" required>
-                </div>
-            </div>
-        </div>
-
-
-        <div class="row">
-            <div class="col-md-3 col-sm-6">
-                <div class="form-group">
-                    <label for="modelo">Módelo</label>
-                    <input type="text" name="modelo" class="form-control" value="{{ $inventario->modelo }}" required>
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-6">
-                <div class="form-group">
-                    <label for="procesador">Procesador</label>
-                    <input type="text" name="procesador" class="form-control" value="{{ $inventario->procesador }}" required>
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-6">
-                <div class="form-group">
-                    <label for="velocidad">Velocidad (GHZ)</label>
-                    <input type="number" name="velocidad" class="form-control" value="{{ $inventario->velocidad }}" required>
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-6">
-                <div class="form-group">
-                    <label for="memoria">Memoria</label>
-                    <input type="text" name="memoria" class="form-control" value="{{ $inventario->memoria }}" required>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-3 col-sm-6">
-                <div class="form-group">
-                    <label for="disco_duro">Disco Duro (GB)</label>
-                    <input type="number" name="disco_duro" class="form-control" value="{{ $inventario->espacio_disco }}" required>
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-6">
-                <div class="form-group">
-                    <label for="so">SO</label>
-                    <input type="text" name="so" class="form-control" value="{{ $inventario->so }}" required>
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-6">
-                <div class="form-group">
-                    <label for="arquitectura">Arquitectura</label>
-                    <input type="text" name="arquitectura" class="form-control" value="{{ $inventario->arquitectura }}" required>
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-6">
-                <div class="form-group">
-                    <label for="ofimatica">Ofimática</label>
-                    <input type="text" name="ofimatica" class="form-control" value="{{ $inventario->ofimatica }}" required>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-3 col-sm-6">
-                <div class="form-group">
-                    <label for="antivirus">Antivirus</label>
-                    <input type="text" name="antivirus" class="form-control" value="{{ $inventario->antivirus }}" required>
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-6">
-                <div class="form-group">
-                    <label for="otro">Otro</label>
-                    <input type="text" name="otro" class="form-control" value="{{ $inventario->otros }}">
-                </div>
-            </div>
-            <?php   
-                $date_programado = date_create($inventario->Fecha_mttoProgramado);
-                $date_mtto = date_create($inventario->Fecha_mantenimiento);                               
-            ?>
-            <div class="col-md-3 col-sm-6">
-                <div class="form-group">
-                    <label for="mantenimiento_programado">Último mantenimiento Programado</label>
-                    <input type="Date" name="mantenimiento_programado" class="form-control" placeholder="" value="{{ date_format($date_programado, 'Y-m-d') }}">
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-6">
-                <div class="form-group">
-                    <label for="mantenimiento_realizado">Último mantenimiento Realizado</label>
-                    <input type="Date" name="mantenimiento_realizado" class="form-control" placeholder="" value="{{ date_format($date_mtto, 'Y-m-d') }}">
-                </div>
-
-            </div>
-            <input type="hidden" name="id_inv" class="form-control" value="{{$inventario->id_inv}}">
-        </div>
-        <div>
-            <p align="right">
-                <button type="submit" class="btn btn-primary">Guardar</button> {!! Form::close() !!}
-            </p>
-        </div>
-
     </div>
+    {!! Form::close() !!}
+
+    </div> <!-- /.container -->
 
 @endsection
  
 @section('script')
+$('input').keyup(function() {
+this.value = this.value.toLocaleUpperCase();
+});
 @endsection

@@ -10,14 +10,29 @@
                 margin: 0 auto;
             }
             div.ColVis {
-                    float: left;
-                }
-                .DTFC_LeftBodyWrapper{
-                    margin-top: 86px;
-                }
-                .DTFC_LeftHeadWrapper {
-                display:none;
-                }
+                float: left;
+            }
+            .DTFC_LeftBodyWrapper{
+                margin-top: 0px;
+            }
+            
+            td:first-child{
+                width:40px;
+            }
+            th:first-child {
+                position: -webkit-sticky;
+                position: sticky;
+                left: 0px;
+                z-index: 4;
+                width: 40px;
+            }
+            table.dataTable thead .sorting_asc{
+                position: sticky;
+            }
+            table { //me ayudo a que no se desfazaran las columnas en Chrome
+                table-layout: fixed;
+            }
+                
             </style>
     <div class="container">
 
@@ -78,34 +93,56 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="">
-                    <table id="tinventario" class="display" cellspacing="0" width="100%" style="width:100%">
+                    <table id="tinventario" class="display" cellspacing="0" style="width:100%">
                         <thead>
                             <tr>          
                                     <th width="110px">Acciones</th>                  
-                                    <th>#_Equipo</th>
-                                    <th>Nombre_equipo</th>
-                                    <th>Usuario</th>
-                                    <th>Correo</th>
-                                    <th>Correo_password</th>
-                                    <th>Monitor</th>
+                                    <th># Equipo</th>
                                     <th>Estatus</th>
                                     <th>Ubicación</th>
                                     <th>Area</th>
+                                    <th>Descripción equipo</th>
+                                    <th>Ultima Actualización</th>
+                                    <th>Fecha Actualización</th>
+
+                                    <th>Usuario</th>
+                                    <th>Correo</th>
+                                    <th>Contraseña Correo</th>
+                                    
                                     <th>Tipo_equipo</th>
+                                    <th>Monitor</th>
                                     <th>No.Serie</th>
                                     <th>Marca</th>
                                     <th>Modelo</th>
                                     <th>Procesador</th>
                                     <th>Velocidad</th>
+                                    <th>Arquitectura</th>
                                     <th>Memoria</th>
                                     <th>Espacio_DD</th>
+                                    <th>Proteccion Eléctrica</th>
+                                    <th>Descripción Eléctrica</th>
+                                    
                                     <th>SO</th>
-                                    <th>Arquitectura</th>
+                                    <th>Licencia SO</th>
                                     <th>Ofimática</th>
+                                    <th>Licencia Ofimática</th>
                                     <th>Antivirus</th>
-                                    <th>Otros     </th>
-                                    <th>Mtto. Programado</th>
+                                    <th>Licencia Antivirus</th>
+                                    <th>Otro Software</th>
+                                    <th>Licencia Otro Software</th>
+                                    
+                                    <th>Próximo Mtto.</th>
                                     <th>Ultimo Mtto.</th>
+                                    <th>Observaciones Mtto.</th>
+                                    <th>Garantía</th>
+                                    <th>Fecha Garantía</th>
+                                    <th>Usuario Local</th>
+                                    <th>Contraseña Local</th>
+                                    <th>Usuario Dominio</th>
+                                    <th>Contraseña Dominio</th>
+                                    <th>Usuario Antivirus</th>
+                                    <th>Contraseña Antivirus</th>
+                                    <th>Fecha Alta</th>
                                     
                             </tr>
                         </thead>
@@ -153,17 +190,7 @@ var f = fecha.toUpperCase();
 var table = $('#tinventario').DataTable({
     dom: 'Bfrtip',
     buttons: [
-        {
-            text: '<i class="fa fa-columns" aria-hidden="true"></i> Columna',
-            className: "btn btn-primary",
-            extend: 'colvis',
-            postfixButtons: [                                  
-                {
-                    text: 'Restaurar columnas',
-                    extend: 'colvisRestore',     
-                }             
-                ]
-        },
+        
         {
             text: '<i class="fa fa-copy" aria-hidden="true"></i> Copy', 
             extend: 'copy',    
@@ -238,9 +265,7 @@ var table = $('#tinventario').DataTable({
     scrollX:        true,
     scrollCollapse: true,
     paging:         true,
-    fixedColumns:   {
-        leftColumns: 2
-    },
+    fixedColumns:   true,
     processing: true,
     responsive: true,
     deferRender:    true,
@@ -253,40 +278,82 @@ var table = $('#tinventario').DataTable({
     columns: [
         { data: 'action', name:  'action'},                 
         { data: 'numero_equipo', name: 'numero_equipo'},
-        { data: 'nombre_equipo', name: 'nombre_equipo'},
-        { data: 'nombre_usuario', name:  'nombre_usuario'},
-        { data: 'correo', name: 'correo'},
-        { data: 'correo_password', name: 'correo_password'},
-        { data: 'monitor', name: 'monitor'},
         { data: 'estatus', name:  'estatus'},
         { data: 'ubicacion', name: 'ubicacion'},
         { data: 'area', name:  'area'},
+        { data: 'nombre_equipo', name: 'nombre_equipo'},
+        { data: 'usuario_actualizacion'},
+        { data: 'fecha_actualizacion', defaultContent: 'SIN',
+        render: function(data){
+            if (data === null){return data;}
+        var d = new Date(data);
+        return moment(d).format("DD-MM-YYYY");
+        }
+        },
+//8
+        { data: 'nombre_usuario', name:  'nombre_usuario'},
+        { data: 'correo', name: 'correo'},
+        { data: 'correo_password', name: 'correo_password'},
+//11
         { data: 'tipo_equipo', name:  'tipo_equipo'},
+        { data: 'nombre_monitor', name: 'nombre_monitor'},
         { data: 'noserie', name:  'noserie'},
         { data: 'marca', name:  'marca' },
         { data: 'modelo', name:  'modelo'},
         { data: 'procesador', name:  'procesador'},
         { data: 'velocidad', name:  'velocidad' },
+        { data: 'arquitectura', name:  'arquitectura'},
         { data: 'memoria', name: 'memoria' },
         { data: 'espacio_disco', name:  'espacio_disco'},
+        { data: 'proteccion_electrica'},
+        { data: 'descripcion_electrica'},
+    //23    
         { data: 'so', name:  'so' },
-        { data: 'arquitectura', name:  'arquitectura'},
+        { data: 'l_so', name:  'l_so' },
         { data: 'ofimatica', name:  'ofimatica'},
+        { data: 'l_ofimatica'},
         { data: 'antivirus', name:  'antivirus'},
+        { data: 'l_antivirus'},
         { data: 'otros', name:  'otros'},        
-        { data: 'Fecha_mttoProgramado', name:  'Fecha_mttoProgramado',
-                render: function(data){   
-                    var d = new Date(data);               
-                    return moment(d).format("DD-MM-YYYY");
-                }
+        { data: 'l_otros'},
+        //31
+        { data: 'Fecha_mttoProgramado', name:  'Fecha_mttoProgramado', defaultContent: 'SIN',
+        render: function(data){ 
+            if (data === null){return data;}  
+            var d = new Date(data);               
+            return moment(d).format("DD-MM-YYYY");
+        }
         },
-        { data: 'Fecha_mantenimiento', name:  'Fecha_mantenimiento',
-                render: function(data){   
-                    var d = new Date(data);               
-                    return moment(d).format("DD-MM-YYYY");
-                }
+        { data: 'Fecha_mantenimiento', name:  'Fecha_mantenimiento', defaultContent: 'SIN',
+        render: function(data){   
+            if (data === null){return data;}
+            var d = new Date(data);               
+            return moment(d).format("DD-MM-YYYY");
+        }
         },  
-       
+        { data: 'Observaciones'},
+        { data: 'garantia'},
+        { data: 'Fecha_garantia', name: 'Fecha_garantia', defaultContent: 'SIN',
+        render: function(data){
+            if (data === null){return data;}
+        var d = new Date(data);
+        return moment(d).format("DD-MM-YYYY");
+        }
+        },
+        { data: 'local_user'},
+        { data: 'local_pass'},
+        { data: 'dominio_user'},
+        { data: 'dominio_pass'},
+        { data: 'antivirus_user'},
+        { data: 'antivirus_pass'},
+        
+        { data: 'fecha_alta', name: 'fecha_alta', defaultContent: 'SIN',
+        render: function(data){
+            if (data === null){return data;}
+        var d = new Date(data);
+        return moment(d).format("DD-MM-YYYY");
+        }
+        },
     ],
     "language": {
         "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json",

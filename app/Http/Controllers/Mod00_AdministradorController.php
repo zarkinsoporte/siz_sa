@@ -496,11 +496,11 @@ dd($user);
             //Realizamos la consulta nuevamente
         $inventario = DB::table('Siz_Inventario')
         ->join('Siz_Monitores', 'Siz_Inventario.monitor', '=', 'Siz_Monitores.id')
-        ->select('Siz_Inventario.id as id_inv', 'Siz_Inventario.*', 'Siz_Monitores.id as id_mon', 'Siz_Monitores.*')
+        ->select('Siz_Inventario.numero_equipo as id_inv', 'Siz_Inventario.*', 'Siz_Monitores.id as id_mon', 'Siz_Monitores.*')
         ->where('Siz_Inventario.obsoleto', '=',1);       
 
 
-
+        //dd($inventario->get());
     return Datatables::of($inventario)
     ->addColumn('action', function ($i) {
        
@@ -520,7 +520,7 @@ dd($user);
     public function mark_obs($id)
     {
         //Actualizamos el valor en la DB
-        $act_inv = DB::table('Siz_Inventario')
+        DB::table('Siz_Inventario')
             ->where("id", "=", "$id")
             ->update([
                 'obsoleto' => '0'
@@ -534,7 +534,7 @@ dd($user);
     public function mark_rest($id)
     {
         //Actualizamos el valor en la DB
-        $act_inv = DB::table('Siz_Inventario')
+        DB::table('Siz_Inventario')
             ->where("id", "=", "$id")
             ->update([
                 'obsoleto' => '1'
@@ -567,7 +567,11 @@ dd($user);
     public function altaInventario( Request $request)
     {
         $monitores = DB::select( DB::raw("SELECT Siz_Monitores.id AS id_mon, nombre_monitor FROM Siz_Monitores LEFT JOIN Siz_Inventario ON Siz_Monitores.id = Siz_Inventario.monitor WHERE Siz_Inventario.monitor IS NULL AND Siz_Monitores.id !='1'") );
-        return view('Mod00_Administrador.altaInventario', compact('monitores'));   
+        $numero_equipo =  DB::table('SIZ_Inventario')->max('numero_equipo');
+        
+        $numero_equipo+=1;
+        
+        return view('Mod00_Administrador.altaInventario', compact('monitores', 'numero_equipo'));   
     }
 
     public function altaMonitor( Request $request)
@@ -591,7 +595,7 @@ dd($user);
     {
         //$users = User::plantilla();
         $id_monitor = $request->input('id_monitor');
-        $act_mon = DB::table('Siz_Monitores')
+        DB::table('Siz_Monitores')
         ->where("id", "=", "$id_monitor")
         ->update([
             'nombre_monitor' => $request->input('nombre_monitor')
@@ -618,36 +622,63 @@ dd($user);
     {         
         //Insertamos en la DB
         try{
-            DB::table('Siz_Inventario')->insert(
+             DB::table('Siz_Inventario')->insert(
                 [
-                 'numero_equipo' => $request->input('numero_equipo'),
-                 'nombre_equipo' => $request->input('nombre_equipo'),
-                 'nombre_usuario' => $request->input('nombre_usuario'),
-                 'correo' => $request->input('correo'), 
-                 'correo_password' => $request->input('correo_password'), 
-                 'monitor' => $request->input('monitor'),
+                 //registro
+                // 'numero_equipo' => $request->input('numero_equipo'),
                  'estatus' => $request->input('estatus'),
                  'ubicacion' => $request->input('ubicacion'),
                  'area' => $request->input('area'),             
+                 'nombre_equipo' => $request->input('nombre_equipo'), //descripcion
+                 'usuario_actualizacion' => $request->input('usuario_actualizacion'),//*
+                 'fecha_actualizacion' => $request->input('fecha_actualizacion'),//*
+                //Usuario
+                 'nombre_usuario' => $request->input('nombre_usuario'),
+                 'correo' => $request->input('correo'), 
+                 'correo_password' => $request->input('correo_password'), 
+                //Hardware
+                 'tipo_equipo' => $request->input('tipo_equipo'),
+                 'monitor' => $request->input('monitor'),
                  'noserie' => $request->input('serie'),
                  'marca' => $request->input('marca'),
                  'modelo' => $request->input('modelo'),
                  'procesador' => $request->input('procesador'),
                  'velocidad' => $request->input('velocidad'),
+                 'arquitectura' => $request->input('arquitectura'),
                  'memoria' => $request->input('memoria'),
                  'espacio_disco' => $request->input('disco_duro'),
+                 'proteccion_electrica' => $request->input('electrica'),//*
+                 'descripcion_electrica' => $request->input('descripcion_electrica'), //+
+                 //software
                  'so' => $request->input('so'),
-                 'arquitectura' => $request->input('arquitectura'),
+                 'l_so' => $request->input( 'l_so'), //*
                  'ofimatica' => $request->input('ofimatica'),
+                 'l_ofimatica' => $request->input('l_ofimatica'), //*
                  'antivirus' => $request->input('antivirus'),
+                 'l_antivirus' => $request->input('l_antivirus'), //*
                  'otros' => $request->input('otro'),                     
-                 'fecha_alta' => date("Y-m-d"),           
+                 'l_otros' => $request->input('l_otro'),//*
+                 //Mto             
                  'Fecha_mttoProgramado' => $request->input('mantenimiento_programado'),
                  'Fecha_mantenimiento' => $request->input('mantenimiento_realizado'),
+                 'Observaciones' => $request->input('ObservacionesTec'), //*
+                 'garantia' => $request->input('garantia'), //*
+                 'Fecha_garantia' => $request->input('fecha_garantia'), //*
+                 //acceso
+                 'local_user' => $request->input('local_user'), //*
+                 'dominio_user' => $request->input('dominio_user'), //*
+                 'antivirus_user' => $request->input('antivirus_user'), //*
+                 'local_pass' => $request->input('local_pass'), //*
+                 'dominio_pass' => $request->input('dominio_pass'), //*
+                 'antivirus_pass' => $request->input('antivirus_pass'), //*
+
+                 'fecha_alta' => date("Y-m-d"),           
                  'obsoleto'=> 1
                 ]
             );
-            Session::flash('mensaje', 'Equipo #'.$request->input('numero_equipo').' agregado Correctamente');
+            $id = DB::getPdo()->lastInsertId();
+            
+            Session::flash('mensaje', 'Equipo #'.$id.' agregado Correctamente');
             return redirect('admin/inventario');
         }catch(Exception $e){
             return redirect()->back()->withErrors(array('message' => 'Error: '.$e->getMessage()."\n"));
@@ -677,21 +708,21 @@ dd($user);
     public function delete_inv($id)
     {
 
-        $eliminar = DB::table('Siz_Inventario')->where('id', '=', $id)->delete();
+        DB::table('Siz_Inventario')->where('numero_equipo', '=', $id)->delete();
         return redirect('admin/inventario');
     }
 
     public function mod_inv($id)
     {
-        $inventario = DB::table('Siz_Inventario')
+        $i = DB::table('Siz_Inventario')
             ->join('Siz_Monitores', 'Siz_Inventario.monitor', '=', 'Siz_Monitores.id')
-            ->select('Siz_Inventario.id as id_inv', 'Siz_Inventario.*', 'Siz_Monitores.id as id_mon', 'Siz_Monitores.*')
-            ->where('Siz_Inventario.id', '=',$id)            
+            ->select('Siz_Inventario.numero_equipo as id_inv', 'Siz_Inventario.*', 'Siz_Monitores.id as id_mon', 'Siz_Monitores.*')
+            ->where('Siz_Inventario.numero_equipo', '=',$id)            
             ->first();
         //dd($inventario);    
         $monitores = DB::select( DB::raw("SELECT Siz_Monitores.id AS id_mon, nombre_monitor FROM Siz_Monitores  WHERE Siz_Monitores.id !='1'") );
         //dd($inventario[0]->nombre_equipo);
-        return view('Mod00_Administrador.modInventario', compact('monitores', 'inventario')); 
+        return view('Mod00_Administrador.modInventario', compact('monitores', 'i')); 
         {
             return redirect('admin/inventario');
         }
@@ -699,40 +730,63 @@ dd($user);
 
     public function mod_inv2(Request $request)
     {
-        //dd($request->input('monitor'));
-        $act_inv = DB::table('Siz_Inventario')
-        ->where("id", "=", "$request->id_inv")
+       // dd($request->input('monitor'));
+        DB::table('Siz_Inventario')
+        ->where("numero_equipo", "=", $request->id_inv)
         ->update(
             [
-                'numero_equipo' => $request->input('numero_equipo'),
-                'nombre_equipo' => $request->input('nombre_equipo'),
-                'nombre_usuario' => $request->input('nombre_usuario'),
-                'correo' => $request->input('correo'), 
-                'correo_password' => $request->input('correo_password'), 
-                'monitor' => $request->input('monitor'),
                 'estatus' => $request->input('estatus'),
                 'ubicacion' => $request->input('ubicacion'),
-                'area' => $request->input('area'),             
+                'area' => $request->input('area'),
+                'nombre_equipo' => $request->input('nombre_equipo'), //descripcion
+                'usuario_actualizacion' => $request->input('usuario_actualizacion'), //*
+                'fecha_actualizacion' => $request->input('fecha_actualizacion'), //*
+                //Usuario
+                'nombre_usuario' => $request->input('nombre_usuario'),
+                'correo' => $request->input('correo'),
+                'correo_password' => $request->input('correo_password'),
+                //Hardware
+                'tipo_equipo' => $request->input('tipo_equipo'),
+                'monitor' => $request->input('monitor'),
                 'noserie' => $request->input('serie'),
                 'marca' => $request->input('marca'),
                 'modelo' => $request->input('modelo'),
                 'procesador' => $request->input('procesador'),
                 'velocidad' => $request->input('velocidad'),
+                'arquitectura' => $request->input('arquitectura'),
                 'memoria' => $request->input('memoria'),
                 'espacio_disco' => $request->input('disco_duro'),
+                'proteccion_electrica' => $request->input('electrica'), //*
+                'descripcion_electrica' => $request->input('descripcion_electrica'), //+
+                //software
                 'so' => $request->input('so'),
-                'arquitectura' => $request->input('arquitectura'),
+                'l_so' => $request->input('l_so'), //*
                 'ofimatica' => $request->input('ofimatica'),
+                'l_ofimatica' => $request->input('l_ofimatica'), //*
                 'antivirus' => $request->input('antivirus'),
-                'otros' => $request->input('otro'),                                 
+                'l_antivirus' => $request->input('l_antivirus'), //*
+                'otros' => $request->input('otro'),
+                'l_otros' => $request->input('l_otro'), //*
+                //Mto             
                 'Fecha_mttoProgramado' => $request->input('mantenimiento_programado'),
                 'Fecha_mantenimiento' => $request->input('mantenimiento_realizado'),
-                'obsoleto'=> 1
+                'Observaciones' => $request->input('ObservacionesTec'), //*
+                'garantia' => $request->input('garantia'), //*
+                'Fecha_garantia' => $request->input('fecha_garantia'), //*
+                //acceso
+                'local_user' => $request->input('local_user'), //*
+                'dominio_user' => $request->input('dominio_user'), //*
+                'antivirus_user' => $request->input('antivirus_user'), //*
+                'local_pass' => $request->input('local_pass'), //*
+                'dominio_pass' => $request->input('dominio_pass'), //*
+                'antivirus_pass' => $request->input('antivirus_pass'), //*
+
                ]
         );
          
          Session::flash('mensaje', 'Registro Actualizado Correctamente');              
-         return redirect()->back();
+        // dd( $request->id_inv);
+         return redirect('admin/mod_inv/'. $request->id_inv);
     }
 
 //brayan
