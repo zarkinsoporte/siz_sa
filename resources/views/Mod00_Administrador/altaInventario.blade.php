@@ -140,14 +140,14 @@
                                 <div class="col-md-3 col-sm-6">
                                     <div class="form-group">
                                         <label for="Correo">Correo</label>
-                                        <input type="email" name="correo" class="form-control" placeholder="nombre.apellido@zarkin.com"
+                                        <input type="email" name="correo" class="form-control minuscula" placeholder="nombre.apellido@zarkin.com"
                                             value="{{ old('correo') }}">
                                     </div>
                                 </div>
                                 <div class="col-md-3 col-sm-6">
                                     <div class="form-group">
                                         <label for="correo_password">Contraseña de Correo</label>
-                                        <input type="text" name="correo_password" class="form-control" value="{{ old('correo_password') }}" >
+                                        <input type="text" name="correo_password" class="form-control minuscula" value="{{ old('correo_password') }}" >
                                     </div>
                                 </div>    
                             </div><!-- /.row-->
@@ -268,7 +268,7 @@
                             <div class="col-md-6 col-sm-6">
                                 <div class="form-group">
                                     <label for="l_so">Licencia SO</label>
-                                    <input type="text" name="l_so" class="form-control" value="{{ old('l_so') }}">
+                                    <input type="text" name="l_so" class="form-control minuscula" value="{{ old('l_so') }}">
                                 </div>
                             </div>
                         </div><!-- /.row-->
@@ -282,7 +282,7 @@
                             <div class="col-md-6 col-sm-6">
                                 <div class="form-group">
                                     <label for="l_ofimatica">Licencia Ofimática</label>
-                                    <input type="text" name="l_ofimatica" class="form-control" value="{{ old('l_ofimatica') }}" >
+                                    <input type="text" name="l_ofimatica" class="form-control minuscula" value="{{ old('l_ofimatica') }}" >
                                 </div>
                             </div>    
                         </div><!-- /.row -->
@@ -296,7 +296,7 @@
                             <div class="col-md-6 col-sm-6">
                                 <div class="form-group">
                                     <label for="l_antivirus">Licencia Antivirus</label>
-                                    <input type="text" name="l_antivirus" class="form-control" value="{{ old('l_antivirus') }}" >
+                                    <input type="text" name="l_antivirus" class="form-control minuscula" value="{{ old('l_antivirus') }}" >
                                 </div>
                             </div>    
                         </div><!-- /.row -->
@@ -310,7 +310,7 @@
                             <div class="col-md-6 col-sm-6">
                                 <div class="form-group">
                                     <label for="l_otro">Licencia Otro</label>
-                                    <input type="text" name="l_otro" class="form-control" value="{{ old('l_otro') }}">
+                                    <input type="text" name="l_otro" class="form-control minuscula" value="{{ old('l_otro') }}">
                                 </div>
                             </div>
                         </div><!-- /.row -->
@@ -374,7 +374,7 @@
                                 <div class="col-md-6 col-sm-6">
                                     <div class="form-group">
                                         <label for="local_pass">Contraseña Local</label>
-                                        <input type="text" name="local_pass" class="form-control" value="{{ old('local_pass') }}">
+                                        <input type="text" name="local_pass" class="form-control minuscula" value="{{ old('local_pass') }}">
                                     </div>
                                 </div>
                             </div><!-- /.row -->
@@ -387,8 +387,8 @@
                                 </div>
                                 <div class="col-md-6 col-sm-6">
                                     <div class="form-group">
-                                        <label for="dominio_pass">Contraseña Local</label>
-                                        <input type="text" name="dominio_pass" class="form-control" value="{{ old('dominio_pass') }}">
+                                        <label for="dominio_pass">Contraseña Dominio</label>
+                                        <input type="text" name="dominio_pass" class="form-control minuscula" value="{{ old('dominio_pass') }}">
                                     </div>
                                 </div>
                             </div><!-- /.row -->
@@ -402,7 +402,7 @@
                                 <div class="col-md-6 col-sm-6">
                                     <div class="form-group">
                                         <label for="antivirus_pass">Contraseña Antivirus</label>
-                                        <input type="text" name="antivirus_pass" class="form-control" value="{{ old('antivirus_pass') }}">
+                                        <input type="text" name="antivirus_pass" class="form-control minuscula" value="{{ old('antivirus_pass') }}">
                                     </div>
                                 </div>
                             </div><!-- /.row -->
@@ -417,7 +417,7 @@
 
 @endsection
 @section('script')
-$('input').keyup(function() {
+$('input:not(.minuscula)').keyup(function() {
 this.value = this.value.toLocaleUpperCase();
 });
 @endsection
