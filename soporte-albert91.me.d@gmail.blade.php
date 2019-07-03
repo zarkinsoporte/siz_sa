@@ -242,3 +242,27 @@ $(".DTFC_LeftHeadWrapper").find("input").on( 'keyup change', function () {
 
            <input hidden value="{{$fechauser}}" id="fechauser" name="fechauser" />
         <input hidden value="{{$tipo}}" id="tipo" name="tipo" />
+
+
+        https://datatables.net/examples/api/select_single_row.html
+
+        https://datatables.net/forums/discussion/36947/how-to-get-selected-row-data
+
+
+        $rules = [
+        'fieldText' => 'required|exists:OITM,ItemCode',
+        ];
+        $customMessages = [
+        'fieldText.required' => 'El Código es requerido.',
+        'fieldText.exists' => 'El Código no existe.'
+        ];
+        $valid = Validator::make( $request->all(), $rules, $customMessages);
+        
+        if ($valid->fails()) {
+        return redirect()->back()
+        ->withErrors($valid)
+        ->withInput();
+        }
+
+
+        oItem.UserFields.Fields.Item("U_FIELDNAME").Value

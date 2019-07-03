@@ -80,14 +80,29 @@ class HomeController extends Controller
          ]);
     }
     /**
-     * Store a newly created resource in storage.
+     * 
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function ShowArticulos(Request $request)
     {
-        //
+        if (Auth::check()) {
+            
+            $consulta= DB::select('SELECT ItemCode, ItemName, InvntryUom AS UM FROM OITM WHERE PrchseItem = \'Y\' AND InvntItem = \'Y\' AND U_TipoMat = \'MP\'');
+
+            //Definimos las columnas del MRP
+            $columns = array(
+                ["data" => "ItemCode", "name" => "Código"],
+                ["data" => "ItemName", "name" => "Descripción"],
+                ["data" => "UM", "name" => "UM"],            
+            );          
+
+            return response()->json(array('data' => $consulta, 'columns' => $columns, 'pkey' => 'ItemCode'));
+            
+        } else {
+            return redirect()->route('auth/login');
+        }
     }
 
     /**

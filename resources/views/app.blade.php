@@ -239,6 +239,7 @@ li.dt-button.active a::before{
 <script>
     $(document).ready(function (event) {
             $('.toggle').bootstrapSwitch();
+            $('[data-toggle="tooltip"]').tooltip();
 $('.dropdown-toggle').dropdown();
         @yield('script');
         setTimeout(function() {

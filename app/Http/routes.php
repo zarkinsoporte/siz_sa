@@ -16,7 +16,7 @@ use App\Modelos\MOD01\TAREA_MENU;
 use App\OP;
 use Illuminate\Support\Facades\DB;
 use App\User;
-use App\SAP;
+
 use Illuminate\Http\Request;
 Route::get('/', 'HomeController@index');
 Route::get('/home',
@@ -232,6 +232,12 @@ Route::get('home/reporte/ENTRADAS ALMACEN', 'Mod04_MaterialesController@reporteE
 Route::get('home/reporte/entradasXLS', 'Mod04_MaterialesController@entradasXLS');
 Route::get('datatables.showentradasmp', 'Mod04_MaterialesController@DataShowEntradasMP')->name('datatables.showentradasmp');
 Route::get('home/reporte/entradasPDF', 'Mod04_MaterialesController@entradasPDF');
+
+//DESPLIEGUE DATOS MAESTROS ARTICULOS
+Route::get('home/DATOS MAESTROS ARTICULOS', 'Reportes_ProduccionController@showModal');
+Route::post('home/reporte/DATOS MAESTROS ARTICULOS/{redirek?}', 'Mod04_MaterialesController@DM_Articulos');
+Route::post('articuloToSap', 'Mod04_MaterialesController@articuloToSap');
+Route::get('OITM.show', 'HomeController@ShowArticulos')->name( 'OITM.show');
 //
 //-------------------------//
 //RUTAS DE MRP//---------------------------------------------------------

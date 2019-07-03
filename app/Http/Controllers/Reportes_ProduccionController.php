@@ -183,12 +183,15 @@ class Reportes_ProduccionController extends Controller
         $fechas = false;
         $fieldOtroNumber = '';
         $Text = '';
+        $fieldText = '';
         $text_selUno = '';
         $data_selUno = [];
         $text_selDos = '';
         $data_selDos = [];
         $text_selTres = '';
         $data_selTres = [];
+        $sizeModal = 'modal-sm';
+        $data_table = '';
         switch ($nombre) {
             case "HISTORIAL OP":
                 $fieldOtroNumber = 'OP';
@@ -201,6 +204,13 @@ class Reportes_ProduccionController extends Controller
                 break;
             case "PRODUCCION POR AREAS":
                 $fechas = true;
+                break;
+
+            case "DATOS MAESTROS ARTICULOS":
+                $Text = 'Para continuar, primero seleccione un artículo.';
+                //$fieldText = 'Código';
+                $sizeModal = 'modal-lg';
+                $data_table = 'OITM.show';
                 break;
             case "MRP":
                 //Select
@@ -229,13 +239,16 @@ class Reportes_ProduccionController extends Controller
             'nombre' => $nombre, 
             'fieldOtroNumber' => $fieldOtroNumber, 
             'text' => $Text, 
+            'fieldText' => $fieldText, 
             'fechas' => $fechas,
             'text_selUno' => $text_selUno,
             'data_selUno' => $data_selUno,
             'text_selDos' => $text_selDos,
             'data_selDos' => $data_selDos,
             'text_selTres' => $text_selTres,
-            'data_selTres' => $data_selTres
+            'data_selTres' => $data_selTres,
+            'sizeModal' => $sizeModal,
+            'data_table' => $data_table
             ]);
         } else {
             return redirect()->route('auth/login');
