@@ -47,11 +47,23 @@ class SAP extends Model
     }
    }
    public static function SaveArticulo($array){
-        
+       //pKey
+       //proveedor
+       //metodo
+       //grupop
+       //comprador
+       //costocompras --
+       //monedacompras
         (self::$vCmp == false) ? self::Connect(): '';
         $vItem = self::$vCmp->GetBusinessObject("4");
         $RetVal = $vItem->GetByKey($array['pKey']);
-        dd($vItem->ItemName);
+        $vItem->CardCode = $array['proveedor'];
+         $vItem->Update;
+        if ($vItem->ProductionOrderStatus <> $status) {
+            return false;
+        } else {
+            return true;
+        }
    }
 }
 

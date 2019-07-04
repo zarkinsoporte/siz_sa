@@ -147,6 +147,8 @@
                     <!-- /.container -->
 
                     @endsection
+                  @if($data_table <> '')  
+                 
                     @section('homescript')
                         $('#pass').modal(
                         {
@@ -250,6 +252,17 @@
                         $('#tabla thead tr').clone(true).appendTo( '#tabla thead' );                      
                    
                     @endsection
+                    @else
+                    @section('homescript')
+                    $('#pass').modal(
+                    {
+                    show: true,
+                    backdrop: 'static',
+                    keyboard: false
+                    }
+                    );                                                        
+                    @endsection
+                    @endif
                     <script>
 
                         function mostrar(){

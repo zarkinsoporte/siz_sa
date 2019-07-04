@@ -215,13 +215,7 @@ public function entradasPDF()
     }
 
     public function articuloToSap(Request $request){
-        //monedacompras
-        //grupop
-        //metodo
-        //proveedor
-        //code
-        //costocompras --
-        //comprador
+        
 //dd($request->all());
          $rules = [
                 // 'fieldText' => 'required|exists:OITM,ItemCode',
