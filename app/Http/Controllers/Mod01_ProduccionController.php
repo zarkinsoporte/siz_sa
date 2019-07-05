@@ -789,13 +789,23 @@ return redirect()->route('home');
 //-------------Notificaciones--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
  //$Not_us=DB::select(DB::raw("SELECT top 1 U_EmpGiro,firstname,lastname from OHEM where position='4'and dept ='$cod_dep'"));
             $N_Emp = User::where('position', 4)->where('U_CP_CT', 'like', '%' . $Est_ant . '%')->first();
-            if ($N_Emp == null || count($N_Emp) < 1) {
-                $request->session()->flash('op', $orden);
-                return redirect()->back()->withErrors(array('message' => 'Error, La estación anterior no esta asignada al Supervisor en SAP.'));
+            if ($N_Emp == null || count($N_Emp) < 1) {               
+                Session::flash('error', 'Error, La estación anterior no esta asignada al Supervisor en SAP.');               
+                           Session::flash('op', $orden); 
+                           Session::put('return', 1);                               
+                    
+                       return redirect()->action('Mod01_ProduccionController@getOP', $request->input('Nomina'));
+                //return redirect()->back()->withErrors(array('message' => 'Error, La estación anterior no esta asignada al Supervisor en SAP.'));
                 //return Redirect::back()->withErrors(['message', 'The Message']);
             } else if (count($N_Emp) > 1) {
-                return redirect()->back()->withErrors(array('message' => 'Error, Hay dos Supervisores para el área anterior en SAP.'));
-            }                       
+                Session::flash('error', 'Error, Hay dos Supervisores para el área anterior en SAP.');               
+                Session::flash('op', $orden); 
+                Session::put('return', 1);                               
+         
+            return redirect()->action('Mod01_ProduccionController@getOP', $request->input('Nomina'));
+            
+                    // return redirect()->back()->withErrors(array('message' => 'Error, Hay dos Supervisores para el área anterior en SAP.'));
+            }                      
             DB::table('Siz_Noticias')->insert(
                 [
                     'Autor' => $Nom_User,
