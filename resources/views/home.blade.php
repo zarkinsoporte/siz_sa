@@ -23,7 +23,7 @@ $index = 0;
                             ?>
 
                             <li><a href="javascript:;" data-toggle="collapse"  data-target="#mo{{$n1->id_modulo}}" ><i class="fa fa-fw fa-dashboard"></i> {{$n1->modulo}} <i class="fa fa-fw fa-caret-down"></i></a>
-                                <ul id="mo{{$n1->id_modulo}}" class="collapse in">
+                                <ul id="mo{{$n1->id_modulo}}" class="collapse ">
                                     <li><a href="javascript:;" data-toggle="collapse" data-target="#me{{$n1->id_menu}}"><i class="fa fa-fw fa-tasks"></i> {{$n1->menu}} <i class="fa fa-fw fa-caret-down"></i></a>
                                         <ul id="me{{$n1->id_menu}}" class="collapse">
                                             <a href="{!! url('home/'.$n1->tarea) !!}"><li>
@@ -79,7 +79,7 @@ $index = 0;
                                 </li>
 
                         <li><a href="javascript:;" data-toggle="collapse" data-target="#mo{{$n1->id_modulo}}" ><i class="fa fa-fw fa-dashboard"></i> {{$n1->modulo}} <i class="fa fa-fw fa-caret-down"></i></a>
-                            <ul id="mo{{$n1->id_modulo}}" class="collapse in">
+                            <ul id="mo{{$n1->id_modulo}}" class="collapse ">
                                 <li><a href="javascript:;" data-toggle="collapse" data-target="#me{{$n1->id_menu}}"><i class="fa fa-fw fa-tasks"></i> {{$n1->menu}} <i class="fa fa-fw fa-caret-down"></i></a>
                                     <ul id="me{{$n1->id_menu}}" class="collapse">
                                         <a href="{!! url('home/'.$n1->tarea) !!}"><li>

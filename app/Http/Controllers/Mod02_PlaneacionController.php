@@ -156,6 +156,7 @@ public function actualizaMRP(){
         array_push($columns,["data" => "Maximo", "name" => "S. Maximo"]);
         array_push($columns,["data" => "TE", "name" => "T.E."]);
         array_push($columns,["data" => "Costo", "name" => "Costo Compras"]);
+        array_push($columns,["data" => "Moneda", "name" => "Moneda"]);
         array_push($columns,["data" => "Proveedor", "name" => "Proveedor"]);
         array_push($columns,["data" => "Comprador", "name" => "Comprador"]);
         
@@ -167,6 +168,7 @@ public function actualizaMRP(){
         array_push($columns_xls,["data" => "Maximo", "name" => "S. Maximo"]);
         array_push($columns_xls,["data" => "TE", "name" => "T.E."]);
         array_push($columns_xls,["data" => "Costo", "name" => "Costo Compras"]);
+        array_push($columns_xls,["data" => "Moneda", "name" => "Moneda"]);
         array_push($columns_xls,["data" => "Proveedor", "name" => "Proveedor"]);
         array_push($columns_xls,["data" => "Comprador", "name" => "Comprador"]);
         
