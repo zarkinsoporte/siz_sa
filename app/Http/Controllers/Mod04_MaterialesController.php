@@ -192,9 +192,12 @@ public function entradasPDF()
             $rules = [
                 // 'fieldText' => 'required|exists:OITM,ItemCode',
                 'pKey' => 'required',
+                'costocompras' => 'min:0',
+
             ];
             $customMessages = [
                 'pKey.required' => 'Ningun código seleccionado',
+                'costocompras.min' => 'El costo de A-COMPRAS debe ser igual/mayor a cero',
                 //'fieldText.exists' => 'El Código no existe.'
             ];
             $valid = Validator::make( $request->all(), $rules, $customMessages);
@@ -215,7 +218,13 @@ public function entradasPDF()
     }
 
     public function articuloToSap(Request $request){
-        
+        //monedacompras
+        //grupop
+        //metodo
+        //proveedor
+        //code
+        //costocompras --
+        //comprador
 //dd($request->all());
          $rules = [
                 // 'fieldText' => 'required|exists:OITM,ItemCode',
@@ -237,11 +246,18 @@ public function entradasPDF()
                return view('Mod04_Materiales.DM_Articulos', $param)->withErrors($valid);
                     
             }else {
-                 SAP::SaveArticulo(Input::all());
+                 $result = SAP::SaveArticulo(Input::all());
+                 if ($result != 'ok') {                    
+                    Session::flash('error', $result);
+                 } else {
+                    Session::flash('mensaje','Artículo guardado.');
+                 }
+                 $param = self::getParam_DM_Articulos(Input::get('pKey'));
+               return view('Mod04_Materiales.DM_Articulos', $param);
             }
        
     }
-public function getParam_DM_Articulos($item){
+public static function getParam_DM_Articulos($item){
  $data = DB::select( "
                     select OITM.ItemCode, ItemName, oitm.CardCode, ocrd.CardName,ALM.*,
                     Costo1.Price as CostoEstandar, Costo1.Currency as MonedaEstandar,
@@ -331,13 +347,27 @@ public function getParam_DM_Articulos($item){
             array_push($columns,["data" => $value, "name" => $name]);        
          }
          } 
-        $metodos = DB::select( 'SELECT FldValue, Descr FROM UFD1 WHERE TableID = ? AND FieldID = ?', ['OITM',18]);
-        $compradores = DB::select( 'SELECT FldValue, Descr FROM UFD1 WHERE TableID = ? AND FieldID = ?', ['OITM',10]);
-        $gruposPlaneacion = DB::select( 'SELECT FldValue, Descr FROM UFD1 WHERE TableID = ? AND FieldID = ?', ['OITM',19]);
+        $metodos = DB::select( 'SELECT FldValue, Descr FROM UFD1 WHERE TableID = ? AND FieldID = ? ORDER BY Descr', ['OITM',18]);
+        $compradores = DB::select( 'SELECT FldValue, Descr FROM UFD1 WHERE TableID = ? AND FieldID = ? ORDER BY Descr', ['OITM',10]);
+        $gruposPlaneacion = DB::select( 'SELECT FldValue, Descr FROM UFD1 WHERE TableID = ? AND FieldID = ? ORDER BY Descr', ['OITM',19]);
                  
         $user = Auth::user();
         $actividades = $user->getTareas();  
-        $proveedores = DB::select('SELECT CardCode, CardName FROM OCRD WHERE CardType = ?', ['S']);
+        $proveedores = DB::select('SELECT CardCode, CardName FROM OCRD WHERE CardType = ? ORDER BY Descr', ['S']);
+        
+        $tareas = json_decode(json_encode($actividades), true);
+        foreach ($tareas as $tarea) {
+        $privilegioTarea = array_search('DATOS MAESTROS ARTICULOS', $tarea);
+        if ($privilegioTarea != false) {
+             $privilegioTarea = $tarea['privilegio_tarea'];
+             break;
+        }
+       }
+       if (strpos($privilegioTarea, 'checked') !== false) {
+        $privilegioTarea = '';            
+       } else {
+         $privilegioTarea = 'disabled';
+       }
         $param = array(        
             'actividades' => $actividades,
             'ultimo' => count($actividades),
@@ -348,6 +378,7 @@ public function getParam_DM_Articulos($item){
             'metodos' => $metodos,
             'compradores' => $compradores,
             'gruposPlaneacion' => $gruposPlaneacion,
+            'privilegioTarea' => $privilegioTarea
         );
         return $param;
 }

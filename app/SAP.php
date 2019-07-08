@@ -47,23 +47,42 @@ class SAP extends Model
     }
    }
    public static function SaveArticulo($array){
-       //pKey
-       //proveedor
-       //metodo
-       //grupop
-       //comprador
-       //costocompras --
-       //monedacompras
-        (self::$vCmp == false) ? self::Connect(): '';
-        $vItem = self::$vCmp->GetBusinessObject("4");
-        $RetVal = $vItem->GetByKey($array['pKey']);
-        $vItem->CardCode = $array['proveedor'];
-         $vItem->Update;
-        if ($vItem->ProductionOrderStatus <> $status) {
-            return false;
-        } else {
-            return true;
-        }
+    //pKey
+       //proveedor Mainsupplier
+       //metodo U_Metodo
+       //grupop U_GrupoPlanea
+       //comprador U_Comprador
+       //costocompras PriceList->Price
+       //monedacompras PriceList->Currency
+      
+    (self::$vCmp == false) ? self::Connect(): '';
+    //self::$vCmp->XmlExportType("xet_ExportImportMode");
+    $vItem = self::$vCmp->GetBusinessObject("4");
+    $RetVal = $vItem->GetByKey($array['pKey']);
+    //Actualizar Proveedor
+    $vItem->Mainsupplier = $array['proveedor'];
+    //Seleccionar lista de Precios
+    $vItem->PriceList->SetCurrentLine(8);
+    $vItem->PriceList->Price = $array['costocompras'];
+    $vItem->PriceList->Currency = $array['monedacompras'];
+
+   //$arrayName = array(
+    //'metod' => $vItem->UserFields->Fields->Item('U_Metodo')->Value, 
+    //'grupo' => $vItem->UserFields->Fields->Item('U_GrupoPlanea')->Value, 
+    //'comp' => $vItem->UserFields->Fields->Item('U_Comprador')->Value, 
+    //);  
+    //dd($arrayName);
+    $vItem->UserFields->Fields->Item('U_Metodo')->Value = $array['metodo'];
+    $vItem->UserFields->Fields->Item('U_GrupoPlanea')->Value = $array['grupop'];
+    $vItem->UserFields->Fields->Item('U_Comprador')->Value = $array['comprador'];
+
+    $retCode = $vItem->Update; 
+    if ($retCode != 0) {
+        return self::$vCmp->GetLastErrorDescription();
+    } else {
+        return 'ok';
+    }  
+                   
    }
 }
 
