@@ -110,8 +110,8 @@ border: 1px solid #000000;
                             <select class="form-control" id="proveedor" name="proveedor" style="margin-bottom: 10px;" {{$privilegioTarea}}>                               
                                 <option value="" {{ old('proveedor', $data[0]->CardCode??'SIN DATOS') == 'SIN DATOS' ? 'selected' : '' }}>SIN DATOS</option>
                                 @foreach ($proveedores as $proveedor)
-                                <option value="{{old('proveedor',$proveedor->CardCode)}}" {{ ($proveedor->CardCode == $data[0]->CardCode) ? 'selected' : '' }}>
-                                    {{$proveedor->CardCode}} {{$proveedor->CardName}}</option>
+                                <option value="{{old('proveedor',$proveedor->CardCode)}}" {{ ($proveedor->CardCode == $data[0]->CardCode) ? 'selected' : '' }}>                                   
+                                    <span>{{$proveedor->CardCode}}  &nbsp;&nbsp;&nbsp; {{$proveedor->CardName}}</span></option>
                                 @endforeach
                             </select>                         
                         </div><!-- /input-group -->

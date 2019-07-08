@@ -347,13 +347,13 @@ public static function getParam_DM_Articulos($item){
             array_push($columns,["data" => $value, "name" => $name]);        
          }
          } 
-        $metodos = DB::select( 'SELECT FldValue, Descr FROM UFD1 WHERE TableID = ? AND FieldID = ?', ['OITM',18]);
-        $compradores = DB::select( 'SELECT FldValue, Descr FROM UFD1 WHERE TableID = ? AND FieldID = ?', ['OITM',10]);
-        $gruposPlaneacion = DB::select( 'SELECT FldValue, Descr FROM UFD1 WHERE TableID = ? AND FieldID = ?', ['OITM',19]);
+        $metodos = DB::select( 'SELECT FldValue, Descr FROM UFD1 WHERE TableID = ? AND FieldID = ? ORDER BY Descr', ['OITM',18]);
+        $compradores = DB::select( 'SELECT FldValue, Descr FROM UFD1 WHERE TableID = ? AND FieldID = ? ORDER BY Descr', ['OITM',10]);
+        $gruposPlaneacion = DB::select( 'SELECT FldValue, Descr FROM UFD1 WHERE TableID = ? AND FieldID = ? ORDER BY Descr', ['OITM',19]);
                  
         $user = Auth::user();
         $actividades = $user->getTareas();  
-        $proveedores = DB::select('SELECT CardCode, CardName FROM OCRD WHERE CardType = ?', ['S']);
+        $proveedores = DB::select('SELECT CardCode, CardName FROM OCRD WHERE CardType = ? ORDER BY Descr', ['S']);
         
         $tareas = json_decode(json_encode($actividades), true);
         foreach ($tareas as $tarea) {
