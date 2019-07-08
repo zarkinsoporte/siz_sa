@@ -353,7 +353,7 @@ public static function getParam_DM_Articulos($item){
                  
         $user = Auth::user();
         $actividades = $user->getTareas();  
-        $proveedores = DB::select('SELECT CardCode, CardName FROM OCRD WHERE CardType = ? ORDER BY Descr', ['S']);
+        $proveedores = DB::select('SELECT CardCode, CardName FROM OCRD WHERE CardType = ? ORDER BY CardName', ['S']);
         
         $tareas = json_decode(json_encode($actividades), true);
         foreach ($tareas as $tarea) {
