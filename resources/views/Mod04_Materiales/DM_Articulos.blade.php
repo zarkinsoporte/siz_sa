@@ -44,7 +44,7 @@ border: 1px solid #000000;
 }
 </style>
 <div class="container">
- {!! Form::open(['url' => 'articuloToSap', 'method' => 'POST']) !!}
+ {!! Form::open(['url' => 'articuloToSap', 'method' => 'POST', 'id' => 'mainform']) !!}
  {{ csrf_field() }}
     <!-- Page Heading -->
     <div class="row">
@@ -56,8 +56,10 @@ border: 1px solid #000000;
                     Datos Maestros de Artículos 
                     <div class="visible-xs visible-sm"><br></div>
                     <span class="pull-right">
-                        <a class="btn btn-primary" href="{{url('home/DATOS MAESTROS ARTICULOS')}}">Revisar Otro</a>
-                        <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Guardar</button>
+                        <a class="btn btn-primary" href="{{url('home/DATOS MAESTROS ARTICULOS')}}">Revisar Otro Artículo</a>                    
+                        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#confirma" {{$privilegioTarea}}>
+                                        <i class="fa fa-save" aria-hidden="true"></i> Guardar
+                                    </button>
                     <div class="visible-xs visible-sm"><br></div>
              </span>
                 </h3>
@@ -105,7 +107,7 @@ border: 1px solid #000000;
                         <h5>Proveedor</h5>                    
                         <div class="input-group">
                         
-                            <select class="form-control" id="proveedor" name="proveedor" style="margin-bottom: 10px;">                               
+                            <select class="form-control" id="proveedor" name="proveedor" style="margin-bottom: 10px;" {{$privilegioTarea}}>                               
                                 <option value="" {{ old('proveedor', $data[0]->CardCode??'SIN DATOS') == 'SIN DATOS' ? 'selected' : '' }}>SIN DATOS</option>
                                 @foreach ($proveedores as $proveedor)
                                 <option value="{{old('proveedor',$proveedor->CardCode)}}" {{ ($proveedor->CardCode == $data[0]->CardCode) ? 'selected' : '' }}>
@@ -276,7 +278,7 @@ border: 1px solid #000000;
                 <div>
                     <h5 class="my-0">MÉTODO</h5>
                     <div class="">                    
-                        <select class="form-control" id="metodo" name="metodo" style="margin-bottom: 10px;">
+                        <select class="form-control" id="metodo" name="metodo" style="margin-bottom: 10px;" {{$privilegioTarea}}>
                             <option value="" {{ old('metodo', $data[0]->Metodo??'SIN DATOS') == 'SIN DATOS' ? 'selected' : '' }}>SIN
                                 DATOS</option>
                             @foreach ($metodos as $metodo)
@@ -310,7 +312,7 @@ border: 1px solid #000000;
             <div>
                 <h5 class="my-0">GRUPO PLANEACION </h5>
                     <div class="">
-                        <select class="form-control" id="grupop" name="grupop" style="margin-bottom: 10px;">
+                        <select class="form-control" id="grupop" name="grupop" style="margin-bottom: 10px;" {{$privilegioTarea}}>
                             <option value="" {{ old('grupop', $data[0]->Grupo_Pla??'SIN DATOS') == 'SIN DATOS' ? 'selected' : '' }}>SIN
                                 DATOS</option>
                             @foreach ($gruposPlaneacion as $grupo)
@@ -347,10 +349,10 @@ border: 1px solid #000000;
             
             <div class="row">
                 <div class="col-md-6">
-                <input type="number" class="form-control" name="costocompras" id="costocompras" value="{{old('costocompras', number_format($data[0]->CostoACompras??0, 2, '.', ','))}}">
+                <input type="number" step="0.01" min="0" class="form-control" name="costocompras" id="costocompras" value="{{old('costocompras', number_format($data[0]->CostoACompras??0, 2, '.', ','))}}" {{$privilegioTarea}}>
                 </div>
                 <div class="col-md-6">
-                <select class="form-control" id="monedacompras" name="monedacompras" style="margin-bottom: 10px;">
+                <select class="form-control" id="monedacompras" name="monedacompras" style="margin-bottom: 10px;" {{$privilegioTarea}}>
                     <option value="{{old('monedacompras','MXP')}}" {{ ('MXP' == $data[0]->MonedaACompras) ? 'selected' : '' }}>
                         MXP</option>
                     <option value="{{old('monedacompras','USD')}}" {{ ('USD' == $data[0]->MonedaACompras) ? 'selected' : '' }}>
@@ -372,7 +374,7 @@ border: 1px solid #000000;
         <li class="list-group-item green-edit-field">
             <div>
                 <h5 class="my-0">COMPRADOR </h5>
-                    <select class="form-control" id="comprador" name="comprador" style="margin-bottom: 10px;">
+                    <select class="form-control" id="comprador" name="comprador" style="margin-bottom: 10px;" {{$privilegioTarea}}>
                         <option value="" {{ old('comprador', $data[0]->Comprador??'SIN DATOS') == 'SIN DATOS' ? 'selected' : '' }}>SIN
                             DATOS</option>
                         @foreach ($compradores as $comprador)
@@ -393,10 +395,39 @@ border: 1px solid #000000;
   </div><!-- /.md-5 -->
     </div> <!-- /.row -->
     
-    {!! Form::close() !!}
+{!! Form::close() !!}
+                    <div class="modal fade" id="confirma" tabindex="-1" role="dialog" >
+                        <div class="modal-dialog modal-sm" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title" id="pwModalLabel">Actualizar Artículo en SAP</h4>
+                                </div>
+                             
+                                <div class="modal-body">
+
+                                    <div class="form-group">
+                                        <div>
+                                           <h4>¿Desea continuar?</h4>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                                    <button type="button" id="submitBtn" class="btn btn-primary">Guardar</button>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
 </div>
     <!-- /.container -->
 @endsection
- 
 @section('homescript')
+$("#submitBtn").click(function(){        
+
+$("#mainform").submit(); // Submit the form
+
+});
 @endsection
