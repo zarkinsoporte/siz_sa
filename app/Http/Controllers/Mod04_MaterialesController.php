@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\User;
 use Auth;
 use DB;
+use App\OP;
 use Dompdf\Dompdf;
 //excel
 use Illuminate\Http\Request;
@@ -383,5 +384,43 @@ public static function getParam_DM_Articulos($item){
         return $param;
 }
 
+public function solicitudMateriales(){
+     if (Auth::check()) {
+        $user = Auth::user();
+        $actividades = $user->getTareas();  
+        $articulos = DB::select('SELECT CardCode, CardName FROM OCRD WHERE CardType = ? ORDER BY CardName', ['S']);
+        $rutasConNombres = OP::getTodasRutas();  
+      
+        $param = array(        
+            'actividades' => $actividades,
+            'ultimo' => count($actividades),
+            'articulos' => $articulos,  
+            'rutasConNombres' => $rutasConNombres,  
+        );
+        return view('Mod04_Materiales.solicitudMateriales', $param);
+    } else {
+         return redirect()->route('auth/login');
+    }
+    
+}
+  public function ShowArticulosWH(Request $request)
+    {
+        $consulta= DB::select('
+        SELECT OITM.ItemCode, ItemName, InvntryUom AS UM, ALMACENES.Existencia FROM OITM
+        LEFT JOIN 
+        (SELECT ItemCode, SUM(CASE WHEN WhsCode = \'APG-PA\' OR WhsCode = \'AMP-ST\'  THEN OnHand ELSE 0 END) AS Existencia
+        FROM dbo.OITW
+        GROUP BY ItemCode) AS ALMACENES ON OITM.ItemCode = ALMACENES.ItemCode
+        WHERE PrchseItem = \'Y\' AND InvntItem = \'Y\' AND U_TipoMat = \'MP\'
+        ');
+               $columns = array(
+                ["data" => "ItemCode", "name" => "Código"],
+                ["data" => "ItemName", "name" => "Descripción"],
+                ["data" => "UM", "name" => "UM"],            
+                ["data" => "Existencia", "name" => "Existencia", "defaultContent" => "0.00"],            
+            );          
+
+            return response()->json(array('data' => $consulta, 'columns' => $columns));
+    }
    
 }

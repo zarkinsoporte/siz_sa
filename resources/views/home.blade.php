@@ -116,7 +116,7 @@ $index = 0;
     <!-- /.navbar-collapse -->
     </nav>
 
-    <div id="page-wrapper2">
+    <div id="page-wrapper2" ng-app='app'>
         <style>
             td {
                 font-family: 'Helvetica';

@@ -131,9 +131,11 @@ jqxhr =  $.ajax({
             columnas = data.columnsxls;
             // Add some Render transformations to Columns
             // Not a good practice to add any of this in API/ Json side
-            //data.columns[0].render = function (data, type, row) {
-            //    return '<h4>' + data + '</h4>';
-           // }
+            data.columns[(Object.keys(data.columns).length) - 4].render = function (data, type, row) {
+          
+            var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:4}).format(data);
+            return val;
+            }
                     // Debug? console.log(data.columns[0]);
         var table = $(tableName).DataTable({
                
@@ -244,17 +246,17 @@ jqxhr =  $.ajax({
                 filter_default_label: ["Min", "Max"]
             },
             {
-                column_number : [(Object.keys(data.columns).length) - 4], //Col TE
+                column_number : [(Object.keys(data.columns).length) - 4], //Col Costo
                 filter_type: 'range_number',
                 filter_default_label: ["Min", "Max"]
             },
             {
-                column_number : [(Object.keys(data.columns).length) - 7], //Col Pto. Reorden
+                column_number : [(Object.keys(data.columns).length) - 8], //Col Pto. Reorden
                 filter_type: 'range_number',
                 filter_default_label: ["Min", "Max"]
             },
             {
-                column_number : [(Object.keys(data.columns).length) - 9], //Col Necesidad
+                column_number : [(Object.keys(data.columns).length) - 10], //Col Necesidad
                 filter_type: 'range_number',
                 filter_default_label: ["Min", "Max"]
             },

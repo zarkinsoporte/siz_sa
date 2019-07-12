@@ -45,6 +45,18 @@ foreach($ruta as $e){
 
 return $data1;
    }
+   
+   public static function getTodasRutas(){
+
+        $resu =DB::table('@PL_RUTAS')
+        ->select('Code', 'Name')
+        ->where('U_Estatus', 'A')          
+        ->where('Code', '>','109')          
+        ->where('U_Tipo','1')          
+        ->where('U_Calidad', 'N');          
+
+        return $resu->get();
+   }
 
    public static function getStatus($docEntry){
     /*   select	OWOR.docentry, [@CP_OF].Code,

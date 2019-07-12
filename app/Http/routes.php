@@ -239,6 +239,11 @@ Route::post('home/reporte/DATOS MAESTROS ARTICULOS/{redirek?}', 'Mod04_Materiale
 Route::post('articuloToSap', 'Mod04_MaterialesController@articuloToSap');
 Route::get('OITM.show', 'HomeController@ShowArticulos')->name( 'OITM.show');
 //
+//ENTREGA DE MATERIALES
+Route::get('home/SOLICITUD MATERIALES', 'Mod04_MaterialesController@solicitudMateriales');
+Route::get('OITM.WH.show', 'Mod04_MaterialesController@ShowArticulosWH')->name( 'OITM.WH.show');
+
+//
 //-------------------------//
 //RUTAS DE MRP//---------------------------------------------------------
 //-------------------------//

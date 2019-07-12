@@ -15,6 +15,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
   
     <!-- Material Design fonts -->
     <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
@@ -234,12 +235,17 @@ li.dt-button.active a::before{
 {!! Html::script('assets/js/moment.min.js') !!}
 {!! Html::script('assets/js/shortcut.js') !!}
 <!-- Include Date Range Picker -->
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/css/bootstrap-select.min.css">
 
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/js/bootstrap-select.min.js"></script>
 
 <script>
     $(document).ready(function (event) {
             $('.toggle').bootstrapSwitch();
             $('[data-toggle="tooltip"]').tooltip();
+            $('.boot-select').selectpicker();
 $('.dropdown-toggle').dropdown();
         @yield('script');
         setTimeout(function() {

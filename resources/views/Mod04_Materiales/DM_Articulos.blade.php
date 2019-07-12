@@ -42,6 +42,12 @@ margin-left: 10px;
 .green-edit-field {
 border: 1px solid #000000;
 }
+.boot-select{
+    padding-bottom: 10px !important;
+}
+.bootstrap-select>.dropdown-toggle {
+width: 100% !important;
+}
 </style>
 <div class="container">
  {!! Form::open(['url' => 'articuloToSap', 'method' => 'POST', 'id' => 'mainform']) !!}
@@ -88,7 +94,7 @@ border: 1px solid #000000;
             <ul>
                 <li class="list-group-item">
                     <div>
-                       <h5 class="my-0">Descripción <small>{{$data[0]->ItemName}}</small></h5>
+                       <h5 class="my-0"> <small>{{$data[0]->ItemName}}</small></h5>
                         <h5 class="my-0"></h5>
                     </div>
         
@@ -100,14 +106,14 @@ border: 1px solid #000000;
     <!-- /.row -->
     <div class="row">
        
-        <div class="col-md-7">
+        <div class="col-md-7 col-sm-12">
             <ul>
                 <li class="list-group-item green-edit-field">
                     <div>
                         <h5>Proveedor</h5>                    
                         <div class="input-group">
                         
-                            <select class="form-control" id="proveedor" name="proveedor" style="margin-bottom: 10px;" {{$privilegioTarea}}>                               
+                            <select data-live-search="true" class="boot-select" id="proveedor" name="proveedor" {{$privilegioTarea}}>                               
                                 <option value="" {{ old('proveedor', $data[0]->CardCode??'SIN DATOS') == 'SIN DATOS' ? 'selected' : '' }}>SIN DATOS</option>
                                 @foreach ($proveedores as $proveedor)
                                 <option value="{{old('proveedor',$proveedor->CardCode)}}" {{ ($proveedor->CardCode == $data[0]->CardCode) ? 'selected' : '' }}>                                   
@@ -118,6 +124,9 @@ border: 1px solid #000000;
                     </div>        
                 </li>
             </ul>
+        </div>
+        <div class="col-md-3 col-sm-12">
+            <a class="btn btn-primary" id="showImg" style="margin-bottom: 10px;" src="{{URL::asset('/images/articulos/img_'.$data[0]->ItemCode.'.jpg')}}"><i class="fa fa-camera" aria-hidden="true"></i> Ver Imagen</a>
         </div>
     </div>   
     
@@ -311,8 +320,8 @@ border: 1px solid #000000;
         <li class="list-group-item green-edit-field">
             <div>
                 <h5 class="my-0">GRUPO PLANEACION </h5>
-                    <div class="">
-                        <select class="form-control" id="grupop" name="grupop" style="margin-bottom: 10px;" {{$privilegioTarea}}>
+                    <div class="input-group">
+                        <select  data-live-search="true"  class="boot-select" id="grupop" name="grupop" style="margin-bottom: 10px;" {{$privilegioTarea}}>
                             <option value="" {{ old('grupop', $data[0]->Grupo_Pla??'SIN DATOS') == 'SIN DATOS' ? 'selected' : '' }}>SIN
                                 DATOS</option>
                             @foreach ($gruposPlaneacion as $grupo)
@@ -421,6 +430,19 @@ border: 1px solid #000000;
                             </div>
                         </div>
                     </div>
+
+
+                    <div class="modal fade" id="imagemodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-body">
+                                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                                            class="sr-only">Close</span></button>
+                                    <img src="" class="imagepreview" style="width: 100%;" onerror="this.src='{{URL::asset('/images/articulos/SIN_IMAGEN.jpg')}}'">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 </div>
     <!-- /.container -->
 @endsection
@@ -428,6 +450,11 @@ border: 1px solid #000000;
 $("#submitBtn").click(function(){        
 
 $("#mainform").submit(); // Submit the form
+
+});
+$("#showImg").click(function(){        
+$('.imagepreview').attr('src', $("#showImg").attr('src'));
+$('#imagemodal').modal('show');
 
 });
 @endsection
