@@ -691,8 +691,8 @@ dd($user);
         //$pdf = App::make('dompdf.wrapper');
         $inventario = DB::table('Siz_Inventario')
         ->join('Siz_Monitores', 'Siz_Inventario.monitor', '=', 'Siz_Monitores.id')
-        ->select('Siz_Inventario.id as id_inv', 'Siz_Inventario.*', 'Siz_Monitores.id as id_mon', 'Siz_Monitores.*')
-        ->where('Siz_Inventario.id', '=',$id)
+        ->select('Siz_Inventario.numero_equipo as id_inv', 'Siz_Inventario.*', 'Siz_Monitores.id as id_mon', 'Siz_Monitores.*')
+        ->where('Siz_Inventario.numero_equipo', '=',$id)
         ->get();
     
         $data=array('data' => $inventario,
