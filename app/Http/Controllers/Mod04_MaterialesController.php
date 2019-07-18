@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use App\SAP;
 use Session;
+use Illuminate\Support\Facades\Mail;
 use Maatwebsite\Excel\Facades\Excel;
 use Datatables;
 use Validator;
@@ -422,5 +423,64 @@ public function solicitudMateriales(){
 
             return response()->json(array('data' => $consulta, 'columns' => $columns));
     }
-   
+public function saveArt(Request $request){
+
+    if (Auth::check()) {
+            DB::beginTransaction();
+        $err = false;
+        $id = 0;
+        $arts = $request->get('arts');
+                $dt = new \DateTime();
+                $id = DB::table('SIZ_SolicitudesMP')->insertGetId(
+                    ['FechaCreacion' => $dt, 'Usuario' => Auth::id()]
+                );
+                
+                foreach ($arts as $art) {
+                    DB::table('SIZ_MaterialesSolicitudes')->insert(
+                        ['Id_Solicitud' => $id, 'ItemCode' => $art['pKey'], 'Cant' => $art['cant'], 'Destino' => $art['destino'], 'Surtir' => 'Y']
+                    );
+                }
+                if (!($id > 0) || is_null($arts) || is_null($id)) {
+                    $err =true;
+                }
+        
+        if ($err) {
+            return 'Error: No se guardo la solicitud, favor de notificar a Sistemas';
+                DB::rollBack();       
+        }else{
+                DB::commit();
+                $N_Emp = User::where('position', 4)->where('dept', Auth::user()->dept)->first();
+                if (!is_null($N_Emp)) {
+                    $correo = utf8_encode($N_Emp->email . '@zarkin.com');
+                    if (strlen($correo) > 10) {
+                        Mail::send('Emails.SolicitudMP', [
+                            'arts' => $arts, 'id' =>$id
+                        ], function ($msj) use ($correo, $id) {
+                            $msj->subject('SIZ Solicitud de Material #'.$id); //ASUNTO DEL CORREO
+                            $msj->to($correo); //Correo del destinatario
+                        });
+                    } 
+                }
+                $Num_Nominas = DB::select(DB::raw("SELECT No_Nomina FROM Siz_Email WHERE SolicitudesMP = '1'"));
+                foreach ($Num_Nominas as $Num_Nomina) {
+                    $user = User::find($Num_Nomina->No_Nomina);
+                    $correo = utf8_encode($user['email'] . '@zarkin.com');
+                    if (strlen($correo) > 10) {
+                        Mail::send('Emails.SolicitudMP', [
+                            'arts' => $arts, 'id' =>$id
+                                        ], function ($msj) use ($correo, $id) {
+                            $msj->subject('SIZ Solicitud de Material #'.$id); //ASUNTO DEL CORREO
+                            $msj->to($correo); //Correo del destinatario
+                        });
+                    }
+                }
+        }
+         
+        //$request->session()->put('help', $arts);
+        return 'Mensaje: Tu Solicitud ha sido enviada';
+    } else {
+        return 'Error: Inicia de nuevo Sessión';
+    }
+}
+  
 }

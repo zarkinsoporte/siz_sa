@@ -16,6 +16,7 @@ use App\Modelos\MOD01\TAREA_MENU;
 use App\OP;
 use Illuminate\Support\Facades\DB;
 use App\User;
+use Illuminate\Support\Facades\Mail;
 
 use Illuminate\Http\Request;
 Route::get('/', 'HomeController@index');
@@ -242,7 +243,7 @@ Route::get('OITM.show', 'HomeController@ShowArticulos')->name( 'OITM.show');
 //ENTREGA DE MATERIALES
 Route::get('home/SOLICITUD MATERIALES', 'Mod04_MaterialesController@solicitudMateriales');
 Route::get('OITM.WH.show', 'Mod04_MaterialesController@ShowArticulosWH')->name( 'OITM.WH.show');
-
+Route::post('home/saveArt', 'Mod04_MaterialesController@saveArt')->name('home/saveArt');
 //
 //-------------------------//
 //RUTAS DE MRP//---------------------------------------------------------
@@ -268,15 +269,10 @@ Route::get('home/PRODUCCION POR AREAS', 'Reportes_ProduccionController@showModal
 Route::post('home/reporte/PRODUCCION POR AREAS', 'Reportes_ProduccionController@reporteProdxAreas');
 Route::get('home/reporte/PRODUCCION POR AREAS', 'Reportes_ProduccionController@reporteProdxAreasPDF');
 Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@produccionxareasXLS');
- 
+
  Route::get('/pruebas', function (Request $request) {
-dd(
-
-$request->session()->all()
-
-);
     
-//  $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
+    //  $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
 //  $vCmp->DbServerType="6"; 
 //  $vCmp->server = "SERVER-SAPBO";
 //  $vCmp->LicenseServer = "SERVER-SAPBO:30000";

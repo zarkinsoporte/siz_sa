@@ -46,9 +46,10 @@ border: 1px solid #000000;
 </style>
 <style>
     div.dataTables_wrapper div.dataTables_processing {
-        width: 500px;
-        height: 200px;
-        margin-left: 0%;
+        width: 400px;
+        height: 150px;
+        margin-left: -25%;
+        margin-top: -8%;
         background: linear-gradient(to right, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.95) 25%, rgba(255, 255, 255, 0.95) 75%, rgba(255, 255, 255, 0.2) 100%);
         z-index: 15;
     }
@@ -77,8 +78,7 @@ border: 1px solid #000000;
 </style>
 
 <div class="container"  ng-controller="MainController">
- {!! Form::open(['url' => 'articuloToSap', 'method' => 'POST', 'id' => 'mainform']) !!}
- {{ csrf_field() }}
+
     <!-- Page Heading -->
     <div class="row">
         
@@ -102,22 +102,58 @@ border: 1px solid #000000;
         <div class="col-lg-6">
             <div class="input-group">
                 
-                <span class="input-group-btn">
-                    <button class="btn btn-primary" id="myBtn" type="button">Agregar</button>
+                <span class="">
+                    <button class="btn btn-primary" ng-click="modals()" type="button"><i class="fa fa-plus"></i> Agregar</button>
+                    <button ng-if="articulos.length > 0" class="btn btn-success" id="spin" ng-click="sendArt()">
+                        <i class="fa fa-send"></i> Enviar</button>
                 </span>
             </div><!-- /input-group -->
         </div><!-- /.col-lg-6 -->
     </div><!-- /.row -->
+    <br>
+    <div class="row" ng-if="successVar.includes('Mensaje')">
+        <div class="col-md-12">
+            <div class="alert alert-success" role="alert">
+                <%successVar%>
+            </div>
+        </div>
+    </div>
+    <div class="row" ng-if="successVar.includes('Error')">
+        <div class="col-md-12">
+            <div class="alert alert-danger" role="alert">
+                <%successVar%>
+            </div>
+        </div>
+    </div>
     <div class="row">
-       
-     
+       <div class="col-md-12">
+           <table class="display condensed" ng-if="articulos.length > 0">
+            <thead>
+                <tr>                    
+                    <th>Código</th>
+                    <th>Descripción</th>
+                    <th>Cantidad</th>
+                    <th>Estación</th>
+                    <th>Quitar</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="art in articulos">
+                    <td><%art.pKey%></td>
+                    <td><%art.descr%></td>
+                    <td><%art.cant%></td>
+                    <td><%art.destino%></td>
+                    <td><a role="button" ng-click="quitaArt(art)"  class="btn btn-default"><i class="fa fa-trash" style="color:red"></i></a></td>
+                </tr>
+            </tbody>
+        </table>
+       </div>
     </div>   <!-- /.row -->
     
     <div class="row">
     
     </div> <!-- /.row -->
     
-{!! Form::close() !!}
 
                    <div class="row">
                        <div class="col-md-12">
@@ -129,10 +165,14 @@ border: 1px solid #000000;
                                                     aria-hidden="true">&times;</span></button>
                                             <h4 class="modal-title" id="pwModalLabel">Agregar Artículo <small>Busca y selecciona el artículo de lista</small></h4>
                                         </div>
-                                        
+                                       
                                         <div class="modal-body">
                                             
                                             <div class="row">
+                                                <div id="ajax_processing" class="dataTables_wrapper">
+                                                    <div class="dataTables_processing" style="display: block;"><i class="fa fa-spinner fa-pulse fa-3x fa-fw"
+                                                            style="font-size:20px; "></i><span style="font-size:20px; "><b>Procesando...</b></span></div>
+                                                </div>
                                                <div class="col-md-12">
                                                    <table id="tabla" width="100%" class="table-condensed stripe cell-border display" style="width:100%">
                                                         <thead class="">
@@ -153,8 +193,8 @@ border: 1px solid #000000;
                                                 <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label for="pKey">Código:</label>
-                                                    <input type="text" readonly name="pKey" class="form-control"
-                                                        ng-model="insert.pKey">
+                                                    <input type="text"  name="pKey" class="form-control" required readonly>
+                                                        <input type="text" name="descr" hidden>
                                              
                                                 </div>                                               
                                                 </div>
@@ -172,7 +212,7 @@ border: 1px solid #000000;
                                                         <select class="form-control" name="destino" id="destino" ng-model="insert.destino" required>
                                                             <option></option>
                                                             @foreach($rutasConNombres as $key)
-                                                            <option class="col-md-6" value="{{$key->Code}}">{{$key->Name}}</option>
+                                                            <option class="col-md-6" value="{{$key->Name}}">{{$key->Name}}</option>
                                                             @endforeach
                                                         </select>
                                                     </div>
@@ -180,8 +220,10 @@ border: 1px solid #000000;
                                             </div>
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-                                            <button type="submit" id="submitBtn" class="btn btn-primary" disabled>Agregar</button>
+                                            <button type="submit" id="submitBtn" class="btn btn-primary" disabled>Añadir a Solicitud</button>
+                                            <button type="button" class="btn btn-success" data-dismiss="modal" ng-if="articulos.length > 0">
+                                                Ver Solicitud de Material <span class="badge badge-light"><% articulos.length %></span>
+                                            </button>                                            
                                         </div>
                                     </form>
                                     </div>
@@ -245,10 +287,9 @@ var data,
        
     }
     },
-    "initComplete": function(settings, json) {
-     
+   "initComplete": function( settings, json ) {
+        $('#ajax_processing').hide();
     }
-    
     });
     
     $('#tabla thead tr:eq(1) th').each( function (i) {
@@ -272,6 +313,7 @@ var data,
         if ( $(this).hasClass('selected') ) {
             $(this).removeClass('selected');
             $('input[name=pKey]').val('');
+            $('input[name=descr]').val('');
             $('input[name=cant]').val('');
             $('input[name=cant]').blur();
             $('#submitBtn').attr("disabled", true);
@@ -285,6 +327,7 @@ var data,
                // console.log(fila[0]['Existencia']);
                 if(fila[0]['Existencia'] == '.000000'){
                     $('input[name=pKey]').val('');
+                    $('input[name=descr]').val('');
                     $('input[name=cant]').val('');
                     $('input[name=cant]').blur();
                     $('#submitBtn').attr("disabled", true);
@@ -293,7 +336,9 @@ var data,
                     $(this).addClass('selected');
                    // console.log(fila[0]['ItemCode']);
                     $('input[name=pKey]').val(fila[0]['ItemCode']);
+                    $('input[name=descr]').val(fila[0]['ItemName']);
                    // $('input[name=cant]').attr('title', valor+" en Existencia");
+                   
                     $('input[name=cant]').focus();                    
                     $('input[name=cant]').attr('max', fila[0]['Existencia']);
                     $('input[name=cant]').attr('min',1);
@@ -326,11 +371,7 @@ var data,
     
     $('#tabla thead tr').clone(true).appendTo( '#tabla thead' );
 
- $("#myBtn").click(function(){
-$("#confirma").modal();
 
-
-});
 $(window).on('load',function(){
 $('#confirma').modal('show');
 });
@@ -344,10 +385,52 @@ $('#confirma').modal('show');
 $interpolateProvider.startSymbol('<%');
     $interpolateProvider.endSymbol('%>');
 });
-   app.controller("MainController",["$scope", function($scope, $http){
+   app.controller("MainController",["$scope", "$http", function($scope, $http){
+    $scope.articulos = [];
+    $scope.successVar = '';
     $scope.insert = {};
+    $scope.modals = function(){
+        if($scope.successVar == null){
+            location.reload();
+        }
+        $("#confirma").modal();
+    }
     $scope.AddArt = function(){
-        alert('ok');
+        $scope.insert.pKey = $('input[name=pKey]').val();
+        $scope.insert.descr = $('input[name=descr]').val();
+        $scope.articulos.push($scope.insert);
+        $scope.insert = null;
+        $scope.successVar = null;
+       // console.log(this.articulos);
+        
+    };
+    $scope.quitaArt = function(item){
+        var pos = $scope.articulos.indexOf(item);
+        //console.log(index-1);
+        // removemos del array tareas el indice que guarda al elemento donde se hizo click
+        $scope.articulos.splice(pos,1);
+    };
+    $scope.sendArt = function(){
+        $( "#spin" ).html('<span><i class="fa fa-spinner fa-pulse fa-lg fa-fw"></i> Enviando...</span>');
+       $http({
+        method: 'POST',
+        url: 'saveArt',
+        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        data:
+        {
+            "_token": "{{ Session::token() }}",
+            "arts": $scope.articulos            
+        },
+       
+        }).then(function (response) {
+            $( "#spin" ).html('<span><i class="fa fa-send"></i> Enviar</span>');
+        $scope.articulos = [];
+        $scope.successVar = response.data;
+        return response.data;
+        }, function (response) {
+        
+        }
+        );
     }
     }]);
 </script>
