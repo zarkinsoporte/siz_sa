@@ -3,9 +3,10 @@ use Closure;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Session\Store;
 use DB;
+use Session;
 class SessionTimeout {
     protected $session;
-    protected $timeout=1460;
+    protected $timeout=14;
     public function __construct(Store $session){
         $this->session=$session;
     }
@@ -19,15 +20,15 @@ class SessionTimeout {
     public function handle($request, Closure $next)
     {
 
+        if ($request->path() != "auth/login") {
+            if(time() - $this->session->get('lastActivityTime') > $this->getTimeOut()){
 
-        if(!$this->session->has('lastActivityTime'))
-            $this->session->put('lastActivityTime',time());
-        elseif(time() - $this->session->get('lastActivityTime') > $this->getTimeOut()){
-
-            $this->session->forget('lastActivityTime');
-            DB::disconnect('sqlsrv');
-            Auth::logout();
-            return redirect('auth/login')->withErrors(['la sesión se ha cerrado por inactividad']);
+                $this->session->flush();
+                Session::flush();
+                DB::disconnect('sqlsrv');
+                Auth::logout();
+                return redirect('auth/login')->withErrors(['la sesión se ha cerrado por inactividad']);
+            }
         }
         $this->session->put('lastActivityTime',time());
         return $next($request);
