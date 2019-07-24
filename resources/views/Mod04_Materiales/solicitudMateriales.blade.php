@@ -180,7 +180,7 @@ border: 1px solid #000000;
                                                                 <th><i>Código</i></th>
                                                                 <th>Descripción</th>
                                                                 <th>UM</th>
-                                                                <th>Existencia</th>
+                                                                <th>Disponible</th>
                                                             </tr>
                                                         </thead>
                                                     

@@ -1,8 +1,8 @@
 @extends('home') 
 @section('homecontent')
 <style>
-    th { font-size: 12px; }
-    td { font-size: 11px; }
+    th { font-size: 13px; }
+    td { font-size: 13px; }
    
     div.dataTables_wrapper {
     margin: 0 ;
@@ -25,7 +25,7 @@
         position: sticky;
     }
     .DTFC_LeftBodyWrapper{
-        margin-top: 88px;
+        margin-top:68px;
     }
     .DTFC_LeftHeadWrapper {
         display:none;
@@ -67,13 +67,13 @@
 
     <!-- Page Heading -->
     <div class="row">
-        <div class="col-md-11">
-            <h3 class="page-header">
+        <div class="col-md-11" >
+            <h3 class="page-header" style="margin-bottom: -7px;">
                 Resumen de MRP
                 <small id="parameter">Necesidades de Materia Prima  ({{$fechauser}}/{{$tipo}})</small>
             </h3>
             
-            <h5>{{$text}}</h5>
+            <h4>{{$text}}</h4>
             <!-- <h5>Fecha & hora: {{\AppHelper::instance()->getHumanDate(date('d-m-Y h:i a', strtotime("now")))}}</h5> -->
         </div>
     </div>
@@ -87,8 +87,8 @@
         </div>
         
         <div class="col-md-12">
-            <table id="tmrp" class="stripe cell-border display" >
-                        <thead class="table-condensed">
+            <table id="tmrp" class="stripe cell-border display table-condensed" >
+                        <thead class="">
                          <tr>
 
                          </tr>
@@ -140,9 +140,8 @@ jqxhr =  $.ajax({
         var table = $(tableName).DataTable({
                
                 dom: 'Blrtfip',
-                orderCellsTop: true,    
-                scrollY:        "300px",
-                "pageLength": 50,
+                orderCellsTop: true,  
+                "pageLength": 10,
                 scrollX:        true,
                 paging:         true,
                 fixedColumns: true,

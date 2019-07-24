@@ -6,7 +6,7 @@ use DB;
 use Session;
 class SessionTimeout {
     protected $session;
-    protected $timeout=14;
+    protected $timeout=1460;
     public function __construct(Store $session){
         $this->session=$session;
     }
@@ -19,8 +19,11 @@ class SessionTimeout {
      */
     public function handle($request, Closure $next)
     {
-
-        if ($request->path() != "auth/login") {
+       // dd($request->path());
+    if ($request->path() == "auth/login" || $request->path() == "/") {
+          
+        }
+        else{
             if(time() - $this->session->get('lastActivityTime') > $this->getTimeOut()){
 
                 $this->session->flush();

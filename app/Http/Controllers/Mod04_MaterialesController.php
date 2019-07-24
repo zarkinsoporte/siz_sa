@@ -404,6 +404,50 @@ public function solicitudMateriales(){
     }
     
 }
+public function pickingArticulos(){
+     if (Auth::check()) {
+        $user = Auth::user();
+        $actividades = $user->getTareas();  
+      // $solicitudes = DB::table('SIZ_SolicitudesMP');
+        
+      
+        $param = array(        
+            'actividades' => $actividades,
+            'ultimo' => count($actividades),          
+        );
+        return view('Mod04_Materiales.ShowSolicitudes', $param);
+    } else {
+         return redirect()->route('auth/login');
+    }
+    
+}
+public function DataSolicitudes(){
+     $consulta = DB::table('SIZ_SolicitudesMP')
+                    ->join('SIZ_MaterialesSolicitudes', 'SIZ_MaterialesSolicitudes.Id_Solicitud', '=', 'SIZ_SolicitudesMP.Id_Solicitud')
+                    ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')
+                    ->leftjoin('OUDP', 'OUDP.Code', '=', 'dept')
+                    ->groupBy('SIZ_SolicitudesMP.Id_Solicitud', 'SIZ_SolicitudesMP.FechaCreacion', 'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'firstName', 'lastName', 'dept', 'Name')
+                    ->select('SIZ_SolicitudesMP.Id_Solicitud', 'SIZ_SolicitudesMP.FechaCreacion', 
+                    'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'OHEM.firstName',
+                     'OHEM.lastName', 'OHEM.dept', 'OUDP.Name as depto')
+                    ->where('SIZ_SolicitudesMP.Status', 'Pendiente')                    
+                  ;
+     //$consulta = collect($consulta);
+            return Datatables::of($consulta)             
+                 ->addColumn('action', function ($item) {
+                       return  '<a href="PICKING ARTICULOS/solicitud/'.$item->Id_Solicitud.'" class="btn btn-xs btn-default"><i class="fa fa-eye"></i> </a>';           
+                    }
+                    )
+                    ->addColumn('user_name', function ($item) {
+                       return  $item->firstName.' '.$item->lastName;           
+                    }
+                    )
+                    ->addColumn('area', function ($item) {                      
+                       return  $item->depto;
+                    }
+                    )
+                ->make(true);
+}
   public function ShowArticulosWH(Request $request)
     {
         $consulta= DB::select('
@@ -432,7 +476,7 @@ public function saveArt(Request $request){
         $arts = $request->get('arts');
                 $dt = new \DateTime();
                 $id = DB::table('SIZ_SolicitudesMP')->insertGetId(
-                    ['FechaCreacion' => $dt, 'Usuario' => Auth::id()]
+                    ['FechaCreacion' => $dt, 'Usuario' => Auth::id(), 'Status' => 'Pendiente']
                 );
                 
                 foreach ($arts as $art) {
