@@ -27,13 +27,16 @@
                         </ul>   
                     </li>
                     <li>
-                    <a href="javascript:;" data-toggle="collapse" data-target="#inventario">Noticias<i class="fa fa-fw fa-caret-down"></i></a>
+                    <a href="javascript:;" data-toggle="collapse" data-target="#inventario">Notificaciones<i class="fa fa-fw fa-caret-down"></i></a>
                     <ul id="inventario" class="">
                             <li>
                                 <a href="{!! url('admin/Nueva') !!}"><i class="glyphicon glyphicon-pencil"></i> Nueva</a>
                             </li>
                             <li>
-                                <a href="{!! url('admin/Notificaciones') !!}"><i class="glyphicon glyphicon-list-alt"></i> Notificaciones</a>
+                                <a href="{!! url('admin/Notificaciones') !!}"><i class="glyphicon glyphicon-list-alt"></i> Log Notificaciones</a>
+                            </li>
+                            <li>
+                                <a href="{!! url('admin/emails') !!}"><i class="fa fa-envelope"></i> Ajustes Email</a>
                             </li>
                          
                         </ul>  

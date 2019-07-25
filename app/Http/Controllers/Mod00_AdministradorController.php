@@ -13,6 +13,7 @@ use Hash;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Validator;
 use Session;
 use Auth;
 use Lava;
@@ -863,7 +864,7 @@ public function Noticia()
      public function delete_noti($id_Autor){
       $eliminar = DB::table('Siz_Noticias')->where('Id', '=', $id_Autor)->delete();
     
-        Session::flash('info', 'Eliminaste una noticia');
+        Session::flash('mensaje', 'Eliminaste la noticia #'.$id_Autor);
         return redirect()->back();
     }
     public function backOrderAjaxToSession(){
@@ -882,5 +883,52 @@ public function Noticia()
         }else {
             return redirect()->route('auth/login');
         }
+    }
+    public function Email(){
+        if (Auth::check()) {
+            $emails = DB::table('Siz_Email')->get();
+            $activeUsers = DB::table('OHEM')
+                            ->select('firstName', 'lastName', 'U_EmpGiro')
+                            ->whereNotNull('email')
+                            ->get();
+       
+            return view('Mod00_Administrador.Emails', compact('emails', 'activeUsers'));
+        }else {
+            return redirect()->route('auth/login');
+        }    
+    }
+    public function saveEmail(Request $request){
+       //Insertamos el monitor en la DB
+        $valid = Validator::make(Input::all(), [
+            'nomina' => 'exists:Siz_Email,No_Nomina' ,          
+        ]);
+           // dd($valid->fails());
+        if ($valid->fails()) {
+          DB::table('Siz_Email')->insert(
+            [           
+             'No_Nomina' => $request->input('nomina'),
+             'Reprocesos' => $request->input('reprocesos'),
+             'SolicitudesMP' => $request->input('solicitudmp')
+            ]
+        );
+        }else{
+            DB::table('Siz_Email')
+            ->where('No_Nomina', $request->input('nomina'))
+            ->update( [
+             'Reprocesos' => $request->input('reprocesos'),
+             'SolicitudesMP' => $request->input('solicitudmp'),
+            ]);
+        }                
+        Session::flash('mensaje', 'Cambios guardados');
+        return redirect()->back();
+        //Realizamos la consulta nuevamente
+        //$monitores = DB::table('Siz_Monitores')->orderBy('id', 'ASC')->get();
+        //Llamamos a la vista para mostrar su contendio
+        //return view('Mod00_Administrador.monitores')->with('monitores', $monitores);
+    }
+    public function deleteEmail($id){
+        DB::table('Siz_Email')->where('id', '=', $id)->delete();
+         Session::flash('mensaje', 'Registro eliminado');
+        return redirect()->back();
     }
 }

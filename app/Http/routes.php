@@ -93,7 +93,10 @@ Route::get('datatables.data', 'Mod00_AdministradorController@anyData')->name('da
 |--------------------------------------------------------------------------
 */
 Route::get('admin/Nueva', 'Mod00_AdministradorController@Noticia');
+Route::get('admin/emails', 'Mod00_AdministradorController@Email');
 Route::post('admin/Nueva', 'Mod00_AdministradorController@Noticia2');
+Route::post('admin/save/email', 'Mod00_AdministradorController@saveEmail');
+Route::get('admin/email/del/{id}', 'Mod00_AdministradorController@deleteEmail');
 Route::get('admin/Notificaciones', 'Mod00_AdministradorController@Notificacion');
 Route::post('admin/Notificaciones', 'Mod00_AdministradorController@Notificacion2');
 Route::get('admin/Mod_Noti/{id}/{mensaje}', 'Mod00_AdministradorController@Mod_Noti');

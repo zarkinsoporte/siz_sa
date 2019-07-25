@@ -13,21 +13,14 @@
             <div class="row">
                 <div >
                     <div class="visible-xs"><br><br></div>
-                    <h3 class="page-header">
-                        Usuarios
+                    <h3 class="page-header col-lg-6.5 col-md-8 col-sm-7">
+                          Detalle de Notificación
                     </h3>
                     
                        <div class= "col-lg-6.5 col-md-8 col-sm-7">
                         <div class="hidden-xs">
                        <div class="hidden-sm">
-                        <ol class="breadcrumb">
-                        <li>
-                            <i class="fa fa-dashboard"></i>  <a href="{!! url('home') !!}">Inicio</a>
-                        </li>
-                        <li>
-                            <i class="fa fa-archive"></i> <a href="users">Usuarios</a>
-                       </li>
-                    </ol>
+                       
                 </div>
             </div>
             @include('partials.alertas')
@@ -48,7 +41,7 @@
   </div>
   <button type="submit" class="btn btn-primary">Enviar</button> 
   {!! Form::close() !!} 
-
+</div>
 @endsection
 
 @section('script')

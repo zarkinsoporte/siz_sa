@@ -13,11 +13,13 @@
             <!-- Page Heading -->
             <div class="row">
                 <div >
-                    <div class="visible-xs"><br><br></div>
+                   <div class="col-lg-6.5 col-md-9 col-sm-8">
+                    <div class="visible-xs visible-sm"><br><br></div>
                     <h3 class="page-header">
-                        Bandeja de  Mensajes 
+                        Log de Notificaciones
                     </h3>
-                       <div class= "col-lg-6.5 col-md-8 col-sm-7">
+                </div>
+                       <div class= "col-lg-6.5 col-md-12 col-sm-7">
                         <div class="hidden-xs">
                         <div class="hidden-sm">
                         <ol class="breadcrumb">
@@ -28,7 +30,7 @@
                             <i class="fa fa-archive"></i> <a href="users">Usuarios</a>
                        </li>
                        <li>
-                            <i class="fa fa-home"></i>  <a href="{!! url('/admin/Nueva') !!}">Nueva Noticia</a>
+                            <i class="fa fa-home"></i>  <a href="{!! url('/admin/Notificaciones') !!}">Log Notificaciones</a>
                         </li>
                     </ol>
                 </div>
@@ -37,7 +39,7 @@
             <table id="usuarios" class="table table-striped table-bordered table-condensed">
                                     <thead>
                                     <tr>
-                                             <th>Id_Autor</th>
+                                             <th>#</th>
                                             <th>Autor</th>
                                             <th>Destinatario</th>  
                                             <th>Descripción</th>
