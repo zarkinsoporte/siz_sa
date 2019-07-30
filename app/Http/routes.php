@@ -250,6 +250,12 @@ Route::post('home/saveArt', 'Mod04_MaterialesController@saveArt')->name('home/sa
 //PICKING ARTICULOS
 Route::get('home/PICKING ARTICULOS', 'Mod04_MaterialesController@pickingArticulos');
 Route::get('datatables.solicitudesMP', 'Mod04_MaterialesController@DataSolicitudes')->name('datatables.solicitudesMP');
+Route::get('home/PICKING ARTICULOS/solicitud/{id}', 'Mod04_MaterialesController@ShowDetalleSolicitud');
+Route::post('home/PICKING ARTICULOS/solicitud/articulos/remove', 'Mod04_MaterialesController@removeArticuloSolicitud');
+Route::get('home/PICKING ARTICULOS/solicitud/articulos/return/{id}', 'Mod04_MaterialesController@returnArticuloSolicitud');
+Route::get('home/PICKING ARTICULOS/solicitud/PDF/{id}', 'Mod04_MaterialesController@SolicitudPDF');
+Route::get('home/PICKING ARTICULOS/solicitud/update/{id}', 'Mod04_MaterialesController@CerrarSolicitud');
+
 //
 //-------------------------//
 //RUTAS DE MRP//---------------------------------------------------------

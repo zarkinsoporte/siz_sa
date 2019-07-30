@@ -214,6 +214,10 @@ border: 1px solid #000000;
                                                             @foreach($rutasConNombres as $key)
                                                             <option class="col-md-6" value="{{$key->Name}}">{{$key->Name}}</option>
                                                             @endforeach
+                                                            <option class="col-md-6" value="306 Habilitado Proceso">306 Habilitado Proceso</option>
+                                                            <option class="col-md-6" value="406 Armado">406 Armado</option>
+                                                            <option class="col-md-6" value="412 Preparado de Casco">412 Preparado de Casco</option>
+                                                            <option class="col-md-6" value="415 Pegado Hule al Casco">415 Pegado Hule al Casco</option>
                                                         </select>
                                                     </div>
                                                 </div>

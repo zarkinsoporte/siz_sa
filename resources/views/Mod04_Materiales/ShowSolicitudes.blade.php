@@ -19,7 +19,7 @@
 
         <!-- Page Heading -->
         <div class="row">
-            <div class="col-lg-6.5 col-md-9 col-sm-8" style="margin-bottom: -20px;">
+            <div class="col-lg-6.5 col-md-12 col-sm-8" style="margin-bottom: -20px;">
                     <div class="visible-xs visible-sm"><br><br></div>               
                 <h3 class="page-header">
                     Picking de Artículos <small>Solicitudes de Material</small>
@@ -60,11 +60,11 @@
                     <table id="tsolicitudes" class="table table-striped table-bordered" style="width:100%" >
                         <thead>
                             <tr>          
+                                    <th>Status</th>                                                                                                  
                                     <th>#Folio</th>                  
                                     <th>Usuario</th>
                                     <th>Area</th>
                                     <th>Fecha</th>
-                                    <th>Material</th>                                                                        
                             </tr>
                         </thead>
                         <tbody>
@@ -86,7 +86,7 @@
 
 var table = $('#tsolicitudes').DataTable({
     dom: 'frtip',       
-    "order": [[ 0, "desc" ]],
+    "order": [[ 1, "desc" ]],
     orderCellsTop: true,   
     scrollX:        true,
     paging:         true,
@@ -100,8 +100,8 @@ var table = $('#tsolicitudes').DataTable({
                         }              
     },
     columns: [
-   
-        { data: 'Id_Solicitud'},
+        { data: 'statusbadge'},
+        { data: 'folio'},
         { data: 'user_name'},
         { data: 'area'},
         { data: 'FechaCreacion',
@@ -110,9 +110,7 @@ var table = $('#tsolicitudes').DataTable({
             var d = new Date(data);
             return moment(d).format("DD-MM-YYYY HH:mm:ss");
             }
-        },        
-        { data: 'action'},
-       
+        },       
     ],
     "language": {
       "url": "{{ asset('assets/lang/Spanish.json') }}",       

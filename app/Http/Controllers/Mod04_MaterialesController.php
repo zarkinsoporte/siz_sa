@@ -431,11 +431,11 @@ public function DataSolicitudes(){
                     'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'OHEM.firstName',
                      'OHEM.lastName', 'OHEM.dept', 'OUDP.Name as depto')
                     ->where('SIZ_SolicitudesMP.Status', 'Pendiente')                    
-                  ;
+                    ->orWhere('SIZ_SolicitudesMP.Status', 'En Proceso');
      //$consulta = collect($consulta);
             return Datatables::of($consulta)             
-                 ->addColumn('action', function ($item) {
-                       return  '<a href="PICKING ARTICULOS/solicitud/'.$item->Id_Solicitud.'" class="btn btn-xs btn-default"><i class="fa fa-eye"></i> </a>';           
+                 ->addColumn('folio', function ($item) {                     
+                       return  '<a href="PICKING ARTICULOS/solicitud/'.$item->Id_Solicitud.'"><i class="fa fa-arrow-right"></i> '.$item->Id_Solicitud.'</a>';           
                     }
                     )
                     ->addColumn('user_name', function ($item) {
@@ -444,6 +444,14 @@ public function DataSolicitudes(){
                     )
                     ->addColumn('area', function ($item) {                      
                        return  $item->depto;
+                    }
+                    )
+                    ->addColumn('statusbadge', function ($item) {
+                      if ($item->Status == 'Pendiente') {
+                          return '<a href="PICKING ARTICULOS/solicitud/'.$item->Id_Solicitud.'"><span class="badge badge-warning" style="background:#FFC107">'.$item->Status.'</span></a>';
+                      } else {
+                            return '<a href="PICKING ARTICULOS/solicitud/'.$item->Id_Solicitud.'"><span class="badge badge-primary" style="background:#007BFF">'.$item->Status.'</span></a>';
+                      }                                                                    
                     }
                     )
                 ->make(true);
@@ -500,7 +508,7 @@ public function saveArt(Request $request){
                         Mail::send('Emails.SolicitudMP', [
                             'arts' => $arts, 'id' =>$id
                         ], function ($msj) use ($correo, $id) {
-                            $msj->subject('SIZ Solicitud de Material #'.$id); //ASUNTO DEL CORREO
+                            $msj->subject('Prueba SISTEMAS SIZ Solicitud de Material #'.$id); //ASUNTO DEL CORREO
                             $msj->to($correo); //Correo del destinatario
                         });
                     } 
@@ -513,7 +521,7 @@ public function saveArt(Request $request){
                         Mail::send('Emails.SolicitudMP', [
                             'arts' => $arts, 'id' =>$id
                                         ], function ($msj) use ($correo, $id) {
-                            $msj->subject('SIZ Solicitud de Material #'.$id); //ASUNTO DEL CORREO
+                            $msj->subject('Prueba SISTEMAS SIZ Solicitud de Material #'.$id); //ASUNTO DEL CORREO
                             $msj->to($correo); //Correo del destinatario
                         });
                     }
@@ -523,8 +531,88 @@ public function saveArt(Request $request){
         //$request->session()->put('help', $arts);
         return 'Mensaje: Tu Solicitud ha sido enviada';
     } else {
-        return 'Error: Inicia de nuevo Sessión';
+        return 'Error: Inicia de nuevo Sesión';
     }
 }
+ 
+public function ShowDetalleSolicitud($id){
+    if (Auth::check()) {
+    $user = Auth::user();
+    $actividades = $user->getTareas();  
+      // $solicitudes = DB::table('SIZ_SolicitudesMP');
+    $articulos = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as UM, OITM.ItemName, mat.Destino, mat.Cant, ALMACENES.APGPA, ALMACENES.AMPST, (APGPA + AMPST) AS Disponible, CASE WHEN (APGPA + AMPST)  < mat.Cant THEN \'N\' ELSE mat.Surtir END AS Surtir from SIZ_MaterialesSolicitudes mat
+                    LEFT JOIN OITM on OITM.ItemCode = mat.ItemCode
+                    LEFT JOIN 
+                    (SELECT ItemCode, SUM(CASE WHEN WhsCode = \'APG-PA\'  THEN OnHand ELSE 0 END) AS APGPA,
+					SUM(CASE WHEN WhsCode = \'AMP-ST\'  THEN OnHand ELSE 0 END) AS AMPST
+                    FROM dbo.OITW
+                    GROUP BY ItemCode) AS ALMACENES ON OITM.ItemCode = ALMACENES.ItemCode
+                    WHERE Id_Solicitud = ?', [$id]);
+    $articulos_validos = array_where($articulos, function ($key,$item) {
+                            return $item->Surtir == 'Y';
+                        });
+    $articulos_novalidos = array_where($articulos, function ($key,$item) {
+                            return $item->Surtir == 'N';
+                        });   
+    $param = array(        
+        'actividades' => $actividades,
+        'ultimo' => count($actividades),    
+        'id' => $id,
+        'articulos_validos' => $articulos_validos,
+        'articulos_novalidos' => $articulos_novalidos,
+
+    );
+    return view('Mod04_Materiales.Picking', $param);  
+    } else {
+        return 'Error: Inicia de nuevo Sesión';
+    }
+}
+public function removeArticuloSolicitud(){
+    if (Auth::check()) {
+        DB::update('UPDATE SIZ_MaterialesSolicitudes SET Surtir = ? , Comentario = ? WHERE Id = ?', ['N', Input::get('reason'), Input::get('articulo')]);
+        return redirect()->back();
+    } else {
+        return 'Error: Inicia de nuevo Sesión';
+    }
+}
+public function returnArticuloSolicitud($id){
+    if (Auth::check()) {   
+        DB::update('UPDATE SIZ_MaterialesSolicitudes SET Surtir = ? , Comentario = ? WHERE Id = ?', ['Y', '', $id]);
+        return redirect()->back();
+    } else {
+        return 'Error: Inicia de nuevo Sesión';
+    }
+}
+public function SolicitudPDF($id){
+    if (Auth::check()) {   
+    
+        DB::update('UPDATE SIZ_SolicitudesMP SET Status = ? WHERE Id_Solicitud = ?', ['En Proceso', $id]);
+        $articulos = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as UM, OITM.ItemName, mat.Destino, mat.Cant, ALMACENES.APGPA, ALMACENES.AMPST, (APGPA + AMPST) AS Disponible from SIZ_MaterialesSolicitudes mat
+                    LEFT JOIN OITM on OITM.ItemCode = mat.ItemCode
+                    LEFT JOIN 
+                    (SELECT ItemCode, SUM(CASE WHEN WhsCode = \'APG-PA\'  THEN OnHand ELSE 0 END) AS APGPA,
+					SUM(CASE WHEN WhsCode = \'AMP-ST\'  THEN OnHand ELSE 0 END) AS AMPST
+                    FROM dbo.OITW
+                    GROUP BY ItemCode) AS ALMACENES ON OITM.ItemCode = ALMACENES.ItemCode
+                    WHERE Id_Solicitud = ? AND mat.Surtir = \'Y\'', [$id]);       
   
+       //haz el PDF
+        $pdf = \PDF::loadView('Mod04_Materiales.SolicitudPDF', compact('articulos', 'id'));
+        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
+        return $pdf->stream('Siz_Picking_'.$id . ' - ' .date("d/m/Y") . '.Pdf');
+    } else {
+        return 'Error: Inicia de nuevo Sesión';
+    }
+}
+public function CerrarSolicitud($id){
+ if (Auth::check()) {   
+    
+        DB::update('UPDATE SIZ_SolicitudesMP SET Status = ? WHERE Id_Solicitud = ?', ['Preparada', $id]);
+        Session::flash('mensaje','Picking #'.$id.' Terminado');
+        return redirect()->action('Mod04_MaterialesController@pickingArticulos');
+       
+    } else {
+        return 'Error: Inicia de nuevo Sesión';
+    }
+}
 }
