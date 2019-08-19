@@ -390,13 +390,16 @@ public function solicitudMateriales(){
         $user = Auth::user();
         $actividades = $user->getTareas();  
         $articulos = DB::select('SELECT CardCode, CardName FROM OCRD WHERE CardType = ? ORDER BY CardName', ['S']);
-        $rutasConNombres = OP::getTodasRutas();  
-      
+        //$rutasConNombres = OP::getTodasRutas();  
+        $almacenesDestino = DB::table('SIZ_AlmacenesTransferencias')
+                            ->where('Dept', Auth::user()->dept)->get();
+    
+
         $param = array(        
             'actividades' => $actividades,
             'ultimo' => count($actividades),
             'articulos' => $articulos,  
-            'rutasConNombres' => $rutasConNombres,  
+            'almacenesDestino' => $almacenesDestino,  
         );
         return view('Mod04_Materiales.solicitudMateriales', $param);
     } else {
@@ -408,14 +411,40 @@ public function pickingArticulos(){
      if (Auth::check()) {
         $user = Auth::user();
         $actividades = $user->getTareas();  
-      // $solicitudes = DB::table('SIZ_SolicitudesMP');
-        
-      
+
         $param = array(        
             'actividades' => $actividades,
             'ultimo' => count($actividades),          
         );
         return view('Mod04_Materiales.ShowSolicitudes', $param);
+    } else {
+         return redirect()->route('auth/login');
+    } 
+}
+public function TrasladosArticulos(){
+     if (Auth::check()) {
+        $user = Auth::user();
+        $actividades = $user->getTareas();  
+
+        $param = array(        
+            'actividades' => $actividades,
+            'ultimo' => count($actividades),          
+        );
+        return view('Mod04_Materiales.ShowTraslados', $param);
+    } else {
+         return redirect()->route('auth/login');
+    } 
+}
+public function AutorizacionSolicitudes(){
+     if (Auth::check()) {
+        $user = Auth::user();
+        $actividades = $user->getTareas();         
+      
+        $param = array(        
+            'actividades' => $actividades,
+            'ultimo' => count($actividades),          
+        );
+        return view('Mod04_Materiales.AutorizarSolicitudes', $param);
     } else {
          return redirect()->route('auth/login');
     }
@@ -435,7 +464,7 @@ public function DataSolicitudes(){
      //$consulta = collect($consulta);
             return Datatables::of($consulta)             
                  ->addColumn('folio', function ($item) {                     
-                       return  '<a href="PICKING ARTICULOS/solicitud/'.$item->Id_Solicitud.'"><i class="fa fa-arrow-right"></i> '.$item->Id_Solicitud.'</a>';           
+                       return  '<a href="2 PICKING ARTICULOS/solicitud/'.$item->Id_Solicitud.'"><i class="fa fa-hand-o-right"></i> '.$item->Id_Solicitud.'</a>';           
                     }
                     )
                     ->addColumn('user_name', function ($item) {
@@ -448,12 +477,66 @@ public function DataSolicitudes(){
                     )
                     ->addColumn('statusbadge', function ($item) {
                       if ($item->Status == 'Pendiente') {
-                          return '<a href="PICKING ARTICULOS/solicitud/'.$item->Id_Solicitud.'"><span class="badge badge-warning" style="background:#FFC107">'.$item->Status.'</span></a>';
+                          return '<a href="2 PICKING ARTICULOS/solicitud/'.$item->Id_Solicitud.'"><span class="badge badge-warning" style="background:#FFC107">'.$item->Status.'</span></a>';
                       } else {
-                            return '<a href="PICKING ARTICULOS/solicitud/'.$item->Id_Solicitud.'"><span class="badge badge-primary" style="background:#007BFF">'.$item->Status.'</span></a>';
+                            return '<a href="2 PICKING ARTICULOS/solicitud/'.$item->Id_Solicitud.'"><span class="badge badge-primary" style="background:#007BFF">'.$item->Status.'</span></a>';
                       }                                                                    
                     }
                     )
+                ->make(true);
+}
+public function DataTraslados(){
+     $consulta = DB::table('SIZ_SolicitudesMP')
+                    ->join('SIZ_MaterialesSolicitudes', 'SIZ_MaterialesSolicitudes.Id_Solicitud', '=', 'SIZ_SolicitudesMP.Id_Solicitud')
+                    ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')
+                    ->leftjoin('OUDP', 'OUDP.Code', '=', 'dept')
+                    ->groupBy('SIZ_SolicitudesMP.Id_Solicitud', 'SIZ_SolicitudesMP.FechaCreacion', 'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'firstName', 'lastName', 'dept', 'Name')
+                    ->select('SIZ_SolicitudesMP.Id_Solicitud', 'SIZ_SolicitudesMP.FechaCreacion', 
+                    'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'OHEM.firstName',
+                     'OHEM.lastName', 'OHEM.dept', 'OUDP.Name as depto')
+                    ->where('SIZ_SolicitudesMP.Status', 'Traslado');
+     //$consulta = collect($consulta);
+            return Datatables::of($consulta)             
+                 ->addColumn('folio', function ($item) {                     
+                       return  '<a href="TRASLADOS/solicitud/'.$item->Id_Solicitud.'"><i class="fa fa-hand-o-right"></i> '.$item->Id_Solicitud.'</a>';           
+                    }
+                    )
+                    ->addColumn('user_name', function ($item) {
+                       return  $item->firstName.' '.$item->lastName;           
+                    }
+                    )
+                    ->addColumn('area', function ($item) {                      
+                       return  $item->depto;
+                    }
+                    )
+                   
+                ->make(true);
+}
+public function DataSolicitudes_Auht(){
+     $consulta = DB::table('SIZ_SolicitudesMP')
+                    ->join('SIZ_MaterialesSolicitudes', 'SIZ_MaterialesSolicitudes.Id_Solicitud', '=', 'SIZ_SolicitudesMP.Id_Solicitud')
+                    ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')
+                    ->leftjoin('OUDP', 'OUDP.Code', '=', 'dept')
+                    ->groupBy('SIZ_SolicitudesMP.Id_Solicitud', 'SIZ_SolicitudesMP.FechaCreacion', 'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'firstName', 'lastName', 'dept', 'Name')
+                    ->select('SIZ_SolicitudesMP.Id_Solicitud', 'SIZ_SolicitudesMP.FechaCreacion', 
+                    'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'OHEM.firstName',
+                     'OHEM.lastName', 'OHEM.dept', 'OUDP.Name as depto')
+                    ->where('SIZ_SolicitudesMP.Status', 'Autorizacion');
+     //$consulta = collect($consulta);
+            return Datatables::of($consulta)             
+                 ->addColumn('folio', function ($item) {                     
+                       return  '<a href="AUTORIZACION/solicitud/'.$item->Id_Solicitud.'"><i class="fa fa-hand-o-right"></i> '.$item->Id_Solicitud.'</a>';           
+                    }
+                    )
+                    ->addColumn('user_name', function ($item) {
+                       return  $item->firstName.' '.$item->lastName;           
+                    }
+                    )
+                    ->addColumn('area', function ($item) {                      
+                       return  $item->depto;
+                    }
+                    )                                     
+                    
                 ->make(true);
 }
   public function ShowArticulosWH(Request $request)
@@ -484,12 +567,15 @@ public function saveArt(Request $request){
         $arts = $request->get('arts');
                 $dt = new \DateTime();
                 $id = DB::table('SIZ_SolicitudesMP')->insertGetId(
-                    ['FechaCreacion' => $dt, 'Usuario' => Auth::id(), 'Status' => 'Pendiente']
+                    ['FechaCreacion' => $dt, 'Usuario' => Auth::id(), 'Status' => 'Autorizacion']
                 );
                 
                 foreach ($arts as $art) {
                     DB::table('SIZ_MaterialesSolicitudes')->insert(
-                        ['Id_Solicitud' => $id, 'ItemCode' => $art['pKey'], 'Cant' => $art['cant'], 'Destino' => $art['destino'], 'Surtir' => 'Y']
+                        ['Id_Solicitud' => $id, 'ItemCode' => $art['pKey'], 
+                        'Cant_Requerida' => $art['cant'], 'Destino' => $art['destino'], 
+                        'Cant_Autorizada' =>  $art['cant'], 'Cant_Pendiente' =>  $art['cant'], 
+                        'EstatusLinea' => 'S', 'Cant_ASurtir_Origen_A' => 0, 'Cant_ASurtir_Origen_B' => 0]
                     );
                 }
                 if (!($id > 0) || is_null($arts) || is_null($id)) {
@@ -502,13 +588,13 @@ public function saveArt(Request $request){
         }else{
                 DB::commit();
                 $N_Emp = User::where('position', 4)->where('dept', Auth::user()->dept)->first();
-                if (!is_null($N_Emp)) {
+                if (!is_null($N_Emp) && $N_Emp>0) {
                     $correo = utf8_encode($N_Emp->email . '@zarkin.com');
                     if (strlen($correo) > 10) {
                         Mail::send('Emails.SolicitudMP', [
                             'arts' => $arts, 'id' =>$id
                         ], function ($msj) use ($correo, $id) {
-                            $msj->subject('Prueba SISTEMAS SIZ Solicitud de Material #'.$id); //ASUNTO DEL CORREO
+                            $msj->subject('Prueba SIZ Solicitud de Material #'.$id); //ASUNTO DEL CORREO
                             $msj->to($correo); //Correo del destinatario
                         });
                     } 
@@ -521,7 +607,7 @@ public function saveArt(Request $request){
                         Mail::send('Emails.SolicitudMP', [
                             'arts' => $arts, 'id' =>$id
                                         ], function ($msj) use ($correo, $id) {
-                            $msj->subject('Prueba SISTEMAS SIZ Solicitud de Material #'.$id); //ASUNTO DEL CORREO
+                            $msj->subject('Prueba SIZ Solicitud de Material #'.$id); //ASUNTO DEL CORREO
                             $msj->to($correo); //Correo del destinatario
                         });
                     }
@@ -540,7 +626,9 @@ public function ShowDetalleSolicitud($id){
     $user = Auth::user();
     $actividades = $user->getTareas();  
       // $solicitudes = DB::table('SIZ_SolicitudesMP');
-    $articulos = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as UM, OITM.ItemName, mat.Destino, mat.Cant, ALMACENES.APGPA, ALMACENES.AMPST, (APGPA + AMPST) AS Disponible, CASE WHEN (APGPA + AMPST)  < mat.Cant THEN \'N\' ELSE mat.Surtir END AS Surtir from SIZ_MaterialesSolicitudes mat
+    $articulos = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as UM, OITM.ItemName, mat.Destino, 
+                    mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente, mat.Cant_ASurtir_Origen_A, mat.Cant_ASurtir_Origen_B,
+                     ALMACENES.APGPA, ALMACENES.AMPST, (APGPA + AMPST) AS Disponible, CASE WHEN (APGPA + AMPST)  < mat.Cant_Requerida THEN \'N\' ELSE mat.EstatusLinea END AS EstatusLinea from SIZ_MaterialesSolicitudes mat
                     LEFT JOIN OITM on OITM.ItemCode = mat.ItemCode
                     LEFT JOIN 
                     (SELECT ItemCode, SUM(CASE WHEN WhsCode = \'APG-PA\'  THEN OnHand ELSE 0 END) AS APGPA,
@@ -548,12 +636,35 @@ public function ShowDetalleSolicitud($id){
                     FROM dbo.OITW
                     GROUP BY ItemCode) AS ALMACENES ON OITM.ItemCode = ALMACENES.ItemCode
                     WHERE Id_Solicitud = ?', [$id]);
+    
+    self::asignaAlmacenesOrigen($articulos);                    
+
+    $articulos = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as UM, OITM.ItemName, mat.Destino, 
+                    mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente, mat.Cant_ASurtir_Origen_A, mat.Cant_ASurtir_Origen_B,
+                     ALMACENES.APGPA, ALMACENES.AMPST, (APGPA + AMPST) AS Disponible, CASE WHEN (APGPA + AMPST)  < mat.Cant_Requerida THEN \'N\' ELSE mat.EstatusLinea END AS EstatusLinea from SIZ_MaterialesSolicitudes mat
+                    LEFT JOIN OITM on OITM.ItemCode = mat.ItemCode
+                    LEFT JOIN 
+                    (SELECT ItemCode, SUM(CASE WHEN WhsCode = \'APG-PA\'  THEN OnHand ELSE 0 END) AS APGPA,
+					SUM(CASE WHEN WhsCode = \'AMP-ST\'  THEN OnHand ELSE 0 END) AS AMPST
+                    FROM dbo.OITW
+                    GROUP BY ItemCode) AS ALMACENES ON OITM.ItemCode = ALMACENES.ItemCode
+                    WHERE Id_Solicitud = ?', [$id]);
+
     $articulos_validos = array_where($articulos, function ($key,$item) {
-                            return $item->Surtir == 'Y';
+                            return $item->EstatusLinea == 'S';
                         });
-    $articulos_novalidos = array_where($articulos, function ($key,$item) {
-                            return $item->Surtir == 'N';
-                        });   
+    $step = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $id)->value('Status');
+    if ($step == 'Autorizacion') {
+       $articulos_novalidos = array_where($articulos, function ($key,$item) {
+                            return $item->EstatusLinea == 'A';});   
+    } else {
+       $articulos_novalidos = array_where($articulos, function ($key,$item) {
+                            return $item->EstatusLinea == 'N';});   
+    }
+        
+    if (count($articulos_novalidos) > 0) {
+        Session::flash('mensaje','Esta Solicitud tiene artículos que no se surtirán');
+    }
     $param = array(        
         'actividades' => $actividades,
         'ultimo' => count($actividades),    
@@ -562,22 +673,179 @@ public function ShowDetalleSolicitud($id){
         'articulos_novalidos' => $articulos_novalidos,
 
     );
-    return view('Mod04_Materiales.Picking', $param);  
+    if ($step == 'Autorizacion') {
+        return view('Mod04_Materiales.Autorizacion', $param);
+    } else {
+        return view('Mod04_Materiales.Picking', $param);
+    }
+          
     } else {
         return 'Error: Inicia de nuevo Sesión';
     }
 }
+public function ShowDetalleTraslado($id){
+    if (Auth::check()) {
+    $user = Auth::user();
+    $actividades = $user->getTareas();  
+      // $solicitudes = DB::table('SIZ_SolicitudesMP');                
+
+    $articulos = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as UM, OITM.ItemName, mat.Destino, 
+                    mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente, mat.Cant_ASurtir_Origen_A, mat.Cant_ASurtir_Origen_B,
+                     ALMACENES.APGPA, ALMACENES.AMPST, (APGPA + AMPST) AS Disponible, CASE WHEN (APGPA + AMPST)  < mat.Cant_Requerida THEN \'N\' ELSE mat.EstatusLinea END AS EstatusLinea from SIZ_MaterialesSolicitudes mat
+                    LEFT JOIN OITM on OITM.ItemCode = mat.ItemCode
+                    LEFT JOIN 
+                    (SELECT ItemCode, SUM(CASE WHEN WhsCode = \'APG-PA\'  THEN OnHand ELSE 0 END) AS APGPA,
+					SUM(CASE WHEN WhsCode = \'AMP-ST\'  THEN OnHand ELSE 0 END) AS AMPST
+                    FROM dbo.OITW
+                    GROUP BY ItemCode) AS ALMACENES ON OITM.ItemCode = ALMACENES.ItemCode
+                    WHERE Id_Solicitud = ?', [$id]);
+
+    $articulos_validos = array_where($articulos, function ($key,$item) {
+                            return $item->EstatusLinea == 'S';
+                        });
+  
+    $articulos_novalidos = array_where($articulos, function ($key,$item) {
+                         return $item->EstatusLinea != 'S';});   
+    
+        
+    if (count($articulos_novalidos) > 0) {
+        Session::flash('mensaje','Esta Solicitud tiene artículos que no se surtirán');
+    }
+    $param = array(        
+        'actividades' => $actividades,
+        'ultimo' => count($actividades),    
+        'id' => $id,
+        'articulos_validos' => $articulos_validos,
+        'articulos_novalidos' => $articulos_novalidos,
+
+    );
+ 
+        return view('Mod04_Materiales.Traslado', $param);
+    
+          
+    } else {
+        return 'Error: Inicia de nuevo Sesión';
+    }
+}
+public function asignaAlmacenesOrigen($articulos){
+    foreach ($articulos as $art) {
+        if (($art->Cant_ASurtir_Origen_A + $art->Cant_ASurtir_Origen_B) == 0) {
+            $Cant = $art->Cant_Pendiente; 
+                $P = $art->Cant_Pendiente; 
+                $A = $art->APGPA; 
+                $B = $art->AMPST;
+                $ALMA = 0;      
+                $ALMB = 0;      
+                if(($A + $B) >= $Cant){
+                    if ($A >= $B) {
+                        if ($A >= $P) {
+                            $ALMA = $P;
+                            $ALMB = 0;
+                        
+                        } else {
+                            $P = $P - $A;
+                            $ALMA = $Cant - $P;
+                            if ($P <= $B) {
+                            $ALMB = $P;
+                            
+                            }
+                        }                
+                    } else {
+                        if ($B >= $P) {
+                            $ALMA = 0;
+                            $ALMB = $P;
+                        
+                        } else {
+                            $P = $P - $B;
+                            $ALMB = $Cant - $P;
+                            if ($P <= $A) {
+                                $ALMA = $P;
+
+                            }
+                        }
+                        
+                    }
+                    self::updateAlmacenesArticulo([$ALMA, $ALMB, 'S', $art->Id]);               
+                }else{
+                    self::updateAlmacenesArticulo([0, 0, 'N', $art->Id]);
+                }
+        }        
+    }
+}
+public function updateAlmacenesArticulo($parametros){
+    DB::update('UPDATE SIZ_MaterialesSolicitudes SET Cant_ASurtir_Origen_A = ? , Cant_ASurtir_Origen_B = ?, EstatusLinea = ? WHERE Id = ?', $parametros);
+}
 public function removeArticuloSolicitud(){
     if (Auth::check()) {
-        DB::update('UPDATE SIZ_MaterialesSolicitudes SET Surtir = ? , Comentario = ? WHERE Id = ?', ['N', Input::get('reason'), Input::get('articulo')]);
+        DB::update('UPDATE SIZ_MaterialesSolicitudes SET EstatusLinea = ? , Razon_Picking = ? WHERE Id = ?', ['N', Input::get('reason'), Input::get('articulo')]);
         return redirect()->back();
+    } else {
+        return 'Error: Inicia de nuevo Sesión';
+    }
+}
+public function removeArticuloNoAutorizado(){
+    if (Auth::check()) {
+        DB::update('UPDATE SIZ_MaterialesSolicitudes SET EstatusLinea = ? , Razon_NoAutorizado = ? WHERE Id = ?', ['A', Input::get('reason'), Input::get('articulo')]);
+        return redirect()->back();
+    } else {
+        return 'Error: Inicia de nuevo Sesión';
+    }
+}
+public function editArticulo(){
+    if (Auth::check()) {
+        DB::update('UPDATE SIZ_MaterialesSolicitudes SET Cant_Autorizada = ? , Cant_Pendiente = ?, Razon_AutorizaCantMenor = ? WHERE Id = ?', [Input::get('canta'), Input::get('canta'), Input::get('reason'), Input::get('articulo')]);
+        return redirect()->back();
+    } else {
+        return 'Error: Inicia de nuevo Sesión';
+    }
+}
+public function editArticuloPicking(){
+  
+    if (Auth::check()) {
+
+    if (Input::get('pendiente') < (Input::get('canta')+Input::get('cantb'))) {
+        Session::flash('error', 'La Cantidad a Surtir debe ser igual o menor a '.Input::get('pendiente'));
+        return redirect()->back();
+    }
+
+    if (Input::get('canta') + Input::get('cantb') == Input::get('pendiente')) {
+        DB::update('UPDATE SIZ_MaterialesSolicitudes SET  Cant_ASurtir_Origen_A = ?, Cant_ASurtir_Origen_B = ?, Razon_PickingCantMenor = ? WHERE Id = ?', [Input::get('canta'), Input::get('cantb'), '', Input::get('articulo')]);
+    } elseif(Input::get('canta') + Input::get('cantb') < Input::get('pendiente')){
+        DB::update('UPDATE SIZ_MaterialesSolicitudes SET  Cant_ASurtir_Origen_A = ?, Cant_ASurtir_Origen_B = ?, Razon_PickingCantMenor = ? WHERE Id = ?', [Input::get('canta'), Input::get('cantb'), Input::get('reason'), Input::get('articulo')]);
+        
+        if (strpos(Input::get('reason'), 'existencia') !== false) {
+            $id = Input::get('itemcode');
+            $art = DB::table('SIZ_MaterialesSolicitudes')
+            ->join('OITM', 'OITM.ItemCode', '=' , 'SIZ_MaterialesSolicitudes.ItemCode')
+            ->select('SIZ_MaterialesSolicitudes.*', 'OITM.ItemName')        
+            ->where('Id', Input::get('articulo'))->first();
+        
+            $Num_Nominas = DB::select(DB::raw("SELECT No_Nomina FROM Siz_Email WHERE SolicitudesErrExistencias = '1'"));
+                    foreach ($Num_Nominas as $Num_Nomina) {
+                        $user = User::find($Num_Nomina->No_Nomina);
+                        $correo = utf8_encode($user['email'] . '@zarkin.com');
+                        if (strlen($correo) > 10) {
+                            Mail::send('Emails.Err_existencias', [
+                                'art' => $art, 'id' =>$id
+                                            ], function ($msj) use ($correo, $id) {
+                                $msj->subject('Prueba SIZ Error de Existencias ('.$id.')'); //ASUNTO DEL CORREO
+                                $msj->to($correo); //Correo del destinatario
+                            });
+                        }
+                    }
+        }
+        
+    } else{
+          Session::flash('error', 'No se pudo actualizar...');
+    }
+     return redirect()->back();
     } else {
         return 'Error: Inicia de nuevo Sesión';
     }
 }
 public function returnArticuloSolicitud($id){
     if (Auth::check()) {   
-        DB::update('UPDATE SIZ_MaterialesSolicitudes SET Surtir = ? , Comentario = ? WHERE Id = ?', ['Y', '', $id]);
+        DB::update('UPDATE SIZ_MaterialesSolicitudes SET EstatusLinea = ? , Razon_Picking = ? , Razon_NoAutorizado = ? WHERE Id = ?', ['S', '', '', $id]);
         return redirect()->back();
     } else {
         return 'Error: Inicia de nuevo Sesión';
@@ -587,14 +855,16 @@ public function SolicitudPDF($id){
     if (Auth::check()) {   
     
         DB::update('UPDATE SIZ_SolicitudesMP SET Status = ? WHERE Id_Solicitud = ?', ['En Proceso', $id]);
-        $articulos = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as UM, OITM.ItemName, mat.Destino, mat.Cant, ALMACENES.APGPA, ALMACENES.AMPST, (APGPA + AMPST) AS Disponible from SIZ_MaterialesSolicitudes mat
+        $articulos = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as UM, OITM.ItemName, mat.Destino,
+          mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente, (mat.Cant_ASurtir_Origen_A + mat.Cant_ASurtir_Origen_B) AS Cant_Surtir,
+         ALMACENES.APGPA, ALMACENES.AMPST, (APGPA + AMPST) AS Disponible from SIZ_MaterialesSolicitudes mat
                     LEFT JOIN OITM on OITM.ItemCode = mat.ItemCode
                     LEFT JOIN 
                     (SELECT ItemCode, SUM(CASE WHEN WhsCode = \'APG-PA\'  THEN OnHand ELSE 0 END) AS APGPA,
 					SUM(CASE WHEN WhsCode = \'AMP-ST\'  THEN OnHand ELSE 0 END) AS AMPST
                     FROM dbo.OITW
                     GROUP BY ItemCode) AS ALMACENES ON OITM.ItemCode = ALMACENES.ItemCode
-                    WHERE Id_Solicitud = ? AND mat.Surtir = \'Y\'', [$id]);       
+                    WHERE Id_Solicitud = ? AND mat.EstatusLinea = \'S\'', [$id]);       
   
        //haz el PDF
         $pdf = \PDF::loadView('Mod04_Materiales.SolicitudPDF', compact('articulos', 'id'));
@@ -604,15 +874,43 @@ public function SolicitudPDF($id){
         return 'Error: Inicia de nuevo Sesión';
     }
 }
-public function CerrarSolicitud($id){
+public function Solicitud_A_Traslados($id){
  if (Auth::check()) {   
-    
-        DB::update('UPDATE SIZ_SolicitudesMP SET Status = ? WHERE Id_Solicitud = ?', ['Preparada', $id]);
+        DB::update('UPDATE SIZ_SolicitudesMP SET Status = ? WHERE Id_Solicitud = ?', ['Traslado', $id]);
         Session::flash('mensaje','Picking #'.$id.' Terminado');
         return redirect()->action('Mod04_MaterialesController@pickingArticulos');
        
     } else {
         return 'Error: Inicia de nuevo Sesión';
     }
+}
+public function Solicitud_A_Picking($id){
+ if (Auth::check()) {   
+    
+        DB::update('UPDATE SIZ_SolicitudesMP SET Status = ? WHERE Id_Solicitud = ?', ['Pendiente', $id]);
+        Session::flash('mensaje','La Solicitud  #'.$id.' se ha enviado al Almacén');
+        return redirect()->action('Mod04_MaterialesController@AutorizacionSolicitudes');
+       
+    } else {
+        return 'Error: Inicia de nuevo Sesión';
+    }
+}
+public function DM_Articulo($ItemCode){
+    if (Auth::check()) {
+        $param = self::getParam_DM_Articulos($ItemCode);
+        
+        $param['privilegioTarea'] = 'disabled';
+        $param['oculto'] = true;
+
+        
+        return view('Mod04_Materiales.DM_Articulos', $param);
+    } else {
+        return 'Error: Inicia de nuevo Sesión';
+    }
+}
+
+public function HacerTraslados(){
+    $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
+    dd($rates);
 }
 }

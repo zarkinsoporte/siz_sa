@@ -84,6 +84,41 @@ class SAP extends Model
     }  
                    
    }
+
+   public static function Transfer($data){
+        
+        $items = $data['id_solicitud']; // items(Codigos, Cant. Real), Solicitante, Area, 
+        //Anadir CantPendiente, CantRealSurtir
+        $items = $data['PriceList']; //10
+        $items = $data['Destination']; //APG ST
+
+        echo '<br>';
+        $vItem = $vCmp->GetBusinessObject("67");
+        
+        //Obtener Lineas de una Transferencia
+        //$RetVal = $vItem->GetByKey("665");
+        //echo $vItem->Lines->SetCurrentLine(0);
+        //echo $vItem->Lines->ItemCode;
+        //dd();
+
+        //Crear Transferencia
+        $vItem->DocDate = (new DateTime('now'))->format('Y-m-d H:i:s');
+        $vItem->FromWarehouse = "AMP-ST";
+        $vItem->PriceList = "10";
+        $vItem->FolioNumber = "7780";//**/Pendiente
+        $vItem->Comments = "Transfer de prueba Sistemas";
+        //agregar linea
+        $vItem->Lines->ItemCode = "10001";
+        $vItem->Lines->WarehouseCode = "APG-ST";
+        $vItem->Lines->Quantity = 1;        
+        $vItem->Lines->Add();
+        //Guardar Transferencia
+        echo $vItem->Add();  // cero es correcto
+
+
+        $vCmp->GetLastErrorDescription();
+        echo 'fin';
+   }
 }
 
 /*

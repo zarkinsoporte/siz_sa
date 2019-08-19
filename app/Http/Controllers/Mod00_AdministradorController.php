@@ -908,7 +908,8 @@ public function Noticia()
             [           
              'No_Nomina' => $request->input('nomina'),
              'Reprocesos' => $request->input('reprocesos'),
-             'SolicitudesMP' => $request->input('solicitudmp')
+             'SolicitudesMP' => $request->input('solicitudmp'),
+             'SolicitudesErrExistencias' => $request->input('errorexistencia_04')
             ]
         );
         }else{
@@ -917,6 +918,7 @@ public function Noticia()
             ->update( [
              'Reprocesos' => $request->input('reprocesos'),
              'SolicitudesMP' => $request->input('solicitudmp'),
+             'SolicitudesErrExistencias' => $request->input('errorexistencia_04'),
             ]);
         }                
         Session::flash('mensaje', 'Cambios guardados');

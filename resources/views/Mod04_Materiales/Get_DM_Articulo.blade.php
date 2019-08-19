@@ -59,19 +59,10 @@ width: 100% !important;
          
             <div class="col-md-12">
                 <h3 class="page-header">
-                    Datos Maestros de Artículos 
+                    Datos Maestros de Artículo
                     <div class="visible-xs visible-sm"><br></div>
-                    <span class="pull-right">
-                        @if(!isset($oculto))  
-                            <a class="btn btn-primary" href="{{url('home/DATOS MAESTROS ARTICULOS')}}">Revisar Otro Artículo</a>                    
-                            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#confirma" {{$privilegioTarea}}>
-                                            <i class="fa fa-save" aria-hidden="true"></i> Guardar
-                            </button>
-                        @else
-                            <a class="btn btn-primary btn-sm" href="{{URL::previous()}}"><i class="fa fa-angle-left"></i> Atras</a>
-                        @endif
-                        <div class="visible-xs visible-sm"><br></div>
-                    </span>         
+                 
+             </span>
                 </h3>
                 
             </div>
@@ -116,14 +107,8 @@ width: 100% !important;
                     <div>
                         <h5>Proveedor</h5>                    
                         <div class="input-group">
-                        
-                            <select data-live-search="true" class="boot-select" id="proveedor" name="proveedor" {{$privilegioTarea}}>                               
-                                <option value="" {{ old('proveedor', $data[0]->CardCode??'SIN DATOS') == 'SIN DATOS' ? 'selected' : '' }}>SIN DATOS</option>
-                                @foreach ($proveedores as $proveedor)
-                                <option value="{{old('proveedor',$proveedor->CardCode)}}" {{ ($proveedor->CardCode == $data[0]->CardCode) ? 'selected' : '' }}>                                   
-                                    <span>{{$proveedor->CardCode}}  &nbsp;&nbsp;&nbsp; {{$proveedor->CardName}}</span></option>
-                                @endforeach
-                            </select>                         
+                            <h5><span>{{$proveedor->CardCode}} &nbsp;&nbsp;&nbsp; {{$proveedor->CardName}}</span></h5>
+                                             
                         </div><!-- /input-group -->
                     </div>        
                 </li>
@@ -290,16 +275,9 @@ width: 100% !important;
             <li class="list-group-item green-edit-field">
                 <div>
                     <h5 class="my-0">MÉTODO</h5>
-                    <div class="">                    
-                        <select class="form-control" id="metodo" name="metodo" style="margin-bottom: 10px;" {{$privilegioTarea}}>
-                            <option value="" {{ old('metodo', $data[0]->Metodo??'SIN DATOS') == 'SIN DATOS' ? 'selected' : '' }}>SIN
-                                DATOS</option>
-                            @foreach ($metodos as $metodo)
-                            <option value="{{old('metodo',$metodo->FldValue)}}"
-                                {{ ($metodo->Descr == $data[0]->Metodo) ? 'selected' : '' }}>
-                                {{$metodo->Descr}}</option>
-                            @endforeach
-                        </select>
+                    <div class="">
+                        <h5>{{$metodo->Descr}}</h5>                    
+                        
                     </div> 
                                                 
                 </div>            
@@ -325,15 +303,8 @@ width: 100% !important;
             <div>
                 <h5 class="my-0">GRUPO PLANEACION </h5>
                     <div class="input-group">
-                        <select  data-live-search="true"  class="boot-select" id="grupop" name="grupop" style="margin-bottom: 10px;" {{$privilegioTarea}}>
-                            <option value="" {{ old('grupop', $data[0]->Grupo_Pla??'SIN DATOS') == 'SIN DATOS' ? 'selected' : '' }}>SIN
-                                DATOS</option>
-                            @foreach ($gruposPlaneacion as $grupo)
-                            <option value="{{old('grupop',$grupo->FldValue)}}"
-                                {{ ($grupo->Descr == $data[0]->Grupo_Pla) ? 'selected' : '' }}>
-                                {{$grupo->Descr}}</option>
-                            @endforeach
-                        </select>
+                        <h5>{{$grupo->Descr}}</h5>
+                       
                     </div>
             </div>
         </li>
@@ -365,15 +336,7 @@ width: 100% !important;
                 <input type="number" step="0.01" min="0" class="form-control" name="costocompras" id="costocompras" value="{{old('costocompras', number_format($data[0]->CostoACompras??0, 2, '.', ','))}}" {{$privilegioTarea}}>
                 </div>
                 <div class="col-md-6">
-                <select class="form-control" id="monedacompras" name="monedacompras" style="margin-bottom: 10px;" {{$privilegioTarea}}>
-                    <option value="{{old('monedacompras','MXP')}}" {{ ('MXP' == $data[0]->MonedaACompras) ? 'selected' : '' }}>
-                        MXP</option>
-                    <option value="{{old('monedacompras','USD')}}" {{ ('USD' == $data[0]->MonedaACompras) ? 'selected' : '' }}>
-                        USD</option>
-                    <option value="{{old('monedacompras','CAN')}}" {{ ('CAN' == $data[0]->MonedaACompras) ? 'selected' : '' }}>
-                        CAN</option>
-                        
-                </select>
+                <h5>{{$data[0]->MonedaACompras}}</h5>                   
             </div>
         </li>
         <li class="list-group-item">   
@@ -387,6 +350,7 @@ width: 100% !important;
         <li class="list-group-item green-edit-field">
             <div>
                 <h5 class="my-0">COMPRADOR </h5>
+                <h5>{{$comprador->Descr}}</h5>
                     <select class="form-control" id="comprador" name="comprador" style="margin-bottom: 10px;" {{$privilegioTarea}}>
                         <option value="" {{ old('comprador', $data[0]->Comprador??'SIN DATOS') == 'SIN DATOS' ? 'selected' : '' }}>SIN
                             DATOS</option>

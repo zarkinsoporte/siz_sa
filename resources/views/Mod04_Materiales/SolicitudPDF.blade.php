@@ -129,13 +129,14 @@
                     <table class="table table-striped" style="table-layout:fixed;">
                         <thead>
                             <tr>                        
-                                <th style="width:10%;">Código</th>
-                                <th style="width:40%;">Descripción</th>
-                                <th style="width:10%;">UM</th>
-                                <th style="width:10%;">Cant. Requerida</th>
-                                <th style="width:10%;">APG-PA</th>
-                                <th style="width:10%;">AMP-ST</th>
-                                <th style="width:10%;">Total Disponible</th>                               
+                                <th style="width:7%;">Código</th>
+                                <th style="width:35%;">Descripción</th>
+                                <th style="width:7%;">UM</th>
+                                <th style="width:7%;">Cantidad a Surtir</th>
+                                <th style="width:7%;">APG-PA</th>
+                                <th style="width:7%;">AMP-ST</th>
+                                <th style="width:15%;">Cantidad Picking</th>                               
+                                <th style="width:15%;">Almacén Picking</th>                               
                             </tr>
                         </thead>
                         <tbody>
@@ -143,18 +144,32 @@
                             @foreach ($articulos as $art)
                             <tr <?php ?>>
                         
-                                <td style="width:10%;">{{$art->ItemCode}}</td>
-                                <td style="width:40%;">{{$art->ItemName}}</td>
-                                <td style="width:10%;">{{$art->UM}}</td>
-                                <td style="width:10%;">{{$art->Cant}}</td>
-                                <td style="width:10%;">{{number_format($art->APGPA, 2)}}</td>
-                                <td style="width:10%;">{{number_format($art->AMPST, 2)}}</td>
-                                <td style="width:10%;">{{number_format($art->Disponible, 2)}}</td>
+                                <td style="width:7%;">{{$art->ItemCode}}</td>
+                                <td style="width:35%;">{{$art->ItemName}}</td>
+                                <td style="width:7%;">{{$art->UM}}</td>
+                                <td style="width:7%;">{{$art->Cant_Surtir}}</td>
+                                <td style="width:7%;">{{number_format($art->APGPA, 2)}}</td>
+                                <td style="width:7%;">{{number_format($art->AMPST, 2)}}</td>
+                                <td style="width:15%;"></td>
+                                <td style="width:15%;"></td>
                             </tr>
                             @endforeach                      
                     </table>
                 </div>
 
+            </div>
+            <div style="width:70%;">
+                <br><br>
+               <table class="table">
+                   <tr>
+                       <td style="width:10%;">Material preparado por:</td>                     
+                       <td style="width:90%;"></td> 
+                   </tr>                  
+                   <tr>
+                       <td style="width:10%; height: 70px;">Observaciones de Picking:</td>                     
+                       <td style="width:90%; height: 70px;"></td> 
+                   </tr>
+               </table>
             </div>
        @endif
 

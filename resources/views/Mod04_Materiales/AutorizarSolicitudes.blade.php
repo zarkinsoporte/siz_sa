@@ -19,28 +19,18 @@
 
         <!-- Page Heading -->
         <div class="row">
-            <div class="col-lg-6.5 col-md-12 col-sm-8" style="margin-bottom: -20px;">
+            <div class="col-md-12" style="margin-bottom: -20px;">
                     <div class="visible-xs visible-sm"><br><br></div>               
                 <h3 class="page-header">
-                    Picking de Artículos <small>Solicitudes</small>
+                    Autorización de Materia Prima <small>Planeación</small>
                 </h3>
             </div>
         </div>
-        <div class="col-md-12">
-                @if (count($errors) > 0)
-                <div class="alert alert-danger text-center" role="alert">
-                    @foreach($errors->getMessages() as $this_error)
-                    <strong>¡Lo sentimos!  &nbsp; {{$this_error[0]}}</strong><br> @endforeach
-                </div>
-                @elseif(Session::has('mensaje'))
-                <div class="row">
-                    <div class="alert alert-success text-center" role="alert">
-                        {{ Session::get('mensaje') }}
-                    </div>
-                </div>
-                @endif
-
+        <div class="row">
+            <div class="col-md-12 ">
+                @include('partials.alertas')
             </div>
+        </div>
         <style>
             td {
                 font-family: 'Helvetica';
@@ -59,8 +49,7 @@
                 <div class="">
                     <table id="tsolicitudes" class="table table-striped table-bordered" style="width:100%" >
                         <thead>
-                            <tr>          
-                                    <th>Status</th>                                                                                                  
+                            <tr>                                                                                                                                             
                                     <th>#Folio</th>                  
                                     <th>Usuario</th>
                                     <th>Area</th>
@@ -94,13 +83,12 @@ var table = $('#tsolicitudes').DataTable({
     responsive: true,
     deferRender:    true,
     ajax: {
-        url: '{!! route('datatables.solicitudesMP') !!}',
+        url: '{!! route('datatables.Solicitudes_Auht') !!}',
         data: function () {
                          
                         }              
     },
-    columns: [
-        { data: 'statusbadge'},
+    columns: [        
         { data: 'folio'},
         { data: 'user_name'},
         { data: 'area'},

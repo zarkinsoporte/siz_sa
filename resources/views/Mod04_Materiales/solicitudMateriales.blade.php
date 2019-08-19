@@ -202,22 +202,18 @@ border: 1px solid #000000;
                                                     <div class="form-group">
                                                         <label for="cant">Cantidad:</label>
                                                         
-                                                        <input type="number" step="0.01" min="0" class="form-control" name="cant" id="cant"
+                                                        <input type="number" step="0.01" min="0.1" class="form-control" name="cant" id="cant"
                                                      ng-model="insert.cant" required>
                                                     </div>                                               
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label for="destino">Surtirse en:</label>
-                                                        <select class="form-control" name="destino" id="destino" ng-model="insert.destino" required>
-                                                            <option></option>
-                                                            @foreach($rutasConNombres as $key)
-                                                            <option class="col-md-6" value="{{$key->Name}}">{{$key->Name}}</option>
-                                                            @endforeach
-                                                            <option class="col-md-6" value="306 Habilitado Proceso">306 Habilitado Proceso</option>
-                                                            <option class="col-md-6" value="406 Armado">406 Armado</option>
-                                                            <option class="col-md-6" value="412 Preparado de Casco">412 Preparado de Casco</option>
-                                                            <option class="col-md-6" value="415 Pegado Hule al Casco">415 Pegado Hule al Casco</option>
+                                                    <select class="form-control" name="destino" id="destino" ng-model="insert.destino" required>
+                                                            <option value="" hidden disabled>Seleccione destino</option>
+                                                            @foreach($almacenesDestino as $key)
+                                                            <option value="{{$key->Code}}" {{ ($key->Code == $almacenesDestino[0]->Code) ? 'selected' : '' }}>{{$key->Label}}</option>
+                                                            @endforeach                                                            
                                                         </select>
                                                     </div>
                                                 </div>

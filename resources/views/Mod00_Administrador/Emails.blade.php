@@ -56,6 +56,14 @@
                         </select>
                        
                     </div>
+                    <div class="col-md-3">                        
+                        <label>Err_Existencias</label>
+                        <select class="form-control" name="errorexistencia_04" id="errorexistencia_04">
+                            <option value="1">Activado</option>
+                            <option value="0">Desactivado</option>
+                        </select>
+                       
+                    </div>
                     <div class="col-md-3">
                        
                                 <button class="btn btn-primary" style="margin-top:25px" type="submit">Guardar</button>
@@ -74,6 +82,7 @@
                                             <th>Email</th>
                                             <th>Reprocesos</th>  
                                             <th>Solicitudes MP</th>
+                                            <th>Err_Existencias</th>
                                             <th>Acciones</th>
                                           
                                     </tr>
@@ -87,9 +96,10 @@
                         <td>{{ App\User::find($campo->No_Nomina)['email'].'@zarkin.com' }}</td>
                         <td>{{ $campo->Reprocesos==1?'Activado':'-'}}</td>
                         <td>{{ $campo->SolicitudesMP==1?'Activado':'-' }}</td>
+                        <td>{{ $campo->SolicitudesErrExistencias==1?'Activado':'-' }}</td>
                                                    
                         <td>
-                        <a class="btn btn-warning" id="btneditar-{{ $campo->id}}" onclick="getItem({{ $campo->id}})" data-id="{{ $campo->id}}" data-nomina="{{ $campo->No_Nomina}}" data-reproceso="{{ $campo->Reprocesos}}" data-solicitudmp="{{$campo->SolicitudesMP}}"><i class="glyphicon glyphicon-edit"></i></a>
+                        <a class="btn btn-warning" id="btneditar-{{ $campo->id}}" onclick="getItem({{ $campo->id}})" data-id="{{ $campo->id}}" data-nomina="{{ $campo->No_Nomina}}" data-reproceso="{{ $campo->Reprocesos}}" data-solicitudmp="{{$campo->SolicitudesMP}}" data-errorexistencia_04="{{$campo->SolicitudesErrExistencias}}"><i class="glyphicon glyphicon-edit"></i></a>
                        
                         <a href="email/del/{{$campo->id}}" class="btn btn-danger"><i class="glyphicon glyphicon-trash"></i></a>
                         </td>
@@ -106,10 +116,12 @@ function getItem(btn) {
 var nomina = $("#btneditar-"+btn).data("nomina");
 var reprocesos = $("#btneditar-"+btn).data("reproceso");
 var solicitudmp = $("#btneditar-"+btn).data("solicitudmp");
+var errorexistencia_04 = $("#btneditar-"+btn).data("errorexistencia_04");
 
 $('#nomina').val(nomina);
 $('#reprocesos').val(reprocesos);
 $('#solicitudmp').val(solicitudmp);
+$('#errorexistencia_04').val(errorexistencia_04);
 }
 </script>
 @section('script')

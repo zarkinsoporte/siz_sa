@@ -244,18 +244,32 @@ Route::post('articuloToSap', 'Mod04_MaterialesController@articuloToSap');
 Route::get('OITM.show', 'HomeController@ShowArticulos')->name( 'OITM.show');
 //
 //SOLICITUD DE MATERIALES
-Route::get('home/SOLICITUD MATERIALES', 'Mod04_MaterialesController@solicitudMateriales');
+Route::get('home/1 SOLICITUD MATERIALES', 'Mod04_MaterialesController@solicitudMateriales');
 Route::get('OITM.WH.show', 'Mod04_MaterialesController@ShowArticulosWH')->name( 'OITM.WH.show');
 Route::post('home/saveArt', 'Mod04_MaterialesController@saveArt')->name('home/saveArt');
-//PICKING ARTICULOS
-Route::get('home/PICKING ARTICULOS', 'Mod04_MaterialesController@pickingArticulos');
+//AUTORIZACION
+Route::get('home/2 AUTORIZACION', 'Mod04_MaterialesController@AutorizacionSolicitudes');
+Route::get('datatables.Solicitudes_Auht', 'Mod04_MaterialesController@DataSolicitudes_Auht')->name('datatables.Solicitudes_Auht');
+Route::get('home/AUTORIZACION/solicitud/{id}', 'Mod04_MaterialesController@ShowDetalleSolicitud');
+Route::get('home/DATOS MAESTROS ARTICULO/{id}', 'Mod04_MaterialesController@DM_Articulo');
+Route::post('home/AUTORIZACION/solicitud/articulos/remove', 'Mod04_MaterialesController@removeArticuloNoAutorizado');
+Route::post('home/AUTORIZACION/solicitud/articulos/edit', 'Mod04_MaterialesController@editArticulo');
+Route::get('home/AUTORIZACION/solicitud/articulos/return/{id}', 'Mod04_MaterialesController@returnArticuloSolicitud');
+Route::get('home/AUTORIZACION/solicitud/update/{id}', 'Mod04_MaterialesController@Solicitud_A_Picking');
+//3 PICKING ARTICULOS
+Route::get('home/2 PICKING ARTICULOS', 'Mod04_MaterialesController@pickingArticulos');
 Route::get('datatables.solicitudesMP', 'Mod04_MaterialesController@DataSolicitudes')->name('datatables.solicitudesMP');
-Route::get('home/PICKING ARTICULOS/solicitud/{id}', 'Mod04_MaterialesController@ShowDetalleSolicitud');
-Route::post('home/PICKING ARTICULOS/solicitud/articulos/remove', 'Mod04_MaterialesController@removeArticuloSolicitud');
-Route::get('home/PICKING ARTICULOS/solicitud/articulos/return/{id}', 'Mod04_MaterialesController@returnArticuloSolicitud');
-Route::get('home/PICKING ARTICULOS/solicitud/PDF/{id}', 'Mod04_MaterialesController@SolicitudPDF');
-Route::get('home/PICKING ARTICULOS/solicitud/update/{id}', 'Mod04_MaterialesController@CerrarSolicitud');
-
+Route::get('home/2 PICKING ARTICULOS/solicitud/{id}', 'Mod04_MaterialesController@ShowDetalleSolicitud');
+Route::post('home/2 PICKING ARTICULOS/solicitud/articulos/remove', 'Mod04_MaterialesController@removeArticuloSolicitud');
+Route::get('home/2 PICKING ARTICULOS/solicitud/articulos/return/{id}', 'Mod04_MaterialesController@returnArticuloSolicitud');
+Route::get('home/2 PICKING ARTICULOS/solicitud/PDF/{id}', 'Mod04_MaterialesController@SolicitudPDF');
+Route::get('home/2 PICKING ARTICULOS/solicitud/update/{id}', 'Mod04_MaterialesController@Solicitud_A_Traslados');
+Route::post('home/PICKING ARTICULOS/solicitud/articulos/edit', 'Mod04_MaterialesController@editArticuloPicking');
+// 4 TRASLADOS
+Route::get('home/4 GENERAR TRASLADO', 'Mod04_MaterialesController@TrasladosArticulos');
+Route::get('datatables.solicitudesTraslados', 'Mod04_MaterialesController@DataTraslados')->name('datatables.solicitudesTraslados');
+Route::get('home/TRASLADOS/solicitud/{id}', 'Mod04_MaterialesController@ShowDetalleTraslado');
+Route::get('home/TRASLADOS/solicitud/update/{id}', 'Mod04_MaterialesController@HacerTraslados');
 //
 //-------------------------//
 //RUTAS DE MRP//---------------------------------------------------------
@@ -283,7 +297,12 @@ Route::get('home/reporte/PRODUCCION POR AREAS', 'Reportes_ProduccionController@r
 Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@produccionxareasXLS');
 
  Route::get('/pruebas', function (Request $request) {
-    
+     $tareas = DB::table('Siz_Tarea_Menu')->get();
+
+    foreach ($tareas as $k) {
+        DB::update('update Siz_Tarea_Menu set route = ? where name = ?', [$k->name, $k->name]);
+     
+    }
     //  $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
 //  $vCmp->DbServerType="6"; 
 //  $vCmp->server = "SERVER-SAPBO";
@@ -316,6 +335,8 @@ Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@pr
  });
  Route::get('setpassword', function () {
     try {
+
+
         $password = Hash::make('1234');
         DB::table('dbo.OHEM')
             ->where('U_EmpGiro', 1349)
@@ -326,3 +347,4 @@ Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@pr
     echo 'hecho';
 });
  
+

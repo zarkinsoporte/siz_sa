@@ -26,7 +26,7 @@ $index = 0;
                                 <ul id="mo{{$n1->id_modulo}}" class="collapse ">
                                     <li><a href="javascript:;" data-toggle="collapse" data-target="#me{{$n1->id_menu}}"><i class="fa fa-fw fa-tasks"></i> {{$n1->menu}} <i class="fa fa-fw fa-caret-down"></i></a>
                                         <ul id="me{{$n1->id_menu}}" class="collapse">
-                                            <a href="{!! url('home/'.$n1->tarea) !!}"><li>
+                                            <a href="{!! url('home/'.$n1->ruta) !!}"><li>
                                                 {{$n1->tarea}}
                                             </li></a>
                                         
@@ -36,7 +36,7 @@ $index = 0;
                             <!-- si es el mismo modulo, pregunto si es el mismo menu -->
                             @if($bnd2 == $n1->id_menu)
                                 <!-- si modulo y menu son iguales, solo agrego la tarea -->
-                                    <a href="{!! url('home/'.$n1->tarea) !!}"><li>
+                                    <a href="{!! url('home/'.$n1->ruta) !!}"><li>
                                         {{$n1->tarea}} 
                                     </li></a>   
                                 @if($ultimo == $index)
@@ -56,7 +56,7 @@ $index = 0;
                                     <!-- abro otro menu nuevo y agrego la tarea -->
                                     <li><a href="javascript:;" data-toggle="collapse" data-target="#me{{$n1->id_menu}}"><i class="fa fa-fw fa-tasks"></i> {{$n1->menu}} <i class="fa fa-fw fa-caret-down"></i></a>
                                         <ul id="me{{$n1->id_menu}}" class="collapse">
-                                            <a href="{!! url('home/'.$n1->tarea) !!}"><li>
+                                            <a href="{!! url('home/'.$n1->ruta) !!}"><li>
                                                 {{$n1->tarea}}
                                             </li></a>
                                     @if($ultimo == $index)
@@ -82,7 +82,7 @@ $index = 0;
                             <ul id="mo{{$n1->id_modulo}}" class="collapse ">
                                 <li><a href="javascript:;" data-toggle="collapse" data-target="#me{{$n1->id_menu}}"><i class="fa fa-fw fa-tasks"></i> {{$n1->menu}} <i class="fa fa-fw fa-caret-down"></i></a>
                                     <ul id="me{{$n1->id_menu}}" class="collapse">
-                                        <a href="{!! url('home/'.$n1->tarea) !!}"><li>
+                                        <a href="{!! url('home/'.$n1->ruta) !!}"><li>
                                             {{$n1->tarea}}
                                         </li></a>
 

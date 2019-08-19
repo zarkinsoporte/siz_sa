@@ -89,7 +89,8 @@ class User extends Model implements AuthenticatableContract,
             ->select('Siz_Modulos_Grupo.*',
                 'Siz_Modulo.name AS modulo',
                 'Siz_Menu_Item.name AS menu',
-                'Siz_Tarea_menu.name AS tarea')
+                'Siz_Tarea_menu.name AS tarea',
+                'Siz_Tarea_menu.route AS ruta')
             ->orderBy('Siz_Modulo.name', 'asc')
             ->orderBy( 'Siz_Menu_Item.name', 'asc')
             ->orderBy( 'Siz_Tarea_menu.name', 'asc')

@@ -8,7 +8,7 @@
             <div class="col-md-12" style="margin-bottom: -20px;">
                     <div class="visible-xs visible-sm"><br><br></div>               
                 <h3 class="page-header">
-                   Picking de Artículos<small> Solicitud de Material #{{$id}}</small>
+                   Traslado<small> Solicitud de Material #{{$id}}</small>
                 </h3>
             </div>
         </div>
@@ -29,17 +29,18 @@
             }
         </style>
       @if (count($articulos_validos)>0)
-     <div class="row">
-  <div class="col-md-12">     
-      <span class="pull-right">
-                     <a class="btn btn-primary btn-sm" href="{{url('home/2 PICKING ARTICULOS') }}"><i class="fa fa-angle-left"></i> Atras</a>                                                              
-                            <a class="btn btn-danger btn-sm" href="{{'PDF/'.$id}}" target="_blank"><i class="fa fa-file-pdf-o"></i> PDF</a>                                                              
-                            <a class="btn btn-success btn-sm" href="{{'update/'.$id}}"><i class="fa fa-send"></i> Enviar a Traslados</a>
-                   
+           <div class="row">
+  <div class="col-md-12">  
+    <span class="pull-right">
+                     <div class="">
+                     <a class="btn btn-primary btn-sm" href="{{URL::previous()}}"><i class="fa fa-angle-left"></i> Atras</a>                                                              
+                         <!--   <a class="btn btn-primary btn-sm" href="" ><i class="fa fa-send"></i> Regresar a Picking</a>                                                              
+                          -->  <a class="btn btn-success btn-sm" href="{{'update/'.$id}}"><i class="fa fa-send"></i> Hacer Traslado</a>
+                    </div>  
             </span>          
         <!-- /.row -->
- 
- <h4>Material a Surtir</h4>
+
+ <h4>Material del Traslado</h4>
     <table>
       <thead>
         <tr>
@@ -61,7 +62,7 @@
           <th>APG-PA</th>
           <th>AMP-ST</th>
           <th>Total</th>
-          <th>Acciones</th>
+         
         </tr>
       </thead>
       <tbody>
@@ -80,10 +81,7 @@
           <td>{{number_format($art->APGPA, 2)}}</td>
           <td>{{number_format($art->AMPST, 2)}}</td>
           <td>{{number_format($art->Disponible, 2)}}</td>
-          <td>
-          <a id="btneditar" ng-click="editar()" role="button" data-toggle="modal" data-target="#edit" data-maxb="{{$art->AMPST}}" data-maxa="{{$art->APGPA}}" data-id="{{$art->Id}}" data-itemcode="{{$art->ItemCode}}" data-cantr="{{$art->Cant_Autorizada}}" data-canta="{{$art->Cant_ASurtir_Origen_A}}" data-cantb="{{$art->Cant_ASurtir_Origen_B}}" data-cantp="{{$art->Cant_Pendiente}}" class="btn btn-default"><i class="fa fa-pencil fa-lg" style="color:#007BFF"></i></a>
-            <a role="button" data-toggle="modal" data-target="#remove" data-id="{{$art->Id}}" class="btn btn-default"><i class="fa fa-arrow-circle-o-down fa-lg" style="color:red"></i></a>          
-          </td>  
+         
         </tr>
         @endforeach
 
@@ -93,42 +91,7 @@
 </div> <!-- /.row -->   
 @endif
 @if (count($articulos_novalidos)>0)
-    <div class="row">
-  <div class="col-md-12">
-    <h4>Material que NO se surtirá</h4>
-    <table>
-      <thead>
-        <tr>
-
-          <th>Código</th>
-          <th>Descripción</th>
-          <th>Estación</th>
-          <th>Cant. Requerida</th>
-          <th>Cant. Disponible</th>
-          <th>Regresar</th>
-        </tr>
-      </thead>
-      <tbody>
-
-        @foreach ($articulos_novalidos as $art)
-        <tr>
-          
-          <td>{{$art->ItemCode}}</td>
-          <td>{{$art->ItemName}}</td>
-          <td>{{$art->Destino}}</td>
-          <td>{{$art->Cant_Requerida}}</td>
-          <td>{{number_format($art->Disponible, 2)}}</td>          
-          <td><a @if ($art->Disponible < $art->Cant_Requerida)
-                    {{'disabled'}}
-                @endif
-            role="button" href="{{'articulos/return/'.$art->Id}}" class="btn btn-default"><i class="fa fa-arrow-circle-o-up fa-lg" style="color:royalblue"></i></a></td>
-        </tr>
-        @endforeach     
-
-      </tbody>
-    </table>
-  </div>
-</div> <!-- /.row -->
+  
 @endif
 
 <!-- .Model quitar -->
@@ -221,7 +184,6 @@
           <div class="form-group col-md-12">
             <input type="hidden" id="articulo-id" name="articulo">
             <input type="hidden" value="@{{pendiente}}" id="pendiente" name="pendiente">
-            <input type="hidden"  id="itemcode" name="itemcode">
             <span>
               <h6>NOTA:</h6>
               <h6>* La Cantidad a Surtir puede ser menor a la Autorizada</h6>
@@ -259,21 +221,15 @@ $('#edit').on('show.bs.modal', function (event) {
 var button = $(event.relatedTarget) // Button that triggered the modal
 var id = button.data('id') // Extract info from data-* attributes
 var cantp = button.data('cantp')
-var itemcode = button.data('itemcode')
-var maxa = button.data('maxa')
-var maxb = button.data('maxb')
 
 var modal = $(this)
 modal.find('#articulo-id').val(id)
-modal.find('#itemcode').val(itemcode)
 modal.find('#cantr').val(cantp) //autorizada
-modal.find('#canta').attr('max', maxa)
-modal.find('#cantb').attr('max', maxb)
+
 
 });
 @endsection 
 <script>
-  
 document.onkeyup = function(e) {
    if (e.shiftKey && e.which == 112) {
     window.open("ayudas_pdf/AyM00_00.pdf","_blank");

@@ -46,7 +46,7 @@
          </div>
             </div>
              <div class="row">
-             <div class="col-lg-5.5 col-md-8 col-sm-7">
+             <div class="col-md-12">
              <div class="table-responsive">
              <table class="table table-striped">
                     <thead class="thead-dark">
@@ -69,7 +69,7 @@
                     </tbody>
                 </table>
 </div>
-                 <div class="col-lg-5.5 col-md-8 col-sm-7">
+                 <div class="col-md-12">
                      @if (count($errors) > 0)
                          <div class="alert alert-danger text-center" role="alert">
                              @foreach($errors->getMessages() as $this_error)
@@ -86,8 +86,7 @@
                     </div>
                  </div>
              </div>
-             <div class="col-lg-5.5 col-md-8 col-sm-7">
-             </div>
+          
              </div>
              @yield('subcontent-01')
         </div>

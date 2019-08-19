@@ -18,7 +18,7 @@ class OP extends Model
     //[100,106,109]  
     foreach ($rs as $r) {
         $ruta = explode(",", $r->u_Ruta);
-        return $ruta;
+        return trim($ruta);
     }
    }
    public static function ContieneRuta($docEntry, $ruta){
