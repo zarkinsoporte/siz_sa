@@ -270,6 +270,8 @@ Route::get('home/4 GENERAR TRASLADO', 'Mod04_MaterialesController@TrasladosArtic
 Route::get('datatables.solicitudesTraslados', 'Mod04_MaterialesController@DataTraslados')->name('datatables.solicitudesTraslados');
 Route::get('home/TRASLADOS/solicitud/{id}', 'Mod04_MaterialesController@ShowDetalleTraslado');
 Route::get('home/TRASLADOS/solicitud/update/{id}', 'Mod04_MaterialesController@HacerTraslados');
+Route::get('home/TRASLADOS/solicitud/updatepicking/{id}', 'Mod04_MaterialesController@Solicitud_A_PickingTraslados');
+Route::get('home/TRASLADOS/solicitud/PDF/traslado/{transfer}','Mod04_MaterialesController@getPdfTraslado');
 //
 //-------------------------//
 //RUTAS DE MRP//---------------------------------------------------------
@@ -297,6 +299,12 @@ Route::get('home/reporte/PRODUCCION POR AREAS', 'Reportes_ProduccionController@r
 Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@produccionxareasXLS');
 
  Route::get('/pruebas', function (Request $request) {
+    $filas = DB::table('SIZ_MaterialesSolicitudes')
+    ->where('Id_Solicitud', 7)
+    ->whereIn('EstatusLinea', ['S', 'P'])
+    ->count();
+    dd($filas);
+
      $tareas = DB::table('Siz_Tarea_Menu')->get();
 
     foreach ($tareas as $k) {

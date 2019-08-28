@@ -15,6 +15,13 @@
     <div class="row">
       <div class="col-md-12 ">
         @include('partials.alertas')
+        
+        @if(Session::has('solicitud_err'))
+
+        <div class="alert alert-danger" role="alert">
+            {{ Session::get('solicitud_err') }}
+        </div>
+        @endif
       </div>
     </div>
             <style>       
@@ -28,11 +35,11 @@
                 font-size: 90%;
             }
         </style>
-      @if (count($articulos_validos)>0)
+   @if (count($articulos_validos)>0)
      <div class="row">
   <div class="col-md-12">     
       <span class="pull-right">
-                     <a class="btn btn-primary btn-sm" href="{{url('home/2 PICKING ARTICULOS') }}"><i class="fa fa-angle-left"></i> Atras</a>                                                              
+                     <a class="btn btn-primary btn-sm" href="{{URL::previous()}}""><i class="fa fa-angle-left"></i> Atras</a>                                                              
                             <a class="btn btn-danger btn-sm" href="{{'PDF/'.$id}}" target="_blank"><i class="fa fa-file-pdf-o"></i> PDF</a>                                                              
                             <a class="btn btn-success btn-sm" href="{{'update/'.$id}}"><i class="fa fa-send"></i> Enviar a Traslados</a>
                    
@@ -54,8 +61,8 @@
           <th >Descripción</th>
           <th >UM</th>
           <th >Autorizada</th>
-          <th >Pendiente</th>
           <th >A Surtir</th>
+          <th >Pendiente</th>
           <th >APG-PA</th>
           <th >AMP-ST</th>
           <th>APG-PA</th>
@@ -73,15 +80,15 @@
           <td>{{$art->ItemName}}</td>
           <td>{{$art->UM}}</td>
           <td>{{$art->Cant_Autorizada}}</td>
-          <td>{{$art->Cant_Pendiente}}</td>
           <td>{{number_format($art->Cant_ASurtir_Origen_A + $art->Cant_ASurtir_Origen_B, 2)}}</td>
+          <td>{{$art->Cant_PendienteA}}</td>
           <td>{{$art->Cant_ASurtir_Origen_A}}</td>
           <td>{{$art->Cant_ASurtir_Origen_B}}</td>
           <td>{{number_format($art->APGPA, 2)}}</td>
           <td>{{number_format($art->AMPST, 2)}}</td>
           <td>{{number_format($art->Disponible, 2)}}</td>
           <td>
-          <a id="btneditar" ng-click="editar()" role="button" data-toggle="modal" data-target="#edit" data-maxb="{{$art->AMPST}}" data-maxa="{{$art->APGPA}}" data-id="{{$art->Id}}" data-itemcode="{{$art->ItemCode}}" data-cantr="{{$art->Cant_Autorizada}}" data-canta="{{$art->Cant_ASurtir_Origen_A}}" data-cantb="{{$art->Cant_ASurtir_Origen_B}}" data-cantp="{{$art->Cant_Pendiente}}" class="btn btn-default"><i class="fa fa-pencil fa-lg" style="color:#007BFF"></i></a>
+          <a id="btneditar" ng-click="editar()" role="button" data-toggle="modal" data-target="#edit" data-maxb="{{$art->AMPST}}" data-maxa="{{$art->APGPA}}" data-id="{{$art->Id}}" data-itemcode="{{$art->ItemCode}}" data-cantr="{{$art->Cant_Autorizada}}" data-canta="{{$art->Cant_ASurtir_Origen_A}}" data-cantb="{{$art->Cant_ASurtir_Origen_B}}" data-cantp="{{$art->Cant_PendienteA}}" class="btn btn-default"><i class="fa fa-pencil fa-lg" style="color:#007BFF"></i></a>
             <a role="button" data-toggle="modal" data-target="#remove" data-id="{{$art->Id}}" class="btn btn-default"><i class="fa fa-arrow-circle-o-down fa-lg" style="color:red"></i></a>          
           </td>  
         </tr>
@@ -91,6 +98,14 @@
     </table>
   </div>
 </div> <!-- /.row -->   
+@else
+  <div class="row">
+      <div class="col-md-12">
+        <span class="pull-right">
+                <a class="btn btn-primary btn-sm" href="{{url('home/2 PICKING ARTICULOS') }}"><i class="fa fa-angle-left"></i> Atras</a>                                                              
+        </span>         
+      </div>
+  </div>
 @endif
 @if (count($articulos_novalidos)>0)
     <div class="row">
@@ -102,7 +117,7 @@
 
           <th>Código</th>
           <th>Descripción</th>
-          <th>Estación</th>
+          <th>Destino</th>
           <th>Cant. Requerida</th>
           <th>Cant. Disponible</th>
           <th>Regresar</th>
@@ -118,10 +133,14 @@
           <td>{{$art->Destino}}</td>
           <td>{{$art->Cant_Requerida}}</td>
           <td>{{number_format($art->Disponible, 2)}}</td>          
-          <td><a @if ($art->Disponible < $art->Cant_Requerida)
-                    {{'disabled'}}
+          <td><a @if ($art->Disponible > $art->Cant_Requerida)
+          href="{{'articulos/return/'.$art->Id}}"
+            @else
+            disabled = "disabled"
                 @endif
-            role="button" href="{{'articulos/return/'.$art->Id}}" class="btn btn-default"><i class="fa fa-arrow-circle-o-up fa-lg" style="color:royalblue"></i></a></td>
+            role="button"  class="btn btn-default"><i class="fa fa-arrow-circle-o-up fa-lg" style="color:royalblue"></i></a>
+            <a role="button" data-toggle="modal" data-target="#remove" data-id="{{$art->Id}}" class="btn btn-default"><i class="fa fa-arrow-circle-o-down fa-lg" style="color:red"></i></a>          
+            </td>
         </tr>
         @endforeach     
 
@@ -146,21 +165,18 @@
         <div class="modal-body">
 
           <input type="hidden" id="articulo-id" name="articulo" >
-          <h4>¿Cuàl es la razón por la que no surtirá este artículo?</h4>
+          <h4>¿Cuál es la razón por la que no surtirá este artículo?</h4>
           <input type="radio" name="reason" value="Se Surtira posteriormente" required checked>
           Se surtirá posteriormente<br>
 
-          <input type="radio" name="reason" value="Dañado / Incompleto">
+          <input type="radio" name="reason" value="Material Dañado / Incompleto">
           Material Dañado / Incompleto<br>
 
-          <input type="radio" name="reason" value="No se encuentra">
+          <input type="radio" name="reason" value="Material No se encuentra">
           El Material no se encuentra<br>         
 
-          <input type="radio" name="reason" value="No Disponible / Apartado">
+          <input type="radio" name="reason" value="Material No Disponible / Apartado">
           Material No Disponible / Apartado<br>
-
-          <input type="radio" name="reason" value="Otro">
-          Otro…<br>
 
         </div>
         <div class="modal-footer">
@@ -184,24 +200,19 @@
         {!! Form::open(['url' => 'home/PICKING ARTICULOS/solicitud/articulos/edit', 'method' => 'POST']) !!}
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
             aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Detalles de Surtido</h4>
+        <h4 class="modal-title">Detalle de Surtido</h4>
       </div>
       <div class="modal-body">
         <div class="row">
-          <div ng-if="pendiente < (canta -- cantb)" class="alert alert-danger" role="alert">
+         <div class="col-md-12">
+              <div ng-if="pendiente < (canta -- cantb)" class="alert alert-danger" role="alert">
+              
+              <strong>Las cantidad a surtir debe ser menor o igual @{{pendiente}}</strong><br>
         
-            <strong>Las cantidad a surtir debe ser menor o igual @{{pendiente}}</strong><br>
-       
-          </div>
-          <div class="form-group col-md-6">
-            <label for="cantr">Cantidad Pendiente</label>
-            <input id="cantr" name="cantr" type="number" class="form-control"  readonly>
-          </div>
-          <div class="form-group col-md-6">
-            <label for="cantp" >Cantidad A Surtir</label>
-          <input id="cantp" value="@{{canta -- cantb}}" name="cantp" type="text" class="form-control" min="0" step="any" max="@{{cantp}}" readonly>
-            
-          </div>
+            </div>
+         </div>
+          
+          <div > 
           <div class="form-group col-md-6">
             <label for="canta">Tomar de APG-PA:</label>
             <input ng-model="canta"  id="canta" name="canta" type="number" class="form-control" min="0" step="any" required>
@@ -210,10 +221,19 @@
             <label for="canta">Tomar de AMP-ST:</label>
             <input ng-model="cantb"  id="cantb" name="cantb" type="number" class="form-control" min="0" step="any" required>
           </div>
+          </div>
+          <div class="">
+           
+            <input id="cantr" name="cantr" type="hidden" class="form-control"  readonly>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="cantp" >Cantidad Total a Surtir</label>
+          <input id="cantp" value="@{{canta -- cantb}}" name="cantp" type="text" class="form-control" min="0" step="any" max="@{{cantp}}" readonly>
+          </div>
           <div class="form-group col-md-12" ng-show="pendiente > (canta -- cantb)">
-              <h5>¿Cuàl es la razón por la que se surtira una cantidad menor?</h5>
-              <input type="radio" name="reason" value="No hay existencia"  checked>
-              No hay existencia<br>
+              <h5>¿Cuál es la razón por la que se surtirá una cantidad menor?</h5>
+              <input type="radio" name="reason" value="No se completa existencia"  checked>
+              No se completa existencia<br>
               
               <input type="radio" name="reason" value="Se posterga">
               Se posterga entrega<br>                            
@@ -224,7 +244,7 @@
             <input type="hidden"  id="itemcode" name="itemcode">
             <span>
               <h6>NOTA:</h6>
-              <h6>* La Cantidad a Surtir puede ser menor a la Autorizada</h6>
+              <h6>* La Cantidad a Surtir puede ser menor a la cantidad Pendiente</h6>
               <h6>* La Cantidad a Surtir puede modificarse con las Cantidades de los Almacenes</h6>
             </span>
           </div>

@@ -15,6 +15,16 @@
     <div class="row">
       <div class="col-md-12 ">
         @include('partials.alertas')
+        @if(Session::has('solicitud_err'))
+        <div class="alert alert-danger" role="alert">
+            {{ Session::get('solicitud_err') }}
+        </div>
+        @endif
+        @if(Session::has('mensaje2'))
+        <div class="alert alert-success" role="alert">
+            {{ Session::get('mensaje2') }}
+        </div>
+        @endif
       </div>
     </div>
             <style>       
@@ -28,6 +38,7 @@
                 font-size: 90%;
             }
         </style>
+        
       @if (count($articulos_validos)>0)
            <div class="row">
   <div class="col-md-12">  
@@ -35,7 +46,9 @@
                      <div class="">
                      <a class="btn btn-primary btn-sm" href="{{URL::previous()}}"><i class="fa fa-angle-left"></i> Atras</a>                                                              
                          <!--   <a class="btn btn-primary btn-sm" href="" ><i class="fa fa-send"></i> Regresar a Picking</a>                                                              
-                          -->  <a class="btn btn-success btn-sm" href="{{'update/'.$id}}"><i class="fa fa-send"></i> Hacer Traslado</a>
+                          -->  
+                          <a  ng-hide="showme" class="btn btn-primary btn-sm" href="{{'updatepicking/'.$id}}"><i class="fa fa-send"></i> Enviar a Picking</a>
+                          <a ng-click="sendArt()" id="spinn"  class="btn ddd btn-success btn-sm" href="{{'update/'.$id}}" ><i class="fa fa-send"></i> Hacer Traslado</a>
                     </div>  
             </span>          
         <!-- /.row -->
@@ -45,7 +58,7 @@
       <thead>
         <tr>
            <th colspan="3">Artículo</th>
-           <th colspan="3">Cantidad</th>
+           <th colspan="1">Cantidad</th>
            <th colspan="2">Almacén Origen</th>
            <th colspan="3">Stock Disponible</th>
         </tr>
@@ -54,8 +67,6 @@
           <th>Código</th>
           <th >Descripción</th>
           <th >UM</th>
-          <th >Autorizada</th>
-          <th >Pendiente</th>
           <th >A Surtir</th>
           <th >APG-PA</th>
           <th >AMP-ST</th>
@@ -68,13 +79,11 @@
       <tbody>
 
         @foreach ($articulos_validos as $art)
-        <tr <?php ?>>
+        <tr>
                    
           <td>{{$art->ItemCode}}</td>
           <td>{{$art->ItemName}}</td>
           <td>{{$art->UM}}</td>
-          <td>{{$art->Cant_Autorizada}}</td>
-          <td>{{$art->Cant_Pendiente}}</td>
           <td>{{number_format($art->Cant_ASurtir_Origen_A + $art->Cant_ASurtir_Origen_B, 2)}}</td>
           <td>{{$art->Cant_ASurtir_Origen_A}}</td>
           <td>{{$art->Cant_ASurtir_Origen_B}}</td>
@@ -88,12 +97,91 @@
       </tbody>
     </table>
   </div>
-</div> <!-- /.row -->   
+</div> <!-- /.row -->  
+@else
+  <div class="row">
+      <div class="col-md-12">
+        <span class="pull-right">
+                <a class="btn btn-primary btn-sm" href="{{url('home/4 GENERAR TRASLADO') }}"><i class="fa fa-angle-left"></i> Atras</a>                                                              
+        </span>         
+      </div>
+  </div> 
 @endif
 @if (count($articulos_novalidos)>0)
-  
+<div class="row">
+  <div class="col-md-12">  
+    <span class="pull-right">
+                     <div class="">
+                     <a class="btn btn-primary btn-sm" href="{{URL::previous()}}"><i class="fa fa-angle-left"></i> Atras</a>                                                              
+                         <!--   <a class="btn btn-primary btn-sm" href="" ><i class="fa fa-send"></i> Regresar a Picking</a>                                                              
+                          --> <a class="btn btn-success btn-sm" href="{{'updatepicking/'.$id}}"><i class="fa fa-send"></i> Enviar a Picking</a>
+                    </div>  
+            </span>  
+    <h4>Material que NO se surtirá</h4>
+    <table>
+      <thead>
+        <tr>
+
+          <th>Código</th>
+          <th>Descripción</th>
+          <th>Destino</th>
+          <th>Cant. Requerida</th>
+          <th>Cant. Disponible</th>          
+        </tr>
+      </thead>
+      <tbody>
+
+        @foreach ($articulos_novalidos as $art)
+        <tr>
+          
+          <td>{{$art->ItemCode}}</td>
+          <td>{{$art->ItemName}}</td>
+          <td>{{$art->Destino}}</td>
+          <td>{{$art->Cant_Requerida}}</td>
+          <td>{{number_format($art->Disponible, 2)}}</td>          
+         </tr>
+        @endforeach     
+
+      </tbody>
+    </table>
+  </div>
+</div> <!-- /.row -->
 @endif
 
+@if(count($pdf_solicitud) > 0)
+<div class="row">
+  <div class="col-md-12"> 
+<h4>Transferencias de esta Solicitud</h4>
+    <table>
+      <thead>
+        <tr>
+
+          <th># Traslado</th>
+          <th>Fecha</th>
+          <th>Cancelado</th>
+          <th>Comentario</th>
+          <th>Pdf</th>          
+        </tr>
+      </thead>
+      <tbody>  
+      @foreach ($pdf_solicitud as $art)
+        <tr>
+          
+          <td>{{$art->DocEntry}}</td>
+          <td>{{date('d-m-Y', strtotime($art->DocDate))}}</td>
+          <td>{{$art->CANCELED}}</td>
+          <td>{{$art->Comments}}</td>
+          <td>
+          <a class="btn btn-danger btn-sm" href="{{'PDF/traslado/'.$art->DocEntry}}" target="_blank"><i class="fa fa-file-pdf-o"></i> </a>                                                              
+          </td>          
+         </tr>
+        @endforeach     
+
+      </tbody>
+    </table>
+  </div>
+</div> <!-- /.row -->  
+@endif
 <!-- .Model quitar -->
 
 <div class="modal fade" id="remove" tabindex="-1" role="dialog">
@@ -228,6 +316,7 @@ modal.find('#cantr').val(cantp) //autorizada
 
 
 });
+
 @endsection 
 <script>
 document.onkeyup = function(e) {
@@ -250,7 +339,11 @@ document.onkeyup = function(e) {
         $scope.pendiente= $('#btneditar').data('cantp') * 1;     
         
       };
- 
+      
+      $scope.sendArt = function(){
+        $( "#spinn" ).html('<span><i class="fa fa-spinner fa-pulse fa-lg fa-fw"></i> Enviando...</span>');
+        $scope.showme = true;
+    };
     }]);
 
    

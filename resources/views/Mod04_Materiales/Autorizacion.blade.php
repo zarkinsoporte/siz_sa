@@ -89,7 +89,7 @@
 
           <th>Código</th>
           <th>Descripción</th>
-          <th>Estación</th>
+          <th>Destino</th>
           <th>Cant. Requerida</th>
           <th>Cant. Disponible</th>
           <th>Regresar</th>
@@ -117,7 +117,18 @@
   </div>
 </div> <!-- /.row -->
 @endif
+<br>
+@if(strlen($comentario) > 0)
 
+<div class="row">
+<div class="col-md-12">
+<div class="form-group">
+        <label for="comment">Observaciones:</label>
+        <textarea  class="form-control" rows="3" id="comment" readonly>{{$comentario}}</textarea>
+        </div> 
+</div>
+</div>
+@endif
 <!-- .Model quitar -->
 
 <div class="modal fade" id="remove" tabindex="-1" role="dialog">
@@ -133,7 +144,7 @@
         <div class="modal-body">
 
           <input type="hidden" id="articulo-id" name="articulo" >
-          <h4>¿Cuàl es la razón por la que no está autorizando este material?</h4>
+          <h4>¿Cuál es la razón por la que no está autorizando este material?</h4>
           <input type="radio" name="reason" value="No Disponible / Apartado" checked>
           Material No Disponible / Apartado<br>
           <input type="radio" name="reason" value="Error Captura Solicitud" required>

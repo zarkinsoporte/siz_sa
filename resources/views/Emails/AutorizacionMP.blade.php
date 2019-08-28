@@ -36,50 +36,39 @@
 <div class="container">
   <div class="row">
     <div class="col-md-12">
-        <h3>Solicitud de Material #{{$id}}</h3>
-        <h4>Requerido por: {{ Auth::user()->firstName.' '.Auth::user()->lastName }}</h4>
+        <h3>Autorización de Material #{{$id}}</h3>
+       
       <table class="paleBlueRows">
         <thead>
           <tr>
-            <th>#</th>
             <th>Código</th>
             <th>Descripción</th>
-            <th>Cantidad</th>
-            <th>Destino</th>
-          
+            <th>Cant Solicitada</th>          
+            <th>Cant Autorizada</th>            
+            <th>Comentario </th>            
           </tr>
         </thead>
         <tbody>
-          <?php $i=0;?>
-          @foreach ($arts as $art)
-            <tr>
-            <?php $i++;?>
-            <td>{{ $i }}</td>
-            <td>{{$art['pKey']}}</td>
-            <td>{{$art['descr']}}</td>
-            <td>{{$art['cant']}}</td>
-            <td>{{$art['destino']}}</td>
+         
+         @foreach($arts as $art)
+            <tr>     
+            <td>{{$art->ItemCode}}</td>
+            <td>{{$art->ItemName}}</td>
+            <td>{{number_format($art->Cant_Requerida, 2)}}</td>          
+            <td>{{number_format($art->Cant_Autorizada, 2)}}</td>
+            @if(is_null($art->Razon_NoAutorizado))
+            <td>{{$art->Razon_AutorizaCantMenor}}</td>
+            @else
+            <td>{{$art->Razon_NoAutorizado}}</td>
+            @endif
           </tr>
-          @endforeach
+        @endforeach
          
         </tbody>
       </table>
     </div>
   </div> <!-- /.row -->
-  <br>
-  @if(strlen($comentario) > 0)
-                    <div>
-                    <table class="mytable">
-                        <thead>
-                        <th style="width:10%;">Observaciones de la Solicitud:</th>
-                        </thead>
-                        <tbody>
-                        <tr>
-                        <td style="width:90%;" class="text-left" >{{$comentario}}</td>
-                        </tr>
-                        </tbody>
-                    </table></div>
-                    @endif
+
 </div>
     
 

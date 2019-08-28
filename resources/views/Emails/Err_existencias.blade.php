@@ -53,7 +53,7 @@
          
          
             <tr>                 
-            <td>{{$art->Id}}</td>
+            <td>{{$art->Id_Solicitud}}</td>
             <td>{{$art->ItemCode}}</td>
             <td>{{$art->ItemName}}</td>
             <td>{{$art->Cant_Pendiente}}</td>

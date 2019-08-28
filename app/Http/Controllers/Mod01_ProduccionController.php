@@ -430,7 +430,7 @@ class Mod01_ProduccionController extends Controller
                     ],
                 ]);
                 ////RUTA RETROCESO
-                $Ruta = OP::getRutaNombres($op);
+                $Ruta = (OP::getRutaNombres($op));
                 return view('Mod01_Produccion.traslados', ['actividades' => $actividades, 'ultimo' => count($actividades), 'Ruta' => $Ruta, 't_user' => $t_user, 'ofs' => $one, 'op' => $op, 'pedido' => $pedido, 'HisOrden' => $HisOrden]);
             }
             Session::flash('miusuario', $id);

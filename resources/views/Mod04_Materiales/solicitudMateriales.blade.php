@@ -2,6 +2,9 @@
 @section('homecontent')
 
 <style>
+.upperc{ 
+    text-transform: uppercase;
+}
     th, td{
         font-size: 12px;
     }
@@ -93,11 +96,7 @@ border: 1px solid #000000;
             </div>
         
     </div>
-   <div class="row">
-    <div class="col-md-12">
-        @include('partials.alertas')
-    </div>
-</div>
+   
     <div class="row">      
         <div class="col-lg-6">
             <div class="input-group">
@@ -126,14 +125,14 @@ border: 1px solid #000000;
         </div>
     </div>
     <div class="row">
-       <div class="col-md-12">
-           <table class="display condensed" ng-if="articulos.length > 0">
+       <div class="col-md-12" ng-if="articulos.length > 0">
+           <table class="display condensed">
             <thead>
                 <tr>                    
                     <th>Código</th>
                     <th>Descripción</th>
                     <th>Cantidad</th>
-                    <th>Estación</th>
+                    <th>Destino</th>
                     <th>Quitar</th>
                 </tr>
             </thead>
@@ -147,6 +146,14 @@ border: 1px solid #000000;
                 </tr>
             </tbody>
         </table>
+        <br>
+        <div class="form-group">
+        <label for="comment">Observaciones:</label>
+        <textarea ng-keyup="count = total - comment.length" ng-model="comment" 
+        ng-init="total=100" class="form-control upperc" maxlength="100" rows="3" id="comment"></textarea>
+        caracteres restantes: <%count%>
+        
+        </div> 
        </div>
     </div>   <!-- /.row -->
     
@@ -419,7 +426,8 @@ $interpolateProvider.startSymbol('<%');
         data:
         {
             "_token": "{{ Session::token() }}",
-            "arts": $scope.articulos            
+            "arts": $scope.articulos,
+            "comentario": $('#comment').val()       
         },
        
         }).then(function (response) {

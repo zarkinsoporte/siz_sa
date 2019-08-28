@@ -26,21 +26,7 @@
                 </h3>
             </div>
         </div>
-        <div class="col-md-12">
-                @if (count($errors) > 0)
-                <div class="alert alert-danger text-center" role="alert">
-                    @foreach($errors->getMessages() as $this_error)
-                    <strong>¡Lo sentimos!  &nbsp; {{$this_error[0]}}</strong><br> @endforeach
-                </div>
-                @elseif(Session::has('mensaje'))
-                <div class="row">
-                    <div class="alert alert-success text-center" role="alert">
-                        {{ Session::get('mensaje') }}
-                    </div>
-                </div>
-                @endif
-
-            </div>
+      
         <style>
             td {
                 font-family: 'Helvetica';
@@ -53,7 +39,11 @@
             }
         </style>
         <!-- /.row -->
-        
+        <div class="row">
+      <div class="col-md-12 ">
+        @include('partials.alertas')
+      </div>
+    </div>
         <div class="">
             <div class="">
                 <div class="">

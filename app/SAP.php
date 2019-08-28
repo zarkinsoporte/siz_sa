@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use DB;
 use \COM;
+use Session;
 class SAP extends Model
 {
      private static $vCmp = false;
@@ -85,39 +86,93 @@ class SAP extends Model
                    
    }
 
-   public static function Transfer($data){
-        
-        $items = $data['id_solicitud']; // items(Codigos, Cant. Real), Solicitante, Area, 
-        //Anadir CantPendiente, CantRealSurtir
-        $items = $data['PriceList']; //10
-        $items = $data['Destination']; //APG ST
-
-        echo '<br>';
-        $vItem = $vCmp->GetBusinessObject("67");
-        
+   public static function Transfer($data){   
+  
+        $id = $data['id_solicitud']; 
+        (self::$vCmp == false) ? self::Connect(): '';
+        //self::$vCmp->XmlExportType("xet_ExportImportMode");
+        $vItem = self::$vCmp->GetBusinessObject("67");
         //Obtener Lineas de una Transferencia
-        //$RetVal = $vItem->GetByKey("665");
+       // $RetVal = $vItem->GetByKey("7782");
+        //dd($vItem->Printed);
         //echo $vItem->Lines->SetCurrentLine(0);
         //echo $vItem->Lines->ItemCode;
-        //dd();
-
-        //Crear Transferencia
-        $vItem->DocDate = (new DateTime('now'))->format('Y-m-d H:i:s');
-        $vItem->FromWarehouse = "AMP-ST";
-        $vItem->PriceList = "10";
-        $vItem->FolioNumber = "7780";//**/Pendiente
-        $vItem->Comments = "Transfer de prueba Sistemas";
-        //agregar linea
-        $vItem->Lines->ItemCode = "10001";
-        $vItem->Lines->WarehouseCode = "APG-ST";
-        $vItem->Lines->Quantity = 1;        
-        $vItem->Lines->Add();
+        //dd($data['items']);
+        DB::beginTransaction();
+        if (count($data['items']) > 0) {
+            //Crear Transferencia
+            $vItem->DocDate = (new \DateTime('now'))->format('Y-m-d H:i:s');
+            $vItem->FromWarehouse = $data['almacen_origen']; //origen
+            $vItem->PriceList = $data['pricelist'];
+            $vItem->FolioNumber = $id;//**/Vale:solicitud
+            $vItem->Comments = "SIZ VALE #".$id." Solicitado por:". $data['nombre_completo'];
+            $vItem->JournalMemo = "Traslados -";
+            
+            foreach ($data['items'] as $item) {
+               //agregar lineaS               
+               if ($data['almacen_origen'] == 'APG-PA') {
+                    if ($item->Cant_Pendiente >= $item->CA) {
+                        $vItem->Lines->Quantity = $item->CA;
+                        DB::table('SIZ_MaterialesSolicitudes')
+                        ->where('Id', $item->Id)
+                        ->update(['Cant_PendienteA' => ($item->Cant_PendienteA - $item->CA),
+                        'Cant_Pendiente' => ($item->Cant_PendienteA - $item->CA),
+                        'Cant_ASurtir_Origen_A' => 0]);
+                        $vItem->Lines->ItemCode = $item->ItemCode;
+                        $vItem->Lines->WarehouseCode = $item->Destino;               
+                        $vItem->Lines->Add(); 
+                        if (($item->Cant_PendienteA - $item->CA) == 0) {
+                            DB::table('SIZ_MaterialesSolicitudes')
+                            ->where('Id', $item->Id)
+                            ->update(['EstatusLinea' => 'T']);                   
+                            
+                        }
+                    }
+                } elseif ($data['almacen_origen'] == 'AMP-ST') {
+                   
+                    if ($item->Cant_Pendiente >= $item->CB) {
+                        $vItem->Lines->Quantity = $item->CB; 
+                        DB::table('SIZ_MaterialesSolicitudes')
+                        ->where('Id', $item->Id)
+                        ->update(['Cant_PendienteA' => ($item->Cant_PendienteA - $item->CB),
+                        'Cant_Pendiente' => ($item->Cant_PendienteA - $item->CB),
+                        'Cant_ASurtir_Origen_B' => 0]);
+                        $vItem->Lines->ItemCode = $item->ItemCode;
+                        $vItem->Lines->WarehouseCode = $item->Destino;               
+                        $vItem->Lines->Add(); 
+                        if (($item->Cant_PendienteA - $item->CB) == 0) {
+                            DB::table('SIZ_MaterialesSolicitudes')
+                            ->where('Id', $item->Id)
+                            ->update(['EstatusLinea' => 'T']);                   
+                            
+                        }elseif (($item->Cant_PendienteA - $item->CB) > 0) {
+                            DB::table('SIZ_MaterialesSolicitudes')
+                            ->where('Id', $item->Id)
+                            ->update(['EstatusLinea' => 'P']);
+                        }
+                    }
+                }
+                
+            }
+        }else{
+            return 'No hay ningun material que surtir';
+        }       
         //Guardar Transferencia
-        echo $vItem->Add();  // cero es correcto
-
-
-        $vCmp->GetLastErrorDescription();
-        echo 'fin';
+       
+        if ($vItem->Add() == 0) {// cero es correcto
+            DB::commit();
+            $docentry = DB::table('OWTR')
+            ->where('FolioNum', $id)
+            ->max('DocEntry');
+            DB::table('SIZ_TransferSolicitudesMP')->insert(
+                ['Id_Solicitud' => $id, 'DocEntry_Transfer' => $docentry]
+            );          
+            return $docentry;
+        } else {
+            DB::rollBack();
+            return 'Error desde SAP: '.self::$vCmp->GetLastErrorDescription();
+           
+        }  
    }
 }
 

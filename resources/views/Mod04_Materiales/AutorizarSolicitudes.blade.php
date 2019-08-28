@@ -26,11 +26,7 @@
                 </h3>
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-12 ">
-                @include('partials.alertas')
-            </div>
-        </div>
+       
         <style>
             td {
                 font-family: 'Helvetica';
@@ -43,7 +39,11 @@
             }
         </style>
         <!-- /.row -->
-        
+        <div class="row">
+      <div class="col-md-12 ">
+        @include('partials.alertas')
+      </div>
+    </div>
         <div class="">
             <div class="">
                 <div class="">
