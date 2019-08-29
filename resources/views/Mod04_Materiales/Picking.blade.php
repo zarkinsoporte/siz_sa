@@ -61,8 +61,8 @@
           <th >Descripción</th>
           <th >UM</th>
           <th >Autorizada</th>
+          <th >Surtida</th>
           <th >A Surtir</th>
-          <th >Pendiente</th>
           <th >APG-PA</th>
           <th >AMP-ST</th>
           <th>APG-PA</th>
@@ -80,8 +80,8 @@
           <td>{{$art->ItemName}}</td>
           <td>{{$art->UM}}</td>
           <td>{{$art->Cant_Autorizada}}</td>
+          <td>{{number_format(($art->Cant_Autorizada - $art->Cant_PendienteA), 2)}}</td>
           <td>{{number_format($art->Cant_ASurtir_Origen_A + $art->Cant_ASurtir_Origen_B, 2)}}</td>
-          <td>{{$art->Cant_PendienteA}}</td>
           <td>{{$art->Cant_ASurtir_Origen_A}}</td>
           <td>{{$art->Cant_ASurtir_Origen_B}}</td>
           <td>{{number_format($art->APGPA, 2)}}</td>
