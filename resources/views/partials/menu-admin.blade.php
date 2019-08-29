@@ -36,7 +36,7 @@
                                 <a href="{!! url('admin/Notificaciones') !!}"><i class="glyphicon glyphicon-list-alt"></i> Log Notificaciones</a>
                             </li>
                             <li>
-                                <a href="{!! url('admin/emails') !!}"><i class="fa fa-envelope"></i> Ajustes Email</a>
+                                <a href="{!! url('admin/emails') !!}"><i class="fa fa-envelope"></i> Conf. Correo</a>
                             </li>
                          
                         </ul>  

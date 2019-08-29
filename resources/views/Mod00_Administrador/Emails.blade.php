@@ -16,7 +16,7 @@
                    <div class="col-lg-6.5 col-md-9 col-sm-8">
                     <div class="visible-xs visible-sm"><br><br></div>
                     <h3 class="page-header">
-                        Ajuste de Emails
+                    Configuración de envío de Correo
                     </h3>
                 </div>
                        <div class= "col-lg-6.5 col-md-12 col-sm-7">
@@ -52,6 +52,8 @@
                         <label>SolicitudesMP</label>
                         <select class="form-control" name="solicitudmp" id="solicitudmp">
                             <option value="1">Activado</option>
+                            <option value="2">Solicitudes</option>
+                            <option value="3">Autorizaciones</option>
                             <option value="0">Desactivado</option>
                         </select>
                        
