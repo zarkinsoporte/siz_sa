@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use DB;
 use \COM;
 use Session;
+use Illuminate\Support\Facades\Auth;
 class SAP extends Model
 {
      private static $vCmp = false;
@@ -165,7 +166,7 @@ class SAP extends Model
             ->where('FolioNum', $id)
             ->max('DocEntry');
             DB::table('SIZ_TransferSolicitudesMP')->insert(
-                ['Id_Solicitud' => $id, 'DocEntry_Transfer' => $docentry]
+                ['Id_Solicitud' => $id, 'DocEntry_Transfer' => $docentry, 'Usuario' => Auth::user()->U_EmpGiro]
             );          
             return $docentry;
         } else {

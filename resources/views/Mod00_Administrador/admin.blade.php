@@ -11,23 +11,24 @@
 
             <!-- Page Heading -->
             <div class="row">
-                <div >
-                    <div class="visible-xs"><br><br></div>
+                <div class="col-md-12 col-sm-12">
+                    <div class="visible-xs visible-sm"><br><br></div>
                     <h3 class="page-header">
-                        Módulo Administrador
+                       Módulo Administrador
                     </h3>
-                    
-                       <div class= "col-lg-12 col-md-12 col-sm-12">
-                        <div class="hidden-xs">
+               
+                    <div class="hidden-xs">
                         <div class="hidden-sm">
-                        <ol class="breadcrumb">
-                        <li>
-                            <i class="fa fa-dashboard"></i>  <a href="{!! url('home') !!}">Inicio</a>
-                        </li>
-                        <li>
-                            <i class="fa fa-archive"></i> <a href="admin/users">Administrador</a>
-                       </li>
-                    </ol>
+                            <ol class="breadcrumb">
+                                <li>
+                                    <i class="fa fa-dashboard"></i>  <a href="{!! url('home') !!}">Inicio</a>
+                                </li>
+                                <li>
+                                    <i class="fa fa-archive"></i> <a href="admin/users">Administrador</a>
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
                 </div>
             </div>
             <!-- /.row -->

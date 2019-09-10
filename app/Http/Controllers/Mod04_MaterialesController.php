@@ -388,17 +388,15 @@ public static function getParam_DM_Articulos($item){
 public function solicitudMateriales(){
      if (Auth::check()) {
         $user = Auth::user();
-        $actividades = $user->getTareas();  
-        $articulos = DB::select('SELECT CardCode, CardName FROM OCRD WHERE CardType = ? ORDER BY CardName', ['S']);
-        //$rutasConNombres = OP::getTodasRutas();  
+        $actividades = $user->getTareas();
         $almacenesDestino = DB::table('SIZ_AlmacenesTransferencias')
-                            ->where('Dept', Auth::user()->dept)->get();
+                            ->where('Dept', Auth::user()->dept)
+                            ->where('SolicitudMateriales', 'D')->get();
     
 
         $param = array(        
             'actividades' => $actividades,
             'ultimo' => count($actividades),
-            'articulos' => $articulos,  
             'almacenesDestino' => $almacenesDestino,  
         );
         return view('Mod04_Materiales.solicitudMateriales', $param);
@@ -1168,5 +1166,64 @@ public function HacerTraslados($id){
          'total1',  'transfer', 'comentario'));
         $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
         return $pdf->stream('Siz_Traslado_'.$info1[0]->FolioNum . ' - ' .date("d/m/Y") . '.Pdf');
-  }  
+  }
+    public function trasladoEntrega()
+    {
+        if (Auth::check()) {
+            $user = Auth::user();
+            $actividades = $user->getTareas();
+           
+           
+            $param = array(
+                'actividades' => $actividades,
+                'ultimo' => count($actividades),
+   
+            );
+            return view('Mod04_Materiales.solicitudMateriales', $param);
+        } else {
+            return redirect()->route('auth/login');
+        }
+    }
+    public function test(){
+        //dd(Input::get('text_selTres'));
+        $user = Auth::user();
+        $actividades = $user->getTareas();
+        $almacenesDestino = DB::table('SIZ_AlmacenesTransferencias')
+            ->where('Dept', Auth::user()->dept)
+            ->whereIn('TrasladoDeptos', ['D', 'OD'])->get();
+
+
+        $param = array(
+            'actividades' => $actividades,
+            'ultimo' => count($actividades),
+            'almacenOrigen' => Input::get('text_selTres'),
+            'almacenesDestino' => $almacenesDestino,
+        );
+        return view('Mod04_Materiales.showListMateriales', $param);
+    }
+    public function ShowArticulosWHTraslados(Request $request)
+    {
+        
+            
+        //AND U_TipoMat = \'PT\' 
+        $consulta = DB::select('
+        SELECT  top 5 OITM.ItemCode, ItemName, InvntryUom AS UM, ALMACENES.Existencia FROM OITM
+        LEFT JOIN 
+        (SELECT ItemCode, SUM(CASE WHEN WhsCode = \''. $request->get('almacen'). '\'   THEN OnHand ELSE 0 END) AS Existencia
+        FROM dbo.OITW 
+        GROUP BY ItemCode) AS ALMACENES ON OITM.ItemCode = ALMACENES.ItemCode
+        WHERE PrchseItem = \'Y\' AND InvntItem = \'Y\' 
+        
+        AND Existencia > 0
+        ');
+        $columns = array(
+            ["data" => "ItemCode", "name" => "Código"],
+            ["data" => "ItemName", "name" => "Descripción"],
+            ["data" => "UM", "name" => "UM"],
+            ["data" => "Existencia", "name" => "Existencia", "defaultContent" => "0.00"],
+        );
+
+        return response()->json(array('data' => $consulta, 'columns' => $columns));
+    }
+ 
 }

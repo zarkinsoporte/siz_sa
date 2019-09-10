@@ -220,14 +220,25 @@ class Reportes_ProduccionController extends Controller
                 $data_selUno = ['Producción', 'Compras'];
                 $text_selDos = 'Tipo'; 
                 $data_selDos = ['Completo', 'Con Orden', 'Proyección'];
-                // if (Auth::user()->position == 6 || Auth::user()->isAdmin()) { //solo planeadores y administradores
-                //     $text_selTres = 'Acción';
-                //     $data_selTres = ['Consultar', 'Actualizar'];
-                //  }
+                
                 break;
-                case "ACTUALIZAR MRP":
-                    $Text = "Esta a punto de actualizar el MRP. ¿Desea continuar?";
+            case "ACTUALIZAR MRP":
+                $Text = "Esta a punto de actualizar el MRP. ¿Desea continuar?";
                 break;
+            case "TRASLADO ENTREGA":
+                $almacenesOrigen = DB::table('SIZ_AlmacenesTransferencias')
+                    ->select('Code as llave', 'Label as valor')
+                    ->where('Dept', Auth::user()->dept)
+                    ->whereIn('TrasladoDeptos', ['O', 'OD'])
+                    ->get();
+                    
+                   //    dd(array_pluck($almacenesOrigen, 'Label'));
+                        
+                $Text = "Elije Almacén Origen";
+                $text_selTres = 'Almacén';
+                $data_selTres = $almacenesOrigen;       
+                break;
+
         }
 
         if (Auth::check()) {

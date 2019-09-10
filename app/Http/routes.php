@@ -272,6 +272,13 @@ Route::get('home/TRASLADOS/solicitud/{id}', 'Mod04_MaterialesController@ShowDeta
 Route::get('home/TRASLADOS/solicitud/update/{id}', 'Mod04_MaterialesController@HacerTraslados');
 Route::get('home/TRASLADOS/solicitud/updatepicking/{id}', 'Mod04_MaterialesController@Solicitud_A_PickingTraslados');
 Route::get('home/TRASLADOS/solicitud/PDF/traslado/{transfer}','Mod04_MaterialesController@getPdfTraslado');
+//5 TRASLADOS DEPTOS ENTREGA
+Route::get('home/TRASLADO ENTREGA', 'Reportes_ProduccionController@showModal');
+Route::post('home/reporte/TRASLADO ENTREGA', 'Mod04_MaterialesController@test');
+
+Route::get('OITM.WH.traslados', 'Mod04_MaterialesController@ShowArticulosWHTraslados')->name('OITM.WH.traslados');
+//Route::post('home/saveArt', 'Mod04_MaterialesController@saveArt')->name('home/saveArt');
+
 //
 //-------------------------//
 //RUTAS DE MRP//---------------------------------------------------------
@@ -343,7 +350,9 @@ Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@pr
  });
  Route::get('setpassword', function () {
     try {
-
+        
+        dd(Auth::user()->U_EmpGiro);
+        
 
         $password = Hash::make('1234');
         DB::table('dbo.OHEM')

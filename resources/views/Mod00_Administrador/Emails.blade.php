@@ -13,7 +13,7 @@
             <!-- Page Heading -->
             <div class="row">
                 <div >
-                   <div class="col-lg-6.5 col-md-9 col-sm-8">
+                   <div class="col-md-12">
                     <div class="visible-xs visible-sm"><br><br></div>
                     <h3 class="page-header">
                     Configuración de envío de Correo
@@ -97,7 +97,17 @@
                         <td>{{ App\User::find($campo->No_Nomina)['firstName'].' '.App\User::find($campo->No_Nomina)['lastName'] }}</td>
                         <td>{{ App\User::find($campo->No_Nomina)['email'].'@zarkin.com' }}</td>
                         <td>{{ $campo->Reprocesos==1?'Activado':'-'}}</td>
-                        <td>{{ $campo->SolicitudesMP==1?'Activado':'-' }}</td>
+                        <td>
+                            @if ($campo->SolicitudesMP == 1)
+                                Activado
+                            @elseif ($campo->SolicitudesMP == 2)
+                                Solicitudes
+                            @elseif ($campo->SolicitudesMP == 3)
+                                Autorizaciones
+                            @else
+                                -
+                            @endif
+                        </td>
                         <td>{{ $campo->SolicitudesErrExistencias==1?'Activado':'-' }}</td>
                                                    
                         <td>

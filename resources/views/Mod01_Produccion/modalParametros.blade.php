@@ -101,7 +101,7 @@
                                                 <label for="text_selTres">{{$text_selTres}}:</label>
                                                 <select class="form-control" id="text_selTres" name="text_selTres" autofocus required>
                                                     @foreach ($data_selTres as $item)
-                                                        <option value="{{$item}}">{{$item}}</option> 
+                                                        <option value="{{$item->llave}}">{{$item->valor}}</option> 
                                                     @endforeach
                                                 </select>
                                             </div>
