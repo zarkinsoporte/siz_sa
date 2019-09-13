@@ -763,7 +763,7 @@ public function asignaAlmacenesOrigen($articulos){
                             $ALMA = 0;
                             $ALMB = $P;
                         
-                        } else {
+                        } else { 
                             $P = $P - $B;
                             $ALMB = $Cant - $P;
                             if ($P <= $A) {
@@ -1172,39 +1172,23 @@ public function HacerTraslados($id){
         if (Auth::check()) {
             $user = Auth::user();
             $actividades = $user->getTareas();
-           
-           
+            $almacenesDestino = DB::table('SIZ_AlmacenesTransferencias')
+                ->where('Dept', Auth::user()->dept)
+                ->whereIn('TrasladoDeptos', ['D', 'OD'])->get();
+
             $param = array(
                 'actividades' => $actividades,
                 'ultimo' => count($actividades),
-   
+                'almacenOrigen' => Input::get('text_selTres'),
+                'almacenesDestino' => $almacenesDestino,
             );
-            return view('Mod04_Materiales.solicitudMateriales', $param);
+            return view('Mod04_Materiales.showListMateriales', $param);
         } else {
             return redirect()->route('auth/login');
         }
     }
-    public function test(){
-        //dd(Input::get('text_selTres'));
-        $user = Auth::user();
-        $actividades = $user->getTareas();
-        $almacenesDestino = DB::table('SIZ_AlmacenesTransferencias')
-            ->where('Dept', Auth::user()->dept)
-            ->whereIn('TrasladoDeptos', ['D', 'OD'])->get();
-
-
-        $param = array(
-            'actividades' => $actividades,
-            'ultimo' => count($actividades),
-            'almacenOrigen' => Input::get('text_selTres'),
-            'almacenesDestino' => $almacenesDestino,
-        );
-        return view('Mod04_Materiales.showListMateriales', $param);
-    }
     public function ShowArticulosWHTraslados(Request $request)
-    {
-        
-            
+    {    
         //AND U_TipoMat = \'PT\' 
         $consulta = DB::select('
         SELECT  top 5 OITM.ItemCode, ItemName, InvntryUom AS UM, ALMACENES.Existencia FROM OITM
@@ -1225,5 +1209,178 @@ public function HacerTraslados($id){
 
         return response()->json(array('data' => $consulta, 'columns' => $columns));
     }
- 
+    public function saveTraslado(Request $request)
+    {
+        DB::beginTransaction();
+        $err = false;
+        $id = 0;
+        $arts = $request->get('arts');
+        $almacen_origen = $request->get('almacen');
+        $usercomment = mb_strtoupper($request->get('comentario'));
+        $dt = new \DateTime();
+        $id = DB::table('SIZ_SolicitudesMP')->insertGetId(
+            [
+                'FechaCreacion' => $dt, 'Usuario' => Auth::id(), 'Status' => 'Pendiente',
+                'ComentarioUsuario' => $usercomment, 'AlmacenOrigen' => $almacen_origen
+            ]
+        );
+
+        foreach ($arts as $art) {
+           
+            DB::table('SIZ_MaterialesTraslados')->insert(
+                [
+                    'Id_Solicitud' => $id, 'ItemCode' => $art['pKey'],
+                    'Cant_Requerida' => $art['cant'], 'Destino' => $art['destino'],
+                    'Cant_Autorizada' =>  $art['cant'], 'Cant_Pendiente' =>  $art['cant'],
+                    'Cant_PendienteA' =>  $art['cant'],
+                    'EstatusLinea' => 'S', 'Cant_ASurtir_Origen_A' => $art['cant'], 'Cant_ASurtir_Origen_B' => 0
+                ]
+            );
+        }
+        if (!($id > 0) || is_null($arts) || is_null($id)) {
+            $err = true;
+        }
+
+        if ($err) {
+            DB::rollBack();
+            return 'Error: No se guardo la solicitud, favor de notificar a Sistemas';
+        } else {
+            DB::commit();
+            $Num_Nominas = DB::select(DB::raw("SELECT No_Nomina FROM Siz_Email WHERE Traslados = '1' "));
+            foreach ($Num_Nominas as $Num_Nomina) {
+                $user = User::find($Num_Nomina->No_Nomina);
+                $correo = utf8_encode($user['email'] . '@zarkin.com');
+                if (strlen($correo) > 10) {
+                    Mail::send('Emails.TrasladosDeptos', [
+                        'arts' => $arts, 'id' => $id, 'comentario' => $usercomment, 'origen' => $almacen_origen
+                    ], function ($msj) use ($correo, $id) {
+                        $msj->subject('SIZ Traslado #' . $id); //ASUNTO DEL CORREO
+                        $msj->to($correo); //Correo del destinatario
+                    });
+                }
+            }
+            return 'Mensaje: Tu Traslado ha sido enviado (#' . $id . ')';
+        }
+        DB::rollBack();
+        return 'Error: No se guardo la solicitud, favor de notificar a Sistemas';
+    }
+    public function TrasladosDeptos(){
+        if (Auth::check()) {
+            $user = Auth::user();
+            $actividades = $user->getTareas();
+
+            $param = array(
+                'actividades' => $actividades,
+                'ultimo' => count($actividades),
+            );
+            return view('Mod04_Materiales.ShowTrasladosDeptos', $param);
+        } else {
+            return redirect()->route('auth/login');
+        } 
+    }
+    public function DataTrasladosDeptos(){
+        $consulta = DB::table('SIZ_SolicitudesMP')
+            ->join('SIZ_MaterialesTraslados', 'SIZ_MaterialesTraslados.Id_Solicitud', '=', 'SIZ_SolicitudesMP.Id_Solicitud')
+            ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')
+            ->leftjoin('OUDP', 'OUDP.Code', '=', 'dept')
+            ->groupBy('SIZ_SolicitudesMP.Id_Solicitud', 'SIZ_SolicitudesMP.FechaCreacion', 'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'firstName', 'lastName', 'dept', 'Name', 'SIZ_SolicitudesMP.AlmacenOrigen')
+            ->select(
+                'SIZ_SolicitudesMP.Id_Solicitud',
+                'SIZ_SolicitudesMP.FechaCreacion',
+                'SIZ_SolicitudesMP.Usuario',
+                'SIZ_SolicitudesMP.Status',
+                'SIZ_SolicitudesMP.AlmacenOrigen',
+                'OHEM.firstName',
+                'OHEM.lastName',
+                'OHEM.dept',
+                'OUDP.Name as depto'
+            )
+            ->whereNotNull('SIZ_SolicitudesMP.AlmacenOrigen')
+            ->where('SIZ_MaterialesTraslados.Cant_Pendiente', '>', 0)
+            ->where('SIZ_SolicitudesMP.Status', 'Pendiente');
+       
+        return Datatables::of($consulta)
+            ->addColumn(
+                'folio',
+                function ($item) {
+                    return  '<a href="TRASLADO RECEPCION/solicitud/' . $item->Id_Solicitud . '"><i class="fa fa-hand-o-right"></i> ' . $item->Id_Solicitud . '</a>';
+                }
+            )
+            ->addColumn(
+                'user_name',
+                function ($item) {
+                    return  $item->firstName . ' ' . $item->lastName;
+                }
+            )
+            ->addColumn(
+                'area',
+                function ($item) {
+                    return  $item->depto;
+                }
+            )
+
+            ->make(true);
+    }
+    public function ShowDetalleTrasladoDeptos($id)
+    {
+        if (Auth::check()) {
+            $user = Auth::user();
+            $actividades = $user->getTareas();
+            $solicitud = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $id)->first();
+                     
+            $articulos = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as UM, OITM.ItemName, mat.Destino, 
+                    mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente, mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A, 
+                    ALMACENES.AlmacenOrigen, CASE WHEN mat.Cant_ASurtir_Origen_A > AlmacenOrigen THEN \'N\'  ELSE mat.EstatusLinea END as EstatusLinea  
+                    from SIZ_MaterialesTraslados mat
+                    LEFT JOIN OITM on OITM.ItemCode = mat.ItemCode
+                    LEFT JOIN 
+                    (SELECT ItemCode, SUM(CASE WHEN WhsCode = \''.$solicitud->AlmacenOrigen.'\' THEN OnHand ELSE 0 END) AS AlmacenOrigen
+                    FROM dbo.OITW
+                    GROUP BY ItemCode) AS ALMACENES ON OITM.ItemCode = ALMACENES.ItemCode
+                    WHERE Id_Solicitud = ? AND Cant_PendienteA > 0', [$id]);
+              
+                $articulos_validos = array_where($articulos, function ($key, $item) {
+                    return $item->EstatusLinea == 'S' || $item->EstatusLinea == 'P';
+                });
+                $articulos_novalidos = array_where($articulos, function ($key, $item) {
+                    return $item->EstatusLinea == 'N';
+                });
+
+            if (count($articulos_novalidos) > 0) {
+                Session::flash('solicitud_err', 'Esta Solicitud tiene artículos que no se surtirán (fueron quitados o no hay material disponible)');
+            }
+
+            $param = array(
+                'actividades' => $actividades,
+                'ultimo' => count($actividades),
+                'id' => $id,
+                'almacen_origen' => $solicitud->AlmacenOrigen,
+                'articulos_validos' => $articulos_validos,
+                'articulos_novalidos' => $articulos_novalidos,
+                'comentario' => $solicitud->ComentarioUsuario
+            );
+            
+                return view('Mod04_Materiales.TrasladosDeptos', $param);
+            
+        } else {
+            return redirect()->route('auth/login');
+        }
+    }
+    public function removeArticuloTrasladoDepto()
+    {
+        // dd(strpos(Input::get('reason'), 'Material') !== false);
+        // dd(Input::all());
+        if (Auth::check()) {
+            if (strpos(Input::get('reason'), 'Material') !== false) {
+                DB::update('UPDATE SIZ_MaterialesTraslados SET EstatusLinea = ? , Razon = ?
+            WHERE Id = ?', ['C', Input::get('reason'), Input::get('articulo')]);
+            } else {
+                DB::update('UPDATE SIZ_MaterialesTraslados SET EstatusLinea = ? , Razon= ?
+            WHERE Id = ?', ['N', Input::get('reason'), Input::get('articulo')]);
+            }
+            return redirect()->back();
+        } else {
+            return redirect()->route('auth/login');
+        }
+    }
 }

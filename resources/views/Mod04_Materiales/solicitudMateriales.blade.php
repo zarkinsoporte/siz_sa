@@ -408,6 +408,7 @@ $interpolateProvider.startSymbol('<%');
         $scope.articulos.push($scope.insert);
         $scope.insert = null;
         $scope.successVar = null;
+        $("#spin").attr("disabled", false);
        // console.log(this.articulos);
         
     };
@@ -419,6 +420,7 @@ $interpolateProvider.startSymbol('<%');
     };
     $scope.sendArt = function(){
         $( "#spin" ).html('<span><i class="fa fa-spinner fa-pulse fa-lg fa-fw"></i> Enviando...</span>');
+        $("#spin").attr("disabled", true);
        $http({
         method: 'POST',
         url: 'saveArt',

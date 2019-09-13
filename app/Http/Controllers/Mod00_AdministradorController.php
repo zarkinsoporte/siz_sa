@@ -889,6 +889,7 @@ public function Noticia()
             $emails = DB::table('Siz_Email')->get();
             $activeUsers = DB::table('OHEM')
                             ->select('firstName', 'lastName', 'U_EmpGiro')
+                            ->where('status', 1)
                             ->whereNotNull('email')
                             ->get();
        
@@ -909,7 +910,8 @@ public function Noticia()
              'No_Nomina' => $request->input('nomina'),
              'Reprocesos' => $request->input('reprocesos'),
              'SolicitudesMP' => $request->input('solicitudmp'),
-             'SolicitudesErrExistencias' => $request->input('errorexistencia_04')
+             'SolicitudesErrExistencias' => $request->input('errorexistencia_04'),
+             'Traslados' => $request->input('traslados_04')
             ]
         );
         }else{
@@ -919,6 +921,7 @@ public function Noticia()
              'Reprocesos' => $request->input('reprocesos'),
              'SolicitudesMP' => $request->input('solicitudmp'),
              'SolicitudesErrExistencias' => $request->input('errorexistencia_04'),
+             'Traslados' => $request->input('traslados_04')
             ]);
         }                
         Session::flash('mensaje', 'Cambios guardados');

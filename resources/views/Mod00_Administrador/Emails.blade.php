@@ -40,7 +40,7 @@
                         </select>
                        
                     </div>
-                    <div class="col-md-3">   
+                    <div class="col-md-2">   
                         <label>Reprocesos</label>
                         <select class="form-control" name="reprocesos" id="reprocesos">
                             <option value="1">Activado</option>
@@ -48,8 +48,8 @@
                         </select>
                         
                     </div>
-                    <div class="col-md-3">                        
-                        <label>SolicitudesMP</label>
+                    <div class="col-md-2">                        
+                        <label>Solicitudes MP</label>
                         <select class="form-control" name="solicitudmp" id="solicitudmp">
                             <option value="1">Activado</option>
                             <option value="2">Solicitudes</option>
@@ -58,9 +58,17 @@
                         </select>
                        
                     </div>
-                    <div class="col-md-3">                        
-                        <label>Err_Existencias</label>
+                    <div class="col-md-2">                        
+                        <label>Error Existencias</label>
                         <select class="form-control" name="errorexistencia_04" id="errorexistencia_04">
+                            <option value="1">Activado</option>
+                            <option value="0">Desactivado</option>
+                        </select>
+                       
+                    </div>
+                    <div class="col-md-2">                        
+                        <label>Traslados Dept.</label>
+                        <select class="form-control" name="traslados_04" id="traslados_04">
                             <option value="1">Activado</option>
                             <option value="0">Desactivado</option>
                         </select>
@@ -78,15 +86,15 @@
             <table id="usuarios" class="table table-striped table-bordered table-condensed">
                                     <thead>
                                     <tr>
-                                             <th>#</th>
+                                            <th>#</th>
                                             <th># Nómina</th>
                                             <th>Nombre</th>
                                             <th>Email</th>
                                             <th>Reprocesos</th>  
                                             <th>Solicitudes MP</th>
-                                            <th>Err_Existencias</th>
+                                            <th>Error Existencias</th>
                                             <th>Acciones</th>
-                                          
+                                            <th>Traslados</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -99,19 +107,28 @@
                         <td>{{ $campo->Reprocesos==1?'Activado':'-'}}</td>
                         <td>
                             @if ($campo->SolicitudesMP == 1)
-                                Activado
+                            Activado
                             @elseif ($campo->SolicitudesMP == 2)
-                                Solicitudes
+                            Solicitudes
                             @elseif ($campo->SolicitudesMP == 3)
-                                Autorizaciones
+                            Autorizaciones
                             @else
-                                -
+                            -
                             @endif
                         </td>
                         <td>{{ $campo->SolicitudesErrExistencias==1?'Activado':'-' }}</td>
+                        <td>{{ $campo->Traslados==1?'Activado':'-'}}</td>
                                                    
                         <td>
-                        <a class="btn btn-warning" id="btneditar-{{ $campo->id}}" onclick="getItem({{ $campo->id}})" data-id="{{ $campo->id}}" data-nomina="{{ $campo->No_Nomina}}" data-reproceso="{{ $campo->Reprocesos}}" data-solicitudmp="{{$campo->SolicitudesMP}}" data-errorexistencia_04="{{$campo->SolicitudesErrExistencias}}"><i class="glyphicon glyphicon-edit"></i></a>
+                            <a class="btn btn-warning" id="btneditar-{{ $campo->id}}" onclick="getItem({{ $campo->id}})" 
+                                data-id="{{ $campo->id}}" 
+                                data-nomina="{{ $campo->No_Nomina}}" 
+                                data-reproceso="{{ $campo->Reprocesos}}" 
+                                data-solicitudmp="{{$campo->SolicitudesMP}}" 
+                                data-errorexistencia_04="{{$campo->SolicitudesErrExistencias}}"
+                                data-traslados_04="{{$campo->Traslados}}">
+                                
+                            <i class="glyphicon glyphicon-edit"></i></a>
                        
                         <a href="email/del/{{$campo->id}}" class="btn btn-danger"><i class="glyphicon glyphicon-trash"></i></a>
                         </td>
@@ -129,11 +146,13 @@ var nomina = $("#btneditar-"+btn).data("nomina");
 var reprocesos = $("#btneditar-"+btn).data("reproceso");
 var solicitudmp = $("#btneditar-"+btn).data("solicitudmp");
 var errorexistencia_04 = $("#btneditar-"+btn).data("errorexistencia_04");
+var traslados_04 = $("#btneditar-"+btn).data("traslados_04");
 
 $('#nomina').val(nomina);
 $('#reprocesos').val(reprocesos);
 $('#solicitudmp').val(solicitudmp);
 $('#errorexistencia_04').val(errorexistencia_04);
+$('#traslados_04').val(traslados_04);
 }
 </script>
 @section('script')

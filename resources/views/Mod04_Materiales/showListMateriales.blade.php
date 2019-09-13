@@ -89,7 +89,7 @@ border: 1px solid #000000;
          
             <div class="col-md-12">
                 <h3 class="page-header">
-                    Entrega de Mercancía
+                    Traslado Entrega de Mercancía <small>Almacén Origen: {{$almacenOrigen}}</small>
                     <div class="visible-xs visible-sm"><br></div>                 
                 </h3>
                 
@@ -120,7 +120,7 @@ border: 1px solid #000000;
     <div class="row" ng-if="successVar.includes('Error')">
         <div class="col-md-12">
             <div class="alert alert-danger" role="alert">
-                <%successVar%>
+                Reinicia sesión y vuelve a intentarlo.
             </div>
         </div>
     </div>
@@ -407,6 +407,7 @@ $interpolateProvider.startSymbol('<%');
         $scope.articulos.push($scope.insert);
         $scope.insert = null;
         $scope.successVar = null;
+        $("#spin").attr("disabled", false);
        // console.log(this.articulos);
         
     };
@@ -418,14 +419,16 @@ $interpolateProvider.startSymbol('<%');
     };
     $scope.sendArt = function(){
         $( "#spin" ).html('<span><i class="fa fa-spinner fa-pulse fa-lg fa-fw"></i> Enviando...</span>');
+        $("#spin").attr("disabled", true);
        $http({
         method: 'POST',
-        url: 'saveArt',
+        url: 'saveTraslado',
         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
         data:
         {
             "_token": "{{ Session::token() }}",
             "arts": $scope.articulos,
+            "almacen" : $('input[name=almacen]').val(),
             "comentario": $('#comment').val()       
         },
        
@@ -433,6 +436,9 @@ $interpolateProvider.startSymbol('<%');
             $( "#spin" ).html('<span><i class="fa fa-send"></i> Enviar</span>');
         $scope.articulos = [];
         $scope.successVar = response.data;
+        if($scope.successVar == null){
+        location.reload();
+        }
         return response.data;
         }, function (response) {
         
