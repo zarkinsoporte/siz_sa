@@ -592,7 +592,7 @@ public function saveArt(Request $request){
                
                 if (count($N_Emp) > 0) {
                     $correo = utf8_encode($N_Emp->email . '@zarkin.com');
-                    if (strlen($correo) > 10) {
+                    if (strlen($correo) > 12) {
                         Mail::send('Emails.SolicitudMP', [
                             'arts' => $arts, 'id' => $id, 'comentario' => $usercomment
                         ], function ($msj) use ($correo, $id) {
@@ -602,16 +602,18 @@ public function saveArt(Request $request){
                     } 
                 }
                 $Num_Nominas = DB::select(DB::raw("SELECT No_Nomina FROM Siz_Email WHERE SolicitudesMP = '1' OR SolicitudesMP = '2' "));
-                foreach ($Num_Nominas as $Num_Nomina) {
+                if (count($Num_Nominas) > 0) {
+                    foreach ($Num_Nominas as $Num_Nomina) {
                     $user = User::find($Num_Nomina->No_Nomina);
                     $correo = utf8_encode($user['email'] . '@zarkin.com');
-                    if (strlen($correo) > 10) {
-                        Mail::send('Emails.SolicitudMP', [
-                            'arts' => $arts, 'id' => $id, 'comentario' => $usercomment
-                                        ], function ($msj) use ($correo, $id) {
-                            $msj->subject('SIZ Solicitud de Material #'.$id); //ASUNTO DEL CORREO
-                            $msj->to($correo); //Correo del destinatario
-                        });
+                        if (strlen($correo) > 12) {
+                            Mail::send('Emails.SolicitudMP', [
+                                'arts' => $arts, 'id' => $id, 'comentario' => $usercomment
+                                            ], function ($msj) use ($correo, $id) {
+                                            $msj->subject('SIZ Solicitud de Material #'.$id); //ASUNTO DEL CORREO
+                                            $msj->to($correo); //Correo del destinatario
+                                        });
+                        }
                     }
                 }
                 return 'Mensaje: Tu Solicitud ha sido enviada (#'.$id.')';
@@ -842,10 +844,11 @@ public function editArticuloPicking(){
             ->where('Id', Input::get('articulo'))->first();
         
             $Num_Nominas = DB::select(DB::raw("SELECT No_Nomina FROM Siz_Email WHERE SolicitudesErrExistencias = '1' "));
+                if (count($Num_Nominas) > 0) {
                     foreach ($Num_Nominas as $Num_Nomina) {
                         $user = User::find($Num_Nomina->No_Nomina);
                         $correo = utf8_encode($user['email'] . '@zarkin.com');
-                        if (strlen($correo) > 10) {
+                        if (strlen($correo) > 12) {
                             Mail::send('Emails.Err_existencias', [
                                 'art' => $art
                                             ], function ($msj) use ($correo, $art) {
@@ -854,6 +857,7 @@ public function editArticuloPicking(){
                             });
                         }
                     }
+                }
         }
         
     } else{
@@ -944,18 +948,20 @@ public function Solicitud_A_Picking($id){
         ->select('SIZ_MaterialesSolicitudes.*', 'OITM.ItemName')        
         ->where('Id_Solicitud', $id)->get(); 
         
-        foreach ($Num_Nominas as $Num_Nomina) {
+       if (count($Num_Nominas) > 0) {
+            foreach ($Num_Nominas as $Num_Nomina) {
             $user = User::find($Num_Nomina);
             $correo = utf8_encode($user['email'] . '@zarkin.com');
-            if (strlen($correo) > 10) {
-                Mail::send('Emails.AutorizacionMP', [
-                    'arts' => $arts, 'id' =>$id
-                ], function ($msj) use ($correo, $id) {
-                    $msj->subject('SIZ Autorización Material #'.$id); //ASUNTO DEL CORREO
-                    $msj->to($correo); //Correo del destinatario
-                });
+            if (strlen($correo) > 12) {
+                    Mail::send('Emails.AutorizacionMP', [
+                        'arts' => $arts, 'id' =>$id
+                    ], function ($msj) use ($correo, $id) {
+                        $msj->subject('SIZ Autorización Material #'.$id); //ASUNTO DEL CORREO
+                        $msj->to($correo); //Correo del destinatario
+                    });
+                }
             }
-        }
+       }
         return redirect()->action('Mod04_MaterialesController@AutorizacionSolicitudes');
     } else {
         return redirect()->route('auth/login');
@@ -1264,16 +1270,18 @@ public function HacerTraslados($id){
             if (count($traslado_externo) > 0) {
                 
                 $Num_Nominas = DB::select(DB::raw("SELECT No_Nomina FROM Siz_Email WHERE Traslados = '1' OR Traslados = '3' "));
-                foreach ($Num_Nominas as $Num_Nomina) {
+                if (count($Num_Nominas) > 0) {
+                    foreach ($Num_Nominas as $Num_Nomina) {
                     $user = User::find($Num_Nomina->No_Nomina);
                     $correo = utf8_encode($user['email'] . '@zarkin.com');
-                    if (strlen($correo) > 10) {
-                        Mail::send('Emails.TrasladosDeptos', [
-                            'arts' => $traslado_externo, 'id' => $id, 'comentario' => $usercomment, 'origen' => $almacen_origen
-                        ], function ($msj) use ($correo, $id) {
-                            $msj->subject('SIZ Traslado #' . $id); //ASUNTO DEL CORREO
-                            $msj->to($correo); //Correo del destinatario
-                        });
+                    if (strlen($correo) > 12) {
+                            Mail::send('Emails.TrasladosDeptos', [
+                                'arts' => $traslado_externo, 'id' => $id, 'comentario' => $usercomment, 'origen' => $almacen_origen
+                            ], function ($msj) use ($correo, $id) {
+                                $msj->subject('SIZ Traslado #' . $id); //ASUNTO DEL CORREO
+                                $msj->to($correo); //Correo del destinatario
+                            });
+                        }
                     }
                 }
             }
@@ -1503,10 +1511,11 @@ if (count($traslado_interno) > 0) {
                         ->where('Id', Input::get('articulo'))->first();
 
                     $Num_Nominas = DB::select(DB::raw("SELECT No_Nomina FROM Siz_Email WHERE Traslados = '1' OR  Traslados = '3' "));
-                    foreach ($Num_Nominas as $Num_Nomina) {
+                    if (count($Num_Nominas) > 0) {
+                        foreach ($Num_Nominas as $Num_Nomina) {
                         $user = User::find($Num_Nomina->No_Nomina);
                         $correo = utf8_encode($user['email'] . '@zarkin.com');
-                        if (strlen($correo) > 10) {
+                        if (strlen($correo) > 12) {
                             Mail::send('Emails.Err_TrasladoDeptos', [
                                 'art' => $art
                             ], function ($msj) use ($correo, $art) {
@@ -1514,6 +1523,7 @@ if (count($traslado_interno) > 0) {
                                 $msj->to($correo); //Correo del destinatario
                             });
                         }
+                    }
                     }
                 }
             } else {

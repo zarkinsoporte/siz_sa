@@ -117,6 +117,13 @@ border: 1px solid #000000;
             </div>
         </div>
     </div>
+    <div class="row" ng-if="nule === 1">
+        <div class="col-md-12">
+            <div class="alert alert-danger" role="alert">
+                Reinicia Sesión en SIZ. Sesión expirada.
+            </div>
+        </div>
+    </div>
     <div class="row" ng-if="successVar.includes('Error')">
         <div class="col-md-12">
             <div class="alert alert-danger" role="alert">
@@ -395,6 +402,7 @@ $interpolateProvider.startSymbol('<%');
    app.controller("MainController",["$scope", "$http", function($scope, $http){
     $scope.articulos = [];
     $scope.successVar = '';
+    $scope.nule = 0;
     $scope.insert = {};
     $scope.modals = function(){
         if($scope.successVar == null){
@@ -437,6 +445,9 @@ $interpolateProvider.startSymbol('<%');
         $scope.articulos = [];
         $scope.successVar = response.data;
         return response.data;
+        if($scope.successVar === null){
+            $scope.nule = 1;
+        }
         }, function (response) {
         
         }

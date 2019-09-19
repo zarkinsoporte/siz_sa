@@ -476,8 +476,6 @@ $interpolateProvider.startSymbol('<%');
             $scope.mensaje = aux[1];
             $scope.mensaje2 = aux[0];
         }
-
-
         return response.data;
         }, function (response) {
         
