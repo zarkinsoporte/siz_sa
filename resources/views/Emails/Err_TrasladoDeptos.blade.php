@@ -36,44 +36,36 @@
 <div class="container">
   <div class="row">
     <div class="col-md-12">
-        <h3>Autorización de Material #{{$id}}</h3>
+        <h3>Problema con la Entrega - Artículo #{{$art->ItemCode}}</h3>
        
       <table class="paleBlueRows">
         <thead>
           <tr>
+            <th>Num Entrega</th>
             <th>Código</th>
             <th>Descripción</th>
-            <th>Cant Solicitada</th>          
-            <th>Cant Autorizada</th>    
-            <th>Observación de Autorización </th>
-                   
+            <th>Cant de Entrega</th>          
+            <th>Cant real a Recibir</th>            
+            <th>Motivo Cantidad menor</th>            
           </tr>
         </thead>
         <tbody>
          
-         @foreach($arts as $art)
-            <tr>     
+         
+            <tr>                 
+            <td>{{$art->Id_Solicitud}}</td>
             <td>{{$art->ItemCode}}</td>
             <td>{{$art->ItemName}}</td>
-            <td>{{number_format($art->Cant_Requerida, 2)}}</td>          
-            <td>{{number_format($art->Cant_Autorizada, 2)}}</td>
-            @if (is_null($art->Razon_NoAutorizado) && is_null($art->Razon_AutorizaCantMenor))
-                <td>-</td>
-            @else
-                @if(is_null($art->Razon_NoAutorizado))
-                <td>{{$art->Razon_AutorizaCantMenor}}</td>
-                @else
-                <td>{{$art->Razon_NoAutorizado}}</td>
-                @endif
-            @endif
+            <td>{{$art->Cant_PendienteA}}</td>
+            <td>{{number_format($art->Cant_ASurtir_Origen_A , 2)}}</td>          
+            <td>{{$art->Razon_CantMenor}}</td>
           </tr>
-        @endforeach
+     
          
         </tbody>
       </table>
     </div>
   </div> <!-- /.row -->
-
 </div>
     
 

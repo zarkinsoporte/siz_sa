@@ -101,6 +101,10 @@
             text-align: right; 
             padding-right:4px;
         }
+        .left{
+            text-align: left;
+            padding-right:4px;
+        }
       
     </style>
 </head>
@@ -160,6 +164,17 @@
             </div>
             <div style="width:70%;">
                 <br><br>
+                <table class="table">                   
+                    <tr>
+                        <td style="width:10%; height: 20px;">Observaciones de Solicitud:</td>
+                        <td style="width:90%; height: 20px;" class="left">
+                        {{$comment}}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div style="width:70%;">
+                <br>
                <table class="table">
                    <tr>
                        <td style="width:10%;">Material preparado por:</td>                     

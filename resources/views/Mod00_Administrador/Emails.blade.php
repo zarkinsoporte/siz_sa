@@ -70,7 +70,10 @@
                         <label>Traslados Dept.</label>
                         <select class="form-control" name="traslados_04" id="traslados_04">
                             <option value="1">Activado</option>
+                            <option value="2">Entregas</option>
+                            <option value="3">Err_Material</option>
                             <option value="0">Desactivado</option>
+
                         </select>
                        
                     </div>
@@ -93,8 +96,8 @@
                                             <th>Reprocesos</th>  
                                             <th>Solicitudes MP</th>
                                             <th>Error Existencias</th>
-                                            <th>Acciones</th>
                                             <th>Traslados</th>
+                                            <th>Acciones</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -117,8 +120,17 @@
                             @endif
                         </td>
                         <td>{{ $campo->SolicitudesErrExistencias==1?'Activado':'-' }}</td>
-                        <td>{{ $campo->Traslados==1?'Activado':'-'}}</td>
-                                                   
+                        <td>
+                             @if ($campo->Traslados == 1)
+                            Activado
+                            @elseif ($campo->Traslados == 2)
+                            Entregas
+                            @elseif ($campo->Traslados == 3)
+                            Err_Material
+                            @else
+                            -
+                            @endif     
+                        </td>                 
                         <td>
                             <a class="btn btn-warning" id="btneditar-{{ $campo->id}}" onclick="getItem({{ $campo->id}})" 
                                 data-id="{{ $campo->id}}" 

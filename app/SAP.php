@@ -86,11 +86,29 @@ class SAP extends Model
     }  
                    
    }
-
+    public static function Connect2(){
+        self::$vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
+        self::$vCmp->DbServerType="6"; 
+        self::$vCmp->server = "SERVER-SAPBO";
+        self::$vCmp->LicenseServer = "SERVER-SAPBO:30000";
+        self::$vCmp->CompanyDB = "Pruebas";
+        self::$vCmp->username = "manager";
+        self::$vCmp->password = "aqnlaaepp";
+        self::$vCmp->DbUserName = "sa";
+        self::$vCmp->DbPassword = "B1Admin";
+        self::$vCmp->UseTrusted = false;
+        self::$vCmp->language = "6";
+        $lRetCode = self::$vCmp->Connect;
+        if ($lRetCode <> 0) {
+           return self::$vCmp->GetLastErrorDescription();
+        } else {
+            return 'Conectado';
+        }  
+   }
    public static function Transfer($data){   
   
         $id = $data['id_solicitud']; 
-        (self::$vCmp == false) ? self::Connect(): '';
+        (self::$vCmp == false) ? self::Connect2(): '';
         //self::$vCmp->XmlExportType("xet_ExportImportMode");
         $vItem = self::$vCmp->GetBusinessObject("67");
         //Obtener Lineas de una Transferencia
@@ -165,6 +183,70 @@ class SAP extends Model
             $docentry = DB::table('OWTR')
             ->where('FolioNum', $id)
             ->max('DocEntry');
+            DB::table('SIZ_TransferSolicitudesMP')->insert(
+                ['Id_Solicitud' => $id, 'DocEntry_Transfer' => $docentry, 'Usuario' => Auth::user()->U_EmpGiro]
+            );          
+            return $docentry;
+        } else {
+            DB::rollBack();
+            return 'Error desde SAP: '.self::$vCmp->GetLastErrorDescription();
+           
+        }  
+   }
+   public static function Transfer2($data){   
+  
+        $id = $data['id_solicitud']; 
+        (self::$vCmp == false) ? self::Connect2(): '';
+        //self::$vCmp->XmlExportType("xet_ExportImportMode");
+        $vItem = self::$vCmp->GetBusinessObject("67");
+        //Obtener Lineas de una Transferencia
+       // $RetVal = $vItem->GetByKey("7782");
+        //dd($vItem->Printed);
+        //echo $vItem->Lines->SetCurrentLine(0);
+        //echo $vItem->Lines->ItemCode;
+        //dd($data['items']);
+        DB::beginTransaction();
+        if (count($data['items']) > 0) {
+            //Crear Transferencia
+            $vItem->DocDate = (new \DateTime('now'))->format('Y-m-d H:i:s');
+            $vItem->FromWarehouse = $data['almacen_origen']; //origen
+            $vItem->PriceList = $data['pricelist'];
+            $vItem->FolioNumber = $id;//**/Vale:solicitud
+            $vItem->Comments = "SIZ VALE #".$id." Solicitado por:". $data['nombre_completo'];
+            $vItem->JournalMemo = "Traslados -";
+            
+            foreach ($data['items'] as $item) {
+               //agregar lineaS 
+                    if ($item->Cant_Pendiente >= $item->CA) {
+                        $vItem->Lines->Quantity = $item->CA;
+                        DB::table('SIZ_MaterialesTraslados')
+                        ->where('Id', $item->Id)
+                        ->update(['Cant_PendienteA' => ($item->Cant_PendienteA - $item->CA),
+                        'Cant_Pendiente' => ($item->Cant_PendienteA - $item->CA),
+                        'Cant_ASurtir_Origen_A' => 0]);
+                        $vItem->Lines->ItemCode = $item->ItemCode;
+                        $vItem->Lines->WarehouseCode = $item->Destino;               
+                        $vItem->Lines->Add(); 
+                        if (($item->Cant_PendienteA - $item->CA) == 0) {
+                            DB::table('SIZ_MaterialesSolicitudes')
+                            ->where('Id', $item->Id)
+                            ->update(['EstatusLinea' => 'T']);                   
+                            
+                        }
+                    }
+                 
+                
+            }
+        }else{
+            return 'No hay ningun material que surtir';
+        }       
+        //Guardar Transferencia
+       
+        if ($vItem->Add() == 0) {// cero es correcto
+            $docentry = DB::table('OWTR')
+            ->where('FolioNum', $id)
+            ->max('DocEntry');
+            DB::commit();
             DB::table('SIZ_TransferSolicitudesMP')->insert(
                 ['Id_Solicitud' => $id, 'DocEntry_Transfer' => $docentry, 'Usuario' => Auth::user()->U_EmpGiro]
             );          

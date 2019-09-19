@@ -41,7 +41,7 @@
       <span class="pull-right">
                      <a class="btn btn-primary btn-sm" href="{{URL::previous()}}""><i class="fa fa-angle-left"></i> Atras</a>                                                              
                                                                                        
-                            <a class="btn btn-success btn-sm" href="{{'update/'.$id}}"><i class="fa fa-send"></i> Enviar a Traslados</a>
+                            <a ng-click="sendArt()" id="spinn" class="btn btn-success btn-sm" href="{{'update/'.$id}}"><i class="fa fa-send"></i> Aceptar entrega</a>
                    
             </span>          
         <!-- /.row -->
@@ -143,6 +143,42 @@
 </div> <!-- /.row -->
 @endif
 
+@if(count($pdf_solicitud) > 0)
+<div class="row">
+  <div class="col-md-12">
+    <h4>Transferencias de esta Solicitud</h4>
+    <table>
+      <thead>
+        <tr>
+
+          <th># Traslado</th>
+          <th>Fecha</th>
+          <th>Cancelado</th>
+          <th>Comentario</th>
+          <th>Pdf</th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach ($pdf_solicitud as $art)
+        <tr>
+
+          <td>{{$art->DocEntry}}</td>
+          <td>{{date('d-m-Y', strtotime($art->DocDate))}}</td>
+          <td>{{$art->CANCELED}}</td>
+          <td>{{$art->Comments}}</td>
+          <td>
+            <a class="btn btn-danger btn-sm" href="{{'PDF/traslado/'.$art->DocEntry}}" target="_blank"><i
+                class="fa fa-file-pdf-o"></i> </a>
+          </td>
+        </tr>
+        @endforeach
+
+      </tbody>
+    </table>
+  </div>
+</div> <!-- /.row -->
+@endif
+
 <!-- .Model quitar -->
 
 <div class="modal fade" id="remove" tabindex="-1" role="dialog">
@@ -186,7 +222,7 @@
   <div class="modal-dialog modal-sm" role="document">
     <div class="modal-content" >
       <div class="modal-header">
-        {!! Form::open(['url' => 'home/PICKING ARTICULOS/solicitud/articulos/edit', 'method' => 'POST']) !!}
+        {!! Form::open(['url' => 'home/TRASLADO RECEPCION/solicitud/articulos/edit', 'method' => 'POST']) !!}
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
             aria-hidden="true">&times;</span></button>
         <h4 class="modal-title">Editar cantidad</h4>
@@ -204,10 +240,11 @@
           </div>
           <div class="form-group col-md-12" ng-show="pendiente > (canta)">
               <h5>¿Cuál es la razón por la que se recibe una cantidad menor?</h5>
-              <input type="radio" name="reason" value="No se completa existencia"  checked>
-              No se completa existencia<br> 
-              <input type="radio" name="reason" value="Se posterga">
-              Se posterga entrega<br>                            
+              <input type="radio" name="reason" value="Se posterga" checked>
+              Se posterga entrega<br>
+              <input type="radio" name="reason" value="Material Dañado / Incompleto">
+              Material Dañado / Incompleto<br> 
+                                         
           </div>
           <div class="form-group col-md-12">
             <input type="hidden" id="articulo-id" name="articulo">
@@ -277,7 +314,11 @@ document.onkeyup = function(e) {
         $scope.canta = event.currentTarget.dataset.cantp * 1;        
         $scope.pendiente= event.currentTarget.dataset.cantp * 1;     
       };
- 
+      $scope.sendArt = function(){
+        $( "#spinn" ).html('<span><i class="fa fa-spinner fa-pulse fa-lg fa-fw"></i> Enviando...</span>');
+        $scope.showme = true;
+        $("#spinn").attr("disabled", true);
+      };
     }]);
 
    

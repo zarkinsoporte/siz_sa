@@ -343,6 +343,7 @@ document.onkeyup = function(e) {
       $scope.sendArt = function(){
         $( "#spinn" ).html('<span><i class="fa fa-spinner fa-pulse fa-lg fa-fw"></i> Enviando...</span>');
         $scope.showme = true;
+        $("#spinn").attr("disabled", true);
     };
     }]);
 

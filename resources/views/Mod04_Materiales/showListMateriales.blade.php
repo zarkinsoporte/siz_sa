@@ -110,20 +110,46 @@ border: 1px solid #000000;
         </div><!-- /.col-lg-6 -->
     </div><!-- /.row -->
     <br>
-    <div class="row" ng-if="successVar.includes('Mensaje')">
+    <div class="row" ng-if="mensaje > 0 && mensaje2 == 0">
         <div class="col-md-12">
             <div class="alert alert-success" role="alert">
-                <%successVar%>
+                Transferencia interna <%mensaje%> realizada. <a class="btn btn-danger btn-sm" href="{{'PDF/traslado/'}}<%mensaje%>" target="_blank"><i
+                        class="fa fa-file-pdf-o"></i> PDF</a>                 
+            </div>
+        </div>
+    </div>
+    <div class="row" ng-if="mensaje > 0 && mensaje2 > 0">
+        <div class="col-md-12">
+            <div class="alert alert-success" role="alert">
+                Transferencia interna <%mensaje%> realizada. <a class="btn btn-danger btn-sm" href="{{'PDF/traslado/'}}<%mensaje%>" target="_blank"><i
+                        class="fa fa-file-pdf-o"></i> PDF</a>                 
+            </div>
+            <div class="alert alert-success" role="alert">
+                La Entrega #<%mensaje2%> fue enviada. 
             </div>
         </div>
     </div>
     <div class="row" ng-if="successVar.includes('Error')">
         <div class="col-md-12">
             <div class="alert alert-danger" role="alert">
-                Reinicia sesión y vuelve a intentarlo.
+                <%successVar%>
             </div>
         </div>
-    </div>
+    </div>    
+    <div class="row" ng-if="successVar.includes('Entrega')">
+        <div class="col-md-12">
+            <div class="alert alert-success" role="alert">
+                <%successVar%>
+            </div>
+        </div>
+    </div>    
+    <div class="row" ng-if="nule === 1">
+        <div class="col-md-12">
+            <div class="alert alert-danger" role="alert">
+                Reinicia Sesión en SIZ. Sesión expirada.
+            </div>
+        </div>
+    </div>    
     <div class="row">
        <div class="col-md-12" ng-if="articulos.length > 0">
            <table class="display condensed">
@@ -396,6 +422,9 @@ $interpolateProvider.startSymbol('<%');
    app.controller("MainController",["$scope", "$http", function($scope, $http){
     $scope.articulos = [];
     $scope.successVar = '';
+    $scope.nule = 0;
+    $scope.mensaje = 0;
+    $scope.mensaje2 = 0;
     $scope.insert = {};
     $scope.modals = function(){
        
@@ -436,9 +465,19 @@ $interpolateProvider.startSymbol('<%');
             $( "#spin" ).html('<span><i class="fa fa-send"></i> Enviar</span>');
         $scope.articulos = [];
         $scope.successVar = response.data;
-        if($scope.successVar == null){
-        location.reload();
+        
+        if($scope.successVar === null){
+            $scope.nule = 1;
+        } else if ($scope.successVar.includes('Mensaje')) {
+            var aux = $scope.successVar.split(':')
+            $scope.mensaje = aux[1];
+        } else if ($scope.successVar.includes(';')){
+            var aux = $scope.successVar.split(';')
+            $scope.mensaje = aux[1];
+            $scope.mensaje2 = aux[0];
         }
+
+
         return response.data;
         }, function (response) {
         

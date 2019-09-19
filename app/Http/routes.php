@@ -283,9 +283,9 @@ Route::get('home/TRASLADO RECEPCION', 'Mod04_MaterialesController@TrasladosDepto
 Route::get('datatables.traslados', 'Mod04_MaterialesController@DataTrasladosDeptos')->name('datatables.traslados');
 Route::get('home/TRASLADO RECEPCION/solicitud/{id}', 'Mod04_MaterialesController@ShowDetalleTrasladoDeptos');
 Route::post('home/TRASLADO RECEPCION/solicitud/articulos/remove', 'Mod04_MaterialesController@removeArticuloTrasladoDepto');
-Route::get('home/TRASLADO RECEPCION/solicitud/articulos/return/{id}', 'Mod04_MaterialesController@returnArticuloSolicitud');
-Route::get('home/TRASLADO RECEPCION/solicitud/update/{id}', 'Mod04_MaterialesController@Solicitud_A_Traslados');
-Route::post('home/TRASLADO RECEPCION/solicitud/articulos/edit', 'Mod04_MaterialesController@editArticuloPicking');
+Route::get('home/TRASLADO RECEPCION/solicitud/articulos/return/{id}', 'Mod04_MaterialesController@returnArticuloTrasladosDepto');
+Route::get('home/TRASLADO RECEPCION/solicitud/update/{id}', 'Mod04_MaterialesController@updateArticuloTrasladoDepto');
+Route::post('home/TRASLADO RECEPCION/solicitud/articulos/edit', 'Mod04_MaterialesController@editArticuloTrasladosDepto');
 //
 //-------------------------//
 //RUTAS DE MRP//---------------------------------------------------------

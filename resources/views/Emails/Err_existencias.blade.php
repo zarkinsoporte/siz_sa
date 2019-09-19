@@ -56,7 +56,7 @@
             <td>{{$art->Id_Solicitud}}</td>
             <td>{{$art->ItemCode}}</td>
             <td>{{$art->ItemName}}</td>
-            <td>{{$art->Cant_Pendiente}}</td>
+            <td>{{$art->Cant_PendienteA}}</td>
             <td>{{number_format($art->Cant_ASurtir_Origen_A + $art->Cant_ASurtir_Origen_B, 2)}}</td>          
             <td>{{$art->Razon_PickingCantMenor}}</td>
           </tr>

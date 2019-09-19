@@ -589,7 +589,8 @@ public function saveArt(Request $request){
         }else{
                 DB::commit();
                 $N_Emp = User::where('position', 4)->where('dept', Auth::user()->dept)->first();
-                if (!is_null($N_Emp) && count($N_Emp)>0) {
+               
+                if (count($N_Emp) > 0) {
                     $correo = utf8_encode($N_Emp->email . '@zarkin.com');
                     if (strlen($correo) > 10) {
                         Mail::send('Emails.SolicitudMP', [
@@ -873,7 +874,7 @@ public function returnArticuloSolicitud($id){
 }
 public function SolicitudPDF($id){
     if (Auth::check()) {   
-    
+        $comment = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $id)->value('ComentarioUsuario');
         DB::update('UPDATE SIZ_SolicitudesMP SET Status = ? WHERE Id_Solicitud = ?', ['En Proceso', $id]);
         $articulos = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as UM, OITM.ItemName, mat.Destino,
           mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente, mat.Cant_PendienteA, (mat.Cant_ASurtir_Origen_A + mat.Cant_ASurtir_Origen_B) AS Cant_Surtir,
@@ -887,7 +888,7 @@ public function SolicitudPDF($id){
                     WHERE Id_Solicitud = ? AND mat.EstatusLinea = \'S\'', [$id]);       
   
        //haz el PDF
-        $pdf = \PDF::loadView('Mod04_Materiales.SolicitudPDF', compact('articulos', 'id'));
+        $pdf = \PDF::loadView('Mod04_Materiales.SolicitudPDF', compact('articulos', 'id', 'comment'));
         $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
         return $pdf->stream('Siz_Picking_'.$id . ' - ' .date("d/m/Y") . '.Pdf');
     } else {
@@ -1175,12 +1176,16 @@ public function HacerTraslados($id){
             $almacenesDestino = DB::table('SIZ_AlmacenesTransferencias')
                 ->where('Dept', Auth::user()->dept)
                 ->whereIn('TrasladoDeptos', ['D', 'OD'])->get();
-
+            //quitar almacen origen de los almacenes destino si existe.
+            $almacenesDestino = array_where($almacenesDestino, function ($key, $item) {            
+                    return $item->Code != Input::get('text_selTres');
+            });
+ 
             $param = array(
                 'actividades' => $actividades,
                 'ultimo' => count($actividades),
                 'almacenOrigen' => Input::get('text_selTres'),
-                'almacenesDestino' => $almacenesDestino,
+                'almacenesDestino' => array_values($almacenesDestino)
             );
             return view('Mod04_Materiales.showListMateriales', $param);
         } else {
@@ -1218,14 +1223,18 @@ public function HacerTraslados($id){
         $almacen_origen = $request->get('almacen');
         $usercomment = mb_strtoupper($request->get('comentario'));
         $dt = new \DateTime();
+        
         $id = DB::table('SIZ_SolicitudesMP')->insertGetId(
             [
                 'FechaCreacion' => $dt, 'Usuario' => Auth::id(), 'Status' => 'Pendiente',
                 'ComentarioUsuario' => $usercomment, 'AlmacenOrigen' => $almacen_origen
             ]
         );
-
-        foreach ($arts as $art) {
+        $almacenesDestino = DB::table('SIZ_AlmacenesTransferencias')                        
+                        ->where('Dept', Auth::user()->dept)
+                        ->where('TrasladoDeptos', 'OD')->lists('Code');
+                        
+        foreach ($arts as $art) { 
            
             DB::table('SIZ_MaterialesTraslados')->insert(
                 [
@@ -1235,31 +1244,116 @@ public function HacerTraslados($id){
                     'Cant_PendienteA' =>  $art['cant'],
                     'EstatusLinea' => 'S', 'Cant_ASurtir_Origen_A' => $art['cant'], 'Cant_ASurtir_Origen_B' => 0
                 ]
-            );
+            );                                                 
         }
         if (!($id > 0) || is_null($arts) || is_null($id)) {
             $err = true;
         }
-
         if ($err) {
             DB::rollBack();
             return 'Error: No se guardo la solicitud, favor de notificar a Sistemas';
         } else {
-            DB::commit();
-            $Num_Nominas = DB::select(DB::raw("SELECT No_Nomina FROM Siz_Email WHERE Traslados = '1' "));
-            foreach ($Num_Nominas as $Num_Nomina) {
-                $user = User::find($Num_Nomina->No_Nomina);
-                $correo = utf8_encode($user['email'] . '@zarkin.com');
-                if (strlen($correo) > 10) {
-                    Mail::send('Emails.TrasladosDeptos', [
-                        'arts' => $arts, 'id' => $id, 'comentario' => $usercomment, 'origen' => $almacen_origen
-                    ], function ($msj) use ($correo, $id) {
-                        $msj->subject('SIZ Traslado #' . $id); //ASUNTO DEL CORREO
-                        $msj->to($correo); //Correo del destinatario
-                    });
+            
+            $traslado_interno = array_where($arts, function ($key, $item) use($almacenesDestino){       
+                return is_numeric(array_search($item['destino'], $almacenesDestino));
+            });
+            $traslado_externo = array_where($arts, function ($key, $item) use($almacenesDestino){            
+                return !is_numeric(array_search($item['destino'], $almacenesDestino));
+            });
+           // DB::commit();
+            if (count($traslado_externo) > 0) {
+                
+                $Num_Nominas = DB::select(DB::raw("SELECT No_Nomina FROM Siz_Email WHERE Traslados = '1' OR Traslados = '3' "));
+                foreach ($Num_Nominas as $Num_Nomina) {
+                    $user = User::find($Num_Nomina->No_Nomina);
+                    $correo = utf8_encode($user['email'] . '@zarkin.com');
+                    if (strlen($correo) > 10) {
+                        Mail::send('Emails.TrasladosDeptos', [
+                            'arts' => $traslado_externo, 'id' => $id, 'comentario' => $usercomment, 'origen' => $almacen_origen
+                        ], function ($msj) use ($correo, $id) {
+                            $msj->subject('SIZ Traslado #' . $id); //ASUNTO DEL CORREO
+                            $msj->to($correo); //Correo del destinatario
+                        });
+                    }
                 }
             }
-            return 'Mensaje: Tu Traslado ha sido enviado (#' . $id . ')';
+
+if (count($traslado_interno) > 0) {
+    $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
+            if (count($rates) >= 3) {
+           // if (true) {
+                //PERSONA QUE SOLICITA
+                $solicitud = DB::table('SIZ_SolicitudesMP')       
+                    ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
+                    ->select('OHEM.firstName','OHEM.lastName', 'SIZ_SolicitudesMP.*')
+                    ->where('SIZ_SolicitudesMP.Id_Solicitud', $id)->first();
+                $nombreCompleto = $solicitud->firstName.' '.$solicitud->lastName;    
+                              
+                $stat3 = 0;
+                $transfer3 = 0;                 
+                $total3 = 0;               
+                $t3 = 0;
+                $info3 = 0;
+                if (count($articulos) > 0) {
+                    $data =  array(
+                        'id_solicitud' => $id,
+                        'pricelist' => '10',
+                        'almacen_origen' => $solicitud->AlmacenOrigen,
+                        'items' => $traslado_interno,
+                        'nombre_completo' => $nombreCompleto
+                    );
+                   //  dd($data);   
+                    if (Session::has('transfer4')) {                        
+                        if (Session::get('transfer4') > 0) {
+                            $t3 = Session::get('transfer4');
+                        } else {
+                            $t3 = SAP::Transfer2($data);
+                        }
+                    } else {
+                            $t3 = SAP::Transfer2($data);                           
+                    }
+
+                    if (is_numeric($t3) && $t3 > 0 ) {                        
+                        Session::put('transfer4', $t3);
+                        $mensaje_traslado_interno = $t3;
+                    }else{
+                        $stat3 = strlen($t3);
+                        $transfer3 = array();
+                    }
+                }
+                if ( $stat3 > 0 ) {
+                    $mensaje_traslado_interno = 'Error Transferencia: '.$t3;                                        
+                }
+                $filas = DB::table('SIZ_MaterialesTraslados')
+                ->where('Id_Solicitud', $id)
+                ->whereIn('EstatusLinea', ['S', 'P'])
+                ->count();            
+                if ($filas > 0) {
+                   
+                } elseif($filas == 0) {
+                    DB::table('SIZ_SolicitudesMP')
+                    ->where('Id_Solicitud', $id)
+                    ->update(['Status' => 'Cerrada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
+                }
+               
+            }else {
+            $mensaje_traslado_interno = 'Error. No estan capturados todos los "Tipos de Cambio" en SAP.';                    
+            }
+        
+}
+
+            if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {                
+                return  $id .';'.$mensaje_traslado_interno;
+            } else if(count($traslado_interno) > 0) {
+                if (strpos($mensaje_traslado_interno, 'Error') !== false) {
+                     return $mensaje_traslado_interno;
+                }else{
+                    return 'Mensaje:'.$mensaje_traslado_interno; //link pdf
+                }
+            } else if(count($traslado_externo) > 0) {
+                return 'Entrega #' . $id . ' enviada.';    
+            }            
+           
         }
         DB::rollBack();
         return 'Error: No se guardo la solicitud, favor de notificar a Sistemas';
@@ -1345,7 +1439,7 @@ public function HacerTraslados($id){
                 $articulos_novalidos = array_where($articulos, function ($key, $item) {
                     return $item->EstatusLinea == 'N';
                 });
-
+                $pdf_solicitud = DB::table('OWTR')->where('FolioNum', $id)->get();                        
             if (count($articulos_novalidos) > 0) {
                 Session::flash('solicitud_err', 'Esta Solicitud tiene artículos que no se surtirán (fueron quitados o no hay material disponible)');
             }
@@ -1357,7 +1451,8 @@ public function HacerTraslados($id){
                 'almacen_origen' => $solicitud->AlmacenOrigen,
                 'articulos_validos' => $articulos_validos,
                 'articulos_novalidos' => $articulos_novalidos,
-                'comentario' => $solicitud->ComentarioUsuario
+                'comentario' => $solicitud->ComentarioUsuario,
+                'pdf_solicitud' => $pdf_solicitud
             );
             
                 return view('Mod04_Materiales.TrasladosDeptos', $param);
@@ -1381,6 +1476,131 @@ public function HacerTraslados($id){
             return redirect()->back();
         } else {
             return redirect()->route('auth/login');
+        }
+    }
+    public function returnArticuloTrasladosDepto($id)
+    {
+        if (Auth::check()) {
+            DB::update('UPDATE SIZ_MaterialesTraslados SET EstatusLinea = ? , Razon = ?  WHERE Id = ?', ['S', '', $id]);
+            return redirect()->back();
+        } else {
+            return redirect()->route('auth/login');
+        }
+    }
+    public function editArticuloTrasladosDepto()
+    {
+        if (Auth::check()) {
+            if (Input::get('cantp')  == Input::get('pendiente')) {
+                DB::update('UPDATE SIZ_MaterialesTraslados SET  Cant_ASurtir_Origen_A = ?, Razon_CantMenor = ? WHERE Id = ?', [Input::get('cantp'), '', Input::get('articulo')]);
+            } elseif (Input::get('cantp') < Input::get('pendiente')) {
+                DB::update('UPDATE SIZ_MaterialesTraslados SET  Cant_ASurtir_Origen_A = ?, Razon_CantMenor = ? WHERE Id = ?', [Input::get('cantp'), Input::get('reason'), Input::get('articulo')]);
+
+                if (strpos(Input::get('reason'), 'Material') !== false) {
+
+                    $art = DB::table('SIZ_MaterialesTraslados')
+                        ->join('OITM', 'OITM.ItemCode', '=', 'SIZ_MaterialesTraslados.ItemCode')
+                        ->select('SIZ_MaterialesTraslados.*', 'OITM.ItemName')
+                        ->where('Id', Input::get('articulo'))->first();
+
+                    $Num_Nominas = DB::select(DB::raw("SELECT No_Nomina FROM Siz_Email WHERE Traslados = '1' OR  Traslados = '3' "));
+                    foreach ($Num_Nominas as $Num_Nomina) {
+                        $user = User::find($Num_Nomina->No_Nomina);
+                        $correo = utf8_encode($user['email'] . '@zarkin.com');
+                        if (strlen($correo) > 10) {
+                            Mail::send('Emails.Err_TrasladoDeptos', [
+                                'art' => $art
+                            ], function ($msj) use ($correo, $art) {
+                                $msj->subject('SIZ Traslado - Articulo  (' . $art->ItemCode . ')'); //ASUNTO DEL CORREO
+                                $msj->to($correo); //Correo del destinatario
+                            });
+                        }
+                    }
+                }
+            } else {
+                Session::flash('error', 'No se pudo actualizar...');
+            }
+            return redirect()->back();
+        } else {
+            return redirect()->route('auth/login');
+        }
+    }
+    Public function updateArticuloTrasladoDepto($id){
+        if (Auth::check()) {
+             $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
+            if (count($rates) >= 3) {
+           // if (true) {
+                //PERSONA QUE SOLICITA
+                $solicitud = DB::table('SIZ_SolicitudesMP')       
+                    ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
+                    ->select('OHEM.firstName','OHEM.lastName', 'SIZ_SolicitudesMP.*')
+                    ->where('SIZ_SolicitudesMP.Id_Solicitud', $id)->first();
+                $nombreCompleto = $solicitud->firstName.' '.$solicitud->lastName;    
+               
+                $articulos = DB::select('select mat.Id, mat.ItemCode, mat.Destino, mat.Cant_ASurtir_Origen_A as CA, mat.Cant_PendienteA,
+                ALMACENES.AlmacenOrigen from SIZ_MaterialesTraslados mat                                
+                LEFT JOIN (SELECT ItemCode, SUM(CASE WHEN WhsCode = \''.$solicitud->AlmacenOrigen.'\' THEN OnHand ELSE 0 END) AS AlmacenOrigen
+                    FROM dbo.OITW
+                    GROUP BY ItemCode) AS ALMACENES ON mat.ItemCode = ALMACENES.ItemCode
+                WHERE Id_Solicitud = ? AND mat.EstatusLinea = \'S\' 
+                AND mat.Cant_ASurtir_Origen_A <= AlmacenOrigen ', [$id]);
+                
+                $stat3 = 0;
+                $transfer3 = 0;                 
+                $total3 = 0;               
+                $t3 = 0;
+                $info3 = 0;
+                if (count($articulos) > 0) {
+                    $data =  array(
+                        'id_solicitud' => $id,
+                        'pricelist' => '10',
+                        'almacen_origen' => $solicitud->AlmacenOrigen,
+                        'items' => $articulos,
+                        'nombre_completo' => $nombreCompleto
+                    );
+                   //  dd($data);   
+                    if (Session::has('transfer3')) {                        
+                        if (Session::get('transfer3') > 0) {
+                            $t3 = Session::get('transfer3');
+                        } else {
+                            $t3 = SAP::Transfer2($data);
+                        }
+                    } else {
+                            $t3 = SAP::Transfer2($data);                           
+                    }
+
+                    if (is_numeric($t3) && $t3 > 0 ) {
+                        
+                        Session::put('transfer3', $t3);
+                        Session::flash('mensaje2', 'Transferencia '.$t3.' realizada.');
+                    }else{
+                        $stat3 = strlen($t3);
+                        $transfer3 = array();
+                    }
+                }
+                if ( $stat3 > 0 ) {
+                    Session::flash('error', 'Transferencia '.$t3);                    
+                    return redirect()->back();
+                }
+                $filas = DB::table('SIZ_MaterialesTraslados')
+                ->where('Id_Solicitud', $id)
+                ->whereIn('EstatusLinea', ['S', 'P'])
+                ->count();            
+                if ($filas > 0) {
+                    DB::table('SIZ_SolicitudesMP')
+                    ->where('Id_Solicitud', $id)
+                    ->update(['Status' => 'Pendiente']);
+                } elseif($filas == 0) {
+                    DB::table('SIZ_SolicitudesMP')
+                    ->where('Id_Solicitud', $id)
+                    ->update(['Status' => 'Cerrada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
+                }
+                return redirect()->action('Mod04_MaterialesController@ShowDetalleTrasladoDeptos', [$id]);
+            }else {
+            Session::flash('error', 'No estan capturados todos los "Tipos de Cambio" en SAP.');        
+            return redirect()->back();
+        }                       
+        }else {
+        return redirect()->route('auth/login');
         }
     }
 }
