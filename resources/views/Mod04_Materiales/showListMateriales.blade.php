@@ -159,6 +159,7 @@ border: 1px solid #000000;
                     <th>Código</th>
                     <th>Descripción</th>
                     <th>Cantidad</th>
+                    <th>UM</th>
                     <th>Destino</th>
                     <th>Quitar</th>
                 </tr>
@@ -168,6 +169,7 @@ border: 1px solid #000000;
                     <td><%art.pKey%></td>
                     <td><%art.descr%></td>
                     <td><%art.cant%></td>
+                    <td><%art.um%></td>
                     <td><%art.labelDestino%></td>
                     <td><a role="button" ng-click="quitaArt(art)"  class="btn btn-default"><i class="fa fa-trash" style="color:red"></i></a></td>
                 </tr>
@@ -229,7 +231,7 @@ border: 1px solid #000000;
                                                     <label for="pKey">Código:</label>
                                                     <input type="text"  name="pKey" class="form-control" required readonly>
                                                         <input type="text" name="descr" hidden>
-                                             
+                                                        <input type="text" name="um" hidden>
                                                 </div>                                               
                                                 </div>
                                                 <div class="col-md-4">
@@ -349,6 +351,7 @@ var data,
             $(this).removeClass('selected');
             $('input[name=pKey]').val('');
             $('input[name=descr]').val('');
+            $('input[name=um]').val('');
             $('input[name=cant]').val('');
             $('input[name=cant]').blur();
             $('#submitBtn').attr("disabled", true);
@@ -363,6 +366,7 @@ var data,
                 if(fila[0]['Existencia'] == '.000000'){
                     $('input[name=pKey]').val('');
                     $('input[name=descr]').val('');
+                    $('input[name=um]').val('');
                     $('input[name=cant]').val('');
                     $('input[name=cant]').blur();
                     $('#submitBtn').attr("disabled", true);
@@ -372,6 +376,7 @@ var data,
                    // console.log(fila[0]['ItemCode']);
                     $('input[name=pKey]').val(fila[0]['ItemCode']);
                     $('input[name=descr]').val(fila[0]['ItemName']);
+                    $('input[name=um]').val(fila[0]['UM']);
                    // $('input[name=cant]').attr('title', valor+" en Existencia");
                    
                     $('input[name=cant]').focus();                    
@@ -435,6 +440,7 @@ $interpolateProvider.startSymbol('<%');
     $scope.AddArt = function(){
         $scope.insert.pKey = $('input[name=pKey]').val();
         $scope.insert.descr = $('input[name=descr]').val();
+        $scope.insert.um = $('input[name=um]').val();
         $scope.insert.labelDestino = $( "#destino option:selected" ).text();
         $scope.articulos.push($scope.insert);
         $scope.insert = null;
@@ -484,7 +490,9 @@ $interpolateProvider.startSymbol('<%');
             $scope.mensaje2 = aux[0] * 1;
             $scope.btnshow = true;
         }
-
+        if ($scope.successVar.includes('reload')) {
+            location.reload();
+        }
         return response.data;
         }, function (response) {
         
