@@ -940,36 +940,35 @@ public function Solicitud_A_Picking($id){
         
         $solicitante = DB::table('SIZ_SolicitudesMP')       
         ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
-        ->select('OHEM.firstName','OHEM.lastName', 'SIZ_SolicitudesMP.Usuario')
+        ->select('OHEM.firstName','OHEM.lastName', DB::raw('case when email like \'%@%\' then email else email + cast(\'@zarkin.com\' as varchar)  end AS correo'))
         ->where('SIZ_SolicitudesMP.Id_Solicitud', $id)->first();
         $nombreCompleto = $solicitante->firstName.' '.$solicitante->lastName;
-        $nomSolicitante = $solicitante->Usuario;                    
-        $Num_Nominas = DB::table('Siz_Email')
-                        ->whereIn('SolicitudesMP', [1,3])
-                        ->lists('No_Nomina');
-//$Num_Nominas = DB::select(DB::raw("SELECT No_Nomina FROM Siz_Email WHERE SolicitudesMP = '1' OR SolicitudesMP = '2' "));            
-        if (!in_array($nomSolicitante, $Num_Nominas)) {
-            $Num_Nominas[] = $nomSolicitante;
+         
+        $correos_db = DB::select("
+            SELECT 
+            CASE WHEN email like '%@%' THEN email ELSE email + cast('@zarkin.com' as varchar) END AS correo
+            FROM OHEM
+            INNER JOIN Siz_Email AS se ON se.No_Nomina = OHEM.U_EmpGiro
+            WHERE se.SolicitudesMP in (1,3)
+            GROUP BY email
+        ");
+        $correos =array_pluck($correos_db, 'correo'); 
+        if (!in_array($solicitante->correo, $correos)) {
+            $correos[] = $solicitante->correo;
         }
-       $arts = DB::table('SIZ_MaterialesSolicitudes')
+        $arts = DB::table('SIZ_MaterialesSolicitudes')
         ->join('OITM', 'OITM.ItemCode', '=' , 'SIZ_MaterialesSolicitudes.ItemCode')
         ->select('SIZ_MaterialesSolicitudes.*', 'OITM.ItemName', 'OITM.InvntryUom')        
         ->where('Id_Solicitud', $id)->get(); 
         
-       if (count($Num_Nominas) > 0) {
-            foreach ($Num_Nominas as $Num_Nomina) {
-            $user = User::find($Num_Nomina);
-            $correo = utf8_encode($user['email'] . '@zarkin.com');
-            if (strlen($correo) > 12) {
-                    Mail::send('Emails.AutorizacionMP', [
-                        'arts' => $arts, 'id' =>$id, 'nombreCompleto' => $nombreCompleto
-                    ], function ($msj) use ($correo, $id) {
-                        $msj->subject('SIZ Autorización Material #'.$id); //ASUNTO DEL CORREO
-                        $msj->to($correo); //Correo del destinatario
-                    });
-                }
-            }
-       }
+        if (count($correos) > 0) {
+            Mail::send('Emails.AutorizacionMP', [
+                'arts' => $arts, 'id' =>$id, 'nombreCompleto' => $nombreCompleto
+            ], function ($msj) use ($correos, $id) {
+                $msj->subject('SIZ Autorización Material #'.$id); //ASUNTO DEL CORREO
+                $msj->to($correos); //Correo del destinatario
+            });
+        }
         return redirect()->action('Mod04_MaterialesController@AutorizacionSolicitudes');
     } else {
         return redirect()->route('auth/login');
