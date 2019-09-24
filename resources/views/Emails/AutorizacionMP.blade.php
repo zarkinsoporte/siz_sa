@@ -43,6 +43,7 @@
           <tr>
             <th>Código</th>
             <th>Descripción</th>
+            <th>UM</th>    
             <th>Cant Solicitada</th>          
             <th>Cant Autorizada</th>    
             <th>Destino</th>    
@@ -56,6 +57,7 @@
             <tr>     
             <td>{{$art->ItemCode}}</td>
             <td>{{$art->ItemName}}</td>
+            <td>{{$art->InvntryUom}}</td>
             <td>{{number_format($art->Cant_Requerida, 2)}}</td>          
             <td>{{number_format($art->Cant_Autorizada, 2)}}</td>
             <td>{{$art->Destino}}</td>

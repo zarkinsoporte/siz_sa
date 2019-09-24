@@ -216,7 +216,7 @@
         {!! Form::open(['url' => 'home/AUTORIZACION/solicitud/articulos/edit', 'method' => 'POST']) !!}
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
           aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title">Autorizar una Cantidad menor</h4>
+          <h4 class="modal-title">Autorizar Otra Cantidad </h4>
         </div>
         <div class="modal-body">
           <div class="row">
@@ -230,7 +230,7 @@
           </div>
           <div class="form-group col-md-12">
           <input type="hidden" id="articulo-id" name="articulo">
-            <h5>Motivo por el que se autoriza una cantidad menor:</h5>
+            <h5>Motivo por el que se autoriza otra cantidad :</h5>
           
             <input type="radio" name="reason" value="Error Captura Solicitud" required checked>
             Error de Captura en Solicitud
@@ -273,7 +273,7 @@ var modal = $(this)
 modal.find('#articulo-id').val(id)
 modal.find('#cantr').val(cantr)
 modal.find('#canta').val(canta)
-modal.find('#canta').attr("max",cantr)
+//modal.find('#canta').attr("max",cantr)
 
 });
 @endsection 

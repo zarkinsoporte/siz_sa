@@ -44,6 +44,7 @@
             <th>#</th>
             <th>Código</th>
             <th>Descripción</th>
+            <th>UM</th>
             <th>Cantidad</th>
             <th>Destino</th>
           
@@ -57,6 +58,7 @@
             <td>{{ $i }}</td>
             <td>{{$art['pKey']}}</td>
             <td>{{$art['descr']}}</td>
+            <td>{{$art['um']}}</td>
             <td>{{$art['cant']}}</td>
             <td>{{$art['labelDestino']}}</td>
           </tr>

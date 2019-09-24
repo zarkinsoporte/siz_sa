@@ -558,7 +558,7 @@ public function DataSolicitudes_Auht(){
             return response()->json(array('data' => $consulta, 'columns' => $columns));
     }
 public function saveArt(Request $request){   
-    
+    if (Auth::check()) {  
             DB::beginTransaction();
         $err = false;
         $id = 0;
@@ -621,6 +621,9 @@ public function saveArt(Request $request){
         }
         DB::rollBack();       
         return 'Error: No se guardo la solicitud, favor de notificar a Sistemas';
+    } else {
+        return 'reload';
+    }
     
 }
  
@@ -841,7 +844,7 @@ public function editArticuloPicking(){
            
             $art = DB::table('SIZ_MaterialesSolicitudes')
             ->join('OITM', 'OITM.ItemCode', '=' , 'SIZ_MaterialesSolicitudes.ItemCode')
-            ->select('SIZ_MaterialesSolicitudes.*', 'OITM.ItemName')        
+            ->select('SIZ_MaterialesSolicitudes.*', 'OITM.ItemName', 'OITM.InvntryUom')        
             ->where('Id', Input::get('articulo'))->first();
         
             $Num_Nominas = DB::select(DB::raw("SELECT No_Nomina FROM Siz_Email WHERE SolicitudesErrExistencias = '1' "));
@@ -944,13 +947,13 @@ public function Solicitud_A_Picking($id){
         $Num_Nominas = DB::table('Siz_Email')
                         ->whereIn('SolicitudesMP', [1,3])
                         ->lists('No_Nomina');
-                     
+//$Num_Nominas = DB::select(DB::raw("SELECT No_Nomina FROM Siz_Email WHERE SolicitudesMP = '1' OR SolicitudesMP = '2' "));            
         if (!in_array($nomSolicitante, $Num_Nominas)) {
             $Num_Nominas[] = $nomSolicitante;
         }
        $arts = DB::table('SIZ_MaterialesSolicitudes')
         ->join('OITM', 'OITM.ItemCode', '=' , 'SIZ_MaterialesSolicitudes.ItemCode')
-        ->select('SIZ_MaterialesSolicitudes.*', 'OITM.ItemName')        
+        ->select('SIZ_MaterialesSolicitudes.*', 'OITM.ItemName', 'OITM.InvntryUom')        
         ->where('Id_Solicitud', $id)->get(); 
         
        if (count($Num_Nominas) > 0) {
@@ -1514,7 +1517,7 @@ if (count($traslado_interno) > 0) {
 
                     $art = DB::table('SIZ_MaterialesTraslados')
                         ->join('OITM', 'OITM.ItemCode', '=', 'SIZ_MaterialesTraslados.ItemCode')
-                        ->select('SIZ_MaterialesTraslados.*', 'OITM.ItemName')
+                        ->select('SIZ_MaterialesTraslados.*', 'OITM.ItemName', 'OITM.InvntryUom')
                         ->where('Id', Input::get('articulo'))->first();
 
                     $Num_Nominas = DB::select(DB::raw("SELECT No_Nomina FROM Siz_Email WHERE Traslados = '1' OR  Traslados = '3' "));

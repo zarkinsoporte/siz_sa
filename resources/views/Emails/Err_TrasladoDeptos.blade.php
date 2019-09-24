@@ -44,6 +44,7 @@
             <th>Num Entrega</th>
             <th>Código</th>
             <th>Descripción</th>
+            <th>UM</th>
             <th>Cant de Entrega</th>          
             <th>Cant real a Recibir</th>            
             <th>Motivo Cantidad menor</th>            
@@ -56,6 +57,7 @@
             <td>{{$art->Id_Solicitud}}</td>
             <td>{{$art->ItemCode}}</td>
             <td>{{$art->ItemName}}</td>
+            <td>{{$art->InvntryUom}}</td>
             <td>{{$art->Cant_PendienteA}}</td>
             <td>{{number_format($art->Cant_ASurtir_Origen_A , 2)}}</td>          
             <td>{{$art->Razon_CantMenor}}</td>
