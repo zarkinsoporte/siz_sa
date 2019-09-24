@@ -102,7 +102,8 @@ border: 1px solid #000000;
             <div class="input-group">
                 
                 <span class="">
-                    <button class="btn btn-primary" ng-click="modals()" type="button"><i class="fa fa-plus"></i> Agregar</button>
+                    <button class="btn btn-primary" ng-click="modals()" ng-if="!btnshow" type="button"><i class="fa fa-plus"></i> Agregar</button>
+                    <a class="btn btn-primary"  ng-if="btnshow" type="button" href="{!! url('home/TRASLADO ENTREGA') !!}">Otro traslado</a>
                     <button ng-if="articulos.length > 0" class="btn btn-success" id="spin" ng-click="sendArt()">
                         <i class="fa fa-send"></i> Enviar</button>
                 </span>
@@ -167,7 +168,7 @@ border: 1px solid #000000;
                     <td><%art.pKey%></td>
                     <td><%art.descr%></td>
                     <td><%art.cant%></td>
-                    <td><%art.destino%></td>
+                    <td><%art.labelDestino%></td>
                     <td><a role="button" ng-click="quitaArt(art)"  class="btn btn-default"><i class="fa fa-trash" style="color:red"></i></a></td>
                 </tr>
             </tbody>
@@ -425,6 +426,7 @@ $interpolateProvider.startSymbol('<%');
     $scope.nule = 0;
     $scope.mensaje = 0;
     $scope.mensaje2 = 0;
+    $scope.btnshow = false;
     $scope.insert = {};
     $scope.modals = function(){
        
@@ -433,6 +435,7 @@ $interpolateProvider.startSymbol('<%');
     $scope.AddArt = function(){
         $scope.insert.pKey = $('input[name=pKey]').val();
         $scope.insert.descr = $('input[name=descr]').val();
+        $scope.insert.labelDestino = $( "#destino option:selected" ).text();
         $scope.articulos.push($scope.insert);
         $scope.insert = null;
         $scope.successVar = null;
@@ -468,14 +471,20 @@ $interpolateProvider.startSymbol('<%');
         
         if($scope.successVar === null){
             $scope.nule = 1;
-        } else if ($scope.successVar.includes('Mensaje')) {
+        } 
+        if ($scope.successVar.includes('Mensaje')) {
             var aux = $scope.successVar.split(':')
-            $scope.mensaje = aux[1];
-        } else if ($scope.successVar.includes(';')){
+            $scope.mensaje = aux[1] * 1;
+            $scope.mensaje2 = 0;
+            $scope.btnshow = true;
+        } 
+        if ($scope.successVar.includes(';')){
             var aux = $scope.successVar.split(';')
-            $scope.mensaje = aux[1];
-            $scope.mensaje2 = aux[0];
+            $scope.mensaje = aux[1] * 1;
+            $scope.mensaje2 = aux[0] * 1;
+            $scope.btnshow = true;
         }
+
         return response.data;
         }, function (response) {
         

@@ -546,7 +546,7 @@ public function DataSolicitudes_Auht(){
         (SELECT ItemCode, SUM(CASE WHEN WhsCode = \'APG-PA\' OR WhsCode = \'AMP-ST\'  THEN OnHand ELSE 0 END) AS Existencia
         FROM dbo.OITW
         GROUP BY ItemCode) AS ALMACENES ON OITM.ItemCode = ALMACENES.ItemCode
-        WHERE PrchseItem = \'Y\' AND InvntItem = \'Y\' AND U_TipoMat = \'MP\'
+        WHERE PrchseItem = \'Y\' AND InvntItem = \'Y\' AND U_TipoMat <> \'PT\' AND U_TipoMat IS NOT NULL
         ');
                $columns = array(
                 ["data" => "ItemCode", "name" => "Código"],
@@ -573,10 +573,11 @@ public function saveArt(Request $request){
                 foreach ($arts as $art) {
                     DB::table('SIZ_MaterialesSolicitudes')->insert(
                         ['Id_Solicitud' => $id, 'ItemCode' => $art['pKey'], 
-                        'Cant_Requerida' => $art['cant'], 'Destino' => $art['destino'], 
+                        'Cant_Requerida' => $art['cant'], 'Destino' => $art['labelDestino'], 
                         'Cant_Autorizada' =>  $art['cant'], 'Cant_Pendiente' =>  $art['cant'], 
                         'Cant_PendienteA' =>  $art['cant'],
-                        'EstatusLinea' => 'S', 'Cant_ASurtir_Origen_A' => 0, 'Cant_ASurtir_Origen_B' => 0]
+                        'EstatusLinea' => 'S', 'Cant_ASurtir_Origen_A' => 0, 
+                        'Cant_ASurtir_Origen_B' => 0]
                     );
                 }
                 if (!($id > 0) || is_null($arts) || is_null($id)) {
@@ -933,9 +934,13 @@ public function Solicitud_A_Picking($id){
         ['Pendiente', $id]);
         Session::flash('mensaje','La Solicitud  #'.$id.' se ha enviado a Picking Almacén');
         //aquicorreo
-        $nomSolicitante = DB::table('SIZ_SolicitudesMP')
-                            ->where('Id_Solicitud', $id)
-                            ->value('Usuario');
+        
+        $solicitante = DB::table('SIZ_SolicitudesMP')       
+        ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
+        ->select('OHEM.firstName','OHEM.lastName', 'SIZ_SolicitudesMP.Usuario')
+        ->where('SIZ_SolicitudesMP.Id_Solicitud', $id)->first();
+        $nombreCompleto = $solicitante->firstName.' '.$solicitante->lastName;
+        $nomSolicitante = $solicitante->Usuario;                    
         $Num_Nominas = DB::table('Siz_Email')
                         ->whereIn('SolicitudesMP', [1,3])
                         ->lists('No_Nomina');
@@ -954,7 +959,7 @@ public function Solicitud_A_Picking($id){
             $correo = utf8_encode($user['email'] . '@zarkin.com');
             if (strlen($correo) > 12) {
                     Mail::send('Emails.AutorizacionMP', [
-                        'arts' => $arts, 'id' =>$id
+                        'arts' => $arts, 'id' =>$id, 'nombreCompleto' => $nombreCompleto
                     ], function ($msj) use ($correo, $id) {
                         $msj->subject('SIZ Autorización Material #'.$id); //ASUNTO DEL CORREO
                         $msj->to($correo); //Correo del destinatario
@@ -1240,15 +1245,18 @@ public function HacerTraslados($id){
                         ->where('Dept', Auth::user()->dept)
                         ->where('TrasladoDeptos', 'OD')->lists('Code');
                         
-        foreach ($arts as $art) { 
-           
+        foreach ($arts as $art) {            
+            $statusL = 'S';
+            if (is_numeric(array_search($art['destino'], $almacenesDestino))) {
+                $statusL = 'I';
+            } 
             DB::table('SIZ_MaterialesTraslados')->insert(
                 [
                     'Id_Solicitud' => $id, 'ItemCode' => $art['pKey'],
-                    'Cant_Requerida' => $art['cant'], 'Destino' => $art['destino'],
+                    'Cant_Requerida' => $art['cant'], 'Destino' => $art['labelDestino'],
                     'Cant_Autorizada' =>  $art['cant'], 'Cant_Pendiente' =>  $art['cant'],
                     'Cant_PendienteA' =>  $art['cant'],
-                    'EstatusLinea' => 'S', 'Cant_ASurtir_Origen_A' => $art['cant'], 'Cant_ASurtir_Origen_B' => 0
+                    'EstatusLinea' => $statusL, 'Cant_ASurtir_Origen_A' => $art['cant'], 'Cant_ASurtir_Origen_B' => 0
                 ]
             );                                                 
         }
@@ -1259,14 +1267,22 @@ public function HacerTraslados($id){
             DB::rollBack();
             return 'Error: No se guardo la solicitud, favor de notificar a Sistemas';
         } else {
-            
-            $traslado_interno = array_where($arts, function ($key, $item) use($almacenesDestino){       
-                return is_numeric(array_search($item['destino'], $almacenesDestino));
-            });
+            DB::commit();
+            $traslado_interno =  DB::select('select mat.Id, mat.ItemCode, 
+            mat.Destino, mat.Cant_ASurtir_Origen_A as CA, mat.Cant_PendienteA, mat.Cant_Pendiente,
+            ALMACENES.AlmacenOrigen from SIZ_MaterialesTraslados mat                                
+            LEFT JOIN 
+            (SELECT ItemCode, SUM(CASE WHEN WhsCode = \''.$almacen_origen.'\' THEN 
+            OnHand ELSE 0 END) AS AlmacenOrigen
+                FROM dbo.OITW
+                GROUP BY ItemCode) AS ALMACENES ON mat.ItemCode = ALMACENES.ItemCode
+            WHERE Id_Solicitud = ? AND mat.EstatusLinea = \'I\' 
+            AND mat.Cant_ASurtir_Origen_A <= AlmacenOrigen ', [$id]);
+
             $traslado_externo = array_where($arts, function ($key, $item) use($almacenesDestino){            
                 return !is_numeric(array_search($item['destino'], $almacenesDestino));
             });
-           // DB::commit();
+            
             if (count($traslado_externo) > 0) {
                 
                 $Num_Nominas = DB::select(DB::raw("SELECT No_Nomina FROM Siz_Email WHERE Traslados = '1' OR Traslados = '3' "));
@@ -1299,10 +1315,9 @@ if (count($traslado_interno) > 0) {
                               
                 $stat3 = 0;
                 $transfer3 = 0;                 
-                $total3 = 0;               
                 $t3 = 0;
                 $info3 = 0;
-                if (count($articulos) > 0) {
+                if (count($arts) > 0) {
                     $data =  array(
                         'id_solicitud' => $id,
                         'pricelist' => '10',
@@ -1311,18 +1326,10 @@ if (count($traslado_interno) > 0) {
                         'nombre_completo' => $nombreCompleto
                     );
                    //  dd($data);   
-                    if (Session::has('transfer4')) {                        
-                        if (Session::get('transfer4') > 0) {
-                            $t3 = Session::get('transfer4');
-                        } else {
-                            $t3 = SAP::Transfer2($data);
-                        }
-                    } else {
-                            $t3 = SAP::Transfer2($data);                           
-                    }
+                    
+                            $t3 = SAP::Transfer2($data);                                               
 
-                    if (is_numeric($t3) && $t3 > 0 ) {                        
-                        Session::put('transfer4', $t3);
+                    if (is_numeric($t3) && $t3 > 0 ) {                                             
                         $mensaje_traslado_interno = $t3;
                     }else{
                         $stat3 = strlen($t3);
@@ -1546,7 +1553,8 @@ if (count($traslado_interno) > 0) {
                     ->where('SIZ_SolicitudesMP.Id_Solicitud', $id)->first();
                 $nombreCompleto = $solicitud->firstName.' '.$solicitud->lastName;    
                
-                $articulos = DB::select('select mat.Id, mat.ItemCode, mat.Destino, mat.Cant_ASurtir_Origen_A as CA, mat.Cant_PendienteA,
+                $articulos = DB::select('select mat.Id, mat.ItemCode, mat.Destino, 
+                mat.Cant_ASurtir_Origen_A as CA, mat.Cant_PendienteA, mat.Cant_Pendiente,
                 ALMACENES.AlmacenOrigen from SIZ_MaterialesTraslados mat                                
                 LEFT JOIN (SELECT ItemCode, SUM(CASE WHEN WhsCode = \''.$solicitud->AlmacenOrigen.'\' THEN OnHand ELSE 0 END) AS AlmacenOrigen
                     FROM dbo.OITW
@@ -1555,8 +1563,7 @@ if (count($traslado_interno) > 0) {
                 AND mat.Cant_ASurtir_Origen_A <= AlmacenOrigen ', [$id]);
                 
                 $stat3 = 0;
-                $transfer3 = 0;                 
-                $total3 = 0;               
+                $transfer3 = 0;              
                 $t3 = 0;
                 $info3 = 0;
                 if (count($articulos) > 0) {

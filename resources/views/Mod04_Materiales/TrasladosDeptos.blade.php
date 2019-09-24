@@ -39,7 +39,7 @@
      <div class="row">
   <div class="col-md-12">     
       <span class="pull-right">
-                     <a class="btn btn-primary btn-sm" href="{{URL::previous()}}""><i class="fa fa-angle-left"></i> Atras</a>                                                              
+                     <a class="btn btn-primary btn-sm" href="{{URL::previous()}}"><i class="fa fa-angle-left"></i> Atras</a>                                                              
                                                                                        
                             <a ng-click="sendArt()" id="spinn" class="btn btn-success btn-sm" href="{{'update/'.$id}}"><i class="fa fa-send"></i> Aceptar entrega</a>
                    
@@ -98,7 +98,7 @@
   <div class="row">
       <div class="col-md-12">
         <span class="pull-right">
-                <a class="btn btn-primary btn-sm" href="{{url('home/2 PICKING ARTICULOS') }}"><i class="fa fa-angle-left"></i> Atras</a>                                                              
+                <a class="btn btn-primary btn-sm" href="{{URL::previous()}}"><i class="fa fa-angle-left"></i> Atras</a>                                                              
         </span>         
       </div>
   </div>

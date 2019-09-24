@@ -37,7 +37,7 @@
   <div class="row">
     <div class="col-md-12">
         <h3>Autorización de Material #{{$id}}</h3>
-       
+        <h4>Requerido por: {{ $nombreCompleto }}</h4>
       <table class="paleBlueRows">
         <thead>
           <tr>
@@ -45,6 +45,7 @@
             <th>Descripción</th>
             <th>Cant Solicitada</th>          
             <th>Cant Autorizada</th>    
+            <th>Destino</th>    
             <th>Observación de Autorización </th>
                    
           </tr>
@@ -57,6 +58,7 @@
             <td>{{$art->ItemName}}</td>
             <td>{{number_format($art->Cant_Requerida, 2)}}</td>          
             <td>{{number_format($art->Cant_Autorizada, 2)}}</td>
+            <td>{{$art->Destino}}</td>
             @if (is_null($art->Razon_NoAutorizado) && is_null($art->Razon_AutorizaCantMenor))
                 <td>-</td>
             @else

@@ -59,7 +59,7 @@
             <td>{{$art['pKey']}}</td>
             <td>{{$art['descr']}}</td>
             <td>{{$art['cant']}}</td>
-            <td>{{$art['destino']}}</td>
+            <td>{{$art['labelDestino']}}</td>
           </tr>
           @endforeach
          

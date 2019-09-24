@@ -148,7 +148,7 @@ border: 1px solid #000000;
                     <td><%art.pKey%></td>
                     <td><%art.descr%></td>
                     <td><%art.cant%></td>
-                    <td><%art.destino%></td>
+                    <td><%art.labelDestino%></td>
                     <td><a role="button" ng-click="quitaArt(art)"  class="btn btn-default"><i class="fa fa-trash" style="color:red"></i></a></td>
                 </tr>
             </tbody>
@@ -413,6 +413,7 @@ $interpolateProvider.startSymbol('<%');
     $scope.AddArt = function(){
         $scope.insert.pKey = $('input[name=pKey]').val();
         $scope.insert.descr = $('input[name=descr]').val();
+        $scope.insert.labelDestino = $( "#destino option:selected" ).text();
         $scope.articulos.push($scope.insert);
         $scope.insert = null;
         $scope.successVar = null;

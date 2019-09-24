@@ -278,6 +278,7 @@ Route::get('home/reporte/TRASLADO ENTREGA', 'Reportes_ProduccionController@showM
 Route::post('home/reporte/TRASLADO ENTREGA', 'Mod04_MaterialesController@trasladoEntrega');
 Route::get('OITM.WH.traslados', 'Mod04_MaterialesController@ShowArticulosWHTraslados')->name('OITM.WH.traslados');
 Route::post('home/reporte/saveTraslado', 'Mod04_MaterialesController@saveTraslado')->name('home/reporte/saveTraslado');
+Route::get('home/reporte/PDF/traslado/{transfer}','Mod04_MaterialesController@getPdfTraslado');
 //6 TRASLADOS DEPTOS RECEPCION
 Route::get('home/TRASLADO RECEPCION', 'Mod04_MaterialesController@TrasladosDeptos');
 Route::get('datatables.traslados', 'Mod04_MaterialesController@DataTrasladosDeptos')->name('datatables.traslados');
@@ -286,6 +287,7 @@ Route::post('home/TRASLADO RECEPCION/solicitud/articulos/remove', 'Mod04_Materia
 Route::get('home/TRASLADO RECEPCION/solicitud/articulos/return/{id}', 'Mod04_MaterialesController@returnArticuloTrasladosDepto');
 Route::get('home/TRASLADO RECEPCION/solicitud/update/{id}', 'Mod04_MaterialesController@updateArticuloTrasladoDepto');
 Route::post('home/TRASLADO RECEPCION/solicitud/articulos/edit', 'Mod04_MaterialesController@editArticuloTrasladosDepto');
+Route::get('home/TRASLADO RECEPCION/solicitud/PDF/traslado/{transfer}','Mod04_MaterialesController@getPdfTraslado');
 //
 //-------------------------//
 //RUTAS DE MRP//---------------------------------------------------------

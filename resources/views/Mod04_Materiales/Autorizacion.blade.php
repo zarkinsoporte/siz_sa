@@ -19,6 +19,7 @@
       
             <style>       
             td {
+              white-space: nowrap;
                 font-family: 'Helvetica';
                 font-size: 80%;
             }
@@ -28,6 +29,39 @@
                 font-size: 90%;
             }
         </style>
+        <style>
+    .table-scroll {
+        position: relative;
+    }
+    .table-scroll thead th {     
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0;
+    }
+    .table-scroll tfoot,
+    .table-scroll tfoot th,
+    .table-scroll tfoot td {
+    position: -webkit-sticky;
+    position: sticky;
+    bottom: 0;  
+    z-index:4;
+    }  
+    th:first-child {
+    position: -webkit-sticky;
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    
+    }
+    thead th:first-child,
+    tfoot th:first-child {
+        z-index: 5;
+    }
+    .pane {
+        overflow: auto;
+        max-height: 300px;
+    }    
+</style>
       @if (count($articulos_validos)>0)
             <div class="row">
   <div class="col-md-12">
@@ -39,19 +73,24 @@
         <!-- /.row -->
 
  <h4>Material Autorizado</h4>
-    <table>
+ <div id="t1" class="col-md-12 table-scroll">
+            <div class="pane">
+    <table id="main-table" class="table table-striped main-table" style="margin-bottom:0px">
       <thead>
         <tr>
           
-          <th>Código</th>
-          <th>Descripción</th>
-          <th>UM</th>
-          <th>Cant. Requerida</th>
-          <th>Cant. Autorizada</th>
-          <th>APG-PA</th>
-          <th>AMP-ST</th>
-          <th>Total Disponible</th>
-          <th>Acciones</th>
+         <th scope="col">Código</th>
+         <th scope="col">Descripción</th>
+         <th scope="col">UM</th>
+         <th scope="col">Cant. Requerida</th>
+         <th scope="col">Cant. Autorizada</th>
+         <th scope="col">APG-PA</th>
+         <th scope="col">AMP-ST</th>
+         <th scope="col">Total Disponible</th>
+         <th scope="col">Destino</th>
+         
+         <th scope="col">Acciones</th>
+          
         </tr>
       </thead>
       <tbody>
@@ -59,15 +98,16 @@
         @foreach ($articulos_validos as $art)
         <tr <?php ?>>
                    
-          <td><a href="{{url('home/DATOS MAESTROS ARTICULO/'.$art->ItemCode)}}"><i class="fa fa-hand-o-right"></i>{{$art->ItemCode}}</a></td>
-          <td>{{$art->ItemName}}</td>
-          <td>{{$art->UM}}</td>
-          <td>{{$art->Cant_Requerida}}</td>
-          <td>{{$art->Cant_Autorizada}}</td>
-          <td>{{number_format($art->APGPA, 2)}}</td>
-          <td>{{number_format($art->AMPST, 2)}}</td>
-          <td>{{number_format($art->Disponible, 2)}}</td>
-          <td>
+          <th scope="row" style="background-color:white" nowrap><a href="{{url('home/DATOS MAESTROS ARTICULO/'.$art->ItemCode)}}"><i class="fa fa-hand-o-right"></i>{{$art->ItemCode}}</a></th>
+          <td scope="row">{{$art->ItemName}}</td>
+          <td scope="row">{{$art->UM}}</td>
+          <td scope="row">{{$art->Cant_Requerida}}</td>
+          <td scope="row">{{$art->Cant_Autorizada}}</td>
+          <td scope="row">{{number_format($art->APGPA, 2)}}</td>
+          <td scope="row">{{number_format($art->AMPST, 2)}}</td>
+          <td scope="row">{{number_format($art->Disponible, 2)}}</td>
+          <td scope="row">{{$art->Destino}}</td>
+          <td scope="row">
           <a role="button" data-toggle="modal" data-target="#edit" data-id="{{$art->Id}}" data-cantr="{{$art->Cant_Requerida}}" data-canta="{{$art->Cant_Autorizada}}" class="btn btn-default"><i class="fa fa-pencil fa-lg" style="color:#007BFF"></i></a>
             <a role="button" data-toggle="modal" data-target="#remove" data-id="{{$art->Id}}" class="btn btn-default"><i class="fa fa-arrow-circle-o-down fa-lg" style="color:red"></i></a>
           </td>
@@ -76,6 +116,8 @@
 
       </tbody>
     </table>
+    </div>
+    </div>
   </div>
 </div> <!-- /.row -->   
 @endif

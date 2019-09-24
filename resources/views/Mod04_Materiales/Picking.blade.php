@@ -39,7 +39,7 @@
      <div class="row">
   <div class="col-md-12">     
       <span class="pull-right">
-                     <a class="btn btn-primary btn-sm" href="{{URL::previous()}}""><i class="fa fa-angle-left"></i> Atras</a>                                                              
+                     <a class="btn btn-primary btn-sm" href="{{URL::previous()}}"><i class="fa fa-angle-left"></i> Atras</a>                                                              
                             <a class="btn btn-danger btn-sm" href="{{'PDF/'.$id}}" target="_blank"><i class="fa fa-file-pdf-o"></i> PDF</a>                                                              
                             <a class="btn btn-success btn-sm" href="{{'update/'.$id}}"><i class="fa fa-send"></i> Enviar a Traslados</a>
                    
