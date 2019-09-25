@@ -589,34 +589,31 @@ public function saveArt(Request $request){
             return 'Error: No se guardo la solicitud, favor de notificar a Sistemas';
         }else{
                 DB::commit();
-                $N_Emp = User::where('position', 4)->where('dept', Auth::user()->dept)->first();
-               
-                if (count($N_Emp) > 0) {
-                    $correo = utf8_encode($N_Emp->email . '@zarkin.com');
-                    if (strlen($correo) > 12) {
-                        Mail::send('Emails.SolicitudMP', [
-                            'arts' => $arts, 'id' => $id, 'comentario' => $usercomment
-                        ], function ($msj) use ($correo, $id) {
-                            $msj->subject('SIZ Solicitud de Material #'.$id); //ASUNTO DEL CORREO
-                            $msj->to($correo); //Correo del destinatario
-                        });
-                    } 
-                }
-                $Num_Nominas = DB::select(DB::raw("SELECT No_Nomina FROM Siz_Email WHERE SolicitudesMP = '1' OR SolicitudesMP = '2' "));
-                if (count($Num_Nominas) > 0) {
-                    foreach ($Num_Nominas as $Num_Nomina) {
-                    $user = User::find($Num_Nomina->No_Nomina);
-                    $correo = utf8_encode($user['email'] . '@zarkin.com');
-                        if (strlen($correo) > 12) {
-                            Mail::send('Emails.SolicitudMP', [
-                                'arts' => $arts, 'id' => $id, 'comentario' => $usercomment
-                                            ], function ($msj) use ($correo, $id) {
-                                            $msj->subject('SIZ Solicitud de Material #'.$id); //ASUNTO DEL CORREO
-                                            $msj->to($correo); //Correo del destinatario
-                                        });
-                        }
-                    }
-                }
+                $N_Emp = User::where('position', 4)
+                    ->select(DB::raw('case when email like \'%@%\' then email else email + cast(\'@zarkin.com\' as varchar)  end AS correo'))
+                    ->where('dept', Auth::user()->dept)
+                    ->where('status', 1)
+                    ->value('correo'); 
+                $correos_db = DB::select("
+                    SELECT 
+                    CASE WHEN email like '%@%' THEN email ELSE email + cast('@zarkin.com' as varchar) END AS correo
+                    FROM OHEM
+                    INNER JOIN Siz_Email AS se ON se.No_Nomina = OHEM.U_EmpGiro
+                    WHERE se.SolicitudesMP in (1,2)
+                    GROUP BY email
+                ");                  
+                $correos =array_pluck($correos_db, 'correo'); 
+                if (!in_array($N_Emp, $correos) && $N_Emp !== null) {
+                    $correos[] = $N_Emp;
+                }    
+                if (count($correos) > 0) {                                        
+                    Mail::send('Emails.SolicitudMP', [
+                        'arts' => $arts, 'id' => $id, 'comentario' => $usercomment
+                    ], function ($msj) use ($correos, $id) {
+                        $msj->subject('SIZ Solicitud de Material #'.$id); //ASUNTO DEL CORREO
+                        $msj->to($correos); //Correo del destinatario
+                    });                    
+                }               
                 return 'Mensaje: Tu Solicitud ha sido enviada (#'.$id.')';
         }
         DB::rollBack();       
@@ -846,21 +843,23 @@ public function editArticuloPicking(){
             ->join('OITM', 'OITM.ItemCode', '=' , 'SIZ_MaterialesSolicitudes.ItemCode')
             ->select('SIZ_MaterialesSolicitudes.*', 'OITM.ItemName', 'OITM.InvntryUom')        
             ->where('Id', Input::get('articulo'))->first();
-        
-            $Num_Nominas = DB::select(DB::raw("SELECT No_Nomina FROM Siz_Email WHERE SolicitudesErrExistencias = '1' "));
-                if (count($Num_Nominas) > 0) {
-                    foreach ($Num_Nominas as $Num_Nomina) {
-                        $user = User::find($Num_Nomina->No_Nomina);
-                        $correo = utf8_encode($user['email'] . '@zarkin.com');
-                        if (strlen($correo) > 12) {
-                            Mail::send('Emails.Err_existencias', [
-                                'art' => $art
-                                            ], function ($msj) use ($correo, $art) {
-                                $msj->subject('SIZ Error de Existencias ('.$art->ItemCode.')'); //ASUNTO DEL CORREO
-                                $msj->to($correo); //Correo del destinatario
-                            });
-                        }
-                    }
+                    
+            $correos_db = DB::select("
+                SELECT 
+                CASE WHEN email like '%@%' THEN email ELSE email + cast('@zarkin.com' as varchar) END AS correo
+                FROM OHEM
+                INNER JOIN Siz_Email AS se ON se.No_Nomina = OHEM.U_EmpGiro
+                WHERE se.SolicitudesErrExistencias = 1
+                GROUP BY email
+            ");
+            $correos = array_pluck($correos_db, 'correo');
+                if (count($correos) > 0) {                    
+                    Mail::send('Emails.Err_existencias', 
+                    ['art' => $art], 
+                    function ($msj) use ($correos, $art) {
+                        $msj->subject('SIZ Error de Existencias ('.$art->ItemCode.')'); //ASUNTO DEL CORREO
+                        $msj->to($correos); //Correo del destinatario
+                    });
                 }
         }
         
@@ -953,7 +952,7 @@ public function Solicitud_A_Picking($id){
             GROUP BY email
         ");
         $correos =array_pluck($correos_db, 'correo'); 
-        if (!in_array($solicitante->correo, $correos)) {
+        if (!in_array($solicitante->correo, $correos) && $solicitante->correo !== null) {
             $correos[] = $solicitante->correo;
         }
         $arts = DB::table('SIZ_MaterialesSolicitudes')
@@ -1286,21 +1285,23 @@ public function HacerTraslados($id){
             });
             
             if (count($traslado_externo) > 0) {
-                
-                $Num_Nominas = DB::select(DB::raw("SELECT No_Nomina FROM Siz_Email WHERE Traslados = '1' OR Traslados = '3' "));
-                if (count($Num_Nominas) > 0) {
-                    foreach ($Num_Nominas as $Num_Nomina) {
-                    $user = User::find($Num_Nomina->No_Nomina);
-                    $correo = utf8_encode($user['email'] . '@zarkin.com');
-                    if (strlen($correo) > 12) {
-                            Mail::send('Emails.TrasladosDeptos', [
-                                'arts' => $traslado_externo, 'id' => $id, 'comentario' => $usercomment, 'origen' => $almacen_origen
-                            ], function ($msj) use ($correo, $id) {
-                                $msj->subject('SIZ Traslado #' . $id); //ASUNTO DEL CORREO
-                                $msj->to($correo); //Correo del destinatario
-                            });
-                        }
-                    }
+               
+                $correos_db = DB::select("
+                    SELECT 
+                    CASE WHEN email like '%@%' THEN email ELSE email + cast('@zarkin.com' as varchar) END AS correo
+                    FROM OHEM
+                    INNER JOIN Siz_Email AS se ON se.No_Nomina = OHEM.U_EmpGiro
+                    WHERE se.Traslados in (1,3)
+                    GROUP BY email
+                ");
+                $correos = array_pluck($correos_db, 'correo');
+                if (count($correos) > 0) {                    
+                    Mail::send('Emails.TrasladosDeptos', [
+                        'arts' => $traslado_externo, 'id' => $id, 'comentario' => $usercomment, 'origen' => $almacen_origen
+                    ], function ($msj) use ($correos, $id) {
+                        $msj->subject('SIZ Traslado #' . $id); //ASUNTO DEL CORREO
+                        $msj->to($correos); //Correo del destinatario
+                    });                        
                 }
             }
 
@@ -1519,20 +1520,23 @@ if (count($traslado_interno) > 0) {
                         ->select('SIZ_MaterialesTraslados.*', 'OITM.ItemName', 'OITM.InvntryUom')
                         ->where('Id', Input::get('articulo'))->first();
 
-                    $Num_Nominas = DB::select(DB::raw("SELECT No_Nomina FROM Siz_Email WHERE Traslados = '1' OR  Traslados = '3' "));
-                    if (count($Num_Nominas) > 0) {
-                        foreach ($Num_Nominas as $Num_Nomina) {
-                        $user = User::find($Num_Nomina->No_Nomina);
-                        $correo = utf8_encode($user['email'] . '@zarkin.com');
-                        if (strlen($correo) > 12) {
-                            Mail::send('Emails.Err_TrasladoDeptos', [
-                                'art' => $art
-                            ], function ($msj) use ($correo, $art) {
-                                $msj->subject('SIZ Traslado - Articulo  (' . $art->ItemCode . ')'); //ASUNTO DEL CORREO
-                                $msj->to($correo); //Correo del destinatario
-                            });
-                        }
-                    }
+                    $correos_db = DB::select("
+                        SELECT 
+                        CASE WHEN email like '%@%' THEN email ELSE email + cast('@zarkin.com' as varchar) END AS correo
+                        FROM OHEM
+                        INNER JOIN Siz_Email AS se ON se.No_Nomina = OHEM.U_EmpGiro
+                        WHERE se.Traslados in (1,3)
+                        GROUP BY email
+                    ");
+                    $correos =array_pluck($correos_db, 'correo');
+
+                    if (count($correos) > 0) {                        
+                        Mail::send('Emails.Err_TrasladoDeptos', [
+                            'art' => $art
+                        ], function ($msj) use ($correos, $art) {
+                            $msj->subject('SIZ Traslado - Articulo  (' . $art->ItemCode . ')'); //ASUNTO DEL CORREO
+                            $msj->to($correos); //Correo del destinatario
+                        });                        
                     }
                 }
             } else {

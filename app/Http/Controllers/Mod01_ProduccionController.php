@@ -921,19 +921,25 @@ return redirect()->route('home');
             $Nombre_Destino = DB::table('@PL_RUTAS')->where('U_Orden', $request->input('selectestaciones'))->value('Name');
             $Nombre_Actual = DB::table('@PL_RUTAS')->where('U_Orden', $request->input('Estacion'))->value('Name');
             //--------------------correo-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
-            $Num_Nominas = DB::select(DB::raw("SELECT No_Nomina from Siz_Email where Reprocesos='1'"));
-            foreach ($Num_Nominas as $Num_Nomina) {
-                $user = User::find($Num_Nomina->No_Nomina);
-                $correo = utf8_encode($user['email'] . '@zarkin.com');
-                if (strlen($correo) > 10) {
-                    Mail::send('Emails.Reprocesos', ['Nombre_Destino' => $Nombre_Destino, 'Nombre_Actual' => $Nombre_Actual, 'autorizo' => $autorizo, 'dt' => date('d/M/Y h:m:s'),
-                        'No_Nomina' => $No_Nomina, 'Nom_User' => $Nom_User, 'orden' => $orden,
-                        'cant_r' => $cant_r, 'Est_act' => $Est_act, 'Est_ant' => $Est_ant, 'reason' => $reason, 'nota' => $nota, 'leido' => $leido], function ($msj) use ($correo) {
-                        $msj->subject('Notificaciones SIZ'); //ASUNTO DEL CORREO
-                        $msj->to($correo); //Correo del destinatario
-                    });
-                }
+            $correos_db = DB::select("
+                SELECT 
+                CASE WHEN email like '%@%' THEN email ELSE email + cast('@zarkin.com' as varchar) END AS correo
+                FROM OHEM
+                INNER JOIN Siz_Email AS se ON se.No_Nomina = OHEM.U_EmpGiro
+                WHERE se.Reprocesos = 1
+                GROUP BY email
+            ");
+            $correos = array_pluck($correos_db, 'correo');
+            
+            if (count($correos) > 0) {
+                Mail::send('Emails.Reprocesos', ['Nombre_Destino' => $Nombre_Destino, 'Nombre_Actual' => $Nombre_Actual, 'autorizo' => $autorizo, 'dt' => date('d/M/Y h:m:s'),
+                    'No_Nomina' => $No_Nomina, 'Nom_User' => $Nom_User, 'orden' => $orden,
+                    'cant_r' => $cant_r, 'Est_act' => $Est_act, 'Est_ant' => $Est_ant, 'reason' => $reason, 'nota' => $nota, 'leido' => $leido], function ($msj) use ($correos) {
+                    $msj->subject('Notificaciones SIZ'); //ASUNTO DEL CORREO
+                    $msj->to($correos); //Correo del destinatario
+                });
             }
+            
 //-----------------Refresca a la vista-------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
             Session::flash('mensaje', 'Reproceso Realizado!!...
  De :' . $Nombre_Actual . '
