@@ -930,16 +930,10 @@ public function Solicitud_A_Traslados($id){
     }
 }
 public function Solicitud_A_Picking($id){
- if (Auth::check()) {   
-    
-        DB::update('UPDATE SIZ_SolicitudesMP SET Status = ? WHERE Id_Solicitud = ?', 
-        ['Pendiente', $id]);
-        Session::flash('mensaje','La Solicitud  #'.$id.' se ha enviado a Picking Almacén');
-        //aquicorreo
-        
+ if (Auth::check()) {       
         $solicitante = DB::table('SIZ_SolicitudesMP')       
         ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
-        ->select('OHEM.firstName','OHEM.lastName', DB::raw('case when email like \'%@%\' then email else email + cast(\'@zarkin.com\' as varchar)  end AS correo'))
+        ->select('SIZ_SolicitudesMP.Status','OHEM.firstName','OHEM.lastName', DB::raw('case when email like \'%@%\' then email else email + cast(\'@zarkin.com\' as varchar)  end AS correo'))
         ->where('SIZ_SolicitudesMP.Id_Solicitud', $id)->first();
         $nombreCompleto = $solicitante->firstName.' '.$solicitante->lastName;
          
@@ -960,7 +954,7 @@ public function Solicitud_A_Picking($id){
         ->select('SIZ_MaterialesSolicitudes.*', 'OITM.ItemName', 'OITM.InvntryUom')        
         ->where('Id_Solicitud', $id)->get(); 
         
-        if (count($correos) > 0) {
+        if ((count($correos) > 0) && ($solicitante->Status === 'Autorizacion')) {                                        
             Mail::send('Emails.AutorizacionMP', [
                 'arts' => $arts, 'id' =>$id, 'nombreCompleto' => $nombreCompleto
             ], function ($msj) use ($correos, $id) {
@@ -968,6 +962,9 @@ public function Solicitud_A_Picking($id){
                 $msj->to($correos); //Correo del destinatario
             });
         }
+        DB::update('UPDATE SIZ_SolicitudesMP SET Status = ? WHERE Id_Solicitud = ?', 
+            ['Pendiente', $id]);
+        Session::flash('mensaje','La Solicitud  #'.$id.' se ha enviado a Picking Almacén');
         return redirect()->action('Mod04_MaterialesController@AutorizacionSolicitudes');
     } else {
         return redirect()->route('auth/login');
