@@ -419,7 +419,8 @@ $interpolateProvider.startSymbol('<%');
         $scope.insert.descr = $('input[name=descr]').val();
         $scope.insert.um = $('input[name=um]').val();
         $scope.insert.labelDestino = $( "#destino option:selected" ).text();
-        $scope.articulos.push($scope.insert);
+        $scope.addOrReplace($scope.articulos, $scope.insert)
+        //$scope.articulos.push($scope.insert);
         $scope.insert = null;
         $scope.successVar = null;
         $("#spin").attr("disabled", false);
@@ -432,6 +433,14 @@ $interpolateProvider.startSymbol('<%');
         // removemos del array tareas el indice que guarda al elemento donde se hizo click
         $scope.articulos.splice(pos,1);
     };
+    $scope.addOrReplace = function (array, item) { // (1)
+    //console.log(item);
+    const i = array.findIndex(_item => _item.pKey === item.pKey);
+        if (i > -1) 
+        array[i] = item; // (2)
+        else 
+        array.push(item);
+    }
     $scope.sendArt = function(){
         $( "#spin" ).html('<span><i class="fa fa-spinner fa-pulse fa-lg fa-fw"></i> Enviando...</span>');
         $("#spin").attr("disabled", true);

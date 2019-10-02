@@ -1057,6 +1057,7 @@ public function HacerTraslados($id){
                 }else{
                     $stat1 = strlen($t1);
                     $transfer1 = array();
+                    Session::flash('error', $t1);
                 }
                
                 }else{
@@ -1119,6 +1120,7 @@ public function HacerTraslados($id){
                     }else{
                         $stat2 = strlen($t2);
                         $transfer2 = array();
+                        Session::flash('error', $t2);
                     }
             }else{
                 if (false) {

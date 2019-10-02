@@ -12,7 +12,7 @@
     <style>
         /*
                 Generic Styling, for Desktops/Laptops
-                */
+        */
 
         table {
             width: 100%;
@@ -130,19 +130,17 @@
             <h4>Entradas (Lerma)</h4>
             <div class="col-md-8">
                 <table class="table table-striped" style="table-layout:fixed;">
-                    
-                
                     <?php
-                            $index = 0;
-                            $totalEntrada = 0;
-                            $moneda = 'MXP';   
-                        ?>
+                        $index = 0;
+                        $totalEntrada = 0;
+                        $moneda = 'MXP';   
+                    ?>
                         @foreach ($entradasL as $rep) @if($index == 0)
                         <?php
-                                $DocN = $rep->DocNum; 
-                                $totalEntrada = $rep->LineaTotal + $rep->Iva;
-                                $moneda = $rep->DocCur;
-                            ?>
+                            $DocN = $rep->DocNum; 
+                            $totalEntrada = $rep->LineaTotal + $rep->Iva;
+                            $moneda = $rep->DocCur;
+                        ?>
                             <thead class="table-condensed">
                                 <tr>
                                     <th style="width:100px" class="zrk-gris" scope="col">Entrada</th>
@@ -330,6 +328,7 @@
                 <?php
                                 $DocN = $rep->DocNum; 
                                 $totalEntrada = $rep->LineaTotal + $rep->Iva;
+                                $moneda = $rep->DocCur;
                             ?>
                     <thead class="table-condensed">
                         <tr>
@@ -517,6 +516,7 @@
                 <?php
                                 $DocN = $rep->DocNum; 
                                 $totalEntrada = $rep->LineaTotal + $rep->Iva;
+                                $moneda = $rep->DocCur;
                             ?>
                     <thead class="table-condensed">
                         <tr>
@@ -703,6 +703,7 @@
                     <?php
                                     $DocN = $rep->DocNum; 
                                     $totalEntrada = $rep->LineaTotal + $rep->Iva;
+                                    $moneda = $rep->DocCur;
                                 ?>
                         <thead class="table-condensed">
                             <tr>
