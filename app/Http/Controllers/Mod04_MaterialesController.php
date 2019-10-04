@@ -541,12 +541,19 @@ public function DataSolicitudes_Auht(){
   public function ShowArticulosWH(Request $request)
     {
         $consulta= DB::select('
-        SELECT OITM.ItemCode, ItemName, InvntryUom AS UM, ALMACENES.Existencia FROM OITM
+        SELECT OITM.ItemCode, ItemName, InvntryUom AS UM, (ALMACENES.stock - COALESCE(PROCESO.CantProceso, 0)) AS Existencia FROM OITM
         LEFT JOIN 
-        (SELECT ItemCode, SUM(CASE WHEN WhsCode = \'APG-PA\' OR WhsCode = \'AMP-ST\'  THEN OnHand ELSE 0 END) AS Existencia
+        (SELECT ItemCode, SUM(CASE WHEN WhsCode = \'APG-PA\' OR WhsCode = \'AMP-ST\'  THEN OnHand ELSE 0 END) 
+		AS stock
         FROM dbo.OITW
         GROUP BY ItemCode) AS ALMACENES ON OITM.ItemCode = ALMACENES.ItemCode
+		LEFT JOIN
+		(select ItemCode, sum (Cant_PendienteA) CantProceso
+		 from SIZ_MaterialesSolicitudes mat
+		 where mat.EstatusLinea in (\'S\', \'P\')
+		 group by ItemCode) AS PROCESO ON OITM.ItemCode = PROCESO.ItemCode
         WHERE PrchseItem = \'Y\' AND InvntItem = \'Y\' AND U_TipoMat <> \'PT\' AND U_TipoMat IS NOT NULL
+        AND (ALMACENES.stock - COALESCE(PROCESO.CantProceso, 0)) >= 0
         ');
                $columns = array(
                 ["data" => "ItemCode", "name" => "Código"],
@@ -558,7 +565,7 @@ public function DataSolicitudes_Auht(){
             return response()->json(array('data' => $consulta, 'columns' => $columns));
     }
 public function saveArt(Request $request){   
-    if (Auth::check()) {  
+     
             DB::beginTransaction();
         $err = false;
         $id = 0;
@@ -616,11 +623,9 @@ public function saveArt(Request $request){
                 }               
                 return 'Mensaje: Tu Solicitud ha sido enviada (#'.$id.')';
         }
-        DB::rollBack();       
-        return 'Error: No se guardo la solicitud, favor de notificar a Sistemas';
-    } else {
+        DB::rollBack();  
         return 'reload';
-    }
+    
     
 }
  

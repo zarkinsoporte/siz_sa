@@ -30,6 +30,9 @@
             }
         </style>
         <style>
+          .upperc{
+          text-transform: uppercase;
+          }
     .table-scroll {
         position: relative;
     }
@@ -67,7 +70,9 @@
   <div class="col-md-12">
      <span class="pull-right">
                      <a class="btn btn-primary btn-sm" href="{{url('home/2 AUTORIZACION') }}"><i class="fa fa-angle-left"></i> Atras</a>                                                                                                                                          
-                            <a class="btn btn-success btn-sm" href="{{'update/'.$id}}"><i class="fa fa-send"></i> Enviar a Picking</a>
+                     <a role="button" data-toggle="modal" data-target="#remove" data-id="{{$id}}" class="btn btn-danger"><i
+                          class="fa fa-trash"></i> No Autorizar</a>       
+                     <a class="btn btn-success btn-sm" href="{{'update/'.$id}}"><i class="fa fa-send"></i> Enviar a Picking</a>
                    
                   </span>          
         <!-- /.row -->
@@ -89,7 +94,7 @@
          <th scope="col">Total Disponible</th>
          <th scope="col">Destino</th>
          
-         <th scope="col">Acciones</th>
+         <th scope="col">Editar Cant.</th>
           
         </tr>
       </thead>
@@ -108,8 +113,7 @@
           <td scope="row">{{number_format($art->Disponible, 2)}}</td>
           <td scope="row">{{$art->Destino}}</td>
           <td scope="row">
-          <a role="button" data-toggle="modal" data-target="#edit" data-id="{{$art->Id}}" data-cantr="{{$art->Cant_Requerida}}" data-canta="{{$art->Cant_Autorizada}}" class="btn btn-default"><i class="fa fa-pencil fa-lg" style="color:#007BFF"></i></a>
-            <a role="button" data-toggle="modal" data-target="#remove" data-id="{{$art->Id}}" class="btn btn-default"><i class="fa fa-arrow-circle-o-down fa-lg" style="color:red"></i></a>
+            <a role="button" data-toggle="modal" data-target="#edit" data-id="{{$art->Id}}" data-cantr="{{$art->Cant_Requerida}}" data-canta="{{$art->Cant_Autorizada}}" class="btn btn-default"><i class="fa fa-pencil fa-lg" style="color:#007BFF"></i></a>          
           </td>
         </tr>
         @endforeach
@@ -174,31 +178,38 @@
 <!-- .Model quitar -->
 
 <div class="modal fade" id="remove" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
+  <div class="modal-dialog" role="document" ng-controller="MainController">
+    <div class="modal-content" >
       <div class="modal-header">
 
         {!! Form::open(['url' => 'home/AUTORIZACION/solicitud/articulos/remove', 'method' => 'POST']) !!}
 
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
             aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Quitar Artículo</h4>
+        <h4 class="modal-title">No Autorizar</h4>
         <div class="modal-body">
 
           <input type="hidden" id="articulo-id" name="articulo" >
           <h4>¿Cuál es la razón por la que no está autorizando este material?</h4>
-          <input type="radio" name="reason" value="No Disponible / Apartado" checked>
-          Material No Disponible / Apartado<br>
+          <input type="radio" name="reason" value="Pendiente por Autorizar" checked>
+          Pendiente por Autorizar<br>
           <input type="radio" name="reason" value="Error Captura Solicitud" required>
           Error de Captura en Solicitud<br>         
-          <input type="radio" name="reason" value="Otro">
-          Otro…<br>
-
+          <input type="radio" name="reason" value="Solicitud no Procede">
+          La Solicitud no Procede<br>
+          <br>
+          <div class="form-group">
+            <label for="comment">Observaciones:</label>
+            <textarea ng-keyup="count = total - comment.length" ng-model="comment" ng-init="total=100" class="form-control upperc"
+              maxlength="100" rows="3" id="comment"></textarea>
+            caracteres restantes: <%count%>
+          
+          </div>
         </div>
         <div class="modal-footer">
 
           <button class="btn btn-default" data-dismiss="modal">Cerrar</button>
-          <button type="submit" class="btn btn-primary">Quitar</button>
+          <button type="submit" class="btn btn-primary">Guardar</button>
         </div>
       </div>
     </div>
@@ -288,8 +299,20 @@ document.onkeyup = function(e) {
 </script>
 
 
-
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.7.2/angular.min.js"></script>
+<script>
+  var app = angular.module('app', [], function($interpolateProvider) {
+$interpolateProvider.startSymbol('<%');
+    $interpolateProvider.endSymbol('%>');
+});
+   app.controller("MainController",["$scope", "$http", function($scope, $http){
+    $scope.modals = function(){
+       
+        $("#confirma").modal();
+    }
+    
+    }]);
+</script>
 
 
 
