@@ -265,6 +265,9 @@ Route::get('home/2 PICKING ARTICULOS/solicitud/articulos/return/{id}', 'Mod04_Ma
 Route::get('home/2 PICKING ARTICULOS/solicitud/PDF/{id}', 'Mod04_MaterialesController@SolicitudPDF');
 Route::get('home/2 PICKING ARTICULOS/solicitud/update/{id}', 'Mod04_MaterialesController@Solicitud_A_Traslados');
 Route::post('home/PICKING ARTICULOS/solicitud/articulos/edit', 'Mod04_MaterialesController@editArticuloPicking');
+Route::get('home/lotes/{alm}/{item}', 'Mod04_MaterialesController@vistaLotes');
+Route::post('home/lotes/insert', 'Mod04_MaterialesController@insertLotes');
+Route::get('home/lotes/remove/{id}/{lote}/{alm}', 'Mod04_MaterialesController@removeLote');
 // 4 TRASLADOS
 Route::get('home/4 GENERAR TRASLADO', 'Mod04_MaterialesController@TrasladosArticulos');
 Route::get('datatables.solicitudesTraslados', 'Mod04_MaterialesController@DataTraslados')->name('datatables.solicitudesTraslados');
@@ -314,13 +317,7 @@ Route::post('home/reporte/PRODUCCION POR AREAS', 'Reportes_ProduccionController@
 Route::get('home/reporte/PRODUCCION POR AREAS', 'Reportes_ProduccionController@reporteProdxAreasPDF');
 Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@produccionxareasXLS');
 
- Route::get('/pruebas', function (Request $request) {
-    $filas = DB::table('SIZ_MaterialesSolicitudes')
-    ->where('Id_Solicitud', 7)
-    ->whereIn('EstatusLinea', ['S', 'P'])
-    ->count();
-    dd($filas);
-
+ Route::get('/pruebas', function (Request $request) {      
      $tareas = DB::table('Siz_Tarea_Menu')->get();
 
     foreach ($tareas as $k) {

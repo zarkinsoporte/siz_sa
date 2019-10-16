@@ -158,9 +158,9 @@
                             <tr>                        
                                 <th style="width:5%;">#</th>
                                 <th style="width:7%;">Código</th>
-                                <th style="width:40%;">Descripción</th>
+                                <th style="width:35%;">Descripción</th>
                                 <th style="width:7%;">UM</th>
-                                <th style="width:7%;">Almacén</th>
+                                <th style="width:12%;">Almacén</th>
                                 <th style="width:7%;">Cantidad</th>
                                                              
                                                              
@@ -173,9 +173,9 @@
                         
                                 <td style="width:5%;">{{$art->lineNum}}</td>
                                 <td style="width:7%;">{{$art->ItemCode}}</td>
-                                <td style="width:40%;" class="text-left">{{$art->Dscription}}</td>
+                                <td style="width:35%;" class="text-left">{{$art->Dscription}}</td>
                                 <td style="width:7%;">{{$art->unitMsr}}</td>
-                                <td style="width:7%;">{{$art->WhsCode}}</td>
+                                <td style="width:12%;">{{$art->WhsCode}}</td>
                                 <td style="width:7%;">{{number_format($art->Quantity, 2)}}</td>
                                
                                
