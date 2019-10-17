@@ -516,7 +516,8 @@ public function DataSolicitudes_Auht(){
                   //  ->join('SIZ_MaterialesSolicitudes', 'SIZ_MaterialesSolicitudes.Id_Solicitud', '=', 'SIZ_SolicitudesMP.Id_Solicitud')
             ->join('SIZ_MaterialesSolicitudes', function ($join) {
                 $join->on('SIZ_MaterialesSolicitudes.Id_Solicitud', '=', 'SIZ_SolicitudesMP.Id_Solicitud')
-                    ->where('SIZ_MaterialesSolicitudes.EstatusLinea', '<>', 'A');
+                    //->where('SIZ_MaterialesSolicitudes.EstatusLinea', '<>', 'A');
+                    ->whereIn('EstatusLinea', ['S', 'A']);
             })
                     ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')
                     ->leftjoin('OUDP', 'OUDP.Code', '=', 'dept')
@@ -845,7 +846,63 @@ public function removeArticuloSolicitud(){
 }
 public function removeArticuloNoAutorizado(){
     if (Auth::check()) {
-        DB::update('UPDATE SIZ_MaterialesSolicitudes SET EstatusLinea = ? , Razon_NoAutorizado = ? WHERE Id = ?', ['A', Input::get('reason'), Input::get('articulo')]);
+            $item = DB::table('SIZ_MaterialesSolicitudes')->where('Id', Input::get('articulo'))->first();
+            $id_sol = $item->Id_Solicitud;
+            $estatus_item = $item->EstatusLinea;
+        if (strpos(Input::get('reason'), 'Pendiente') !== false) {
+            if ($estatus_item <> 'C') {
+               DB::update('UPDATE SIZ_MaterialesSolicitudes SET EstatusLinea = ? , 
+                Razon_NoAutorizado = ? WHERE Id = ?', 
+                ['A', Input::get('reason'), Input::get('articulo')]);
+            } else {
+                Session::flash('mensaje', 'Este artículo ya esta cancelado');
+            }
+                        
+        } else {
+            DB::beginTransaction();
+            DB::update('UPDATE SIZ_MaterialesSolicitudes SET EstatusLinea = ? , 
+            Razon_NoAutorizado = ? WHERE Id = ?',
+            ['C', Input::get('reason'), Input::get('articulo')]);
+                
+                $articulosvalidos = DB::table('SIZ_MaterialesSolicitudes')
+                    ->whereIn('EstatusLinea', ['S', 'A'])
+                    ->where('Id_Solicitud', $id_sol)->count();
+
+                if ($articulosvalidos == 0) {
+                    DB::update(
+                        'UPDATE SIZ_SolicitudesMP SET Status = ? 
+                             WHERE Id_Solicitud = ?',
+                        ['Cancelada', $id_sol]
+                    );
+                    // si el Solicitante tiene correo se le avisa
+                    $solicitante = DB::table('SIZ_SolicitudesMP')
+                        ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')
+                        ->select('SIZ_SolicitudesMP.Status', 'OHEM.firstName', 'OHEM.lastName', DB::raw('case when email like \'%@%\' then email else email + cast(\'@zarkin.com\' as varchar)  end AS correo'))
+                        ->where('SIZ_SolicitudesMP.Id_Solicitud', $id_sol)->first();
+                    $nombreCompleto = $solicitante->firstName . ' ' . $solicitante->lastName;
+
+                    $correos = array();
+                    if ( $solicitante->correo !== null ) {
+                        $correos[] = $solicitante->correo;
+                    }
+                    $arts = DB::table('SIZ_MaterialesSolicitudes')
+                        ->join('OITM', 'OITM.ItemCode', '=', 'SIZ_MaterialesSolicitudes.ItemCode')
+                        ->select('SIZ_MaterialesSolicitudes.*', 'OITM.ItemName', 'OITM.InvntryUom')
+                        ->where('Id_Solicitud', $id_sol)->get();
+
+                    if ((count($correos) > 0) && ($solicitante->Status === 'Cancelada')) {
+                        Mail::send('Emails.AutorizacionMP', [
+                            'arts' => $arts, 'id' => $id_sol, 'nombreCompleto' => $nombreCompleto
+                        ], function ($msj) use ($correos, $id_sol) {
+                            $msj->subject('SIZ No se Autorizo Material #' . $id_sol); //ASUNTO DEL CORREO
+                            $msj->to($correos); //Correo del destinatario
+                        });
+                    }
+                    DB::commit();
+                    Session::flash('mensaje', 'Solicitud #' . $id_sol . ' Cancelada');
+                    return redirect('/home/2 AUTORIZACION');
+                }
+        }
         return redirect()->back();
     } else {
         return redirect()->route('auth/login');
@@ -992,7 +1049,7 @@ public function Solicitud_A_Picking($id){
         
         if ((count($correos) > 0) && ($solicitante->Status === 'Autorizacion')) {                                        
             Mail::send('Emails.AutorizacionMP', [
-                'arts' => $arts, 'id' =>$id, 'nombreCompleto' => $nombreCompleto
+                'arts' => $arts, 'id' => $id, 'nombreCompleto' => $nombreCompleto
             ], function ($msj) use ($correos, $id) {
                 $msj->subject('SIZ Autorización Material #'.$id); //ASUNTO DEL CORREO
                 $msj->to($correos); //Correo del destinatario
