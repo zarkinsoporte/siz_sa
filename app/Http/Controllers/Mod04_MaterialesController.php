@@ -1739,21 +1739,34 @@ if (count($traslado_interno) > 0) {
                 and mat.EstatusLinea = \'S\'  ', [$id]))->first();
         //return $articulo->ItemCode;
         $lotes = DB::select('select
-                    T0.DistNumber as NumLote,  T1.Quantity AS Disponible
+                    T0.DistNumber as NumLote,  (T1.Quantity  - COALESCE(PROCESO.CantProceso, 0)) AS Disponible, COALESCE(PROCESO.CantProceso, 0) Proceso
                 from
                     OBTN T0
                     inner join OBTQ T1 on T0.ItemCode = T1.ItemCode and T0.SysNumber = T1.SysNumber
                     inner join OITM T2 on T0.ItemCode = T2.ItemCode
-					left join SIZ_MaterialesSolicitudes as sol on sol.ItemCode = T2.ItemCode
-					left join SIZ_MaterialesLotes as lotesa on lotesa.Id_Item = sol.Id AND lotesa.lote = T0.DistNumber 
-                where
-                    T1.Quantity > 0 AND T0.ItemCode = ? AND WhsCode = ? AND lotesa.Cant IS NULL
-				group by T0.DistNumber, T1.Quantity
+                    LEFT JOIN
+                        (select ItemCode, sum (Cant_PendienteA) CantProceso
+                        from SIZ_MaterialesSolicitudes mat
+                        where mat.EstatusLinea in (\'S\', \'P\')
+                        group by ItemCode) AS PROCESO ON T2.ItemCode = PROCESO.ItemCode
+                     where
+                    T1.Quantity > 0 AND T0.ItemCode = ? AND WhsCode = ? 
+				group by T0.DistNumber, T1.Quantity, CantProceso
 				order by T0.DistNumber', [$articulo->ItemCode, $alm]);
+        $arrayNumLotes = array_pluck($lotes, 'NumLote');
+        //dd($arrayNumLotes);
         $lotesAsignados = DB::table('SIZ_MaterialesLotes')
         ->where('Id_Item', $id)                  
         ->where('alm', $alm)                  
         ->get();
+
+       foreach ($lotesAsignados as $l) {
+           if (($key = array_search($l->lote, $arrayNumLotes)) !== false) {
+           // dd($key);    
+            unset($lotes[$key]);                
+            }
+       }
+      // dd($lotes);
         $sumLotesAsignados = array_sum(array_pluck($lotesAsignados, 'Cant'));
        // dd(array_pluck($lotesAsignados, 'Disponible'));
         

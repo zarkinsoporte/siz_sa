@@ -291,7 +291,7 @@ var data,
     ],
    "rowCallback": function( row, data, index ) {
         //console.log(data['Existencia']);
-    if ( data['Existencia'] == '.00' )
+    if ( parseFloat(data['Existencia']) == 0 )
     {
       //  $(row).addClass("ignoreme");
         $('td',row).addClass("ignoreme");
@@ -338,7 +338,7 @@ var data,
                 var idx = table.cell('.usel', 0).index();
                 var fila = table.rows( idx.row ).data();
                // console.log(fila[0]['Existencia']);
-                if(fila[0]['Existencia'] == '.00'){
+                if(parseFloat(fila[0]['Existencia']) == 0){
                     $('input[name=pKey]').val('');
                     $('input[name=descr]').val('');
                     $('input[name=um]').val('');                   

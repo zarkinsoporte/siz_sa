@@ -60,6 +60,7 @@
           <tr>
             <th># Lote</th>
             <th>Disponible</th>
+            <th>No Disponible</th>
           </tr>
         </thead>
         <tbody>
@@ -74,6 +75,7 @@
                   class="btn btn-primary btn-sm"><i class="fa fa-arrow-right"></i></a>
               </span>
             </td>
+            <td>{{$lote->Proceso}}</td>
           </tr>
           @endforeach
           @else
@@ -84,6 +86,7 @@
                 <a role="button" href="#" class="btn btn-default btn-sm"><i class="fa fa-arrow-right"></i></a>
               </span>
             </td>
+            <td></td>
           </tr>
           @endif
         </tbody>
