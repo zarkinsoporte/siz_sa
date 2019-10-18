@@ -648,7 +648,7 @@ public function ShowDetalleSolicitud($id){
 					SUM(CASE WHEN WhsCode = \'AMP-ST\'  THEN OnHand ELSE 0 END) AS AMPST
                     FROM dbo.OITW
                     GROUP BY ItemCode) AS ALMACENES ON OITM.ItemCode = ALMACENES.ItemCode
-                    WHERE Id_Solicitud = ? AND Cant_PendienteA > 0', [$id]);
+                    WHERE mat.EstatusLinea <> \'C\' AND Id_Solicitud = ? AND Cant_PendienteA > 0', [$id]);
                     $step = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $id)->first();
                     if ($step->Status != 'Autorizacion') {
                          self::asignaAlmacenesOrigen($articulos);                    
@@ -849,6 +849,7 @@ public function removeArticuloNoAutorizado(){
             $item = DB::table('SIZ_MaterialesSolicitudes')->where('Id', Input::get('articulo'))->first();
             $id_sol = $item->Id_Solicitud;
             $estatus_item = $item->EstatusLinea;
+           
         if (strpos(Input::get('reason'), 'Pendiente') !== false) {
             if ($estatus_item <> 'C') {
                DB::update('UPDATE SIZ_MaterialesSolicitudes SET EstatusLinea = ? , 
@@ -859,7 +860,7 @@ public function removeArticuloNoAutorizado(){
             }
                         
         } else {
-            DB::beginTransaction();
+          
             DB::update('UPDATE SIZ_MaterialesSolicitudes SET EstatusLinea = ? , 
             Razon_NoAutorizado = ? WHERE Id = ?',
             ['C', Input::get('reason'), Input::get('articulo')]);
@@ -898,7 +899,6 @@ public function removeArticuloNoAutorizado(){
                             $msj->to($correos); //Correo del destinatario
                         });
                     }
-                    DB::commit();
                     Session::flash('mensaje', 'Solicitud #' . $id_sol . ' Cancelada');
                     return redirect('/home/2 AUTORIZACION');
                 }
