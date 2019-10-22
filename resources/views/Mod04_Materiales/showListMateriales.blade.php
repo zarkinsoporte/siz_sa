@@ -120,17 +120,21 @@ border: 1px solid #000000;
         </div>
     </div>
     <div class="row" ng-if="mensaje > 0 && mensaje2 > 0">
-        <div class="col-md-12">
+        <div class="col-md-6">
             <div class="alert alert-success" role="alert">
+                Para Mercancía que se entregó en sus almacenes: <br>
                 Transferencia interna <%mensaje%> realizada. <a class="btn btn-danger btn-sm" href="{{'PDF/traslado/'}}<%mensaje%>" target="_blank"><i
                         class="fa fa-file-pdf-o"></i> PDF</a>                 
             </div>
+        </div>
+        <div class="col-md-6">            
             <div class="alert alert-success" role="alert">
+                Para Mercancía que se entregará en otros almacenes: <br>
                 La Entrega #<%mensaje2%> fue enviada. 
             </div>
         </div>
     </div>
-    <div class="row" ng-if="successVar.includes('Error')">
+    <div class="row" ng-if="successVar.includes('Error') && merror == 1">
         <div class="col-md-12">
             <div class="alert alert-danger" role="alert">
                 <%successVar%>
@@ -144,13 +148,7 @@ border: 1px solid #000000;
             </div>
         </div>
     </div>    
-    <div class="row" ng-if="nule === 1">
-        <div class="col-md-12">
-            <div class="alert alert-danger" role="alert">
-                Reinicia Sesión en SIZ. Sesión expirada.
-            </div>
-        </div>
-    </div>    
+    
     <div class="row">
        <div class="col-md-12" ng-if="articulos.length > 0">
            <table class="display condensed">
@@ -171,7 +169,7 @@ border: 1px solid #000000;
                     <td><%art.cant%></td>
                     <td><%art.um%></td>
                     <td><%art.labelDestino%></td>
-                    <td><a role="button" ng-click="quitaArt(art)"  class="btn btn-default"><i class="fa fa-trash" style="color:red"></i></a></td>
+                    <td><a id="btnquitar" data-cant="<%art.cant%>" data-index="<%art.index%>" role="button" ng-click="quitaArt(art)"  class="btn btn-default regresacant"><i class="fa fa-trash" style="color:red"></i></a></td>
                 </tr>
             </tbody>
         </table>
@@ -232,6 +230,7 @@ border: 1px solid #000000;
                                                     <input type="text"  name="pKey" class="form-control" required readonly>
                                                         <input type="text" name="descr" hidden>
                                                         <input type="text" name="um" hidden>
+                                                        <input type="text" name="datatableindex" hidden>
                                                 </div>                                               
                                                 </div>
                                                 <div class="col-md-4">
@@ -317,7 +316,7 @@ var data,
     ],
    "rowCallback": function( row, data, index ) {
         //console.log(data['Existencia']);
-    if ( data['Existencia'] == '.000000' )
+    if ( parseFloat( data['Existencia'] ) == 0 )
     {
       //  $(row).addClass("ignoreme");
         $('td',row).addClass("ignoreme");
@@ -352,6 +351,7 @@ var data,
             $('input[name=pKey]').val('');
             $('input[name=descr]').val('');
             $('input[name=um]').val('');
+            $('input[name=datatableindex]').val('');
             $('input[name=cant]').val('');
             $('input[name=cant]').blur();
             $('#submitBtn').attr("disabled", true);
@@ -363,10 +363,11 @@ var data,
                 var idx = table.cell('.usel', 0).index();
                 var fila = table.rows( idx.row ).data();
                // console.log(fila[0]['Existencia']);
-                if(fila[0]['Existencia'] == '.000000'){
+                if(parseFloat( fila[0]['Existencia'] ) == 0){
                     $('input[name=pKey]').val('');
                     $('input[name=descr]').val('');
                     $('input[name=um]').val('');
+                    $('input[name=datatableindex]').val('');
                     $('input[name=cant]').val('');
                     $('input[name=cant]').blur();
                     $('#submitBtn').attr("disabled", true);
@@ -377,6 +378,7 @@ var data,
                     $('input[name=pKey]').val(fila[0]['ItemCode']);
                     $('input[name=descr]').val(fila[0]['ItemName']);
                     $('input[name=um]').val(fila[0]['UM']);
+                    $('input[name=datatableindex]').val(idx.row);
                    // $('input[name=cant]').attr('title', valor+" en Existencia");
                    
                     $('input[name=cant]').focus();                    
@@ -416,7 +418,33 @@ $(window).on('load',function(){
 $('#confirma').modal('show');
 });
 
+$("#submitBtn").click(function(){
+    //console.log(($( "#destino option:selected" ).val()).length);
+    if(($( "#destino option:selected" ).val()).length > 0){
+        var idx = table.cell('.usel', 0).index();
+       // console.log( idx.row);
+        table
+        .rows(idx.row)
+        .every(function (rowIdx, tableLoop, rowLoop) {
+        //tablenest.cell(rowIdx,2).data(fila[0]['Existencia'] - );
+        table.cell(rowIdx, 3).data(parseFloat(table.cell(rowIdx, 3).data()) - parseFloat($('input[name=cant]').val()) );
+        })
+        .draw();
+        //$('input[name=datatableindex]').val($('input[name=cant]').val());
+        //angular.element(document.getElementById('MainController')).scope().AddArt();     
+    }    
+});
 
+$(document).on('click', '.regresacant', function(event) {
+    var cantidad = event.currentTarget.dataset.cant;
+    var dtindex = event.currentTarget.dataset.index;
+    table
+    .rows(dtindex)
+    .every(function (rowIdx, tableLoop, rowLoop) {    
+        table.cell(rowIdx, 3).data(parseFloat(table.cell(rowIdx, 3).data()) + parseFloat(cantidad));
+    })
+    .draw();
+})
 @endsection
 <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.7.2/angular.min.js"></script>
 <script >
@@ -425,10 +453,10 @@ $('#confirma').modal('show');
 $interpolateProvider.startSymbol('<%');
     $interpolateProvider.endSymbol('%>');
 });
-   app.controller("MainController",["$scope", "$http", function($scope, $http){
+   app.controller("MainController",["$scope", "$http", "$window", function($scope, $http, $window){
     $scope.articulos = [];
     $scope.successVar = '';
-    $scope.nule = 0;
+    $scope.merror = 0;
     $scope.mensaje = 0;
     $scope.mensaje2 = 0;
     $scope.btnshow = false;
@@ -442,13 +470,25 @@ $interpolateProvider.startSymbol('<%');
         $scope.insert.descr = $('input[name=descr]').val();
         $scope.insert.um = $('input[name=um]').val();
         $scope.insert.labelDestino = $( "#destino option:selected" ).text();
-        $scope.articulos.push($scope.insert);
+       // $scope.articulos.push($scope.insert);
+       $scope.insert.index = $('input[name=datatableindex]').val();
+        $scope.addOrReplace($scope.articulos, $scope.insert)
         $scope.insert = null;
-        $scope.successVar = null;
         $("#spin").attr("disabled", false);
        // console.log(this.articulos);
         
     };
+    $scope.addOrReplace = function (array, item) { // (1)
+    //console.log(item);
+        const i = array.findIndex(_item => (_item.pKey === item.pKey));
+        if (i > -1) {
+        array[i].cant += item.cant; // (2)
+        array[i].destino = item.destino; // (2)
+        array[i].labelDestino = item.labelDestino; // (2)
+        }else {
+        array.push(item);
+        }
+    }
     $scope.quitaArt = function(item){
         var pos = $scope.articulos.indexOf(item);
         //console.log(index-1);
@@ -472,28 +512,32 @@ $interpolateProvider.startSymbol('<%');
        
         }).then(function (response) {
             $( "#spin" ).html('<span><i class="fa fa-send"></i> Enviar</span>');
-        $scope.articulos = [];
-        $scope.successVar = response.data;
-        
-        if($scope.successVar === null){
-            $scope.nule = 1;
-        } 
-        if ($scope.successVar.includes('Mensaje')) {
-            var aux = $scope.successVar.split(':')
-            $scope.mensaje = aux[1] * 1;
-            $scope.mensaje2 = 0;
-            $scope.btnshow = true;
-        } 
-        if ($scope.successVar.includes(';')){
-            var aux = $scope.successVar.split(';')
-            $scope.mensaje = aux[1] * 1;
-            $scope.mensaje2 = aux[0] * 1;
-            $scope.btnshow = true;
-        }
-        if ($scope.successVar.includes('reload')) {
-            location.reload();
-        }
-        return response.data;
+            $scope.articulos = [];
+            $scope.successVar = response.data;
+            
+            
+            if ($scope.successVar.includes('Mensaje')) {
+                var aux = $scope.successVar.split(':')
+                $scope.mensaje = aux[1] * 1;
+                $scope.mensaje2 = 0;
+                $scope.btnshow = true;
+            } 
+            if ($scope.successVar.includes(';')){
+                var aux = $scope.successVar.split(';')
+                $scope.mensaje = aux[1] * 1;
+                $scope.mensaje2 = aux[0] * 1;
+                $scope.btnshow = true;
+            }
+            if ($scope.successVar.includes('Lotes')) {
+                window.location.replace("{{ url('/hosti') }}");
+            }
+            if($scope.successVar.includes('reload') || $scope.successVar.includes('inactividad')){
+                $window.location.reload();
+            }else{
+                $scope.merror = 1;
+            }
+            
+            return response.data;
         }, function (response) {
         
         }

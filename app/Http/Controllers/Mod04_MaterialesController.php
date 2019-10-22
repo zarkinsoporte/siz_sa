@@ -1306,14 +1306,19 @@ public function HacerTraslados($id){
     {    
         //AND U_TipoMat = \'PT\' 
         $consulta = DB::select('
-        SELECT  top 5 OITM.ItemCode, ItemName, InvntryUom AS UM, ALMACENES.Existencia FROM OITM
+        SELECT  OITM.ItemCode, ItemName, InvntryUom AS UM, (ALMACENES.stock - COALESCE(PROCESO.CantProceso, 0)) AS Existencia FROM OITM
         LEFT JOIN 
-        (SELECT ItemCode, SUM(CASE WHEN WhsCode = \''. $request->get('almacen'). '\'   THEN OnHand ELSE 0 END) AS Existencia
+        (SELECT ItemCode, SUM(CASE WHEN WhsCode = \''. $request->get('almacen'). '\'   THEN OnHand ELSE 0 END) AS stock
         FROM dbo.OITW 
         GROUP BY ItemCode) AS ALMACENES ON OITM.ItemCode = ALMACENES.ItemCode
-        WHERE PrchseItem = \'Y\' AND InvntItem = \'Y\' 
-        
-        AND Existencia > 0
+		LEFT JOIN
+		(select ItemCode, sum (Cant_PendienteA) CantProceso
+		 from SIZ_MaterialesTraslados mat
+		 inner join SIZ_SolicitudesMP sol on sol.Id_Solicitud = mat.Id_Solicitud and sol.AlmacenOrigen =\''. $request->get('almacen'). '\'
+		 where mat.EstatusLinea in (\'S\', \'P\')
+		 group by ItemCode) AS PROCESO ON OITM.ItemCode = PROCESO.ItemCode 
+        WHERE PrchseItem = \'Y\' AND InvntItem = \'Y\' AND (ALMACENES.stock - COALESCE(PROCESO.CantProceso, 0)) > 0
+
         ');
         $columns = array(
             ["data" => "ItemCode", "name" => "Código"],
@@ -1358,7 +1363,7 @@ public function HacerTraslados($id){
                     'EstatusLinea' => $statusL, 'Cant_ASurtir_Origen_A' => $art['cant'], 'Cant_ASurtir_Origen_B' => 0
                 ]
             );                                                 
-        }
+        }        
         if (!($id > 0) || is_null($arts) || is_null($id)) {
             $err = true;
         }
@@ -1367,19 +1372,52 @@ public function HacerTraslados($id){
             return 'Error: No se guardo la solicitud, favor de notificar a Sistemas';
         } else {
             DB::commit();
-            $traslado_interno =  DB::select('select mat.Id, mat.ItemCode, 
+            return self::trasladosInternosExternos($id, $almacen_origen);                       
+        }
+        DB::rollBack();
+        return 'Error: No se guardo la solicitud, favor de notificar a Sistemas';
+    }
+    public static function trasladosInternosExternos($id, $almacen_origen){
+         $todosArticulos = DB::select('select mat.Id, mat.ItemCode, 
             mat.Destino, mat.Cant_ASurtir_Origen_A as CA, mat.Cant_PendienteA, mat.Cant_Pendiente,
-            ALMACENES.AlmacenOrigen from SIZ_MaterialesTraslados mat                                
+            ALMACENES.AlmacenOrigen, LOTES.BatchNum, CASE WHEN (mat.Cant_ASurtir_Origen_A ) = L.Asignado THEN \'Y\' ELSE \'N\' END AS Preparado
+			from SIZ_MaterialesTraslados mat                                
             LEFT JOIN 
             (SELECT ItemCode, SUM(CASE WHEN WhsCode = \''.$almacen_origen.'\' THEN 
             OnHand ELSE 0 END) AS AlmacenOrigen
                 FROM dbo.OITW
                 GROUP BY ItemCode) AS ALMACENES ON mat.ItemCode = ALMACENES.ItemCode
-            WHERE Id_Solicitud = ? AND mat.EstatusLinea = \'I\' 
-            AND mat.Cant_ASurtir_Origen_A <= AlmacenOrigen ', [$id]);
+            LEFT JOIN (					
+                SELECT ItemCode, COUNT (DistNumber) AS BatchNum FROM OBTN 
+                GROUP BY ItemCode
+            )AS LOTES on LOTES.ItemCode = mat.ItemCode
+            LEFT JOIN (					
+                select
+                    T0.DistNumber as NumLote, T2.ItemCode, sum(COALESCE(lotesa.Cant, 0)) AS Asignado
+                from
+                    OBTN T0
+                    inner join OBTQ T1 on T0.ItemCode = T1.ItemCode and T0.SysNumber = T1.SysNumber
+                    inner join OITM T2 on T0.ItemCode = T2.ItemCode
+                    left join SIZ_MaterialesSolicitudes as sol on sol.ItemCode = T2.ItemCode
+                    left join SIZ_MaterialesLotes as lotesa on lotesa.Id_Item = sol.Id AND lotesa.lote = T0.DistNumber 
+                where
+                    T1.Quantity > 0 AND  WhsCode = \''.$almacen_origen.'\'
+                group by T0.DistNumber, T2.ItemCode
+            )AS L on L.ItemCode = mat.ItemCode			
+            WHERE Id_Solicitud = ?
+            AND mat.Cant_ASurtir_Origen_A <= AlmacenOrigen', [$id]);
+            $itemsConLotes = array_where($todosArticulos, function ($key, $item) {
+                return $item->BatchNum > 0 && $item->Preparado == 'N';
+            });
+            if (count($itemsConLotes) > 0) {
+                return 'Lotes';
+            }
 
-            $traslado_externo = array_where($arts, function ($key, $item) use($almacenesDestino){            
-                return !is_numeric(array_search($item['destino'], $almacenesDestino));
+            $traslado_interno =  array_where($todosArticulos, function ($key, $item) {            
+                return $item->EstatusLinea == 'I';
+            });
+            $traslado_externo = array_where($todosArticulos, function ($key, $item){            
+                return $item->EstatusLinea == 'S';
             });
             
             if (count($traslado_externo) > 0) {
@@ -1418,7 +1456,7 @@ if (count($traslado_interno) > 0) {
                 $transfer3 = 0;                 
                 $t3 = 0;
                 $info3 = 0;
-                if (count($arts) > 0) {
+                
                     $data =  array(
                         'id_solicitud' => $id,
                         'pricelist' => '10',
@@ -1436,7 +1474,7 @@ if (count($traslado_interno) > 0) {
                         $stat3 = strlen($t3);
                         $transfer3 = array();
                     }
-                }
+                
                 if ( $stat3 > 0 ) {
                     $mensaje_traslado_interno = 'Error Transferencia: '.$t3;                                        
                 }
@@ -1454,10 +1492,8 @@ if (count($traslado_interno) > 0) {
                
             }else {
             $mensaje_traslado_interno = 'Error. No estan capturados todos los "Tipos de Cambio" en SAP.';                    
-            }
-        
+            }        
 }
-
             if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {                
                 return  $id .';'.$mensaje_traslado_interno;
             } else if(count($traslado_interno) > 0) {
@@ -1468,11 +1504,7 @@ if (count($traslado_interno) > 0) {
                 }
             } else if(count($traslado_externo) > 0) {
                 return 'Entrega #' . $id . ' enviada.';    
-            }            
-           
-        }
-        DB::rollBack();
-        return 'Error: No se guardo la solicitud, favor de notificar a Sistemas';
+            }
     }
     public function TrasladosDeptos(){
         if (Auth::check()) {
@@ -1696,6 +1728,7 @@ if (count($traslado_interno) > 0) {
                     }else{
                         $stat3 = strlen($t3);
                         $transfer3 = array();
+                        Session::flash('error', $t3);
                     }
                 }
                 if ( $stat3 > 0 ) {
