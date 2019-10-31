@@ -46,6 +46,7 @@
             <th>Código</th>
             <th>Descripción</th>
             <th>Cantidad</th>
+            <th>UM</th>
             <th>Destino</th>
           
           </tr>
@@ -56,10 +57,11 @@
             <tr>
             <?php $i++;?>
             <td>{{ $i }}</td>
-            <td>{{$art['pKey']}}</td>
-            <td>{{$art['descr']}}</td>
-            <td>{{$art['cant']}}</td>
-            <td>{{$art['labelDestino']}}</td>
+            <td>{{$art->ItemCode}}</td>
+            <td>{{$art->ItemName}}</td>
+            <td>{{$art->CA}}</td>
+            <td>{{$art->UM}}</td>
+            <td>{{$art->Destino}}</td>
           </tr>
           @endforeach
          
@@ -80,7 +82,7 @@
                         </tr>
                         </tbody>
                     </table></div>
-                    @endif
+   @endif
 </div>
     
 

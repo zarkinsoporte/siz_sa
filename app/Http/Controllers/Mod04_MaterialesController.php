@@ -511,6 +511,34 @@ public function DataTraslados(){
                    
                 ->make(true);
 }
+public function DataEntregaslotes(){
+     $consulta = DB::table('SIZ_SolicitudesMP')
+                    ->join('SIZ_MaterialesTraslados', 
+                    'SIZ_MaterialesTraslados.Id_Solicitud', '=', 'SIZ_SolicitudesMP.Id_Solicitud')
+                    ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')
+                    
+                    ->groupBy('SIZ_SolicitudesMP.Id_Solicitud', 'SIZ_SolicitudesMP.FechaCreacion', 
+                    'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'firstName', 'lastName', 'AlmacenOrigen')
+                    ->select('SIZ_SolicitudesMP.Id_Solicitud', 'SIZ_SolicitudesMP.FechaCreacion', 
+                        'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'OHEM.firstName',
+                        'OHEM.lastName', 'SIZ_SolicitudesMP.AlmacenOrigen')
+                    ->where('SIZ_MaterialesTraslados.Cant_PendienteA', '>', 0)
+                    ->whereNotIn('SIZ_MaterialesTraslados.EstatusLinea', ['T', 'S'])
+                    ->where('SIZ_SolicitudesMP.Status', 'Pendiente')
+                    ->where('SIZ_SolicitudesMP.Usuario', Auth::user()->U_EmpGiro);
+     //$consulta = collect($consulta);
+            return Datatables::of($consulta)             
+                 ->addColumn('folio', function ($item) {                     
+                       return  '<a href="'.url('lotesdeptos/'.$item->Id_Solicitud).'"><i class="fa fa-hand-o-right"></i> '.$item->Id_Solicitud.'</a>';           
+                    }
+                    )
+                    ->addColumn('user_name', function ($item) {
+                       return  $item->firstName.' '.$item->lastName;           
+                    }
+                    )
+                   
+                ->make(true);
+}
 public function DataSolicitudes_Auht(){
      $consulta = DB::table('SIZ_SolicitudesMP')
                   //  ->join('SIZ_MaterialesSolicitudes', 'SIZ_MaterialesSolicitudes.Id_Solicitud', '=', 'SIZ_SolicitudesMP.Id_Solicitud')
@@ -546,7 +574,7 @@ public function DataSolicitudes_Auht(){
   public function ShowArticulosWH(Request $request)
     {
         $consulta= DB::select('
-        SELECT OITM.ItemCode, ItemName, InvntryUom AS UM, (ALMACENES.stock - COALESCE(PROCESO.CantProceso, 0)) AS Existencia FROM OITM
+        SELECT OITM.ItemCode, ItemName, InvntryUom AS UM, (ALMACENES.stock - (COALESCE(PROCESO.CantProceso, 0) + COALESCE(PROCESOT.CantProcesoT, 0))) AS Existencia FROM OITM
         LEFT JOIN 
         (SELECT ItemCode, SUM(CASE WHEN WhsCode = \'APG-PA\' OR WhsCode = \'AMP-ST\'  THEN OnHand ELSE 0 END) 
 		AS stock
@@ -556,9 +584,17 @@ public function DataSolicitudes_Auht(){
 		(select ItemCode, sum (Cant_PendienteA) CantProceso
 		 from SIZ_MaterialesSolicitudes mat
 		 where mat.EstatusLinea in (\'S\', \'P\')
-		 group by ItemCode) AS PROCESO ON OITM.ItemCode = PROCESO.ItemCode
+         group by ItemCode) AS PROCESO ON OITM.ItemCode = PROCESO.ItemCode
+         LEFT JOIN
+         (select mat.ItemCode, sum (Cant_PendienteA) CantProcesoT
+from SIZ_MaterialesTraslados mat
+LEFT JOIN SIZ_SolicitudesMP sol on sol.Id_Solicitud = mat.Id_Solicitud
+where mat.EstatusLinea in (\'S\', \'P\', \'I\', \'E\')
+AND (sol.AlmacenOrigen = \'AMP-ST\' OR sol.AlmacenOrigen = \'APG-PA\' )
+group by ItemCode) AS PROCESOT ON OITM.itemCode = PROCESOT.ItemCode
         WHERE PrchseItem = \'Y\' AND InvntItem = \'Y\' AND U_TipoMat <> \'PT\' AND U_TipoMat IS NOT NULL
-        AND (ALMACENES.stock - COALESCE(PROCESO.CantProceso, 0)) >= 0
+        AND OITM.frozenFor = \'N\'
+        AND (ALMACENES.stock - (COALESCE(PROCESO.CantProceso, 0) + COALESCE(PROCESOT.CantProcesoT, 0))) >= 0
         ');
                $columns = array(
                 ["data" => "ItemCode", "name" => "Código"],
@@ -633,7 +669,6 @@ public function saveArt(Request $request){
     
     
 }
- //++
 public function ShowDetalleSolicitud($id){
     if (Auth::check()) {
     $user = Auth::user();
@@ -671,18 +706,21 @@ public function ShowDetalleSolicitud($id){
                                         )AS LOTES on LOTES.ItemCode = OITM.ItemCode
                                         LEFT JOIN (					
                                             select
-                                                T0.DistNumber as NumLote, T2.ItemCode, sum(COALESCE(lotesa.Cant, 0)) AS Asignado
+                                                T2.ItemCode, sum(COALESCE(lotesa.Cant, 0)) AS Asignado
                                             from
                                                 OBTN T0
                                                 inner join OBTQ T1 on T0.ItemCode = T1.ItemCode and T0.SysNumber = T1.SysNumber
                                                 inner join OITM T2 on T0.ItemCode = T2.ItemCode
-                                                left join SIZ_MaterialesSolicitudes as sol on sol.ItemCode = T2.ItemCode
-                                                left join SIZ_MaterialesLotes as lotesa on lotesa.Id_Item = sol.Id AND lotesa.lote = T0.DistNumber 
-                                            where
+                                                Left join (
+                                                    select sum(matl.Cant) Cant, matt.Id_Solicitud, matt.ItemCode, matl.lote from SIZ_MaterialesLotes matl
+                            inner join SIZ_MaterialesTraslados matt on matt.Id = matl.Id_Item
+                            group by matt.Id_Solicitud, matt.ItemCode, matl.lote
+                            ) as lotesa on lotesa.Id_Solicitud = ? AND lotesa.ItemCode = T1.ItemCode AND lotesa.lote = T0.DistNumber
+                            where
                                                 T1.Quantity > 0 AND  WhsCode = \'AMP-ST\' OR WhsCode = \'APG-PA\' 
-                                            group by T0.DistNumber, T2.ItemCode
+                                            group by T2.ItemCode
                                         )AS L on L.ItemCode = OITM.ItemCode
-                                        WHERE mat.EstatusLinea <> \'A\' AND Id_Solicitud = ?', [$id]);
+                                        WHERE mat.EstatusLinea <> \'A\' AND Id_Solicitud = ?', [$id, $id]);
                     }
     
     //$step = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $id)->value('Status');
@@ -1242,7 +1280,7 @@ public function HacerTraslados($id){
 
             $filas = DB::table('SIZ_MaterialesSolicitudes')
             ->where('Id_Solicitud', $id)
-            ->whereIn('EstatusLinea', ['S', 'P'])
+            ->whereIn('EstatusLinea', ['S', 'P', 'N'])
             ->count();            
             if ($filas > 0) {
                 DB::table('SIZ_SolicitudesMP')
@@ -1263,13 +1301,35 @@ public function HacerTraslados($id){
         return redirect()->route('auth/login');
     }
 }
-  public function getPdfTraslado($transfer){
+public function getPdfSolicitud(){
+    $sol = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', Input::get('sol'))->exists();
+    if ($sol) {
+        return redirect('home/TRASLADOS/solicitud/'.Input::get('sol'));
+    } else {
+        Session::flash('error', 'No tenemos registros de esa Solicitud');
+        return redirect()->back();
+    }
+    
+}
+  public function getPdfTraslado(Request $request){
+    if (isset($request->transfer)) {
+        $transfer = $request->transfer;
+        Session::forget('lotesdeptos');
+    }else{
+        $transfer = $request->input('transfer');
+    }
+      
     $transfer1 = DB::select('select LineNum +1 As lineNum, WTR1.ItemCode, Dscription, unitMsr, COALESCE( Destino, WhsCode ) as WhsCode,
-                                                Quantity, Price, Currency, LineTotal 
-                                                from WTR1 
-                                                left join SIZ_TransferSolicitudesMP as t on t.DocEntry_Transfer = WTR1.DocEntry
-                                                left join SIZ_MaterialesSolicitudes as s on s.Id_Solicitud = t.Id_Solicitud and s.ItemCode = WTR1.ItemCode
-                                                where DocEntry = ? ', [$transfer]);                                
+                Quantity, Price, Currency, LineTotal 
+                from WTR1 
+                left join SIZ_TransferSolicitudesMP as t on t.DocEntry_Transfer = WTR1.DocEntry
+                left join SIZ_MaterialesSolicitudes as s on s.Id_Solicitud = t.Id_Solicitud and s.ItemCode = WTR1.ItemCode
+                where DocEntry = ? ', [$transfer]); 
+       if (count($transfer1) <= 0) {
+        Session::flash('error', 'No tenemos registros de ese Traslado');
+        return redirect()->back();
+       }         
+                               
         $total1 = DB::select('select sum(LineTotal) as Total from WTR1 where DocEntry = ? ', [$transfer]);
         $info1 = DB::select('select FolioNum, Filler, Printed, Comments  from OWTR where DocEntry = ? ', [$transfer]);
         $comentario = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $info1[0]->FolioNum)->value('ComentarioUsuario');
@@ -1305,21 +1365,51 @@ public function HacerTraslados($id){
     public function ShowArticulosWHTraslados(Request $request)
     {    
         //AND U_TipoMat = \'PT\' 
-        $consulta = DB::select('
-        SELECT  OITM.ItemCode, ItemName, InvntryUom AS UM, (ALMACENES.stock - COALESCE(PROCESO.CantProceso, 0)) AS Existencia FROM OITM
-        LEFT JOIN 
-        (SELECT ItemCode, SUM(CASE WHEN WhsCode = \''. $request->get('almacen'). '\'   THEN OnHand ELSE 0 END) AS stock
-        FROM dbo.OITW 
-        GROUP BY ItemCode) AS ALMACENES ON OITM.ItemCode = ALMACENES.ItemCode
-		LEFT JOIN
-		(select ItemCode, sum (Cant_PendienteA) CantProceso
-		 from SIZ_MaterialesTraslados mat
-		 inner join SIZ_SolicitudesMP sol on sol.Id_Solicitud = mat.Id_Solicitud and sol.AlmacenOrigen =\''. $request->get('almacen'). '\'
-		 where mat.EstatusLinea in (\'S\', \'P\')
-		 group by ItemCode) AS PROCESO ON OITM.ItemCode = PROCESO.ItemCode 
-        WHERE PrchseItem = \'Y\' AND InvntItem = \'Y\' AND (ALMACENES.stock - COALESCE(PROCESO.CantProceso, 0)) > 0
-
-        ');
+        if ($request->get('almacen') !== 'AMP-ST' && $request->get('almacen') !== 'APG-PA') {
+            $consulta = DB::select('
+            SELECT  OITM.ItemCode, ItemName, InvntryUom AS UM, (ALMACENES.stock - COALESCE(PROCESO.CantProceso, 0)) AS Existencia FROM OITM
+            LEFT JOIN 
+            (SELECT ItemCode, SUM(CASE WHEN WhsCode = \''. $request->get('almacen'). '\'   THEN OnHand ELSE 0 END) AS stock
+            FROM dbo.OITW 
+            GROUP BY ItemCode) AS ALMACENES ON OITM.ItemCode = ALMACENES.ItemCode
+            LEFT JOIN
+            (select ItemCode, sum (Cant_PendienteA) CantProceso
+            from SIZ_MaterialesTraslados mat
+            inner join SIZ_SolicitudesMP sol on sol.Id_Solicitud = mat.Id_Solicitud 
+            AND sol.AlmacenOrigen =\''. $request->get('almacen'). '\'
+            where mat.EstatusLinea in (\'S\', \'P\', \'I\', \'E\')
+            group by ItemCode) AS PROCESO ON OITM.ItemCode = PROCESO.ItemCode 
+            WHERE PrchseItem = \'Y\' AND InvntItem = \'Y\' 
+            AND OITM.frozenFor = \'N\'
+            AND (ALMACENES.stock - COALESCE(PROCESO.CantProceso, 0)) > 0
+            ');
+        } else {
+            $consulta = DB::select('
+            SELECT  OITM.ItemCode, ItemName, InvntryUom AS UM, (ALMACENES.stock - (COALESCE(PROCESO.CantProceso, 0) + COALESCE(PROCESOSOL.CantProcesosol, 0))) AS Existencia FROM OITM
+            LEFT JOIN 
+            (SELECT ItemCode, SUM(CASE WHEN WhsCode = \''. $request->get('almacen'). '\'   THEN OnHand ELSE 0 END) AS stock
+            FROM dbo.OITW 
+            GROUP BY ItemCode) AS ALMACENES ON OITM.ItemCode = ALMACENES.ItemCode
+            LEFT JOIN
+            (select ItemCode, sum (Cant_PendienteA) CantProceso
+            from SIZ_MaterialesTraslados mat
+            inner join SIZ_SolicitudesMP sol on sol.Id_Solicitud = mat.Id_Solicitud 
+            AND sol.AlmacenOrigen =\''. $request->get('almacen'). '\'
+            where mat.EstatusLinea in (\'S\', \'P\', \'I\', \'E\')
+            group by ItemCode) AS PROCESO ON OITM.ItemCode = PROCESO.ItemCode 
+            LEFT JOIN (
+            select ItemCode, sum(Cant_PendienteA)AS CantProcesosol
+                        from SIZ_MaterialesSolicitudes mat
+                        where mat.EstatusLinea in (\'S\', \'P\')
+                        group by ItemCode
+                        ) AS PROCESOSOL ON PROCESOSOL.ItemCode = OITM.ItemCode
+            WHERE PrchseItem = \'Y\' AND InvntItem = \'Y\' 
+            AND OITM.frozenFor = \'N\'
+            AND (ALMACENES.stock - (COALESCE(PROCESO.CantProceso, 0) + COALESCE(PROCESOSOL.CantProcesosol, 0))) > 0
+            ');
+        }
+        
+        
         $columns = array(
             ["data" => "ItemCode", "name" => "Código"],
             ["data" => "ItemName", "name" => "Descripción"],
@@ -1329,8 +1419,164 @@ public function HacerTraslados($id){
 
         return response()->json(array('data' => $consulta, 'columns' => $columns));
     }
+    public function HacerEntrega($almacen_origen, $id){
+        //sreturn redirect()->back();
+        $todosArticulos = DB::select('select mat.Id, mat.ItemCode, OITM.ItemName,
+        mat.Destino, mat.Cant_ASurtir_Origen_A as CA, mat.Cant_PendienteA, mat.Cant_Pendiente,
+        ALMACENES.AlmacenOrigen, LOTES.BatchNum, mat.EstatusLinea, OITM.InvntryUom as UM,
+        CASE WHEN (mat.Cant_ASurtir_Origen_A ) = L.Asignado THEN \'Y\' ELSE \'N\' END AS Preparado
+        from SIZ_MaterialesTraslados mat 
+        
+        LEFT JOIN OITM on OITM.ItemCode = mat.ItemCode                                
+        LEFT JOIN 
+        (SELECT ItemCode, SUM(CASE WHEN WhsCode = \''.$almacen_origen.'\' THEN 
+        OnHand ELSE 0 END) AS AlmacenOrigen
+            FROM dbo.OITW
+            GROUP BY ItemCode) AS ALMACENES ON mat.ItemCode = ALMACENES.ItemCode
+        LEFT JOIN (					
+            SELECT ItemCode, COUNT (DistNumber) AS BatchNum FROM OBTN 
+            GROUP BY ItemCode
+        )AS LOTES on LOTES.ItemCode = mat.ItemCode
+        LEFT JOIN (					
+            select
+                T2.ItemCode, sum(COALESCE(lotesa.Cant, 0)) AS Asignado
+            from
+                OBTN T0
+                inner join OBTQ T1 on T0.ItemCode = T1.ItemCode and T0.SysNumber = T1.SysNumber
+                inner join OITM T2 on T0.ItemCode = T2.ItemCode
+                Left join (
+                    select sum(matl.Cant) Cant, matt.Id_Solicitud, matt.ItemCode, matl.lote from SIZ_MaterialesLotes matl
+                            inner join SIZ_MaterialesTraslados matt on matt.Id = matl.Id_Item
+                            group by matt.Id_Solicitud, matt.ItemCode, matl.lote
+                            ) as lotesa on lotesa.Id_Solicitud = ? AND lotesa.ItemCode = T1.ItemCode AND lotesa.lote = T0.DistNumber
+                            where
+                T1.Quantity > 0 AND  WhsCode = \''.$almacen_origen.'\'
+            group by T2.ItemCode
+        )AS L on L.ItemCode = mat.ItemCode			
+        WHERE Id_Solicitud = ?
+        AND mat.Cant_ASurtir_Origen_A <= AlmacenOrigen AND mat.EstatusLinea <> \'T\'', [$id, $id]);
+            
+        $itemsConLotes = array_where($todosArticulos, function ($key, $item) {
+            return $item->BatchNum > 0 && $item->Preparado == 'N';
+        });
+        if (count($itemsConLotes) > 0) {
+            Session::flash('error', 'Termina de asignar Lotes');
+            return redirect()->back();
+        }else{
+            DB::table('SIZ_MaterialesTraslados')
+            ->where('Id_Solicitud', $id)
+            ->where('EstatusLinea', 'E')
+            ->update(['EstatusLinea' => 'S']);  
+            DB::commit();
+        }
+       
+        $traslado_interno =  array_where($todosArticulos, function ($key, $item) {            
+            return $item->EstatusLinea == 'I';
+        });
+        $traslado_externo = array_where($todosArticulos, function ($key, $item){            
+            return $item->EstatusLinea == 'E';
+        });
+        $usercomment = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $id)
+        ->value('ComentarioUsuario');
+        
+        if (count($traslado_externo) > 0) {
+           
+            $correos_db = DB::select("
+                SELECT 
+                CASE WHEN email like '%@%' THEN email ELSE email + cast('@zarkin.com' as varchar) END AS correo
+                FROM OHEM
+                INNER JOIN Siz_Email AS se ON se.No_Nomina = OHEM.U_EmpGiro
+                WHERE se.Traslados in (1,3)
+                GROUP BY email
+            ");
+            $correos = array_pluck($correos_db, 'correo');
+            if (count($correos) > 0) {                    
+                Mail::send('Emails.TrasladosDeptos', [
+                    'arts' => $traslado_externo, 'id' => $id, 'comentario' => $usercomment, 'origen' => $almacen_origen
+                ], function ($msj) use ($correos, $id) {
+                    $msj->subject('SIZ Traslado #' . $id); //ASUNTO DEL CORREO
+                    $msj->to($correos); //Correo del destinatario
+                });                        
+            }
+        }
+
+
+if (count($traslado_interno) > 0) {
+$rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
+        if (count($rates) >= 3) {
+       // if (true) {
+            //PERSONA QUE SOLICITA
+            $solicitud = DB::table('SIZ_SolicitudesMP')       
+                ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
+                ->select('OHEM.firstName','OHEM.lastName', 'SIZ_SolicitudesMP.*')
+                ->where('SIZ_SolicitudesMP.Id_Solicitud', $id)->first();
+            $nombreCompleto = $solicitud->firstName.' '.$solicitud->lastName;    
+                          
+            $stat3 = 0;
+            $transfer3 = 0;                 
+            $t3 = 0;
+            $info3 = 0;
+            
+                $data =  array(
+                    'id_solicitud' => $id,
+                    'pricelist' => '10',
+                    'almacen_origen' => $solicitud->AlmacenOrigen,
+                    'items' => $traslado_interno,
+                    'nombre_completo' => $nombreCompleto
+                );
+                // dd($data);   
+                
+                        $t3 = SAP::Transfer2($data);                                               
+
+                if (is_numeric($t3) && $t3 > 0 ) {                                             
+                    $mensaje_traslado_interno = $t3;
+                }else{
+                    $stat3 = strlen($t3);
+                    $transfer3 = array();
+                }
+            
+            if ( $stat3 > 0 ) {
+                $mensaje_traslado_interno = 'Error Transferencia: '.$t3;                                        
+            }
+            $filas = DB::table('SIZ_MaterialesTraslados')
+            ->where('Id_Solicitud', $id)
+            ->where('EstatusLinea', '<>', 'T' )
+            ->count();            
+            if ($filas > 0) {
+               
+            } elseif($filas == 0) {
+                DB::table('SIZ_SolicitudesMP')
+                ->where('Id_Solicitud', $id)
+                ->update(['Status' => 'Cerrada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
+            }
+           
+        }else {
+            $mensaje_traslado_interno = 'Error. No estan capturados todos los "Tipos de Cambio" en SAP.';                    
+        }        
+}
+
+if (count($traslado_interno) > 0 && count($traslado_externo) > 0) { 
+        Session::flash('ambos', 'true'); 
+        Session::flash('interno', $mensaje_traslado_interno);   
+        Session::flash('externo','Entrega #' . $id . ' enviada.'); 
+        return redirect()->back(); 
+        } else if(count($traslado_interno) > 0) {
+            if (strpos($mensaje_traslado_interno, 'Error') !== false) {
+                Session::flash('error', $mensaje_traslado_interno);
+                 return redirect()->back();
+            }else{
+                Session::flash('interno', $mensaje_traslado_interno);
+                 return redirect()->back();
+            }
+        } else if(count($traslado_externo) > 0) {
+            Session::flash('externo','Entrega #' . $id . ' enviada.');
+             return redirect()->back();                
+        }
+        ///
+    }
     public function saveTraslado(Request $request)
     {
+        
         DB::beginTransaction();
         $err = false;
         $id = 0;
@@ -1350,7 +1596,7 @@ public function HacerTraslados($id){
                         ->where('TrasladoDeptos', 'OD')->lists('Code');
                         
         foreach ($arts as $art) {            
-            $statusL = 'S';
+            $statusL = 'E';
             if (is_numeric(array_search($art['destino'], $almacenesDestino))) {
                 $statusL = 'I';
             } 
@@ -1370,141 +1616,248 @@ public function HacerTraslados($id){
         if ($err) {
             DB::rollBack();
             return 'Error: No se guardo la solicitud, favor de notificar a Sistemas';
-        } else {
-            DB::commit();
-            return self::trasladosInternosExternos($id, $almacen_origen);                       
-        }
-        DB::rollBack();
-        return 'Error: No se guardo la solicitud, favor de notificar a Sistemas';
-    }
-    public static function trasladosInternosExternos($id, $almacen_origen){
-         $todosArticulos = DB::select('select mat.Id, mat.ItemCode, 
-            mat.Destino, mat.Cant_ASurtir_Origen_A as CA, mat.Cant_PendienteA, mat.Cant_Pendiente,
-            ALMACENES.AlmacenOrigen, LOTES.BatchNum, CASE WHEN (mat.Cant_ASurtir_Origen_A ) = L.Asignado THEN \'Y\' ELSE \'N\' END AS Preparado
-			from SIZ_MaterialesTraslados mat                                
-            LEFT JOIN 
-            (SELECT ItemCode, SUM(CASE WHEN WhsCode = \''.$almacen_origen.'\' THEN 
-            OnHand ELSE 0 END) AS AlmacenOrigen
-                FROM dbo.OITW
-                GROUP BY ItemCode) AS ALMACENES ON mat.ItemCode = ALMACENES.ItemCode
-            LEFT JOIN (					
-                SELECT ItemCode, COUNT (DistNumber) AS BatchNum FROM OBTN 
-                GROUP BY ItemCode
-            )AS LOTES on LOTES.ItemCode = mat.ItemCode
-            LEFT JOIN (					
-                select
-                    T0.DistNumber as NumLote, T2.ItemCode, sum(COALESCE(lotesa.Cant, 0)) AS Asignado
-                from
-                    OBTN T0
-                    inner join OBTQ T1 on T0.ItemCode = T1.ItemCode and T0.SysNumber = T1.SysNumber
-                    inner join OITM T2 on T0.ItemCode = T2.ItemCode
-                    left join SIZ_MaterialesSolicitudes as sol on sol.ItemCode = T2.ItemCode
-                    left join SIZ_MaterialesLotes as lotesa on lotesa.Id_Item = sol.Id AND lotesa.lote = T0.DistNumber 
-                where
-                    T1.Quantity > 0 AND  WhsCode = \''.$almacen_origen.'\'
-                group by T0.DistNumber, T2.ItemCode
-            )AS L on L.ItemCode = mat.ItemCode			
-            WHERE Id_Solicitud = ?
-            AND mat.Cant_ASurtir_Origen_A <= AlmacenOrigen', [$id]);
-            $itemsConLotes = array_where($todosArticulos, function ($key, $item) {
-                return $item->BatchNum > 0 && $item->Preparado == 'N';
-            });
-            if (count($itemsConLotes) > 0) {
-                return 'Lotes';
-            }
-
-            $traslado_interno =  array_where($todosArticulos, function ($key, $item) {            
-                return $item->EstatusLinea == 'I';
-            });
-            $traslado_externo = array_where($todosArticulos, function ($key, $item){            
-                return $item->EstatusLinea == 'S';
-            });
+        } 
+        $todosArticulos = DB::select('select mat.Id, mat.ItemCode, OITM.ItemName,
+        mat.Destino, mat.Cant_ASurtir_Origen_A as CA, mat.Cant_PendienteA, mat.Cant_Pendiente,
+        ALMACENES.AlmacenOrigen, LOTES.BatchNum, mat.EstatusLinea, OITM.InvntryUom as UM,
+         CASE WHEN (mat.Cant_ASurtir_Origen_A ) = L.Asignado THEN \'Y\' ELSE \'N\' END AS Preparado
+        from SIZ_MaterialesTraslados mat  
+        LEFT JOIN OITM on OITM.ItemCode = mat.ItemCode                               
+        LEFT JOIN 
+        (SELECT ItemCode, SUM(CASE WHEN WhsCode = \''.$almacen_origen.'\' THEN 
+        OnHand ELSE 0 END) AS AlmacenOrigen
+            FROM dbo.OITW
+            GROUP BY ItemCode) AS ALMACENES ON mat.ItemCode = ALMACENES.ItemCode
+        LEFT JOIN (					
+            SELECT ItemCode, COUNT (DistNumber) AS BatchNum FROM OBTN 
+            GROUP BY ItemCode
+        )AS LOTES on LOTES.ItemCode = mat.ItemCode
+        LEFT JOIN (					
+            select
+                T2.ItemCode, sum(COALESCE(lotesa.Cant, 0)) AS Asignado
+            from
+                OBTN T0
+                inner join OBTQ T1 on T0.ItemCode = T1.ItemCode and T0.SysNumber = T1.SysNumber
+                inner join OITM T2 on T0.ItemCode = T2.ItemCode
+                Left join (
+                    select sum(matl.Cant) Cant, matt.Id_Solicitud, matt.ItemCode, matl.lote from SIZ_MaterialesLotes matl
+                    inner join SIZ_MaterialesTraslados matt on matt.Id = matl.Id_Item
+                    group by matt.Id_Solicitud, matt.ItemCode, matl.lote
+                    ) as lotesa on lotesa.Id_Solicitud = ? AND lotesa.ItemCode = T1.ItemCode AND lotesa.lote = T0.DistNumber
+                     where
+                T1.Quantity > 0 AND  WhsCode = \''.$almacen_origen.'\'
+            group by T2.ItemCode
+        )AS L on L.ItemCode = mat.ItemCode			
+        WHERE Id_Solicitud = ?
+        AND mat.Cant_ASurtir_Origen_A <= AlmacenOrigen AND mat.EstatusLinea <> \'T\'', [$id, $id]);
             
-            if (count($traslado_externo) > 0) {
-               
-                $correos_db = DB::select("
-                    SELECT 
-                    CASE WHEN email like '%@%' THEN email ELSE email + cast('@zarkin.com' as varchar) END AS correo
-                    FROM OHEM
-                    INNER JOIN Siz_Email AS se ON se.No_Nomina = OHEM.U_EmpGiro
-                    WHERE se.Traslados in (1,3)
-                    GROUP BY email
-                ");
-                $correos = array_pluck($correos_db, 'correo');
-                if (count($correos) > 0) {                    
-                    Mail::send('Emails.TrasladosDeptos', [
-                        'arts' => $traslado_externo, 'id' => $id, 'comentario' => $usercomment, 'origen' => $almacen_origen
-                    ], function ($msj) use ($correos, $id) {
-                        $msj->subject('SIZ Traslado #' . $id); //ASUNTO DEL CORREO
-                        $msj->to($correos); //Correo del destinatario
-                    });                        
-                }
+        $itemsConLotes = array_where($todosArticulos, function ($key, $item) {
+            return $item->BatchNum > 0 && $item->Preparado == 'N';
+        });
+        if (count($itemsConLotes) > 0) {
+            DB::commit();
+            Session::put('lotesdeptos', $id);
+            return 'lotesdeptos';
+        }else{
+            DB::table('SIZ_MaterialesTraslados')
+            ->where('Id_Solicitud', $id)
+            ->where('EstatusLinea', 'E')
+            ->update(['EstatusLinea' => 'S']);  
+            DB::commit();
+        }
+       
+        $traslado_interno =  array_where($todosArticulos, function ($key, $item) {            
+            return $item->EstatusLinea == 'I';
+        });
+        $traslado_externo = array_where($todosArticulos, function ($key, $item){            
+            return $item->EstatusLinea == 'E';
+        });
+        
+        if (count($traslado_externo) > 0) {
+           
+            $correos_db = DB::select("
+                SELECT 
+                CASE WHEN email like '%@%' THEN email ELSE email + cast('@zarkin.com' as varchar) END AS correo
+                FROM OHEM
+                INNER JOIN Siz_Email AS se ON se.No_Nomina = OHEM.U_EmpGiro
+                WHERE se.Traslados in (1,3)
+                GROUP BY email
+            ");
+            $correos = array_pluck($correos_db, 'correo');
+            if (count($correos) > 0) {                    
+                Mail::send('Emails.TrasladosDeptos', [
+                    'arts' => $traslado_externo, 'id' => $id, 'comentario' => $usercomment, 'origen' => $almacen_origen
+                ], function ($msj) use ($correos, $id) {
+                    $msj->subject('SIZ Traslado #' . $id); //ASUNTO DEL CORREO
+                    $msj->to($correos); //Correo del destinatario
+                });                        
             }
+        }
+
 
 if (count($traslado_interno) > 0) {
-    $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
-            if (count($rates) >= 3) {
-           // if (true) {
-                //PERSONA QUE SOLICITA
-                $solicitud = DB::table('SIZ_SolicitudesMP')       
-                    ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
-                    ->select('OHEM.firstName','OHEM.lastName', 'SIZ_SolicitudesMP.*')
-                    ->where('SIZ_SolicitudesMP.Id_Solicitud', $id)->first();
-                $nombreCompleto = $solicitud->firstName.' '.$solicitud->lastName;    
-                              
-                $stat3 = 0;
-                $transfer3 = 0;                 
-                $t3 = 0;
-                $info3 = 0;
+$rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
+        if (count($rates) >= 3) {
+       // if (true) {
+            //PERSONA QUE SOLICITA
+            $solicitud = DB::table('SIZ_SolicitudesMP')       
+                ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
+                ->select('OHEM.firstName','OHEM.lastName', 'SIZ_SolicitudesMP.*')
+                ->where('SIZ_SolicitudesMP.Id_Solicitud', $id)->first();
+            $nombreCompleto = $solicitud->firstName.' '.$solicitud->lastName;    
+                          
+            $stat3 = 0;
+            $transfer3 = 0;                 
+            $t3 = 0;
+            $info3 = 0;
+            
+                $data =  array(
+                    'id_solicitud' => $id,
+                    'pricelist' => '10',
+                    'almacen_origen' => $solicitud->AlmacenOrigen,
+                    'items' => $traslado_interno,
+                    'nombre_completo' => $nombreCompleto
+                );
+               //  dd($data);   
                 
-                    $data =  array(
-                        'id_solicitud' => $id,
-                        'pricelist' => '10',
-                        'almacen_origen' => $solicitud->AlmacenOrigen,
-                        'items' => $traslado_interno,
-                        'nombre_completo' => $nombreCompleto
-                    );
-                   //  dd($data);   
-                    
-                            $t3 = SAP::Transfer2($data);                                               
+                        $t3 = SAP::Transfer2($data);                                               
 
-                    if (is_numeric($t3) && $t3 > 0 ) {                                             
-                        $mensaje_traslado_interno = $t3;
-                    }else{
-                        $stat3 = strlen($t3);
-                        $transfer3 = array();
-                    }
-                
-                if ( $stat3 > 0 ) {
-                    $mensaje_traslado_interno = 'Error Transferencia: '.$t3;                                        
-                }
-                $filas = DB::table('SIZ_MaterialesTraslados')
-                ->where('Id_Solicitud', $id)
-                ->whereIn('EstatusLinea', ['S', 'P'])
-                ->count();            
-                if ($filas > 0) {
-                   
-                } elseif($filas == 0) {
-                    DB::table('SIZ_SolicitudesMP')
-                    ->where('Id_Solicitud', $id)
-                    ->update(['Status' => 'Cerrada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
-                }
-               
-            }else {
-            $mensaje_traslado_interno = 'Error. No estan capturados todos los "Tipos de Cambio" en SAP.';                    
-            }        
-}
-            if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {                
-                return  $id .';'.$mensaje_traslado_interno;
-            } else if(count($traslado_interno) > 0) {
-                if (strpos($mensaje_traslado_interno, 'Error') !== false) {
-                     return $mensaje_traslado_interno;
+                if (is_numeric($t3) && $t3 > 0 ) {                                             
+                    $mensaje_traslado_interno = $t3;
                 }else{
-                    return 'Mensaje:'.$mensaje_traslado_interno; //link pdf
+                    $stat3 = strlen($t3);
+                    $transfer3 = array();
                 }
-            } else if(count($traslado_externo) > 0) {
-                return 'Entrega #' . $id . ' enviada.';    
+            
+            if ( $stat3 > 0 ) {
+                $mensaje_traslado_interno = 'Error Transferencia: '.$t3;                                        
             }
+            $filas = DB::table('SIZ_MaterialesTraslados')
+            ->where('Id_Solicitud', $id)
+            ->where('EstatusLinea', '<>', 'T' )
+            ->count();            
+            if ($filas > 0) {
+               
+            } elseif($filas == 0) {
+                DB::table('SIZ_SolicitudesMP')
+                ->where('Id_Solicitud', $id)
+                ->update(['Status' => 'Cerrada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
+            }
+           
+        }else {
+        $mensaje_traslado_interno = 'Error. No estan capturados todos los "Tipos de Cambio" en SAP.';                    
+        }        
+}
+DB::commit();
+if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {                
+            return  $id .';'.$mensaje_traslado_interno;
+        } else if(count($traslado_interno) > 0) {
+            if (strpos($mensaje_traslado_interno, 'Error') !== false) {
+                 return $mensaje_traslado_interno;
+            }else{
+                return 'Mensaje:'.$mensaje_traslado_interno; //link pdf
+            }
+        } else if(count($traslado_externo) > 0) {
+            return 'Entrega #' . $id . ' enviada.';    
+        }                      
+        
+    }
+    public function lotesdeptos(Request $request){
+
+       // dd( $request->session()->get('lotesdept')) ;
+        if (Auth::check()) {
+           // dd($request->id);
+                
+                if (isset($request->id)) {
+                    $id = $request->id;
+                }else{
+                    if (Session::has('lotesdeptos')) {
+                        $id = Session::get('lotesdeptos');
+                    }else{
+                        Session::flash('error', 'No hemos podido definir el número de solicitud');
+                        return redirect()->back();
+                    }
+                }
+                
+                $user = Auth::user();
+                $actividades = $user->getTareas();  
+               
+                $almacen_origen = DB::table('SIZ_SolicitudesMP')
+                ->where('Id_Solicitud', $id)
+                ->value('AlmacenOrigen');
+
+                $todosArticulos = DB::select('
+                select mat.Id, mat.ItemCode, OITM.InvntryUom as UM, OITM.ItemName, mat.Destino, 
+                                        mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente,
+                                         mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A AS CA,
+                ALMACENES.AlmacenOrigen,
+                mat.EstatusLinea, LOTES.BatchNum, 
+                CASE WHEN (mat.Cant_ASurtir_Origen_A ) = L.Asignado THEN \'Y\' ELSE \'N\' END AS Preparado
+                from SIZ_MaterialesTraslados mat 
+                LEFT JOIN OITM on OITM.ItemCode = mat.ItemCode                               
+                LEFT JOIN 
+                (SELECT ItemCode, SUM(CASE WHEN WhsCode = \''.$almacen_origen.'\' THEN 
+                OnHand ELSE 0 END) AS AlmacenOrigen
+                    FROM dbo.OITW
+                    GROUP BY ItemCode) AS ALMACENES ON mat.ItemCode = ALMACENES.ItemCode
+                LEFT JOIN (					
+                    SELECT ItemCode, COUNT (DistNumber) AS BatchNum FROM OBTN 
+                    GROUP BY ItemCode
+                )AS LOTES on LOTES.ItemCode = mat.ItemCode
+                LEFT JOIN (					
+                    select
+                        T2.ItemCode, sum(COALESCE(lotesa.Cant, 0)) AS Asignado
+                    from
+                        OBTN T0
+                        inner join OBTQ T1 on T0.ItemCode = T1.ItemCode and T0.SysNumber = T1.SysNumber
+                        inner join OITM T2 on T0.ItemCode = T2.ItemCode
+                        Left join (
+                            select sum(matl.Cant) Cant, matt.Id_Solicitud, matt.ItemCode, matl.lote from SIZ_MaterialesLotes matl
+                            inner join SIZ_MaterialesTraslados matt on matt.Id = matl.Id_Item
+                            group by matt.Id_Solicitud, matt.ItemCode, matl.lote
+                            ) as lotesa on lotesa.Id_Solicitud = ? AND lotesa.ItemCode = T1.ItemCode AND lotesa.lote = T0.DistNumber
+                            where
+                        T1.Quantity > 0 AND  WhsCode = \''.$almacen_origen.'\'
+                    group by T2.ItemCode
+                )AS L on L.ItemCode = mat.ItemCode			
+                WHERE Id_Solicitud = ?
+                AND mat.Cant_ASurtir_Origen_A <= AlmacenOrigen AND mat.EstatusLinea in (\'E\', \'I\')', [$id, $id]);
+                    
+                $itemsConLotes = array_where($todosArticulos, function ($key, $item) {
+                    return $item->BatchNum > 0 && $item->Preparado == 'N';
+                });
+               
+                $articulos_validos = array_where($todosArticulos, function ($key,$item) {
+                    return $item->EstatusLinea == 'S' || $item->EstatusLinea == 'I' || $item->EstatusLinea == 'E';
+                });
+              //  dd($itemsConLotes);
+                $param = array(        
+                    'actividades' => $actividades,
+                    'ultimo' => count($actividades),    
+                    'id' => $id,
+                    'itemsConLotes' => count($itemsConLotes),
+                    'articulos_validos' => $articulos_validos,
+                    'almacen_origen' => $almacen_origen
+                );
+                return view('Mod04_Materiales.LotesDeptos', $param);
+            
+        } else {
+            return redirect()->route('auth/login');
+        }
+    }
+    public function Entregaslotes(){
+        if (Auth::check()) {
+            $user = Auth::user();
+            $actividades = $user->getTareas();  
+    
+            $param = array(        
+                'actividades' => $actividades,
+                'ultimo' => count($actividades),          
+            );
+            return view('Mod04_Materiales.EntregasLotes', $param);
+        } else {
+             return redirect()->route('auth/login');
+        } 
     }
     public function TrasladosDeptos(){
         if (Auth::check()) {
@@ -1539,6 +1892,7 @@ if (count($traslado_interno) > 0) {
             )
             ->whereNotNull('SIZ_SolicitudesMP.AlmacenOrigen')
             ->where('SIZ_MaterialesTraslados.Cant_Pendiente', '>', 0)
+            ->whereIn('SIZ_MaterialesTraslados.EstatusLinea', ['S'])
             ->where('SIZ_SolicitudesMP.Status', 'Pendiente');
        
         return Datatables::of($consulta)
@@ -1691,10 +2045,14 @@ if (count($traslado_interno) > 0) {
                
                 $articulos = DB::select('select mat.Id, mat.ItemCode, mat.Destino, 
                 mat.Cant_ASurtir_Origen_A as CA, mat.Cant_PendienteA, mat.Cant_Pendiente,
-                ALMACENES.AlmacenOrigen from SIZ_MaterialesTraslados mat                                
+                ALMACENES.AlmacenOrigen, LOTES.BatchNum from SIZ_MaterialesTraslados mat                                
                 LEFT JOIN (SELECT ItemCode, SUM(CASE WHEN WhsCode = \''.$solicitud->AlmacenOrigen.'\' THEN OnHand ELSE 0 END) AS AlmacenOrigen
                     FROM dbo.OITW
                     GROUP BY ItemCode) AS ALMACENES ON mat.ItemCode = ALMACENES.ItemCode
+                    LEFT JOIN (					
+                        SELECT ItemCode, COUNT (DistNumber) AS BatchNum FROM OBTN 
+                        GROUP BY ItemCode
+                    )AS LOTES on LOTES.ItemCode = mat.ItemCode
                 WHERE Id_Solicitud = ? AND mat.EstatusLinea = \'S\' 
                 AND mat.Cant_ASurtir_Origen_A <= AlmacenOrigen ', [$id]);
                 
@@ -1737,7 +2095,7 @@ if (count($traslado_interno) > 0) {
                 }
                 $filas = DB::table('SIZ_MaterialesTraslados')
                 ->where('Id_Solicitud', $id)
-                ->whereIn('EstatusLinea', ['S', 'P'])
+                ->where('EstatusLinea', '<>', 'T' )
                 ->count();            
                 if ($filas > 0) {
                     DB::table('SIZ_SolicitudesMP')
@@ -1757,35 +2115,45 @@ if (count($traslado_interno) > 0) {
         return redirect()->route('auth/login');
         }
     }
-    public function vistaLotes($alm, $id){
-        if ($alm == 'AMP-ST') {
+    public function vistaLotes($tabla, $alm, $id){
+        $cant = 'mat.Cant_ASurtir_Origen_A';
+        if ($alm == 'AMP-ST' && ($tabla == 'solicitudes')) {
             $cant = 'mat.Cant_ASurtir_Origen_B';
-        } else if ($alm == 'APG-PA') {
+        } else { //para Traslados
             $cant = 'mat.Cant_ASurtir_Origen_A';
+        }
+        if ($tabla == 'solicitudes') {
+            $t = 'SIZ_MaterialesSolicitudes';
+        } else if ($tabla == 'traslados') {
+            $t = 'SIZ_MaterialesTraslados';
         }
         
         $articulo = collect (DB::select('select mat.Id, mat.ItemCode, o.ItemName, o.InvntryUom AS UM,
                  '.$cant.' AS Cant, mat.Id_Solicitud
-                from SIZ_MaterialesSolicitudes mat                                
+                from '.$t.' mat                                
                 LEFT JOIN OITM o ON mat.ItemCode = o.ItemCode
                 WHERE mat.Id = ? 
-                and mat.EstatusLinea = \'S\'  ', [$id]))->first();
+                and mat.EstatusLinea in (\'S\', \'P\', \'I\', \'E\')', [$id]))->first();
         //return $articulo->ItemCode;
+       // dd($cant);
         $lotes = DB::select('select
-                    T0.DistNumber as NumLote,  (T1.Quantity  - COALESCE(PROCESO.CantProceso, 0)) AS Disponible, COALESCE(PROCESO.CantProceso, 0) Proceso
+                    T0.DistNumber as NumLote,
+                    T1.Quantity  AS Disponible,
+                     COALESCE((PROCESO.CantProceso - '.$articulo->Cant.'), 0) Proceso
                 from
                     OBTN T0
                     inner join OBTQ T1 on T0.ItemCode = T1.ItemCode and T0.SysNumber = T1.SysNumber
                     inner join OITM T2 on T0.ItemCode = T2.ItemCode
                     LEFT JOIN
                         (select ItemCode, sum (Cant_PendienteA) CantProceso
-                        from SIZ_MaterialesSolicitudes mat
-                        where mat.EstatusLinea in (\'S\', \'P\')
+                        from '.$t.' mat
+                        LEFT JOIN SIZ_SolicitudesMP sol on sol.Id_Solicitud = mat.Id_Solicitud
+                        where mat.EstatusLinea in (\'S\', \'P\', \'I\', \'E\')
                         group by ItemCode) AS PROCESO ON T2.ItemCode = PROCESO.ItemCode
                      where
                     T1.Quantity > 0 AND T0.ItemCode = ? AND WhsCode = ? 
 				group by T0.DistNumber, T1.Quantity, CantProceso
-				order by T0.DistNumber', [$articulo->ItemCode, $alm]);
+				order by T0.Dis_tNumber', [$articulo->ItemCode, $alm]);
         $arrayNumLotes = array_pluck($lotes, 'NumLote');
         //dd($arrayNumLotes);
         $lotesAsignados = DB::table('SIZ_MaterialesLotes')
@@ -1799,6 +2167,7 @@ if (count($traslado_interno) > 0) {
             unset($lotes[$key]);                
             }
        }
+       $lotes = array_values($lotes);
       // dd($lotes);
         $sumLotesAsignados = array_sum(array_pluck($lotesAsignados, 'Cant'));
        // dd(array_pluck($lotesAsignados, 'Disponible'));
@@ -1806,7 +2175,8 @@ if (count($traslado_interno) > 0) {
         $user = Auth::user();
         $actividades = $user->getTareas();
         $ultimo = count($actividades);
-        return view('Mod04_Materiales.Lotes', compact('sumLotesAsignados', 'lotes', 'lotesAsignados', 'articulo', 'alm', 'actividades', 'ultimo'));
+        return view('Mod04_Materiales.Lotes', compact('tabla', 'sumLotesAsignados',
+         'lotes', 'lotesAsignados', 'articulo', 'alm', 'actividades', 'ultimo'));
         
     }
     public function insertLotes(Request $request){
@@ -1814,8 +2184,9 @@ if (count($traslado_interno) > 0) {
             $existe = DB::table('SIZ_MaterialesLotes')
             ->where('Id_Item', Input::get('articulo'))
             ->where('alm', Input::get('alm'))
+            ->where('lote',Input::get('lote'))
             ->first();
-
+           // dd($existe);
             $existe = count($existe);
       
             

@@ -106,6 +106,7 @@ border: 1px solid #000000;
                     <a class="btn btn-primary"  ng-if="btnshow" type="button" href="{!! url('home/TRASLADO ENTREGA') !!}">Otro traslado</a>
                     <button ng-if="articulos.length > 0" class="btn btn-success" id="spin" ng-click="sendArt()">
                         <i class="fa fa-send"></i> Enviar</button>
+                        <a class="btn btn-info" href="{{url('/home/entregas_lotes')}}"><i class="fa fa-angle-left"></i> Otras Entregas Pendientes</a>                                                              
                 </span>
             </div><!-- /input-group -->
         </div><!-- /.col-lg-6 -->
@@ -528,8 +529,8 @@ $interpolateProvider.startSymbol('<%');
                 $scope.mensaje2 = aux[0] * 1;
                 $scope.btnshow = true;
             }
-            if ($scope.successVar.includes('Lotes')) {
-                window.location.replace("{{ url('/hosti') }}");
+            if ($scope.successVar.includes('lotesdeptos')) {            
+                window.location.replace("{{url('lotesdeptos')}}");
             }
             if($scope.successVar.includes('reload') || $scope.successVar.includes('inactividad')){
                 $window.location.reload();

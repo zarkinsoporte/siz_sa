@@ -134,13 +134,14 @@ class SAP extends Model
                     from WTR1 
                     inner join SIZ_TransferSolicitudesMP as t on t.DocEntry_Transfer = WTR1.DocEntry
                     left join SIZ_MaterialesSolicitudes as s on s.Id_Solicitud = t.Id_Solicitud and s.ItemCode = WTR1.ItemCode
-                    where t.Id_Solicitud = ?
-                    group by WTR1.ItemCode', [$id]);
+                    where t.Id_Solicitud = ? AND s.ItemCode = ?
+                    group by WTR1.ItemCode', [$id, $item->ItemCode]);
                 
                 $CantSurtida = array_sum(array_pluck($surtido, 'Cant'));
+               // dd($CantSurtida);
                 if ($CantSurtida >= $item->Cant_Autorizada) {
                     DB::rollBack();
-                    return 'Error, Material ' . $item->ItemCode . ' no se puede surtir';
+                    return 'Error, Material ' . $item->ItemCode . ' ya fue surtido.';
                 }
                //agregar lineaS               
                if ($data['almacen_origen'] == 'APG-PA') {
@@ -270,10 +271,26 @@ class SAP extends Model
                         'Cant_Pendiente' => ($item->Cant_PendienteA - $item->CA),
                         'Cant_ASurtir_Origen_A' => 0]);
                         $vItem->Lines->ItemCode = $item->ItemCode;
-                        $vItem->Lines->WarehouseCode = trim($varDestino[0]);              
+                        $vItem->Lines->WarehouseCode = trim($varDestino[0]);
+                        if ($item->BatchNum > 0) {
+                            $lotes = DB::table('SIZ_MaterialesLotes')
+                                ->where('Id_Item', $item->Id)
+                                ->where('alm', $data['almacen_origen'])
+                                ->get();
+                            if (count($lotes) > 0) {
+                                foreach ($lotes as $l) {
+                                    $vItem->Lines->BatchNumbers->BatchNumber = $l->lote;
+                                    $vItem->Lines->BatchNumbers->Quantity = $l->Cant;
+                                    $vItem->Lines->BatchNumbers->Add();
+                                }
+                            } else {
+                                DB::rollBack();
+                                return 'Error, Material ' . $item->ItemCode . ' sin lotes asignados';
+                            }
+                        }              
                         $vItem->Lines->Add(); 
                         if (($item->Cant_PendienteA - $item->CA) == 0) {
-                            DB::table('SIZ_MaterialesSolicitudes')
+                            DB::table('SIZ_MaterialesTraslados')
                             ->where('Id', $item->Id)
                             ->update(['EstatusLinea' => 'T']);                   
                             

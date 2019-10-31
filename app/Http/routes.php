@@ -265,7 +265,7 @@ Route::get('home/2 PICKING ARTICULOS/solicitud/articulos/return/{id}', 'Mod04_Ma
 Route::get('home/2 PICKING ARTICULOS/solicitud/PDF/{id}', 'Mod04_MaterialesController@SolicitudPDF');
 Route::get('home/2 PICKING ARTICULOS/solicitud/update/{id}', 'Mod04_MaterialesController@Solicitud_A_Traslados');
 Route::post('home/PICKING ARTICULOS/solicitud/articulos/edit', 'Mod04_MaterialesController@editArticuloPicking');
-Route::get('home/lotes/{alm}/{item}', 'Mod04_MaterialesController@vistaLotes');
+Route::get('home/lotes/{tabla}/{alm}/{item}', 'Mod04_MaterialesController@vistaLotes');
 Route::post('home/lotes/insert', 'Mod04_MaterialesController@insertLotes');
 Route::get('home/lotes/remove/{id}/{lote}/{alm}', 'Mod04_MaterialesController@removeLote');
 // 4 TRASLADOS
@@ -281,7 +281,13 @@ Route::get('home/reporte/TRASLADO ENTREGA', 'Reportes_ProduccionController@showM
 Route::post('home/reporte/TRASLADO ENTREGA', 'Mod04_MaterialesController@trasladoEntrega');
 Route::get('OITM.WH.traslados', 'Mod04_MaterialesController@ShowArticulosWHTraslados')->name('OITM.WH.traslados');
 Route::post('home/reporte/saveTraslado', 'Mod04_MaterialesController@saveTraslado')->name('home/reporte/saveTraslado');
-Route::get('home/reporte/PDF/traslado/{transfer}','Mod04_MaterialesController@getPdfTraslado');
+Route::get('home/PDF/traslado/{transfer}','Mod04_MaterialesController@getPdfTraslado');
+Route::post('home/PDF/traslado','Mod04_MaterialesController@getPdfTraslado');
+Route::post('home/PDF/solicitud','Mod04_MaterialesController@getPdfSolicitud');
+Route::get('lotesdeptos/{id?}','Mod04_MaterialesController@lotesdeptos');
+Route::get('home/TRASLADO ENTREGA/update/{almacen_origen}/{id}','Mod04_MaterialesController@HacerEntrega');
+Route::get('home/entregas_lotes','Mod04_MaterialesController@Entregaslotes');
+Route::get('datatables.Entregaslotes', 'Mod04_MaterialesController@DataEntregaslotes')->name('datatables.Entregaslotes');
 //6 TRASLADOS DEPTOS RECEPCION
 Route::get('home/TRASLADO RECEPCION', 'Mod04_MaterialesController@TrasladosDeptos');
 Route::get('datatables.traslados', 'Mod04_MaterialesController@DataTrasladosDeptos')->name('datatables.traslados');
@@ -318,7 +324,19 @@ Route::get('home/reporte/PRODUCCION POR AREAS', 'Reportes_ProduccionController@r
 Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@produccionxareasXLS');
 
  Route::get('/pruebas', function (Request $request) {      
-     $tareas = DB::table('Siz_Tarea_Menu')->get();
+    $consulta = DB::table('SIZ_SolicitudesMP')
+                    ->join('SIZ_MaterialesSolicitudes', 'SIZ_MaterialesSolicitudes.Id_Solicitud', '=', 'SIZ_SolicitudesMP.Id_Solicitud')
+                    ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')
+                    ->leftjoin('OUDP', 'OUDP.Code', '=', 'dept')
+                    ->groupBy('SIZ_SolicitudesMP.Id_Solicitud', 'SIZ_SolicitudesMP.FechaCreacion', 'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'firstName', 'lastName', 'dept', 'Name')
+                    ->select('SIZ_SolicitudesMP.Id_Solicitud', 'SIZ_SolicitudesMP.FechaCreacion', 
+                    'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'OHEM.firstName',
+                     'OHEM.lastName', 'OHEM.dept', 'OUDP.Name as depto')
+                    ->whereIn('SIZ_SolicitudesMP.Status', ['Pendiente', 'Regresada', 'En Proceso'])
+                    ->whereIn('SIZ_MaterialesSolicitudes.EstatusLinea', ['S', 'P', 'N']);
+     //$consulta = 
+     dd($consulta->get());
+    $tareas = DB::table('Siz_Tarea_Menu')->get();
 
     foreach ($tareas as $k) {
         DB::update('update Siz_Tarea_Menu set route = ? where name = ?', [$k->name, $k->name]);

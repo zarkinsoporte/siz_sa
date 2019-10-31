@@ -106,7 +106,7 @@
 
                 <th scope="row" style="background-color:white" nowrap><a
                     href="{{url('home/DATOS MAESTROS ARTICULO/'.$art->ItemCode)}}"><i
-                      class="fa fa-hand-o-right"></i>{{$art->ItemCode}}</a></th>
+                      class="fa fa-hand-o-right"></i> {{$art->ItemCode}}</a></th>
                 <td scope="row">{{$art->ItemName}}</td>
                 <td scope="row">{{$art->UM}}</td>
                 <td scope="row">{{$art->Cant_Requerida}}</td>

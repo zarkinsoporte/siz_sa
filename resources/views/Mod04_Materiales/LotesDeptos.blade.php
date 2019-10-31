@@ -22,7 +22,7 @@
             {{ Session::get('solicitud_err') }}
         </div>
         @endif
-        @if($itemsConLotes > 0)
+        @if($itemsConLotes > 0 && count($articulos_validos) > 0)
 
         <div class="alert alert-info" role="alert">
             Favor de Especificar Lotes correctamente para los materiales que corresponde.
@@ -42,36 +42,70 @@
                 font-size: 90%;
             }
         </style>
-   @if (count($itemsConLotes)>0)
+  
      <div class="row">
   <div class="col-md-12">     
       <span class="pull-right">
-                     <a class="btn btn-primary btn-sm" href="{{url('/home/2 PICKING ARTICULOS')}}"><i class="fa fa-angle-left"></i> Atras</a>                                                              
-                            <a class="btn btn-danger btn-sm" href="{{'PDF/'.$id}}" target="_blank"><i class="fa fa-file-pdf-o"></i> PDF</a>                                                              
-                            @if ($itemsConLotes > 0)
-                              <a class="btn btn-success btn-sm" disabled><i class="fa fa-send"></i> Enviar a Traslados</a>  
-                            @else                                
-                              <a class="btn btn-success btn-sm" href="{{'update/'.$id}}"><i class="fa fa-send"></i> Enviar a Traslados</a>
+      
+                     <a class="btn btn-primary btn-sm" href="{{url('/home/entregas_lotes')}}"><i class="fa fa-angle-left"></i> Otras Entregas Pendientes</a>                                                              
+                            
+                            @if ($itemsConLotes > 0 && count($articulos_validos) > 0)
+                              <a class="btn btn-success btn-sm" disabled><i class="fa fa-send"></i> Enviar Entrega</a>  
+                            @elseif(count($articulos_validos) > 0)                              
+                              <a class="btn btn-success btn-sm" href="{{url('/home/TRASLADO ENTREGA/update/'.$almacen_origen.'/'.$id)}}"><i class="fa fa-send"></i> Enviar Entrega</a>
                             @endif
                    
-            </span>          
-        <!-- /.row -->
- 
- <h4>Material a Entregar</h4>
+            </span>   
+            </div></div>
+            
+    @if (Session::has('ambos'))
+    <div class="row" >
+        <div class="col-md-6">
+            <div class="alert alert-success" role="alert">
+                Para Mercancía que se entregó en sus almacenes: <br>
+                Transferencia interna {{Session::get('interno')}} realizada.
+                 <a class="btn btn-danger btn-sm" href="{{'PDF/traslado/'.Session::get('interno')}}" target="_blank"><i
+                        class="fa fa-file-pdf-o"></i> PDF</a>                 
+            </div>
+        </div>
+        <div class="col-md-6">            
+            <div class="alert alert-success" role="alert">
+                Para Mercancía que se entregará en otros almacenes: <br>
+                {{Session::get('externo')}}. 
+            </div>
+        </div>
+    </div>
+    @elseif(Session::has('interno'))
+    <div class="row">
+        <div class="col-md-12">
+            <div class="alert alert-success" role="alert">
+                Transferencia interna {{Session::get('interno')}} realizada. 
+                <a class="btn btn-danger btn-sm" href="{{url('home/PDF/traslado/'.Session::get('interno'))}}" target="_blank"><i
+                        class="fa fa-file-pdf-o"></i> PDF</a>                 
+            </div>
+        </div>
+    </div>
+    @elseif(Session::has('externo'))
+    <div class="row">
+        <div class="col-md-12">
+            <div class="alert alert-success" role="alert">
+            {{Session::get('externo')}}.
+            </div>
+        </div>
+    </div> 
+    @endif
+    
+    <div class="row">
+    <div class="col-md-12">  
+    @if (count($articulos_validos) > 0)
     <table>
       <thead>
-        <tr>
-           <th colspan="3">Artículo</th>
-           <th colspan="3">Cantidad</th>
-           <th colspan="1">Almacén Origen</th>
-        </tr>
+        
         <tr>
           
           <th>Código</th>
           <th >Descripción</th>
           <th >UM</th>
-          <th >Autorizada</th>
-          <th >Surtida</th>
           <th >A Surtir</th>
           <th>{{$almacen_origen}}</th>
                    
@@ -79,42 +113,23 @@
       </thead>
       <tbody>
 
-        @foreach ($itemsConLotes as $art)
+        @foreach ($articulos_validos as $art)
         <tr <?php ?>>
                    
           <td><a href="{{url('home/DATOS MAESTROS ARTICULO/'.$art->ItemCode)}}"><i
-              class="fa fa-hand-o-right"></i>{{$art->ItemCode}}</a></td>
+              class="fa fa-hand-o-right"></i> {{$art->ItemCode}}</a></td>
           <td>{{$art->ItemName}}</td>
-          <td>{{$art->UM}}</td>
-          <td>{{$art->Cant_Autorizada}}</td>
-          <td>{{number_format(($art->Cant_Autorizada - $art->Cant_PendienteA), 2)}}</td>
-          <td>{{number_format($art->Cant_ASurtir_Origen_A + $art->Cant_ASurtir_Origen_B, 2)}}</td>
-          <td>{{$art->Cant_ASurtir_Origen_A}}</td>
-          <td>{{$art->Cant_ASurtir_Origen_B}}</td>
-          @if ($art->APGPA > 0 && $art->BatchNum > 0)
+          <td>{{$art->UM}}</td>          
+          @if ($art->AlmacenOrigen > 0 && $art->BatchNum > 0)
             <td>
-              <a href="{{url('home/lotes/APG-PA/'.$art->Id)}}" ><i class="fa fa-hand-o-right"></i>{{number_format($art->APGPA, 2)}}</a>
-            </td>              
-          @else
-            <td>{{number_format($art->APGPA, 2)}}</td>  
-          @endif
-          @if ($art->AMPST > 0 && $art->BatchNum > 0)
-            <td>
-              <a href="{{url('home/lotes/AMP-ST/'.$art->Id)}}" ><i class="fa fa-hand-o-right"></i>{{number_format($art->AMPST, 2)}}</a>
+              <a href="{{url('home/lotes/traslados/'.$almacen_origen.'/'.$art->Id)}}" >
+              <i class="fa fa-hand-o-right"></i> {{number_format($art->CA, 2)}}</a>
             </td>
           @else
-              <td>{{number_format($art->AMPST, 2)}}</td>
+              <td>{{number_format($art->CA, 2)}}</td>
           @endif         
-          <td>{{number_format($art->Disponible, 2)}}</td>
-          <td>
-            <div class="btn-group" role="group" aria-label="...">
-              
-          <a id="btneditar" ng-click="editar($event)" role="button" data-toggle="modal" data-target="#edit" data-maxb="{{$art->AMPST}}" data-maxa="{{$art->APGPA}}" data-id="{{$art->Id}}" data-itemcode="{{$art->ItemCode}}" data-cantr="{{$art->Cant_Autorizada}}" data-canta="{{$art->Cant_ASurtir_Origen_A}}" data-cantb="{{$art->Cant_ASurtir_Origen_B}}" data-cantp="{{$art->Cant_PendienteA}}" class="btn btn-default"><i class="fa fa-pencil fa-lg" style="color:#007BFF"></i></a>
-          
-          
-          <a role="button" data-toggle="modal" data-target="#remove" data-id="{{$art->Id}}" class="btn btn-default"><i class="fa fa-arrow-circle-o-down fa-lg" style="color:red"></i></a>          
-        </div>  
-        </td>  
+          <td>{{number_format($art->AlmacenOrigen, 2)}}</td>          
+                    
         </tr>
         @endforeach
 
@@ -122,13 +137,6 @@
     </table>
   </div>
 </div> <!-- /.row -->   
-  
-@endif
-
-      </tbody>
-    </table>
-  </div>
-</div> <!-- /.row -->
 @endif
 
 <!-- .Model quitar -->

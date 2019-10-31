@@ -44,6 +44,22 @@
         @include('partials.alertas')
       </div>
     </div>
+    <div class="row">      
+        <div class="col-md-12">
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-danger dropdown-toggle" 
+            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fa fa-file-pdf-o"></i> Impresión de Traslados
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a  role="button" data-toggle="modal" data-target="#pdfsol">Con Num. Solicitud</a></li>
+                <li><a  role="button" data-toggle="modal" data-target="#pdftraslado">Con Num. Traslado SAP</a></li>                
+            </ul>
+        </div>
+                
+        </div><!-- /.col-md-12 -->
+    </div><!-- /.row -->
         <div class="">
             <div class="">
                 <div class="">
@@ -67,6 +83,66 @@
         </div>
          @yield('subcontent-01')
     </div>
+
+    <div class="modal fade" id="pdftraslado" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+
+          {!! Form::open(['target' => '_blank', 'url' => 'home/PDF/traslado', 'method' => 'POST']) !!}
+
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Impresión de Traslados</h4>
+          <div class="modal-body">
+            <div class="row">
+              <div class="form-group col-md-12">
+                <label for="transfer">Número de Traslado SAP</label>
+                <input id="transfer" name="transfer" type="number" 
+                class="form-control" min="1" step="1" required>
+              </div>
+              
+            </div>
+          </div>
+          <div class="modal-footer">
+
+            <button class="btn btn-default" data-dismiss="modal">Cerrar</button>
+            <button type="submit" class="btn btn-primary">PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {!! Form::close() !!}
+
+  <div class="modal fade" id="pdfsol" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+
+          {!! Form::open(['url' => 'home/PDF/solicitud', 'method' => 'POST']) !!}
+
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Impresión de Traslados</h4>
+          <div class="modal-body">
+            <div class="row">
+              <div class="form-group col-md-12">
+                <label for="sol">Número de Solicitud</label>
+                <input id="sol" name="sol" type="number" 
+                class="form-control" min="1" step="1" required>
+              </div>
+              
+            </div>
+          </div>
+          <div class="modal-footer">
+
+            <button class="btn btn-default" data-dismiss="modal">Cerrar</button>
+            <button type="submit" class="btn btn-primary">PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {!! Form::close() !!}
 @endsection
  
 @section('script')

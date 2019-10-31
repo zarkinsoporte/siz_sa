@@ -88,7 +88,7 @@
         <tr <?php ?>>
                    
           <td><a href="{{url('home/DATOS MAESTROS ARTICULO/'.$art->ItemCode)}}"><i
-              class="fa fa-hand-o-right"></i>{{$art->ItemCode}}</a></td>
+              class="fa fa-hand-o-right"></i> {{$art->ItemCode}}</a></td>
           <td>{{$art->ItemName}}</td>
           <td>{{$art->UM}}</td>
           <td>{{$art->Cant_Autorizada}}</td>
@@ -98,14 +98,14 @@
           <td>{{$art->Cant_ASurtir_Origen_B}}</td>
           @if ($art->APGPA > 0 && $art->BatchNum > 0)
             <td>
-              <a href="{{url('home/lotes/APG-PA/'.$art->Id)}}" ><i class="fa fa-hand-o-right"></i>{{number_format($art->APGPA, 2)}}</a>
+              <a href="{{url('home/lotes/solicitudes/APG-PA/'.$art->Id)}}" ><i class="fa fa-hand-o-right"></i> {{number_format($art->APGPA, 2)}}</a>
             </td>              
           @else
             <td>{{number_format($art->APGPA, 2)}}</td>  
           @endif
           @if ($art->AMPST > 0 && $art->BatchNum > 0)
             <td>
-              <a href="{{url('home/lotes/AMP-ST/'.$art->Id)}}" ><i class="fa fa-hand-o-right"></i>{{number_format($art->AMPST, 2)}}</a>
+              <a href="{{url('home/lotes/solicitudes/AMP-ST/'.$art->Id)}}" ><i class="fa fa-hand-o-right"></i> {{number_format($art->AMPST, 2)}}</a>
             </td>
           @else
               <td>{{number_format($art->AMPST, 2)}}</td>

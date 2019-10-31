@@ -110,13 +110,7 @@
 @if (count($articulos_novalidos)>0)
 <div class="row">
   <div class="col-md-12">  
-    <span class="pull-right">
-                     <div class="">
-                     <a class="btn btn-primary btn-sm" href="{{URL::previous()}}"><i class="fa fa-angle-left"></i> Atras</a>                                                              
-                         <!--   <a class="btn btn-primary btn-sm" href="" ><i class="fa fa-send"></i> Regresar a Picking</a>                                                              
-                          --> <a class="btn btn-success btn-sm" href="{{'updatepicking/'.$id}}"><i class="fa fa-send"></i> Enviar a Picking</a>
-                    </div>  
-            </span>  
+    
     <h4>Material que NO se surtirá</h4>
     <table>
       <thead>

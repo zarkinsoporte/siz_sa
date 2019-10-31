@@ -36,7 +36,12 @@
   <div class="row">
     <div class="col-md-12">
       <span class="pull-right" style="padding-top:5px; padding-bottom: 5px">
-        <a class="btn btn-primary btn-sm" href="{{url('home/2 PICKING ARTICULOS/solicitud/'.$articulo->Id_Solicitud)}}"><i class="fa fa-angle-left"></i> Atras</a>
+      @if ($tabla == 'solicitudes') 
+      <a class="btn btn-primary btn-sm" href="{{url('home/2 PICKING ARTICULOS/solicitud/'.$articulo->Id_Solicitud)}}"><i class="fa fa-angle-left"></i> Atras</a>
+      @elseif ($tabla == 'traslados')
+        <a class="btn btn-primary btn-sm" href="{{url('lotesdeptos/'.$articulo->Id_Solicitud)}}"><i class="fa fa-angle-left"></i> Atras</a>                                                              
+      @endif  
+        
       </span>
       
     </div>
@@ -60,24 +65,37 @@
           <tr>
             <th># Lote</th>
             <th>Disponible</th>
-            <th>No Disponible</th>
           </tr>
         </thead>
         <tbody>
           @if (count($lotes)>0)
+          <?php 
+            $totalDisponible = array_sum(array_pluck($lotes, 'Disponible'));;
+            $totalProceso = $lotes[0]->Proceso;
+          ?>
           @foreach($lotes as $lote)
           <tr>
             <td>{{$lote->NumLote}}</td>
-            <td style="padding-top:12px">{{$lote->Disponible}}
+            <td style="padding-top:12px">{{number_format($lote->Disponible, 2)}}
+            @if($totalDisponible > $totalProceso && $Cant > 0)
               <span class="pull-right" >
                 <a role="button" data-toggle="modal" data-target="#edit" data-id="{{$articulo->Id}}"
-                  data-cant="{{$articulo->Cant}}" data-lote="{{$lote->NumLote}}" data-cantlote="{{$lote->Disponible}}"
+                  data-cant="{{$Cant}}" data-lote="{{$lote->NumLote}}" data-cantlote="{{$lote->Disponible}}"
                   class="btn btn-primary btn-sm"><i class="fa fa-arrow-right"></i></a>
               </span>
+            @endif
             </td>
-            <td>{{$lote->Proceso}}</td>
+            
           </tr>
           @endforeach
+          <tr>
+            <td>Total en Lotes Elegibles</td>
+            <td>{{number_format($totalDisponible, 2)}}</td>
+          </tr>
+          <tr>
+            <td>No Disponible (En proceso)</td>
+            <td>{{number_format($totalProceso, 2)}}</td>
+          </tr>
           @else
           <tr>
             <td></td>
@@ -86,7 +104,6 @@
                 <a role="button" href="#" class="btn btn-default btn-sm"><i class="fa fa-arrow-right"></i></a>
               </span>
             </td>
-            <td></td>
           </tr>
           @endif
         </tbody>
@@ -107,7 +124,7 @@
           @foreach($lotesAsignados as $lotea)
           <tr>
             <td>{{$lotea->lote}}</td>
-            <td style="padding-top:12px">{{$lotea->Cant}}
+            <td style="padding-top:12px">{{number_format($lotea->Cant, 2)}}
               <span class="pull-right">
                 <a role="button" href="{{url('/home/lotes/remove/'.$lotea->Id_Item.'/'.$lotea->lote.'/'.$alm)}}" 
                   class="btn btn-warning btn-sm"><i class="fa fa-arrow-left"></i></a>
@@ -115,6 +132,10 @@
             </td>
           </tr>
           @endforeach
+          <tr>
+            <td>Total Asignado</td>
+            <td>{{number_format($sumLotesAsignados, 2)}}</td>
+          </tr>
           @else
           <tr>
             <td></td>
@@ -146,10 +167,11 @@
             <div class="row">
               <div class="form-group col-md-12">
                 <label for="canta">Cantidad</label>
-                <input id="canta" name="cant" type="number" class="form-control" min="0.1" step="0.01" required>
+                <input id="canta" name="cant" type="number" 
+                class="form-control" min="0.1" step="0.01" required>
               </div>
-            <input type="hidden" value="{{$articulo->Id}}" name="articulo">
-            <input type="hidden" value="{{$alm}}" name="alm">
+              <input type="hidden" value="{{$articulo->Id}}" name="articulo">
+              <input type="hidden" value="{{$alm}}" name="alm">
               <input type="hidden" id="lote" name="lote">
             </div>
           </div>
