@@ -92,30 +92,42 @@ border: 1px solid #000000;
                     Traslado Entrega de Mercancía <small>Almacén Origen: {{$almacenOrigen}}</small>
                     <div class="visible-xs visible-sm"><br></div>                 
                 </h3>
-                
+                <span class="">
+                    <button class="btn btn-primary" ng-click="modals()" ng-if="!btnshow" type="button"><i class="fa fa-plus"></i>
+                        Agregar</button>
+                    <a class="btn btn-primary" ng-if="btnshow" type="button" href="{!! url('home/TRASLADO ENTREGA') !!}">Otro
+                        traslado</a>
+                    <button ng-if="articulos.length > 0" class="btn btn-success" id="spin" ng-click="sendArt()">
+                        <i class="fa fa-send"></i> Enviar</button>
+                    <a class="btn btn-info" href="{{url('/home/entregas_lotes')}}"><i class="fa fa-angle-left"></i> Otras Entregas
+                        Pendientes</a>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                            aria-expanded="false">
+                            <i class="fa fa-file-pdf-o"></i> Impresión de Traslados
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a role="button" data-toggle="modal" data-target="#pdfsol">Con Num. Solicitud</a></li>
+                            <li><a role="button" data-toggle="modal" data-target="#pdftraslado">Con Num. Traslado SAP</a></li>
+                        </ul>
+                    </div>
+                </span>
             </div>
         
     </div>
    
-    <div class="row">      
-        <div class="col-lg-6">
-            <div class="input-group">
+    
+           
                 
-                <span class="">
-                    <button class="btn btn-primary" ng-click="modals()" ng-if="!btnshow" type="button"><i class="fa fa-plus"></i> Agregar</button>
-                    <a class="btn btn-primary"  ng-if="btnshow" type="button" href="{!! url('home/TRASLADO ENTREGA') !!}">Otro traslado</a>
-                    <button ng-if="articulos.length > 0" class="btn btn-success" id="spin" ng-click="sendArt()">
-                        <i class="fa fa-send"></i> Enviar</button>
-                        <a class="btn btn-info" href="{{url('/home/entregas_lotes')}}"><i class="fa fa-angle-left"></i> Otras Entregas Pendientes</a>                                                              
-                </span>
-            </div><!-- /input-group -->
-        </div><!-- /.col-lg-6 -->
-    </div><!-- /.row -->
+               
+   
     <br>
     <div class="row" ng-if="mensaje > 0 && mensaje2 == 0">
         <div class="col-md-12">
             <div class="alert alert-success" role="alert">
-                Transferencia interna <%mensaje%> realizada. <a class="btn btn-danger btn-sm" href="{{'PDF/traslado/'}}<%mensaje%>" target="_blank"><i
+                Transferencia interna <%mensaje%> realizada. 
+                <a class="btn btn-danger btn-sm" href="{{url('home/PDF/traslado')}}/<%mensaje%>" target="_blank"><i
                         class="fa fa-file-pdf-o"></i> PDF</a>                 
             </div>
         </div>
@@ -124,7 +136,8 @@ border: 1px solid #000000;
         <div class="col-md-6">
             <div class="alert alert-success" role="alert">
                 Para Mercancía que se entregó en sus almacenes: <br>
-                Transferencia interna <%mensaje%> realizada. <a class="btn btn-danger btn-sm" href="{{'PDF/traslado/'}}<%mensaje%>" target="_blank"><i
+                Transferencia interna <%mensaje%> realizada. 
+                <a class="btn btn-danger btn-sm" href="{{url('home/PDF/traslado')}}/<%mensaje%>" target="_blank"><i
                         class="fa fa-file-pdf-o"></i> PDF</a>                 
             </div>
         </div>
@@ -182,6 +195,31 @@ border: 1px solid #000000;
             caracteres restantes: <%count%>
             
         </div> 
+       </div>
+       <div class="col-md-12" ng-if="articulos.length == 0">
+           <table class="display condensed">
+            <thead>
+                <tr>                    
+                    <th>Código</th>
+                    <th>Descripción</th>
+                    <th>Cantidad</th>
+                    <th>UM</th>
+                    <th>Destino</th>
+                    <th>Quitar</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+        
        </div>
     </div>   <!-- /.row -->
     
@@ -268,6 +306,65 @@ border: 1px solid #000000;
                        </div>
                    </div>
                    <input type="hidden" name="almacen" value="{{$almacenOrigen}}">
+                    <div class="modal fade" id="pdftraslado" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+
+          {!! Form::open(['target' => '_blank', 'url' => 'home/PDF/traslado', 'method' => 'POST']) !!}
+
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Impresión de Traslados</h4>
+          <div class="modal-body">
+            <div class="row">
+              <div class="form-group col-md-12">
+                <label for="transfer">Número de Traslado SAP</label>
+                <input id="transfer" name="transfer" type="number" 
+                class="form-control" min="1" step="1" required>
+              </div>
+              
+            </div>
+          </div>
+          <div class="modal-footer">
+
+            <button class="btn btn-default" data-dismiss="modal">Cerrar</button>
+            <button type="submit" class="btn btn-primary">PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {!! Form::close() !!}
+
+  <div class="modal fade" id="pdfsol" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+
+          {!! Form::open(['url' => 'home/PDF/solicitud', 'method' => 'POST']) !!}
+
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Impresión de Traslados</h4>
+          <div class="modal-body">
+            <div class="row">
+              <div class="form-group col-md-12">
+                <label for="sol">Número de Solicitud</label>
+                <input id="sol" name="sol" type="number" 
+                class="form-control" min="1" step="1" required>
+              </div>
+              
+            </div>
+          </div>
+          <div class="modal-footer">
+
+            <button class="btn btn-default" data-dismiss="modal">Cerrar</button>
+            <button type="submit" class="btn btn-primary">PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {!! Form::close() !!}
 </div>
     <!-- /.container -->
 @endsection

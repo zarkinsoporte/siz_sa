@@ -2153,7 +2153,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                      where
                     T1.Quantity > 0 AND T0.ItemCode = ? AND WhsCode = ? 
 				group by T0.DistNumber, T1.Quantity, CantProceso
-				order by T0.Dis_tNumber', [$articulo->ItemCode, $alm]);
+				order by T0.DistNumber', [$articulo->ItemCode, $alm]);
         $arrayNumLotes = array_pluck($lotes, 'NumLote');
         //dd($arrayNumLotes);
         $lotesAsignados = DB::table('SIZ_MaterialesLotes')
