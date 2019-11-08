@@ -705,20 +705,20 @@ public function ShowDetalleSolicitud($id){
                                             GROUP BY ItemCode
                                         )AS LOTES on LOTES.ItemCode = OITM.ItemCode
                                         LEFT JOIN (					
-                                            select
-                                                T2.ItemCode, sum(COALESCE(lotesa.Cant, 0)) AS Asignado
-                                            from
-                                                OBTN T0
-                                                inner join OBTQ T1 on T0.ItemCode = T1.ItemCode and T0.SysNumber = T1.SysNumber
-                                                inner join OITM T2 on T0.ItemCode = T2.ItemCode
-                                                Left join (
-                                                    select sum(matl.Cant) Cant, matt.Id_Solicitud, matt.ItemCode, matl.lote from SIZ_MaterialesLotes matl
-                            inner join SIZ_MaterialesTraslados matt on matt.Id = matl.Id_Item
+                                           select
+                        T2.ItemCode, sum(COALESCE(lotesa.Cant, 0)) AS Asignado
+                    from
+                        OBTN T0
+                        inner join OBTQ T1 on T0.ItemCode = T1.ItemCode and T0.SysNumber = T1.SysNumber
+                        inner join OITM T2 on T0.ItemCode = T2.ItemCode
+                        Left join (
+                            select sum(matl.Cant) Cant, matt.Id_Solicitud, matt.ItemCode, matl.lote from SIZ_MaterialesLotes matl
+                            inner join SIZ_MaterialesSolicitudes matt on matt.Id = matl.Id_Item
                             group by matt.Id_Solicitud, matt.ItemCode, matl.lote
                             ) as lotesa on lotesa.Id_Solicitud = ? AND lotesa.ItemCode = T1.ItemCode AND lotesa.lote = T0.DistNumber
                             where
-                                                T1.Quantity > 0 AND  WhsCode = \'AMP-ST\' OR WhsCode = \'APG-PA\' 
-                                            group by T2.ItemCode
+                        T1.Quantity > 0 AND  (WhsCode = \'AMP-ST\' OR WhsCode = \'APG-PA\')						
+                    group by T2.ItemCode
                                         )AS L on L.ItemCode = OITM.ItemCode
                                         WHERE mat.EstatusLinea <> \'A\' AND Id_Solicitud = ?', [$id, $id]);
                     }
@@ -1863,7 +1863,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
         if (Auth::check()) {
             $user = Auth::user();
             $actividades = $user->getTareas();
-
+             Session::forget('transfer3');   
             $param = array(
                 'actividades' => $actividades,
                 'ultimo' => count($actividades),
@@ -1878,7 +1878,13 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
             ->join('SIZ_MaterialesTraslados', 'SIZ_MaterialesTraslados.Id_Solicitud', '=', 'SIZ_SolicitudesMP.Id_Solicitud')
             ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')
             ->leftjoin('OUDP', 'OUDP.Code', '=', 'dept')
-            ->groupBy('SIZ_SolicitudesMP.Id_Solicitud', 'SIZ_SolicitudesMP.FechaCreacion', 'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'firstName', 'lastName', 'dept', 'Name', 'SIZ_SolicitudesMP.AlmacenOrigen')
+            ->join('SIZ_AlmacenesTransferencias', function ($join) {
+            $join->on('SIZ_AlmacenesTransferencias.Code', '=', DB::raw('SUBSTRING(Destino, 1, 6)'))
+                 ->where('SIZ_AlmacenesTransferencias.Dept', '=', Auth::user()->dept)
+                 ->where('SIZ_AlmacenesTransferencias.TrasladoDeptos', '<>', 'D')
+                 ->whereNotNull('TrasladoDeptos');
+              })
+            ->groupBy('SIZ_SolicitudesMP.Id_Solicitud', 'SIZ_SolicitudesMP.FechaCreacion', 'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'firstName', 'lastName', 'OHEM.dept', 'Name', 'SIZ_SolicitudesMP.AlmacenOrigen')
             ->select(
                 'SIZ_SolicitudesMP.Id_Solicitud',
                 'SIZ_SolicitudesMP.FechaCreacion',
@@ -1892,7 +1898,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
             )
             ->whereNotNull('SIZ_SolicitudesMP.AlmacenOrigen')
             ->where('SIZ_MaterialesTraslados.Cant_Pendiente', '>', 0)
-            ->whereIn('SIZ_MaterialesTraslados.EstatusLinea', ['S'])
+            ->whereIn('SIZ_MaterialesTraslados.EstatusLinea', ['S', 'P'])
             ->where('SIZ_SolicitudesMP.Status', 'Pendiente');
        
         return Datatables::of($consulta)
@@ -1933,6 +1939,8 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                     (SELECT ItemCode, SUM(CASE WHEN WhsCode = \''.$solicitud->AlmacenOrigen.'\' THEN OnHand ELSE 0 END) AS AlmacenOrigen
                     FROM dbo.OITW
                     GROUP BY ItemCode) AS ALMACENES ON OITM.ItemCode = ALMACENES.ItemCode
+                    inner join SIZ_AlmacenesTransferencias on SIZ_AlmacenesTransferencias.Code = SUBSTRING(Destino, 1, 6) 
+                    and SIZ_AlmacenesTransferencias.Dept = '.Auth::user()->dept.' and SIZ_AlmacenesTransferencias.TrasladoDeptos <> \'D\' and TrasladoDeptos is not null 
                     WHERE Id_Solicitud = ? AND Cant_PendienteA > 0', [$id]);
               
                 $articulos_validos = array_where($articulos, function ($key, $item) {
@@ -2053,6 +2061,8 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                         SELECT ItemCode, COUNT (DistNumber) AS BatchNum FROM OBTN 
                         GROUP BY ItemCode
                     )AS LOTES on LOTES.ItemCode = mat.ItemCode
+                     inner join SIZ_AlmacenesTransferencias on SIZ_AlmacenesTransferencias.Code = SUBSTRING(Destino, 1, 6) 
+                    and SIZ_AlmacenesTransferencias.Dept = '.Auth::user()->dept.' and SIZ_AlmacenesTransferencias.TrasladoDeptos <> \'D\' and TrasladoDeptos is not null 
                 WHERE Id_Solicitud = ? AND mat.EstatusLinea = \'S\' 
                 AND mat.Cant_ASurtir_Origen_A <= AlmacenOrigen ', [$id]);
                 

@@ -39,7 +39,7 @@
      <div class="row">
   <div class="col-md-12">     
       <span class="pull-right">
-                     <a class="btn btn-primary btn-sm" href="{{URL::previous()}}"><i class="fa fa-angle-left"></i> Atras</a>                                                              
+                     <a class="btn btn-primary btn-sm" href="{{url('home/TRASLADO RECEPCION')}}"><i class="fa fa-angle-left"></i> Atras</a>                                                              
                                                                                        
                             <a ng-click="sendArt()" id="spinn" class="btn btn-success btn-sm" href="{{'update/'.$id}}"><i class="fa fa-send"></i> Aceptar entrega</a>
                    
@@ -53,6 +53,7 @@
            <th colspan="3">Artículo</th>
            <th colspan="2">Cantidad</th>
            <th colspan="1"></th>
+           <th colspan="1"></th>
         </tr>
         <tr>
           
@@ -62,6 +63,7 @@
 
           <th >Recibida</th>
           <th >A Recibir</th>
+          <th >Destino</th>
           
           <th>Acciones</th>
         </tr>
@@ -77,6 +79,7 @@
           
           <td>{{number_format($art->Cant_Autorizada - $art->Cant_PendienteA , 2)}}</td>
           <td>{{$art->Cant_ASurtir_Origen_A}}</td>
+          <td>{{$art->Destino}}</td>
           
           <td>
           <a id="btneditar" ng-click="editar($event)" role="button" data-toggle="modal" 
