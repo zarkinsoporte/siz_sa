@@ -190,6 +190,8 @@ class Reportes_ProduccionController extends Controller
         $data_selDos = [];
         $text_selTres = '';
         $data_selTres = [];
+        $text_selCuatro = '';
+        $data_selCuatro = [];
         $sizeModal = 'modal-sm';
         $data_table = '';
         switch ($nombre) {
@@ -238,6 +240,18 @@ class Reportes_ProduccionController extends Controller
                 $text_selTres = 'Almacén';
                 $data_selTres = $almacenesOrigen;       
                 break;
+            case "ENTRADAS SALIDAS":
+                $fechas = true;
+                $text_selDos = 'Tipo de Material'; 
+                $data_selDos = ['Cualquiera', 'Sólo MP', 'Sólo PT'];
+                $almacenes = DB::table('OWHS')
+                    ->select('WhsCode as llave', DB::raw('WhsCode + \' - \' + WhsName as valor'))
+                    ->where('DataSource', 'I')
+                    ->orderBy('WhsName')                    
+                    ->get();                
+                $text_selCuatro = 'Almacenes a Considerar';
+                $data_selCuatro = $almacenes;
+            break;
 
         }
 
@@ -258,14 +272,15 @@ class Reportes_ProduccionController extends Controller
             'data_selDos' => $data_selDos,
             'text_selTres' => $text_selTres,
             'data_selTres' => $data_selTres,
+            'text_selCuatro' => $text_selCuatro,
+            'data_selCuatro' => $data_selCuatro,
             'sizeModal' => $sizeModal,
             'data_table' => $data_table
             ]);
         } else {
             return redirect()->route('auth/login');
         }
-    }
-
+    }     
     public function historialOP(Request $request)
     {
         if (Auth::check()) {

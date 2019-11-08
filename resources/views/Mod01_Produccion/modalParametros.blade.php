@@ -16,7 +16,7 @@
                         </div>
                         
                         </div>
-<style>
+                       <style>
      div.dataTables_wrapper div.dataTables_processing {
         width: 500px;
         height: 250px;
@@ -106,6 +106,31 @@
                                                 </select>
                                             </div>
                                         @endif
+                                        @if($text_selCuatro <> '')
+                                            <div class="form-group">
+                                                <label for="text_selCuatro">{{$text_selCuatro}}:</label>
+                                                
+                                                <select 
+                                                data-live-search="true" 
+                                                class="boot-select form-control" 
+                                                title="No has seleccionado nada" 
+                                                data-size="5" 
+                                                multiple data-actions-box="true" 
+                                                data-select-all-text="Marcar Todos"
+                                                data-deselect-all-text="Desmarcar Todos"
+                                                data-selected-text-format="count"
+                                                data-count-selected-text="{0} Seleccionados"   
+                                                data-live-search-placeholder="Busqueda" 
+                                                id="text_selCuatro" multiple="multiple" 
+                                                name="text_selCuatro[]" 
+                                                autofocus required>
+
+                                                    @foreach ($data_selCuatro as $item)
+                                                        <option value="{{$item->llave}}" checked>{{$item->valor}}</option> 
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        @endif
                                         @if($data_table <> '')
                                            
                                               <div class="col-md-12">
@@ -120,7 +145,7 @@
                                                 <br>
                                             </div> <!-- /.col-md-12 -->
                                         
-                                        @endif
+                                        @endif                                    
                                     </div>
                                    <div class="form-group">
                                     <input hidden id="pKey" name="pKey" />

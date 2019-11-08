@@ -272,6 +272,7 @@ Route::get('home/lotes/remove/{id}/{lote}/{alm}', 'Mod04_MaterialesController@re
 Route::get('home/4 GENERAR TRASLADO', 'Mod04_MaterialesController@TrasladosArticulos');
 Route::get('datatables.solicitudesTraslados', 'Mod04_MaterialesController@DataTraslados')->name('datatables.solicitudesTraslados');
 Route::get('home/TRASLADOS/solicitud/{id}', 'Mod04_MaterialesController@ShowDetalleTraslado');
+Route::get('home/pdf/solicitud/{id}', 'Mod04_MaterialesController@ShowDetallePdf');
 Route::get('home/TRASLADOS/solicitud/update/{id}', 'Mod04_MaterialesController@HacerTraslados');
 Route::get('home/TRASLADOS/solicitud/updatepicking/{id}', 'Mod04_MaterialesController@Solicitud_A_PickingTraslados');
 Route::get('home/TRASLADOS/solicitud/PDF/traslado/{transfer}','Mod04_MaterialesController@getPdfTraslado');
@@ -297,6 +298,11 @@ Route::get('home/TRASLADO RECEPCION/solicitud/articulos/return/{id}', 'Mod04_Mat
 Route::get('home/TRASLADO RECEPCION/solicitud/update/{id}', 'Mod04_MaterialesController@updateArticuloTrasladoDepto');
 Route::post('home/TRASLADO RECEPCION/solicitud/articulos/edit', 'Mod04_MaterialesController@editArticuloTrasladosDepto');
 Route::get('home/TRASLADO RECEPCION/solicitud/PDF/traslado/{transfer}','Mod04_MaterialesController@getPdfTraslado');
+ //REPORTE DE ENTRADAS Y SALIDAS
+
+Route::get('home/ENTRADAS SALIDAS', 'Reportes_ProduccionController@showModal');
+Route::post('home/reporte/ENTRADAS SALIDAS', 'Mod04_MaterialesController@EntradasSalidas');
+Route::get('home/reporte/historialXLS', 'Mod04_MaterialesController@historialOPXLS');
 //
 //-------------------------//
 //RUTAS DE MRP//---------------------------------------------------------

@@ -188,6 +188,10 @@ public function entradasPDF()
             ->setFilename('SIZ Reporte de Materia Prima')
             ->export('xlsx');
     }
+    public function EntradasSalidas(Request $request)
+    {
+        dd(Input::all());
+    }
     public function DM_Articulos(Request $request){
         if (Auth::check()) {
            
@@ -814,6 +818,44 @@ public function ShowDetalleTraslado($id){
         return redirect()->route('auth/login');
     }
 }
+public function ShowDetallePdf($id){ 
+    if (Auth::check()) {
+    $user = Auth::user();
+    $actividades = $user->getTareas();  
+      // $solicitudes = DB::table('SIZ_SolicitudesMP');                
+
+    $articulos = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as UM, OITM.ItemName, mat.Destino, 
+                    mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente, mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A, mat.Cant_ASurtir_Origen_B,                    
+                    mat.EstatusLinea, mat.Destino 
+                      from SIZ_MaterialesSolicitudes mat
+                    LEFT JOIN OITM on OITM.ItemCode = mat.ItemCode                  
+                    WHERE Id_Solicitud = ? AND mat.Cant_Pendiente > 0', [$id]);
+
+                    $articulos_validos = array_where($articulos, function ($key,$item) {
+                        return $item->EstatusLinea == 'S';
+                    });
+                    $articulos_novalidos = array_where($articulos, function ($key,$item) {
+                                        return $item->EstatusLinea == 'N';});     
+                    
+                    $pdf_solicitud = DB::table('OWTR')->where('FolioNum', $id)->get();
+    if (count($articulos_novalidos) > 0) {
+        Session::flash('solicitud_err','Esta Solicitud tiene artículos que no se surtirán (fueron quitados o no hay material disponible)');
+    }
+    $param = array(        
+        'actividades' => $actividades,
+        'ultimo' => count($actividades),    
+        'id' => $id,
+        'articulos_validos' => $articulos_validos,
+        'articulos_novalidos' => $articulos_novalidos,
+        'pdf_solicitud' => $pdf_solicitud
+    );
+       
+        return view('Mod04_Materiales.PDFs_Solicitud', $param);    
+          
+    } else {
+        return redirect()->route('auth/login');
+    }
+}
 public function asignaAlmacenesOrigen($articulos){
     foreach ($articulos as $art) {
         if (($art->Cant_ASurtir_Origen_A + $art->Cant_ASurtir_Origen_B) == 0) {
@@ -1304,12 +1346,11 @@ public function HacerTraslados($id){
 public function getPdfSolicitud(){
     $sol = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', Input::get('sol'))->exists();
     if ($sol) {
-        return redirect('home/TRASLADOS/solicitud/'.Input::get('sol'));
+        return redirect('home/pdf/solicitud/'.Input::get('sol'));
     } else {
         Session::flash('error', 'No tenemos registros de esa Solicitud');
         return redirect()->back();
-    }
-    
+    }    
 }
   public function getPdfTraslado(Request $request){
     if (isset($request->transfer)) {
