@@ -1067,7 +1067,52 @@ public function SolicitudPDF($id){
                     GROUP BY ItemCode) AS ALMACENES ON OITM.ItemCode = ALMACENES.ItemCode
                     WHERE Id_Solicitud = ? AND mat.EstatusLinea = \'S\'', [$id]);       
   
-       //haz el PDF
+       //haz el PDF para "Picking"
+        $pdf = \PDF::loadView('Mod04_Materiales.SolicitudPDF', compact('articulos', 'id', 'comment'));
+        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
+        return $pdf->stream('Siz_Picking_'.$id . ' - ' .date("d/m/Y") . '.Pdf');
+    } else {
+        return redirect()->route('auth/login');
+    }
+}
+public function SolicitudPDF_Traslados($id){      
+    $transfer = 'Por Definir ';
+    $transfer1 = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as unitMsr, OITM.ItemName as Dscription, mat.Destino as WhsCode,
+          mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente, mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A AS Quantity,
+          from SIZ_Traslados mat
+                    LEFT JOIN OITM on OITM.ItemCode = mat.ItemCode
+                    
+                    WHERE Id_Solicitud = ? AND mat.EstatusLinea = \'S\'', [$id]); 
+       if (count($transfer1) <= 0) {
+        Session::flash('error', 'No tenemos registros de esa Solicitud');
+        return redirect()->back();
+       }         
+                               
+        $total1 = array_sum(array_pluck($transfer1, 'Quantity'));
+        $info1= null;
+        //$info1 = DB::select('select FolioNum, Filler, Printed, Comments  from OWTR where DocEntry = ? ', [$transfer]);
+        $comentario = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $id)->value('ComentarioUsuario');
+        $pdf = \PDF::loadView('Mod04_Materiales.TrasladoPDF_SinPrecio', compact('info1', 'transfer1', 
+         'total1',  'transfer', 'comentario'));
+        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
+        return $pdf->stream('Siz_Traslado_'.$id . ' - ' .date("d/m/Y") . '.Pdf');
+  
+
+    if (Auth::check()) {   
+        $comment = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $id)->value('ComentarioUsuario');
+        DB::update('UPDATE SIZ_SolicitudesMP SET Status = ? WHERE Id_Solicitud = ?', ['En Proceso', $id]);
+        $articulos = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as UM, OITM.ItemName, mat.Destino,
+          mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente, mat.Cant_PendienteA, (mat.Cant_ASurtir_Origen_A + mat.Cant_ASurtir_Origen_B) AS Cant_Surtir,
+          from SIZ_Traslados mat
+                    LEFT JOIN OITM on OITM.ItemCode = mat.ItemCode
+                    LEFT JOIN 
+                    (SELECT ItemCode, SUM(CASE WHEN WhsCode = \'APG-PA\'  THEN OnHand ELSE 0 END) AS APGPA,
+					SUM(CASE WHEN WhsCode = \'AMP-ST\'  THEN OnHand ELSE 0 END) AS AMPST
+                    FROM dbo.OITW
+                    GROUP BY ItemCode) AS ALMACENES ON OITM.ItemCode = ALMACENES.ItemCode
+                    WHERE Id_Solicitud = ? AND mat.EstatusLinea = \'S\'', [$id]);       
+  
+       //haz el PDF para "Picking"
         $pdf = \PDF::loadView('Mod04_Materiales.SolicitudPDF', compact('articulos', 'id', 'comment'));
         $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
         return $pdf->stream('Siz_Picking_'.$id . ' - ' .date("d/m/Y") . '.Pdf');
