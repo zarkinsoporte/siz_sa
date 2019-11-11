@@ -13,10 +13,11 @@
         /*
                 Generic Styling, for Desktops/Laptops
                 */
-                .firma {
-                    border: none;
-                
-                }
+        .firma {
+            border: none;
+
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -49,11 +50,13 @@
             font-family: 'Helvetica';
             margin-bottom: 15;
         }
+
         h2 {
             font-family: 'Helvetica';
             margin-bottom: -15;
-            margin-top:0;
+            margin-top: 0;
         }
+
         small {
             font-size: 16px;
         }
@@ -84,39 +87,52 @@
         tr:nth-child(even) {
             background-color: #f2f2f2;
         }
-        .zrk-silver{
+
+        .zrk-silver {
             background-color: #AFB0AE;
             color: black;
         }
-        .zrk-dimgray{
+
+        .zrk-dimgray {
             background-color: #514d4a;
             color: white;
         }
-        .zrk-gris-claro{
+
+        .zrk-gris-claro {
             background-color: #eeeeee;
             color: black;
         }
-        .zrk-silver-w{
+
+        .zrk-silver-w {
             background-color: #656565;
             color: white;
         }
-        .table > thead > tr > th, 
-        .table > tbody > tr > th, 
-        .table > tfoot > tr > th, 
-        .table > thead > tr > td, 
-        .table > tbody > tr > td,
-        .table > tfoot > tr > td { 
-            padding-bottom: 2px; padding-top: 2px; padding-left: 4px; padding-right: 0px;
+
+        .table>thead>tr>th,
+        .table>tbody>tr>th,
+        .table>tfoot>tr>th,
+        .table>thead>tr>td,
+        .table>tbody>tr>td,
+        .table>tfoot>tr>td {
+            padding-bottom: 2px;
+            padding-top: 2px;
+            padding-left: 4px;
+            padding-right: 0px;
         }
-        .total{
-            text-align: right; 
-            padding-right:4px;
+
+        .total {
+            text-align: right;
+            padding-right: 4px;
         }
-        .text-left{
-            text-align: left; 
-            padding-left:4px;
+
+        .text-left {
+            text-align: left;
+            padding-left: 4px;
         }
-        .page_break { page-break-before: always; }
+
+        .page_break {
+            page-break-before: always;
+        }
     </style>
 </head>
 
@@ -130,7 +146,7 @@
                     <td colspan="6" align="center" bgcolor="#fff">
                         <div class="fz"><b>{{env('EMPRESA_NAME')}}, S.A de C.V.</b><br><br>
                             <b>Mod04 - Generación de Traslado</b></div>
-                                           
+
                     </td>
                 </tr>
             </thead>
@@ -138,91 +154,128 @@
     </div>
     <!--Cuerpo o datos de la tabla-->
     <div id="content">
-  
-            <div class="row">    
-                
-                <div class="col-md-12">
-                <div><span style="float:right"><h2>
-                @if($info1[0]->Printed == 'N')
-                    ORIGINAL
-                @else
-                    COPIA
-                @endif
-                </h2></span>
-                <h2 >Traslado SAP #{{$transfer}} <small> Solicitud Número: {{$info1[0]->FolioNum}}</small></h2></div>
-                
-               <div><span style="float:right"><h3>Lista de Precios 10</h3></span>
-               <h3>De Almacén {{$info1[0]->Filler}}</h3></div>
-                    <table class="table table-striped mytable" style="table-layout:fixed;">
-                        <thead>
-                            <tr>                        
-                                <th style="width:5%;">#</th>
-                                <th style="width:7%;">Código</th>
-                                <th style="width:35%;">Descripción</th>
-                                <th style="width:7%;">UM</th>
-                                <th style="width:12%;">Almacén</th>
-                                <th style="width:7%;">Cantidad</th>
-                                                             
-                                                             
-                            </tr>
-                        </thead>
-                        <tbody>
-                        
-                            @foreach ($transfer1 as $art)
-                            <tr <?php ?>>
-                        
-                                <td style="width:5%;">{{$art->lineNum}}</td>
-                                <td style="width:7%;">{{$art->ItemCode}}</td>
-                                <td style="width:35%;" class="text-left">{{$art->Dscription}}</td>
-                                <td style="width:7%;">{{$art->unitMsr}}</td>
-                                <td style="width:12%;">{{$art->WhsCode}}</td>
-                                <td style="width:7%;">{{number_format($art->Quantity, 2)}}</td>
-                               
-                               
-                            </tr>
-                            @endforeach  
-                                           
-                    </table>
-                   <br>
-                    <div>
-                    <table class="mytable">
-                        <thead>
-                        <th style="width:10%;">Comentario:</th>
-                        </thead>
-                        <tbody>
-                        <tr>
-                        <td style="width:90%;" class="text-left" >{{$info1[0]->Comments}}</td>
-                        </tr>
-                        </tbody>
-                    </table></div>
-                    <br>
-@if(strlen($comentario) > 0)
-                    <div>
-                    <table class="mytable">
-                        <thead>
-                        <th style="width:10%;">Observaciones de la Solicitud:</th>
-                        </thead>
-                        <tbody>
-                        <tr>
-                        <td style="width:90%;" class="text-left" >{{$comentario}}</td>
-                        </tr>
-                        </tbody>
-                    </table></div>
-                    @endif
+
+        <div class="row">
+
+            <div class="col-md-12">
+                <div><span style="float:right">
+                        <h2>
+                            @if (isset($info1))
+                            @if($info1[0]->Printed == 'N')
+                            ORIGINAL
+                            @else
+                            COPIA
+                            @endif
+                            @endif
+                        </h2>
+                    </span>
+                    <h2>Traslado SAP #{{$transfer}} <small> Solicitud Número:
+                            @if (isset($info1))
+                            {{$info1[0]->FolioNum}}
+                            @else
+                            @if (isset($id))
+                            {{$id}}
+                            @endif
+                            @endif
+                        </small></h2>
                 </div>
-                <br><br><br><br>
-                <table  class="firma">
-                        
-                        <tbody>
-                        <tr class="firma">
-                        <td style="width:45%; border-top: 2px solid black"  class="text-center firma" >Nombre y firma de quien entrega</td>
-                        <td style="width:10%;" class="firma" ></td>
-                        <td style="width:45%; border-top: 2px solid black" class="text-center firma" >Nombre y firma de quien recibe</td>
+                <div><span style="float:right">
+                        <h3>Lista de Precios 10</h3>
+                    </span>
+                    <h3>De Almacén
+                        @if (isset($info1))
+                        {{$info1[0]->Filler}}
+                        @else
+                        @if (isset($almacenOrigen))
+                        {{$almacenOrigen}}
+                        @endif
+                        @endif
+                    </h3>
+                </div>
+                <table class="table table-striped mytable" style="table-layout:fixed;">
+                    <thead>
+                        <tr>
+                            @if (isset($info1))
+
+                            <th style="width:5%;">#</th>
+                            @endif
+                            <th style="width:7%;">Código</th>
+                            <th style="width:35%;">Descripción</th>
+                            <th style="width:7%;">UM</th>
+                            <th style="width:12%;">Almacén</th>
+                            <th style="width:7%;">Cantidad</th>
+
+
                         </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach ($transfer1 as $art)
+                        <tr <?php ?>>
+                            @if (isset($info1))
+                            <td style="width:5%;">{{$art->lineNum}}</td>
+                            @endif
+                            <td style="width:7%;">{{$art->ItemCode}}</td>
+                            <td style="width:35%;" class="text-left">{{$art->Dscription}}</td>
+                            <td style="width:7%;">{{$art->unitMsr}}</td>
+                            <td style="width:12%;">{{$art->WhsCode}}</td>
+                            <td style="width:7%;">{{number_format($art->Quantity, 2)}}</td>
+
+
+                        </tr>
+                        @endforeach
+
+                </table>
+                <br>
+                <div>
+                    <table class="mytable">
+                        <thead>
+                            <th style="width:10%;">Comentario:</th>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="width:90%;" class="text-left">
+                                    @if (isset($info1))
+                                    {{$info1[0]->Comments}}
+                                    @else
+                                    {{$comentario}}
+                                    @endif
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
-            </div>        
-    
+                </div>
+                <br>
+                @if(strlen($comentario) > 0)
+                <div>
+                    <table class="mytable">
+                        <thead>
+                            <th style="width:10%;">Observaciones de la Solicitud:</th>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="width:90%;" class="text-left">{{$comentario}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                @endif
+            </div>
+            <br><br><br><br>
+            <table class="firma">
+
+                <tbody>
+                    <tr class="firma">
+                        <td style="width:45%; border-top: 2px solid black" class="text-center firma">Nombre y firma de
+                            quien entrega</td>
+                        <td style="width:10%;" class="firma"></td>
+                        <td style="width:45%; border-top: 2px solid black" class="text-center firma">Nombre y firma de
+                            quien recibe</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
     </div>
 
 

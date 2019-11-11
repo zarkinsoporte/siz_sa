@@ -273,6 +273,7 @@ Route::get('home/4 GENERAR TRASLADO', 'Mod04_MaterialesController@TrasladosArtic
 Route::get('datatables.solicitudesTraslados', 'Mod04_MaterialesController@DataTraslados')->name('datatables.solicitudesTraslados');
 Route::get('home/TRASLADOS/solicitud/{id}', 'Mod04_MaterialesController@ShowDetalleTraslado');
 Route::get('home/pdf/solicitud/{id}', 'Mod04_MaterialesController@ShowDetallePdf');
+Route::get('home/pdf/solicitud/PDF/{id}', 'Mod04_MaterialesController@SolicitudPDF_Traslados');
 Route::get('home/TRASLADOS/solicitud/update/{id}', 'Mod04_MaterialesController@HacerTraslados');
 Route::get('home/TRASLADOS/solicitud/updatepicking/{id}', 'Mod04_MaterialesController@Solicitud_A_PickingTraslados');
 Route::get('home/TRASLADOS/solicitud/PDF/traslado/{transfer}','Mod04_MaterialesController@getPdfTraslado');

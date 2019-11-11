@@ -823,14 +823,19 @@ public function ShowDetallePdf($id){
     $user = Auth::user();
     $actividades = $user->getTareas();  
       // $solicitudes = DB::table('SIZ_SolicitudesMP');                
-
+      $almacenOrigen = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $id)->value('AlmacenOrigen');    
+      if (is_null($almacenOrigen)) {
+          $t = 'SIZ_MaterialesSolicitudes';
+      } else {
+          $t = 'SIZ_MaterialesTraslados';
+      }    
     $articulos = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as UM, OITM.ItemName, mat.Destino, 
                     mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente, mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A, mat.Cant_ASurtir_Origen_B,                    
                     mat.EstatusLinea, mat.Destino 
-                      from SIZ_MaterialesSolicitudes mat
+                      from '.$t.' mat
                     LEFT JOIN OITM on OITM.ItemCode = mat.ItemCode                  
                     WHERE Id_Solicitud = ? AND mat.Cant_Pendiente > 0', [$id]);
-
+  
                     $articulos_validos = array_where($articulos, function ($key,$item) {
                         return $item->EstatusLinea == 'S';
                     });
@@ -1076,10 +1081,18 @@ public function SolicitudPDF($id){
     }
 }
 public function SolicitudPDF_Traslados($id){      
+    $almacenOrigen = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $id)->value('AlmacenOrigen');
+    
     $transfer = 'Por Definir ';
-    $transfer1 = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as unitMsr, OITM.ItemName as Dscription, mat.Destino as WhsCode,
-          mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente, mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A AS Quantity,
-          from SIZ_Traslados mat
+    if (is_null($almacenOrigen)) {
+        $t = 'SIZ_MaterialesSolicitudes';
+        $almacenOrigen = "Materia Prima";
+    } else {
+        $t = 'SIZ_MaterialesTraslados';
+    }
+$transfer1 = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as unitMsr, OITM.ItemName as Dscription, mat.Destino as WhsCode,
+      mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente, mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A AS Quantity
+      from '.$t.' mat
                     LEFT JOIN OITM on OITM.ItemCode = mat.ItemCode
                     
                     WHERE Id_Solicitud = ? AND mat.EstatusLinea = \'S\'', [$id]); 
@@ -1089,11 +1102,12 @@ public function SolicitudPDF_Traslados($id){
        }         
                                
         $total1 = array_sum(array_pluck($transfer1, 'Quantity'));
-        $info1= null;
+        
         //$info1 = DB::select('select FolioNum, Filler, Printed, Comments  from OWTR where DocEntry = ? ', [$transfer]);
         $comentario = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $id)->value('ComentarioUsuario');
-        $pdf = \PDF::loadView('Mod04_Materiales.TrasladoPDF_SinPrecio', compact('info1', 'transfer1', 
-         'total1',  'transfer', 'comentario'));
+        
+        $pdf = \PDF::loadView('Mod04_Materiales.TrasladoPDF_SinPrecio', compact('id', 'transfer1', 
+         'total1',  'transfer', 'comentario', 'almacenOrigen'));
         $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
         return $pdf->stream('Siz_Traslado_'.$id . ' - ' .date("d/m/Y") . '.Pdf');
   
