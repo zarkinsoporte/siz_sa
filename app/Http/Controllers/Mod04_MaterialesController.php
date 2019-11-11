@@ -1090,8 +1090,10 @@ public function SolicitudPDF_Traslados($id){
     } else {
         $t = 'SIZ_MaterialesTraslados';
     }
-$transfer1 = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as unitMsr, OITM.ItemName as Dscription, mat.Destino as WhsCode,
-      mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente, mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A AS Quantity
+$transfer1 = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as unitMsr, 
+OITM.ItemName as Dscription, mat.Destino as WhsCode,
+      mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente, 
+      mat.Cant_PendienteA, (mat.Cant_ASurtir_Origen_A + mat.Cant_ASurtir_Origen_B) AS Quantity
       from '.$t.' mat
                     LEFT JOIN OITM on OITM.ItemCode = mat.ItemCode
                     
@@ -1658,7 +1660,7 @@ $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
 if (count($traslado_interno) > 0 && count($traslado_externo) > 0) { 
         Session::flash('ambos', 'true'); 
         Session::flash('interno', $mensaje_traslado_interno);   
-        Session::flash('externo','Entrega #' . $id . ' enviada.'); 
+        Session::flash('externo','Entrega #' . $id ); 
         return redirect()->back(); 
         } else if(count($traslado_interno) > 0) {
             if (strpos($mensaje_traslado_interno, 'Error') !== false) {
@@ -1669,7 +1671,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                  return redirect()->back();
             }
         } else if(count($traslado_externo) > 0) {
-            Session::flash('externo','Entrega #' . $id . ' enviada.');
+            Session::flash('externo','Entrega #' . $id );
              return redirect()->back();                
         }
         ///
@@ -1858,7 +1860,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                 return 'Mensaje:'.$mensaje_traslado_interno; //link pdf
             }
         } else if(count($traslado_externo) > 0) {
-            return 'Entrega #' . $id . ' enviada.';    
+            return 'Entrega #' . $id ;    
         }                      
         
     }
@@ -2073,12 +2075,57 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
     }
     public function removeArticuloTrasladoDepto()
     {
-        // dd(strpos(Input::get('reason'), 'Material') !== false);
-        // dd(Input::all());
+        $item = DB::table('SIZ_MaterialesSolicitudes')->where('Id', Input::get('articulo'))->first();
+        $id_sol = $item->Id_Solicitud;
         if (Auth::check()) {
             if (strpos(Input::get('reason'), 'Material') !== false) {
                 DB::update('UPDATE SIZ_MaterialesTraslados SET EstatusLinea = ? , Razon = ?
             WHERE Id = ?', ['C', Input::get('reason'), Input::get('articulo')]);
+
+                $articulosvalidos = DB::table('SIZ_MaterialesSolicitudes')
+                    ->whereIn('EstatusLinea', ['S', 'N'])
+                    ->where('Id_Solicitud', $id_sol)->count();
+
+                if ($articulosvalidos == 0) {
+                    DB::update(
+                        'UPDATE SIZ_SolicitudesMP SET Status = ? 
+                             WHERE Id_Solicitud = ?',
+                        ['Cancelada', $id_sol]
+                    );
+                    // si el Solicitante tiene correo se le avisa
+                    $solicitante = DB::table('SIZ_SolicitudesMP')
+                        ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')
+                        ->select('SIZ_SolicitudesMP.Status', 'OHEM.firstName', 'OHEM.lastName', DB::raw('case when email like \'%@%\' then email else email + cast(\'@zarkin.com\' as varchar)  end AS correo'))
+                        ->where('SIZ_SolicitudesMP.Id_Solicitud', $id_sol)->first();
+
+                    $nombreCompleto = $solicitante->firstName . ' ' . $solicitante->lastName;
+                    $correos_db = DB::select("
+                    SELECT 
+                    CASE WHEN email like '%@%' THEN email ELSE email + cast('@zarkin.com' as varchar) END AS correo
+                    FROM OHEM
+                    INNER JOIN Siz_Email AS se ON se.No_Nomina = OHEM.U_EmpGiro
+                    WHERE se.Traslados in (1, 3)
+                    GROUP BY email
+                    ");
+                    $correos = array_pluck($correos_db, 'correo');
+                    if (!in_array($solicitante->correo, $correos) && $solicitante->correo !== null) {
+                        $correos[] = $solicitante->correo;
+                    }   
+                    $arts = DB::table('SIZ_MaterialesSolicitudes')
+                        ->join('OITM', 'OITM.ItemCode', '=', 'SIZ_MaterialesSolicitudes.ItemCode')
+                        ->select('SIZ_MaterialesSolicitudes.*', 'OITM.ItemName', 'OITM.InvntryUom')
+                        ->where('Id_Solicitud', $id_sol)->get();
+
+                    if ((count($correos) > 0) && ($solicitante->Status === 'Cancelada')) {
+                        Mail::send('Emails.TrasladoDeptosMaterialesCancelacion', [
+                            'arts' => $arts, 'id' => $id_sol, 'nombreCompleto' => $nombreCompleto
+                        ], function ($msj) use ($correos, $id_sol) {
+                            $msj->subject('SIZ Traslado Cancelación #' . $id_sol); //ASUNTO DEL CORREO
+                            $msj->to($correos); //Correo del destinatario
+                        });
+                    }
+                    Session::flash('mensaje', 'Solicitud #' . $id_sol . ' Cancelada');
+                }
             } else {
                 DB::update('UPDATE SIZ_MaterialesTraslados SET EstatusLinea = ? , Razon= ?
             WHERE Id = ?', ['N', Input::get('reason'), Input::get('articulo')]);

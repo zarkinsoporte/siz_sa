@@ -9,6 +9,7 @@
 | and give it the controller to call when that URI is requested.
 |
  */
+
 use App\Grupo;
 use App\Modelos\MOD01\LOGOF;
 use App\Modelos\MOD01\MODULOS_GRUPO_SIZ;
@@ -19,12 +20,15 @@ use App\User;
 use Illuminate\Support\Facades\Mail;
 
 use Illuminate\Http\Request;
+
 Route::get('/', 'HomeController@index');
-Route::get('/home',
+Route::get(
+    '/home',
     [
         'as' => 'home',
         'uses' => 'HomeController@index',
-    ]);
+    ]
+);
 /*
 |--------------------------------------------------------------------------
 | Administrator Routes
@@ -109,7 +113,7 @@ Route::post('admin/delete_Noti/', 'Mod00_AdministradorController@delete_Noti');
 Route::get('updateprivilegio', 'Mod00_AdministradorController@updateprivilegio');
 Route::get('dropdown', function () {
     return TAREA_MENU::where('id_menu_item', Input::get('option'))
-    ->lists('name', 'id');
+        ->lists('name', 'id');
 });
 Route::get('switch', function () {
     $vava = MODULOS_GRUPO_SIZ::find(2);
@@ -124,75 +128,76 @@ Route::post('nuevatarea', 'Mod00_AdministradorController@nuevatarea');
 |--------------------------------------------------------------------------
 */
 Route::get('home/TRASLADO ÷ AREAS', [
-    'as' => 'traslado', 'uses' =>'Mod01_ProduccionController@traslados']);
-    Route::post('home/TRASLADO ÷ AREAS', 'Mod01_ProduccionController@traslados');
-    Route::get('home/TRASLADO ÷ AREAS/{id}', 'Mod01_ProduccionController@getOP');
-    Route::post('home/TRASLADO ÷ AREAS/{id}', 'Mod01_ProduccionController@getOP');
-    //la siguiente ruta avanza la orden //
-    Route::post('home/traslados/avanzar', 'Mod01_ProduccionController@avanzarOP');
-    Route::post('home/traslados/Reprocesos', 'Mod01_ProduccionController@Retroceso');
-    //Route::get('home/traslados/Reprocesos', 'Mod01_ProduccionController@getOP');
-    Route::post('/', 'HomeController@index');
-    Route::get('Mod01_Produccion/Noticias', 'HomeController@create');
-    Route::get('leido/{id}', 'HomeController@UPT_Noticias');
-    Route::post('/leido', 'HomeController@UPT_Noticias');
-    //REPORTE DE PRODUCCION
-    Route::get('home/REPORTE PRODUCCION', 'Reportes_ProduccionController@produccion1');
-    Route::post('home/REPORTE PRODUCCION', 'Reportes_ProduccionController@produccion1');
-    //REPORTE 112-CORTE PIEL///
-    Route::get('home/112 CORTE DE PIEL','Mod01_ProduccionController@repCortePiel' );
-    Route::post('home/112 CORTE DE PIEL','Mod01_ProduccionController@repCortePiel' );
-    Route::post('home/reporte/DetinsPiel', 'Mod01_ProduccionController@repCortePiel');
-    Route::get('home/repCortePielExl', 'Mod01_ProduccionController@repCortePielExl');
-    //PDF de Historial por OP
-    Route::get('home/ReporteOpPDF/{op}', 'Mod01_ProduccionController@ReporteOpPDF');
-    Route::get('home/ReporteMaterialesPDF/{op}', 'Mod01_ProduccionController@ReporteMaterialesPDF');
-    Route::get('home/ReporteProduccionPDF', 'Reportes_ProduccionController@ReporteProduccionPDF');
-    Route::get('home/ReporteProduccionEXL', 'Reportes_ProduccionController@ReporteProduccionEXL');
-    //REPORTE DE HISTORIAL X OP
-    Route::get('home/HISTORIAL OP', 'Reportes_ProduccionController@showModal');
-    Route::post('home/reporte/HISTORIAL OP', 'Reportes_ProduccionController@historialOP');
-    Route::get('home/reporte/historialXLS', 'Reportes_ProduccionController@historialOPXLS');
-    //REPORTE DE MATERIALES X OP
-    Route::get('home/MATERIALES OP', 'Reportes_ProduccionController@showModal');
-    Route::post('home/reporte/MATERIALES OP', 'Reportes_ProduccionController@materialesOP');
-    Route::get('home/reporte/materialesXLS', 'Reportes_ProduccionController@materialesOPXLS');
-    //REPORTE BACK ORDER
-    Route::get('home/BACK ORDER', 'Reportes_ProduccionController@backorder');
-    Route::get('datatables.showbackorder', 'Reportes_ProduccionController@DataShowbackorder')->name('datatables.showbackorder');
-    Route::post('home/reporte/backorderPDF', 'Reportes_ProduccionController@backOrderAjaxToSession');
-    Route::get('home/reporte/backorderVentasPDF', 'Reportes_ProduccionController@ReporteBackOrderVentasPDF');
-    Route::get('home/reporte/backorderPlaneaPDF', 'Reportes_ProduccionController@ReporteBackOrderPlaneaPDF');
-    Route::get('home/reporte/backorderXLS', 'Reportes_ProduccionController@ReporteBackOrderXLS');
-    //RPORTE BACK ORDER CASCO
-    Route::get('home/BACK ORDER CASCO', 'Reportes_ProduccionController@backorderCasco');
-    Route::get('datatables.showbackordercasco', 'Reportes_ProduccionController@DataShowbackorderCasco')->name('datatables.showbackordercasco');
-    
-    Route::get('home/reporte/backorderCascoPDF', 'Reportes_ProduccionController@ReporteBackOrderCascoPDF');
-    //Ruta generica para guardar ajaxtoSession
-    Route::post('home/reporte/ajaxtosession/{id}', 'Reportes_ProduccionController@AjaxToSession');
-    /*
+    'as' => 'traslado', 'uses' => 'Mod01_ProduccionController@traslados'
+]);
+Route::post('home/TRASLADO ÷ AREAS', 'Mod01_ProduccionController@traslados');
+Route::get('home/TRASLADO ÷ AREAS/{id}', 'Mod01_ProduccionController@getOP');
+Route::post('home/TRASLADO ÷ AREAS/{id}', 'Mod01_ProduccionController@getOP');
+//la siguiente ruta avanza la orden //
+Route::post('home/traslados/avanzar', 'Mod01_ProduccionController@avanzarOP');
+Route::post('home/traslados/Reprocesos', 'Mod01_ProduccionController@Retroceso');
+//Route::get('home/traslados/Reprocesos', 'Mod01_ProduccionController@getOP');
+Route::post('/', 'HomeController@index');
+Route::get('Mod01_Produccion/Noticias', 'HomeController@create');
+Route::get('leido/{id}', 'HomeController@UPT_Noticias');
+Route::post('/leido', 'HomeController@UPT_Noticias');
+//REPORTE DE PRODUCCION
+Route::get('home/REPORTE PRODUCCION', 'Reportes_ProduccionController@produccion1');
+Route::post('home/REPORTE PRODUCCION', 'Reportes_ProduccionController@produccion1');
+//REPORTE 112-CORTE PIEL///
+Route::get('home/112 CORTE DE PIEL', 'Mod01_ProduccionController@repCortePiel');
+Route::post('home/112 CORTE DE PIEL', 'Mod01_ProduccionController@repCortePiel');
+Route::post('home/reporte/DetinsPiel', 'Mod01_ProduccionController@repCortePiel');
+Route::get('home/repCortePielExl', 'Mod01_ProduccionController@repCortePielExl');
+//PDF de Historial por OP
+Route::get('home/ReporteOpPDF/{op}', 'Mod01_ProduccionController@ReporteOpPDF');
+Route::get('home/ReporteMaterialesPDF/{op}', 'Mod01_ProduccionController@ReporteMaterialesPDF');
+Route::get('home/ReporteProduccionPDF', 'Reportes_ProduccionController@ReporteProduccionPDF');
+Route::get('home/ReporteProduccionEXL', 'Reportes_ProduccionController@ReporteProduccionEXL');
+//REPORTE DE HISTORIAL X OP
+Route::get('home/HISTORIAL OP', 'Reportes_ProduccionController@showModal');
+Route::post('home/reporte/HISTORIAL OP', 'Reportes_ProduccionController@historialOP');
+Route::get('home/reporte/historialXLS', 'Reportes_ProduccionController@historialOPXLS');
+//REPORTE DE MATERIALES X OP
+Route::get('home/MATERIALES OP', 'Reportes_ProduccionController@showModal');
+Route::post('home/reporte/MATERIALES OP', 'Reportes_ProduccionController@materialesOP');
+Route::get('home/reporte/materialesXLS', 'Reportes_ProduccionController@materialesOPXLS');
+//REPORTE BACK ORDER
+Route::get('home/BACK ORDER', 'Reportes_ProduccionController@backorder');
+Route::get('datatables.showbackorder', 'Reportes_ProduccionController@DataShowbackorder')->name('datatables.showbackorder');
+Route::post('home/reporte/backorderPDF', 'Reportes_ProduccionController@backOrderAjaxToSession');
+Route::get('home/reporte/backorderVentasPDF', 'Reportes_ProduccionController@ReporteBackOrderVentasPDF');
+Route::get('home/reporte/backorderPlaneaPDF', 'Reportes_ProduccionController@ReporteBackOrderPlaneaPDF');
+Route::get('home/reporte/backorderXLS', 'Reportes_ProduccionController@ReporteBackOrderXLS');
+//RPORTE BACK ORDER CASCO
+Route::get('home/BACK ORDER CASCO', 'Reportes_ProduccionController@backorderCasco');
+Route::get('datatables.showbackordercasco', 'Reportes_ProduccionController@DataShowbackorderCasco')->name('datatables.showbackordercasco');
+
+Route::get('home/reporte/backorderCascoPDF', 'Reportes_ProduccionController@ReporteBackOrderCascoPDF');
+//Ruta generica para guardar ajaxtoSession
+Route::post('home/reporte/ajaxtosession/{id}', 'Reportes_ProduccionController@AjaxToSession');
+/*
     |--------------------------------------------------------------------------
     | MOD07-CALIDAD Routes
     |--------------------------------------------------------------------------
     */
-    Route::get('home/NUEVO RECHAZO', 'Mod07_CalidadController@Rechazo');
-    Route::post('RechazosNuevo', 'Mod07_CalidadController@RechazoIn');
-    Route::get('Mod07_Calidad/Mod_Rechazo/{id}/{mensaje}', 'Mod07_CalidadController@Mod_Rechazo');
-    Route::post('Mod07_Calidad/Mod_RechazoUPDT', 'Mod07_CalidadController@Mod_RechazoUPDT');
-    Route::get('admin/Delete_Rechazo/{id}', 'Mod07_CalidadController@Delete_Rechazo');
-    Route::post('admin/Delete_Rechazo/', 'Mod07_CalidadController@Delete_Rechazo');
-    Route::get('search/autocomplete', 'Mod07_CalidadController@autocomplete');
-    Route::post('/pdfRechazo', 'Mod07_CalidadController@Pdf_Rechazo');
-    Route::get('home/REPORTE DE RECHAZOS', 'Mod07_CalidadController@Reporte');
-    Route::get('home/CANCELACIONES', 'Mod07_CalidadController@Cancelado');
-    Route::get('borrado/{id}', 'Mod07_CalidadController@UPT_Cancelado');
-    Route::post('/borrado', 'Mod07_CalidadController@UPT_Cancelado');
+Route::get('home/NUEVO RECHAZO', 'Mod07_CalidadController@Rechazo');
+Route::post('RechazosNuevo', 'Mod07_CalidadController@RechazoIn');
+Route::get('Mod07_Calidad/Mod_Rechazo/{id}/{mensaje}', 'Mod07_CalidadController@Mod_Rechazo');
+Route::post('Mod07_Calidad/Mod_RechazoUPDT', 'Mod07_CalidadController@Mod_RechazoUPDT');
+Route::get('admin/Delete_Rechazo/{id}', 'Mod07_CalidadController@Delete_Rechazo');
+Route::post('admin/Delete_Rechazo/', 'Mod07_CalidadController@Delete_Rechazo');
+Route::get('search/autocomplete', 'Mod07_CalidadController@autocomplete');
+Route::post('/pdfRechazo', 'Mod07_CalidadController@Pdf_Rechazo');
+Route::get('home/REPORTE DE RECHAZOS', 'Mod07_CalidadController@Reporte');
+Route::get('home/CANCELACIONES', 'Mod07_CalidadController@Cancelado');
+Route::get('borrado/{id}', 'Mod07_CalidadController@UPT_Cancelado');
+Route::post('/borrado', 'Mod07_CalidadController@UPT_Cancelado');
 Route::get('home/HISTORIAL', 'Mod07_CalidadController@Historial');
 Route::post('/excel', 'Mod07_CalidadController@excel');
 ////reporte calidad
-Route::get('home/CALIDAD POR DEPTO','Mod07_CalidadController@repCalidad' );
-Route::post('home/CALIDAD POR DEPTO','Mod07_CalidadController@repCalidad2' );
+Route::get('home/CALIDAD POR DEPTO', 'Mod07_CalidadController@repCalidad');
+Route::post('home/CALIDAD POR DEPTO', 'Mod07_CalidadController@repCalidad2');
 Route::get('getAutocomplete', function () {
     return view('Mod07_Calidad.RechazoFrame');
 })->name('getAutocomplete');
@@ -209,7 +214,7 @@ Route::post('home/rh/reportes/bonos', 'Mod10_RhController@calculoBonos');
 Route::get('home/PARAMETROS BONOS', 'Mod10_RhController@setParametrosBonos');
 Route::post('home/PARAMETROS BONOS', 'Mod10_RhController@setParametrosBonos2');
 Route::get('home/rh/reportes/bonosPdf', 'Mod10_RhController@bonosPdf');
-Route::get('home/BONOS CORTE','Mod10_RhController@bonosCorte' );
+Route::get('home/BONOS CORTE', 'Mod10_RhController@bonosCorte');
 Route::post('home/rh/reportes/bonosCorte', 'Mod10_RhController@calculoBonosCorte');
 Route::get('home/rh/reportes/bonoscortePdf', 'Mod10_RhController@bonoscortePdf');
 Route::get('home/rh/reportes/bonoscorteEXL', 'Mod10_RhController@bonoscorteEXL');
@@ -241,11 +246,11 @@ Route::get('home/reporte/entradasPDF', 'Mod04_MaterialesController@entradasPDF')
 Route::get('home/DATOS MAESTROS ARTICULOS', 'Reportes_ProduccionController@showModal');
 Route::post('home/reporte/DATOS MAESTROS ARTICULOS/{redirek?}', 'Mod04_MaterialesController@DM_Articulos');
 Route::post('articuloToSap', 'Mod04_MaterialesController@articuloToSap');
-Route::get('OITM.show', 'HomeController@ShowArticulos')->name( 'OITM.show');
+Route::get('OITM.show', 'HomeController@ShowArticulos')->name('OITM.show');
 //
 //SOLICITUD DE MATERIALES
 Route::get('home/1 SOLICITUD MATERIALES', 'Mod04_MaterialesController@solicitudMateriales');
-Route::get('OITM.WH.show', 'Mod04_MaterialesController@ShowArticulosWH')->name( 'OITM.WH.show');
+Route::get('OITM.WH.show', 'Mod04_MaterialesController@ShowArticulosWH')->name('OITM.WH.show');
 Route::post('home/saveArt', 'Mod04_MaterialesController@saveArt')->name('home/saveArt');
 //AUTORIZACION
 Route::get('home/2 AUTORIZACION', 'Mod04_MaterialesController@AutorizacionSolicitudes');
@@ -276,19 +281,19 @@ Route::get('home/pdf/solicitud/{id}', 'Mod04_MaterialesController@ShowDetallePdf
 Route::get('home/pdf/solicitud/PDF/{id}', 'Mod04_MaterialesController@SolicitudPDF_Traslados');
 Route::get('home/TRASLADOS/solicitud/update/{id}', 'Mod04_MaterialesController@HacerTraslados');
 Route::get('home/TRASLADOS/solicitud/updatepicking/{id}', 'Mod04_MaterialesController@Solicitud_A_PickingTraslados');
-Route::get('home/TRASLADOS/solicitud/PDF/traslado/{transfer}','Mod04_MaterialesController@getPdfTraslado');
+Route::get('home/TRASLADOS/solicitud/PDF/traslado/{transfer}', 'Mod04_MaterialesController@getPdfTraslado');
 //5 TRASLADOS DEPTOS ENTREGA
 Route::get('home/TRASLADO ENTREGA', 'Reportes_ProduccionController@showModal');
 Route::get('home/reporte/TRASLADO ENTREGA', 'Reportes_ProduccionController@showModal');
 Route::post('home/reporte/TRASLADO ENTREGA', 'Mod04_MaterialesController@trasladoEntrega');
 Route::get('OITM.WH.traslados', 'Mod04_MaterialesController@ShowArticulosWHTraslados')->name('OITM.WH.traslados');
 Route::post('home/reporte/saveTraslado', 'Mod04_MaterialesController@saveTraslado')->name('home/reporte/saveTraslado');
-Route::get('home/PDF/traslado/{transfer}','Mod04_MaterialesController@getPdfTraslado');
-Route::post('home/PDF/traslado','Mod04_MaterialesController@getPdfTraslado');
-Route::post('home/PDF/solicitud','Mod04_MaterialesController@getPdfSolicitud');
-Route::get('lotesdeptos/{id?}','Mod04_MaterialesController@lotesdeptos');
-Route::get('home/TRASLADO ENTREGA/update/{almacen_origen}/{id}','Mod04_MaterialesController@HacerEntrega');
-Route::get('home/entregas_lotes','Mod04_MaterialesController@Entregaslotes');
+Route::get('home/PDF/traslado/{transfer}', 'Mod04_MaterialesController@getPdfTraslado');
+Route::post('home/PDF/traslado', 'Mod04_MaterialesController@getPdfTraslado');
+Route::post('home/PDF/solicitud', 'Mod04_MaterialesController@getPdfSolicitud');
+Route::get('lotesdeptos/{id?}', 'Mod04_MaterialesController@lotesdeptos');
+Route::get('home/TRASLADO ENTREGA/update/{almacen_origen}/{id}', 'Mod04_MaterialesController@HacerEntrega');
+Route::get('home/entregas_lotes', 'Mod04_MaterialesController@Entregaslotes');
 Route::get('datatables.Entregaslotes', 'Mod04_MaterialesController@DataEntregaslotes')->name('datatables.Entregaslotes');
 //6 TRASLADOS DEPTOS RECEPCION
 Route::get('home/TRASLADO RECEPCION', 'Mod04_MaterialesController@TrasladosDeptos');
@@ -298,8 +303,8 @@ Route::post('home/TRASLADO RECEPCION/solicitud/articulos/remove', 'Mod04_Materia
 Route::get('home/TRASLADO RECEPCION/solicitud/articulos/return/{id}', 'Mod04_MaterialesController@returnArticuloTrasladosDepto');
 Route::get('home/TRASLADO RECEPCION/solicitud/update/{id}', 'Mod04_MaterialesController@updateArticuloTrasladoDepto');
 Route::post('home/TRASLADO RECEPCION/solicitud/articulos/edit', 'Mod04_MaterialesController@editArticuloTrasladosDepto');
-Route::get('home/TRASLADO RECEPCION/solicitud/PDF/traslado/{transfer}','Mod04_MaterialesController@getPdfTraslado');
- //REPORTE DE ENTRADAS Y SALIDAS
+Route::get('home/TRASLADO RECEPCION/solicitud/PDF/traslado/{transfer}', 'Mod04_MaterialesController@getPdfTraslado');
+//REPORTE DE ENTRADAS Y SALIDAS
 
 Route::get('home/ENTRADAS SALIDAS', 'Reportes_ProduccionController@showModal');
 Route::post('home/reporte/ENTRADAS SALIDAS', 'Mod04_MaterialesController@EntradasSalidas');
@@ -330,60 +335,66 @@ Route::post('home/reporte/PRODUCCION POR AREAS', 'Reportes_ProduccionController@
 Route::get('home/reporte/PRODUCCION POR AREAS', 'Reportes_ProduccionController@reporteProdxAreasPDF');
 Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@produccionxareasXLS');
 
- Route::get('/pruebas', function (Request $request) {      
+Route::get('/pruebas', function (Request $request) {
     $consulta = DB::table('SIZ_SolicitudesMP')
-                    ->join('SIZ_MaterialesSolicitudes', 'SIZ_MaterialesSolicitudes.Id_Solicitud', '=', 'SIZ_SolicitudesMP.Id_Solicitud')
-                    ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')
-                    ->leftjoin('OUDP', 'OUDP.Code', '=', 'dept')
-                    ->groupBy('SIZ_SolicitudesMP.Id_Solicitud', 'SIZ_SolicitudesMP.FechaCreacion', 'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'firstName', 'lastName', 'dept', 'Name')
-                    ->select('SIZ_SolicitudesMP.Id_Solicitud', 'SIZ_SolicitudesMP.FechaCreacion', 
-                    'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'OHEM.firstName',
-                     'OHEM.lastName', 'OHEM.dept', 'OUDP.Name as depto')
-                    ->whereIn('SIZ_SolicitudesMP.Status', ['Pendiente', 'Regresada', 'En Proceso'])
-                    ->whereIn('SIZ_MaterialesSolicitudes.EstatusLinea', ['S', 'P', 'N']);
-     //$consulta = 
-     dd($consulta->get());
+        ->join('SIZ_MaterialesSolicitudes', 'SIZ_MaterialesSolicitudes.Id_Solicitud', '=', 'SIZ_SolicitudesMP.Id_Solicitud')
+        ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')
+        ->leftjoin('OUDP', 'OUDP.Code', '=', 'dept')
+        ->groupBy('SIZ_SolicitudesMP.Id_Solicitud', 'SIZ_SolicitudesMP.FechaCreacion', 'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'firstName', 'lastName', 'dept', 'Name')
+        ->select(
+            'SIZ_SolicitudesMP.Id_Solicitud',
+            'SIZ_SolicitudesMP.FechaCreacion',
+            'SIZ_SolicitudesMP.Usuario',
+            'SIZ_SolicitudesMP.Status',
+            'OHEM.firstName',
+            'OHEM.lastName',
+            'OHEM.dept',
+            'OUDP.Name as depto'
+        )
+        ->whereIn('SIZ_SolicitudesMP.Status', ['Pendiente', 'Regresada', 'En Proceso'])
+        ->whereIn('SIZ_MaterialesSolicitudes.EstatusLinea', ['S', 'P', 'N']);
+    //$consulta = 
+    dd($consulta->get());
     $tareas = DB::table('Siz_Tarea_Menu')->get();
 
     foreach ($tareas as $k) {
         DB::update('update Siz_Tarea_Menu set route = ? where name = ?', [$k->name, $k->name]);
-     
     }
     //  $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
-//  $vCmp->DbServerType="6"; 
-//  $vCmp->server = "SERVER-SAPBO";
-//  $vCmp->LicenseServer = "SERVER-SAPBO:30000";
-//  $vCmp->CompanyDB = "Pruebas";
-//  $vCmp->username = "manager";
-//  $vCmp->password = "aqnlaaepp";
-//  $vCmp->DbUserName = "sa";
-//  $vCmp->DbPassword = "B1Admin";
-//  $vCmp->UseTrusted = false;
-//  $vCmp->language = "6";
-//  $lRetCode = $vCmp->Connect;
-//  //dd($lRetCode);
-//  echo $vCmp->GetLastErrorDescription();
-//  echo 'iniciada';
-//  echo '<br>';
-//  $vItem = $vCmp->GetBusinessObject("202");
-//  $RetVal = $vItem->GetByKey("19848");
-//  echo $vItem->ProductionOrderStatus;
-//  echo '<br>';
-//  $vItem->ProductionOrderStatus = 1;
-//  $vItem->Update;
-//  //if ($vCmp->InTransaction){
-//      //$vCmp->EndTransaction();
-//   //   dd('cerrada');
-//  //}
-//  echo $vCmp->GetLastErrorDescription();
-//  echo $vItem->ProductionOrderStatus;
-     //return view('Mod00_Administrador.pruebas');
- });
- Route::get('setpassword', function () {
+    //  $vCmp->DbServerType="6"; 
+    //  $vCmp->server = "SERVER-SAPBO";
+    //  $vCmp->LicenseServer = "SERVER-SAPBO:30000";
+    //  $vCmp->CompanyDB = "Pruebas";
+    //  $vCmp->username = "manager";
+    //  $vCmp->password = "aqnlaaepp";
+    //  $vCmp->DbUserName = "sa";
+    //  $vCmp->DbPassword = "B1Admin";
+    //  $vCmp->UseTrusted = false;
+    //  $vCmp->language = "6";
+    //  $lRetCode = $vCmp->Connect;
+    //  //dd($lRetCode);
+    //  echo $vCmp->GetLastErrorDescription();
+    //  echo 'iniciada';
+    //  echo '<br>';
+    //  $vItem = $vCmp->GetBusinessObject("202");
+    //  $RetVal = $vItem->GetByKey("19848");
+    //  echo $vItem->ProductionOrderStatus;
+    //  echo '<br>';
+    //  $vItem->ProductionOrderStatus = 1;
+    //  $vItem->Update;
+    //  //if ($vCmp->InTransaction){
+    //      //$vCmp->EndTransaction();
+    //   //   dd('cerrada');
+    //  //}
+    //  echo $vCmp->GetLastErrorDescription();
+    //  echo $vItem->ProductionOrderStatus;
+    //return view('Mod00_Administrador.pruebas');
+});
+Route::get('setpassword', function () {
     try {
-        
+
         dd(Auth::user()->U_EmpGiro);
-        
+
 
         $password = Hash::make('1234');
         DB::table('dbo.OHEM')
@@ -394,5 +405,3 @@ Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@pr
     }
     echo 'hecho';
 });
- 
-
