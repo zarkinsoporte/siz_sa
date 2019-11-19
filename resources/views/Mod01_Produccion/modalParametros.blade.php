@@ -160,8 +160,13 @@
                                         </div>
                                         &nbsp;&nbsp;&nbsp;
                                         <input id="submit" name="submit" type="submit" value="Generar" onclick="mostrar();"  class="btn btn-primary"/>
-
-                                        <a type="button" class="btn btn-default"  href="{!!url('home')!!}">Cancelar</a>
+                                        @if ($btn3 !== '')
+                                            <?php $path = '';  ?>
+                                            <a type="button" class="btn btn-default" href="{{url()}}/{{$btn3['route']}}">{{$btn3['btnName']}}</a>    
+                                        @else
+                                            <a type="button" class="btn btn-default" href="{!!url('home')!!}">Cancelar</a>
+                                        @endif
+                                        
                                     </div>
                                     {!! Form::close() !!}
                                 </div>

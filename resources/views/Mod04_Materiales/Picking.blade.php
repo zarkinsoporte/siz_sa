@@ -162,7 +162,7 @@
           <td>{{$art->Destino}}</td>
           <td>{{number_format($art->Cant_ASurtir_Origen_A + $art->Cant_ASurtir_Origen_B, 2)}}</td>
           <td>{{number_format($art->Disponible, 2)}}</td>          
-          <td><a @if ($art->Disponible > $art->Cant_Requerida)
+          <td><a @if ($art->Disponible >= $art->Cant_Requerida)
           href="{{'articulos/return/'.$art->Id}}"
             @else
             disabled = "disabled"

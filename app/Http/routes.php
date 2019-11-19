@@ -286,6 +286,7 @@ Route::get('home/TRASLADOS/solicitud/PDF/traslado/{transfer}', 'Mod04_Materiales
 Route::get('home/TRASLADO ENTREGA', 'Reportes_ProduccionController@showModal');
 Route::get('home/reporte/TRASLADO ENTREGA', 'Reportes_ProduccionController@showModal');
 Route::post('home/reporte/TRASLADO ENTREGA', 'Mod04_MaterialesController@trasladoEntrega');
+Route::get('home/reporte2/TRASLADO ENTREGA', 'Mod04_MaterialesController@trasladoEntrega');
 Route::get('OITM.WH.traslados', 'Mod04_MaterialesController@ShowArticulosWHTraslados')->name('OITM.WH.traslados');
 Route::post('home/reporte/saveTraslado', 'Mod04_MaterialesController@saveTraslado')->name('home/reporte/saveTraslado');
 Route::get('home/PDF/traslado/{transfer}', 'Mod04_MaterialesController@getPdfTraslado');

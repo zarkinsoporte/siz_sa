@@ -269,7 +269,7 @@ class SAP extends Model
                         ->where('Id', $item->Id)
                         ->update(['Cant_PendienteA' => ($item->Cant_PendienteA - $item->CA),
                         'Cant_Pendiente' => ($item->Cant_PendienteA - $item->CA),
-                        'Cant_ASurtir_Origen_A' => 0]);
+                        'Cant_ASurtir_Origen_A' => ($item->Cant_PendienteA - $item->CA)]);
                         $vItem->Lines->ItemCode = $item->ItemCode;
                         $vItem->Lines->WarehouseCode = trim($varDestino[0]);
                         if ($item->BatchNum > 0) {

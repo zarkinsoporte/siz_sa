@@ -529,7 +529,8 @@ public function DataEntregaslotes(){
                     ->where('SIZ_MaterialesTraslados.Cant_PendienteA', '>', 0)
                     ->whereNotIn('SIZ_MaterialesTraslados.EstatusLinea', ['T', 'S'])
                     ->where('SIZ_SolicitudesMP.Status', 'Pendiente')
-                    ->where('SIZ_SolicitudesMP.Usuario', Auth::user()->U_EmpGiro);
+                    //->where('SIZ_SolicitudesMP.Usuario', Auth::user()->U_EmpGiro)
+                    ;
      //$consulta = collect($consulta);
             return Datatables::of($consulta)             
                  ->addColumn('folio', function ($item) {                     
@@ -1449,14 +1450,19 @@ public function getPdfSolicitud(){
                 ->where('Dept', Auth::user()->dept)
                 ->whereIn('TrasladoDeptos', ['D', 'OD'])->get();
             //quitar almacen origen de los almacenes destino si existe.
-            $almacenesDestino = array_where($almacenesDestino, function ($key, $item) {            
-                    return $item->Code != Input::get('text_selTres');
+            $almacenOrigen = '';
+            if (Input::has('text_selTres')) {
+                $almacenOrigen = Input::get('text_selTres');
+            } 
+            
+            $almacenesDestino = array_where($almacenesDestino, function ($key, $item) use($almacenOrigen){            
+                    return $item->Code != $almacenOrigen;
             });
  
             $param = array(
                 'actividades' => $actividades,
                 'ultimo' => count($actividades),
-                'almacenOrigen' => Input::get('text_selTres'),
+                'almacenOrigen' => $almacenOrigen,
                 'almacenesDestino' => array_values($almacenesDestino)
             );
             return view('Mod04_Materiales.showListMateriales', $param);
@@ -1557,7 +1563,7 @@ public function getPdfSolicitud(){
         )AS L on L.ItemCode = mat.ItemCode			
         WHERE Id_Solicitud = ?
         AND mat.Cant_ASurtir_Origen_A <= AlmacenOrigen AND mat.EstatusLinea <> \'T\'', [$id, $id]);
-            
+            //dd($todosArticulos);
         $itemsConLotes = array_where($todosArticulos, function ($key, $item) {
             return $item->BatchNum > 0 && $item->Preparado == 'N';
         });
@@ -1699,13 +1705,13 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                         
         foreach ($arts as $art) {            
             $statusL = 'E';
-            if (is_numeric(array_search($art['destino'], $almacenesDestino))) {
+            if (is_numeric(array_search(trim($art['destino']), $almacenesDestino))) {
                 $statusL = 'I';
             } 
             DB::table('SIZ_MaterialesTraslados')->insert(
                 [
                     'Id_Solicitud' => $id, 'ItemCode' => $art['pKey'],
-                    'Cant_Requerida' => $art['cant'], 'Destino' => $art['labelDestino'],
+                    'Cant_Requerida' => $art['cant'], 'Destino' => trim($art['labelDestino']),
                     'Cant_Autorizada' =>  $art['cant'], 'Cant_Pendiente' =>  $art['cant'],
                     'Cant_PendienteA' =>  $art['cant'],
                     'EstatusLinea' => $statusL, 'Cant_ASurtir_Origen_A' => $art['cant'], 'Cant_ASurtir_Origen_B' => 0
@@ -1893,7 +1899,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                                         mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente,
                                          mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A AS CA,
                 ALMACENES.AlmacenOrigen,
-                mat.EstatusLinea, LOTES.BatchNum, 
+                CASE WHEN (mat.Cant_ASurtir_Origen_A > AlmacenOrigen) THEN \'N\' ELSE mat.EstatusLinea END EstatusLinea, LOTES.BatchNum, 
                 CASE WHEN (mat.Cant_ASurtir_Origen_A ) = L.Asignado THEN \'Y\' ELSE \'N\' END AS Preparado
                 from SIZ_MaterialesTraslados mat 
                 LEFT JOIN OITM on OITM.ItemCode = mat.ItemCode                               
@@ -1923,14 +1929,17 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                     group by T2.ItemCode
                 )AS L on L.ItemCode = mat.ItemCode			
                 WHERE Id_Solicitud = ?
-                AND mat.Cant_ASurtir_Origen_A <= AlmacenOrigen AND mat.EstatusLinea in (\'E\', \'I\')', [$id, $id]);
-                    
+                 AND mat.EstatusLinea in (\'E\', \'I\')', [$id, $id]);
+                    //dd($todosArticulos);
                 $itemsConLotes = array_where($todosArticulos, function ($key, $item) {
                     return $item->BatchNum > 0 && $item->Preparado == 'N';
                 });
                
                 $articulos_validos = array_where($todosArticulos, function ($key,$item) {
                     return $item->EstatusLinea == 'S' || $item->EstatusLinea == 'I' || $item->EstatusLinea == 'E';
+                });
+                $articulos_novalidos = array_where($todosArticulos, function ($key,$item) {
+                    return $item->EstatusLinea == 'N' ;
                 });
               //  dd($itemsConLotes);
                 $param = array(        
@@ -1939,6 +1948,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                     'id' => $id,
                     'itemsConLotes' => count($itemsConLotes),
                     'articulos_validos' => $articulos_validos,
+                    'articulos_novalidos' => $articulos_novalidos,
                     'almacen_origen' => $almacen_origen
                 );
                 return view('Mod04_Materiales.LotesDeptos', $param);
@@ -1981,11 +1991,10 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
             ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')
             ->leftjoin('OUDP', 'OUDP.Code', '=', 'dept')
             ->join('SIZ_AlmacenesTransferencias', function ($join) {
-            $join->on('SIZ_AlmacenesTransferencias.Code', '=', DB::raw('SUBSTRING(Destino, 1, 6)'))
-                 ->where('SIZ_AlmacenesTransferencias.Dept', '=', Auth::user()->dept)
-                 ->where('SIZ_AlmacenesTransferencias.TrasladoDeptos', '<>', 'D')
-                 ->whereNotNull('TrasladoDeptos');
-              })
+                $join->on('SIZ_AlmacenesTransferencias.Code', '=', DB::raw('SUBSTRING(Destino, 1, 6)'))
+                    ->where('SIZ_AlmacenesTransferencias.TrasladoDeptos', '<>', 'D')
+                    ->whereNotNull('TrasladoDeptos');
+            })
             ->groupBy('SIZ_SolicitudesMP.Id_Solicitud', 'SIZ_SolicitudesMP.FechaCreacion', 'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'firstName', 'lastName', 'OHEM.dept', 'Name', 'SIZ_SolicitudesMP.AlmacenOrigen')
             ->select(
                 'SIZ_SolicitudesMP.Id_Solicitud',
@@ -2000,6 +2009,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
             )
             ->whereNotNull('SIZ_SolicitudesMP.AlmacenOrigen')
             ->where('SIZ_MaterialesTraslados.Cant_Pendiente', '>', 0)
+            ->where('SIZ_AlmacenesTransferencias.dept', Auth::user()->dept)
             ->whereIn('SIZ_MaterialesTraslados.EstatusLinea', ['S', 'P'])
             ->where('SIZ_SolicitudesMP.Status', 'Pendiente');
        
@@ -2075,7 +2085,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
     }
     public function removeArticuloTrasladoDepto()
     {
-        $item = DB::table('SIZ_MaterialesSolicitudes')->where('Id', Input::get('articulo'))->first();
+        $item = DB::table('SIZ_MaterialesTraslados')->where('Id', Input::get('articulo'))->first();
         $id_sol = $item->Id_Solicitud;
         if (Auth::check()) {
             if (strpos(Input::get('reason'), 'Material') !== false) {
@@ -2083,7 +2093,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
             WHERE Id = ?', ['C', Input::get('reason'), Input::get('articulo')]);
 
                 $articulosvalidos = DB::table('SIZ_MaterialesSolicitudes')
-                    ->whereIn('EstatusLinea', ['S', 'N'])
+                    ->whereIn('EstatusLinea', ['S', 'N', 'I'])
                     ->where('Id_Solicitud', $id_sol)->count();
 
                 if ($articulosvalidos == 0) {
@@ -2111,9 +2121,10 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                     if (!in_array($solicitante->correo, $correos) && $solicitante->correo !== null) {
                         $correos[] = $solicitante->correo;
                     }   
-                    $arts = DB::table('SIZ_MaterialesSolicitudes')
-                        ->join('OITM', 'OITM.ItemCode', '=', 'SIZ_MaterialesSolicitudes.ItemCode')
-                        ->select('SIZ_MaterialesSolicitudes.*', 'OITM.ItemName', 'OITM.InvntryUom')
+                    $arts = DB::table('SIZ_MaterialesTraslados')
+                        ->join('OITM', 'OITM.ItemCode', '=', 'SIZ_MaterialesTraslados.ItemCode')
+                        ->select('SIZ_MaterialesTraslados.*', 'OITM.ItemName', 'OITM.InvntryUom')
+                        ->where('EstatusLinea', '<>', 'T')
                         ->where('Id_Solicitud', $id_sol)->get();
 
                     if ((count($correos) > 0) && ($solicitante->Status === 'Cancelada')) {
@@ -2374,5 +2385,104 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
         ->where('alm', $alm)
         ->delete();
         return redirect()->back();
+    }
+
+//aca
+    public function reporteEntradasSalidas()
+{
+    if (Auth::check()) {
+        $user = Auth::user();
+        $actividades = $user->getTareas();  
+        $data = array(        
+            'actividades' => $actividades,
+            'ultimo' => count($actividades),
+            'db' => DB::getDatabaseName(),          
+            'fi' => Input::get('FechIn'),
+            'ff' => Input::get('FechaFa')
+        );
+        return view('Mod04_Materiales.reporteEntradasAlmacen', $data);
+    } else {
+        return redirect()->route('auth/login');
+    }
+}
+    public function DataShowEntradasSalidas(Request $request)
+    {
+        if (Auth::check()) {
+            $consulta = DB::select(DB::raw( "
+          SELECT * FROM(
+            SELECT 'ENTRADA G' as TIPO, PDN1.ItemCode, OPDN.DocNum, OPDN.DocDate, OPDN.CardCode, OPDN.CardName, PDN1.Price, PDN1.LineTotal, PDN1.VatSum, OPDN.DocCur, PDN1.Dscription, OPDN.DocRate, PDN1.WhsCode, PDN1.Quantity, PDN1.NumPerMsr, OPDN.NumAtCard
+            ,PDN1.TotalFrgn, PDN1.VatSumFrgn 
+            FROM   SALOTTO.dbo.OPDN OPDN INNER JOIN dbo.PDN1 PDN1 ON OPDN.DocEntry=PDN1.DocEntry
+            WHERE  (CAST( OPDN.DocDate as DATE) 
+                        BETWEEN '" . date('d-m-Y', strtotime($request->get('fi'))) . ' 00:00' . "' and '" . date('d-m-Y', strtotime($request->get('ff'))) . ' 23:59:59' . "'
+            )AND (PDN1.WhsCode=N'AMG-CC' OR PDN1.WhsCode=N'AMG-ST' OR PDN1.WhsCode=N'AMG-FE' OR PDN1.WhsCode=N'AGG-RE' OR PDN1.WhsCode=N'AMG-KU' OR PDN1.WhsCode=N'AMP-BL' OR PDN1.WhsCode=N'APG-ST' OR PDN1.WhsCode=N'APG-PA' OR PDN1.WhsCode=N'ATG-ST' OR PDN1.WhsCode=N'ATG-FX' OR PDN1.WhsCode=N'AMP-TR' OR PDN1.WhsCode=N'ARG-ST')
+UNION ALL
+            SELECT 'ENTRADA L' as TIPO, PDN1.ItemCode, OPDN.DocNum, OPDN.DocDate, OPDN.CardCode, OPDN.CardName, PDN1.Price, PDN1.LineTotal, PDN1.VatSum, OPDN.DocCur, PDN1.Dscription, OPDN.DocRate, PDN1.WhsCode, PDN1.Quantity, PDN1.NumPerMsr, OPDN.NumAtCard
+            ,PDN1.TotalFrgn, PDN1.VatSumFrgn 
+            FROM   OPDN OPDN INNER JOIN PDN1 PDN1 ON OPDN.DocEntry=PDN1.DocEntry
+            WHERE  (CAST( OPDN.DocDate as DATE) 
+            BETWEEN '" . date('d-m-Y', strtotime($request->get('fi'))) . ' 00:00' . "' and '" . date('d-m-Y', strtotime($request->get('ff'))) . ' 23:59:59' . "'
+            ) 
+            AND (PDN1.WhsCode IS  NULL  OR  NOT (PDN1.WhsCode=N'AGG-RE' OR PDN1.WhsCode=N'AMG-CC' OR PDN1.WhsCode=N'AMG-FE' OR PDN1.WhsCode=N'AMG-KU' OR PDN1.WhsCode=N'AMG-ST' OR PDN1.WhsCode=N'AMP-BL' OR PDN1.WhsCode=N'AMP-TR' OR PDN1.WhsCode=N'APG-PA' OR PDN1.WhsCode=N'APG-ST' OR PDN1.WhsCode=N'ARG-ST' OR PDN1.WhsCode=N'ATG-FX' OR PDN1.WhsCode=N'ATG-ST'))
+UNION ALL
+            SELECT 'NOTA CREDITO' as TIPO, RPC1.ItemCode, ORPC.DocNum, ORPC.DocDate, ORPC.CardCode, ORPC.CardName, RPC1.Price, RPC1.LineTotal, RPC1.VatSum, ORPC.DocCur, RPC1.Dscription, ORPC.DocRate, RPC1.WhsCode, RPC1.Quantity, RPC1.NumPerMsr, ORPC.NumAtCard
+            ,RPC1.TotalFrgn, RPC1.VatSumFrgn 
+            FROM   ORPC ORPC INNER JOIN RPC1 RPC1 ON ORPC.DocEntry=RPC1.DocEntry
+            WHERE  (CAST( ORPC.DocDate as DATE) 
+            BETWEEN '" . date('d-m-Y', strtotime($request->get('fi'))) . ' 00:00' . "' and '" . date('d-m-Y', strtotime($request->get('ff'))) . ' 23:59:59' . "'
+            ) 
+            AND (RPC1.WhsCode IS  NULL  OR  NOT (RPC1.WhsCode=N'AGG-RE' OR RPC1.WhsCode=N'AMG-CC' OR RPC1.WhsCode=N'AMG-FE' OR RPC1.WhsCode=N'AMG-KU' OR RPC1.WhsCode=N'AMG-ST' OR RPC1.WhsCode=N'AMP-BL' OR RPC1.WhsCode=N'AMP-TR' OR RPC1.WhsCode=N'APG-PA' OR RPC1.WhsCode=N'APG-ST' OR RPC1.WhsCode=N'ARG-ST' OR RPC1.WhsCode=N'ATG-FX' OR RPC1.WhsCode=N'ATG-ST'))
+UNION ALL
+            SELECT 'DEVOLUCION' AS TIPO, RPD1.ItemCode, ORPD.DocNum, ORPD.DocDate, ORPD.CardCode, ORPD.CardName, RPD1.Price, RPD1.LineTotal, RPD1.VatSum, ORPD.DocCur, RPD1.Dscription, ORPD.DocRate, RPD1.WhsCode, RPD1.Quantity, RPD1.NumPerMsr, ORPD.NumAtCard
+            ,RPD1.TotalFrgn, RPD1.VatSumFrgn 
+            FROM   ORPD ORPD INNER JOIN RPD1 RPD1 ON ORPD.DocEntry=RPD1.DocEntry
+            WHERE  (CAST( ORPD.DocDate as DATE) 
+            BETWEEN '" . date('d-m-Y', strtotime($request->get('fi'))) . ' 00:00' . "' and '" . date('d-m-Y', strtotime($request->get('ff'))) . ' 23:59:59' . "'
+            ) 
+            AND (RPD1.WhsCode IS  NULL  OR  NOT (RPD1.WhsCode=N'AGG-RE' OR RPD1.WhsCode=N'AMG-CC' OR RPD1.WhsCode=N'AMG-FE' OR RPD1.WhsCode=N'AMG-KU' OR RPD1.WhsCode=N'AMG-ST' OR RPD1.WhsCode=N'AMP-BL' OR RPD1.WhsCode=N'AMP-TR' OR RPD1.WhsCode=N'APG-PA' OR RPD1.WhsCode=N'APG-ST' OR RPD1.WhsCode=N'ARG-ST' OR RPD1.WhsCode=N'ATG-FX' OR RPD1.WhsCode=N'ATG-ST'))
+            
+            ) T
+            ORDER BY T.TIPO, T.DocNum, T.DocDate
+        "));
+        
+        $request->session()->put( 'fechas_entradas', array(
+                'fi' => $request->get('fi'),
+                'ff' => $request->get('ff')
+            ));
+        
+        $consulta = collect($consulta);
+            return Datatables::of($consulta)
+                ->addColumn('Cant', function ($consulta) {
+                    return ($consulta->Quantity * $consulta->NumPerMsr);
+                })
+                ->addColumn('LineaTotal', function ($consulta) {
+                    if ($consulta->DocCur == 'MXP') {
+                        return $consulta->LineTotal;
+                    } 
+                    elseif ($consulta->DocCur == 'USD') {
+                        return $consulta->TotalFrgn;
+                    }
+                })
+                ->addColumn('Iva', function ($consulta) {
+                    if ($consulta->DocCur == 'MXP') {
+                        return $consulta->VatSum;
+                    } 
+                    elseif ($consulta->DocCur == 'USD') {
+                        return $consulta->VatSumFrgn;
+                    }
+                })
+                ->addColumn('TotalConIva', function ($consulta) {
+                    if ($consulta->DocCur == 'MXP') {
+                        return ($consulta->LineTotal + $consulta->VatSum);
+                    } 
+                    elseif ($consulta->DocCur == 'USD') {
+                        return ($consulta->TotalFrgn + $consulta->VatSumFrgn);
+                    }
+                })
+                
+                ->make(true);
+        } else {
+            return redirect()->route('auth/login');
+        }
     }
 }

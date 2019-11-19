@@ -194,6 +194,7 @@ class Reportes_ProduccionController extends Controller
         $data_selCuatro = [];
         $sizeModal = 'modal-sm';
         $data_table = '';
+        $btn3 = '';
         switch ($nombre) {
             case "HISTORIAL OP":
                 $fieldOtroNumber = 'OP';
@@ -216,7 +217,7 @@ class Reportes_ProduccionController extends Controller
                 break;
             case "MRP":
                 //Select
-                       //$f->weekOfYear . '-' . $f->addWeek(2)->weekOfYear;
+                        //$f->weekOfYear . '-' . $f->addWeek(2)->weekOfYear;
                 // strftime('%V', strtotime( '+1 week', $f->fechaDeEjecucion));
                 $text_selUno = 'Semana';
                 $data_selUno = ['Producción', 'Compras'];
@@ -233,7 +234,9 @@ class Reportes_ProduccionController extends Controller
                     ->where('Dept', Auth::user()->dept)
                     ->whereIn('TrasladoDeptos', ['O', 'OD'])
                     ->get();
-                    
+                $btn3 = ['btnName' => 'Omitir', 
+                'route' => 'home/reporte2/TRASLADO ENTREGA'];
+            
                    //    dd(array_pluck($almacenesOrigen, 'Label'));
                         
                 $Text = "Elije Almacén Origen";
@@ -275,7 +278,8 @@ class Reportes_ProduccionController extends Controller
             'text_selCuatro' => $text_selCuatro,
             'data_selCuatro' => $data_selCuatro,
             'sizeModal' => $sizeModal,
-            'data_table' => $data_table
+            'data_table' => $data_table,
+            'btn3' => $btn3
             ]);
         } else {
             return redirect()->route('auth/login');

@@ -99,13 +99,16 @@
 
         <div class="col-md-12">
             <h3 class="page-header">
-                Traslado Entrega de Mercancía <small>Almacén Origen: {{$almacenOrigen}}</small>
+                Traslado Entrega de Mercancía <small>@if ($almacenOrigen !== '') Almacén Origen: {{$almacenOrigen}} @endif</small>
                 <div class="visible-xs visible-sm"><br></div>
             </h3>
             <span class="">
-                <button class="btn btn-primary" ng-click="modals()" ng-if="!btnshow" type="button"><i
-                        class="fa fa-plus"></i>
-                    Agregar</button>
+                @if ($almacenOrigen !== '')
+                    <button class="btn btn-primary" ng-click="modals()" ng-if="!btnshow" type="button"><i class="fa fa-plus"></i>
+                        Agregar</button>
+                @else
+                    <a class="btn btn-primary"  type="button" href="{!! url('home/TRASLADO ENTREGA') !!}">Agregar</a>
+                @endif
                 <a class="btn btn-primary" ng-if="btnshow" type="button"
                     href="{!! url('home/TRASLADO ENTREGA') !!}">Otro
                     traslado</a>
@@ -250,7 +253,14 @@
 
     <div class="row">
         <div class="col-md-12">
-            <div class="modal fade" id="confirma" tabindex="-1" role="dialog">
+            <div class="modal fade" 
+            @if ($almacenOrigen !== '')
+                id="confirma" 
+            @else
+                id="no_mostrar"
+            @endif
+            
+            tabindex="-1" role="dialog">
                 <div class="modal-dialog modal-lg" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
