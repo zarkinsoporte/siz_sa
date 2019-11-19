@@ -22,6 +22,11 @@
         {{ Session::get('solicitud_err') }}
       </div>
       @endif
+      @if(Session::has('mensaje2'))
+      <div class="alert alert-success" role="alert">
+        {{ Session::pull('mensaje2') }}
+      </div>
+      @endif
     </div>
   </div>
   <style>
@@ -41,10 +46,10 @@
       <span class="pull-right">
         <a class="btn btn-primary btn-sm" href="{{url('home/TRASLADO RECEPCION')}}"><i class="fa fa-angle-left"></i>
           Atras</a>
-
+        @if(!(Session::has('transfer3')))
         <a ng-click="sendArt()" id="spinn" class="btn btn-success btn-sm" href="{{'update/'.$id}}"><i
             class="fa fa-send"></i> Aceptar entrega</a>
-
+        @endif
       </span>
       <!-- /.row -->
 
@@ -53,7 +58,7 @@
         <thead>
           <tr>
             <th colspan="3">Artículo</th>
-            <th colspan="2">Cantidad</th>
+            <th colspan="3">Cantidad</th>
             <th colspan="1"></th>
             <th colspan="1"></th>
           </tr>
@@ -62,7 +67,7 @@
             <th>Código</th>
             <th>Descripción</th>
             <th>UM</th>
-
+            <th>Autorizada</th>
             <th>Recibida</th>
             <th>A Recibir</th>
             <th>Destino</th>
@@ -78,7 +83,7 @@
             <td>{{$art->ItemCode}}</td>
             <td>{{$art->ItemName}}</td>
             <td>{{$art->UM}}</td>
-
+            <td>{{number_format($art->Cant_Autorizada, 2)}}</td>
             <td>{{number_format($art->Cant_Autorizada - $art->Cant_PendienteA , 2)}}</td>
             <td>{{$art->Cant_ASurtir_Origen_A}}</td>
             <td>{{$art->Destino}}</td>
@@ -246,14 +251,14 @@
             </div>
             <div class="form-group col-md-12" ng-show="pendiente > (canta)">
               <h5>¿Cuál es la razón por la que se recibe una cantidad menor?</h5>
-              <input type="radio" name="reason" value="Se posterga" checked>
+              <input type="radio" name="reason" value="Se Posterga Entrega" checked>
               Se posterga entrega<br>
               <input type="radio" name="reason" value="Material Dañado / Incompleto">
               Material Dañado / Incompleto<br>
 
             </div>
             <div class="form-group col-md-12">
-              <input type="hidden" id="articulo-id" name="articulo">
+              <input type="hidden" id="articulo-id" name="articulo" value="@{{id}}">
               <input type="hidden" ng-model="pendiente" value="@{{pendiente}}" id="pendiente" name="pendiente">
               <input type="hidden" id="itemcode" name="itemcode">
 
@@ -280,9 +285,6 @@
   var button = $(event.relatedTarget) // Button that triggered the modal
   var id = button.data('id') // Extract info from data-* attributes
 
-  // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
-  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods
-  instead.
   var modal = $(this)
   modal.find('#articulo-id').val(id)
   });

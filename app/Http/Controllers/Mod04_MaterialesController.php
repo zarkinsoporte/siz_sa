@@ -2192,6 +2192,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
             } else {
                 Session::flash('error', 'No se pudo actualizar...');
             }
+            Session::flash('mensaje', 'Cantidad Actualizada...');
             return redirect()->back();
         } else {
             return redirect()->route('auth/login');
@@ -2237,7 +2238,8 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                         'nombre_completo' => $nombreCompleto
                     );
                    //  dd($data);   
-                    if (Session::has('transfer3')) {                        
+                    if (Session::has('transfer3')) {   
+                                        
                         if (Session::get('transfer3') > 0) {
                             $t3 = Session::get('transfer3');
                         } else {
@@ -2248,13 +2250,12 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                     }
 
                     if (is_numeric($t3) && $t3 > 0 ) {
-                        
+                         
                         Session::put('transfer3', $t3);
-                        Session::flash('mensaje2', 'Transferencia '.$t3.' realizada.');
+                        Session::put('mensaje2', 'Transferencia '.$t3.' realizada.');
                     }else{
                         $stat3 = strlen($t3);
-                        $transfer3 = array();
-                        Session::flash('error', $t3);
+                        $transfer3 = array();                       
                     }
                 }
                 if ( $stat3 > 0 ) {
