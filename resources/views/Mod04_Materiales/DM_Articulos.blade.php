@@ -130,7 +130,18 @@ width: 100% !important;
             </ul>
         </div>
         <div class="col-md-3 col-sm-12">
-            <a class="btn btn-primary" id="showImg" style="margin-bottom: 10px;" src="{{URL::asset('/images/articulos/img_'.$data[0]->ItemCode.'.jpg')}}"><i class="fa fa-camera" aria-hidden="true"></i> Ver Imagen</a>
+        @if (Storage::disk('nas')->has($data[0]->ItemCode.'.jpg'))
+        
+            <a class="btn btn-primary" id="showImg" style="margin-bottom: 10px;" 
+            
+            src="data:image/jpeg;base64,{{ base64_encode(Storage::disk('nas')->get(''.$data[0]->ItemCode.'.jpg')) }}"
+            ><i class="fa fa-camera" aria-hidden="true"></i> Ver Imagen</a>
+        @else
+        <a class="btn btn-warning" id="showImg" style="margin-bottom: 10px;" 
+            
+            src="data:image/jpeg;base64,{{ base64_encode(Storage::disk('nas')->get('SIN_IMAGEN.jpg')) }}"
+            ><i class="fa fa-camera" aria-hidden="true"></i> Sin Imagen</a>
+        @endif
         </div>
     </div>   
     
@@ -185,6 +196,12 @@ width: 100% !important;
                     </li>
                     @endforeach
               @else
+              <li class="list-group-item active">
+                <div>
+                   <i class="fa fa-cube"></i> MRP <small></small>                  
+                </div>
+            
+            </li>
                   <li class="list-group-item">
                     <div>
                         <h5 class="my-0">SIN DATOS <small ><span class="pull-right"></span></small>

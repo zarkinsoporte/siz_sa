@@ -47,7 +47,10 @@ return [
             'driver' => 'local',
             'root'   => storage_path('app'),
         ],
-
+        'nas' => [
+            'driver' => 'local',
+            'root'   => 'E:\\sizarticulos'            
+        ],
         'ftp' => [
             'driver'   => 'ftp',
             'host'     => 'ftp.example.com',

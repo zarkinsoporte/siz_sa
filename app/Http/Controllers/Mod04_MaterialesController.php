@@ -327,7 +327,12 @@ public static function getParam_DM_Articulos($item){
                     where oitm.ItemCode =  ?            
                 ",[$item]); 
         
-                $semanas = DB::select('exec SIZ_SP_Art ?, ?', ['semana', $item]);
+                
+                try { 
+                    $semanas = DB::select('exec SIZ_SP_Art ?, ?', ['semana', $item]);
+                  } catch(\Illuminate\Database\QueryException $ex){ 
+                    $semanas = array();                   
+                  }
          $columns = array();
          $sem = '';
          if (count($semanas) > 0) {
@@ -1893,7 +1898,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                 $almacen_origen = DB::table('SIZ_SolicitudesMP')
                 ->where('Id_Solicitud', $id)
                 ->value('AlmacenOrigen');
-
+            //consulta validada
                 $todosArticulos = DB::select('
                 select mat.Id, mat.ItemCode, OITM.InvntryUom as UM, OITM.ItemName, mat.Destino, 
                                         mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente,
@@ -2053,7 +2058,9 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                     GROUP BY ItemCode) AS ALMACENES ON OITM.ItemCode = ALMACENES.ItemCode
                     inner join SIZ_AlmacenesTransferencias on SIZ_AlmacenesTransferencias.Code = SUBSTRING(Destino, 1, 6) 
                     and SIZ_AlmacenesTransferencias.Dept = '.Auth::user()->dept.' and SIZ_AlmacenesTransferencias.TrasladoDeptos <> \'D\' and TrasladoDeptos is not null 
-                    WHERE Id_Solicitud = ? AND Cant_PendienteA > 0', [$id]);
+                    WHERE Id_Solicitud = ? AND Cant_PendienteA > 0
+                    group by Id, mat.ItemCode, OITM.InvntryUom, OITM.ItemName, mat.Destino,  mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente, mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A, 
+                    ALMACENES.AlmacenOrigen, EstatusLinea', [$id]);
               
                 $articulos_validos = array_where($articulos, function ($key, $item) {
                     return $item->EstatusLinea == 'S' || $item->EstatusLinea == 'P';
@@ -2223,7 +2230,10 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                      inner join SIZ_AlmacenesTransferencias on SIZ_AlmacenesTransferencias.Code = SUBSTRING(Destino, 1, 6) 
                     and SIZ_AlmacenesTransferencias.Dept = '.Auth::user()->dept.' and SIZ_AlmacenesTransferencias.TrasladoDeptos <> \'D\' and TrasladoDeptos is not null 
                 WHERE Id_Solicitud = ? AND mat.EstatusLinea = \'S\' 
-                AND mat.Cant_ASurtir_Origen_A <= AlmacenOrigen ', [$id]);
+                AND mat.Cant_ASurtir_Origen_A <= AlmacenOrigen 
+                 group by Id, mat.ItemCode, mat.Destino, 
+                mat.Cant_Pendiente, mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A, 
+                ALMACENES.AlmacenOrigen, BatchNum', [$id]);
                 
                 $stat3 = 0;
                 $transfer3 = 0;              
