@@ -62,18 +62,18 @@
                                         @if($fechas == true)
                                         <div class="form-group">                                        
                                             <label for="date_range" class="control-label">Rango de Fechas:</label><br>
-                                            Desde:<input type="date" id="FechIn" name="FechIn" class="form-control" autofocus required>
-                                            Hasta:<input type="date" id="FechaFa" name="FechaFa" class="form-control" required>
+                                            Desde:<input type="date" id="FechIn" name="FechIn"   value="{{ old('FechIn') }}" class="form-control" autofocus required>
+                                            Hasta:<input type="date" id="FechaFa" name="FechaFa" value="{{ old('FechaFa') }}" class="form-control" required>
                                         </div>
                                         @endif
                                         @if($fieldOtroNumber <> '')                                    
                                         <div class="form-group">
-                                        Escribe {{$fieldOtroNumber}}:<input type="number" id="fieldOtroNumber" name="fieldOtroNumber" class="form-control" autofocus required>
+                                        Escribe {{$fieldOtroNumber}}:<input type="number" id="fieldOtroNumber" name="fieldOtroNumber" value="{{ old('fieldOtroNumber') }}" class="form-control" autofocus required>
                                         </div>
                                         @endif
                                         @if($fieldText <> '')                                    
                                         <div class="form-group">
-                                        Escribe {{$fieldText}}:<input type="text" id="fieldText" name="fieldText" class="form-control" autofocus required>
+                                        Escribe {{$fieldText}}:<input type="text" id="fieldText" name="fieldText" value="{{ old('fieldText') }}" class="form-control" autofocus required>
                                         </div>
                                         @endif
                                         @if($text_selUno <> '')                                    

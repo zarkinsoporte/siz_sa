@@ -77,7 +77,7 @@
           <tr>
             <td>{{$lote->NumLote}}</td>
             <td style="padding-top:12px">{{number_format($lote->Disponible, 2)}}
-            @if($totalDisponible > $totalProceso && $Cant > 0)
+            @if( $Cant > 0 )
               <span class="pull-right" >
                 <a role="button" data-toggle="modal" data-target="#edit" data-id="{{$articulo->Id}}"
                   data-cant="{{$Cant}}" data-lote="{{$lote->NumLote}}" data-cantlote="{{$lote->Disponible}}"

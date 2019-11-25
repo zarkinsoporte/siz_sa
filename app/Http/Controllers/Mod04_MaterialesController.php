@@ -190,7 +190,50 @@ public function entradasPDF()
     }
     public function EntradasSalidas(Request $request)
     {
-        dd(Input::all());
+        if (Auth::check()) {
+            $fi = strtotime($request->get('FechIn'). ' 00:00:00');
+            $ff = strtotime($request->get('FechaFa'). ' 23:59:59');
+            if ($fi > $ff) {
+                Session::flash('error', 'Rango de fechas no válido');
+                return redirect()->back()->withInput($request->input());
+            }
+            $rules = [
+                // 'fieldText' => 'required|exists:OITM,ItemCode',
+                'FechIn' => 'required|date|before:tomorrow',
+                'FechaFa' => 'required|date',              
+            ];
+            $customMessages = [
+                'FechIn.before' => 'La Fecha de Inicio no es válida',               
+                //'fieldText.exists' => 'El Código no existe.'
+            ];
+            $valid = Validator::make( $request->all(), $rules, $customMessages);
+            
+            if ($valid->fails()) {
+                return redirect()->back()
+                    ->withErrors($valid)
+                    ->withInput($request->input());
+            }
+           
+            $tipomat = Input::get('text_selDos');
+            $almacenes = implode(", ", Input::get('text_selCuatro')); //alamacenes separados por comas            
+            $fechai = date('Y-m-d H:i:s' , $fi);
+            $fechaf = date('Y-m-d H:i:s' , $ff);
+                   
+            $user = Auth::user();
+            $actividades = $user->getTareas();
+
+            $param = array(
+                'actividades' => $actividades,
+                'ultimo' => count($actividades),
+                'fi' => $fechai,
+                'ff' => $fechaf,
+                'tipomat' => $tipomat,
+                'almacenes' => $almacenes
+            );
+            return view('Mod04_Materiales.ReporteEntradasSalidas', $param);
+        } else {
+            return redirect()->route('auth/login');
+        }
     }
     public function DM_Articulos(Request $request){
         if (Auth::check()) {
@@ -1871,7 +1914,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                 return 'Mensaje:'.$mensaje_traslado_interno; //link pdf
             }
         } else if(count($traslado_externo) > 0) {
-            return 'Entrega #' . $id ;    
+            return 'Entrega #' . $id .' ha sido enviada.';    
         }                      
         
     }
