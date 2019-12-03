@@ -891,7 +891,11 @@ public function ShowDetallePdf($id){
                     $articulos_novalidos = array_where($articulos, function ($key,$item) {
                                         return $item->EstatusLinea == 'N';});     
                     
-                    $pdf_solicitud = DB::table('OWTR')->where('FolioNum', $id)->get();
+                    $pdf_solicitud = DB::table('OWTR')->where('FolioNum', $id)
+                    ->orWhere('Comments', 'like', '%SIZ VALE #'.$id.'%')
+                    ->get();
+                    
+
     if (count($articulos_novalidos) > 0) {
         Session::flash('solicitud_err','Esta Solicitud tiene artículos que no se surtirán (fueron quitados o no hay material disponible)');
     }
@@ -1471,7 +1475,7 @@ public function getPdfSolicitud(){
     }
       
     $transfer1 = DB::select('select LineNum +1 As lineNum, WTR1.ItemCode, Dscription, unitMsr, COALESCE( Destino, WhsCode ) as WhsCode,
-                Quantity, Price, Currency, LineTotal 
+                Quantity, Price, Currency, LineTotal
                 from WTR1 
                 left join SIZ_TransferSolicitudesMP as t on t.DocEntry_Transfer = WTR1.DocEntry
                 left join SIZ_MaterialesSolicitudes as s on s.Id_Solicitud = t.Id_Solicitud and s.ItemCode = WTR1.ItemCode
@@ -1482,9 +1486,12 @@ public function getPdfSolicitud(){
        }         
                                
         $total1 = DB::select('select sum(LineTotal) as Total from WTR1 where DocEntry = ? ', [$transfer]);
-        $info1 = DB::select('select FolioNum, Filler, Printed, Comments  from OWTR where DocEntry = ? ', [$transfer]);
+        $info1 = DB::select('select COALESCE(FolioNum, t.Id_Solicitud) FolioNum, Filler, Printed, Comments  from OWTR 
+        left join SIZ_TransferSolicitudesMP as t on t.DocEntry_Transfer = OWTR.DocEntry
+        where OWTR.DocEntry = ? ', [$transfer]);
         $comentario = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $info1[0]->FolioNum)->value('ComentarioUsuario');
-        $pdf = \PDF::loadView('Mod04_Materiales.TrasladoPDF_SinPrecio', compact('info1', 'transfer1', 
+        $pdf = \PDF::loadView('Mod04_Materiales.TrasladoPDF_SinPrecio', 
+        compact('info1', 'transfer1', 
          'total1',  'transfer', 'comentario'));
         $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
         return $pdf->stream('Siz_Traslado_'.$info1[0]->FolioNum . ' - ' .date("d/m/Y") . '.Pdf');
@@ -2440,103 +2447,311 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
         ->delete();
         return redirect()->back();
     }
-
-//aca
-    public function reporteEntradasSalidas()
-{
-    if (Auth::check()) {
-        $user = Auth::user();
-        $actividades = $user->getTareas();  
-        $data = array(        
-            'actividades' => $actividades,
-            'ultimo' => count($actividades),
-            'db' => DB::getDatabaseName(),          
-            'fi' => Input::get('FechIn'),
-            'ff' => Input::get('FechaFa')
-        );
-        return view('Mod04_Materiales.reporteEntradasAlmacen', $data);
-    } else {
-        return redirect()->route('auth/login');
-    }
-}
     public function DataShowEntradasSalidas(Request $request)
     {
         if (Auth::check()) {
-            $consulta = DB::select(DB::raw( "
-          SELECT * FROM(
-            SELECT 'ENTRADA G' as TIPO, PDN1.ItemCode, OPDN.DocNum, OPDN.DocDate, OPDN.CardCode, OPDN.CardName, PDN1.Price, PDN1.LineTotal, PDN1.VatSum, OPDN.DocCur, PDN1.Dscription, OPDN.DocRate, PDN1.WhsCode, PDN1.Quantity, PDN1.NumPerMsr, OPDN.NumAtCard
-            ,PDN1.TotalFrgn, PDN1.VatSumFrgn 
-            FROM   SALOTTO.dbo.OPDN OPDN INNER JOIN dbo.PDN1 PDN1 ON OPDN.DocEntry=PDN1.DocEntry
-            WHERE  (CAST( OPDN.DocDate as DATE) 
-                        BETWEEN '" . date('d-m-Y', strtotime($request->get('fi'))) . ' 00:00' . "' and '" . date('d-m-Y', strtotime($request->get('ff'))) . ' 23:59:59' . "'
-            )AND (PDN1.WhsCode=N'AMG-CC' OR PDN1.WhsCode=N'AMG-ST' OR PDN1.WhsCode=N'AMG-FE' OR PDN1.WhsCode=N'AGG-RE' OR PDN1.WhsCode=N'AMG-KU' OR PDN1.WhsCode=N'AMP-BL' OR PDN1.WhsCode=N'APG-ST' OR PDN1.WhsCode=N'APG-PA' OR PDN1.WhsCode=N'ATG-ST' OR PDN1.WhsCode=N'ATG-FX' OR PDN1.WhsCode=N'AMP-TR' OR PDN1.WhsCode=N'ARG-ST')
-UNION ALL
-            SELECT 'ENTRADA L' as TIPO, PDN1.ItemCode, OPDN.DocNum, OPDN.DocDate, OPDN.CardCode, OPDN.CardName, PDN1.Price, PDN1.LineTotal, PDN1.VatSum, OPDN.DocCur, PDN1.Dscription, OPDN.DocRate, PDN1.WhsCode, PDN1.Quantity, PDN1.NumPerMsr, OPDN.NumAtCard
-            ,PDN1.TotalFrgn, PDN1.VatSumFrgn 
-            FROM   OPDN OPDN INNER JOIN PDN1 PDN1 ON OPDN.DocEntry=PDN1.DocEntry
-            WHERE  (CAST( OPDN.DocDate as DATE) 
-            BETWEEN '" . date('d-m-Y', strtotime($request->get('fi'))) . ' 00:00' . "' and '" . date('d-m-Y', strtotime($request->get('ff'))) . ' 23:59:59' . "'
-            ) 
-            AND (PDN1.WhsCode IS  NULL  OR  NOT (PDN1.WhsCode=N'AGG-RE' OR PDN1.WhsCode=N'AMG-CC' OR PDN1.WhsCode=N'AMG-FE' OR PDN1.WhsCode=N'AMG-KU' OR PDN1.WhsCode=N'AMG-ST' OR PDN1.WhsCode=N'AMP-BL' OR PDN1.WhsCode=N'AMP-TR' OR PDN1.WhsCode=N'APG-PA' OR PDN1.WhsCode=N'APG-ST' OR PDN1.WhsCode=N'ARG-ST' OR PDN1.WhsCode=N'ATG-FX' OR PDN1.WhsCode=N'ATG-ST'))
-UNION ALL
-            SELECT 'NOTA CREDITO' as TIPO, RPC1.ItemCode, ORPC.DocNum, ORPC.DocDate, ORPC.CardCode, ORPC.CardName, RPC1.Price, RPC1.LineTotal, RPC1.VatSum, ORPC.DocCur, RPC1.Dscription, ORPC.DocRate, RPC1.WhsCode, RPC1.Quantity, RPC1.NumPerMsr, ORPC.NumAtCard
-            ,RPC1.TotalFrgn, RPC1.VatSumFrgn 
-            FROM   ORPC ORPC INNER JOIN RPC1 RPC1 ON ORPC.DocEntry=RPC1.DocEntry
-            WHERE  (CAST( ORPC.DocDate as DATE) 
-            BETWEEN '" . date('d-m-Y', strtotime($request->get('fi'))) . ' 00:00' . "' and '" . date('d-m-Y', strtotime($request->get('ff'))) . ' 23:59:59' . "'
-            ) 
-            AND (RPC1.WhsCode IS  NULL  OR  NOT (RPC1.WhsCode=N'AGG-RE' OR RPC1.WhsCode=N'AMG-CC' OR RPC1.WhsCode=N'AMG-FE' OR RPC1.WhsCode=N'AMG-KU' OR RPC1.WhsCode=N'AMG-ST' OR RPC1.WhsCode=N'AMP-BL' OR RPC1.WhsCode=N'AMP-TR' OR RPC1.WhsCode=N'APG-PA' OR RPC1.WhsCode=N'APG-ST' OR RPC1.WhsCode=N'ARG-ST' OR RPC1.WhsCode=N'ATG-FX' OR RPC1.WhsCode=N'ATG-ST'))
-UNION ALL
-            SELECT 'DEVOLUCION' AS TIPO, RPD1.ItemCode, ORPD.DocNum, ORPD.DocDate, ORPD.CardCode, ORPD.CardName, RPD1.Price, RPD1.LineTotal, RPD1.VatSum, ORPD.DocCur, RPD1.Dscription, ORPD.DocRate, RPD1.WhsCode, RPD1.Quantity, RPD1.NumPerMsr, ORPD.NumAtCard
-            ,RPD1.TotalFrgn, RPD1.VatSumFrgn 
-            FROM   ORPD ORPD INNER JOIN RPD1 RPD1 ON ORPD.DocEntry=RPD1.DocEntry
-            WHERE  (CAST( ORPD.DocDate as DATE) 
-            BETWEEN '" . date('d-m-Y', strtotime($request->get('fi'))) . ' 00:00' . "' and '" . date('d-m-Y', strtotime($request->get('ff'))) . ' 23:59:59' . "'
-            ) 
-            AND (RPD1.WhsCode IS  NULL  OR  NOT (RPD1.WhsCode=N'AGG-RE' OR RPD1.WhsCode=N'AMG-CC' OR RPD1.WhsCode=N'AMG-FE' OR RPD1.WhsCode=N'AMG-KU' OR RPD1.WhsCode=N'AMG-ST' OR RPD1.WhsCode=N'AMP-BL' OR RPD1.WhsCode=N'AMP-TR' OR RPD1.WhsCode=N'APG-PA' OR RPD1.WhsCode=N'APG-ST' OR RPD1.WhsCode=N'ARG-ST' OR RPD1.WhsCode=N'ATG-FX' OR RPD1.WhsCode=N'ATG-ST'))
+            $fi = $request->get('fi');
+            $ff = $request->get('ff');
+            $tipomat = $request->get('tipomat');
+            $almacenes = $request->get('almacenes');
             
-            ) T
-            ORDER BY T.TIPO, T.DocNum, T.DocDate
-        "));
-        
-        $request->session()->put( 'fechas_entradas', array(
-                'fi' => $request->get('fi'),
-                'ff' => $request->get('ff')
-            ));
-        
-        $consulta = collect($consulta);
-            return Datatables::of($consulta)
-                ->addColumn('Cant', function ($consulta) {
-                    return ($consulta->Quantity * $consulta->NumPerMsr);
-                })
-                ->addColumn('LineaTotal', function ($consulta) {
-                    if ($consulta->DocCur == 'MXP') {
-                        return $consulta->LineTotal;
-                    } 
-                    elseif ($consulta->DocCur == 'USD') {
-                        return $consulta->TotalFrgn;
+            if ($tipomat == 'Cualquiera') {
+                $tipomat = '%';
+            }
+
+    $consulta = DB::select("
+        Select OINM.CardName, OINM.BASE_REF, OINM.AppObjAbs, 
+        OINM.DocDate, OINM.CreateDate, OINM.JrnlMemo, OINM.ItemCode, OINM.Dscription, ITM1.Price as COST01, 
+        OINM.RevalTotal,(OINM.InQty-OINM.OutQty) as Movimiento, OINM.UserSign, OUSR.U_NAME, OINM.Warehouse AS ALM_ORG, 
+        ISNULL(OINM.Ref2, 'N/A') AS ALM_DES, OITM.U_VS, OINM.Comments, OITM.U_TipoMat, OINM.DocTime, 
+        OWOR.ItemCode as OPModelo 
+        from OINM  inner join OUSR on OINM.UserSign=OUSR.USERID 
+        inner join OITM on OINM.ItemCode=OITM.ItemCode left join OWOR on OINM.AppObjAbs = OWOR.DocEntry 
+        inner join ITM1 on OINM.ItemCode= ITM1.ItemCode and ITM1.PriceList = '10'  
+        Where Cast (OINM.CreateDate as DATE) between  '".$fi."' and '".$ff."' 
+        and U_TipoMat like '".$tipomat."' and OINM.Warehouse in ('".$almacenes."')
+    " );
+
+$consultaj = collect($consulta);
+foreach($consultaj as $item)
+{        
+    $almacenO = self::defAlmacen($item->ALM_ORG);
+    $almacenD = self::defAlmacen($item->ALM_DES);
+    $item->AMLORIG = $almacenO;
+    $item->AMLDEST = $almacenD;
+    $tipo = 'SIN REGISTRO';
+    $item->NUMOPER =  '';
+    $item->VSala = floatval($item->U_VS) * floatval($item->Movimiento);
+    $item->STDVAL =(strpos($item->JrnlMemo, 'Reval') !== false) ? $item->RevalTotal : $item->COST01;
+    if ((strpos($item->JrnlMemo, 'Pedido') !== false) || ( strpos($item->JrnlMemo, 'Fact.') !== false )){
+        $item->NUMOPER = "01 COMPRA";
+        $tipo = "PROVEEDOR -> ". $almacenO; 
+    }
+    //1
+    if ( ((strpos($item->JrnlMemo, 'Emisi') !== false) || ( strpos($item->JrnlMemo, 'Recibo.') !== false )) 
+    && $item->Movimiento < 0 ){
+       //2
+        if ((strpos($item->Dscription, 'PIEL 0') !== false) && ($item->U_TipoMat == 'MP')) {
+            $item->NUMOPER = "02 SALIDA PIEL";
+            $tipo = "ENV. " . $almacenO . " -> PROCESO";
+        } else {
+            $item->NUMOPER = "02 SALIDA CON";
+            if (strlen($item->OPModelo) < 6) {
+                $tipo = $almacenO . " -> CONS-SUB";
+            } else {
+                if (strlen($item->OPModelo) > 10) {
+                    if ((strpos($item->OPModelo, '3581-42') !== false) || (strpos($item->OPModelo, '3581-32') !== false) ||
+                        (strpos($item->OPModelo, '3774-42') !== false) || (strpos($item->OPModelo, '3778-42') !== false) ) {
+                        $tipo = $almacenO . " -> CONS-REF";
+                    } else {
+                        $tipo = $almacenO . " -> CONS-PT";
                     }
-                })
-                ->addColumn('Iva', function ($consulta) {
-                    if ($consulta->DocCur == 'MXP') {
-                        return $consulta->VatSum;
-                    } 
-                    elseif ($consulta->DocCur == 'USD') {
-                        return $consulta->VatSumFrgn;
+                } else {
+                    if ((strpos($item->OPModelo, '-H') !== false)) {
+                        $tipo = $almacenO . " -> CONS-HB";
+                    } else {
+                        $tipo = $almacenO . " -> CONS-CA";
                     }
-                })
-                ->addColumn('TotalConIva', function ($consulta) {
-                    if ($consulta->DocCur == 'MXP') {
-                        return ($consulta->LineTotal + $consulta->VatSum);
-                    } 
-                    elseif ($consulta->DocCur == 'USD') {
-                        return ($consulta->TotalFrgn + $consulta->VatSumFrgn);
-                    }
-                })
+                }
+            }
+        } //2
+    } //1
+    if (( strpos($item->JrnlMemo, 'Recibo.') !== false ) && $item->Movimiento > 0 ){
+        $item->NUMOPER = "04 DEV PIEL";
+        $tipo = "PROCESO -> " . $almacenO; 
+    } else {
+        if ($item->U_TipoMat == 'CA') {
+            $item->NUMOPER = "03 PROD KASCO";
+            $tipo = "FAB-CASCO -> " . $almacenO;
+        } else {
+            if ($item->U_TipoMat == 'PT') {
+                $item->NUMOPER = "03 PROD SALAS";
+                $tipo = "FAB-PT -> " . $almacenO;
+            } else {
+                if (strpos($item->ItemCode, '-H') !== false) {
+                    $item->NUMOPER = "03 PROD HABIL";
+                    $tipo = "FAB-HAB -> " . $almacenO;
+                } else {
+                    $item->NUMOPER = "03 PROD SUB";
+                    $tipo = "FAB-SUB -> " . $almacenO;
+                }
                 
-                ->make(true);
+            }
+            
+        }
+    } //1
+    if (((strpos($item->JrnlMemo, 'dito proveedore') !== false) || ( strpos($item->JrnlMemo, 'Devolución de merc') !== false ))) {
+        $item->NUMOPER = "04 DEV CANCELA";
+        $tipo = $almacenO . " -> PROVEEDOR";
+    }
+    if (((strpos($item->JrnlMemo, 'dito clientes') !== false) || ( strpos($item->JrnlMemo, 'Credit Me') !== false ))) {
+        $item->NUMOPER = "04 DEV CLIENTE";
+        $tipo = "CLIENTE -> " . $almacenO;
+    }
+    if (strpos($item->JrnlMemo, 'Devoluciones') !== false) {
+        $item->NUMOPER = "04 DEV CLIENTE";
+        $tipo = "CLIENTE -> " . $almacenO;
+    }
+    if (((strpos($item->JrnlMemo, 'Entreg') !== false) || ( strpos($item->JrnlMemo, 'Facturas clie') !== false ))) {
+        $tipo = $almacenO . " -> CLIENTE";
+        if ($item->ALM_ORG == 'AXL-CI') {
+            $item->NUMOPER = "08 S-SERVICIOS";            
+        } else {
+            $item->NUMOPER = "05 FACTURA";
+        }
+    }
+    if (strpos($item->JrnlMemo, 'Traslado') !== false) {
+        $item->NUMOPER = "07 TRASLADO";
+        if ($item->Movimiento < 0) {
+           $tipo = "ENV. " . $almacenO . " -> " . $almacenD;           
+        } else {
+           $tipo = "REC. " . $almacenO . " <- " . $almacenD; 
+        }
+    }
+    if (($item->NUMOPER ==  '') && (strpos($item->CardName, 'RECLASIFI') !== false)) {
+        $item->NUMOPER = "06 AJUSTE REC";
+        $tipo = "RECLA. -> " . $almacenO;
+    }
+    if (($item->NUMOPER ==  '') && (strpos($item->CardName, 'GVN') !== false)) {
+        $item->NUMOPER = "02 SALIDA GAS";
+        $tipo = $almacenO . " -> CONS-GRAL";
+    }
+    if (($item->NUMOPER ==  '') && (strpos($item->CardName, 'DIVER') !== false)) {
+        $item->NUMOPER = "02 SALIDA CON";
+        $tipo = $almacenO . " -> CONS " . $almacenO;
+    }
+    if (($item->NUMOPER ==  '') && (strpos($item->CardName, 'SALDOS INICIALES CONTABLES') !== false)) {
+        $item->NUMOPER = "05 FACTURA";
+        $tipo = $almacenO . " -> CLIENTE FUS";
+    }
+    $item->TIPO = $tipo;
+}
+
+return
+   Datatables::of($consultaj)
+   ->make(true);
         } else {
             return redirect()->route('auth/login');
         }
     }
+    public function defAlmacen($alm){
+        $grpAlmacen = ["AMG-FE", "AMG-ST", "AMP-BL","AMP-CC", "AMP-CO", "AMP-KU", "AMP-ST", "APG-PA", 
+                         "ARF-ST" , "ATG-SE", "AMP-FE", "AMG-KU", "APT-FX", "AMG-CC", "AXL-TC" ];
+        $grpTerminado = ["APT-ST", "ATG-ST", "AXL-CA", "APT-CO" ];
+        $grpProceso = [ "APG-ST", "APP-ST", "APT-PA"];
+        if ( in_array($alm, $grpAlmacen) ) {
+            return 'ALMACEN';
+        } else if ( in_array($alm, $grpTerminado) ){
+            return 'TERMINADO';
+        } else if (  in_array($alm, $grpProceso) ){
+            return 'PROCESO';
+        } else if ( $alm == "APT-PR" ){
+            return 'DIRECCION';
+        } else if ( $alm == "ATL-DS" ){
+            return 'DISEÑO';
+        } else if ( $alm == "APT-SE" ){
+            return 'SERVICIOS';
+        } else if ( $alm == "AMP-TR"){
+            return 'CAMION';
+        } else if ( $alm == "APT-TR" ){
+            return 'CONSUMOS';
+        }
+         return 'SIN DEFINIR';               
+    }
+    public function test(){
+        
+    $consulta = DB::select("
+    Select top 1 OINM.CardName, OINM.BASE_REF, OINM.AppObjAbs, 
+    OINM.DocDate, OINM.CreateDate, OINM.JrnlMemo, OINM.ItemCode, OINM.Dscription, ITM1.Price as COST01, 
+    OINM.RevalTotal,(OINM.InQty-OINM.OutQty) as Movimiento, OINM.UserSign, OUSR.U_NAME, OINM.Warehouse AS ALM_ORG, 
+    ISNULL(OINM.Ref2, 'N/A') AS ALM_DES, OITM.U_VS, OINM.Comments, OITM.U_TipoMat, 
+    OINM.DocTime, 
+    OWOR.ItemCode as OPModelo 
+    from OINM  inner join OUSR on OINM.UserSign=OUSR.USERID 
+    inner join OITM on OINM.ItemCode=OITM.ItemCode left join OWOR on OINM.AppObjAbs = OWOR.DocEntry 
+    inner join ITM1 on OINM.ItemCode= ITM1.ItemCode and ITM1.PriceList = '10'  
+    Where Cast (OINM.CreateDate as DATE) between  '13-12-2018' and '14-12-2018' 
+    and U_TipoMat like '%' and OINM.Warehouse in ('AXL-CA')
+" );
+
+$consultaj = collect($consulta);
+foreach($consultaj as $item)
+{        
+    $almacenO = self::defAlmacen($item->ALM_ORG);
+    $almacenD = self::defAlmacen($item->ALM_DES);
+    $item->AMLORIG = $almacenO;
+    $item->AMLDEST = $almacenD;
+    $tipo = 'SIN REGISTRO';
+    $item->NUMOPER =  '';
+    $item->VSala = floatval($item->U_VS) * floatval($item->Movimiento);
+    $item->STDVAL =(strpos($item->JrnlMemo, 'Reval') !== false) ? $item->RevalTotal : $item->COST01;
+    if ((strpos($item->JrnlMemo, 'Pedido') !== false) || ( strpos($item->JrnlMemo, 'Fact.') !== false )){
+        $item->NUMOPER = "01 COMPRA";
+        $tipo = "PROVEEDOR -> ". $almacenO; 
+    }
+    //1
+    if ( ((strpos($item->JrnlMemo, 'Emisi') !== false) || ( strpos($item->JrnlMemo, 'Recibo.') !== false )) 
+    && $item->Movimiento < 0 ){
+       //2
+        if ((strpos($item->Dscription, 'PIEL 0') !== false) && ($item->U_TipoMat == 'MP')) {
+            $item->NUMOPER = "02 SALIDA PIEL";
+            $tipo = "ENV. " . $almacenO . " -> PROCESO";
+        } else {
+            $item->NUMOPER = "02 SALIDA CON";
+            if (strlen($item->OPModelo) < 6) {
+                $tipo = $almacenO . " -> CONS-SUB";
+            } else {
+                if (strlen($item->OPModelo) > 10) {
+                    if ((strpos($item->OPModelo, '3581-42') !== false) || (strpos($item->OPModelo, '3581-32') !== false) ||
+                        (strpos($item->OPModelo, '3774-42') !== false) || (strpos($item->OPModelo, '3778-42') !== false) ) {
+                        $tipo = $almacenO . " -> CONS-REF";
+                    } else {
+                        $tipo = $almacenO . " -> CONS-PT";
+                    }
+                } else {
+                    if ((strpos($item->OPModelo, '-H') !== false)) {
+                        $tipo = $almacenO . " -> CONS-HB";
+                    } else {
+                        $tipo = $almacenO . " -> CONS-CA";
+                    }
+                }
+            }
+        } //2
+    } //1
+    if (( strpos($item->JrnlMemo, 'Recibo.') !== false ) && $item->Movimiento > 0 ){
+        $item->NUMOPER = "04 DEV PIEL";
+        $tipo = "PROCESO -> " . $almacenO; 
+    } else {
+        if ($item->U_TipoMat == 'CA') {
+            $item->NUMOPER = "03 PROD KASCO";
+            $tipo = "FAB-CASCO -> " . $almacenO;
+        } else {
+            if ($item->U_TipoMat == 'PT') {
+                $item->NUMOPER = "03 PROD SALAS";
+                $tipo = "FAB-PT -> " . $almacenO;
+            } else {
+                if (strpos($item->ItemCode, '-H') !== false) {
+                    $item->NUMOPER = "03 PROD HABIL";
+                    $tipo = "FAB-HAB -> " . $almacenO;
+                } else {
+                    $item->NUMOPER = "03 PROD SUB";
+                    $tipo = "FAB-SUB -> " . $almacenO;
+                }
+                
+            }
+            
+        }
+    } //1
+    if (((strpos($item->JrnlMemo, 'dito proveedore') !== false) || ( strpos($item->JrnlMemo, 'Devolución de merc') !== false ))) {
+        $item->NUMOPER = "04 DEV CANCELA";
+        $tipo = $almacenO . " -> PROVEEDOR";
+    }
+    if (((strpos($item->JrnlMemo, 'dito clientes') !== false) || ( strpos($item->JrnlMemo, 'Credit Me') !== false ))) {
+        $item->NUMOPER = "04 DEV CLIENTE";
+        $tipo = "CLIENTE -> " . $almacenO;
+    }
+    if (strpos($item->JrnlMemo, 'Devoluciones') !== false) {
+        $item->NUMOPER = "04 DEV CLIENTE";
+        $tipo = "CLIENTE -> " . $almacenO;
+    }
+    if (((strpos($item->JrnlMemo, 'Entreg') !== false) || ( strpos($item->JrnlMemo, 'Facturas clie') !== false ))) {
+        $tipo = $almacenO . " -> CLIENTE";
+        if ($item->ALM_ORG == 'AXL-CI') {
+            $item->NUMOPER = "08 S-SERVICIOS";            
+        } else {
+            $item->NUMOPER = "05 FACTURA";
+        }
+    }
+    if (strpos($item->JrnlMemo, 'Traslado') !== false) {
+        $item->NUMOPER = "07 TRASLADO";
+        if ($item->Movimiento < 0) {
+           $tipo = "ENV. " . $almacenO . " -> " . $almacenD;           
+        } else {
+           $tipo = "REC. " . $almacenO . " <- " . $almacenD; 
+        }
+    }
+    if (($item->NUMOPER ==  '') && (strpos($item->CardName, 'RECLASIFI') !== false)) {
+        $item->NUMOPER = "06 AJUSTE REC";
+        $tipo = "RECLA. -> " . $almacenO;
+    }
+    if (($item->NUMOPER ==  '') && (strpos($item->CardName, 'GVN') !== false)) {
+        $item->NUMOPER = "02 SALIDA GAS";
+        $tipo = $almacenO . " -> CONS-GRAL";
+    }
+    if (($item->NUMOPER ==  '') && (strpos($item->CardName, 'DIVER') !== false)) {
+        $item->NUMOPER = "02 SALIDA CON";
+        $tipo = $almacenO . " -> CONS " . $almacenO;
+    }
+    if (($item->NUMOPER ==  '') && (strpos($item->CardName, 'SALDOS INICIALES CONTABLES') !== false)) {
+        $item->NUMOPER = "05 FACTURA";
+        $tipo = $almacenO . " -> CLIENTE FUS";
+    }
+    $item->TIPO = $tipo;
 }
+dd($consultaj);
+return
+   Datatables::of($consultaj)
+   ->make(true);
+
+    }
+    }

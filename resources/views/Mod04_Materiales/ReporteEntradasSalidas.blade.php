@@ -31,7 +31,7 @@
     }
 
     .DTFC_LeftBodyWrapper {
-        margin-top: 83px;
+        margin-top: 84px;
     }
 
     .DTFC_LeftHeadWrapper {
@@ -90,7 +90,7 @@
                 <thead class="table-condensed">
                     <tr>
                         <th># Documento</th>
-                        <th>OP</th>
+                       
                         <th>Fecha</th>
                         <th>Fech Sistema</th>
                         <th>Movimiento</th>
@@ -104,38 +104,45 @@
                         <th>Usuario</th>
                         <th>Almacén</th>
                         <th>VS</th>
+                        <th>Operación</th>
                         <th>Movimiento</th>
                         <th>Notas</th>
 
                         <th>CardName</th>
                         <th>Hora</th>
                     </tr>
-                <tfoot>
-                    <tr>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th>Total:</th>
-                        <th></th>
-                        <th></th>
-                    </tr>
-                </tfoot>
+               
                 </thead>
                 <tbody></tbody>
+                <tfoot>
+                <tr>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                </tr>
+                </tfoot>
             </table>
         </div> <!-- /.col-md-12 -->
 
     </div> <!-- /.row -->
     <input hidden value="{{$fi}}" id="fi" name="fi" />
     <input hidden value="{{$ff}}" id="ff" name="ff" />
+    <input hidden value="{{$almacenes}}" id="almacenes" name="almacenes" />
+    <input hidden value="{{$tipomat}}" id="tipomat" name="tipomat" />
 </div>
 <!-- /.container -->
 @endsection
@@ -158,15 +165,7 @@ table
 
 } );
 } );
-var meses = new Array
-("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
-var diasSemana = new Array("Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado");
-var f=new Date();
-var hours = f.getHours();
-var ampm = hours >= 12 ? 'pm' : 'am';
-var fecha = 'ACTUALIZADO: '+ diasSemana[f.getDay()] + ', ' + f.getDate() + ' de ' + meses[f.getMonth()] + ' del ' +
-f.getFullYear()+', A LAS '+hours+":"+f.getMinutes()+ ' ' + ampm;
-var f = fecha.toUpperCase();
+
 
 var table = $('#tentradas').DataTable({
 "order": [[ 1, "desc" ],[0, "asc"],[2, "asc"]],
@@ -181,49 +180,56 @@ fixedColumns: true,
 processing: true,
 deferRender: true,
 ajax: {
-url: '{!! route('datatables.showentradasmp') !!}',
+url: '{!! route('datatables.ioWhs') !!}',
 data: function (d) {
 d.fi = $('input[name=fi]').val();
 d.ff = $('input[name=ff]').val();
+d.almacenes = $('input[name=almacenes]').val();
+d.tipomat = $('input[name=tipomat]').val();
 }
 },
 columns: [
 // { data: 'action', name: 'action', orderable: false, searchable: false}
-{ data: 'DocNum', name: 'DocNum', orderable: true, searchable: true},
-{ data: 'TIPO'},
-{ data: 'DocDate', name: 'DocDate',
+{ data: 'BASE_REF'},
+{ data: 'DocDate', 
 render: function(data){
 var d = new Date(data.split(' ')[0]);
 return moment(d).format("DD-MM-YYYY");
 }},
-{ data: 'CardCode', name: 'CardCode'},
-{ data: 'CardName', name: 'CardName'},
-{ data: 'NumAtCard', name: 'NumAtCard'},
+{ data: 'CreateDate', 
+render: function(data){
+var d = new Date(data.split(' ')[0]);
+return moment(d).format("DD-MM-YYYY");
+}},
+{ data: 'JrnlMemo'},
+
 { data: 'ItemCode', name: 'ItemCode'},
 { data: 'Dscription', name: 'Dscription'},
-{ data: 'Cant', name: 'Cant'},
-{ data: 'Price', name: 'Price',
+{ data: 'Movimiento', 
 render: function(data){
 var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
 return val;
 }},
-{ data: 'LineaTotal', name: 'LineaTotal',
+{ data: 'STDVAL', 
 render: function(data){
 var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
 return val;
 }},
+{ data: 'U_TipoMat'},
 
-{ data: 'Iva', name: 'Iva',
+{ data: 'U_NAME'},
+{ data: 'ALM_ORG'},
+{ data: 'VSala',
 render: function(data){
 var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
 return val;
 }},
-{ data: 'TotalConIva', name: 'TotalConIva',
-render: function(data){
-var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
-return val;
-}},
-{ data: 'DocCur', name: 'DocCur'},
+{ data: 'NUMOPER'},
+{ data: 'TIPO'},
+
+{ data: 'Comments'},
+{ data: 'CardName'},
+{ data: 'DocTime'},
 ],
 buttons: [
 {
@@ -283,18 +289,7 @@ window.open('entradasPDF', '_blank')
 }
 });
 }
-},
-
-{
-text: '<i class="fa fa-print"></i> Imprimir',
-
-extend: 'print',
-title: 'Reporte de Materia Prima',
-exportOptions: {
-columns: ':visible',
 }
-},
-
 ],
 "language": {
 "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json",
@@ -321,24 +316,49 @@ typeof i === 'number' ?
 i : 0;
 };
 
-// Total over this page for VS
+// Total Cantidad
 pageTotal = api
-.column( 12, { page: 'current'} )
+.column( 6, { page: 'current'} )
 .data()
 .reduce( function (a, b) {
 return intVal(a) + intVal(b);
 }, 0 );
+var pageT = pageTotal.toLocaleString("es-MX", {minimumFractionDigits:2})
 
+$( api.column( 6 ).footer() ).html(
+pageT
+);
+// Total Val Standar
+pageTotal = api
+.column( 7, { page: 'current'} )
+.data()
+.reduce( function (a, b) {
+return intVal(a) + intVal(b);
+}, 0 );
+var pageT = pageTotal.toLocaleString("es-MX", {minimumFractionDigits:2})
+
+$( api.column( 7 ).footer() ).html(
+ '$ '+pageT
+);
+// Total VS
+pageTotal = api
+.column( 11, { page: 'current'} )
+.data()
+.reduce( function (a, b) {
+return intVal(a) + intVal(b);
+}, 0 );
+var pageT = pageTotal.toLocaleString("es-MX", {minimumFractionDigits:2})
+
+$( api.column( 11 ).footer() ).html(
+pageT
+);
 // Update footer for VS
 //.toLocaleString("es-MX",{style:"currency", currency:"MXN"}) //example to format a number to Mexican Pesos
 //var n = 1234567.22
 //alert(n.toLocaleString("es-MX",{style:"currency", currency:"MXN"}))
 
-var pageT = pageTotal.toLocaleString("es-MX", {minimumFractionDigits:2})
 
-$( api.column( 12 ).footer() ).html(
-'$ '+pageT
-);
+
 
 
 }
