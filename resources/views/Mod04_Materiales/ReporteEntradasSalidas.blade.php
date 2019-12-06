@@ -92,7 +92,7 @@
                         <th># Documento</th>
                        
                         <th>Fecha</th>
-                        <th>Fech Sistema</th>
+                        <th>F. Sistema</th>
                         <th>Movimiento</th>
 
                         <th>Código</th>
@@ -193,12 +193,12 @@ columns: [
 { data: 'BASE_REF'},
 { data: 'DocDate', 
 render: function(data){
-var d = new Date(data.split(' ')[0]);
+var d = new Date(data);
 return moment(d).format("DD-MM-YYYY");
 }},
 { data: 'CreateDate', 
 render: function(data){
-var d = new Date(data.split(' ')[0]);
+var d = new Date(data);
 return moment(d).format("DD-MM-YYYY");
 }},
 { data: 'JrnlMemo'},
@@ -258,14 +258,14 @@ var data=table.rows( { filter : 'applied'} ).data().toArray();
 var json = JSON.stringify( data );
 $.ajax({
 type:'POST',
-url:'ajaxtosession/entradas',
+url:'ajaxtosession/entradasysalidas',
 headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
 data: {
 "_token": "{{ csrf_token() }}",
 "arr": json
 },
 success:function(data){
-window.location.href = 'entradasXLS';
+window.location.href = 'entradasysalidasXLS';
 }
 });
 }
@@ -278,14 +278,14 @@ var data=table.rows( { filter : 'applied'} ).data().toArray();
 var json = JSON.stringify( data );
 $.ajax({
 type:'POST',
-url:'ajaxtosession/entradas',
+url:'ajaxtosession/entradasysalidas',
 headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
 data: {
 "_token": "{{ csrf_token() }}",
 "arr": json
 },
 success:function(data){
-window.open('entradasPDF', '_blank')
+window.open('entradasysalidasPDF', '_blank')
 }
 });
 }
@@ -367,7 +367,7 @@ pageT
 <script>
     document.onkeyup = function(e) {
    if (e.shiftKey && e.which == 112) {
-    window.open("ayudas_pdf/AYM04_27.pdf","_blank");
+    window.open("ayudas_pdf/AYM00_00.pdf","_blank");
   }
   }
 
