@@ -71,8 +71,6 @@
  
 @section('script')
 
-
-
 var table = $('#tsolicitudes').DataTable({
     dom: 'frtip',       
     "order": [[ 1, "desc" ]],
