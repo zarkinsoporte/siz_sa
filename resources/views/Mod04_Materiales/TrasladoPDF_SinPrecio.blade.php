@@ -48,7 +48,7 @@
 
         h5 {
             font-family: 'Helvetica';
-            margin-bottom: 15;
+            margin-bottom: 10;
         }
 
         h2 {
@@ -180,7 +180,14 @@
                         </small></h2>
                 </div>
                 <div><span style="float:right">
-                        <h3>Lista de Precios 10</h3>
+                        <h3>Lista de Precios 10
+                            <?php
+                       $Soldate = date_create($fechaSol);
+                    ?>
+
+                            <br>Fecha Solicitud: {{ date_format($Soldate, 'd-m-Y') }}
+
+                        </h3>
                     </span>
                     <h3>De Almacén
                         @if (isset($info1))
@@ -189,6 +196,15 @@
                         @if (isset($almacenOrigen))
                         {{$almacenOrigen}}
                         @endif
+                        @endif
+                        <br>Fecha Traslado SAP:
+                        @if (isset($info1))
+                        <?php
+                            $SAPdate = date_create($info1[0]->CreateDate);
+                        ?>
+                        {{ date_format($SAPdate, 'd-m-Y') }}
+                        @else
+                        Por Definir
                         @endif
                     </h3>
                 </div>
@@ -237,8 +253,6 @@
                                 <td style="width:90%;" class="text-left">
                                     @if (isset($info1))
                                     {{$info1[0]->Comments}}
-                                    @else
-                                    {{$comentario}}
                                     @endif
                                 </td>
                             </tr>

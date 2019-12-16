@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'default' => 'local',
+    'default' => 'ftp',
 
     /*
     |--------------------------------------------------------------------------
@@ -49,17 +49,18 @@ return [
         ],
         'nas' => [
             'driver' => 'local',
-            'root'   => 'E:\\sizarticulos'            
+            'root'   => 'E:\\sizarticulos'
+            
         ],
         'ftp' => [
             'driver'   => 'ftp',
-            'host'     => 'ftp.example.com',
-            'username' => 'your-username',
-            'password' => 'your-password',
+            'host'     => '187.189.177.39',
+            'username' => 'siz',
+            'password' => '9-Rdlg',
 
             // Optional FTP Settings...
             // 'port'     => 21,
-            // 'root'     => '',
+            // 'root'     => 'SIZARTICULOS',
             // 'passive'  => true,
             // 'ssl'      => true,
             // 'timeout'  => 30,

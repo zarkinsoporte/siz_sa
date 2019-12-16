@@ -224,7 +224,8 @@ public function iowhsPDF()
             }
            
             $tipomat = Input::get('text_selDos');
-            $almacenes = implode(", ", Input::get('text_selCuatro')); //alamacenes separados por comas            
+            $almacenes = "'".implode("', '", Input::get('text_selCuatro')). "'"; //alamacenes separados por comas            
+           // dd($almacenes);
             $fechai = date('d-m-Y' , $fi);
             $fechaf = date('d-m-Y' , $ff);
                    
@@ -573,19 +574,24 @@ public function DataTraslados(){
                 ->make(true);
 }
 public function DataEntregaslotes(){
-     $consulta = DB::table('SIZ_SolicitudesMP')
-                    ->join('SIZ_MaterialesTraslados', 
-                    'SIZ_MaterialesTraslados.Id_Solicitud', '=', 'SIZ_SolicitudesMP.Id_Solicitud')
-                    ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')
-                    
-                    ->groupBy('SIZ_SolicitudesMP.Id_Solicitud', 'SIZ_SolicitudesMP.FechaCreacion', 
-                    'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'firstName', 'lastName', 'AlmacenOrigen')
-                    ->select('SIZ_SolicitudesMP.Id_Solicitud', 'SIZ_SolicitudesMP.FechaCreacion', 
-                        'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'OHEM.firstName',
-                        'OHEM.lastName', 'SIZ_SolicitudesMP.AlmacenOrigen')
-                    ->where('SIZ_MaterialesTraslados.Cant_PendienteA', '>', 0)
-                    ->whereNotIn('SIZ_MaterialesTraslados.EstatusLinea', ['T', 'S'])
-                    ->where('SIZ_SolicitudesMP.Status', 'Pendiente')
+    $consulta = DB::table('SIZ_SolicitudesMP')
+    ->join('SIZ_MaterialesTraslados', 
+    'SIZ_MaterialesTraslados.Id_Solicitud', '=', 'SIZ_SolicitudesMP.Id_Solicitud')
+    ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')
+    ->join('SIZ_AlmacenesTransferencias', function ($join) {
+        $join->on('SIZ_AlmacenesTransferencias.Code', '=', 'SIZ_SolicitudesMP.AlmacenOrigen')
+            ->where('SIZ_AlmacenesTransferencias.TrasladoDeptos', '<>', 'D')
+            ->whereNotNull('TrasladoDeptos');
+    })
+    ->groupBy('SIZ_SolicitudesMP.Id_Solicitud', 'SIZ_SolicitudesMP.FechaCreacion', 
+    'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'firstName', 'lastName', 'AlmacenOrigen')
+    ->select('SIZ_SolicitudesMP.Id_Solicitud', 'SIZ_SolicitudesMP.FechaCreacion', 
+        'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'OHEM.firstName',
+        'OHEM.lastName', 'SIZ_SolicitudesMP.AlmacenOrigen')
+    ->where('SIZ_MaterialesTraslados.Cant_PendienteA', '>', 0)
+    ->whereNotIn('SIZ_MaterialesTraslados.EstatusLinea', ['T', 'S'])
+    ->where('SIZ_SolicitudesMP.Status', 'Pendiente')
+    ->where('SIZ_AlmacenesTransferencias.dept', Auth::user()->dept)
                     //->where('SIZ_SolicitudesMP.Usuario', Auth::user()->U_EmpGiro)
                     ;
      //$consulta = collect($consulta);
@@ -1495,12 +1501,13 @@ public function getPdfSolicitud(){
        }         
                                
         $total1 = DB::select('select sum(LineTotal) as Total from WTR1 where DocEntry = ? ', [$transfer]);
-        $info1 = DB::select('select COALESCE(FolioNum, t.Id_Solicitud) FolioNum, Filler, Printed, Comments  from OWTR 
+        $info1 = DB::select('select COALESCE(FolioNum, t.Id_Solicitud) FolioNum, CreateDate, Filler, Printed, Comments  from OWTR 
         left join SIZ_TransferSolicitudesMP as t on t.DocEntry_Transfer = OWTR.DocEntry
         where OWTR.DocEntry = ? ', [$transfer]);
         $comentario = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $info1[0]->FolioNum)->value('ComentarioUsuario');
+        $fechaSol = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $info1[0]->FolioNum)->value('FechaCreacion');
         $pdf = \PDF::loadView('Mod04_Materiales.TrasladoPDF_SinPrecio', 
-        compact('info1', 'transfer1', 
+        compact('info1', 'transfer1', 'fechaSol',
          'total1',  'transfer', 'comentario'));
         $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
         return $pdf->stream('Siz_Traslado_'.$info1[0]->FolioNum . ' - ' .date("d/m/Y") . '.Pdf');
@@ -2509,8 +2516,8 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
     public function DataShowEntradasSalidas(Request $request)
     {
         if (Auth::check()) {
-            $fi = $request->get('fi');
-            $ff = $request->get('ff');
+            $fi = $request->get('fi').' 00:00';
+            $ff = $request->get('ff').' 23:59:59';
             $tipomat = $request->get('tipomat');
             $almacenes = $request->get('almacenes');
             
@@ -2521,14 +2528,14 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
     $consulta = DB::select("
         Select OINM.CardName, OINM.BASE_REF, OINM.AppObjAbs, 
         OINM.DocDate, OINM.CreateDate, OINM.JrnlMemo, OINM.ItemCode, OINM.Dscription, ITM1.Price as COST01, 
-        OINM.RevalTotal,(OINM.InQty-OINM.OutQty) as Movimiento, OINM.UserSign, OUSR.U_NAME, OINM.Warehouse AS ALM_ORG, 
+        OINM.RevalTotal,(OINM.InQty-OINM.OutQty) as Movimiento, OINM.UserSign, OUSR.U_NAME AS UNAME, OINM.Warehouse AS ALM_ORG, 
         ISNULL(OINM.Ref2, 'N/A') AS ALM_DES, OITM.U_VS, OINM.Comments, OITM.U_TipoMat, OINM.DocTime, 
         OWOR.ItemCode as OPModelo 
         from OINM  inner join OUSR on OINM.UserSign=OUSR.USERID 
         inner join OITM on OINM.ItemCode=OITM.ItemCode left join OWOR on OINM.AppObjAbs = OWOR.DocEntry 
         inner join ITM1 on OINM.ItemCode= ITM1.ItemCode and ITM1.PriceList = '10'  
         Where Cast (OINM.CreateDate as DATE) between  '".$fi."' and '".$ff."' 
-        and U_TipoMat like '".$tipomat."' and OINM.Warehouse in ('".$almacenes."')
+        and U_TipoMat like '".$tipomat."' and OINM.Warehouse in (".$almacenes.")
     " );
 
 $consultaj = collect($consulta);
@@ -2652,6 +2659,19 @@ foreach($consultaj as $item)
     ));
     return
     Datatables::of($consultaj)
+    ->addColumn('U_NAME', function ($consultaj) {
+        if (strpos($consultaj->Comments, 'SIZ VALE') !== false) {
+           $nombre = explode(':', $consultaj->Comments);
+           if ( strlen($nombre[1]) > 5 ){
+                return $nombre[1];
+           } else {
+                return $consultaj->UNAME;
+           }
+           
+        } else {
+           return $consultaj->UNAME;
+        }
+    })
     ->make(true);
     } else {
         return redirect()->route('auth/login');

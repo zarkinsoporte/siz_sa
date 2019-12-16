@@ -4,11 +4,7 @@
 {!! Html::style('assets/css/site_global.css?crc=443350757.css') !!}
 {!! Html::style('assets/css/index.css?crc=3185328.css') !!}
 
-<script>  
-    window.Laravel = {!! json_encode([
-            'csrfToken' => csrf_token(),
-        ]) !!};
-</script>
+
 
 <!DOCTYPE html>
 <html class="nojs html css_verticalspacer" lang="es-ES">

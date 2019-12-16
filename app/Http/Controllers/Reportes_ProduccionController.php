@@ -246,7 +246,7 @@ class Reportes_ProduccionController extends Controller
             case "ENTRADAS SALIDAS":
                 $fechas = true;
                 $text_selDos = 'Tipo de Material'; 
-                $data_selDos = ['Cualquiera', 'Sólo MP', 'Sólo PT'];
+                $data_selDos = ['Cualquiera', 'MP', 'PT'];
                 $almacenes = DB::table('OWHS')
                     ->select('WhsCode as llave', DB::raw('WhsCode + \' - \' + WhsName as valor'))
                     ->where('DataSource', 'I')
