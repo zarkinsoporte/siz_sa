@@ -310,7 +310,10 @@ Route::get('home/TRASLADO RECEPCION/solicitud/PDF/traslado/{transfer}', 'Mod04_M
 Route::get('home/ENTRADAS SALIDAS', 'Reportes_ProduccionController@showModal');
 Route::post('home/reporte/ENTRADAS SALIDAS', 'Mod04_MaterialesController@EntradasSalidas');
 Route::get('datatables.ioWhs', 'Mod04_MaterialesController@DataShowEntradasSalidas')->name('datatables.ioWhs');
-Route::get('home/reporte/historialXLS', 'Mod04_MaterialesController@historialOPXLS');
+Route::get('home/reporte/ENTRADAS SALIDAS', 'Mod04_MaterialesController@reporteiowhsPDF');
+Route::get('home/reporte/entradasysalidasXLS', 'Mod04_MaterialesController@iowhsXLS');
+Route::get('home/reporte/entradasysalidasPDF', 'Mod04_MaterialesController@iowhsPDF');
+
 //
 //-------------------------//
 //RUTAS DE MRP//---------------------------------------------------------

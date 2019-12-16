@@ -135,7 +135,8 @@
                         $totalEntrada = 0;
                         $moneda = 'MXP';   
                     ?>
-                        @foreach ($entradasL as $rep) @if($index == 0)
+                        @foreach ($entradasL as $rep) 
+                        @if($index == 0)
                         <?php
                             $DocN = $rep->DocNum; 
                             $totalEntrada = $rep->LineaTotal + $rep->Iva;

@@ -142,9 +142,18 @@ public function entradasPDF()
     $data = array('notascredito' => $notascredito, 'entradasL' => $entradasL, 'entradasG' => $entradasG, 'devoluciones' => $devoluciones, 'fechas_entradas' => Session::get('fechas_entradas'));
     $pdf = \PDF::loadView('Mod04_Materiales.ReporteEntradasPDF', $data);
         $pdf->setPaper('Letter', 'landscape')->setOptions(['isPhpEnabled' => true]);  
-    return $pdf->stream('Siz_MP_Almacén' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
+    return $pdf->stream('SIZ Entradas' . ' - ' . date("d/m/Y") . '.Pdf');
 }
-
+public function iowhsPDF()
+{
+    $a = json_decode(Session::get('entradasysalidas'));
+         
+    // dd(\AppHelper::instance()->getHumanDate(array_get( Session::get('fechas_entradas'), 'ff')));
+    $data = array('data' => $a, 'fechas_entradas' => Session::get('param_entradasysalidas'));
+    $pdf = \PDF::loadView('Mod04_Materiales.ReporteIOWhsPDF', $data);
+        $pdf->setPaper('Letter', 'landscape')->setOptions(['isPhpEnabled' => true]);  
+    return $pdf->stream('SIZ Entradas - Salidas' . ' ' . date("d/m/Y") . '.Pdf');
+}
     public function entradasXLS()
     {
         $path = public_path() . '/assets/plantillas_excel/Mod_01/SIZ_entradas.xlsx';
@@ -216,8 +225,8 @@ public function entradasPDF()
            
             $tipomat = Input::get('text_selDos');
             $almacenes = implode(", ", Input::get('text_selCuatro')); //alamacenes separados por comas            
-            $fechai = date('Y-m-d H:i:s' , $fi);
-            $fechaf = date('Y-m-d H:i:s' , $ff);
+            $fechai = date('d-m-Y' , $fi);
+            $fechaf = date('d-m-Y' , $ff);
                    
             $user = Auth::user();
             $actividades = $user->getTareas();
@@ -1589,7 +1598,6 @@ public function getPdfSolicitud(){
         ALMACENES.AlmacenOrigen, LOTES.BatchNum, mat.EstatusLinea, OITM.InvntryUom as UM,
         CASE WHEN (mat.Cant_ASurtir_Origen_A ) = L.Asignado THEN \'Y\' ELSE \'N\' END AS Preparado
         from SIZ_MaterialesTraslados mat 
-        
         LEFT JOIN OITM on OITM.ItemCode = mat.ItemCode                                
         LEFT JOIN 
         (SELECT ItemCode, SUM(CASE WHEN WhsCode = \''.$almacen_origen.'\' THEN 
@@ -1643,7 +1651,6 @@ public function getPdfSolicitud(){
         ->value('ComentarioUsuario');
         
         if (count($traslado_externo) > 0) {
-           
             $correos_db = DB::select("
                 SELECT 
                 CASE WHEN email like '%@%' THEN email ELSE email + cast('@zarkin.com' as varchar) END AS correo
@@ -1662,7 +1669,6 @@ public function getPdfSolicitud(){
                 });                        
             }
         }
-
 
 if (count($traslado_interno) > 0) {
 $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
@@ -2447,6 +2453,59 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
         ->delete();
         return redirect()->back();
     }
+    public function iowhsXLS()
+    {
+        $path = public_path() . '/assets/plantillas_excel/Mod_04/SIZ_entradas_salidas.xlsx';
+        $data = json_decode(Session::get('entradasysalidas'));
+        $fechas_entradas = Session::get('param_entradasysalidas');
+        $fecha = 'Del: '. \AppHelper::instance()->getHumanDate(array_get($fechas_entradas, 'fi')).' al: '.
+                \AppHelper::instance()->getHumanDate(array_get($fechas_entradas, 'ff'));
+
+                Excel::load($path, function ($excel) use ($data, $fecha) {
+            $excel->sheet('Detalles', function ($sheet) use ($data, $fecha) {
+
+                $sheet->cell('C4', function ($cell) {
+                    $cell->setValue(\AppHelper::instance()->getHumanDate(date("Y-m-d H:i:s")).' '. date("H:i:s"));
+                });
+                $sheet->cell('C5', function ($cell) use ($fecha) {
+                    $cell->setValue($fecha);
+                });
+                $index = 7;
+                foreach ($data as $row) {
+                    $dateA = date_create($row->DocDate);
+                    $dateB = date_create($row->CreateDate);
+
+                    $sheet->row($index, [
+                     $row->BASE_REF, 
+                     date_format($dateA,'d-m-Y'),
+                     date_format($dateB,'d-m-Y'),
+                     $row->JrnlMemo,
+                     $row->ItemCode,
+
+                     $row->Dscription,
+                     $row->Movimiento,
+                     $row->STDVAL,
+                     $row->U_TipoMat,
+                     $row->U_NAME,
+                     
+                     $row->ALM_ORG,
+                     $row->VSala,
+                     $row->NUMOPER,
+                     $row->TIPO,
+                     $row->Comments,
+                     
+                     $row->CardName,
+                     $row->DocTime
+                     
+                    ]);
+                    $index++;
+                }
+            });
+        })
+            ->setFilename('SIZ M04 Reporte de Entradas - Salidas Articulos')
+            ->export('xlsx');
+    }
+
     public function DataShowEntradasSalidas(Request $request)
     {
         if (Auth::check()) {
@@ -2586,14 +2645,19 @@ foreach($consultaj as $item)
     }
     $item->TIPO = $tipo;
 }
-
-return
-   Datatables::of($consultaj)
-   ->make(true);
-        } else {
-            return redirect()->route('auth/login');
-        }
+    $request->session()->put( 'param_entradasysalidas', array(
+        'fi' => $request->get('fi'),
+        'ff' => $request->get('ff'),
+        'tipomat' => $request->get('tipomat')
+    ));
+    return
+    Datatables::of($consultaj)
+    ->make(true);
+    } else {
+        return redirect()->route('auth/login');
     }
+}
+
     public function defAlmacen($alm){
         $grpAlmacen = ["AMG-FE", "AMG-ST", "AMP-BL","AMP-CC", "AMP-CO", "AMP-KU", "AMP-ST", "APG-PA", 
                          "ARF-ST" , "ATG-SE", "AMP-FE", "AMG-KU", "APT-FX", "AMG-CC", "AXL-TC" ];
@@ -2617,141 +2681,5 @@ return
             return 'CONSUMOS';
         }
          return 'SIN DEFINIR';               
-    }
-    public function test(){
-        
-    $consulta = DB::select("
-    Select top 1 OINM.CardName, OINM.BASE_REF, OINM.AppObjAbs, 
-    OINM.DocDate, OINM.CreateDate, OINM.JrnlMemo, OINM.ItemCode, OINM.Dscription, ITM1.Price as COST01, 
-    OINM.RevalTotal,(OINM.InQty-OINM.OutQty) as Movimiento, OINM.UserSign, OUSR.U_NAME, OINM.Warehouse AS ALM_ORG, 
-    ISNULL(OINM.Ref2, 'N/A') AS ALM_DES, OITM.U_VS, OINM.Comments, OITM.U_TipoMat, 
-    OINM.DocTime, 
-    OWOR.ItemCode as OPModelo 
-    from OINM  inner join OUSR on OINM.UserSign=OUSR.USERID 
-    inner join OITM on OINM.ItemCode=OITM.ItemCode left join OWOR on OINM.AppObjAbs = OWOR.DocEntry 
-    inner join ITM1 on OINM.ItemCode= ITM1.ItemCode and ITM1.PriceList = '10'  
-    Where Cast (OINM.CreateDate as DATE) between  '13-12-2018' and '14-12-2018' 
-    and U_TipoMat like '%' and OINM.Warehouse in ('AXL-CA')
-" );
-
-$consultaj = collect($consulta);
-foreach($consultaj as $item)
-{        
-    $almacenO = self::defAlmacen($item->ALM_ORG);
-    $almacenD = self::defAlmacen($item->ALM_DES);
-    $item->AMLORIG = $almacenO;
-    $item->AMLDEST = $almacenD;
-    $tipo = 'SIN REGISTRO';
-    $item->NUMOPER =  '';
-    $item->VSala = floatval($item->U_VS) * floatval($item->Movimiento);
-    $item->STDVAL =(strpos($item->JrnlMemo, 'Reval') !== false) ? $item->RevalTotal : $item->COST01;
-    if ((strpos($item->JrnlMemo, 'Pedido') !== false) || ( strpos($item->JrnlMemo, 'Fact.') !== false )){
-        $item->NUMOPER = "01 COMPRA";
-        $tipo = "PROVEEDOR -> ". $almacenO; 
-    }
-    //1
-    if ( ((strpos($item->JrnlMemo, 'Emisi') !== false) || ( strpos($item->JrnlMemo, 'Recibo.') !== false )) 
-    && $item->Movimiento < 0 ){
-       //2
-        if ((strpos($item->Dscription, 'PIEL 0') !== false) && ($item->U_TipoMat == 'MP')) {
-            $item->NUMOPER = "02 SALIDA PIEL";
-            $tipo = "ENV. " . $almacenO . " -> PROCESO";
-        } else {
-            $item->NUMOPER = "02 SALIDA CON";
-            if (strlen($item->OPModelo) < 6) {
-                $tipo = $almacenO . " -> CONS-SUB";
-            } else {
-                if (strlen($item->OPModelo) > 10) {
-                    if ((strpos($item->OPModelo, '3581-42') !== false) || (strpos($item->OPModelo, '3581-32') !== false) ||
-                        (strpos($item->OPModelo, '3774-42') !== false) || (strpos($item->OPModelo, '3778-42') !== false) ) {
-                        $tipo = $almacenO . " -> CONS-REF";
-                    } else {
-                        $tipo = $almacenO . " -> CONS-PT";
-                    }
-                } else {
-                    if ((strpos($item->OPModelo, '-H') !== false)) {
-                        $tipo = $almacenO . " -> CONS-HB";
-                    } else {
-                        $tipo = $almacenO . " -> CONS-CA";
-                    }
-                }
-            }
-        } //2
-    } //1
-    if (( strpos($item->JrnlMemo, 'Recibo.') !== false ) && $item->Movimiento > 0 ){
-        $item->NUMOPER = "04 DEV PIEL";
-        $tipo = "PROCESO -> " . $almacenO; 
-    } else {
-        if ($item->U_TipoMat == 'CA') {
-            $item->NUMOPER = "03 PROD KASCO";
-            $tipo = "FAB-CASCO -> " . $almacenO;
-        } else {
-            if ($item->U_TipoMat == 'PT') {
-                $item->NUMOPER = "03 PROD SALAS";
-                $tipo = "FAB-PT -> " . $almacenO;
-            } else {
-                if (strpos($item->ItemCode, '-H') !== false) {
-                    $item->NUMOPER = "03 PROD HABIL";
-                    $tipo = "FAB-HAB -> " . $almacenO;
-                } else {
-                    $item->NUMOPER = "03 PROD SUB";
-                    $tipo = "FAB-SUB -> " . $almacenO;
-                }
-                
-            }
-            
-        }
-    } //1
-    if (((strpos($item->JrnlMemo, 'dito proveedore') !== false) || ( strpos($item->JrnlMemo, 'Devolución de merc') !== false ))) {
-        $item->NUMOPER = "04 DEV CANCELA";
-        $tipo = $almacenO . " -> PROVEEDOR";
-    }
-    if (((strpos($item->JrnlMemo, 'dito clientes') !== false) || ( strpos($item->JrnlMemo, 'Credit Me') !== false ))) {
-        $item->NUMOPER = "04 DEV CLIENTE";
-        $tipo = "CLIENTE -> " . $almacenO;
-    }
-    if (strpos($item->JrnlMemo, 'Devoluciones') !== false) {
-        $item->NUMOPER = "04 DEV CLIENTE";
-        $tipo = "CLIENTE -> " . $almacenO;
-    }
-    if (((strpos($item->JrnlMemo, 'Entreg') !== false) || ( strpos($item->JrnlMemo, 'Facturas clie') !== false ))) {
-        $tipo = $almacenO . " -> CLIENTE";
-        if ($item->ALM_ORG == 'AXL-CI') {
-            $item->NUMOPER = "08 S-SERVICIOS";            
-        } else {
-            $item->NUMOPER = "05 FACTURA";
-        }
-    }
-    if (strpos($item->JrnlMemo, 'Traslado') !== false) {
-        $item->NUMOPER = "07 TRASLADO";
-        if ($item->Movimiento < 0) {
-           $tipo = "ENV. " . $almacenO . " -> " . $almacenD;           
-        } else {
-           $tipo = "REC. " . $almacenO . " <- " . $almacenD; 
-        }
-    }
-    if (($item->NUMOPER ==  '') && (strpos($item->CardName, 'RECLASIFI') !== false)) {
-        $item->NUMOPER = "06 AJUSTE REC";
-        $tipo = "RECLA. -> " . $almacenO;
-    }
-    if (($item->NUMOPER ==  '') && (strpos($item->CardName, 'GVN') !== false)) {
-        $item->NUMOPER = "02 SALIDA GAS";
-        $tipo = $almacenO . " -> CONS-GRAL";
-    }
-    if (($item->NUMOPER ==  '') && (strpos($item->CardName, 'DIVER') !== false)) {
-        $item->NUMOPER = "02 SALIDA CON";
-        $tipo = $almacenO . " -> CONS " . $almacenO;
-    }
-    if (($item->NUMOPER ==  '') && (strpos($item->CardName, 'SALDOS INICIALES CONTABLES') !== false)) {
-        $item->NUMOPER = "05 FACTURA";
-        $tipo = $almacenO . " -> CLIENTE FUS";
-    }
-    $item->TIPO = $tipo;
-}
-dd($consultaj);
-return
-   Datatables::of($consultaj)
-   ->make(true);
-
     }
     }
