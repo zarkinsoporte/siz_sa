@@ -162,13 +162,15 @@
           <td>{{$art->Destino}}</td>
           <td>{{number_format($art->Cant_ASurtir_Origen_A + $art->Cant_ASurtir_Origen_B, 2)}}</td>
           <td>{{number_format($art->Disponible, 2)}}</td>          
-          <td><a @if ($art->Disponible >= $art->Cant_Requerida)
+          <td><a @if ($art->Disponible >= ($art->Cant_ASurtir_Origen_A + $art->Cant_ASurtir_Origen_B))
           href="{{'articulos/return/'.$art->Id}}"
             @else
             disabled = "disabled"
                 @endif
             role="button"  class="btn btn-default"><i class="fa fa-arrow-circle-o-up fa-lg" style="color:royalblue"></i></a>
             <a role="button" data-toggle="modal" data-target="#remove" data-id="{{$art->Id}}" class="btn btn-default"><i class="fa fa-arrow-circle-o-down fa-lg" style="color:red"></i></a>          
+            <a id="btneditar" ng-click="editar($event)" role="button" data-toggle="modal" data-target="#edit" data-maxb="{{$art->AMPST}}" data-maxa="{{$art->APGPA}}" data-id="{{$art->Id}}" data-itemcode="{{$art->ItemCode}}" data-cantr="{{$art->Cant_Autorizada}}" data-canta="{{$art->Cant_ASurtir_Origen_A}}" data-cantb="{{$art->Cant_ASurtir_Origen_B}}" data-cantp="{{$art->Cant_PendienteA}}" class="btn btn-default"><i class="fa fa-pencil fa-lg" style="color:#007BFF"></i></a>
+          
             </td>
         </tr>
         @endforeach     
