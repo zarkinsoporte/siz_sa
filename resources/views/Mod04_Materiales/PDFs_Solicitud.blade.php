@@ -247,11 +247,10 @@
             </div>
             <div class="form-group col-md-12" ng-show="pendiente > (canta -- cantb)">
               <h5>¿Cuàl es la razón por la que se surtira una cantidad menor?</h5>
-              <input type="radio" name="reason" value="No hay existencia" checked>
-              No hay existencia<br>
-
-              <input type="radio" name="reason" value="Se posterga">
+              <input type="radio" name="reason" value="Se posterga" checked>
               Se posterga entrega<br>
+              <input type="radio" name="reason" value="No hay existencia">
+              No hay existencia<br>  
             </div>
             <div class="form-group col-md-12">
               <input type="hidden" id="articulo-id" name="articulo">
