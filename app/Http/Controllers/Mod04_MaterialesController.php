@@ -225,7 +225,7 @@ public function iowhsPDF()
            
             $tipomat = Input::get('text_selDos');
             $almacenes = "'".implode("', '", Input::get('text_selCuatro')). "'"; //alamacenes separados por comas            
-           // dd($almacenes);            
+           // dd($almacenes);
             $fechai = date('d-m-Y' , $fi);
             $fechaf = date('d-m-Y' , $ff);
                    
@@ -574,24 +574,24 @@ public function DataTraslados(){
                 ->make(true);
 }
 public function DataEntregaslotes(){
-     $consulta = DB::table('SIZ_SolicitudesMP')
-                    ->join('SIZ_MaterialesTraslados', 
-                    'SIZ_MaterialesTraslados.Id_Solicitud', '=', 'SIZ_SolicitudesMP.Id_Solicitud')
-                    ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')
-                    ->join('SIZ_AlmacenesTransferencias', function ($join) {
-                        $join->on('SIZ_AlmacenesTransferencias.Code', '=', 'SIZ_SolicitudesMP.AlmacenOrigen')
-                            ->where('SIZ_AlmacenesTransferencias.TrasladoDeptos', '<>', 'D')
-                            ->whereNotNull('TrasladoDeptos');
-                    })
-                    ->groupBy('SIZ_SolicitudesMP.Id_Solicitud', 'SIZ_SolicitudesMP.FechaCreacion', 
-                    'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'firstName', 'lastName', 'AlmacenOrigen')
-                    ->select('SIZ_SolicitudesMP.Id_Solicitud', 'SIZ_SolicitudesMP.FechaCreacion', 
-                        'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'OHEM.firstName',
-                        'OHEM.lastName', 'SIZ_SolicitudesMP.AlmacenOrigen')
-                    ->where('SIZ_MaterialesTraslados.Cant_PendienteA', '>', 0)
-                    ->whereNotIn('SIZ_MaterialesTraslados.EstatusLinea', ['T', 'S'])
-                    ->where('SIZ_SolicitudesMP.Status', 'Pendiente')
-                    ->where('SIZ_AlmacenesTransferencias.dept', Auth::user()->dept)
+    $consulta = DB::table('SIZ_SolicitudesMP')
+    ->join('SIZ_MaterialesTraslados', 
+    'SIZ_MaterialesTraslados.Id_Solicitud', '=', 'SIZ_SolicitudesMP.Id_Solicitud')
+    ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')
+    ->join('SIZ_AlmacenesTransferencias', function ($join) {
+        $join->on('SIZ_AlmacenesTransferencias.Code', '=', 'SIZ_SolicitudesMP.AlmacenOrigen')
+            ->where('SIZ_AlmacenesTransferencias.TrasladoDeptos', '<>', 'D')
+            ->whereNotNull('TrasladoDeptos');
+    })
+    ->groupBy('SIZ_SolicitudesMP.Id_Solicitud', 'SIZ_SolicitudesMP.FechaCreacion', 
+    'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'firstName', 'lastName', 'AlmacenOrigen')
+    ->select('SIZ_SolicitudesMP.Id_Solicitud', 'SIZ_SolicitudesMP.FechaCreacion', 
+        'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'OHEM.firstName',
+        'OHEM.lastName', 'SIZ_SolicitudesMP.AlmacenOrigen')
+    ->where('SIZ_MaterialesTraslados.Cant_PendienteA', '>', 0)
+    ->whereNotIn('SIZ_MaterialesTraslados.EstatusLinea', ['T', 'S'])
+    ->where('SIZ_SolicitudesMP.Status', 'Pendiente')
+    ->where('SIZ_AlmacenesTransferencias.dept', Auth::user()->dept)
                     //->where('SIZ_SolicitudesMP.Usuario', Auth::user()->U_EmpGiro)
                     ;
      //$consulta = collect($consulta);
@@ -651,13 +651,13 @@ public function DataSolicitudes_Auht(){
 		LEFT JOIN
 		(select ItemCode, sum (Cant_PendienteA) CantProceso
 		 from SIZ_MaterialesSolicitudes mat
-		 where mat.EstatusLinea in (\'S\', \'P\', \'N\')
+		 where mat.EstatusLinea in (\'S\', \'P\')
          group by ItemCode) AS PROCESO ON OITM.ItemCode = PROCESO.ItemCode
          LEFT JOIN
          (select mat.ItemCode, sum (Cant_PendienteA) CantProcesoT
 from SIZ_MaterialesTraslados mat
 LEFT JOIN SIZ_SolicitudesMP sol on sol.Id_Solicitud = mat.Id_Solicitud
-where mat.EstatusLinea in (\'S\', \'P\', \'I\', \'E\', \'N\')
+where mat.EstatusLinea in (\'S\', \'P\', \'I\', \'E\')
 AND (sol.AlmacenOrigen = \'AMP-ST\' OR sol.AlmacenOrigen = \'APG-PA\' )
 group by ItemCode) AS PROCESOT ON OITM.itemCode = PROCESOT.ItemCode
         WHERE PrchseItem = \'Y\' AND InvntItem = \'Y\' AND U_TipoMat <> \'PT\' AND U_TipoMat IS NOT NULL
@@ -1507,7 +1507,7 @@ public function getPdfSolicitud(){
         $comentario = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $info1[0]->FolioNum)->value('ComentarioUsuario');
         $fechaSol = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $info1[0]->FolioNum)->value('FechaCreacion');
         $pdf = \PDF::loadView('Mod04_Materiales.TrasladoPDF_SinPrecio', 
-        compact('info1', 'transfer1', 'fechaSol', 
+        compact('info1', 'transfer1', 'fechaSol',
          'total1',  'transfer', 'comentario'));
         $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
         return $pdf->stream('Siz_Traslado_'.$info1[0]->FolioNum . ' - ' .date("d/m/Y") . '.Pdf');
@@ -1556,7 +1556,7 @@ public function getPdfSolicitud(){
             from SIZ_MaterialesTraslados mat
             inner join SIZ_SolicitudesMP sol on sol.Id_Solicitud = mat.Id_Solicitud 
             AND sol.AlmacenOrigen =\''. $request->get('almacen'). '\'
-            where mat.EstatusLinea in (\'S\', \'P\', \'I\', \'E\' , \'N\')
+            where mat.EstatusLinea in (\'S\', \'P\', \'I\', \'E\')
             group by ItemCode) AS PROCESO ON OITM.ItemCode = PROCESO.ItemCode 
             WHERE PrchseItem = \'Y\' AND InvntItem = \'Y\' 
             AND OITM.frozenFor = \'N\'
@@ -1574,12 +1574,12 @@ public function getPdfSolicitud(){
             from SIZ_MaterialesTraslados mat
             inner join SIZ_SolicitudesMP sol on sol.Id_Solicitud = mat.Id_Solicitud 
             AND sol.AlmacenOrigen =\''. $request->get('almacen'). '\'
-            where mat.EstatusLinea in (\'S\', \'P\', \'I\', \'E\', \'N\')
+            where mat.EstatusLinea in (\'S\', \'P\', \'I\', \'E\')
             group by ItemCode) AS PROCESO ON OITM.ItemCode = PROCESO.ItemCode 
             LEFT JOIN (
             select ItemCode, sum(Cant_PendienteA)AS CantProcesosol
                         from SIZ_MaterialesSolicitudes mat
-                        where mat.EstatusLinea in (\'S\', \'P\', \'N\')
+                        where mat.EstatusLinea in (\'S\', \'P\')
                         group by ItemCode
                         ) AS PROCESOSOL ON PROCESOSOL.ItemCode = OITM.ItemCode
             WHERE PrchseItem = \'Y\' AND InvntItem = \'Y\' 
@@ -2375,7 +2375,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                 from '.$t.' mat                                
                 LEFT JOIN OITM o ON mat.ItemCode = o.ItemCode
                 WHERE mat.Id = ? 
-                and mat.EstatusLinea in (\'S\', \'P\', \'I\', \'E\', \'N\')', [$id]))->first();
+                and mat.EstatusLinea in (\'S\', \'P\', \'I\', \'E\')', [$id]))->first();
         //return $articulo->ItemCode;
        // dd($cant);
         $lotes = DB::select('select
@@ -2390,7 +2390,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                         (select ItemCode, sum (Cant_PendienteA) CantProceso
                         from '.$t.' mat
                         LEFT JOIN SIZ_SolicitudesMP sol on sol.Id_Solicitud = mat.Id_Solicitud
-                        where mat.EstatusLinea in (\'S\', \'P\', \'I\', \'E\', \'N\')
+                        where mat.EstatusLinea in (\'S\', \'P\', \'I\', \'E\')
                         group by ItemCode) AS PROCESO ON T2.ItemCode = PROCESO.ItemCode
                      where
                     T1.Quantity > 0 AND T0.ItemCode = ? AND WhsCode = ? 
