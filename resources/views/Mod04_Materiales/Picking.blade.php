@@ -149,7 +149,7 @@
           <th>Destino</th>
           <th>Cant. Requerida</th>
           <th>Cant. Disponible</th>
-          <th>Regresar</th>
+          <th>Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -169,7 +169,8 @@
                 @endif
             role="button"  class="btn btn-default"><i class="fa fa-arrow-circle-o-up fa-lg" style="color:royalblue"></i></a>
             <a role="button" data-toggle="modal" data-target="#remove" data-id="{{$art->Id}}" class="btn btn-default"><i class="fa fa-arrow-circle-o-down fa-lg" style="color:red"></i></a>          
-            <a id="btneditar" ng-click="editar($event)" role="button" data-toggle="modal" data-target="#edit" data-maxb="{{$art->AMPST}}" data-maxa="{{$art->APGPA}}" data-id="{{$art->Id}}" data-itemcode="{{$art->ItemCode}}" data-cantr="{{$art->Cant_Autorizada}}" data-canta="{{$art->Cant_ASurtir_Origen_A}}" data-cantb="{{$art->Cant_ASurtir_Origen_B}}" data-cantp="{{$art->Cant_PendienteA}}" class="btn btn-default"><i class="fa fa-pencil fa-lg" style="color:#007BFF"></i></a>
+            <a id="btneditar" ng-click="editar($event)" role="button" data-toggle="modal" data-target="#edit"
+            data-nom = "{{substr(' '.$art->ItemName, 0, 25).'...'}}" data-maxb="{{$art->AMPST}}" data-maxa="{{$art->APGPA}}" data-id="{{$art->Id}}" data-itemcode="{{$art->ItemCode}}" data-cantr="{{$art->Cant_Autorizada}}" data-canta="{{$art->Cant_ASurtir_Origen_A}}" data-cantb="{{$art->Cant_ASurtir_Origen_B}}" data-cantp="{{$art->Cant_PendienteA}}" class="btn btn-default"><i class="fa fa-pencil fa-lg" style="color:#007BFF"></i></a>
           
             </td>
         </tr>
@@ -231,8 +232,9 @@
         {!! Form::open(['url' => 'home/PICKING ARTICULOS/solicitud/articulos/edit', 'method' => 'POST']) !!}
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
             aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Detalle de Surtido</h4>
+        <h4 class="modal-title">Detalle de Surtido (<codigo id = 'tituloedit'></codigo>)</h4>
       </div>
+      
       <div class="modal-body">
         <div class="row">
          <div class="col-md-12">
@@ -245,11 +247,12 @@
           
           <div > 
           <div class="form-group col-md-6">
-            <label for="canta">Tomar de APG-PA:</label>
+          
+            <label for="canta">Tomar de APG-PA: <apgpa id="stockAPGPA"></apgpa></label>
             <input ng-model="canta"  id="canta" name="canta" type="number" class="form-control" min="0" step="any" required>
           </div>
           <div class="form-group col-md-6">
-            <label for="canta">Tomar de AMP-ST:</label>
+            <label for="canta">Tomar de AMP-ST: <ampst id="stockAMPST"></ampst></label>
             <input ng-model="cantb"  id="cantb" name="cantb" type="number" class="form-control" min="0" step="any" required>
           </div>
           </div>
@@ -258,7 +261,7 @@
             <input id="cantr" name="cantr" type="hidden" class="form-control"  readonly>
           </div>
           <div class="form-group col-md-6">
-            <label for="cantp" >Cantidad Total a Surtir</label>
+            <label for="cantp" >Cantidad a Surtir</label>
           <input id="cantp" value="@{{canta -- cantb}}" name="cantp" type="text" class="form-control" min="0" step="any" max="@{{cantp}}" readonly>
           </div>
           <div class="form-group col-md-12" ng-show="pendiente > (canta -- cantb)">
@@ -312,14 +315,22 @@ var cantp = button.data('cantp')
 var itemcode = button.data('itemcode')
 var maxa = button.data('maxa')
 var maxb = button.data('maxb')
+var nom = button.data('nom')
 
 var modal = $(this)
 modal.find('#articulo-id').val(id)
 modal.find('#itemcode').val(itemcode)
+modal.find('#tituloedit').text(itemcode + nom)
 modal.find('#cantr').val(cantp) //autorizada
 modal.find('#canta').attr('max', maxa)
 modal.find('#cantb').attr('max', maxb)
-
+$.get("{!! url('disponibilidadAlmacenMP') !!}",
+    { codigo: itemcode },
+    function(data) {
+    
+     modal.find('#stockAPGPA').text(Number(data[0].stockapgpa).toFixed(2))
+     modal.find('#stockAMPST').text(Number(data[0].stockampst).toFixed(2))
+    });
 });
 @endsection 
 <script>
