@@ -114,9 +114,7 @@
           <td>
             <div class="btn-group" role="group" aria-label="...">
               
-          <a id="btneditar" ng-click="editar($event)" role="button" data-toggle="modal" data-target="#edit" data-maxb="{{$art->AMPST}}" data-maxa="{{$art->APGPA}}" data-id="{{$art->Id}}" data-itemcode="{{$art->ItemCode}}" data-cantr="{{$art->Cant_Autorizada}}" data-canta="{{$art->Cant_ASurtir_Origen_A}}" data-cantb="{{$art->Cant_ASurtir_Origen_B}}" data-cantp="{{$art->Cant_PendienteA}}" class="btn btn-default"><i class="fa fa-pencil fa-lg" style="color:#007BFF"></i></a>
-          
-          
+          <a id="btneditar" ng-click="editar($event)" role="button" data-toggle="modal" data-target="#edit" data-nom = "{{substr(' '.$art->ItemName, 0, 25).'...'}}" data-maxb="{{$art->AMPST}}" data-maxa="{{$art->APGPA}}" data-id="{{$art->Id}}" data-itemcode="{{$art->ItemCode}}" data-cantr="{{$art->Cant_Autorizada}}" data-canta="{{$art->Cant_ASurtir_Origen_A}}" data-cantb="{{$art->Cant_ASurtir_Origen_B}}" data-cantp="{{$art->Cant_PendienteA}}" class="btn btn-default"><i class="fa fa-pencil fa-lg" style="color:#007BFF"></i></a>                    
           <a role="button" data-toggle="modal" data-target="#remove" data-id="{{$art->Id}}" class="btn btn-default"><i class="fa fa-arrow-circle-o-down fa-lg" style="color:red"></i></a>          
         </div>  
         </td>  
@@ -324,13 +322,13 @@ modal.find('#tituloedit').text(itemcode + nom)
 modal.find('#cantr').val(cantp) //autorizada
 modal.find('#canta').attr('max', maxa)
 modal.find('#cantb').attr('max', maxb)
-$.get("{!! url('disponibilidadAlmacenMP') !!}",
+  $.get("{!! url('disponibilidadAlmacenMP') !!}",
     { codigo: itemcode },
     function(data) {
     
      modal.find('#stockAPGPA').text(Number(data[0].stockapgpa).toFixed(2))
      modal.find('#stockAMPST').text(Number(data[0].stockampst).toFixed(2))
-    });
+  });
 });
 @endsection 
 <script>
