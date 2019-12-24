@@ -131,12 +131,7 @@
           @endif         
           <td>{{number_format($art->AlmacenOrigen, 2)}}</td>          
           <td> 
-            <a id="btneditar" ng-click="editar($event)" role="button" data-toggle="modal" data-target="#edit"
-              data-nom="{{substr(' '.$art->ItemName, 0, 25).'...'}}" data-maxb="{{$art->AMPST}}" data-maxa="{{$art->APGPA}}"
-              data-id="{{$art->Id}}" data-itemcode="{{$art->ItemCode}}" data-cantr="{{$art->Cant_Autorizada}}"
-              data-canta="{{$art->Cant_ASurtir_Origen_A}}" data-cantb="{{$art->Cant_ASurtir_Origen_B}}"
-              data-cantp="{{$art->Cant_PendienteA}}" class="btn btn-default"><i class="fa fa-pencil fa-lg"
-                style="color:#007BFF"></i></a>
+          
             <a role="button" data-toggle="modal" data-target="#remove" data-id="{{$art->Id}}" class="btn btn-default"><i class="fa fa-arrow-circle-o-down fa-lg" style="color:red"></i></a>  
 
         </td>          
@@ -181,12 +176,7 @@
                 @endif
             role="button"  class="btn btn-default"><i class="fa fa-arrow-circle-o-up fa-lg" style="color:royalblue"></i></a>
             <a role="button" data-toggle="modal" data-target="#remove" data-id="{{$art->Id}}" class="btn btn-default"><i class="fa fa-arrow-circle-o-down fa-lg" style="color:red"></i></a>          
-            <a id="btneditar" ng-click="editar($event)" role="button" data-toggle="modal" data-target="#edit"
-              data-nom="{{substr(' '.$art->ItemName, 0, 25).'...'}}" data-maxb="{{$art->AMPST}}" data-maxa="{{$art->APGPA}}"
-              data-id="{{$art->Id}}" data-itemcode="{{$art->ItemCode}}" data-cantr="{{$art->Cant_Autorizada}}"
-              data-canta="{{$art->Cant_ASurtir_Origen_A}}" data-cantb="{{$art->Cant_ASurtir_Origen_B}}"
-              data-cantp="{{$art->Cant_PendienteA}}" class="btn btn-default"><i class="fa fa-pencil fa-lg"
-                style="color:#007BFF"></i></a>
+           
             </td>
         </tr>
         @endforeach     
