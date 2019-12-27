@@ -37,7 +37,7 @@
                 
                 <div class="thumbnail">
                     <div class="caption">
-                    <h4>{{ substr($link->tarea, 0, 31).'...' }}</h4>
+                    <h4>{{ substr($link->tarea, 0, 31) }}</h4>
                     <p>{{$link->modulo}}</p>
                         <p align="right">                           
                         <a href="{!! url('home/'.$link->route) !!}" class="btn btn-default" role="button">
