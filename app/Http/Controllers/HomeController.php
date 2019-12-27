@@ -32,16 +32,22 @@ class HomeController extends Controller
     {
         $user = Auth::user();
         $actividades = $user->getTareas();     
-        return view('homeIndex',   ['actividades' => $actividades, 'ultimo' => count($actividades), 'isAdmin'=> User::isAdmin()]);
+        $links = DB::select('Select top 6 l.route, tm.name as tarea, m.name as modulo from SIZ_routes_log l
+                inner join Siz_Tarea_menu tm on tm.route = l.route
+				left join Siz_Modulos_Grupo mg on mg.id_tarea = tm.id
+                left join Siz_Modulo m on m.id = mg.id_modulo				
+                where l.Usuario = ?
+                and tm.name is not null and m.name is not null
+                group by tm.name, m.name, l.route
+                order by tm.name, m.name', [Auth::user()->U_EmpGiro]);
+        return view('homeIndex',   ['links' => $links, 'actividades' => $actividades, 'ultimo' => count($actividades), 'isAdmin'=> User::isAdmin()]);
     }
 
-    public function UPT_Noticias($id){
-     
+    public function UPT_Noticias($id){     
        DB::table('Siz_Noticias')
         ->where('Id', $id)
         ->update(['Leido' => 'Si']);
-        $user = Auth::user();
-                
+        $user = Auth::user();                
        return redirect()->back();
     }
     /**
@@ -54,12 +60,10 @@ class HomeController extends Controller
         $user = Auth::user();
         $actividades = $user->getTareas();
         $id_noticia=$request->input("id");
-      //dd($id_noticia);
 
-        $id_user=Auth::user()->U_EmpGiro;
-    
+        $id_user=Auth::user()->U_EmpGiro;    
         $noticias=DB::select(DB::raw("SELECT * FROM Siz_Noticias WHERE Destinatario='$id_user'and Leido='N'"));
-        //dd
+
       return view('Mod01_Produccion/Noticias', ['actividades' => $actividades,'noticias' => $noticias,'id_user' => $id_user, 'ultimo' => count($actividades)]);
     }
 

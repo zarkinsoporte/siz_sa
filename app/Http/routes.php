@@ -128,7 +128,7 @@ Route::post('nuevatarea', 'Mod00_AdministradorController@nuevatarea');
 |--------------------------------------------------------------------------
 */
 Route::get('home/TRASLADO ÷ AREAS', [
-    'as' => 'traslado', 'uses' => 'Mod01_ProduccionController@traslados'
+    'middleware' => 'routelog', 'as' => 'traslado', 'uses' => 'Mod01_ProduccionController@traslados'
 ]);
 Route::post('home/TRASLADO ÷ AREAS', 'Mod01_ProduccionController@traslados');
 Route::get('home/TRASLADO ÷ AREAS/{id}', 'Mod01_ProduccionController@getOP');
@@ -142,10 +142,10 @@ Route::get('Mod01_Produccion/Noticias', 'HomeController@create');
 Route::get('leido/{id}', 'HomeController@UPT_Noticias');
 Route::post('/leido', 'HomeController@UPT_Noticias');
 //REPORTE DE PRODUCCION
-Route::get('home/REPORTE PRODUCCION', 'Reportes_ProduccionController@produccion1');
+Route::get('home/REPORTE PRODUCCION', 'Reportes_ProduccionController@produccion1')->middleware('routelog');
 Route::post('home/REPORTE PRODUCCION', 'Reportes_ProduccionController@produccion1');
 //REPORTE 112-CORTE PIEL///
-Route::get('home/112 CORTE DE PIEL', 'Mod01_ProduccionController@repCortePiel');
+Route::get('home/112 CORTE DE PIEL', 'Mod01_ProduccionController@repCortePiel')->middleware('routelog');
 Route::post('home/112 CORTE DE PIEL', 'Mod01_ProduccionController@repCortePiel');
 Route::post('home/reporte/DetinsPiel', 'Mod01_ProduccionController@repCortePiel');
 Route::get('home/repCortePielExl', 'Mod01_ProduccionController@repCortePielExl');
@@ -155,22 +155,22 @@ Route::get('home/ReporteMaterialesPDF/{op}', 'Mod01_ProduccionController@Reporte
 Route::get('home/ReporteProduccionPDF', 'Reportes_ProduccionController@ReporteProduccionPDF');
 Route::get('home/ReporteProduccionEXL', 'Reportes_ProduccionController@ReporteProduccionEXL');
 //REPORTE DE HISTORIAL X OP
-Route::get('home/HISTORIAL OP', 'Reportes_ProduccionController@showModal');
+Route::get('home/HISTORIAL OP', 'Reportes_ProduccionController@showModal')->middleware('routelog');
 Route::post('home/reporte/HISTORIAL OP', 'Reportes_ProduccionController@historialOP');
 Route::get('home/reporte/historialXLS', 'Reportes_ProduccionController@historialOPXLS');
 //REPORTE DE MATERIALES X OP
-Route::get('home/MATERIALES OP', 'Reportes_ProduccionController@showModal');
+Route::get('home/MATERIALES OP', 'Reportes_ProduccionController@showModal')->middleware('routelog');
 Route::post('home/reporte/MATERIALES OP', 'Reportes_ProduccionController@materialesOP');
 Route::get('home/reporte/materialesXLS', 'Reportes_ProduccionController@materialesOPXLS');
 //REPORTE BACK ORDER
-Route::get('home/BACK ORDER', 'Reportes_ProduccionController@backorder');
+Route::get('home/BACK ORDER', 'Reportes_ProduccionController@backorder')->middleware('routelog');
 Route::get('datatables.showbackorder', 'Reportes_ProduccionController@DataShowbackorder')->name('datatables.showbackorder');
 Route::post('home/reporte/backorderPDF', 'Reportes_ProduccionController@backOrderAjaxToSession');
 Route::get('home/reporte/backorderVentasPDF', 'Reportes_ProduccionController@ReporteBackOrderVentasPDF');
 Route::get('home/reporte/backorderPlaneaPDF', 'Reportes_ProduccionController@ReporteBackOrderPlaneaPDF');
 Route::get('home/reporte/backorderXLS', 'Reportes_ProduccionController@ReporteBackOrderXLS');
 //RPORTE BACK ORDER CASCO
-Route::get('home/BACK ORDER CASCO', 'Reportes_ProduccionController@backorderCasco');
+Route::get('home/BACK ORDER CASCO', 'Reportes_ProduccionController@backorderCasco')->middleware('routelog');
 Route::get('datatables.showbackordercasco', 'Reportes_ProduccionController@DataShowbackorderCasco')->name('datatables.showbackordercasco');
 
 Route::get('home/reporte/backorderCascoPDF', 'Reportes_ProduccionController@ReporteBackOrderCascoPDF');
@@ -181,7 +181,7 @@ Route::post('home/reporte/ajaxtosession/{id}', 'Reportes_ProduccionController@Aj
     | MOD07-CALIDAD Routes
     |--------------------------------------------------------------------------
     */
-Route::get('home/NUEVO RECHAZO', 'Mod07_CalidadController@Rechazo');
+Route::get('home/NUEVO RECHAZO', 'Mod07_CalidadController@Rechazo')->middleware('routelog');
 Route::post('RechazosNuevo', 'Mod07_CalidadController@RechazoIn');
 Route::get('Mod07_Calidad/Mod_Rechazo/{id}/{mensaje}', 'Mod07_CalidadController@Mod_Rechazo');
 Route::post('Mod07_Calidad/Mod_RechazoUPDT', 'Mod07_CalidadController@Mod_RechazoUPDT');
@@ -189,14 +189,14 @@ Route::get('admin/Delete_Rechazo/{id}', 'Mod07_CalidadController@Delete_Rechazo'
 Route::post('admin/Delete_Rechazo/', 'Mod07_CalidadController@Delete_Rechazo');
 Route::get('search/autocomplete', 'Mod07_CalidadController@autocomplete');
 Route::post('/pdfRechazo', 'Mod07_CalidadController@Pdf_Rechazo');
-Route::get('home/REPORTE DE RECHAZOS', 'Mod07_CalidadController@Reporte');
+Route::get('home/REPORTE DE RECHAZOS', 'Mod07_CalidadController@Reporte')->middleware('routelog');
 Route::get('home/CANCELACIONES', 'Mod07_CalidadController@Cancelado');
 Route::get('borrado/{id}', 'Mod07_CalidadController@UPT_Cancelado');
 Route::post('/borrado', 'Mod07_CalidadController@UPT_Cancelado');
-Route::get('home/HISTORIAL', 'Mod07_CalidadController@Historial');
+Route::get('home/HISTORIAL', 'Mod07_CalidadController@Historial')->middleware('routelog');
 Route::post('/excel', 'Mod07_CalidadController@excel');
 ////reporte calidad
-Route::get('home/CALIDAD POR DEPTO', 'Mod07_CalidadController@repCalidad');
+Route::get('home/CALIDAD POR DEPTO', 'Mod07_CalidadController@repCalidad')->middleware('routelog');
 Route::post('home/CALIDAD POR DEPTO', 'Mod07_CalidadController@repCalidad2');
 Route::get('getAutocomplete', function () {
     return view('Mod07_Calidad.RechazoFrame');
@@ -208,13 +208,13 @@ Route::get('autocomplete', array('as' => 'autocomplete', 'uses' => 'Mod07_Calida
 //RUTAS DE RECURSOS HUMANOS//---------------------------------------------------------
 //-------------------------//
 //
-Route::get('home/CALCULO DE BONOS', 'Mod10_RhController@parametrosmodal');
+Route::get('home/CALCULO DE BONOS', 'Mod10_RhController@parametrosmodal')->middleware('routelog');
 //Route::get('home/rh/reportes/bonos','Mod10_RhController@calculoBonos');
 Route::post('home/rh/reportes/bonos', 'Mod10_RhController@calculoBonos');
-Route::get('home/PARAMETROS BONOS', 'Mod10_RhController@setParametrosBonos');
+Route::get('home/PARAMETROS BONOS', 'Mod10_RhController@setParametrosBonos')->middleware('routelog');
 Route::post('home/PARAMETROS BONOS', 'Mod10_RhController@setParametrosBonos2');
 Route::get('home/rh/reportes/bonosPdf', 'Mod10_RhController@bonosPdf');
-Route::get('home/BONOS CORTE', 'Mod10_RhController@bonosCorte');
+Route::get('home/BONOS CORTE', 'Mod10_RhController@bonosCorte')->middleware('routelog');
 Route::post('home/rh/reportes/bonosCorte', 'Mod10_RhController@calculoBonosCorte');
 Route::get('home/rh/reportes/bonoscortePdf', 'Mod10_RhController@bonoscortePdf');
 Route::get('home/rh/reportes/bonoscorteEXL', 'Mod10_RhController@bonoscorteEXL');
@@ -226,7 +226,7 @@ Route::get('home/delete_parametro/{id}', 'Mod10_RhController@delete_parametro');
 //RUTAS DE COMPRAS//---------------------------------------------------------
 //-------------------------//
 //
-Route::get('home/CONSULTA OC', 'Mod03_ComprasController@pedidosCsv');
+Route::get('home/CONSULTA OC', 'Mod03_ComprasController@pedidosCsv')->middleware('routelog');
 Route::post('home/CONSULTA OC', 'Mod03_ComprasController@postPedidosCsv');
 Route::get('home/desPedidosCsv', 'Mod03_ComprasController@desPedidosCsv');
 Route::get('home/PedidosCsvPDF', 'Mod03_ComprasController@PedidosCsvPDF');
@@ -235,7 +235,7 @@ Route::get('home/PedidosCsvPDF', 'Mod03_ComprasController@PedidosCsvPDF');
 //RUTAS DE MATERIALES ALMACEN//---------------------------------------------------------
 //-------------------------//
 //
-Route::get('home/ENTRADAS ALMACEN', 'Reportes_ProduccionController@showModal');
+Route::get('home/ENTRADAS ALMACEN', 'Reportes_ProduccionController@showModal')->middleware('routelog');
 Route::post('home/reporte/ENTRADAS ALMACEN', 'Mod04_MaterialesController@reporteEntradasAlmacen');
 Route::get('home/reporte/ENTRADAS ALMACEN', 'Mod04_MaterialesController@reporteEntradasAlmacenPDF');
 Route::get('home/reporte/entradasXLS', 'Mod04_MaterialesController@entradasXLS');
@@ -243,17 +243,17 @@ Route::get('datatables.showentradasmp', 'Mod04_MaterialesController@DataShowEntr
 Route::get('home/reporte/entradasPDF', 'Mod04_MaterialesController@entradasPDF');
 
 //DESPLIEGUE DATOS MAESTROS ARTICULOS
-Route::get('home/DATOS MAESTROS ARTICULOS', 'Reportes_ProduccionController@showModal');
+Route::get('home/DATOS MAESTROS ARTICULOS', 'Reportes_ProduccionController@showModal')->middleware('routelog');
 Route::post('home/reporte/DATOS MAESTROS ARTICULOS/{redirek?}', 'Mod04_MaterialesController@DM_Articulos');
 Route::post('articuloToSap', 'Mod04_MaterialesController@articuloToSap');
 Route::get('OITM.show', 'HomeController@ShowArticulos')->name('OITM.show');
 //
 //SOLICITUD DE MATERIALES
-Route::get('home/1 SOLICITUD MATERIALES', 'Mod04_MaterialesController@solicitudMateriales');
+Route::get('home/1 SOLICITUD MATERIALES', 'Mod04_MaterialesController@solicitudMateriales')->middleware('routelog');
 Route::get('OITM.WH.show', 'Mod04_MaterialesController@ShowArticulosWH')->name('OITM.WH.show');
 Route::post('home/saveArt', 'Mod04_MaterialesController@saveArt')->name('home/saveArt');
 //AUTORIZACION
-Route::get('home/2 AUTORIZACION', 'Mod04_MaterialesController@AutorizacionSolicitudes');
+Route::get('home/2 AUTORIZACION', 'Mod04_MaterialesController@AutorizacionSolicitudes')->middleware('routelog');
 Route::get('datatables.Solicitudes_Auht', 'Mod04_MaterialesController@DataSolicitudes_Auht')->name('datatables.Solicitudes_Auht');
 Route::get('home/AUTORIZACION/solicitud/{id}', 'Mod04_MaterialesController@ShowDetalleSolicitud');
 Route::get('home/DATOS MAESTROS ARTICULO/{id}', 'Mod04_MaterialesController@DM_Articulo');
@@ -262,7 +262,7 @@ Route::post('home/AUTORIZACION/solicitud/articulos/edit', 'Mod04_MaterialesContr
 Route::get('home/AUTORIZACION/solicitud/articulos/return/{id}', 'Mod04_MaterialesController@returnArticuloSolicitud');
 Route::get('home/AUTORIZACION/solicitud/update/{id}', 'Mod04_MaterialesController@Solicitud_A_Picking');
 //3 PICKING ARTICULOS
-Route::get('home/2 PICKING ARTICULOS', 'Mod04_MaterialesController@pickingArticulos');
+Route::get('home/2 PICKING ARTICULOS', 'Mod04_MaterialesController@pickingArticulos')->middleware('routelog');
 Route::get('datatables.solicitudesMP', 'Mod04_MaterialesController@DataSolicitudes')->name('datatables.solicitudesMP');
 Route::get('home/2 PICKING ARTICULOS/solicitud/{id}', 'Mod04_MaterialesController@ShowDetalleSolicitud');
 Route::post('home/2 PICKING ARTICULOS/solicitud/articulos/remove', 'Mod04_MaterialesController@removeArticuloSolicitud');
@@ -274,7 +274,7 @@ Route::get('home/lotes/{tabla}/{alm}/{item}', 'Mod04_MaterialesController@vistaL
 Route::post('home/lotes/insert', 'Mod04_MaterialesController@insertLotes');
 Route::get('home/lotes/remove/{id}/{lote}/{alm}', 'Mod04_MaterialesController@removeLote');
 // 4 TRASLADOS
-Route::get('home/4 GENERAR TRASLADO', 'Mod04_MaterialesController@TrasladosArticulos');
+Route::get('home/4 GENERAR TRASLADO', 'Mod04_MaterialesController@TrasladosArticulos')->middleware('routelog');
 Route::get('datatables.solicitudesTraslados', 'Mod04_MaterialesController@DataTraslados')->name('datatables.solicitudesTraslados');
 Route::get('home/TRASLADOS/solicitud/{id}', 'Mod04_MaterialesController@ShowDetalleTraslado');
 Route::get('home/pdf/solicitud/{id}', 'Mod04_MaterialesController@ShowDetallePdf');
@@ -283,7 +283,7 @@ Route::get('home/TRASLADOS/solicitud/update/{id}', 'Mod04_MaterialesController@H
 Route::get('home/TRASLADOS/solicitud/updatepicking/{id}', 'Mod04_MaterialesController@Solicitud_A_PickingTraslados');
 Route::get('home/TRASLADOS/solicitud/PDF/traslado/{transfer}', 'Mod04_MaterialesController@getPdfTraslado');
 //5 TRASLADOS DEPTOS ENTREGA
-Route::get('home/TRASLADO ENTREGA', 'Reportes_ProduccionController@showModal');
+Route::get('home/TRASLADO ENTREGA', 'Reportes_ProduccionController@showModal')->middleware('routelog');
 Route::get('home/reporte/TRASLADO ENTREGA', 'Reportes_ProduccionController@showModal');
 Route::post('home/reporte/TRASLADO ENTREGA', 'Mod04_MaterialesController@trasladoEntrega');
 Route::get('home/reporte2/TRASLADO ENTREGA', 'Mod04_MaterialesController@trasladoEntrega');
@@ -297,7 +297,7 @@ Route::get('home/TRASLADO ENTREGA/update/{almacen_origen}/{id}', 'Mod04_Material
 Route::get('home/entregas_lotes', 'Mod04_MaterialesController@Entregaslotes');
 Route::get('datatables.Entregaslotes', 'Mod04_MaterialesController@DataEntregaslotes')->name('datatables.Entregaslotes');
 //6 TRASLADOS DEPTOS RECEPCION
-Route::get('home/TRASLADO RECEPCION', 'Mod04_MaterialesController@TrasladosDeptos');
+Route::get('home/TRASLADO RECEPCION', 'Mod04_MaterialesController@TrasladosDeptos')->middleware('routelog');
 Route::get('datatables.traslados', 'Mod04_MaterialesController@DataTrasladosDeptos')->name('datatables.traslados');
 Route::get('home/TRASLADO RECEPCION/solicitud/{id}', 'Mod04_MaterialesController@ShowDetalleTrasladoDeptos');
 Route::post('home/TRASLADO RECEPCION/solicitud/articulos/remove', 'Mod04_MaterialesController@removeArticuloTrasladoDepto');
@@ -307,7 +307,7 @@ Route::post('home/TRASLADO RECEPCION/solicitud/articulos/edit', 'Mod04_Materiale
 Route::get('home/TRASLADO RECEPCION/solicitud/PDF/traslado/{transfer}', 'Mod04_MaterialesController@getPdfTraslado');
 
 //REPORTE DE ENTRADAS Y SALIDAS
-Route::get('home/ENTRADAS SALIDAS', 'Reportes_ProduccionController@showModal');
+Route::get('home/ENTRADAS SALIDAS', 'Reportes_ProduccionController@showModal')->middleware('routelog');
 Route::post('home/reporte/ENTRADAS SALIDAS', 'Mod04_MaterialesController@EntradasSalidas');
 Route::get('datatables.ioWhs', 'Mod04_MaterialesController@DataShowEntradasSalidas')->name('datatables.ioWhs');
 Route::get('home/reporte/ENTRADAS SALIDAS', 'Mod04_MaterialesController@reporteiowhsPDF');
@@ -319,13 +319,13 @@ Route::get('home/reporte/entradasysalidasPDF', 'Mod04_MaterialesController@iowhs
 //RUTAS DE MRP//---------------------------------------------------------
 //-------------------------//
 //
-Route::get('home/MRP', 'Reportes_ProduccionController@showModal');
+Route::get('home/MRP', 'Reportes_ProduccionController@showModal')->middleware('routelog');
 Route::post('home/reporte/MRP', 'Mod02_PlaneacionController@reporteMRP');
 Route::get('home/reporte/mrpXLS', 'Mod02_PlaneacionController@mrpXLS');
 Route::get('datatables.showmrp', 'Mod02_PlaneacionController@DataShowMRP')->name('datatables.showmrp');
 Route::get('home/reporte/mrpPDF', 'Mod02_PlaneacionController@mrpPDF');
 
-Route::get('home/ACTUALIZAR MRP', 'Reportes_ProduccionController@showModal');
+Route::get('home/ACTUALIZAR MRP', 'Reportes_ProduccionController@showModal')->middleware('routelog');
 Route::post('home/reporte/ACTUALIZAR MRP', 'Mod02_PlaneacionController@actualizaMRP');
 ///Ruta Ayudas
 Route::get('home/ayudas_pdf/{PdfName}', 'HomeController@showPdf');
@@ -335,7 +335,7 @@ Route::get('home/{r0}/ayudas_pdf/{PdfName}', 'HomeController@showPdf2');
 //RUTAS DE PRODUCCION POR AREAS//---------------------------------------------------------
 //-------------------------//
 //
-Route::get('home/PRODUCCION POR AREAS', 'Reportes_ProduccionController@showModal');
+Route::get('home/PRODUCCION POR AREAS', 'Reportes_ProduccionController@showModal')->middleware('routelog');
 Route::post('home/reporte/PRODUCCION POR AREAS', 'Reportes_ProduccionController@reporteProdxAreas');
 Route::get('home/reporte/PRODUCCION POR AREAS', 'Reportes_ProduccionController@reporteProdxAreasPDF');
 Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@produccionxareasXLS');
@@ -411,6 +411,7 @@ Route::get('setpassword', function () {
     echo 'hecho';
 });
 Route::get('disponibilidadAlmacenMP', function(){
+     
     $data = DB::select("SELECT 
 		 COALESCE (SUM(CASE WHEN WhsCode = 'APG-PA'  
          THEN OnHand ELSE 0 END) - (COALESCE (t1.A, 0) + COALESCE (tr.A, 0)), 0) 
@@ -437,3 +438,4 @@ Route::get('disponibilidadAlmacenMP', function(){
         return $data;
         //dd(collect($data));
 });
+
