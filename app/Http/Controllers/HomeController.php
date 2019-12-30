@@ -31,7 +31,60 @@ class HomeController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $actividades = $user->getTareas();     
+        $actividades = $user->getTareas();
+        // Inicia notificacion de Mo4 Traslado recepcion
+         $trasladosRecepcion = DB::table('SIZ_SolicitudesMP')
+            ->join('SIZ_MaterialesTraslados', 'SIZ_MaterialesTraslados.Id_Solicitud', '=', 'SIZ_SolicitudesMP.Id_Solicitud')
+            ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')
+            ->leftjoin('OUDP', 'OUDP.Code', '=', 'dept')
+            ->join('SIZ_AlmacenesTransferencias', function ($join) {
+                $join->on('SIZ_AlmacenesTransferencias.Code', '=', DB::raw('SUBSTRING(Destino, 1, 6)'))
+                    ->where('SIZ_AlmacenesTransferencias.TrasladoDeptos', '<>', 'D')
+                    ->whereNotNull('TrasladoDeptos');
+            })
+            ->groupBy('SIZ_SolicitudesMP.Id_Solicitud', 
+            'SIZ_SolicitudesMP.FechaCreacion', 'SIZ_SolicitudesMP.Usuario', 
+            'SIZ_SolicitudesMP.Status', 'firstName', 'lastName',
+             'OHEM.dept', 'Name', 'SIZ_SolicitudesMP.AlmacenOrigen')
+            ->select(
+                'SIZ_SolicitudesMP.Id_Solicitud',
+                'SIZ_SolicitudesMP.FechaCreacion',
+                'SIZ_SolicitudesMP.Usuario',
+                'SIZ_SolicitudesMP.Status',
+                'SIZ_SolicitudesMP.AlmacenOrigen',
+                'OHEM.firstName',
+                'OHEM.lastName',
+                'OHEM.dept',
+                'OUDP.Name as depto'
+            )
+            ->whereNotNull('SIZ_SolicitudesMP.AlmacenOrigen')
+            ->where('SIZ_MaterialesTraslados.Cant_Pendiente', '>', 0)
+            ->where('SIZ_AlmacenesTransferencias.dept', Auth::user()->dept)
+            ->whereIn('SIZ_MaterialesTraslados.EstatusLinea', ['S', 'P'])
+            ->where('SIZ_SolicitudesMP.Status', 'Pendiente')->count();
+           
+        if ($trasladosRecepcion > 0) {
+            $ruta = 'TRASLADO RECEPCION';
+            $result = DB::table('SIZ_routes_log')
+                ->where('Usuario', Auth::user()->U_EmpGiro)
+                ->where('route', $ruta)
+                ->update(['ultimaFecha' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
+            if($result > 1){// borrar si hay mas de 2 registros iguales
+                DB::table('SIZ_routes_log') 
+                ->where('Usuario', Auth::user()->U_EmpGiro)
+                ->where('route', $ruta)->delete();
+                $result = 0;
+            }
+
+            if ($result == 0) { //insertar si no hay algun registro
+                DB::table('SIZ_routes_log')->insert(
+                    ['route' => $ruta, 'Usuario' => Auth::user()->U_EmpGiro, 'ultimaFecha' => (new \DateTime('now'))->format('Y-m-d H:i:s')]
+                );
+            }
+        }
+        
+        // Finaliza notificacion de Mod4 Traslado Recepcion
+     
         $links = DB::select('Select top 6 l.route, tm.name as tarea, m.name as modulo from SIZ_routes_log l
                 inner join Siz_Tarea_menu tm on tm.route = l.route
 				left join Siz_Modulos_Grupo mg on mg.id_tarea = tm.id
@@ -40,7 +93,7 @@ class HomeController extends Controller
                 and tm.name is not null and m.name is not null
                 group by tm.name, m.name, l.route
                 order by tm.name, m.name', [Auth::user()->U_EmpGiro]);
-        return view('homeIndex',   ['links' => $links, 'actividades' => $actividades, 'ultimo' => count($actividades), 'isAdmin'=> User::isAdmin()]);
+        return view('homeIndex',   ['traslados' => $trasladosRecepcion, 'links' => $links, 'actividades' => $actividades, 'ultimo' => count($actividades), 'isAdmin'=> User::isAdmin()]);
     }
 
     public function UPT_Noticias($id){     

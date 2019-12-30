@@ -19,6 +19,9 @@
 .div{
     font-family:arial;
 }
+.badge-info {
+  background-color: #3a87ad;
+}
         </style>
         <!-- /.row -->
         <div class="row">
@@ -38,7 +41,11 @@
                 <div class="thumbnail">
                     <div class="caption">
                     <h4>{{ substr($link->tarea, 0, 31) }}</h4>
-                    <p>{{$link->modulo}}</p>
+                    <p>{{$link->modulo}} 
+                    @if ($traslados > 0 && $link->route == 'TRASLADO RECEPCION')
+                        <span class="badge badge-info">{{$traslados}}</span>
+                    @endif
+                    </p>
                         <p align="right">                           
                         <a href="{!! url('home/'.$link->route) !!}" class="btn btn-default" role="button">
                                 <i class="fa fa-send" aria-hidden="true"></i>

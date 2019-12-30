@@ -23,18 +23,18 @@ class route_log
             ->where('Usuario', Auth::user()->U_EmpGiro)
             ->where('route', $ruta)
             ->update(['ultimaFecha' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
-        if($result > 1){
+        if($result > 1){// borrar si hay mas de 2 registros iguales
             DB::table('SIZ_routes_log') 
             ->where('Usuario', Auth::user()->U_EmpGiro)
             ->where('route', $ruta)->delete();
             $result = 0;
         }
-        if ($result == 0) {
+
+        if ($result == 0) { //insertar si no hay algun registro
             DB::table('SIZ_routes_log')->insert(
                 ['route' => $ruta, 'Usuario' => Auth::user()->U_EmpGiro, 'ultimaFecha' => (new \DateTime('now'))->format('Y-m-d H:i:s')]
             );
         }
-
         $result2 = DB::table('SIZ_routes_log')
             ->where('Usuario', Auth::user()->U_EmpGiro)            
             ->count();
