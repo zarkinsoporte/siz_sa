@@ -22,6 +22,9 @@
 .badge-info {
   background-color: #3a87ad;
 }
+.badge-warning {
+  background-color: #f89406;
+}
         </style>
         <!-- /.row -->
         <div class="row">
@@ -43,7 +46,7 @@
                     <h4>{{ substr($link->tarea, 0, 31) }}</h4>
                     <p>{{$link->modulo}} 
                     @if ($traslados > 0 && $link->route == 'TRASLADO RECEPCION')
-                        <span class="badge badge-info">{{$traslados}}</span>
+                        <span class="badge badge-warning">{{$traslados}} traslados por recibir</span>
                     @endif
                     </p>
                         <p align="right">                           

@@ -61,9 +61,9 @@ class HomeController extends Controller
             ->where('SIZ_MaterialesTraslados.Cant_Pendiente', '>', 0)
             ->where('SIZ_AlmacenesTransferencias.dept', Auth::user()->dept)
             ->whereIn('SIZ_MaterialesTraslados.EstatusLinea', ['S', 'P'])
-            ->where('SIZ_SolicitudesMP.Status', 'Pendiente')->count();
+            ->where('SIZ_SolicitudesMP.Status', 'Pendiente')->get();
            
-        if ($trasladosRecepcion > 0) {
+        if (count ($trasladosRecepcion) > 0) {
             $ruta = 'TRASLADO RECEPCION';
             $result = DB::table('SIZ_routes_log')
                 ->where('Usuario', Auth::user()->U_EmpGiro)
@@ -93,7 +93,7 @@ class HomeController extends Controller
                 and tm.name is not null and m.name is not null
                 group by tm.name, m.name, l.route
                 order by tm.name, m.name', [Auth::user()->U_EmpGiro]);
-        return view('homeIndex',   ['traslados' => $trasladosRecepcion, 'links' => $links, 'actividades' => $actividades, 'ultimo' => count($actividades), 'isAdmin'=> User::isAdmin()]);
+        return view('homeIndex',   ['traslados' => count($trasladosRecepcion), 'links' => $links, 'actividades' => $actividades, 'ultimo' => count($actividades), 'isAdmin'=> User::isAdmin()]);
     }
 
     public function UPT_Noticias($id){     
