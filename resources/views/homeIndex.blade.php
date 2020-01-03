@@ -45,8 +45,11 @@
                     <div class="caption">
                     <h4>{{ substr($link->tarea, 0, 31) }}</h4>
                     <p>{{$link->modulo}} 
-                    @if ($traslados > 0 && $link->route == 'TRASLADO RECEPCION')
-                        <span class="badge badge-warning">{{$traslados}} traslados por recibir</span>
+                    @if ($traslados > 0 && $link->route == 'TRASLADO RECEPCION') &nbsp;
+                        <span class="badge badge-warning"> {{$traslados}}  @if ($traslados > 1) Pendientes
+                        @else
+                        Pendiente    
+                        @endif</span>
                     @endif
                     </p>
                         <p align="right">                           

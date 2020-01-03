@@ -314,6 +314,10 @@ Route::get('home/reporte/ENTRADAS SALIDAS', 'Mod04_MaterialesController@reportei
 Route::get('home/reporte/entradasysalidasXLS', 'Mod04_MaterialesController@iowhsXLS');
 Route::get('home/reporte/entradasysalidasPDF', 'Mod04_MaterialesController@iowhsPDF');
 
+//REPORTE TRANSFERENCIAS PENDIENTES
+Route::get('home/TRANSFERENCIAS PENDIENTES', 'Mod04_MaterialesController@TransferenciasPendientes')->middleware('routelog');
+Route::get('datatables.transferencias_pendientes', 'Mod04_MaterialesController@DataShowTransferenciasPendientes')->name('datatables.transferencias_pendientes');
+
 //
 //-------------------------//
 //RUTAS DE MRP//---------------------------------------------------------

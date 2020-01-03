@@ -2702,4 +2702,78 @@ foreach($consultaj as $item)
         }
          return 'SIN DEFINIR';               
     }
+    public function TransferenciasPendientes(){
+       if (Auth::check()) {
+            $user = Auth::user();
+            $actividades = $user->getTareas();   
+            $param = array(
+                'actividades' => $actividades,
+                'ultimo' => count($actividades),
+            );
+            return view('Mod04_Materiales.ShowTransferenciasP', $param);
+        } else {
+            return redirect()->route('auth/login');
+        }
+    }
+    public function DataShowTransferenciasPendientes(){
+        $consulta = DB::select("
+       Select      'SOLICITUD' AS TIPO_DOC,
+             SIZ_SolicitudesMP.Id_Solicitud AS NUMERO,
+             Cast(SIZ_SolicitudesMP.FechaCreacion AS DATE) AS FECHA,
+             (Select OHEM.firstName +'  '+ OHEM.lastName from OHEM Where OHEM.U_EmpGiro = SIZ_SolicitudesMP.Usuario) AS USUARIO,
+             Destino AS DESTINO,
+             SIZ_SolicitudesMP.Status AS ST_SOL,
+             SIZ_MaterialesSolicitudes.ItemCode AS CODIGO,
+             OITM.ItemName AS DESCRIPCION,
+             OITM.InvntryUom AS UDM,
+             SIZ_MaterialesSolicitudes.Cant_Pendiente AS PENDIENTE,
+             SIZ_MaterialesSolicitudes.EstatusLinea AS ST_LIN
+From SIZ_SolicitudesMP
+inner join SIZ_MaterialesSolicitudes on SIZ_MaterialesSolicitudes.Id_Solicitud = SIZ_SolicitudesMP.Id_Solicitud
+ inner join OITM on SIZ_MaterialesSolicitudes.ItemCode = OITM.ItemCode
+Where SIZ_MaterialesSolicitudes.EstatusLinea in ('S', 'P')
+  UNION ALL
+ 
+Select      'TRASLADOS' AS TIPO_DOC,
+             SIZ_SolicitudesMP.Id_Solicitud AS NUMERO,
+             Cast(SIZ_SolicitudesMP.FechaCreacion AS DATE) AS FECHA,
+             (Select OHEM.firstName +'  '+ OHEM.lastName from OHEM Where OHEM.U_EmpGiro = SIZ_SolicitudesMP.Usuario) AS USUARIO,
+             Destino AS DESTINO,
+             SIZ_SolicitudesMP.Status AS ST_SOL,
+             SIZ_MaterialesTraslados.ItemCode AS CODIGO,
+             OITM.ItemName AS DESCRIPCION,
+             OITM.InvntryUom AS UDM,
+             SIZ_MaterialesTraslados.Cant_Pendiente AS PENDIENTE,
+             SIZ_MaterialesTraslados.EstatusLinea AS ST_LIN
+From SIZ_SolicitudesMP
+inner join SIZ_MaterialesTraslados on SIZ_MaterialesTraslados.Id_Solicitud = SIZ_SolicitudesMP.Id_Solicitud
+ inner join OITM on SIZ_MaterialesTraslados.ItemCode = OITM.ItemCode
+Where SIZ_MaterialesTraslados.EstatusLinea in ('S', 'P', 'I')
+  Order By SIZ_SolicitudesMP.Id_Solicitud
+    " );
+
+$consultaj = collect($consulta);
+       
+        return Datatables::of($consultaj)
+           /* ->addColumn(
+                'folio',
+                function ($item) {
+                    return  '<a href="TRASLADO RECEPCION/solicitud/' . $item->Id_Solicitud . '"><i class="fa fa-hand-o-right"></i> ' . $item->Id_Solicitud . '</a>';
+                }
+            )
+            ->addColumn(
+                'user_name',
+                function ($item) {
+                    return  $item->firstName . ' ' . $item->lastName;
+                }
+            )
+            ->addColumn(
+                'area',
+                function ($item) {
+                    return  $item->depto;
+                }
+            )
+            */
+            ->make(true);
+    }
     }
