@@ -846,7 +846,7 @@ public function ShowDetalleTraslado($id){
     $articulos = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as UM, OITM.ItemName, mat.Destino, 
                     mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente, mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A, mat.Cant_ASurtir_Origen_B,
                      ALMACENES.APGPA, ALMACENES.AMPST, (APGPA + AMPST) AS Disponible, 
-                     CASE WHEN ((APGPA + AMPST)  < mat.Cant_Requerida) and mat.EstatusLinea = \'S\' THEN \'N\' ELSE mat.EstatusLinea END AS EstatusLinea
+                     CASE WHEN ((APGPA + AMPST)  < (mat.Cant_ASurtir_Origen_A + mat.Cant_ASurtir_Origen_B)) and mat.EstatusLinea = \'S\' THEN \'N\' ELSE mat.EstatusLinea END AS EstatusLinea
                       from SIZ_MaterialesSolicitudes mat
                     LEFT JOIN OITM on OITM.ItemCode = mat.ItemCode
                     LEFT JOIN 
@@ -2720,7 +2720,7 @@ foreach($consultaj as $item)
        Select      'SOLICITUD' AS TIPO_DOC,
              SIZ_SolicitudesMP.Id_Solicitud AS NUMERO,
              Cast(SIZ_SolicitudesMP.FechaCreacion AS DATE) AS FECHA,
-             (Select OHEM.firstName +'  '+ OHEM.lastName from OHEM Where OHEM.U_EmpGiro = SIZ_SolicitudesMP.Usuario) AS USUARIO,
+             (Select OHEM.firstName +'  '+ OHEM.lastName  + ' - '+ D.Name from OHEM inner join OUDP D on D.Code = OHEM.dept Where OHEM.U_EmpGiro = SIZ_SolicitudesMP.Usuario) AS USUARIO,
              Destino AS DESTINO,
              SIZ_SolicitudesMP.Status AS ST_SOL,
              SIZ_MaterialesSolicitudes.ItemCode AS CODIGO,
@@ -2737,7 +2737,7 @@ Where SIZ_MaterialesSolicitudes.EstatusLinea in ('S', 'P')
 Select      'TRASLADOS' AS TIPO_DOC,
              SIZ_SolicitudesMP.Id_Solicitud AS NUMERO,
              Cast(SIZ_SolicitudesMP.FechaCreacion AS DATE) AS FECHA,
-             (Select OHEM.firstName +'  '+ OHEM.lastName from OHEM Where OHEM.U_EmpGiro = SIZ_SolicitudesMP.Usuario) AS USUARIO,
+             (Select OHEM.firstName +'  '+ OHEM.lastName  + ' - '+ D.Name from OHEM inner join OUDP D on D.Code = OHEM.dept Where OHEM.U_EmpGiro = SIZ_SolicitudesMP.Usuario) AS USUARIO,
              Destino AS DESTINO,
              SIZ_SolicitudesMP.Status AS ST_SOL,
              SIZ_MaterialesTraslados.ItemCode AS CODIGO,
@@ -2748,19 +2748,43 @@ Select      'TRASLADOS' AS TIPO_DOC,
 From SIZ_SolicitudesMP
 inner join SIZ_MaterialesTraslados on SIZ_MaterialesTraslados.Id_Solicitud = SIZ_SolicitudesMP.Id_Solicitud
  inner join OITM on SIZ_MaterialesTraslados.ItemCode = OITM.ItemCode
-Where SIZ_MaterialesTraslados.EstatusLinea in ('S', 'P', 'I')
+Where SIZ_MaterialesTraslados.EstatusLinea in ('S', 'P', 'I', 'E')
   Order By SIZ_SolicitudesMP.Id_Solicitud
     " );
 
 $consultaj = collect($consulta);
        
         return Datatables::of($consultaj)
-           /* ->addColumn(
-                'folio',
+            ->addColumn(
+                'STATUS_LIN',
                 function ($item) {
-                    return  '<a href="TRASLADO RECEPCION/solicitud/' . $item->Id_Solicitud . '"><i class="fa fa-hand-o-right"></i> ' . $item->Id_Solicitud . '</a>';
+                    switch ($item->ST_LIN) {
+                        case 'E':
+                            return 'Traslado Externo';
+                            break;
+                        case 'I':
+                            return 'Traslado Interno';
+                            break;
+                        case 'S':
+                           if ($item->TIPO_DOC == 'TRASLADOS') {
+                               return 'Esperando Recepción';
+                           } else {
+                               return 'En Proceso';
+                           }
+                           
+                            break;
+                        case 'P':
+                            return 'Cant. Pendiente';
+                            break;
+                        
+                        default:
+                            return 'Indefinido';
+                            break;
+                    }
+                    
                 }
             )
+            /*
             ->addColumn(
                 'user_name',
                 function ($item) {

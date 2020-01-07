@@ -52,8 +52,8 @@
                             <tr>                                                                                                                                             
                                     <th>Tipo</th>                  
                                     <th># Num</th>
-                                    <th>Usuario</th>
                                     <th>Fecha</th>
+                                    <th>Usuario</th>
                                     <th>Destino</th>
 
                                     <th>Estatus Solicitud</th>
@@ -106,7 +106,7 @@ var table = $('#tsolicitudes').DataTable({
             render: function(data){
                 if (data === null){return data;}
             var d = new Date(data);
-            return moment(d).format("DD-MM-YYYY HH:mm:ss");
+            return moment(d).format("DD-MM-YYYY HH:mm");
             }
         },
         { data: 'USUARIO'},
@@ -118,7 +118,7 @@ var table = $('#tsolicitudes').DataTable({
         { data: 'UDM'},       
         { data: 'PENDIENTE'}, 
 
-        { data: 'ST_LIN'},  
+        { data: 'STATUS_LIN'},  
 
 
     ],
