@@ -104,11 +104,9 @@
                         <th>Usuario</th>
                         <th>Almacén</th>
                         <th>VS</th>
-                        <th>Operación</th>
-                        <th>Movimiento</th>
+                       
                         <th>Notas</th>
-
-                        <th>CardName</th>
+                       
                         <th>Hora</th>
                     </tr>
                
@@ -130,9 +128,7 @@
                 <th></th>
                 <th></th>
                 <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
+               
                 </tr>
                 </tfoot>
             </table>
@@ -224,11 +220,10 @@ render: function(data){
 var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
 return val;
 }},
-{ data: 'NUMOPER'},
-{ data: 'TIPO'},
+
 
 { data: 'Comments'},
-{ data: 'CardName'},
+
 { data: 'DocTime'},
 ],
 buttons: [

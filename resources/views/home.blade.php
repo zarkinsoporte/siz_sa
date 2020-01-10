@@ -1,4 +1,7 @@
 @extends('app')
+@section('titulo')
+<title>{{ env('EMPRESA_NAME'). ' '}} @yield('page_name')</title>
+@endsection
 @section('content')
 
 <?php

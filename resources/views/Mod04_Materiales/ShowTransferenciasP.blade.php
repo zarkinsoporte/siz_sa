@@ -1,4 +1,7 @@
 @extends('home') 
+@section('page_name')
+Transferencias Pendientes
+@endsection
 @section('homecontent')
    
     <style>
@@ -54,6 +57,7 @@
                                     <th># Num</th>
                                     <th>Fecha</th>
                                     <th>Usuario</th>
+                                    <th>Origen</th>
                                     <th>Destino</th>
 
                                     <th>Estatus Solicitud</th>
@@ -81,9 +85,16 @@
 @section('script')
 
 
+var meses = new Array ("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
+var diasSemana = new Array("Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado");
+var f=new Date();
+var hours = f.getHours();
+var ampm = hours >= 12 ? 'pm' : 'am';
+var fecha = 'ACTUALIZADO: '+ diasSemana[f.getDay()] + ', ' + f.getDate() + ' de ' + meses[f.getMonth()] + ' del ' + f.getFullYear()+', A LAS '+hours+":"+f.getMinutes()+ ' ' + ampm; 
+var f = fecha.toUpperCase();
 
 var table = $('#tsolicitudes').DataTable({
-    dom: 'lfrtip',       
+    dom: 'Bfrtlip',       
     "order": [[0, "asc"],[ 1, "desc" ]],
     orderCellsTop: true,   
     scrollX:        true,
@@ -93,6 +104,17 @@ var table = $('#tsolicitudes').DataTable({
     processing: true,
     responsive: true,
     deferRender:    true,
+     buttons: [
+            {
+            text: '<i class="fa fa-file-excel-o"></i> Excel',
+            className: "btn-success",
+            extend: 'excelHtml5',
+            message: "SALOTTO S.A. DE C.V.\n",
+            messagetwo: "TRANSFERENCIAS PENDIENTES (Solicitudes y Traslados).\n",
+            messagethree: f,
+                     
+        }, 
+        ],
     ajax: {
         url: '{!! route('datatables.transferencias_pendientes') !!}',
         data: function () {
@@ -103,13 +125,13 @@ var table = $('#tsolicitudes').DataTable({
         { data: 'TIPO_DOC'},
         { data: 'NUMERO'},
         { data: 'FECHA',
-            render: function(data){
-                if (data === null){return data;}
-            var d = new Date(data);
-            return moment(d).format("DD-MM-YYYY HH:mm");
-            }
-        },
+          render:function(data){
+        moment.locale('es');
+      return moment(data).format('DD/MM/YYYY HH:mm a');
+    }},
+                                
         { data: 'USUARIO'},
+        { data: 'ORIGEN'},
         { data: 'DESTINO'},    
 
         { data: 'ST_SOL'},       
@@ -125,8 +147,7 @@ var table = $('#tsolicitudes').DataTable({
     "language": {
       "url": "{{ asset('assets/lang/Spanish.json') }}",       
     },
-    columnDefs: [    
-    ],
+    columnDefs: [],
     //revision
   
 });

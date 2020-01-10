@@ -151,8 +151,7 @@
                                     <th style="width:110px" class="zrk-gris" scope="col">Fecha System</th>
                                     <th style="width:457px" class="zrk-gris" scope="col">Movimiento</th>
                                     <th style="width:120px" class="zrk-gris" scope="col">Usuario</th>
-                                    <th style="width:120px" class="zrk-gris" scope="col" colspan ="2">Notas</th>
-                                    <th style="width:120px" class="zrk-gris" scope="col">CardName</th>
+                                    <th style="width:120px" class="zrk-gris" scope="col" colspan ="2">Notas</th>                                    
                                     <th style="width:120px" class="zrk-gris" scope="col">Hora</th>
                                 </tr>
                                 <?php
@@ -179,9 +178,7 @@
                                         <td style="width:100px" class="zrk-gris-claro" scope="row"  colspan="2">
                                             {{$rep->Comments}} 
                                         </td>
-                                        <td style="width:100px" class="zrk-gris-claro" scope="row">
-                                            {{$rep->CardName}} 
-                                        </td>
+                                      
                                         <td style="width:100px" class="zrk-gris-claro" scope="row">
                                             {{$rep->DocTime}} 
                                         </td>
@@ -195,18 +192,16 @@
                                     <td></td>
                                     <td></td>
                                     <td></td>
-                                    <td></td>
+                                   
                                 </tr>
                                 <tr>
                                     <th style="width:60px" class="zrk-gris-claro">Código</th>
-                                    <th style="width:450px" class="zrk-gris-claro">Descripción</th>
+                                    <th style="width:450px" class="zrk-gris-claro" colspan ="2">Descripción</th>
                                     <th class="zrk-gris-claro">Cantidad</th>
                                     <th style="width:70px" class="zrk-gris-claro">Valor Std</th>
                                     <th style="width:70px" class="zrk-gris-claro">TM</th>
                                     <th style="width:70px" class="zrk-gris-claro">Almacen</th>
                                     <th style="width:100px" class="zrk-gris-claro">VS</th>
-                                    <th style="width:100px" class="zrk-gris-claro">Columna</th>
-                                    <th style="width:100px" class="zrk-gris-claro">Movimiento</th>
                                 </tr>
                                 
                             
@@ -218,7 +213,7 @@
                                         <td style="width:70px"  scope="row">
                                             {{$rep->ItemCode}}
                                         </td>
-                                        <td style="width:70px"  scope="row">
+                                        <td style="width:70px"  scope="row" colspan ="2">
                                             {{$rep->Dscription}}
                                         </td>
                                         <td style="width:100px"  scope="row">
@@ -236,12 +231,7 @@
                                         <td style="width:100px"  scope="row">
                                             {{number_format($rep->VSala,'2', '.',',')}}
                                         </td>
-                                        <td style="width:70px"  scope="row">
-                                            {{$rep->NUMOPER}}
-                                        </td>
-                                        <td style="width:70px"  scope="row">
-                                            {{$rep->TIPO}}
-                                        </td>
+                                        
                                     </tr>
 
                             @elseif($DocN == $rep->BASE_REF)
@@ -254,7 +244,7 @@
                                         <td style="width:70px"  scope="row">
                                             {{$rep->ItemCode}}
                                         </td>
-                                        <td style="width:70px"  scope="row">
+                                        <td style="width:70px"  scope="row" colspan ="2">
                                             {{$rep->Dscription}}
                                         </td>
                                         <td style="width:100px"  scope="row">
@@ -272,12 +262,7 @@
                                         <td style="width:100px"  scope="row">
                                             {{number_format($rep->VSala,'2', '.',',')}}
                                         </td>
-                                        <td style="width:70px"  scope="row">
-                                            {{$rep->NUMOPER}}
-                                        </td>
-                                        <td style="width:70px"  scope="row">
-                                            {{$rep->TIPO}}
-                                        </td>
+                                       
                                     </tr>
                                     @else
 
@@ -288,7 +273,7 @@
                                     <th style="width:457px" class="zrk-gris" scope="col">Movimiento</th>
                                     <th style="width:120px" class="zrk-gris" scope="col">Usuario</th>
                                     <th style="width:120px" class="zrk-gris" scope="col" colspan ="2">Notas</th>
-                                    <th style="width:120px" class="zrk-gris" scope="col">CardName</th>
+                                    
                                     <th style="width:120px" class="zrk-gris" scope="col">Hora</th>
                                 </tr>
                                 <?php
@@ -315,9 +300,7 @@
                                         <td style="width:100px" class="zrk-gris-claro" scope="row"  colspan="2">
                                             {{$rep->Comments}} 
                                         </td>
-                                        <td style="width:100px" class="zrk-gris-claro" scope="row">
-                                            {{$rep->CardName}} 
-                                        </td>
+                                       
                                         <td style="width:100px" class="zrk-gris-claro" scope="row">
                                             {{$rep->DocTime}} 
                                         </td>
@@ -331,18 +314,17 @@
                                     <td></td>
                                     <td></td>
                                     <td></td>
-                                    <td></td>
+                                    
                                 </tr>
                                 <tr>
                                     <th style="width:60px" class="zrk-gris-claro">Código</th>
-                                    <th style="width:450px" class="zrk-gris-claro">Descripción</th>
+                                    <th style="width:450px" class="zrk-gris-claro" colspan ="2">Descripción</th>
                                     <th class="zrk-gris-claro">Cantidad</th>
                                     <th style="width:70px" class="zrk-gris-claro">Valor Std</th>
                                     <th style="width:70px" class="zrk-gris-claro">TM</th>
                                     <th style="width:70px" class="zrk-gris-claro">Almacen</th>
                                     <th style="width:100px" class="zrk-gris-claro">VS</th>
-                                    <th style="width:100px" class="zrk-gris-claro">Columna</th>
-                                    <th style="width:100px" class="zrk-gris-claro">Movimiento</th>
+
                                 </tr>
                                
                           
@@ -357,7 +339,7 @@
                                         <td style="width:70px"  scope="row">
                                             {{$rep->ItemCode}}
                                         </td>
-                                        <td style="width:70px"  scope="row">
+                                        <td style="width:70px"  scope="row" colspan ="2">
                                             {{$rep->Dscription}}
                                         </td>
                                         <td style="width:100px"  scope="row">
@@ -375,12 +357,7 @@
                                         <td style="width:100px"  scope="row">
                                             {{number_format($rep->VSala,'2', '.',',')}}
                                         </td>
-                                        <td style="width:70px"  scope="row">
-                                            {{$rep->NUMOPER}}
-                                        </td>
-                                        <td style="width:70px"  scope="row">
-                                            {{$rep->TIPO}}
-                                        </td>
+                                       
                                     </tr>
                                         @endif 
                                         @if($index == count($data)-1)

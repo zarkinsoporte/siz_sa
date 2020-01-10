@@ -2718,8 +2718,8 @@ foreach($consultaj as $item)
     public function DataShowTransferenciasPendientes(){
         $consulta = DB::select("
        Select      'SOLICITUD' AS TIPO_DOC,
-             SIZ_SolicitudesMP.Id_Solicitud AS NUMERO,
-             Cast(SIZ_SolicitudesMP.FechaCreacion AS DATE) AS FECHA,
+             SIZ_SolicitudesMP.Id_Solicitud AS NUMERO, COALESCE(SIZ_SolicitudesMP.AlmacenOrigen, 'ALMACEN MATERIA PRIMA') AS ORIGEN, 
+             SIZ_SolicitudesMP.FechaCreacion AS FECHA,
              (Select OHEM.firstName +'  '+ OHEM.lastName  + ' - '+ D.Name from OHEM inner join OUDP D on D.Code = OHEM.dept Where OHEM.U_EmpGiro = SIZ_SolicitudesMP.Usuario) AS USUARIO,
              Destino AS DESTINO,
              SIZ_SolicitudesMP.Status AS ST_SOL,
@@ -2735,8 +2735,8 @@ Where SIZ_MaterialesSolicitudes.EstatusLinea in ('S', 'P')
   UNION ALL
  
 Select      'TRASLADOS' AS TIPO_DOC,
-             SIZ_SolicitudesMP.Id_Solicitud AS NUMERO,
-             Cast(SIZ_SolicitudesMP.FechaCreacion AS DATE) AS FECHA,
+             SIZ_SolicitudesMP.Id_Solicitud AS NUMERO, COALESCE(SIZ_SolicitudesMP.AlmacenOrigen, 'ALMACEN MATERIA PRIMA') AS ORIGEN,
+             SIZ_SolicitudesMP.FechaCreacion AS FECHA,
              (Select OHEM.firstName +'  '+ OHEM.lastName  + ' - '+ D.Name from OHEM inner join OUDP D on D.Code = OHEM.dept Where OHEM.U_EmpGiro = SIZ_SolicitudesMP.Usuario) AS USUARIO,
              Destino AS DESTINO,
              SIZ_SolicitudesMP.Status AS ST_SOL,
@@ -2783,14 +2783,8 @@ $consultaj = collect($consulta);
                     }
                     
                 }
-            )
+            )           
             /*
-            ->addColumn(
-                'user_name',
-                function ($item) {
-                    return  $item->firstName . ' ' . $item->lastName;
-                }
-            )
             ->addColumn(
                 'area',
                 function ($item) {

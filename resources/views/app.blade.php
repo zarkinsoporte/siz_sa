@@ -10,7 +10,8 @@
 
     <meta name="csrf-token" content="{{ Session::token() }}"> 
 
-    <title>{{ env('EMPRESA_NAME')}}</title>
+    
+    @yield('titulo')
     <!-- Styles -->
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -243,6 +244,7 @@ li.dt-button.active a::before{
 
 <script>
     $(document).ready(function (event) {
+       // $.fn.dataTable.moment( 'HH:mm MMM D, YY' );
             $('.toggle').bootstrapSwitch();
             $('[data-toggle="tooltip"]').tooltip();
             $('.boot-select').selectpicker();
