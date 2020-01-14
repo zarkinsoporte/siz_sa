@@ -162,6 +162,11 @@
       </table>
     </div>
   </div> <!-- /.row -->
+  @else
+  <br>
+    <div class="alert alert-info">
+                    <strong>¡No hay Transferencias relacionadas!</strong>
+                </div>
   @endif
   <!-- .Model quitar -->
 

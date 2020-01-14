@@ -1148,15 +1148,24 @@ public function SolicitudPDF($id){
         return redirect()->route('auth/login');
     }
 }
-public function SolicitudPDF_Traslados($id){      
-    $almacenOrigen = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $id)->value('AlmacenOrigen');
-    
+public function SolicitudPDF_Traslados($id){  
+    $solicitud =     DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $id)->first();
+    $almacenOrigen = $solicitud->AlmacenOrigen;
     $transfer = 'Por Definir ';
+    $UsuarioSolicitud = DB::table('OHEM')->select(DB::raw("firstName + ' ' + LastName Nombre"))
+                     ->where('U_EmpGiro', $solicitud->Usuario)->value('Nombre');
+    
     if (is_null($almacenOrigen)) {
         $t = 'SIZ_MaterialesSolicitudes';
+        $tipoDoc = 'Solicitud';
         $almacenOrigen = "Materia Prima";
+        $recibe = $UsuarioSolicitud;
+        $entrega = $solicitud->SOLentrega_TRASrecibe_Usuario;
     } else {
         $t = 'SIZ_MaterialesTraslados';
+        $tipoDoc = 'Traslado';
+        $entrega = $UsuarioSolicitud;
+        $recibe = $solicitud->SOLentrega_TRASrecibe_Usuario;
     }
 $transfer1 = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as unitMsr, 
 OITM.ItemName as Dscription, mat.Destino as WhsCode,
@@ -1174,10 +1183,10 @@ OITM.ItemName as Dscription, mat.Destino as WhsCode,
         $total1 = array_sum(array_pluck($transfer1, 'Quantity'));
         
         //$info1 = DB::select('select FolioNum, Filler, Printed, Comments  from OWTR where DocEntry = ? ', [$transfer]);
-        $comentario = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $id)->value('ComentarioUsuario');
-        
-        $pdf = \PDF::loadView('Mod04_Materiales.TrasladoPDF_SinPrecio', compact('id', 'transfer1', 
-         'total1',  'transfer', 'comentario', 'almacenOrigen'));
+        $comentario = $solicitud->ComentarioUsuario;
+        $fechaSol = $solicitud->FechaCreacion;
+        $pdf = \PDF::loadView('Mod04_Materiales.TrasladoPDF_SinPrecio', compact('id', 'transfer1', 'fechaSol',
+         'total1',  'transfer', 'comentario', 'almacenOrigen', 'recibe', 'tipoDoc', 'entrega'));
         $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
         return $pdf->stream('Siz_Traslado_'.$id . ' - ' .date("d/m/Y") . '.Pdf');
   
@@ -1217,7 +1226,7 @@ public function Solicitud_A_Traslados($id){
         ->count();
       
         if ($cantLineas == $cantcheckLineas ) {
-            DB::update('UPDATE SIZ_SolicitudesMP SET Status = ? WHERE Id_Solicitud = ?', ['Traslado', $id]);
+            DB::update('UPDATE SIZ_SolicitudesMP SET Status = ?, PickingUsuario = ?  WHERE Id_Solicitud = ?', ['Traslado', Auth::user()->firstName.' '.Auth::user()->lastName, $id]);
             Session::flash('mensaje','Solicitud #'.$id.' Enviada a Traslados');
             return redirect()->action('Mod04_MaterialesController@pickingArticulos');
         } else {
@@ -1303,10 +1312,15 @@ public function HacerTraslados($id){
     if (Auth::check()) {
         $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
         if (count($rates) >= 3) {
+            //GUARDAR USUARIO QUE HACE MOVIMIENTO
+            DB::table('SIZ_SolicitudesMP')
+                    ->where('Id_Solicitud', $id)
+                    ->update(['SOLentrega_TRASrecibe_Usuario' => Auth::user()->firstName.' '.Auth::user()->lastName]);
             //PERSONA QUE SOLICITA
             $solicitante = DB::table('SIZ_SolicitudesMP')       
                 ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
-                ->select('OHEM.firstName','OHEM.lastName')
+                ->select('OHEM.firstName','OHEM.lastName', 'SIZ_SolicitudesMP.ComentarioUsuario',
+                'SIZ_SolicitudesMP.PickingUsuario', 'SIZ_SolicitudesMP.SOLentrega_TRASrecibe_Usuario')
                 ->where('SIZ_SolicitudesMP.Id_Solicitud', $id)->first();
             $nombreCompleto = $solicitante->firstName.' '.$solicitante->lastName;
             //articulos validos para transferencia
@@ -1339,12 +1353,18 @@ public function HacerTraslados($id){
             $info1 = 0;
             $info2 = 0;
             if (count($primer_origen) > 0) {
+                $observacionesComplemento = (!is_null($solicitante->PickingUsuario)) ? ", 
+                                        Surtido por: ". $solicitante->PickingUsuario. ", 
+                                        Entregado por: ". $solicitante->SOLentrega_TRASrecibe_Usuario : ".";
                 $data =  array(
                     'id_solicitud' => $id,
                     'pricelist' => '10',
                     'almacen_origen' => 'APG-PA',
                     'items' => $primer_origen,
-                    'nombre_completo' => $nombreCompleto
+                    'observaciones' => "SIZ VALE #".$id." ". $solicitante->ComentarioUsuario .", 
+                                        Solicitado por: ". $nombreCompleto . $observacionesComplemento
+                                        
+
                 );
                 if (Session::has('transfer1')) {   
                     if (Session::get('transfer1') > 0) {
@@ -1394,12 +1414,16 @@ public function HacerTraslados($id){
             });
             
                 if (count($segundo_origen) > 0) {
+                     $observacionesComplemento = (!is_null($solicitante->PickingUsuario)) ? ", 
+                                        Surtido por: ". $solicitante->PickingUsuario. ", 
+                                        Entregado por: ". $solicitante->SOLentrega_TRASrecibe_Usuario : ".";
                     $data =  array(
                         'id_solicitud' => $id,
                         'pricelist' => '10',
                         'almacen_origen' => 'AMP-ST',
                         'items' => $segundo_origen,
-                        'nombre_completo' => $nombreCompleto
+                        'observaciones' => "SIZ VALE #".$id." ". $solicitante->ComentarioUsuario .", 
+                                        Solicitado por: ". $nombreCompleto . $observacionesComplemento
                     );
                         
                     if (Session::has('transfer2')) {                        
@@ -1504,11 +1528,25 @@ public function getPdfSolicitud(){
         $info1 = DB::select('select COALESCE(FolioNum, t.Id_Solicitud) FolioNum, CreateDate, Filler, Printed, Comments  from OWTR 
         left join SIZ_TransferSolicitudesMP as t on t.DocEntry_Transfer = OWTR.DocEntry
         where OWTR.DocEntry = ? ', [$transfer]);
-        $comentario = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $info1[0]->FolioNum)->value('ComentarioUsuario');
-        $fechaSol = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $info1[0]->FolioNum)->value('FechaCreacion');
+        $solicitud = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $info1[0]->FolioNum)->first();
+        $UsuarioSolicitud = DB::table('OHEM')->select(DB::raw("firstName + ' ' + LastName Nombre"))
+                     ->where('U_EmpGiro', $solicitud->Usuario)->value('Nombre');
+    if (is_null($solicitud->AlmacenOrigen)) {
+        $tipoDoc = 'Solicitud';
+       // $almacenOrigen = "Materia Prima";
+        $recibe = $UsuarioSolicitud;
+        $entrega = $solicitud->SOLentrega_TRASrecibe_Usuario;
+    } else {
+        $tipoDoc = 'Traslado';
+        $entrega = $UsuarioSolicitud;
+        $recibe = $solicitud->SOLentrega_TRASrecibe_Usuario;
+    }
+    
+        $comentario = $solicitud->ComentarioUsuario;
+        $fechaSol = $solicitud->FechaCreacion;
         $pdf = \PDF::loadView('Mod04_Materiales.TrasladoPDF_SinPrecio', 
         compact('info1', 'transfer1', 'fechaSol', 
-         'total1',  'transfer', 'comentario'));
+         'total1',  'transfer', 'comentario','recibe', 'tipoDoc', 'entrega'));
         $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
         return $pdf->stream('Siz_Traslado_'.$info1[0]->FolioNum . ' - ' .date("d/m/Y") . '.Pdf');
   }
@@ -1692,13 +1730,15 @@ $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
             $transfer3 = 0;                 
             $t3 = 0;
             $info3 = 0;
-            
+             $observacionesComplemento =  (!is_null($solicitud->SOLentrega_TRASrecibe_Usuario)) ? ",  
+                                        Recibido por: ". $solicitud->SOLentrega_TRASrecibe_Usuario : ".";
                 $data =  array(
                     'id_solicitud' => $id,
                     'pricelist' => '10',
                     'almacen_origen' => $solicitud->AlmacenOrigen,
                     'items' => $traslado_interno,
-                    'nombre_completo' => $nombreCompleto
+                    'observaciones' => "SIZ VALE #".$id." ". $solicitud->ComentarioUsuario .", 
+                                        Enviado por: ". $nombreCompleto.$observacionesComplemento
                 );
                 // dd($data);   
                 
@@ -1886,13 +1926,16 @@ $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
             $transfer3 = 0;                 
             $t3 = 0;
             $info3 = 0;
-            
+            $observacionesComplemento = (!is_null($solicitud->SOLentrega_TRASrecibe_Usuario)) ? ",  
+                                        Recibido por: ". $solicitud->SOLentrega_TRASrecibe_Usuario : ".";
                 $data =  array(
                     'id_solicitud' => $id,
                     'pricelist' => '10',
                     'almacen_origen' => $solicitud->AlmacenOrigen,
                     'items' => $traslado_interno,
-                    'nombre_completo' => $nombreCompleto
+                    'observaciones' => "SIZ VALE #".$id." ". $solicitud->ComentarioUsuario .", 
+                                        Enviado por: ". $nombreCompleto. $observacionesComplemento
+                                        
                 );
                //  dd($data);   
                 
@@ -2273,6 +2316,10 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
              $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
             if (count($rates) >= 3) {
            // if (true) {
+               //GUARDAR EL USUARIO QUE HACE EL MOVIMIENTO
+                DB::table('SIZ_SolicitudesMP')
+                    ->where('Id_Solicitud', $id)
+                    ->update(['SOLentrega_TRASrecibe_Usuario' => Auth::user()->firstName.' '.Auth::user()->lastName]);
                 //PERSONA QUE SOLICITA
                 $solicitud = DB::table('SIZ_SolicitudesMP')       
                     ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
@@ -2303,12 +2350,16 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                 $t3 = 0;
                 $info3 = 0;
                 if (count($articulos) > 0) {
+                    $observacionesComplemento = (!is_null($solicitud->SOLentrega_TRASrecibe_Usuario)) ? ",  
+                                        Recibido por: ". $solicitud->SOLentrega_TRASrecibe_Usuario : ".";
                     $data =  array(
                         'id_solicitud' => $id,
                         'pricelist' => '10',
                         'almacen_origen' => $solicitud->AlmacenOrigen,
                         'items' => $articulos,
-                        'nombre_completo' => $nombreCompleto
+                         'observaciones' => "SIZ VALE #".$id." ". $solicitud->ComentarioUsuario .", 
+                                        Enviado por: ". $nombreCompleto.$observacionesComplemento
+                                        
                     );
                    //  dd($data);   
                     if (Session::has('transfer3')) {   
@@ -2661,9 +2712,10 @@ foreach($consultaj as $item)
     Datatables::of($consultaj)
     ->addColumn('U_NAME', function ($consultaj) {
         if (strpos($consultaj->Comments, 'SIZ VALE') !== false) {
-           $nombre = explode(':', $consultaj->Comments);
-           if ( strlen($nombre[1]) > 5 ){
-                return $nombre[1];
+           $cadena = explode(':', $consultaj->Comments);
+           $nombre = explode(',', $cadena[1]);
+           if ( strlen($nombre[0]) > 5 ){
+                return $nombre[0];
            } else {
                 return $consultaj->UNAME;
            }

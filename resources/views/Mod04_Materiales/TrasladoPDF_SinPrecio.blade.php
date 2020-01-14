@@ -169,7 +169,7 @@
                             @endif
                         </h2>
                     </span>
-                    <h2>Traslado SAP #{{$transfer}} <small> Solicitud Número:
+                    <h2>Traslado SAP #{{$transfer}} <small>  # {{$tipoDoc}}:
                             @if (isset($info1))
                             {{$info1[0]->FolioNum}}
                             @else
@@ -185,7 +185,7 @@
                        $Soldate = date_create($fechaSol);
                     ?>
 
-                            <br>Fecha Solicitud: {{ date_format($Soldate, 'd-m-Y') }}
+                            <br>Fecha: {{ date_format($Soldate, 'd-m-Y') }}
 
                         </h3>
                     </span>
@@ -279,6 +279,11 @@
             <table class="firma">
 
                 <tbody>
+                    <tr class="firma">
+                        <td style="width:45%; " class="text-center firma">{{$entrega}}</td>
+                        <td style="width:10%;" class="firma"></td>
+                        <td style="width:45%; " class="text-center firma">{{$recibe}}</td>
+                    </tr>
                     <tr class="firma">
                         <td style="width:45%; border-top: 2px solid black" class="text-center firma">Nombre y firma de
                             quien entrega</td>

@@ -124,7 +124,7 @@ class SAP extends Model
             $vItem->FromWarehouse = $data['almacen_origen']; //origen
             $vItem->PriceList = $data['pricelist'];
             $vItem->FolioNumber = $id;//**/Vale:solicitud
-            $vItem->Comments = "SIZ VALE #".$id." Solicitado por:". $data['nombre_completo'];
+            $vItem->Comments = $data['observaciones'];
             $vItem->JournalMemo = "Traslados -";
             
             foreach ($data['items'] as $item) {
@@ -257,7 +257,7 @@ class SAP extends Model
             $vItem->FromWarehouse = $data['almacen_origen']; //origen
             $vItem->PriceList = $data['pricelist'];
             $vItem->FolioNumber = $id;//**/Vale:solicitud
-            $vItem->Comments = "SIZ VALE #".$id." Solicitado por:". $data['nombre_completo'];
+            $vItem->Comments = $data['observaciones'];
             $vItem->JournalMemo = "Traslados -";
             
             foreach ($data['items'] as $item) {
