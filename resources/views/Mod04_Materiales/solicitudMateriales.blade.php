@@ -152,7 +152,7 @@ border: 1px solid #000000;
         <div class="form-group">
         <label for="comment">Observaciones:</label>
         <textarea ng-keyup="count = total - comment.length" ng-model="comment" 
-        ng-init="total=100" class="form-control upperc" maxlength="100" rows="3" id="comment"></textarea>
+        ng-init="total=35" class="form-control upperc" maxlength="35" rows="3" id="comment"></textarea>
         caracteres restantes: <%count%>
         
         </div> 

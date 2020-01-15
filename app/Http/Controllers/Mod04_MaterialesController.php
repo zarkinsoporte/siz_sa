@@ -1226,7 +1226,7 @@ public function Solicitud_A_Traslados($id){
         ->count();
       
         if ($cantLineas == $cantcheckLineas ) {
-            DB::update('UPDATE SIZ_SolicitudesMP SET Status = ?, PickingUsuario = ?  WHERE Id_Solicitud = ?', ['Traslado', Auth::user()->firstName.' '.Auth::user()->lastName, $id]);
+            DB::update('UPDATE SIZ_SolicitudesMP SET Status = ?, PickingUsuario = ?  WHERE Id_Solicitud = ?', ['Traslado', explode(' ',Auth::user()->firstName)[0].' '.explode(' ',Auth::user()->lastName)[0], $id]);
             Session::flash('mensaje','Solicitud #'.$id.' Enviada a Traslados');
             return redirect()->action('Mod04_MaterialesController@pickingArticulos');
         } else {
@@ -1315,7 +1315,7 @@ public function HacerTraslados($id){
             //GUARDAR USUARIO QUE HACE MOVIMIENTO
             DB::table('SIZ_SolicitudesMP')
                     ->where('Id_Solicitud', $id)
-                    ->update(['SOLentrega_TRASrecibe_Usuario' => Auth::user()->firstName.' '.Auth::user()->lastName]);
+                    ->update(['SOLentrega_TRASrecibe_Usuario' => explode(' ',Auth::user()->firstName)[0].' '.explode(' ',Auth::user()->lastName)[0]]);
             //PERSONA QUE SOLICITA
             $solicitante = DB::table('SIZ_SolicitudesMP')       
                 ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
@@ -1353,16 +1353,13 @@ public function HacerTraslados($id){
             $info1 = 0;
             $info2 = 0;
             if (count($primer_origen) > 0) {
-                $observacionesComplemento = (!is_null($solicitante->PickingUsuario)) ? ", 
-                                        Surtido por: ". $solicitante->PickingUsuario. ", 
-                                        Entregado por: ". $solicitante->SOLentrega_TRASrecibe_Usuario : ".";
+                $observacionesComplemento = (!is_null($solicitante->PickingUsuario)) ? ", Surtió: ". $solicitante->PickingUsuario. ", Entrega: ". $solicitante->SOLentrega_TRASrecibe_Usuario : ".";
                 $data =  array(
                     'id_solicitud' => $id,
                     'pricelist' => '10',
                     'almacen_origen' => 'APG-PA',
                     'items' => $primer_origen,
-                    'observaciones' => "SIZ VALE #".$id." ". $solicitante->ComentarioUsuario .", 
-                                        Solicitado por: ". $nombreCompleto . $observacionesComplemento
+                    'observaciones' => utf8_decode("SIZ VALE #".$id .", Solicitó: ". $nombreCompleto . $observacionesComplemento . ". ".$solicitante->ComentarioUsuario )
                                         
 
                 );
@@ -1414,16 +1411,13 @@ public function HacerTraslados($id){
             });
             
                 if (count($segundo_origen) > 0) {
-                     $observacionesComplemento = (!is_null($solicitante->PickingUsuario)) ? ", 
-                                        Surtido por: ". $solicitante->PickingUsuario. ", 
-                                        Entregado por: ". $solicitante->SOLentrega_TRASrecibe_Usuario : ".";
+                     $observacionesComplemento = (!is_null($solicitante->PickingUsuario)) ? ", Surtió: ". $solicitante->PickingUsuario. ", Entrega: ". $solicitante->SOLentrega_TRASrecibe_Usuario : ".";
                     $data =  array(
                         'id_solicitud' => $id,
                         'pricelist' => '10',
                         'almacen_origen' => 'AMP-ST',
                         'items' => $segundo_origen,
-                        'observaciones' => "SIZ VALE #".$id." ". $solicitante->ComentarioUsuario .", 
-                                        Solicitado por: ". $nombreCompleto . $observacionesComplemento
+                        'observaciones' => utf8_decode("SIZ VALE #".$id .", Solicitó: ". $nombreCompleto . $observacionesComplemento.". ". $solicitante->ComentarioUsuario )
                     );
                         
                     if (Session::has('transfer2')) {                        
@@ -1730,15 +1724,13 @@ $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
             $transfer3 = 0;                 
             $t3 = 0;
             $info3 = 0;
-             $observacionesComplemento =  (!is_null($solicitud->SOLentrega_TRASrecibe_Usuario)) ? ",  
-                                        Recibido por: ". $solicitud->SOLentrega_TRASrecibe_Usuario : ".";
+             $observacionesComplemento =  (!is_null($solicitud->SOLentrega_TRASrecibe_Usuario)) ? ", Recibe: ". $solicitud->SOLentrega_TRASrecibe_Usuario : ".";
                 $data =  array(
                     'id_solicitud' => $id,
                     'pricelist' => '10',
                     'almacen_origen' => $solicitud->AlmacenOrigen,
                     'items' => $traslado_interno,
-                    'observaciones' => "SIZ VALE #".$id." ". $solicitud->ComentarioUsuario .", 
-                                        Enviado por: ". $nombreCompleto.$observacionesComplemento
+                    'observaciones' => utf8_decode("SIZ VALE #".$id .", Envió: ". $nombreCompleto.$observacionesComplemento.". ". $solicitud->ComentarioUsuario )
                 );
                 // dd($data);   
                 
@@ -1926,15 +1918,13 @@ $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
             $transfer3 = 0;                 
             $t3 = 0;
             $info3 = 0;
-            $observacionesComplemento = (!is_null($solicitud->SOLentrega_TRASrecibe_Usuario)) ? ",  
-                                        Recibido por: ". $solicitud->SOLentrega_TRASrecibe_Usuario : ".";
+            $observacionesComplemento = (!is_null($solicitud->SOLentrega_TRASrecibe_Usuario)) ? ", Recibe: ". $solicitud->SOLentrega_TRASrecibe_Usuario : ".";
                 $data =  array(
                     'id_solicitud' => $id,
                     'pricelist' => '10',
                     'almacen_origen' => $solicitud->AlmacenOrigen,
                     'items' => $traslado_interno,
-                    'observaciones' => "SIZ VALE #".$id." ". $solicitud->ComentarioUsuario .", 
-                                        Enviado por: ". $nombreCompleto. $observacionesComplemento
+                    'observaciones' => utf8_decode("SIZ VALE #".$id .", Envió: ". $nombreCompleto. $observacionesComplemento.". ". $solicitud->ComentarioUsuario )
                                         
                 );
                //  dd($data);   
@@ -2319,7 +2309,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                //GUARDAR EL USUARIO QUE HACE EL MOVIMIENTO
                 DB::table('SIZ_SolicitudesMP')
                     ->where('Id_Solicitud', $id)
-                    ->update(['SOLentrega_TRASrecibe_Usuario' => Auth::user()->firstName.' '.Auth::user()->lastName]);
+                    ->update(['SOLentrega_TRASrecibe_Usuario' => explode(' ',Auth::user()->firstName)[0].' '.explode(' ',Auth::user()->lastName)[0]]);
                 //PERSONA QUE SOLICITA
                 $solicitud = DB::table('SIZ_SolicitudesMP')       
                     ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
@@ -2350,15 +2340,13 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                 $t3 = 0;
                 $info3 = 0;
                 if (count($articulos) > 0) {
-                    $observacionesComplemento = (!is_null($solicitud->SOLentrega_TRASrecibe_Usuario)) ? ",  
-                                        Recibido por: ". $solicitud->SOLentrega_TRASrecibe_Usuario : ".";
+                    $observacionesComplemento = (!is_null($solicitud->SOLentrega_TRASrecibe_Usuario)) ? ", Recibe: ". $solicitud->SOLentrega_TRASrecibe_Usuario : ".";
                     $data =  array(
                         'id_solicitud' => $id,
                         'pricelist' => '10',
                         'almacen_origen' => $solicitud->AlmacenOrigen,
                         'items' => $articulos,
-                         'observaciones' => "SIZ VALE #".$id." ". $solicitud->ComentarioUsuario .", 
-                                        Enviado por: ". $nombreCompleto.$observacionesComplemento
+                         'observaciones' => utf8_decode("SIZ VALE #".$id .", Envió: ". $nombreCompleto.$observacionesComplemento.". ". $solicitud->ComentarioUsuario)
                                         
                     );
                    //  dd($data);   

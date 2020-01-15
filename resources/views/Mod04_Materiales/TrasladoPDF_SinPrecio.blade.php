@@ -252,7 +252,14 @@
                             <tr>
                                 <td style="width:90%;" class="text-left">
                                     @if (isset($info1))
-                                    {{$info1[0]->Comments}}
+                                    
+                                    @if(strlen($comentario) == 0)
+                                        {{$info1[0]->Comments}}
+                                    @else
+                                        {{str_replace($comentario, '',$info1[0]->Comments)}}
+                                    @endif
+                                    
+                                    
                                     @endif
                                 </td>
                             </tr>
