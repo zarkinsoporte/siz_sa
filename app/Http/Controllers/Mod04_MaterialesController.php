@@ -589,8 +589,9 @@ public function DataEntregaslotes(){
                         'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'OHEM.firstName',
                         'OHEM.lastName', 'SIZ_SolicitudesMP.AlmacenOrigen')
                     ->where('SIZ_MaterialesTraslados.Cant_PendienteA', '>', 0)
-                    ->whereNotIn('SIZ_MaterialesTraslados.EstatusLinea', ['T', 'S'])
+                    ->whereNotIn('SIZ_MaterialesTraslados.EstatusLinea', ['T', 'S', 'C']) //solicitudes que no tengan lineas terminadas, listas para ser recibidas y canceladas.
                     ->where('SIZ_SolicitudesMP.Status', 'Pendiente')
+                    //->whereNull('AlmacenOrigen')
                     ->where('SIZ_AlmacenesTransferencias.dept', Auth::user()->dept)
                     //->where('SIZ_SolicitudesMP.Usuario', Auth::user()->U_EmpGiro)
                     ;
@@ -1033,7 +1034,7 @@ public function removeArticuloNoAutorizado(){
                         ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')
                         ->select('SIZ_SolicitudesMP.Status', 'OHEM.firstName', 'OHEM.lastName', DB::raw('case when email like \'%@%\' then email else email + cast(\'@zarkin.com\' as varchar)  end AS correo'))
                         ->where('SIZ_SolicitudesMP.Id_Solicitud', $id_sol)->first();
-                    $nombreCompleto = $solicitante->firstName . ' ' . $solicitante->lastName;
+                    $nombreCompleto = explode(' ',$solicitante->firstName)[0].' '.explode(' ',$solicitante->lastName)[0];
 
                     $correos = array();
                     if ( $solicitante->correo !== null ) {
@@ -1152,8 +1153,9 @@ public function SolicitudPDF_Traslados($id){
     $solicitud =     DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $id)->first();
     $almacenOrigen = $solicitud->AlmacenOrigen;
     $transfer = 'Por Definir ';
-    $UsuarioSolicitud = DB::table('OHEM')->select(DB::raw("firstName + ' ' + LastName Nombre"))
-                     ->where('U_EmpGiro', $solicitud->Usuario)->value('Nombre');
+     $solicitante = DB::table('OHEM')
+                     ->where('U_EmpGiro', $solicitud->Usuario)->first();
+     $UsuarioSolicitud = explode(' ',$solicitante->firstName)[0].' '.explode(' ',$solicitante->lastName)[0];
     
     if (is_null($almacenOrigen)) {
         $t = 'SIZ_MaterialesSolicitudes';
@@ -1226,7 +1228,7 @@ public function Solicitud_A_Traslados($id){
         ->count();
       
         if ($cantLineas == $cantcheckLineas ) {
-            DB::update('UPDATE SIZ_SolicitudesMP SET Status = ?, PickingUsuario = ?  WHERE Id_Solicitud = ?', ['Traslado', Auth::user()->firstName.' '.Auth::user()->lastName, $id]);
+            DB::update('UPDATE SIZ_SolicitudesMP SET Status = ?, PickingUsuario = ?  WHERE Id_Solicitud = ?', ['Traslado', explode(' ',Auth::user()->firstName)[0].' '.explode(' ',Auth::user()->lastName)[0], $id]);
             Session::flash('mensaje','Solicitud #'.$id.' Enviada a Traslados');
             return redirect()->action('Mod04_MaterialesController@pickingArticulos');
         } else {
@@ -1246,7 +1248,7 @@ public function Solicitud_A_Picking($id){
         ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
         ->select('SIZ_SolicitudesMP.Status','OHEM.firstName','OHEM.lastName', DB::raw('case when email like \'%@%\' then email else email + cast(\'@zarkin.com\' as varchar)  end AS correo'))
         ->where('SIZ_SolicitudesMP.Id_Solicitud', $id)->first();
-        $nombreCompleto = $solicitante->firstName.' '.$solicitante->lastName;
+        $nombreCompleto = explode(' ',$solicitante->firstName)[0].' '.explode(' ',$solicitante->lastName)[0];
          
         $correos_db = DB::select("
             SELECT 
@@ -1313,16 +1315,16 @@ public function HacerTraslados($id){
         $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
         if (count($rates) >= 3) {
             //GUARDAR USUARIO QUE HACE MOVIMIENTO
-            DB::table('SIZ_SolicitudesMP')
+             DB::table('SIZ_SolicitudesMP')
                     ->where('Id_Solicitud', $id)
-                    ->update(['SOLentrega_TRASrecibe_Usuario' => Auth::user()->firstName.' '.Auth::user()->lastName]);
+                    ->update(['SOLentrega_TRASrecibe_Usuario' => explode(' ',Auth::user()->firstName)[0] .' '.explode(' ',Auth::user()->lastName)[0] ]);
             //PERSONA QUE SOLICITA
             $solicitante = DB::table('SIZ_SolicitudesMP')       
                 ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
                 ->select('OHEM.firstName','OHEM.lastName', 'SIZ_SolicitudesMP.ComentarioUsuario',
                 'SIZ_SolicitudesMP.PickingUsuario', 'SIZ_SolicitudesMP.SOLentrega_TRASrecibe_Usuario')
                 ->where('SIZ_SolicitudesMP.Id_Solicitud', $id)->first();
-            $nombreCompleto = $solicitante->firstName.' '.$solicitante->lastName;
+            $nombreCompleto = explode(' ',$solicitante->firstName)[0].' '.explode(' ',$solicitante->lastName)[0];
             //articulos validos para transferencia
             $articulos = DB::select('select mat.Id, mat.ItemCode, mat.Destino, mat.Cant_Pendiente, 
                 mat.Cant_ASurtir_Origen_A as CA, mat.Cant_ASurtir_Origen_B AS CB, mat.Cant_PendienteA,
@@ -1353,16 +1355,13 @@ public function HacerTraslados($id){
             $info1 = 0;
             $info2 = 0;
             if (count($primer_origen) > 0) {
-                $observacionesComplemento = (!is_null($solicitante->PickingUsuario)) ? ", 
-                                        Surtido por: ". $solicitante->PickingUsuario. ", 
-                                        Entregado por: ". $solicitante->SOLentrega_TRASrecibe_Usuario : ".";
+                $observacionesComplemento = (!is_null($solicitante->PickingUsuario)) ? ", Surtió: ". $solicitante->PickingUsuario. ", Entrega: ". $solicitante->SOLentrega_TRASrecibe_Usuario : "";
                 $data =  array(
                     'id_solicitud' => $id,
                     'pricelist' => '10',
                     'almacen_origen' => 'APG-PA',
                     'items' => $primer_origen,
-                    'observaciones' => "SIZ VALE #".$id." ". $solicitante->ComentarioUsuario .", 
-                                        Solicitado por: ". $nombreCompleto . $observacionesComplemento
+                    'observaciones' => utf8_decode("SIZ VALE #".$id .", Solicitó: ". $nombreCompleto . $observacionesComplemento . ". ".$solicitante->ComentarioUsuario )
                                         
 
                 );
@@ -1414,16 +1413,13 @@ public function HacerTraslados($id){
             });
             
                 if (count($segundo_origen) > 0) {
-                     $observacionesComplemento = (!is_null($solicitante->PickingUsuario)) ? ", 
-                                        Surtido por: ". $solicitante->PickingUsuario. ", 
-                                        Entregado por: ". $solicitante->SOLentrega_TRASrecibe_Usuario : ".";
+                     $observacionesComplemento = (!is_null($solicitante->PickingUsuario)) ? ", Surtió: ". $solicitante->PickingUsuario. ", Entrega: ". $solicitante->SOLentrega_TRASrecibe_Usuario : "";
                     $data =  array(
                         'id_solicitud' => $id,
                         'pricelist' => '10',
                         'almacen_origen' => 'AMP-ST',
                         'items' => $segundo_origen,
-                        'observaciones' => "SIZ VALE #".$id." ". $solicitante->ComentarioUsuario .", 
-                                        Solicitado por: ". $nombreCompleto . $observacionesComplemento
+                        'observaciones' => utf8_decode("SIZ VALE #".$id .", Solicitó: ". $nombreCompleto . $observacionesComplemento.". ". $solicitante->ComentarioUsuario )
                     );
                         
                     if (Session::has('transfer2')) {                        
@@ -1529,8 +1525,9 @@ public function getPdfSolicitud(){
         left join SIZ_TransferSolicitudesMP as t on t.DocEntry_Transfer = OWTR.DocEntry
         where OWTR.DocEntry = ? ', [$transfer]);
         $solicitud = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $info1[0]->FolioNum)->first();
-        $UsuarioSolicitud = DB::table('OHEM')->select(DB::raw("firstName + ' ' + LastName Nombre"))
-                     ->where('U_EmpGiro', $solicitud->Usuario)->value('Nombre');
+        $solicitante = DB::table('OHEM')
+                     ->where('U_EmpGiro', $solicitud->Usuario)->first();
+        $UsuarioSolicitud = explode(' ',$solicitante->firstName)[0].' '.explode(' ',$solicitante->lastName)[0];
     if (is_null($solicitud->AlmacenOrigen)) {
         $tipoDoc = 'Solicitud';
        // $almacenOrigen = "Materia Prima";
@@ -1724,21 +1721,19 @@ $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
                 ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
                 ->select('OHEM.firstName','OHEM.lastName', 'SIZ_SolicitudesMP.*')
                 ->where('SIZ_SolicitudesMP.Id_Solicitud', $id)->first();
-            $nombreCompleto = $solicitud->firstName.' '.$solicitud->lastName;    
+            $nombreCompleto = explode(' ',$solicitud->firstName)[0].' '.explode(' ',$solicitud->lastName)[0];   
                           
             $stat3 = 0;
             $transfer3 = 0;                 
             $t3 = 0;
             $info3 = 0;
-             $observacionesComplemento =  (!is_null($solicitud->SOLentrega_TRASrecibe_Usuario)) ? ",  
-                                        Recibido por: ". $solicitud->SOLentrega_TRASrecibe_Usuario : ".";
+             $observacionesComplemento =  (!is_null($solicitud->SOLentrega_TRASrecibe_Usuario)) ? ", Recibe: ". $solicitud->SOLentrega_TRASrecibe_Usuario : "";
                 $data =  array(
                     'id_solicitud' => $id,
                     'pricelist' => '10',
                     'almacen_origen' => $solicitud->AlmacenOrigen,
                     'items' => $traslado_interno,
-                    'observaciones' => "SIZ VALE #".$id." ". $solicitud->ComentarioUsuario .", 
-                                        Enviado por: ". $nombreCompleto.$observacionesComplemento
+                    'observaciones' => utf8_decode("SIZ VALE #".$id .", Envió: ". $nombreCompleto.$observacionesComplemento.". ". $solicitud->ComentarioUsuario )
                 );
                 // dd($data);   
                 
@@ -1920,21 +1915,19 @@ $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
                 ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
                 ->select('OHEM.firstName','OHEM.lastName', 'SIZ_SolicitudesMP.*')
                 ->where('SIZ_SolicitudesMP.Id_Solicitud', $id)->first();
-            $nombreCompleto = $solicitud->firstName.' '.$solicitud->lastName;    
+            $nombreCompleto = explode(' ',$solicitud->firstName)[0].' '.explode(' ',$solicitud->lastName)[0];   
                           
             $stat3 = 0;
             $transfer3 = 0;                 
             $t3 = 0;
             $info3 = 0;
-            $observacionesComplemento = (!is_null($solicitud->SOLentrega_TRASrecibe_Usuario)) ? ",  
-                                        Recibido por: ". $solicitud->SOLentrega_TRASrecibe_Usuario : ".";
+            $observacionesComplemento = (!is_null($solicitud->SOLentrega_TRASrecibe_Usuario)) ? ", Recibe: ". $solicitud->SOLentrega_TRASrecibe_Usuario : "";
                 $data =  array(
                     'id_solicitud' => $id,
                     'pricelist' => '10',
                     'almacen_origen' => $solicitud->AlmacenOrigen,
                     'items' => $traslado_interno,
-                    'observaciones' => "SIZ VALE #".$id." ". $solicitud->ComentarioUsuario .", 
-                                        Enviado por: ". $nombreCompleto. $observacionesComplemento
+                    'observaciones' => utf8_decode("SIZ VALE #".$id .", Envió: ". $nombreCompleto. $observacionesComplemento.". ". $solicitud->ComentarioUsuario )
                                         
                 );
                //  dd($data);   
@@ -2221,7 +2214,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                         ->select('SIZ_SolicitudesMP.Status', 'OHEM.firstName', 'OHEM.lastName', DB::raw('case when email like \'%@%\' then email else email + cast(\'@zarkin.com\' as varchar)  end AS correo'))
                         ->where('SIZ_SolicitudesMP.Id_Solicitud', $id_sol)->first();
 
-                    $nombreCompleto = $solicitante->firstName . ' ' . $solicitante->lastName;
+                    $nombreCompleto = explode(' ',$solicitante->firstName)[0].' '.explode(' ',$solicitante->lastName)[0];
                     $correos_db = DB::select("
                     SELECT 
                     CASE WHEN email like '%@%' THEN email ELSE email + cast('@zarkin.com' as varchar) END AS correo
@@ -2317,15 +2310,15 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
             if (count($rates) >= 3) {
            // if (true) {
                //GUARDAR EL USUARIO QUE HACE EL MOVIMIENTO
-                DB::table('SIZ_SolicitudesMP')
+             DB::table('SIZ_SolicitudesMP')
                     ->where('Id_Solicitud', $id)
-                    ->update(['SOLentrega_TRASrecibe_Usuario' => Auth::user()->firstName.' '.Auth::user()->lastName]);
-                //PERSONA QUE SOLICITA
+                    ->update(['SOLentrega_TRASrecibe_Usuario' => explode(' ',Auth::user()->firstName)[0] .' '.explode(' ',Auth::user()->lastName)[0] ]);
+                    //PERSONA QUE SOLICITA
                 $solicitud = DB::table('SIZ_SolicitudesMP')       
                     ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
                     ->select('OHEM.firstName','OHEM.lastName', 'SIZ_SolicitudesMP.*')
-                    ->where('SIZ_SolicitudesMP.Id_Solicitud', $id)->first();
-                $nombreCompleto = $solicitud->firstName.' '.$solicitud->lastName;    
+                    ->where('SIZ_SolicitudesMP.Id_Solicitud', $id)->first();  
+                $nombreCompleto = explode(' ',$solicitud->firstName)[0].' '.explode(' ',$solicitud->lastName)[0];   
                
                 $articulos = DB::select('select mat.Id, mat.ItemCode, mat.Destino, 
                 mat.Cant_ASurtir_Origen_A as CA, mat.Cant_PendienteA, mat.Cant_Pendiente,
@@ -2350,15 +2343,13 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                 $t3 = 0;
                 $info3 = 0;
                 if (count($articulos) > 0) {
-                    $observacionesComplemento = (!is_null($solicitud->SOLentrega_TRASrecibe_Usuario)) ? ",  
-                                        Recibido por: ". $solicitud->SOLentrega_TRASrecibe_Usuario : ".";
+                    $observacionesComplemento = (!is_null($solicitud->SOLentrega_TRASrecibe_Usuario)) ? ", Recibe: ". $solicitud->SOLentrega_TRASrecibe_Usuario : "";
                     $data =  array(
                         'id_solicitud' => $id,
                         'pricelist' => '10',
                         'almacen_origen' => $solicitud->AlmacenOrigen,
                         'items' => $articulos,
-                         'observaciones' => "SIZ VALE #".$id." ". $solicitud->ComentarioUsuario .", 
-                                        Enviado por: ". $nombreCompleto.$observacionesComplemento
+                         'observaciones' => utf8_decode("SIZ VALE #".$id .", Envió: ". $nombreCompleto.$observacionesComplemento.". ". $solicitud->ComentarioUsuario)
                                         
                     );
                    //  dd($data);   
