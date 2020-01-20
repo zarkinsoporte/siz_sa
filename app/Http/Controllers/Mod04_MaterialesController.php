@@ -1751,7 +1751,7 @@ $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
             }
             $filas = DB::table('SIZ_MaterialesTraslados')
             ->where('Id_Solicitud', $id)
-            ->where('EstatusLinea', '<>', 'T' )
+            ->whereNotIn('EstatusLinea', ['T', 'C'])
             ->count();            
             if ($filas > 0) {
                
@@ -1946,7 +1946,7 @@ $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
             }
             $filas = DB::table('SIZ_MaterialesTraslados')
             ->where('Id_Solicitud', $id)
-            ->where('EstatusLinea', '<>', 'T' )
+            ->whereNotIn('EstatusLinea', ['T', 'C'])
             ->count();            
             if ($filas > 0) {
                
@@ -2379,7 +2379,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                 }
                 $filas = DB::table('SIZ_MaterialesTraslados')
                 ->where('Id_Solicitud', $id)
-                ->where('EstatusLinea', '<>', 'T' )
+                ->whereNotIn('EstatusLinea', ['T', 'C'])
                 ->count();            
                 if ($filas > 0) {
                     DB::table('SIZ_SolicitudesMP')

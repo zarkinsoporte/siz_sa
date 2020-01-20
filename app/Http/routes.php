@@ -414,32 +414,19 @@ Route::get('setpassword', function () {
     }
     echo 'hecho';
 });
-Route::get('disponibilidadAlmacenMP', function(){
-     
-    $data = DB::select("SELECT 
-		 COALESCE (SUM(CASE WHEN WhsCode = 'APG-PA'  
-         THEN OnHand ELSE 0 END) - (COALESCE (t1.A, 0) + COALESCE (tr.A, 0)), 0) 
-         AS stockapgpa, 
-		 COALESCE (SUM(CASE WHEN WhsCode = 'AMP-ST' 
-          THEN OnHand ELSE 0 END) - (COALESCE (t1.B, 0) + COALESCE (tr.B, 0)), 0) 
-          AS stockampst		
-        FROM dbo.OITW
-		LEFT JOIN (select ItemCode, sum(Cant_ASurtir_Origen_A)  A , sum(Cant_ASurtir_Origen_B)  B  
-        from SIZ_MaterialesSolicitudes where 
-		  EstatusLinea in ('S', 'P', 'I', 'E', 'N')
-		 group by ItemCode) as t1 on t1.ItemCode = OITW.ItemCode
-		 LEFT JOIN(
-		 select itemCode,
-		 SUM(CASE WHEN sol.AlmacenOrigen = 'APG-PA'  THEN Cant_ASurtir_Origen_A ELSE 0 END) A,
-		 SUM(CASE WHEN sol.AlmacenOrigen = 'AMP-ST'  THEN Cant_ASurtir_Origen_A ELSE 0 END) B		
-		 from SIZ_MaterialesTraslados mat
-		 LEFT JOIN SIZ_SolicitudesMP sol on sol.Id_Solicitud = mat.Id_Solicitud
-			where mat.EstatusLinea in ('S', 'P', 'I', 'E', 'N')
-			group by ItemCode
-		 ) tr on tr.ItemCode = OITW.ItemCode
-		where OITW.ItemCode = ?
-        GROUP BY OITW.ItemCode, t1.A, t1.B, tr.A, tr.B",[Input::get('codigo')]);
-        return $data;
-        //dd(collect($data));
+Route::get('cerrartraslado/{id}', function($id){
+    $filas = DB::table('SIZ_MaterialesTraslados')
+                ->where('Id_Solicitud', $id)
+                ->whereNotIn('EstatusLinea', ['T'])
+                ->count();            
+                if ($filas > 0) {
+                    DB::table('SIZ_SolicitudesMP')
+                    ->where('Id_Solicitud', $id)
+                    ->update(['Status' => 'Pendiente']);
+                } elseif($filas == 0) {
+                    DB::table('SIZ_SolicitudesMP')
+                    ->where('Id_Solicitud', $id)
+                    ->update(['Status' => 'Cerrada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
+                }
 });
 
