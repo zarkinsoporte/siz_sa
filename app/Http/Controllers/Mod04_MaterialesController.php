@@ -1317,7 +1317,7 @@ public function HacerTraslados($id){
             //GUARDAR USUARIO QUE HACE MOVIMIENTO
              DB::table('SIZ_SolicitudesMP')
                     ->where('Id_Solicitud', $id)
-                    ->update(['SOLentrega_TRASrecibe_Usuario' => explode(' ',Auth::user()->firstName)[0] .' '.explode(' ',Auth::user()->lastName)[0] ]);
+                    ->update(['SOLentrega_TRASrecibe_Usuario' => explode(' ',Auth::user()->firstName)[0].' '.explode(' ',Auth::user()->lastName)[0]]);
             //PERSONA QUE SOLICITA
             $solicitante = DB::table('SIZ_SolicitudesMP')       
                 ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
@@ -2312,8 +2312,8 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                //GUARDAR EL USUARIO QUE HACE EL MOVIMIENTO
              DB::table('SIZ_SolicitudesMP')
                     ->where('Id_Solicitud', $id)
-                    ->update(['SOLentrega_TRASrecibe_Usuario' => explode(' ',Auth::user()->firstName)[0] .' '.explode(' ',Auth::user()->lastName)[0] ]);
-                    //PERSONA QUE SOLICITA
+                    ->update(['SOLentrega_TRASrecibe_Usuario' => explode(' ',Auth::user()->firstName)[0].' '.explode(' ',Auth::user()->lastName)[0]]);
+                //PERSONA QUE SOLICITA
                 $solicitud = DB::table('SIZ_SolicitudesMP')       
                     ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
                     ->select('OHEM.firstName','OHEM.lastName', 'SIZ_SolicitudesMP.*')
