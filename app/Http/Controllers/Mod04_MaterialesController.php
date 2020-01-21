@@ -1034,7 +1034,8 @@ public function removeArticuloNoAutorizado(){
                         ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')
                         ->select('SIZ_SolicitudesMP.Status', 'OHEM.firstName', 'OHEM.lastName', DB::raw('case when email like \'%@%\' then email else email + cast(\'@zarkin.com\' as varchar)  end AS correo'))
                         ->where('SIZ_SolicitudesMP.Id_Solicitud', $id_sol)->first();
-                    $nombreCompleto = explode(' ',$solicitante->firstName)[0].' '.explode(' ',$solicitante->lastName)[0];
+                    $apellido = Self::getApellidoPaternoUsuario(explode(' ',$solicitante->lastName));                        
+                    $nombreCompleto = explode(' ',$solicitante->firstName)[0].' '.$apellido;
 
                     $correos = array();
                     if ( $solicitante->correo !== null ) {
@@ -1155,7 +1156,8 @@ public function SolicitudPDF_Traslados($id){
     $transfer = 'Por Definir ';
      $solicitante = DB::table('OHEM')
                      ->where('U_EmpGiro', $solicitud->Usuario)->first();
-     $UsuarioSolicitud = explode(' ',$solicitante->firstName)[0].' '.explode(' ',$solicitante->lastName)[0];
+    $apellido = Self::getApellidoPaternoUsuario(explode(' ',$solicitante->lastName));
+    $UsuarioSolicitud = explode(' ',$solicitante->firstName)[0].' '.$apellido;
     
     if (is_null($almacenOrigen)) {
         $t = 'SIZ_MaterialesSolicitudes';
@@ -1248,7 +1250,8 @@ public function Solicitud_A_Picking($id){
         ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
         ->select('SIZ_SolicitudesMP.Status','OHEM.firstName','OHEM.lastName', DB::raw('case when email like \'%@%\' then email else email + cast(\'@zarkin.com\' as varchar)  end AS correo'))
         ->where('SIZ_SolicitudesMP.Id_Solicitud', $id)->first();
-        $nombreCompleto = explode(' ',$solicitante->firstName)[0].' '.explode(' ',$solicitante->lastName)[0];
+        $apellido = Self::getApellidoPaternoUsuario(explode(' ',$solicitante->lastName));
+        $nombreCompleto = explode(' ',$solicitante->firstName)[0].' '.$apellido;
          
         $correos_db = DB::select("
             SELECT 
@@ -1324,7 +1327,8 @@ public function HacerTraslados($id){
                 ->select('OHEM.firstName','OHEM.lastName', 'SIZ_SolicitudesMP.ComentarioUsuario',
                 'SIZ_SolicitudesMP.PickingUsuario', 'SIZ_SolicitudesMP.SOLentrega_TRASrecibe_Usuario')
                 ->where('SIZ_SolicitudesMP.Id_Solicitud', $id)->first();
-            $nombreCompleto = explode(' ',$solicitante->firstName)[0].' '.explode(' ',$solicitante->lastName)[0];
+            $apellido = Self::getApellidoPaternoUsuario(explode(' ',$solicitante->lastName));
+            $nombreCompleto = explode(' ',$solicitante->firstName)[0].' '.$apellido;
             //articulos validos para transferencia
             $articulos = DB::select('select mat.Id, mat.ItemCode, mat.Destino, mat.Cant_Pendiente, 
                 mat.Cant_ASurtir_Origen_A as CA, mat.Cant_ASurtir_Origen_B AS CB, mat.Cant_PendienteA,
@@ -1527,7 +1531,11 @@ public function getPdfSolicitud(){
         $solicitud = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $info1[0]->FolioNum)->first();
         $solicitante = DB::table('OHEM')
                      ->where('U_EmpGiro', $solicitud->Usuario)->first();
-        $UsuarioSolicitud = explode(' ',$solicitante->firstName)[0].' '.explode(' ',$solicitante->lastName)[0];
+
+        $apellido = Self::getApellidoPaternoUsuario(explode(' ',$solicitante->lastName));      
+        
+        
+        $UsuarioSolicitud = explode(' ',$solicitante->firstName)[0].' '.$apellido;
     if (is_null($solicitud->AlmacenOrigen)) {
         $tipoDoc = 'Solicitud';
        // $almacenOrigen = "Materia Prima";
@@ -1721,7 +1729,8 @@ $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
                 ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
                 ->select('OHEM.firstName','OHEM.lastName', 'SIZ_SolicitudesMP.*')
                 ->where('SIZ_SolicitudesMP.Id_Solicitud', $id)->first();
-            $nombreCompleto = explode(' ',$solicitud->firstName)[0].' '.explode(' ',$solicitud->lastName)[0];   
+            $apellido = Self::getApellidoPaternoUsuario(explode(' ',$solicitud->lastName));
+            $nombreCompleto = explode(' ',$solicitud->firstName)[0].' '.$apellido;   
                           
             $stat3 = 0;
             $transfer3 = 0;                 
@@ -1915,7 +1924,8 @@ $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
                 ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
                 ->select('OHEM.firstName','OHEM.lastName', 'SIZ_SolicitudesMP.*')
                 ->where('SIZ_SolicitudesMP.Id_Solicitud', $id)->first();
-            $nombreCompleto = explode(' ',$solicitud->firstName)[0].' '.explode(' ',$solicitud->lastName)[0];   
+            $apellido = Self::getApellidoPaternoUsuario(explode(' ',$solicitud->lastName));
+            $nombreCompleto = explode(' ',$solicitud->firstName)[0].' '.$apellido;   
                           
             $stat3 = 0;
             $transfer3 = 0;                 
@@ -2213,8 +2223,8 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                         ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')
                         ->select('SIZ_SolicitudesMP.Status', 'OHEM.firstName', 'OHEM.lastName', DB::raw('case when email like \'%@%\' then email else email + cast(\'@zarkin.com\' as varchar)  end AS correo'))
                         ->where('SIZ_SolicitudesMP.Id_Solicitud', $id_sol)->first();
-
-                    $nombreCompleto = explode(' ',$solicitante->firstName)[0].' '.explode(' ',$solicitante->lastName)[0];
+                    $apellido = Self::getApellidoPaternoUsuario(explode(' ',$solicitante->lastName));
+                    $nombreCompleto = explode(' ',$solicitante->firstName)[0].' '.$apellido;
                     $correos_db = DB::select("
                     SELECT 
                     CASE WHEN email like '%@%' THEN email ELSE email + cast('@zarkin.com' as varchar) END AS correo
@@ -2318,7 +2328,8 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                     ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
                     ->select('OHEM.firstName','OHEM.lastName', 'SIZ_SolicitudesMP.*')
                     ->where('SIZ_SolicitudesMP.Id_Solicitud', $id)->first();  
-                $nombreCompleto = explode(' ',$solicitud->firstName)[0].' '.explode(' ',$solicitud->lastName)[0];   
+                $apellido = Self::getApellidoPaternoUsuario(explode(' ',$solicitud->lastName));
+                $nombreCompleto = explode(' ',$solicitud->firstName)[0].' '.$apellido;   
                
                 $articulos = DB::select('select mat.Id, mat.ItemCode, mat.Destino, 
                 mat.Cant_ASurtir_Origen_A as CA, mat.Cant_PendienteA, mat.Cant_Pendiente,
@@ -2836,5 +2847,17 @@ $consultaj = collect($consulta);
             )
             */
             ->make(true);
+    }
+    public function getApellidoPaternoUsuario($apellido){
+        $preposiciones = ["DE", "LA", "LAS", "D", "LOS", "DEL"];   
+        if (in_array($apellido[0], $preposiciones) && count($apellido)>1 ) {
+            if (in_array($apellido[1], $preposiciones) && count($apellido)>2 ) {
+               return $apellido[0].' '.$apellido[1].' '.$apellido[2];
+            } else {
+                return $apellido[0].' '.$apellido[1];
+            }            
+        } else {
+            return $apellido[0];
+        }
     }
     }
