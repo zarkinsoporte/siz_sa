@@ -160,7 +160,7 @@ class Mod01_ProduccionController extends Controller
         $users = User::name($request->get('name'))->where('jobTitle', '<>', 'Z BAJA')->where('status', '1')
             ->orderBy('Ohem.dept, OHEM.jobTitle, ohem.firstname', 'asc')
         ;
-        dd($users);
+        //dd($users);
         return view('Mod00_Administrador.usuarios', compact('users'));
     }
 
@@ -344,6 +344,7 @@ class Mod01_ProduccionController extends Controller
                                 foreach ($one as $o) {
                                     $pedido = $o->OriginNum;
                                 }
+                               
                             } else {
                                 $one = array_merge($one, $order); //$one->merge($order);
                                 //dd($one);
@@ -431,14 +432,23 @@ class Mod01_ProduccionController extends Controller
                 ]);
                 ////RUTA RETROCESO
                 $Ruta = (OP::getRutaNombres($op));
-                return view('Mod01_Produccion.traslados', ['actividades' => $actividades, 'ultimo' => count($actividades), 'Ruta' => $Ruta, 't_user' => $t_user, 'ofs' => $one, 'op' => $op, 'pedido' => $pedido, 'HisOrden' => $HisOrden]);
+                
+                return view('Mod01_Produccion.traslados',
+                 ['actividades' => $actividades, 
+                 'ultimo' => count($actividades), 
+                 'Ruta' => $Ruta, 
+                 't_user' => $t_user, 
+                 'ofs' => $one, 
+                 'op' => $op, 
+                 'pedido' => $pedido, 
+                 'HisOrden' => $HisOrden]);
             }
             Session::flash('miusuario', $id);
             Session::flash('send', 'send');
             Session::flash('pass', Input::get('pass'));
             Session::flash('pass2', Input::get('pass2'));
             return redirect()->back()->withErrors(array('message' => 'La OP ' . Input::get('op') . ' no existe.'));
-        } else if ($option == 2) {
+        } else if ($option == 2) { //OPs por Estacion
 
             if (Session::has('OP_us')) {
                 $u_ct = Session::get('OP_us');

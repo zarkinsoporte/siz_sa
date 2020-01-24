@@ -1230,7 +1230,8 @@ public function Solicitud_A_Traslados($id){
         ->count();
       
         if ($cantLineas == $cantcheckLineas ) {
-            DB::update('UPDATE SIZ_SolicitudesMP SET Status = ?, PickingUsuario = ?  WHERE Id_Solicitud = ?', ['Traslado', explode(' ',Auth::user()->firstName)[0].' '.explode(' ',Auth::user()->lastName)[0], $id]);
+            $apellido = Self::getApellidoPaternoUsuario(explode(' ',Auth::user()->lastName));
+            DB::update('UPDATE SIZ_SolicitudesMP SET Status = ?, PickingUsuario = ?  WHERE Id_Solicitud = ?', ['Traslado', explode(' ',Auth::user()->firstName)[0].' '.$apellido, $id]);
             Session::flash('mensaje','Solicitud #'.$id.' Enviada a Traslados');
             return redirect()->action('Mod04_MaterialesController@pickingArticulos');
         } else {
@@ -1318,9 +1319,10 @@ public function HacerTraslados($id){
         $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
         if (count($rates) >= 3) {
             //GUARDAR USUARIO QUE HACE MOVIMIENTO
+            $apellido = Self::getApellidoPaternoUsuario(explode(' ',Auth::user()->lastName));
              DB::table('SIZ_SolicitudesMP')
                     ->where('Id_Solicitud', $id)
-                    ->update(['SOLentrega_TRASrecibe_Usuario' => explode(' ',Auth::user()->firstName)[0].' '.explode(' ',Auth::user()->lastName)[0]]);
+                    ->update(['SOLentrega_TRASrecibe_Usuario' => explode(' ',Auth::user()->firstName)[0].' '.$apellido]);
             //PERSONA QUE SOLICITA
             $solicitante = DB::table('SIZ_SolicitudesMP')       
                 ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
@@ -2320,9 +2322,10 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
             if (count($rates) >= 3) {
            // if (true) {
                //GUARDAR EL USUARIO QUE HACE EL MOVIMIENTO
+               $apellido = Self::getApellidoPaternoUsuario(explode(' ',Auth::user()->lastName));
              DB::table('SIZ_SolicitudesMP')
                     ->where('Id_Solicitud', $id)
-                    ->update(['SOLentrega_TRASrecibe_Usuario' => explode(' ',Auth::user()->firstName)[0].' '.explode(' ',Auth::user()->lastName)[0]]);
+                    ->update(['SOLentrega_TRASrecibe_Usuario' => explode(' ',Auth::user()->firstName)[0].' '.$apellido]);
                 //PERSONA QUE SOLICITA
                 $solicitud = DB::table('SIZ_SolicitudesMP')       
                     ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
@@ -2849,7 +2852,7 @@ $consultaj = collect($consulta);
             ->make(true);
     }
     public function getApellidoPaternoUsuario($apellido){
-        $preposiciones = ["DE", "LA", "LAS", "D", "LOS", "DEL"];   
+        $preposiciones = ["DE", "LA", "LAS", "D", "LOS", "DEL"]; 
         if (in_array($apellido[0], $preposiciones) && count($apellido)>1 ) {
             if (in_array($apellido[1], $preposiciones) && count($apellido)>2 ) {
                return $apellido[0].' '.$apellido[1].' '.$apellido[2];

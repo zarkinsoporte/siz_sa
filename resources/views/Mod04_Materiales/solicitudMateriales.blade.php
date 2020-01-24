@@ -213,7 +213,7 @@ border: 1px solid #000000;
                                                     <div class="form-group">
                                                         <label for="cant">Cantidad:</label>
                                                         
-                                                        <input type="number" step="0.01" min="0.1" class="form-control" name="cant" id="cant"
+                                                        <input type="number" step="0.001" min="0.1" class="form-control" name="cant" id="cant"
                                                      ng-model="insert.cant" required>
                                                     </div>                                               
                                                 </div>
@@ -264,7 +264,7 @@ var data,
   
     data.columns[3].render = function (data, type, row) {
     
-    var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+    var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:3}).format(data);
     return val;
     }
     
@@ -347,7 +347,7 @@ var data,
                     $('input[name=cant]').blur();
                     $('#submitBtn').attr("disabled", true);
                 }else{
-                    var valor = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(fila[0]['Existencia']);
+                    var valor = new Intl.NumberFormat("es-MX", {minimumFractionDigits:3}).format(fila[0]['Existencia']);
                     $(this).addClass('selected');
                    // console.log(fila[0]['ItemCode']);
                     $('input[name=pKey]').val(fila[0]['ItemCode']);

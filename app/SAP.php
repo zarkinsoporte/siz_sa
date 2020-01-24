@@ -319,6 +319,22 @@ class SAP extends Model
            
         }  
    }
+   public function setReciboProduccion($docEntry, $Cant){
+       (self::$vCmp == false) ? self::Connect(): '';
+   
+    $vItem = $vCmp->GetBusinessObject("59");
+    $vItem->Lines->BaseEntry = $docEntry; 
+    $vItem->Lines->BaseType = '202'; 
+    $vItem->Lines->TransactionType = '0'; // botrntComplete
+    $vItem->Lines->Quantity = $Cant;
+    $vItem->Lines->Add(); 
+    if ($vItem->Add() == 0) {// cero es correcto   
+            return 'Recibo de producción creado correctamente';
+        } else {
+            return 'Error SAP: '.self::$vCmp->GetLastErrorDescription();
+           
+        }  
+   }
 }
 
 /*

@@ -228,7 +228,9 @@ data-target="#Retroceder" class="btn btn-info btn-lg" data-codem="{{$of->U_Orden
         <td> <a class="btn btn-success {{$of->avanzar}}" data-toggle="modal"
         data-target="#cantidad" data-whatever="{{$of->Code}}"
         data-whatever2="{{$of->U_Recibido - $of->U_Procesado}}">
-        <i class="fa fa-send-o" aria-hidden="true">   Avanzar</i>
+        <i class="fa fa-send-o" aria-hidden="true"> 
+          Avanzar
+          </i>
         </a> </td>
     <?php   
     break;        
@@ -261,7 +263,17 @@ data-target="#Retroceder" class="btn btn-info btn-lg" data-codem="{{$of->U_Orden
                   <td> <a class="btn btn-success {{$of->avanzar}}" data-toggle="modal"
                                                     data-target="#cantidad" data-whatever="{{$of->Code}}"
                                                     data-whatever2="{{$of->U_Recibido - $of->U_Procesado}}">
-                                                    <i class="fa fa-send-o" aria-hidden="true">   Avanzar</i>
+                                                    <i class="fa fa-send-o" aria-hidden="true">   
+                                                   <!--
+                                                   Aqui mas bien vamos a poner otro boton para terminar 
+                                                   Si hay error en ruta pues vamos a desabilitar el boton de Terminar
+                                                   -->
+                                                    @if($of->U_CT_SIG !== "Terminar OP")
+                                                    Avanzar
+                                                    @else
+                                                    Terminar
+                                                    @endif
+                                                    </i>
                                                 </a> </td>
 <?php
 break;

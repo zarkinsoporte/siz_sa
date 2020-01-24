@@ -17,8 +17,8 @@ class OP extends Model
     // "100,106,109,112"  
     //[100,106,109]  
     foreach ($rs as $r) {
-        $ruta = explode(",", $r->u_Ruta);
-        return trim($ruta);
+        $ruta = explode(",", str_replace(" ","",$r->u_Ruta));
+        return $ruta;
     }
    }
    public static function ContieneRuta($docEntry, $ruta){
@@ -28,7 +28,7 @@ class OP extends Model
     $rs = DB::select('select u_Ruta from OWOR where DocEntry ='. $docEntry);
 
     foreach ($rs as $r) {
-        $ruta = explode(",", $r->u_Ruta);
+        $ruta = explode(",",str_replace(array("\r","\n","\r\n"),'', $r->u_Ruta));
 
     }
    
@@ -37,7 +37,7 @@ class OP extends Model
 
 foreach($ruta as $e){
 
-    $irs =DB::table('@PL_RUTAS')->where('U_Orden', $e)->value('Name');
+    $irs =DB::table('@PL_RUTAS')->where('U_Orden', ($e))->value('Name');
            $data = array ( $e, $irs );     
            $data1 +=[$i=>$data];
            $i++;
@@ -88,9 +88,13 @@ return $data1;
 
 //dd();
         $i = 1 +  array_search(OP::find($Code)->U_CT, self::getRuta(OP::find($Code)->U_DocEntry));
-  //dd($i);
+  
        if ($i>=count(self::getRuta(OP::find($Code)->U_DocEntry))){
-           $i=$i-1;
+           //aqui falta la validacion si es de Calidad
+           //if(es de calidad)
+           return "'".'Terminar OP'."'";
+           //else
+            //return "'".'Error ruta'."'";
        }
        $rs = DB::select('select * from [@PL_RUTAS] where U_Orden ='. self::getRuta(OP::find($Code)->U_DocEntry)[$i]);
 
@@ -150,10 +154,10 @@ return $data1;
 
    public  static  function avanzarEstacion($Code, $estacionesUsuario){ // habilitar o desabilitar boton
        $rutas = explode(",", $estacionesUsuario);
-
+     //El usuario tiene definidas las estaciones que puede avanzar
        if (array_search(OP::find($Code)->U_CT, $rutas) !== FALSE)
-       {
-           return "'".'enabled'."'";
+       {//si el usuario tiene permitida la estacion actual de la OP 
+           return "'".'enabled'."'";//se habilita boton avanzar
        }else{
            return "'".'disabled'."'";
        }
