@@ -101,7 +101,7 @@
                                 @endif
                             </div>
                         </div>
-                            @if(Session::get('usertraslados') == 2)
+                            @if(Session::get('usertraslados') == 2 && !Session::has('recibo'))
                               <div class="col-md-5">
                                   <div class="panel panel-default">
                                       <div class="panel-heading">
@@ -260,21 +260,33 @@ data-target="#Retroceder" class="btn btn-info btn-lg" data-codem="{{$of->U_Orden
     case '3'; //Operador SAP
         ?>
                   <!--Boton Avanzar-->
-                  <td> <a class="btn btn-success {{$of->avanzar}}" data-toggle="modal"
-                                                    data-target="#cantidad" data-whatever="{{$of->Code}}"
-                                                    data-whatever2="{{$of->U_Recibido - $of->U_Procesado}}">
-                                                    <i class="fa fa-send-o" aria-hidden="true">   
-                                                   <!--
-                                                   Aqui mas bien vamos a poner otro boton para terminar 
-                                                   Si hay error en ruta pues vamos a desabilitar el boton de Terminar
-                                                   -->
-                                                    @if($of->U_CT_SIG !== "Terminar OP")
-                                                    Avanzar
-                                                    @else
-                                                    Terminar
-                                                    @endif
-                                                    </i>
-                                                </a> </td>
+            <td>
+                @if($of->U_CT_SIG !== "Terminar OP")
+                    @if($of->U_CT_SIG == "Error en ruta")
+                        <a class="btn btn-danger disabled" >
+                        <i class="fa fa-send-o" aria-hidden="true">   
+                        Avanzar
+                        </i>
+                        </a> 
+                    @else
+                    <a class="btn btn-success {{$of->avanzar}}" data-toggle="modal"
+                        data-target="#cantidad" data-whatever="{{$of->Code}}"
+                        data-whatever2="{{$of->U_Recibido - $of->U_Procesado}}">
+                        <i class="fa fa-send-o" aria-hidden="true">   
+                        Avanzar
+                        </i>
+                    </a> 
+                    @endif
+                @else
+                        <a class="btn btn-success {{$of->avanzar}}" data-toggle="modal"
+                        data-target="#terminar" data-whatever="{{$of->Code}}"
+                        data-whatever2="{{$of->U_Recibido - $of->U_Procesado}}">
+                        <i class="fa fa-send-o" aria-hidden="true">   
+                        Terminar 
+                        </i>
+                    </a> 
+                @endif
+            </td>
 <?php
 break;
     case '1'; //Gerencia SAP 1 pruebas
@@ -304,6 +316,8 @@ break;
                                 </table>
 
                             </div>
+                            @else
+                            <?php Session::pull('recibo') ?>  
                             @endif
                     @endif
                 </div>  <!-- end col-md-12 -->
@@ -525,17 +539,66 @@ break;
 
         <button class="btn btn-default" data-dismiss="modal">Cerrar</button>
         <button type="submit" class="btn btn-primary" >Enviar</button>
-</div>
+        </div>
 </div>
 </div>
 </div>
 </div>
     {!! Form::close() !!}
 
+
+                          <!--  cantidadModal -->
+            <div class="modal fade" id="terminar" role="dialog" >
+                <div class="modal-dialog modal-sm" role="document">
+                    {!! Form::open(['url' => 'home/traslados/terminar/', 'method' => 'POST']) !!}
+                    <div class="modal-content" >
+
+                        <div class="modal-header" >
+
+                            <h4 class="modal-title" id="pwModalLabel">Recibo Producción</h4>
+                        </div>
+
+            <div class="modal-body">
+
+               <div class="row">
+                   <div class="col-md-12">
+                       <input id="code" name="code" type="text" hidden>
+                       @if(Session::has('usertraslados') && Session::get('usertraslados')>0)
+                          <input id="userId" name="userId" type="text" hidden value="{{$t_user->U_EmpGiro}}">
+                       @endif
+                       
+                       <input type="hidden" id="orden" name="orden"
+                       @if(isset($op)) value="{{$op}}" @endif
+         >
+                       <label for="cant" class="control-label">Cantidad a Procesar:</label>
+                       <input id="cant" type="text" class="form-control" name="cant"  readonly>
+
+                   </div>
+                 
+               </div>
+
+            </div>
+                        <div class="modal-footer">
+
+                            <div id="espera" class="progress" style="display: none">
+                                <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                                    <span>Espere un momento...<span class="dotdotdot"></span></span>
+                                </div>
+                            </div>
+                                        &nbsp;&nbsp;&nbsp;
+                           <input id="submit" name="submit" type="submit" value="Liberar" onclick="mostrarespera();"  class="btn btn-primary"/>
+                            <button type="button" class="btn btn-default" data-dismiss="modal" aria-label="Close">Cancelar</button>
+                        </div>
+
+                    </div>
+                    {!! Form::close() !!}
+                </div>
+            </div><!-- /modal -->
+
         <!-- /.container -->
 <?php
 //$GraficaOrden=1;
-if (isset($HisOrden)) {
+if (isset($HisOrden) && !is_null($HisOrden)) {
     ?>
 <?=
     Lava::render('AreaChart', 'HisOrden', 'chart');
@@ -578,7 +641,21 @@ if (isset($HisOrden)) {
 
 
     });
+ $('#terminar').on('show.bs.modal', function (event) {
+       var button = $(event.relatedTarget) // Button that triggered the modal
+       var recipient2 = button.data('whatever2') // Extract info from data-* attributes
+       var recipient = button.data('whatever') // Extract info from data-* attributes
+    // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+    // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+       var modal = $(this)
 
+        modal.find('#cant').val(recipient2)
+        modal.find('#code').val(recipient)
+        modal.find('#numcant').val(recipient2)
+        modal.find('#cant').attr('max', recipient2);
+
+
+    });
     // Execute something when the modal window is shown.
 
 
@@ -641,14 +718,14 @@ if (isset($Ruta)) {
         $("#mostrar").show();
         $("#miusuario").removeAttr('required');
     };
-function mostrar(){
+    function mostrar(){
         $("#hiddendiv").show();
         $("#mostrar").hide();
         $("#ocultar").show();
         $('#miusuario').attr('required', 'required');
     };
-
-     
-}
+    function mostrarespera(){
+        $("#espera").show();
+    };
 
 </script>

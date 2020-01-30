@@ -455,4 +455,5 @@ Route::get('report', function () {
     $vItem->Add();  
      
 });
+Route::post('home/traslados/terminar', 'Mod01_ProduccionController@terminarOP');
 

@@ -85,24 +85,30 @@ return $data1;
    }
 
    public static function getEstacionSiguiente ($Code, $option){
-
-//dd();
+        //buscar indice en array de estaciones de la "estacion siguiente"
         $i = 1 +  array_search(OP::find($Code)->U_CT, self::getRuta(OP::find($Code)->U_DocEntry));
-  
-       if ($i>=count(self::getRuta(OP::find($Code)->U_DocEntry))){
-           //aqui falta la validacion si es de Calidad
-           //if(es de calidad)
-           return "'".'Terminar OP'."'";
-           //else
-            //return "'".'Error ruta'."'";
+        $cantidad_rutas = count(self::getRuta(OP::find($Code)->U_DocEntry)); //cuantas hay?
+       if ($i>=$cantidad_rutas){ //el indice rebasa la cantidad de rutas
+            //obtener si la ultima ruta es de calidad
+           $calidad = DB::table('@PL_RUTAS')->where('U_Orden', self::getRuta(OP::find($Code)->U_DocEntry)[$cantidad_rutas-1])->value('U_Calidad');
+           
+           if($calidad == 'S'){ // puede generar recibo de Produccion
+               return "'".'Terminar OP'."'";
+           }          
+           else{ //si la ultima estacion de la ruta no es de Calidad entonces:
+               return "'".'Error en ruta'."'";
+           }
+            
        }
-       $rs = DB::select('select * from [@PL_RUTAS] where U_Orden ='. self::getRuta(OP::find($Code)->U_DocEntry)[$i]);
 
+       //el indice esta dentro de la cantidad de rutas
+       $rs = DB::select('select * from [@PL_RUTAS] where U_Orden ='. self::getRuta(OP::find($Code)->U_DocEntry)[$i]);
+    
+       //devolver nombre o numero de la ruta segun la opcion.
        foreach ($rs as $r) {
            if ($option == 1){   
                return "'".$r->Name."'";
            }
-
            if ($option == 2){
                return $r->U_Orden;
            }

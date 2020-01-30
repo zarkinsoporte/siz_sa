@@ -319,19 +319,25 @@ class SAP extends Model
            
         }  
    }
-   public function setReciboProduccion($docEntry, $Cant){
+   public static function setReciboProduccion($docEntry, $Cant){
        (self::$vCmp == false) ? self::Connect(): '';
    
-    $vItem = $vCmp->GetBusinessObject("59");
+    $vItem = self::$vCmp->GetBusinessObject("59");
     $vItem->Lines->BaseEntry = $docEntry; 
     $vItem->Lines->BaseType = '202'; 
     $vItem->Lines->TransactionType = '0'; // botrntComplete
     $vItem->Lines->Quantity = $Cant;
+    $vItem->Lines->WarehouseCode = 'APT-ST';
     $vItem->Lines->Add(); 
     if ($vItem->Add() == 0) {// cero es correcto   
             return 'Recibo de producción creado correctamente';
         } else {
-            return 'Error SAP: '.self::$vCmp->GetLastErrorDescription();
+
+            $descripcionError = self::$vCmp->GetLastErrorDescription();    
+             if (strpos($descripcionError, 'IGN1.WhsCode][line: 1') !== false) {
+             $descripcionError = $descripcionError.' Uno o más materiales tienen stock negativo.';
+            }
+            return 'Error SAP: '.$descripcionError;
            
         }  
    }

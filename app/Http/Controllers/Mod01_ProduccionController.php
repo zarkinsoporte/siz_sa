@@ -223,7 +223,7 @@ class Mod01_ProduccionController extends Controller
                     $est_Av = $t_user->U_CP_CT;
                     $Fil_Est = explode(",", $est_Av); //ARRAY SIMPLE
                     $rutasConNombres = self::getNombresRutas($Fil_Est); //ARRAY LLAVE VALOR
-                     
+                     array_pop($rutasConNombres);
                     //$ruts1=DB::select("SELECT Name From [@PL_RUTAS] where Code=".Input::get('OP_us'));
 
                     return view('Mod01_Produccion.traslados', ['rutasConNombres' => $rutasConNombres, 't_user' => $t_user, 'est_Av' => $est_Av, 'Fil_Est' => $Fil_Est, 'actividades' => $actividades, 'ultimo' => count($actividades), 't_user' => $t_user]);
@@ -278,20 +278,23 @@ class Mod01_ProduccionController extends Controller
         $actividades = $user->getTareas();
 
         if ($option == 1) {
-
-            if (Session::has('op')) {
+        
+            if (!Session::has('recibo')) {
+               if (Session::has('op')) {
                 $op = Session::get('op');
                 Session::forget('op');
-            } else if (Input::has('op')) {
-                $op = Input::get('op');
-            } else {
-                return redirect()->route('home');
-                //dd('getOPss');
+                } else if (Input::has('op')) {
+                    $op = Input::get('op');
+                } else {
+                    return redirect()->route('home');
+                    //dd('getOPss');
+                }
+                $Codes = OP::where('U_DocEntry', $op)->get();
+            } else{
+                $Codes = [];
             }
-
+        
             Session::flash('usertraslados', 2); //evita que salga el modal
-
-            $Codes = OP::where('U_DocEntry', $op)->get();
 
             if (count($Codes) > 0) {
                 $index = 0;
@@ -442,6 +445,16 @@ class Mod01_ProduccionController extends Controller
                  'op' => $op, 
                  'pedido' => $pedido, 
                  'HisOrden' => $HisOrden]);
+            } else if (count($Codes) == 0){ // se hizo un recibo
+                return view('Mod01_Produccion.traslados',
+                 ['actividades' => $actividades, 
+                 'ultimo' => count($actividades), 
+                 'Ruta' => null, 
+                 't_user' => $t_user, 
+                 'ofs' => null, 
+                 'op' => null, 
+                 'pedido' => null, 
+                 'HisOrden' => null]);
             }
             Session::flash('miusuario', $id);
             Session::flash('send', 'send');
@@ -760,6 +773,7 @@ if ($U_CT_siguiente == $Code_actual->U_CT) {
                 $est_Av = $t_user->U_CP_CT; //estaciones que el usuario puede avanzar
                 $Fil_Est = explode(",", $est_Av); //ARRAY SIMPLE  
                 $rutasConNombres = self::getNombresRutas($Fil_Est); //le pasamos las rutas y nos regresa las rutas con nombre
+                array_pop($rutasConNombres);
                 Session::flash('usertraslados', 1);
                 Session::flash('mensaje', 'La orden ' . $orden . ' ha sido retirada de control de piso.');
                 DB::transaction(function () use($orden) {
@@ -1162,5 +1176,39 @@ public function repCortePielExl(){
        }else {
     return redirect()->action('Mod01_ProduccionController@repCortePiel');
 }
+}
+
+public function terminarOP(){
+    
+                $id = Input::get('userId');  
+                Session::flash('op', Input::get('orden')); 
+                Session::put('return', 1);    
+                
+
+   $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
+        if (count($rates) >= 3) {
+            $result = SAP::setReciboProduccion(Input::get('orden'), Input::get('cant'));
+            if (strpos($result, 'Recibo') !== false) {
+                //borrar OP de control Piso
+                DB::table('@CP_OF')->where('Code', Input::get('code'))->delete(); 
+                //validar OP para cerrar 
+                $cerrar = DB::select("
+                            SELECT T0.[DocNum] as Orden, T0.[ItemCode] as Codigo, T0.[PlannedQty] as Planeado, T0.[CmpltQty] as Terminado ,T0.UpdateDate as Actualizado FROM OWOR T0 LEFT JOIN (SELECT OWOR.DocNum as OP,sum(WOR1.PlannedQty) as Cantidad FROM OWOR inner join WOR1 on WOR1.DocEntry = OWOR.DocEntry inner join OITM A1 on WOR1.ItemCode=A1.ItemCode WHERE OWOR.[PlannedQty] <= OWOR.[CmpltQty] and  OWOR.[status] <> 'L' and WOR1.IssueType = 'M' and WOR1.IssuedQty < WOR1.PlannedQty and A1.ItmsGrpCod<> 113 group by OWOR.DocNum ) VAL on T0.DocNum = VAL.OP WHERE  T0.DocNum=? and T0.[PlannedQty] <=  T0.[CmpltQty] and  T0.[status] <> 'L' and VAL.Cantidad is null
+                            ", [Input::get('orden')]);
+                if(count($cerrar) > 0){
+                    SAP::ProductionOrderStatus(Input::get('orden'), 2); //cerrar Orden en SAP
+                }
+                Session::flash('mensaje', 'Recibo de Produccion Generado.');
+                Session::put('recibo', 1);   
+                return redirect()->action('Mod01_ProduccionController@getOP', $id);
+            } else {
+                //regresar el error de SAP 
+                Session::flash('error', $result);
+                return redirect()->action('Mod01_ProduccionController@getOP', $id);
+            } 
+        }else{
+            Session::flash('error', 'No estan capturados todos los "Tipos de Cambio" en SAP.');
+                return redirect()->action('Mod01_ProduccionController@getOP', $id);
+        }
 }
 }
