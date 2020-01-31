@@ -445,7 +445,7 @@ class Mod01_ProduccionController extends Controller
                  'op' => $op, 
                  'pedido' => $pedido, 
                  'HisOrden' => $HisOrden]);
-            } else if (count($Codes) == 0){ // se hizo un recibo
+            } else if (count($Codes) == 0 && Session::has('recibo')){ // se hizo un recibo
                 return view('Mod01_Produccion.traslados',
                  ['actividades' => $actividades, 
                  'ultimo' => count($actividades), 

@@ -399,61 +399,10 @@ Route::get('/pruebas', function (Request $request) {
     //  echo $vItem->ProductionOrderStatus;
     //return view('Mod00_Administrador.pruebas');
 });
-Route::get('setpassword', function () {
-    try {
 
-        dd(Auth::user()->U_EmpGiro);
-
-
-        $password = Hash::make('1234');
-        DB::table('dbo.OHEM')
-            ->where('U_EmpGiro', 1349)
-            ->update(['U_CP_Password' => $password]);
-    } catch (\Exception $e) {
-        echo $e->getMessage();
-    }
-    echo 'hecho';
-});
-Route::get('cerrartraslado/{id}', function($id){
-    $filas = DB::table('SIZ_MaterialesTraslados')
-                ->where('Id_Solicitud', $id)
-                ->whereNotIn('EstatusLinea', ['T'])
-                ->count();            
-                if ($filas > 0) {
-                    DB::table('SIZ_SolicitudesMP')
-                    ->where('Id_Solicitud', $id)
-                    ->update(['Status' => 'Pendiente']);
-                } elseif($filas == 0) {
-                    DB::table('SIZ_SolicitudesMP')
-                    ->where('Id_Solicitud', $id)
-                    ->update(['Status' => 'Cerrada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
-                }
-});
-Route::get('report', function () {
-    $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
-    $vCmp->DbServerType="6"; 
-    $vCmp->server = "SERVER-SAPBO";
-    $vCmp->LicenseServer = "SERVER-SAPBO:30000";
-    $vCmp->CompanyDB = "Pruebas";
-    $vCmp->username = "manager";
-    $vCmp->password = "aqnlaaepp";
-    $vCmp->DbUserName = "sa";
-    $vCmp->DbPassword = "B1Admin";
-    $vCmp->UseTrusted = false;
-    $vCmp->language = "6";
-    $lRetCode = $vCmp->Connect;//
-    //dd($lRetCode);
-    echo $vCmp->GetLastErrorDescription();
-    echo 'iniciada';
-    echo '<br>';
-    $vItem = $vCmp->GetBusinessObject("59");
-    $vItem->Lines->BaseEntry = '15481'; 
-    $vItem->Lines->BaseType = '202';
-    $vItem->Lines->TransactionType = '0'; // botrntComplete
-    $vItem->Lines->Quantity = '1';
-    $vItem->Lines->Add();
-    $vItem->Add();  
-     
-});
 Route::post('home/traslados/terminar', 'Mod01_ProduccionController@terminarOP');
+//IMPRESION ETIQUETAS QR
+Route::get('home/GENERACION ETIQUETAS', 'Reportes_ProduccionController@showModal')->middleware('routelog');
+Route::post('home/reporte/GENERACION ETIQUETAS/{redirek?}', 'Mod04_MaterialesController@QR_Articulos');
 
+Route::get('OITM.show', 'HomeController@ShowArticulos')->name('OITM.show');

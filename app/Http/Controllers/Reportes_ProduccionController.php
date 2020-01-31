@@ -215,6 +215,12 @@ class Reportes_ProduccionController extends Controller
                 $sizeModal = 'modal-lg';
                 $data_table = 'OITM.show';
                 break;
+            case "GENERACION ETIQUETAS":
+                $Text = 'Para continuar, primero seleccione un artículo.';
+                //$fieldText = 'Código';
+                $sizeModal = 'modal-lg';
+                $data_table = 'OITM.show';
+                break;
             case "MRP":
                 //Select
                         //$f->weekOfYear . '-' . $f->addWeek(2)->weekOfYear;

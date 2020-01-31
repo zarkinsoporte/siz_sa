@@ -275,6 +275,36 @@ public function iowhsPDF()
             return redirect()->route('auth/login');
         }
     }
+    public function QR_Articulos(Request $request){
+        if (Auth::check()) {
+           
+            $rules = [
+                // 'fieldText' => 'required|exists:OITM,ItemCode',
+                'pKey' => 'required',
+                'costocompras' => 'min:0',
+
+            ];
+            $customMessages = [
+                'pKey.required' => 'Ningun código seleccionado',
+                'costocompras.min' => 'El costo de A-COMPRAS debe ser igual/mayor a cero',
+                //'fieldText.exists' => 'El Código no existe.'
+            ];
+            $valid = Validator::make( $request->all(), $rules, $customMessages);
+            
+            if ($valid->fails()) {
+                return redirect()->back()
+                    ->withErrors($valid)
+                    ->withInput();
+            }
+            
+            $param = self::getParam_DM_Articulos(Input::get('pKey'));
+            
+            return view('Mod04_Materiales.Etiqueta_Articulo', $param);
+            
+        } else {
+            return redirect()->route('auth/login');
+        }
+    }
 
     public function articuloToSap(Request $request){
         //monedacompras
@@ -1308,6 +1338,15 @@ public function DM_Articulo($ItemCode){
 
         
         return view('Mod04_Materiales.DM_Articulos', $param);
+    } else {
+        return redirect()->route('auth/login');
+    }
+}
+public function Etiqueta_Articulo($ItemCode){
+    if (Auth::check()) {
+        $param = self::getInfo_Etiqueta_Articulos($ItemCode);
+        
+       // return view('Mod04_Materiales.DM_Articulos', $param);
     } else {
         return redirect()->route('auth/login');
     }

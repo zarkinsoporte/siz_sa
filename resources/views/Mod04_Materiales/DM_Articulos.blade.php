@@ -374,7 +374,8 @@ width: 100% !important;
             </div>
         </li>
         <li class="list-group-item green-edit-field">
-            <h5 class="my-0">A-COMPRAS <span class="pull-right">${{ number_format($data[0]->CostoACompras??0, 2, '.', ',') }}
+            <h5 class="my-0">A-COMPRAS 
+            <span class="pull-right">${{ number_format($data[0]->CostoACompras??0, 2, '.', ',') }}
                 {{$data[0]->MonedaACompras??'SIN DATOS'}}</span></h5> 
             
             <div class="row">
