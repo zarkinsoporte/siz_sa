@@ -56,7 +56,7 @@ width: 100% !important;
 }
 </style>
 <div class="container">
- {!! Form::open(['url' => 'articuloToSap', 'method' => 'POST', 'id' => 'mainform']) !!}
+ {!! Form::open(['url' => 'etiquetaQR', 'method' => 'POST', 'id' => 'mainform']) !!}
  {{ csrf_field() }}
     <!-- Page Heading -->
     <div class="row">
@@ -102,7 +102,7 @@ width: 100% !important;
                 <li class="list-group-item">
                     <div>
                        <h5 class="my-0"> <small>{{$data[0]->ItemName}}</small></h5>
-                        <h5 class="my-0"></h5>
+                        <input type="hidden" name="itemName" value="{{$data[0]->ItemName}}">
                     </div>
         
                 </li>
@@ -147,7 +147,7 @@ width: 100% !important;
                 <div>
                     <h5 class="my-0">UM <small ><span
                                 class="pull-right">{{ $data[0]->UM}}</span></small> </h5>
-                    <h5 class="my-0"></h5>
+                     <input type="hidden" name="um" value="{{$data[0]->UM}}">
                 </div>
             
             </li>
