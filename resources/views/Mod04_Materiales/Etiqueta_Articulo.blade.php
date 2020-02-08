@@ -140,12 +140,36 @@ width: 100% !important;
     </div>   
     
     <div class="row">
-      
+    <div class="col-md-3">
+       <ul>
+        <li class="list-group-item green-edit-field">
+                <div>
+                    <h5 class="my-0">CANT X BULTO</h5>
+                    <input type="number" step="0.01" min="0" class="form-control" name="cantx_bulto" id="cantx_bulto" value="{{old('factor', number_format($data[0]->Factor, 2, '.', ','))}}" {{$privilegioTarea}}>
+               
+                </div>
+            
+            </li>
+            </ul>
+            <ul>
+        <li class="list-group-item">
+                <div>
+                    <h5 class="my-0">FACTOR CONV.
+                    <small ><span
+                                class="pull-right">{{ number_format($data[0]->Factor, 2, '.', ',') }}</span></small>
+                    </h5>
+               
+                </div>
+            
+            </li>
+       </ul>
+    
+    </div> <!-- /.md-3 -->  
     <div class="col-md-3">
         <ul>
             <li class="list-group-item">
                 <div>
-                    <h5 class="my-0">UM <small ><span
+                    <h5 class="my-0">UM INVENTARIO<small ><span
                                 class="pull-right">{{ $data[0]->UM}}</span></small> </h5>
                      <input type="hidden" name="um" value="{{$data[0]->UM}}">
                 </div>
@@ -159,19 +183,8 @@ width: 100% !important;
                 </div>
             
             </li>
-            <li class="list-group-item green-edit-field">
-                <div>
-                    <h5 class="my-0">FACTOR</h5>
-                    <input type="number" step="0.01" min="0" class="form-control" name="factor" id="factor" value="{{old('factor', number_format($data[0]->Factor, 2, '.', ','))}}" {{$privilegioTarea}}>
-               
-                </div>
-            
-            </li>
-            
         </ul>
-       
-    </div> <!-- /.md-3 -->
- 
+        </div> <!-- /.md-3 -->
     </div> <!-- /.row -->
     
 {!! Form::close() !!}

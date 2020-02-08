@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Mail;
 use Maatwebsite\Excel\Facades\Excel;
 use Datatables;
 use Validator;
+use QrCode;
 ini_set("memory_limit", '512M');
 ini_set('max_execution_time', 0);
 class Mod04_MaterialesController extends Controller

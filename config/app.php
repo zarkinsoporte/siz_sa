@@ -151,6 +151,7 @@ return [
         Collective\Html\HtmlServiceProvider::class,
         Khill\Lavacharts\Laravel\LavachartsServiceProvider::class,
         Yajra\Datatables\DatatablesServiceProvider::class,
+        SimpleSoftwareIO\QrCode\QrCodeServiceProvider::class,
     ],
 
     /*
@@ -204,7 +205,8 @@ return [
         'Datatables'=> Yajra\Datatables\Facades\Datatables::class,
         'PDF'       => Barryvdh\DomPDF\Facade::class,
         'Excel'     => Maatwebsite\Excel\Facades\Excel::class,
-        'AppHelper' => App\Helpers\AppHelper::class
+        'AppHelper' => App\Helpers\AppHelper::class,
+        'QrCode' => SimpleSoftwareIO\QrCode\Facades\QrCode::class,
     ],
 
 ];
