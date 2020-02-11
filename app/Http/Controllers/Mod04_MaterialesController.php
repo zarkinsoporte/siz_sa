@@ -2903,4 +2903,25 @@ $consultaj = collect($consulta);
             return $apellido[0];
         }
     }
+    public function generaEtiquetaQR(){
+        
+        $itemName = Input::get('itemName');
+        $pKey = Input::get('pKey');
+        $cardCode = Input::get('proveedor');
+        $cardName = DB::table('OCRD')->where('CardCode', Input::get('proveedor'))
+        ->value('CardName');
+        $um = Input::get('um');
+
+        $cant = Input::get('cantx_bulto');
+        $separador = ' - ';
+        $CodigoQR = QrCode::margin(1)->format('png')->size(100)
+        ->generate("http://187.189.177.39:8081/sizb/public/qr/".
+        $pKey."/".$cardCode."/".$cant);
+
+        $pdf = \PDF::loadView('Mod04_Materiales.etiquetaQrPDF', 
+        compact('separador', 'itemName', 'pKey', 'cardCode',  'cardName', 'um','cant', 'CodigoQR'));
+        //  $pdf->setPaper([0, 0, 90, 144], 'landscape')->setOptions(['isPhpEnabled'=>true]);
+        $pdf->setPaper([0, 0, 90, 144],'landscape')->setOptions(['isPhpEnabled'=>true]);             
+        return $pdf->stream('Siz_QR_'.$pKey . ' - ' .date("d/m/Y") . '.Pdf');
+    }
     }

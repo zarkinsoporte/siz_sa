@@ -188,15 +188,16 @@ li.dt-button.active a::before{
                 </div>
                 <!-- Top Menu Items -->
                 <ul class="nav navbar-right top-nav hidden-xs">
+                @if (Auth::guest())
+                     <a href="{{ url('/auth/login') }}" >Login</a>
+                        <!--  <li><a href="url('/register') ">Register</a></li>  -->
+                    @else
                     <li>
                     <a href="{!! url('Mod01_Produccion/Noticias') !!}"><i class="fa fa-bell"></i> <span class="badge badge-danger"> {{Auth::user()->getCountNotificacion()}}</span></a>
                     </li>  
                     <li class="dropdown">
 
-                    @if (Auth::guest())
-                     <a href="{{ url('/auth/login') }}" >Login</a>
-                        <!--  <li><a href="url('/register') ">Register</a></li>  -->
-                    @else
+                    
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="color: white"><i class="fa fa-user"></i>
                                 &nbsp;{{ Auth::user()->firstName.' '.Auth::user()->lastName }} &nbsp;
                                 <b class="caret"></b></a>

@@ -401,31 +401,10 @@ Route::get('/pruebas', function (Request $request) {
 });
 
 Route::post('home/traslados/terminar', 'Mod01_ProduccionController@terminarOP');
-Route::post('etiquetaQR', 
-function(){
-   // dd(Input::all());
-   
-   $itemName = Input::get('itemName');
-   $pKey = Input::get('pKey');
-   $cardCode = Input::get('proveedor');
-   $cardName = DB::table('OCRD')->where('CardCode', Input::get('proveedor'))
-   ->value('CardName');
-   $um = Input::get('um');
-   
-   $cant = Input::get('cantx_bulto');
-   $separador = ' - ';
-   $CodigoQR = QrCode::margin(1)->format('png')->size(100)
-   ->generate("http://187.189.177.39:8081/sizb/public/qr/".
-   $pKey."/".$cardCode."/".$cant);
-
-    $pdf = \PDF::loadView('Mod04_Materiales.etiquetaQrPDF', 
-        compact('separador', 'itemName', 'pKey', 'cardCode',  'cardName', 'um','cant', 'CodigoQR'));
-    //  $pdf->setPaper([0, 0, 90, 144], 'landscape')->setOptions(['isPhpEnabled'=>true]);
-        $pdf->setPaper([0, 0, 90, 144],'landscape')->setOptions(['isPhpEnabled'=>true]);             
-        return $pdf->stream('Siz_QR_'.$pKey . ' - ' .date("d/m/Y") . '.Pdf');
-});
 //IMPRESION ETIQUETAS QR
 Route::get('home/GENERACION ETIQUETAS', 'Reportes_ProduccionController@showModal')->middleware('routelog');
 Route::post('home/reporte/GENERACION ETIQUETAS/{redirek?}', 'Mod04_MaterialesController@QR_Articulos');
-
+Route::post('etiquetaQR', 'Mod04_MaterialesController@generaEtiquetaQR');
 Route::get('OITM.show', 'HomeController@ShowArticulos')->name('OITM.show');
+//Visualizacion de Articulos para INVITADOS
+Route::get('qr/{itemCode}/{proveedor}/{cantXbulto}', 'GuestController@getArticulo');

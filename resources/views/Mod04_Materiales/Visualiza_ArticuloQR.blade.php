@@ -65,16 +65,13 @@ width: 100% !important;
          
             <div class="col-md-12">
                 <h3 class="page-header">
-                    Generacion de Etiquetas 
-                    <div class="visible-xs visible-sm"><br></div>
-                    <span class="pull-right">
-                        @if(!isset($oculto))  
-                            <a class="btn btn-primary" href="{{url('home/GENERACION ETIQUETAS')}}">Ver Otro Artículo</a>                    
-                        @else
-                            <a class="btn btn-primary btn-sm" href="{{URL::previous()}}"><i class="fa fa-angle-left"></i> Atras</a>
-                        @endif
-                        <div class="visible-xs visible-sm"><br></div>
-                    </span>         
+                     
+
+                    <div class="visible-md visible-lg">
+                    Etiqueta QR
+                    </div>
+                    
+                             
                 </h3>
                 
             </div>
@@ -90,7 +87,7 @@ width: 100% !important;
        <ul>
          <li class="list-group-item active">
             <div>
-                <h5>Código <small><span class="pull-right" style="color:white">{{$data[0]->ItemCode}}</span></small></h5>
+                <h5>Código <small><span class="pull-right" style="color:white;font-size:18px">{{$data[0]->ItemCode}}</span></small></h5>
                 <input type="hidden" name="pKey" value="{{$data[0]->ItemCode}}">
             </div>
             
@@ -115,37 +112,25 @@ width: 100% !important;
        
         <div class="col-md-7 col-sm-12">
             <ul>
-                <li class="list-group-item green-edit-field">
+                <li class="list-group-item ">
                     <div>
-                        <h5>Proveedor</h5>                    
-                        <div class="input-group">
-                        
-                            <select data-live-search="true" class="boot-select" id="proveedor" name="proveedor" {{$privilegioTarea}}>                               
-                                <option value="" {{ old('proveedor', $data[0]->CardCode??'SIN DATOS') == 'SIN DATOS' ? 'selected' : '' }}>SIN DATOS</option>
-                                @foreach ($proveedores as $proveedor)
-                                <option value="{{old('proveedor',$proveedor->CardCode)}}" {{ ($proveedor->CardCode == $data[0]->CardCode) ? 'selected' : '' }}>                                   
-                                    <span>{{$proveedor->CardCode}}  &nbsp;&nbsp;&nbsp; {{$proveedor->CardName}}</span></option>
-                                @endforeach
-                            </select>                         
-                        </div><!-- /input-group -->
+                        <h5>Proveedor <small>{{$proveedor}}</small></h5>                    
+                       
                     </div>        
                 </li>
             </ul>
         </div>
-        <div class="col-md-3 col-sm-12">
-        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#confirma" {{$privilegioTarea}}>
-                                            <i class="fa fa-print" aria-hidden="true"></i> Etiqueta
-                            </button>
-        </div>
+        
     </div>   
     
     <div class="row">
     <div class="col-md-3">
        <ul>
-        <li class="list-group-item green-edit-field">
+        <li class="list-group-item ">
                 <div>
-                    <h5 class="my-0">CANT X BULTO</h5>
-                    <input type="number" step="0.01" min="0" class="form-control" name="cantx_bulto" id="cantx_bulto" value="{{old('factor', number_format($data[0]->Factor, 2, '.', ','))}}" {{$privilegioTarea}}>
+                    <h5 class="my-0">CANT X BULTO  <small><span
+                                class="pull-right">{{$cantXbulto}} </span> </small></h5>
+                    
                
                 </div>
             

@@ -6,34 +6,13 @@
 
 /* Global Styles */
 
-
-
-@media(min-width:768px) {
-    body {
+ body {
         margin-top: 50px;
         overflow-x: hidden;
     }
-}
-
-#wrapper {
-    padding-left: 0;
-    overflow-x: hidden;
-}
-
-#page-wrapper {
-    width: 100%;
-    padding: 0;
-    background-color: #fff;
-    height: 100%;
-    overflow-x: hidden;
-}
-
-.huge {
-    font-size: 50px;
-    line-height: normal;
-}
-
+/* Pantallas */
 @media(min-width:768px) {
+    
     #wrapper {
         padding-left: 230px;
         overflow-x: hidden;
@@ -43,6 +22,71 @@
         padding: 10px;
     }
 }
+
+/* ----------- dispositivos móviles ----------- */
+/* cambios css para modo vertical y horizontal */
+@media only screen
+  and (min-width: 320px) 
+  and (max-width: 736px)
+{ 
+    #wrapper {
+        padding-left: 0;
+        overflow-x: hidden;
+    }
+    #page-wrapper {
+        width: 100%;
+        padding: 0;
+        background-color: #fff;
+        height: 100%;
+        overflow-x: hidden;
+    }
+    .huge {
+        font-size: 50px;
+        line-height: normal;
+    }
+    .nav > li > a:hover,
+    .side-nav>li>ul>li>ul>a:hover,
+    .side-nav>li>ul>li>a:hover {
+        color: #3e3e3e;
+        text-decoration: none;
+        background-color: #eee;
+    }
+    .nav > li > a {
+        color: #3e3e3e;
+        text-decoration: none;
+    }
+    .side-nav>li>ul>li>ul>a{   /* actualizacion de marzo2019 */
+        
+        display: block;
+        padding: 8px 50px 8px 55px;
+        color: #3e3e3e;
+        text-decoration: none;   
+    }
+
+}
+ 
+/* cambios css solo para modo vertical */
+@media only screen
+  and (min-width: 320px) 
+  and (max-width: 736px) 
+  and (orientation: portrait) 
+{ 
+  /* inserta aquí tu código */
+}
+ 
+/* cambios css solo para modo horizontal */
+@media only screen
+  and (min-width: 320px) 
+  and (max-width: 736px) 
+  and (orientation: landscape) 
+{ 
+  /* inserta aquí tu código */
+}
+
+
+
+
+
 
 /* Top Navigation */
 
@@ -153,7 +197,6 @@ ul.alert-dropdown {
 .nav > li > a:hover,
 .side-nav>li>ul>li>ul>a:hover,
 .side-nav>li>ul>li>a:hover {
-    color: #fff;
     text-decoration: none;
 }
 .nav > li > a {
@@ -167,6 +210,39 @@ ul.alert-dropdown {
      color: #b5b5b5;
      text-decoration: none;   
 }
+
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.side-nav>li>ul>li>ul>li>a {
+    display: block;
+    color: #e8e8e8;
+    padding: 8px 26px 0% 25%;
+    text-decoration: none;
+}
+
+/* Change the link color on hover */
+.side-nav>li>ul>li>ul>li>a:hover {
+    background-color: #3e3e3e;
+    
+}
+
+.table-condensed{
+    font-size: 12px;
+}
+
+
+
+
+
+
+
+
+
 /* Flot Chart Containers */
 
 .flot-chart {
@@ -237,27 +313,4 @@ ul.alert-dropdown {
 
 .panel-yellow > a:hover {
     color: #df8a13;
-}
-
-ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-}
-
-.side-nav>li>ul>li>ul>li>a {
-    display: block;
-    color: #e8e8e8;
-    padding: 8px 26px 0% 25%;
-    text-decoration: none;
-}
-
-/* Change the link color on hover */
-.side-nav>li>ul>li>ul>li>a:hover {
-    background-color: #3e3e3e;
-    color: white;
-}
-
-.table-condensed{
-    font-size: 12px;
 }
