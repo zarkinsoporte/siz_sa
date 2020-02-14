@@ -268,7 +268,7 @@ public function iowhsPDF()
                     ->withInput();
             }
             
-            $param = self::getParam_DM_Articulos(Input::get('pKey'));
+            $param = self::getParam_DM_Articulos($request, Input::get('pKey'));
             
             return view('Mod04_Materiales.DM_Articulos', $param);
             
@@ -298,7 +298,7 @@ public function iowhsPDF()
                     ->withInput();
             }
             
-            $param = self::getParam_DM_Articulos(Input::get('pKey'));
+            $param = self::getParam_DM_Articulos($request, Input::get('pKey'));
             
             return view('Mod04_Materiales.Etiqueta_Articulo', $param);
             
@@ -332,7 +332,7 @@ public function iowhsPDF()
 
                 // add your error messages:
                // $errors->add('Error', 'El costo A-COMPRAS debe contener un número');
-               $param = self::getParam_DM_Articulos(Input::get('pKey'));
+               $param = self::getParam_DM_Articulos($request, Input::get('pKey'));
                return view('Mod04_Materiales.DM_Articulos', $param)->withErrors($valid);
                     
             }else {
@@ -342,12 +342,12 @@ public function iowhsPDF()
                  } else {
                     Session::flash('mensaje','Artículo guardado.');
                  }
-                 $param = self::getParam_DM_Articulos(Input::get('pKey'));
+                 $param = self::getParam_DM_Articulos($request, Input::get('pKey'));
                return view('Mod04_Materiales.DM_Articulos', $param);
             }
        
     }
-public static function getParam_DM_Articulos($item){
+public static function getParam_DM_Articulos($request, $item){
  $data = DB::select( "
                     select OITM.ItemCode, ItemName, oitm.CardCode, ocrd.CardName,ALM.*,
                     Costo1.Price as CostoEstandar, Costo1.Currency as MonedaEstandar,
@@ -448,15 +448,19 @@ public static function getParam_DM_Articulos($item){
                  
         $user = Auth::user();
         $actividades = $user->getTareas();  
+        
         $proveedores = DB::select('SELECT CardCode, CardName FROM OCRD WHERE CardType = ? ORDER BY CardName', ['S']);
         
         $tareas = json_decode(json_encode($actividades), true);
         foreach ($tareas as $tarea) {
-        $privilegioTarea = array_search('DATOS MAESTROS ARTICULOS', $tarea);
-        if ($privilegioTarea != false) {
-             $privilegioTarea = $tarea['privilegio_tarea'];
-             break;
-        }
+            $ruta = str_replace('%20', ' ', explode('/', $request->path())[2]);
+            $ruta = str_replace('%C3%B7', '&#247;', $ruta);
+            $privilegioTarea = array_search($ruta, $tarea);
+
+            if ($privilegioTarea != false) {
+                $privilegioTarea = $tarea['privilegio_tarea'];
+                break;
+            }
        }
        if (strpos($privilegioTarea, 'checked') !== false) {
         $privilegioTarea = '';            
@@ -1330,9 +1334,9 @@ public function Solicitud_A_PickingTraslados($id){
         return redirect()->route('auth/login');
     }
 }
-public function DM_Articulo($ItemCode){
+public function DM_Articulo(Request $request, $ItemCode){
     if (Auth::check()) {
-        $param = self::getParam_DM_Articulos($ItemCode);
+        $param = self::getParam_DM_Articulos($request, $ItemCode);
         
         $param['privilegioTarea'] = 'disabled';
         $param['oculto'] = true;

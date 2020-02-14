@@ -213,7 +213,7 @@ border: 1px solid #000000;
                                                     <div class="form-group">
                                                         <label for="cant">Cantidad:</label>
                                                         
-                                                        <input type="number" step="0.001" min="0.1" class="form-control" name="cant" id="cant"
+                                                        <input type="number" step="0.001" min="0.001" class="form-control" name="cant" id="cant"
                                                      ng-model="insert.cant" required>
                                                     </div>                                               
                                                 </div>
@@ -358,7 +358,6 @@ var data,
                    
                     $('input[name=cant]').focus();                    
                     $('input[name=cant]').attr('max', fila[0]['Existencia']);
-                    $('input[name=cant]').attr('min',1);
                     $('#submitBtn').attr("disabled", false);                    
                 }                           
         }

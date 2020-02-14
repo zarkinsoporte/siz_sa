@@ -61,17 +61,12 @@ width: 100% !important;
     <!-- Page Heading -->
     <div class="row">
         
-            <div class="visible-xs visible-sm"><br><br></div>
+            <div class="visible-xs visible-sm"><br></div>
          
             <div class="col-md-12">
-                <h3 class="page-header">
-                     
-
-                    <div class="visible-md visible-lg">
+                <h3 class="page-header visible-md visible-lg">
                     Etiqueta QR
-                    </div>
                     
-                             
                 </h3>
                 
             </div>

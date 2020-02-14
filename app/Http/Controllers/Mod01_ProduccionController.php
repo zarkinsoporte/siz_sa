@@ -223,7 +223,7 @@ class Mod01_ProduccionController extends Controller
                     $est_Av = $t_user->U_CP_CT;
                     $Fil_Est = explode(",", $est_Av); //ARRAY SIMPLE
                     $rutasConNombres = self::getNombresRutas($Fil_Est); //ARRAY LLAVE VALOR
-                     array_pop($rutasConNombres);
+                    // array_pop($rutasConNombres);
                     //$ruts1=DB::select("SELECT Name From [@PL_RUTAS] where Code=".Input::get('OP_us'));
 
                     return view('Mod01_Produccion.traslados', ['rutasConNombres' => $rutasConNombres, 't_user' => $t_user, 'est_Av' => $est_Av, 'Fil_Est' => $Fil_Est, 'actividades' => $actividades, 'ultimo' => count($actividades), 't_user' => $t_user]);
@@ -773,7 +773,7 @@ if ($U_CT_siguiente == $Code_actual->U_CT) {
                 $est_Av = $t_user->U_CP_CT; //estaciones que el usuario puede avanzar
                 $Fil_Est = explode(",", $est_Av); //ARRAY SIMPLE  
                 $rutasConNombres = self::getNombresRutas($Fil_Est); //le pasamos las rutas y nos regresa las rutas con nombre
-                array_pop($rutasConNombres);
+                //array_pop($rutasConNombres);
                 Session::flash('usertraslados', 1);
                 Session::flash('mensaje', 'La orden ' . $orden . ' ha sido retirada de control de piso.');
                 DB::transaction(function () use($orden) {
@@ -1187,8 +1187,26 @@ public function terminarOP(){
 
    $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
         if (count($rates) >= 3) {
-            $result = SAP::setReciboProduccion(Input::get('orden'), Input::get('cant'));
+            $result = \App\SAPi::ReciboProduccion((int)Input::get('orden'), (int)Input::get('cant'));
             if (strpos($result, 'Recibo') !== false) {
+                //agregar linea en LOGOF del avance
+                    $dt = new \DateTime();
+                    $user = User::find(Input::get('userId'));
+                    $Code_actual = OP::find(Input::get('code'));
+
+                    $Con_Logof = DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOF]');
+                    $log = new LOGOF();
+                    $log->Code = ((int) $Con_Logof[0]->Code) + 1;
+                    $log->Name = ((int) $Con_Logof[0]->Code) + 1;
+                    
+                    $log->U_idEmpleado = $user->empID;
+                    $log->U_CT = $Code_actual->U_CT;
+                    $log->U_Status = "T";
+                    $log->U_FechaHora = $dt;
+                    $log->U_DocEntry = $Code_actual->U_DocEntry;
+                    $log->U_Cantidad = Input::get('cant');
+                    $log->U_Reproceso = 'N';
+                    $log->save();
                 //borrar OP de control Piso
                 DB::table('@CP_OF')->where('Code', Input::get('code'))->delete(); 
                 //validar OP para cerrar 

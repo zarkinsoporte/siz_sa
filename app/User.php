@@ -159,5 +159,16 @@ class User extends Model implements AuthenticatableContract,
         $noticias=DB::select(DB::raw("SELECT * FROM Siz_Noticias WHERE Destinatario='$id_user'and Leido='N'"));     
         return count($noticias);
        }
+     public function getPuesto(){
+         //DEPARTAMENTO
+         $dept = DB::table('OUDP')->where('Code', $this->dept)
+        ->value('Name');
+        //POSICION
+        $pos = DB::table('OHPS')->where('posID', $this->position)
+        ->value('name');
+        //PUESTO
+        $puesto = $this->jobTitle;
 
+        return $dept." - ".$pos." - ".$puesto;
+     }
 }

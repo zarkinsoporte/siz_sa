@@ -19,9 +19,9 @@ class SessionTimeout {
      */
     public function handle($request, Closure $next)
     {
-       // dd($request->path());
-    if ($request->path() == "auth/login" || $request->path() == "/") {
-          
+      //dd(strpos($request->path(), 'qr') === 0 ); //todas las rutas que comiencen con qr
+    if ($request->path() == "auth/login" || $request->path() == "/" || strpos($request->path(), 'qr') === 0) {
+        
         }
         else{
             if(time() - $this->session->get('lastActivityTime') > $this->getTimeOut()){

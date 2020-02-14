@@ -193,6 +193,9 @@ li.dt-button.active a::before{
                         <!--  <li><a href="url('/register') ">Register</a></li>  -->
                     @else
                     <li>
+                    <a href="#"> {{Auth::user()->getPuesto()}}</a>
+                    </li>
+                    <li>
                     <a href="{!! url('Mod01_Produccion/Noticias') !!}"><i class="fa fa-bell"></i> <span class="badge badge-danger"> {{Auth::user()->getCountNotificacion()}}</span></a>
                     </li>  
                     <li class="dropdown">

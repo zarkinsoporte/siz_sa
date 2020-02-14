@@ -407,4 +407,4 @@ Route::post('home/reporte/GENERACION ETIQUETAS/{redirek?}', 'Mod04_MaterialesCon
 Route::post('etiquetaQR', 'Mod04_MaterialesController@generaEtiquetaQR');
 Route::get('OITM.show', 'HomeController@ShowArticulos')->name('OITM.show');
 //Visualizacion de Articulos para INVITADOS
-Route::get('qr/{itemCode}/{proveedor}/{cantXbulto}', 'GuestController@getArticulo');
+Route::get('qr/{itemCode}/{proveedor}/{cantXbulto}', 'GuestController@getArticulo')->name('qr')->middleware('guest');
