@@ -225,7 +225,7 @@ public function iowhsPDF()
             }
            
             $tipomat = Input::get('text_selDos');
-            $almacenes = "'".implode("', '", Input::get('text_selCuatro')). "'"; //alamacenes separados por comas            
+            $almacenes = "'".implode("', '", Input::get('data_selCuatro')). "'"; //alamacenes separados por comas            
            // dd($almacenes);            
             $fechai = date('d-m-Y' , $fi);
             $fechaf = date('d-m-Y' , $ff);
@@ -349,7 +349,7 @@ public function iowhsPDF()
     }
 public static function getParam_DM_Articulos($request, $item){
  $data = DB::select( "
-                    select OITM.ItemCode, ItemName, oitm.CardCode, ocrd.CardName,ALM.*,
+                     select OITM.ItemCode, ItemName, oitm.CardCode, ocrd.CardName,ALM.*,
                     Costo1.Price as CostoEstandar, Costo1.Currency as MonedaEstandar,
                     Costo10.Price as CostoL10, Costo10.Currency as MonedaL10, 
                     Costo9.Price as CostoACompras, Costo9.Currency as MonedaACompras,
@@ -777,6 +777,7 @@ public function ShowDetalleSolicitud($id){
     if (Auth::check()) {
     $user = Auth::user();
     $actividades = $user->getTareas();  
+    Session::put('solicitud_picking', $id);
       // $solicitudes = DB::table('SIZ_SolicitudesMP');
     $articulos = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as UM, OITM.ItemName, mat.Destino, 
                     mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente, mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A, mat.Cant_ASurtir_Origen_B,

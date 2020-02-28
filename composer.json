@@ -11,7 +11,7 @@
         "laravelcollective/html": "5.1.*",
         "khill/lavacharts" : "3.*", 
         "yajra/laravel-datatables-oracle": "^6.6.0",
-        "simplesoftwareio/simple-qrcode": "~2",
+        "simplesoftwareio/simple-qrcode": "^2.0",
         "barryvdh/laravel-dompdf": "^0.8.2", 
         "maatwebsite/excel": "~2.0"
    },

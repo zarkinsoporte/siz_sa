@@ -106,6 +106,16 @@
                                                 </select>
                                             </div>
                                         @endif
+                                        @if($text_selCinco <> '')
+                                            <div class="form-group">
+                                                <label for="text_selCinco">{{$text_selCinco}}:</label>
+                                                <select class="form-control" id="data_selCinco" name="data_selCinco" autofocus required>
+                                                    @foreach ($data_selCinco as $k => $v)
+                                                        <option value="{{$k}}">{{$v}}</option> 
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        @endif
                                         @if($text_selCuatro <> '')
                                             <div class="form-group">
                                                 <label for="text_selCuatro">{{$text_selCuatro}}:</label>
@@ -114,15 +124,16 @@
                                                 data-live-search="true" 
                                                 class="boot-select form-control" 
                                                 title="No has seleccionado nada" 
-                                                data-size="5" 
+                                                data-size="5"
+                                                data-dropup-auto="false" 
                                                 multiple data-actions-box="true" 
                                                 data-select-all-text="Marcar Todos"
                                                 data-deselect-all-text="Desmarcar Todos"
                                                 data-selected-text-format="count"
                                                 data-count-selected-text="{0} Seleccionados"   
                                                 data-live-search-placeholder="Busqueda" 
-                                                id="text_selCuatro" multiple="multiple" 
-                                                name="text_selCuatro[]" 
+                                                id="data_selCuatro" multiple="multiple" 
+                                                name="data_selCuatro[]" 
                                                 autofocus required>
 
                                                     @foreach ($data_selCuatro as $item)
@@ -131,6 +142,7 @@
                                                 </select>
                                             </div>
                                         @endif
+
                                         @if($data_table <> '')
                                            
                                               <div class="col-md-12">
@@ -159,7 +171,7 @@
                                             </div>
                                         </div>
                                         &nbsp;&nbsp;&nbsp;
-                                        <input id="submit" name="submit" type="submit" value="Generar" onclick="mostrar();"  class="btn btn-primary"/>
+                                        <input id="submit" name="submit" type="submit" value="{{$btnSubmitText}}" onclick="mostrar();"  class="btn btn-primary"/>
                                         @if ($btn3 !== '')
                                             <?php $path = '';  ?>
                                             <a type="button" class="btn btn-default" href="{{url()}}/{{$btn3['route']}}">{{$btn3['btnName']}}</a>    

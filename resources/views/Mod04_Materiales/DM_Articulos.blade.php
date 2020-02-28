@@ -474,9 +474,9 @@ $("#submitBtn").click(function(){
 $("#mainform").submit(); // Submit the form
 
 });
+
 $("#showImg").click(function(){        
 $('.imagepreview').attr('src', $("#showImg").attr('src'));
 $('#imagemodal').modal('show');
-
 });
 @endsection

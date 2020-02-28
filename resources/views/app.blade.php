@@ -108,6 +108,9 @@ https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css
     background-color: #656565;
     color: white;
 }
+.container {
+width: 100%;
+}
 </style>
 
 

@@ -369,35 +369,7 @@ Route::get('/pruebas', function (Request $request) {
     foreach ($tareas as $k) {
         DB::update('update Siz_Tarea_Menu set route = ? where name = ?', [$k->name, $k->name]);
     }
-    //  $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
-    //  $vCmp->DbServerType="6"; 
-    //  $vCmp->server = "SERVER-SAPBO";
-    //  $vCmp->LicenseServer = "SERVER-SAPBO:30000";
-    //  $vCmp->CompanyDB = "Pruebas";
-    //  $vCmp->username = "manager";
-    //  $vCmp->password = "aqnlaaepp";
-    //  $vCmp->DbUserName = "sa";
-    //  $vCmp->DbPassword = "B1Admin";
-    //  $vCmp->UseTrusted = false;
-    //  $vCmp->language = "6";
-    //  $lRetCode = $vCmp->Connect;
-    //  //dd($lRetCode);
-    //  echo $vCmp->GetLastErrorDescription();
-    //  echo 'iniciada';
-    //  echo '<br>';
-    //  $vItem = $vCmp->GetBusinessObject("202");
-    //  $RetVal = $vItem->GetByKey("19848");
-    //  echo $vItem->ProductionOrderStatus;
-    //  echo '<br>';
-    //  $vItem->ProductionOrderStatus = 1;
-    //  $vItem->Update;
-    //  //if ($vCmp->InTransaction){
-    //      //$vCmp->EndTransaction();
-    //   //   dd('cerrada');
-    //  //}
-    //  echo $vCmp->GetLastErrorDescription();
-    //  echo $vItem->ProductionOrderStatus;
-    //return view('Mod00_Administrador.pruebas');
+   
 });
 
 Route::post('home/traslados/terminar', 'Mod01_ProduccionController@terminarOP');
@@ -408,3 +380,11 @@ Route::post('etiquetaQR', 'Mod04_MaterialesController@generaEtiquetaQR');
 Route::get('OITM.show', 'HomeController@ShowArticulos')->name('OITM.show');
 //Visualizacion de Articulos para INVITADOS
 Route::get('qr/{itemCode}/{proveedor}/{cantXbulto}', 'GuestController@getArticulo')->name('qr')->middleware('guest');
+
+
+//itk
+Route::get('home/009 CATALOGO EMPLEADOS', 'Reportes_ProduccionController@showModal')->middleware('routelog');
+Route::get('home/009 CATALOGO DE EMPLEADOS', 'Reportes_ProduccionController@showModal')->name('home/009 CATALOGO DE EMPLEADOS');
+Route::post('home/reporte/009 CATALOGO EMPLEADOS', 'Reportes_ProduccionController@opcionesCatalogo');
+Route::post('home/reporte/009 CATALOGO DE EMPLEADOS', 'Reportes_ProduccionController@R009');
+Route::get('datatables.R009', 'Reportes_ProduccionController@DataShow009')->name('datatables.R009');

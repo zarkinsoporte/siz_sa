@@ -192,9 +192,12 @@ class Reportes_ProduccionController extends Controller
         $data_selTres = [];
         $text_selCuatro = '';
         $data_selCuatro = [];
+        $text_selCinco = '';
+        $data_selCinco = [];
         $sizeModal = 'modal-sm';
         $data_table = '';
         $btn3 = '';
+        $btnSubmitText = 'Generar';
         switch ($nombre) {
             case "HISTORIAL OP":
                 $fieldOtroNumber = 'OP';
@@ -261,6 +264,22 @@ class Reportes_ProduccionController extends Controller
                 $text_selCuatro = 'Almacenes a Considerar';
                 $data_selCuatro = $almacenes;
             break;
+            case "009 CATALOGO EMPLEADOS":
+                $sizeModal = 'modal-md';
+                $btnSubmitText = 'Continuar';
+                $deptos = DB::table('itekniaA.dbo.Departamentos')
+                    ->select('DEP_Nombre as llave', 'DEP_Nombre as valor')
+                    ->where('DEP_Eliminado', '0')
+                    ->orderBy('DEP_Nombre')                    
+                    ->get();                
+                $text_selCuatro = 'Selecciona Departamento';
+                $data_selCuatro = $deptos;
+            break;
+            case "009 CATALOGO DE EMPLEADOS":
+                $sizeModal = 'modal-md';
+                $text_selCinco = 'Escoje una opción';
+                $data_selCinco = $request->get('opciones');
+            break;
 
         }
 
@@ -283,9 +302,12 @@ class Reportes_ProduccionController extends Controller
             'data_selTres' => $data_selTres,
             'text_selCuatro' => $text_selCuatro,
             'data_selCuatro' => $data_selCuatro,
+            'text_selCinco' => $text_selCinco,
+            'data_selCinco' => $data_selCinco,
             'sizeModal' => $sizeModal,
             'data_table' => $data_table,
-            'btn3' => $btn3
+            'btn3' => $btn3,
+            'btnSubmitText' => $btnSubmitText
             ]);
         } else {
             return redirect()->route('auth/login');
@@ -1084,5 +1106,99 @@ class Reportes_ProduccionController extends Controller
         }else {
             return redirect()->route('auth/login');
         }
+    }
+
+    public function opcionesCatalogo(Request $request)
+    {
+        if (Auth::check()) {
+            $user = Auth::user();
+            //se obtienen y guardan los departamentos elegidos
+            $departamentos = "'".implode("', '", $request->get('data_selCuatro')). "'";
+            $request->session()->put('selecciondeptos', $departamentos);
+            $opciones = array();
+                $opciones['1']='Empleados Activos';
+                if ( count($request->get('data_selCuatro')) == 1) {
+                    $opciones['2']='Empleados Activos CON FOTO';                  
+                }
+                $opciones['3']='Empleados No Activos';
+                $opciones['4']='Todos los Empleados';
+            //se manda a llamar el modal que muestre las opciones
+           return redirect()->route('home/009 CATALOGO DE EMPLEADOS', ['opciones'=> $opciones]);
+        } else {
+            return redirect()->route('auth/login');
+        }
+    }
+    public function R009(){
+        if (Auth::check()) {
+        $user = Auth::user();
+        $actividades = $user->getTareas();  
+       // dd(Input::get('data_selCinco'));
+        $data = array(        
+            'actividades' => $actividades,
+            'ultimo' => count($actividades),  
+            'option' => Input::get('data_selCinco')
+        );
+        return view('Mod01_Produccion.R009', $data);
+    } else {
+        return redirect()->route('auth/login');
+    } 
+    }
+    public function DataShow009(Request $request)
+    {
+        $deptos = $request->session()->get('selecciondeptos');
+        $opcionEmpleado = $request->get('empleados');
+        $emp_activo = '1';
+        $foto = false;
+        switch ($opcionEmpleado) {
+            case '1':
+               
+                break;
+            case '2':
+               $foto = true;
+                break;
+            case '3':
+                $emp_activo ='0';
+                break;
+            case '4':
+               $emp_activo ='%';
+                break;
+        }
+            $data = DB::connection('miprueba')->select( "
+            Select DEP_DeptoId, EMP_CodigoEmpleado AS CODIGO, EMP_Nombre + ' ' + 
+            EMP_PrimerApellido + ' ' + EMP_SegundoApellido AS NOMBRE,
+            ISNULL (DEP_Nombre, 'SIN DEPTO') AS DEPARTAMENTO,
+            ISNULL (PUE_NombrePuesto, 'SIN PUESTO...') AS PUESTO, 
+            EMP_FechaIngreso as FEC_INGR, EMP_FechaEgreso as FEC_BAJA, 
+            EMP_Activo as ESTATUS, ISNULL (EMP_Fotografia, 'SIN FOTO') as FOTO 
+            from Empleados left join Departamentos on DEP_DeptoId = EMP_DEP_DeptoId 
+            left join Puestos on PUE_PuestoId = EMP_PUE_PuestoId
+            where EMP_Eliminado = 0 
+            and EMP_Activo = ?
+            and ISNULL(DEP_Nombre, 'SIN DEPTO') in (".$deptos.")
+            Order by DEPARTAMENTO, PUESTO, NOMBRE 
+            ", [$emp_activo]); 
+       // dd($data);
+        $request->session()->put('opcionEmpleado', $opcionEmpleado);
+        return Datatables::of(collect($data))
+        ->addColumn('DTFOTO', function ($consulta) use ($foto){
+            if ($foto) {
+                if (\Storage::disk('nas')->has(''.$consulta->FOTO)) {
+                     return 'data:image/jpeg;base64,'. base64_encode(\Storage::disk('nas')->get(''.$consulta->FOTO));
+                } else {
+                    return 'data:image/jpeg;base64,'. base64_encode(\Storage::disk('nas')->get('SIN_IMAGEN.jpg'));
+                }
+
+            } else {
+                return $consulta->FOTO;
+            }
+        })
+        ->addColumn('ESTADO', function ($consulta) {
+            if ($consulta->ESTATUS == 1) {
+                return 'ACTIVO';
+            } else {
+                return 'NO ACTIVO';
+            }
+        })
+        ->make(true);
     }
 }
