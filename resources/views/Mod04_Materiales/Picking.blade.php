@@ -28,6 +28,20 @@
         Favor de Especificar Lotes correctamente para los materiales que corresponde.
       </div>
       @endif
+      @if($showmodal == 1)
+    <div id="qr" data-field-id="{{$showmodal}}" 
+    data-qrcant="{{$qr_cant}}"    
+    data-itemcode="{{$qr_item[0]->ItemCode}}"
+    data-itemname="{{substr(' '.$qr_item[0]->ItemName, 0, 25).'...'}}"
+    data-maxapgpa="{{$qr_item[0]->APGPA}}"
+    data-maxampst="{{$qr_item[0]->AMPST}}"
+    data-id="{{$qr_item[0]->Id}}"
+    data-cantr="{{$qr_item[0]->Cant_Autorizada}}"
+    data-canta="{{$qr_item[0]->Cant_ASurtir_Origen_A}}"
+    data-cantb="{{$qr_item[0]->Cant_ASurtir_Origen_B}}"
+    data-cantp="{{$qr_item[0]->Cant_PendienteA}}">
+      </div>
+      @endif
 
     </div>
   </div>
@@ -48,11 +62,11 @@
       <span class="pull-right">
         <a class="btn btn-primary btn-sm" href="{{url('/home/2 PICKING ARTICULOS')}}"><i class="fa fa-angle-left"></i>
           Atras</a>
-        <a class="btn btn-danger btn-sm" href="{{'PDF/'.$id}}" target="_blank"><i class="fa fa-file-pdf-o"></i> PDF</a>
+        <a class="btn btn-danger btn-sm" href="{{url('home/2 PICKING ARTICULOS/solicitud/PDF/'.$id)}}" target="_blank"><i class="fa fa-file-pdf-o"></i> PDF</a>
         @if ($itemsConLotes > 0)
         <a class="btn btn-success btn-sm" disabled><i class="fa fa-send"></i> Enviar a Traslados</a>
         @else
-        <a class="btn btn-success btn-sm" href="{{'update/'.$id}}"><i class="fa fa-send"></i> Enviar a Traslados</a>
+        <a class="btn btn-success btn-sm" href="{{url('home/2 PICKING ARTICULOS/solicitud/update/'.$id)}}"><i class="fa fa-send"></i> Enviar a Traslados</a>
         @endif
 
       </span>
@@ -170,8 +184,8 @@
             <td>{{$art->Destino}}</td>
             <td>{{number_format($art->Cant_ASurtir_Origen_A + $art->Cant_ASurtir_Origen_B, 2)}}</td>
             <td>{{number_format($art->Disponible, 2)}}</td>
-            <td><a @if ($art->Disponible >= ($art->Cant_ASurtir_Origen_A + $art->Cant_ASurtir_Origen_B))
-                href="{{'articulos/return/'.$art->Id}}"
+            <td><a @if ($art->Disponible >= ($art->Cant_ASurtir_Origen_A + $art->Cant_ASurtir_Origen_B))                
+                href="{{url('home/PICKING ARTICULOS/solicitud/articulos/return/'.$art->Id)}}"
                 @else
                 disabled = "disabled"
                 @endif
@@ -263,12 +277,12 @@
               <div class="form-group col-md-6">
 
                 <label for="canta">Tomar de APG-PA: <apgpa id="stockAPGPA"></apgpa></label>
-                <input ng-model="canta" id="canta" name="canta" type="number" class="form-control" min="0" step="any"
+                <input string-to-number ng-click="sumaab($event)" ng-model="canta" id="canta" name="canta" type="number" class="form-control" min="0" step="any"
                   required>
               </div>
               <div class="form-group col-md-6">
                 <label for="canta">Tomar de AMP-ST: <ampst id="stockAMPST"></ampst></label>
-                <input ng-model="cantb" id="cantb" name="cantb" type="number" class="form-control" min="0" step="any"
+                <input string-to-number ng-click="sumaab($event)" ng-model="cantb" id="cantb" name="cantb" type="number" class="form-control" min="0" step="any"
                   required>
               </div>
             </div>
@@ -276,10 +290,10 @@
 
               <input id="cantr" name="cantr" type="hidden" class="form-control" readonly>
             </div>
-            <div class="form-group col-md-6">
+            <div class="form-group col-md-6 ng-hide">
               <label for="cantp">Cantidad a Surtir</label>
-              <input id="cantp" value="@{{canta -- cantb}}" name="cantp" type="text" class="form-control" min="0"
-                step="any" max="@{{cantp}}" readonly>
+              <input id="cantp" ng-click="sumaab($event)" value="@{{canta -- cantb}}" name="cantp" type="text" class="form-control" min="0"
+               ng-model="csurtir" step="any" max="@{{cantp}}" readonly>
             </div>
             <div class="form-group col-md-12" ng-show="pendiente > (canta -- cantb)">
               <h5>¿Cuál es la razón por la que se surtirá una cantidad menor?</h5>
@@ -289,10 +303,11 @@
               No hay existencia<br>
             </div>
             <div class="form-group col-md-12">
-              <input type="hidden" id="articulo-id" name="articulo">
+              <input   type="hidden" id="articulo-id" name="articulo">
               <input type="hidden" value="@{{pendiente}}" id="pendiente" name="pendiente">
               <input type="hidden" id="itemcode" name="itemcode">
-              <span>
+            <input type="hidden" id="idsol" name="idsol" value="{{$id}}">
+              <span class="ng-hide">
                 <h6>NOTA:</h6>
                 <h6>* La Cantidad a Surtir puede ser menor a la cantidad Pendiente</h6>
                 <h6>* La Cantidad a Surtir puede modificarse con las Cantidades de los Almacenes</h6>
@@ -305,8 +320,8 @@
         <div class="modal-footer">
 
           <button class="btn btn-default" data-dismiss="modal">Cerrar</button>
-          <button data-ng-disabled="pendiente < (canta -- cantb) || (canta -- cantb) == 0" type="submit"
-            class="btn btn-primary">Guardar</button>
+          <button id="editbtn" data-ng-disabled="pendiente < (canta -- cantb) || (canta -- cantb) == 0" type="submit"
+            ng-click="sumaab($event)" class="btn btn-primary">Guardar</button>
         </div>
         {!! Form::close() !!}
 
@@ -316,16 +331,67 @@
   @endsection
 
   @section('homescript')
+
+
   $('#remove').on('show.bs.modal', function (event) {
   var button = $(event.relatedTarget) // Button that triggered the modal
   var id = button.data('id') // Extract info from data-* attributes
 
   // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
   // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods
-  instead.
+  //instead.
   var modal = $(this)
   modal.find('#articulo-id').val(id)
   });
+var qrcode = $('#qr').data("field-id");
+$('#qr').data("field-id", '');
+var qritemcode = $('#qr').data("itemcode");
+var qritemname = $('#qr').data("itemname");
+var maxapgpa = $('#qr').data("maxapgpa");
+var maxampst = $('#qr').data("maxampst");
+var id = $('#qr').data("id");
+var cantr = $('#qr').data("cantr");
+var canta = $('#qr').data("canta");
+var cantb = $('#qr').data("cantb");
+var cantp = $('#qr').data("cantp");
+var qrcant = $('#qr').data("qrcant");
+$( "#editbtn" ).prop( "disabled", false );
+
+if(qrcode == 1){
+  if(canta >= qrcant){
+    canta = qrcant;
+  }else if (cantb >= qrcant){
+    cantb = qrcant;
+  }else{
+    canta = qrcant;
+  }
+$.get("{!! url('disponibilidadAlmacenMP') !!}",
+{ codigo: qritemcode },
+function(data) {
+var modal = $('#edit').modal(
+{
+show: true,
+backdrop: 'static',
+keyboard: false
+});
+modal.find('#articulo-id').val(id)
+modal.find('#itemcode').val(qritemcode)
+modal.find('#cantr').val(cantp) //autorizada
+modal.find('#canta').attr('max', maxapgpa)
+modal.find('#canta').val( parseFloat(canta * 1))
+modal.find('#cantb').attr('max', maxampst)
+modal.find('#cantb').val( parseFloat(cantb * 1))
+modal.find('#cantp').attr('max', cantp)
+modal.find('#cantp').val( parseFloat((canta + cantb) * 1))
+modal.find('#pendiente').val( parseFloat(cantp * 1))
+
+modal.find('#tituloedit').text(qritemcode + qritemname)
+modal.find('#stockAPGPA').text((data[0].stockapgpa).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","))
+modal.find('#stockAMPST').text((data[0].stockampst).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","))
+});
+}
+
+
 
   $('#edit').on('show.bs.modal', function (event) {
   var button = $(event.relatedTarget) // Button that triggered the modal
@@ -347,9 +413,9 @@
   { codigo: itemcode },
   function(data) {
 
-  modal.find('#stockAPGPA').text(Number(data[0].stockapgpa).toFixed(2))
-  modal.find('#stockAMPST').text(Number(data[0].stockampst).toFixed(2))
-  });
+modal.find('#stockAPGPA').text((data[0].stockapgpa).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","))
+modal.find('#stockAMPST').text((data[0].stockampst).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","))
+});
   });
   @endsection
   <script>
@@ -371,6 +437,16 @@
         $scope.cantb = event.currentTarget.dataset.cantb * 1;   
         $scope.cantr= event.currentTarget.dataset.cantr * 1;    
         $scope.pendiente= event.currentTarget.dataset.cantp * 1;     
+        
+      };
+      $scope.sumaab = function($event){
+       
+        $scope.canta = angular.element(document.querySelector("#canta")).val();  
+        $scope.cantb = angular.element(document.querySelector("#cantb")).val();
+        $scope.pendiente = angular.element(document.querySelector("#qr"))[0].dataset.cantp;
+        $scope.cantr = angular.element(document.querySelector("#qr"))[0].dataset.cantr;
+   
+        $scope.csurtir = parseFloat( $scope.canta ) + parseFloat( $scope.cantb );    
         
       };
  

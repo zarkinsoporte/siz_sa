@@ -264,15 +264,42 @@ Route::get('home/AUTORIZACION/solicitud/update/{id}', 'Mod04_MaterialesControlle
 //3 PICKING ARTICULOS
 Route::get('home/2 PICKING ARTICULOS', 'Mod04_MaterialesController@pickingArticulos')->middleware('routelog');
 Route::get('datatables.solicitudesMP', 'Mod04_MaterialesController@DataSolicitudes')->name('datatables.solicitudesMP');
-Route::get('home/2 PICKING ARTICULOS/solicitud/{id}', 'Mod04_MaterialesController@ShowDetalleSolicitud');
+Route::get('home/2 PICKING ARTICULOS/solicitud/{id}/{qr_itemcode?}/{qr_cant?}', 'Mod04_MaterialesController@ShowDetalleSolicitud');
 Route::post('home/2 PICKING ARTICULOS/solicitud/articulos/remove', 'Mod04_MaterialesController@removeArticuloSolicitud');
-Route::get('home/2 PICKING ARTICULOS/solicitud/articulos/return/{id}', 'Mod04_MaterialesController@returnArticuloSolicitud');
+Route::get('home/PICKING ARTICULOS/solicitud/articulos/return/{id}', 'Mod04_MaterialesController@returnArticuloSolicitud');
 Route::get('home/2 PICKING ARTICULOS/solicitud/PDF/{id}', 'Mod04_MaterialesController@SolicitudPDF');
 Route::get('home/2 PICKING ARTICULOS/solicitud/update/{id}', 'Mod04_MaterialesController@Solicitud_A_Traslados');
 Route::post('home/PICKING ARTICULOS/solicitud/articulos/edit', 'Mod04_MaterialesController@editArticuloPicking');
 Route::get('home/lotes/{tabla}/{alm}/{item}', 'Mod04_MaterialesController@vistaLotes');
 Route::post('home/lotes/insert', 'Mod04_MaterialesController@insertLotes');
 Route::get('home/lotes/remove/{id}/{lote}/{alm}', 'Mod04_MaterialesController@removeLote');
+Route::get('disponibilidadAlmacenMP', function(){
+     
+    $data = DB::select("SELECT 
+		 COALESCE (SUM(CASE WHEN WhsCode = 'APG-PA'  
+         THEN OnHand ELSE 0 END) - (COALESCE (t1.A, 0) + COALESCE (tr.A, 0)), 0) 
+         AS stockapgpa, 
+		 COALESCE (SUM(CASE WHEN WhsCode = 'AMP-ST' 
+          THEN OnHand ELSE 0 END) - (COALESCE (t1.B, 0) + COALESCE (tr.B, 0)), 0) 
+          AS stockampst		
+        FROM dbo.OITW
+		LEFT JOIN (select ItemCode, sum(Cant_ASurtir_Origen_A)  A , sum(Cant_ASurtir_Origen_B)  B  
+        from SIZ_MaterialesSolicitudes where 
+		  EstatusLinea in ('S', 'P', 'I', 'E', 'N')
+		 group by ItemCode) as t1 on t1.ItemCode = OITW.ItemCode
+		 LEFT JOIN(
+		 select itemCode,
+		 SUM(CASE WHEN sol.AlmacenOrigen = 'APG-PA'  THEN Cant_ASurtir_Origen_A ELSE 0 END) A,
+		 SUM(CASE WHEN sol.AlmacenOrigen = 'AMP-ST'  THEN Cant_ASurtir_Origen_A ELSE 0 END) B		
+		 from SIZ_MaterialesTraslados mat
+		 LEFT JOIN SIZ_SolicitudesMP sol on sol.Id_Solicitud = mat.Id_Solicitud
+			where mat.EstatusLinea in ('S', 'P', 'I', 'E', 'N')
+			group by ItemCode
+		 ) tr on tr.ItemCode = OITW.ItemCode
+		where OITW.ItemCode = ?
+        GROUP BY OITW.ItemCode, t1.A, t1.B, tr.A, tr.B",[Input::get('codigo')]);
+        return $data;
+        });
 // 4 TRASLADOS
 Route::get('home/4 GENERAR TRASLADO', 'Mod04_MaterialesController@TrasladosArticulos')->middleware('routelog');
 Route::get('datatables.solicitudesTraslados', 'Mod04_MaterialesController@DataTraslados')->name('datatables.solicitudesTraslados');
@@ -380,6 +407,7 @@ Route::post('etiquetaQR', 'Mod04_MaterialesController@generaEtiquetaQR');
 Route::get('OITM.show', 'HomeController@ShowArticulos')->name('OITM.show');
 //Visualizacion de Articulos para INVITADOS
 Route::get('qr/{itemCode}/{proveedor}/{cantXbulto}', 'GuestController@getArticulo')->name('qr')->middleware('guest');
+Route::get('qr/{itemCode}/{proveedor}/{cantXbulto}', 'Mod04_MaterialesController@getArticulo')->name('qr2');
 
 
 //itk

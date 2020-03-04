@@ -773,7 +773,8 @@ public function saveArt(Request $request){
     
     
 }
-public function ShowDetalleSolicitud($id){
+public function ShowDetalleSolicitud($id, $qr_itemcode = null, $qr_cant = null){
+   
     if (Auth::check()) {
     $user = Auth::user();
     $actividades = $user->getTareas();  
@@ -829,6 +830,8 @@ public function ShowDetalleSolicitud($id){
                     }
     
     //$step = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $id)->value('Status');
+    $showmodal = false;
+    $qr_item = null;
     if ($step->Status == 'Autorizacion') {
         $itemsConLotes = 0;
         $articulos_validos = array_where($articulos, function ($key,$item) {
@@ -836,11 +839,32 @@ public function ShowDetalleSolicitud($id){
         });
         $articulos_novalidos = array_where($articulos, function ($key,$item) {
             return $item->EstatusLinea == 'A';
-        });   
+        });       
     } else {    //para Picking
         $articulos_validos = array_where($articulos, function ($key,$item) {
             return $item->EstatusLinea == 'S' || $item->EstatusLinea == 'P';
-        });
+        });                       
+        if (!is_null($qr_itemcode) && count($articulos_validos) > 0) { 
+            //verificar que venimos de escanear qr 
+            //y que el material escaneado sea de los articulos validos           
+            $qr_item = array_where($articulos_validos, function ($key,$item) use ($qr_itemcode) {
+            return $item->ItemCode == $qr_itemcode;
+            });
+            //dd($qr_item);
+            if (count($qr_item) !== 1) {
+                //si el material no esta en los validos entonces esta en los que no se surtiran
+              
+                $qr_item = null;
+                Session::flash('error', 'El material escaneado esta en la lista de materiales que no se surtirán');
+            }else{
+                $showmodal = true;
+            }
+
+        }else{
+            if (Session::has('notfound')) {
+            Session::flash('error', Session::pull('notfound'));
+        } 
+        } 
         $itemsConLotes = array_where($articulos_validos, function ($key, $item) {
             return $item->BatchNum > 0 && $item->Preparado == 'N';
         });
@@ -862,7 +886,10 @@ public function ShowDetalleSolicitud($id){
         'itemsConLotes' => $itemsConLotes,
         'articulos_validos' => $articulos_validos,
         'articulos_novalidos' => $articulos_novalidos,
-        'comentario' => $step->ComentarioUsuario
+        'comentario' => $step->ComentarioUsuario,
+        'qr_item' => $qr_item,
+        'qr_cant' => $qr_cant,
+        'showmodal' => $showmodal
     );
     if ($step->Status == 'Autorizacion') {
         return view('Mod04_Materiales.Autorizacion', $param);
@@ -1150,7 +1177,11 @@ public function editArticuloPicking(){
     } else{
           Session::flash('error', 'No se pudo actualizar...');
     }
-     return redirect()->back();
+    $id_sol =Input::get('idsol');
+    $item = null;
+    $cant = null;
+     return redirect()
+                ->action('Mod04_MaterialesController@ShowDetalleSolicitud', compact('id_sol', 'item', 'cant'));
     } else {
         return redirect()->route('auth/login');
     }
@@ -2833,7 +2864,7 @@ foreach($consultaj as $item)
 From SIZ_SolicitudesMP
 inner join SIZ_MaterialesSolicitudes on SIZ_MaterialesSolicitudes.Id_Solicitud = SIZ_SolicitudesMP.Id_Solicitud
  inner join OITM on SIZ_MaterialesSolicitudes.ItemCode = OITM.ItemCode
-Where SIZ_MaterialesSolicitudes.EstatusLinea in ('S', 'P')
+Where SIZ_MaterialesSolicitudes.EstatusLinea in ('S', 'P', 'N')
   UNION ALL
  
 Select      'TRASLADOS' AS TIPO_DOC,
@@ -2928,5 +2959,39 @@ $consultaj = collect($consulta);
         //  $pdf->setPaper([0, 0, 90, 144], 'landscape')->setOptions(['isPhpEnabled'=>true]);
         $pdf->setPaper([0, 0, 90, 144],'landscape')->setOptions(['isPhpEnabled'=>true]);             
         return $pdf->stream('Siz_QR_'.$pKey . ' - ' .date("d/m/Y") . '.Pdf');
+    }
+    public function getArticulo($itemCode, $proveedor, $cantXbulto, Request $request)
+    {
+       if (Session::has('solicitud_picking')) {
+               $id_sol = Session::get('solicitud_picking');
+            $items = DB::table('SIZ_MaterialesSolicitudes')
+            ->where('id_solicitud', $id_sol)
+            ->lists('itemCode');
+            $values = array();
+            if (in_array($itemCode ,$items)) {
+                Session::put('qrfound', $id_sol);
+                return redirect()
+                ->action('Mod04_MaterialesController@ShowDetalleSolicitud', compact('id_sol', 'itemCode', 'cantXbulto'));
+               
+            } else {
+                Session::put('notfound','El material escaneado no esta en la solicitud #'.$id_sol);
+              
+                $item = null;
+                $cant = null;
+                return redirect()
+                ->action('Mod04_MaterialesController@ShowDetalleSolicitud', compact('id_sol', 'item', 'cant'));
+               
+            }
+            
+        }
+
+            $cardName = DB::table('OCRD')->where('CardCode', $proveedor)
+            ->value('CardName'); 
+            $proveedor = $proveedor.' '.$cardName;
+            $param = self::getParam_DM_Articulos($request, $itemCode);
+            $param['proveedor'] = $proveedor;
+            $param['cantXbulto'] = $cantXbulto;
+            return view('Mod04_Materiales.Visualiza_ArticuloQR', $param);
+            
     }
     }
