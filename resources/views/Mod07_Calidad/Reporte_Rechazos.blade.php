@@ -35,11 +35,11 @@
                         <!-- Modal -->
 
   <div class="modal fade" id="pass" role="dialog" >
-      <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-dialog modal-md" role="document">
            <div class="modal-content" >
               <div class="modal-header">
 
-                   <h4 class="modal-title" id="pwModalLabel">Reporte de Materiales<small><i data-placement="right" data-toggle="tooltip" class="glyphicon glyphicon-question-sign"  title="Ayuda Shift+F1"></i></small></h4>
+                   <h4 class="modal-title" id="pwModalLabel">Reporte de Rechazos <small><i data-placement="right" data-toggle="tooltip" class="glyphicon glyphicon-question-sign"  title="Ayuda Shift+F1"></i></small></h4>
               </div>
               {!! Form::open(['url' => 'pdfRechazo', 'method' => 'POST']) !!}
 
@@ -59,30 +59,59 @@
       <h4 class="panel-title">
         <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
         Filtros  de Busqueda
-        </a>
         <span class="glyphicon glyphicon-chevron-down"></span>
+        </a>
       </h4>
     </div>
     <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
       <div class="panel-body">
-      <div class="form-group">
-      <label for="date_range" class="control-label">Proveedor:</label><br>
- <select id="prov" name="prov">
-                     <option type="text" selected disabled hidden value="" >Selecciona</option>
-                        @foreach($Proveedores as $proveedor)
-                     <option type="text"  class="form-control" value="{{$proveedor->proveedorId}}">{{$proveedor->proveedorId}} - {{$proveedor->proveedorNombre}}</option>
-                         @endforeach
-                         </select><br>
-                         <label for="date_range" class="control-label">Articulo:</label><br>
-<select  id="arti" name="arti">
-                         <option type="text" maxlength="30" selected disabled hidden max value="">Selecciona</option>
-                         @foreach($Articulos as $Articulo)
-                         <div class="options">
-                     <option  type="text" class="form-control" maxlength="30" value="{{$Articulo->materialCodigo}}">{{$Articulo->materialCodigo}} - {{$Articulo->materialDescripcion}}</option>
-                     </div>
-                         @endforeach
-                      </select>
-                      </div>
+      
+                      <div class="form-group">
+                                                <label for="text_selCuatro">Proveedor:</label>
+                                                
+                                                <select 
+                                                data-live-search="true" 
+                                                class="boot-select form-control" 
+                                                title="No has seleccionado nada" 
+                                                data-size="5"
+                                                data-dropup-auto="false" 
+                                                data-select-all-text="Marcar Todos"
+                                                data-deselect-all-text="Desmarcar Todos"
+                                                data-selected-text-format="count"
+                                                data-count-selected-text="{0} Seleccionados"   
+                                                data-live-search-placeholder="Busqueda" 
+                                                id="arti"  
+                                                name="arti" 
+                                                autofocus >
+
+                                                    @foreach ($Proveedores as $proveedor)
+                                                        <option value="{{$proveedor->proveedorId}}" >{{$proveedor->proveedorId}} - {{$proveedor->proveedorNombre}}</option> 
+                                                    @endforeach
+                                                </select>
+                                            </div>
+<div class="form-group">
+                                                <label for="text_selCuatro">Artículo:</label>
+                                                
+                                                <select 
+                                                data-live-search="true" 
+                                                class="boot-select form-control" 
+                                                title="No has seleccionado nada" 
+                                                data-size="5"
+                                                data-dropup-auto="false" 
+                                                data-select-all-text="Marcar Todos"
+                                                data-deselect-all-text="Desmarcar Todos"
+                                                data-selected-text-format="count"
+                                                data-count-selected-text="{0} Seleccionados"   
+                                                data-live-search-placeholder="Busqueda" 
+                                                id="arti"  
+                                                name="arti" 
+                                                autofocus >
+
+                                                    @foreach ($Articulos as $Articulo)
+                                                        <option value="{{$Articulo->materialCodigo}}" >{{$Articulo->materialCodigo}} - {{$Articulo->materialDescripcion}}</option> 
+                                                    @endforeach
+                                                </select>
+                                            </div>                                    
 
 <div>
 <form id="form1" name="form1">

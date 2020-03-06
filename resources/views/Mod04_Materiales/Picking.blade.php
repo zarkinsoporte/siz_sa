@@ -62,11 +62,11 @@
       <span class="pull-right">
         <a class="btn btn-primary btn-sm" href="{{url('/home/2 PICKING ARTICULOS')}}"><i class="fa fa-angle-left"></i>
           Atras</a>
-        <a class="btn btn-danger btn-sm" href="{{url('home/2 PICKING ARTICULOS/solicitud/PDF/'.$id)}}" target="_blank"><i class="fa fa-file-pdf-o"></i> PDF</a>
+        <a class="btn btn-danger btn-sm" href="{{url('home/PICKING ARTICULOS/solicitud/PDF/'.$id)}}" target="_blank"><i class="fa fa-file-pdf-o"></i> PDF</a>
         @if ($itemsConLotes > 0)
         <a class="btn btn-success btn-sm" disabled><i class="fa fa-send"></i> Enviar a Traslados</a>
         @else
-        <a class="btn btn-success btn-sm" href="{{url('home/2 PICKING ARTICULOS/solicitud/update/'.$id)}}"><i class="fa fa-send"></i> Enviar a Traslados</a>
+        <a class="btn btn-success btn-sm" href="{{url('home/PICKING ARTICULOS/solicitud/update/'.$id)}}"><i class="fa fa-send"></i> Enviar a Traslados</a>
         @endif
 
       </span>
@@ -217,7 +217,7 @@
       <div class="modal-content">
         <div class="modal-header">
 
-          {!! Form::open(['url' => 'home/2 PICKING ARTICULOS/solicitud/articulos/remove', 'method' => 'POST']) !!}
+          {!! Form::open(['url' => 'home/PICKING ARTICULOS/solicitud/articulos/remove', 'method' => 'POST']) !!}
 
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
               aria-hidden="true">&times;</span></button>
@@ -409,6 +409,7 @@ modal.find('#stockAMPST').text((data[0].stockampst).toString().replace(/\B(?=(\d
   modal.find('#cantr').val(cantp) //autorizada
   modal.find('#canta').attr('max', maxa)
   modal.find('#cantb').attr('max', maxb)
+  modal.find('#pendiente').val( parseFloat(cantp * 1))
   $.get("{!! url('disponibilidadAlmacenMP') !!}",
   { codigo: itemcode },
   function(data) {
@@ -436,16 +437,21 @@ modal.find('#stockAMPST').text((data[0].stockampst).toString().replace(/\B(?=(\d
         $scope.canta = event.currentTarget.dataset.canta * 1;    
         $scope.cantb = event.currentTarget.dataset.cantb * 1;   
         $scope.cantr= event.currentTarget.dataset.cantr * 1;    
-        $scope.pendiente= event.currentTarget.dataset.cantp * 1;     
-        
+        $scope.pendiente= event.currentTarget.dataset.cantp * 1;  
+        console.log($scope.pendiente);   
+        console.log($scope.canta);   
+        console.log($scope.cantb);   
+        $scope.csurtir = parseFloat( $scope.canta ) + parseFloat( $scope.cantb );
       };
-      $scope.sumaab = function($event){
+      $scope.sumaabc = function($event){
        
         $scope.canta = angular.element(document.querySelector("#canta")).val();  
         $scope.cantb = angular.element(document.querySelector("#cantb")).val();
         $scope.pendiente = angular.element(document.querySelector("#qr"))[0].dataset.cantp;
         $scope.cantr = angular.element(document.querySelector("#qr"))[0].dataset.cantr;
-   
+   console.log($scope.pendiente);   
+        console.log($scope.canta);   
+        console.log($scope.cantb);  
         $scope.csurtir = parseFloat( $scope.canta ) + parseFloat( $scope.cantb );    
         
       };

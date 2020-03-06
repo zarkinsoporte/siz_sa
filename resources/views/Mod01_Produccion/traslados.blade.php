@@ -54,7 +54,6 @@
                                                     <label class="form-check-label" for="op">
                                                             Orden de Producción:
                                                     </label>
-                                                   
                                             </div> 
                                             <input class="form-control" autofocus type="number" name="op" id="op_input" min="1" max="9999999999">                                                                                                                                         
                                             <input id="pass" hidden type="password" name="pass" value="0123">
@@ -299,11 +298,33 @@ break;
                                                 </a> </td>
 
                                                     <!--Boton Avanzar-->
-                                            <td> <a class="btn btn-success {{$of->avanzar}}" data-toggle="modal"
-                                                    data-target="#cantidad" data-whatever="{{$of->Code}}"
-                                                    data-whatever2="{{$of->U_Recibido - $of->U_Procesado}}">
-                                                    <i class="fa fa-send-o" aria-hidden="true">   Avanzar</i>
-                                                </a> </td>
+                     <td>                       
+                @if($of->U_CT_SIG !== "Terminar OP")
+                    @if($of->U_CT_SIG == "Error en ruta")
+                        <a class="btn btn-danger disabled" >
+                        <i class="fa fa-send-o" aria-hidden="true">   
+                        Avanzar
+                        </i>
+                        </a> 
+                    @else
+                    <a class="btn btn-success {{$of->avanzar}}" data-toggle="modal"
+                        data-target="#cantidad" data-whatever="{{$of->Code}}"
+                        data-whatever2="{{$of->U_Recibido - $of->U_Procesado}}">
+                        <i class="fa fa-send-o" aria-hidden="true">   
+                        Avanzar
+                        </i>
+                    </a> 
+                    @endif
+                @else
+                        <a class="btn btn-success {{$of->avanzar}}" data-toggle="modal"
+                        data-target="#terminar" data-whatever="{{$of->Code}}"
+                        data-whatever2="{{$of->U_Recibido - $of->U_Procesado}}">
+                        <i class="fa fa-send-o" aria-hidden="true">   
+                        Terminar 
+                        </i>
+                    </a> 
+                @endif
+            </td>
 <?php
 break;
 }

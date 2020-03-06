@@ -265,10 +265,10 @@ Route::get('home/AUTORIZACION/solicitud/update/{id}', 'Mod04_MaterialesControlle
 Route::get('home/2 PICKING ARTICULOS', 'Mod04_MaterialesController@pickingArticulos')->middleware('routelog');
 Route::get('datatables.solicitudesMP', 'Mod04_MaterialesController@DataSolicitudes')->name('datatables.solicitudesMP');
 Route::get('home/2 PICKING ARTICULOS/solicitud/{id}/{qr_itemcode?}/{qr_cant?}', 'Mod04_MaterialesController@ShowDetalleSolicitud');
-Route::post('home/2 PICKING ARTICULOS/solicitud/articulos/remove', 'Mod04_MaterialesController@removeArticuloSolicitud');
+Route::post('home/PICKING ARTICULOS/solicitud/articulos/remove', 'Mod04_MaterialesController@removeArticuloSolicitud');
 Route::get('home/PICKING ARTICULOS/solicitud/articulos/return/{id}', 'Mod04_MaterialesController@returnArticuloSolicitud');
-Route::get('home/2 PICKING ARTICULOS/solicitud/PDF/{id}', 'Mod04_MaterialesController@SolicitudPDF');
-Route::get('home/2 PICKING ARTICULOS/solicitud/update/{id}', 'Mod04_MaterialesController@Solicitud_A_Traslados');
+Route::get('home/PICKING ARTICULOS/solicitud/PDF/{id}', 'Mod04_MaterialesController@SolicitudPDF');
+Route::get('home/PICKING ARTICULOS/solicitud/update/{id}', 'Mod04_MaterialesController@Solicitud_A_Traslados');
 Route::post('home/PICKING ARTICULOS/solicitud/articulos/edit', 'Mod04_MaterialesController@editArticuloPicking');
 Route::get('home/lotes/{tabla}/{alm}/{item}', 'Mod04_MaterialesController@vistaLotes');
 Route::post('home/lotes/insert', 'Mod04_MaterialesController@insertLotes');
