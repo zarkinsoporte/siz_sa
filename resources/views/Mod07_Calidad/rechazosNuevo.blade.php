@@ -6,10 +6,10 @@
 
 <!-- Page Heading -->
 <div class="row">
-<div class="col-lg-8 col-md-9 col-xs-10">
+<div class="col-lg-8 col-md-12 col-xs-12">
     <div class="hidden-lg"><br><br></div>
         <h3 class="page-header">
-           Recepcion de Materiales
+           Recepción de Materiales
             <small>Calidad <i data-placement="right" data-toggle="tooltip" class="glyphicon glyphicon-question-sign"  title="Ayuda Shift+F1"></i></small>
         </h3>
         <div class="visible-lg">
@@ -27,7 +27,7 @@
     
 </div>
 @include('partials.alertas')
-<iframe class="col-md-9 " scrolling="yes" height="150%" src="{!! url('getAutocomplete') !!}" frameborder="0"></iframe>
+<iframe class="col-md-12 " scrolling="" height="150%" width="90%"src="{!! url('getAutocomplete') !!}" frameborder="0"></iframe>
 @endsection
 @section ('homescript')
 document.onkeyup = function(e) {

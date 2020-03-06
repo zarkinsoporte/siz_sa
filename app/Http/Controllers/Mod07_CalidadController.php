@@ -51,8 +51,16 @@ public function RechazoIn(Request $request)
     {
     if($request->input('Fech_Recp')<=($request->input('Fech_Rev')))
     {
- 
-      //  dd($request->input('Inspector'));
+        $DocItems = DB::table('Siz_Calidad_Rechazos')->where('DocumentoNumero', $request->input('N_Doc'))->get();
+        $item = $request->input('Codigo');
+        $busqueda = array_where($DocItems, function ($key, $value) use($item) {
+            return $value->materialCodigo = $item;
+        });
+        if (count($busqueda) == 1) {
+            
+            Session::flash('error', 'Error, Ya existe un registro con el mismo "Numero de Fac." y "Código de Material"');
+            return response()->redirectTo('home/NUEVO RECHAZO');
+        }
         DB::table('Siz_Calidad_Rechazos')->insert(
             [
                 'fechaRecepcion'     =>$request->input('Fech_Recp'),
@@ -71,15 +79,15 @@ public function RechazoIn(Request $request)
                 'InspectorNombre'    =>$request->input('Inspector'),
                 'Observaciones'      =>$request->input('Observaciones'),
                 'Borrado'            =>'N'
-                    
-        
             ]
         );
             Session::flash('mensaje', 'Registro Guardado');
           return response()->redirectTo('home/NUEVO RECHAZO');
     } 
 else{
-    return Redirect::back()->with('message' , 'Error,La fecha Revisión es menor a la fecha de Recepción');
+    Session::flash('error', 'Error, La fecha Revisión es menor a la fecha de Recepción');
+    return response()->redirectTo('home/NUEVO RECHAZO');
+    
 }
 }
     public function autocomplete(Request $request)
