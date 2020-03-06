@@ -63,6 +63,8 @@ public function RechazoIn(Request $request)
         }
         DB::table('Siz_Calidad_Rechazos')->insert(
             [
+                //la siguiente linea es para el boton
+                //DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOF]');
                 'fechaRecepcion'     =>$request->input('Fech_Recp'),
                 'fechaRevision'      =>$request->input('Fech_Rev'),
                 'proveedorId'        =>$request->input('Id_prov'),
@@ -213,17 +215,23 @@ else{
         if(Auth::check()){
             $user = Auth::user();
             $actividades = $user->getTareas();
-            $DelRechazo= DB::select("SELECT * FROM Siz_Calidad_Rechazos where Borrado='N'");
-            //$Delfechas=DB::select('SELECT fechaRevision FROM Siz_Calidad_Rechazos');
-         //dd($DelRechazo);
-           return view('Mod07_Calidad.Cancelaciones',['DelRechazo'=>$DelRechazo,'actividades' => $actividades, 'ultimo' => count($actividades)]);
+           return view('Mod07_Calidad.Cancelaciones',['actividades' => $actividades, 'ultimo' => count($actividades)]);
         }else {
             return  redirect()->route('/auth/login');
         }
-    
-       
     }
-    
+    public function DataShowCancelaciones(){
+         $consulta = DB::select("SELECT * FROM Siz_Calidad_Rechazos where Borrado='N'");
+     $consulta = collect($consulta);
+            return Datatables::of($consulta)             
+                 ->addColumn('action', function ($item) {                     
+                      return  '<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mymodal" data-whatever="'.$item->id.'">
+                                        <i class="fa fa-trash" aria-hidden="true"></i>
+                                    </button>';
+                    }
+                    )
+                ->make(true);
+    }
     public function UPT_Cancelado($id){
      
         DB::table('Siz_Calidad_Rechazos')

@@ -1,86 +1,144 @@
-
 @extends('home')
 @section('homecontent')
 
-        <div class="container" >
+<div class="container">
 
-<!-- Page Heading -->
-<div class="row">
-<div class="col-lg-11 col-md-11 col-xs-11">
-    <div class="hidden-lg"><br><br></div>
-        <h3 class="page-header">
-           Cancelación de Rechazos
-            <small>Calidad</small>
-        </h3>
-        <div class="visible-lg">
-        <ol class="breadcrumb">
-            <li>
-                <i class="fa fa-dashboard">  <a href="{!! url('home') !!}">Inicio</a></i>
-            </li>
-            <li>
-                <i class= "fa fa-archive"> <a href="#">Cancelaciones</a></i>
-            </li>
-        </ol>
+    <!-- Page Heading -->
+    <div class="row">
+        <div class="col-md-12 ">
+            <div class="hidden-lg"><br></div>
+            <h3 class="page-header">
+                Cancelación de Rechazos
+                <small>Calidad</small>
+            </h3>
+          
         </div>
-</div>
-</div>
+    </div>
+
     <style>
-    th{
-        font-family:'Helvetica';
-        font-size:90%;
-       
-        text-align:center;
-    }
-    td{
-        font-family:'Helvetica';
-        font-size:80%;
-        
-    }
+        th {
+            font-size: 12px;
+        }
 
+        td {
+            font-size: 11px;
+        }
+
+        th,
+        td {
+            white-space: nowrap;
+        }
+.table-condensed > thead > tr > td, .table-condensed > tbody > tr > td, .table-condensed > tfoot > tr > td {
+padding: 1px 5px 1px 5px;
+}
+
+
+        .dataTables_wrapper .dataTables_filter {
+            float: right;
+            text-align: right;
+            visibility: visible;
+        }
+
+        td {
+            font-family: 'Helvetica';
+            font-size: 100%;
+        }
+
+        th {
+            font-family: 'Helvetica';
+            font-size: 100%;
+        }
     </style>
-
-<div class="row">
-        <div class="col-md-11">
-                <table>
+    <!-- /.row -->
+    <div class="row">
+        <div class="col-md-12 ">
+            @include('partials.alertas')
+        </div>
+    </div>
+    <div class="">
+        <div class="">
+            <div class="">
+                <table id="tsolicitudes" class="stripe table-condensed" style="width:100%">
                     <thead>
-                        <tbody>
                         <tr>
-                        <th rowspan="2" align="center"  scope="col">Fecha de Revisión</th>
-                        <th rowspan="2" style="width:20%;"align="center" scope="col">Proveedor</th>
-                        <th rowspan="2" style="width:30%;" align="center"  scope="col">Descripcion de Material</th>
-                        <th colspan="3" align="center" scope="col">Cantidad</th>
-                        <th rowspan="2" align="center"  scope="col">Descripción Rechazo</th>
-                        <th rowspan="2" align="center" scope="col">Cancelar Rechazo</th>
-                         </tr>
-                         <tr>
-                         <th align="center">Aceptada</th>
-                         <th align="center">Rechazada</th>
-                         <th align="center">Revisada</th>
-                           
+                            <th>F. Revisión</th>
+                            <th># Factura</th>
+                            <th>Proveedor</th>
+                            <th>Descripción</th>
+                            <th>UM</th>
+                            <th>Cant. Aceptada</th>
+                            <th>Cant. Rechazada</th>
+                            <th>Cant. Revisada</th>
+                            <th>Inspector</th>
+                            <th>Descripción Rechazo</th>
+                            <th>Quitar</th>
+                        </tr>
                     </thead>
-            @foreach($DelRechazo as $Rechazo)
-            <tbody>
-            <td>{{date("d-m-Y",strtotime($Rechazo->fechaRevision))}}</td>
-            <td>{{$Rechazo->proveedorNombre}}</td>
-            <td>{{$Rechazo->materialDescripcion}}</td><s></s>
-            <td colspan="1">{{$Rechazo->cantidadAceptada}}&nbsp; {{$Rechazo->materialUM}}</td>
-            <td colspan="1">{{$Rechazo->cantidadRechazada}}&nbsp; {{$Rechazo->materialUM}}</td>
-            <td colspan="1">{{$Rechazo->cantidadRevisada}} &nbsp;{{$Rechazo->materialUM}}</td>
-            <td>{{$Rechazo->DescripcionRechazo}}</td>
-            <!--entra el boton borrar -->
-            <td style="text-align:center;">
-            <a href="../borrado/{{$Rechazo->id}}" type="submit" class="btn btn-danger btn-xs">Eliminar</button></a>
-            </td>
-            </tbody>
-            @endforeach
-            </table>
-                         </tr>
-                        
-                        </tbody>
-                
-            </div>
-</div>
+                    <tbody>
 
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+
+    </div>
+    @yield('subcontent-01')
+</div>
 @endsection
 
-  
+@section('script')
+
+
+
+var table = $('#tsolicitudes').DataTable({
+dom: 'frtip',
+"order": [[ 0, "asc" ]],
+orderCellsTop: true,
+scrollX: true,
+paging: true,
+processing: true,
+responsive: true,
+deferRender: true,
+ajax: {
+url: '{!! route('datatables.cancelacionrechazos') !!}',
+data: function () {
+
+}
+},
+columns: [
+    { data: 'fechaRevision',
+    render: function(data){
+        if (data === null){return data;}
+        var d = new Date(data);
+        return moment(d).format("DD-MM-YYYY");
+    }
+    },
+    { data: 'DocumentoNumero'},
+    { data: 'proveedorNombre'},
+    { data: 'materialDescripcion'},
+    { data: 'materialUM'},
+    { data: 'cantidadAceptada'},
+    { data: 'cantidadRechazada'},
+    { data: 'cantidadRevisada'},
+    { data: 'InspectorNombre'},
+    { data: 'DescripcionRechazo'},
+    { data: 'action'},
+],
+"language": {
+"url": "{{ asset('assets/lang/Spanish.json') }}",
+},
+columnDefs: [
+],
+//revision
+
+});
+@endsection
+
+<script>
+    document.onkeyup = function(e) {
+   if (e.shiftKey && e.which == 112) {
+    window.open("ayudas_pdf/AyM00_00.pdf","_blank");
+  }
+  } 
+</script>

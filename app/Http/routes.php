@@ -190,7 +190,10 @@ Route::post('admin/Delete_Rechazo/', 'Mod07_CalidadController@Delete_Rechazo');
 Route::get('search/autocomplete', 'Mod07_CalidadController@autocomplete');
 Route::post('/pdfRechazo', 'Mod07_CalidadController@Pdf_Rechazo');
 Route::get('home/REPORTE DE RECHAZOS', 'Mod07_CalidadController@Reporte')->middleware('routelog');
-Route::get('home/CANCELACIONES', 'Mod07_CalidadController@Cancelado');
+Route::get('home/CANCELACIONES', 'Mod07_CalidadController@Cancelado')->middleware('routelog');
+
+Route::get('datatables.cancelacionrechazos', 'Mod07_CalidadController@DataShowCancelaciones')->name('datatables.cancelacionrechazos');
+
 Route::get('borrado/{id}', 'Mod07_CalidadController@UPT_Cancelado');
 Route::post('/borrado', 'Mod07_CalidadController@UPT_Cancelado');
 Route::get('home/HISTORIAL', 'Mod07_CalidadController@Historial')->middleware('routelog');
