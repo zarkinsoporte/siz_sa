@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use DB;
 use Auth;
+use Artisan;
 class route_log
 {
     /**
@@ -16,9 +17,13 @@ class route_log
      */
     public function handle($request, Closure $next)
     {
+         if (!Auth::check()) {
+              
+            return redirect()->route('auth/login');
+        }
         $ruta = str_replace('%20', ' ', explode('/', $request->path())[1]);
         $ruta = str_replace('%C3%B7', '&#247;', $ruta);
-
+        
         $result = DB::table('SIZ_routes_log')
             ->where('Usuario', Auth::user()->U_EmpGiro)
             ->where('route', $ruta)
@@ -48,6 +53,11 @@ class route_log
                 and Usuario = ? and ultimaFecha = ?', [$val->route, $val->Usuario, $val->ultimaFecha]);
             }
         }
-        return $next($request);
+        $respuesta = $next($request);
+        if ($ruta == "TRASLADO &#247; AREAS") {
+             Artisan::call('cache:clear');
+            Artisan::call('config:cache');
+        }
+        return $respuesta;
     }
 }

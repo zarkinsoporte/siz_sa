@@ -87,9 +87,9 @@
         <thead class="thead-dark">
                 <tr>
                 
-                        <td rowspan="2" align="center" bgcolor="#474747" style="color:white"; scope="col">Fecha de Revisión</td>
+                        <td rowspan="2" align="center" bgcolor="#474747" style="color:white"; scope="col">Fecha Revisión</td>
                         <td rowspan="2" align="center" bgcolor="#474747" style="color:white"; scope="col">Proveedor</td>
-                        <td rowspan="2" align="center" bgcolor="#474747" style="color:white"; scope="col">Código de Material</td>
+                        <td rowspan="2" align="center" bgcolor="#474747" style="color:white"; scope="col">Código </td>
                         <td rowspan="2" align="center" bgcolor="#474747" style="color:white"; scope="col">Descripcion de Material</td>
                         <td colspan="5" align="center" bgcolor="#474747" style="color:white"; scope="col">Cantidad</td>
                         <td rowspan="2" align="center" bgcolor="#474747" style="color:white"; scope="col">Nombre del Inspector</td>
@@ -122,19 +122,19 @@
                             {{$rep->materialDescripcion}}
                             </td>
                             <td scope="row"align="center">
-                            {{$rep->cantidadRecibida}}
+                            {{number_format($rep->cantidadRecibida, 4)}}
                             </td>
 
                             <td scope="row"align="center">
-                            {{$rep->cantidadRevisada}}
+                                {{number_format($rep->cantidadRevisada, 4)}}
                             </td>
 
                             <td scope="row"align="center">
-                            {{$rep->cantidadAceptada}}
+                            {{number_format($rep->cantidadAceptada, 4)}}
                             </td>
 
                             <td scope="row"align="center">
-                            {{$rep->cantidadRechazada}}
+                            {{number_format($rep->cantidadRechazada, 4)}}
                             </td>
                             <td scope="row"align="center">
                             {{number_format(($rep->cantidadAceptada / $rep->cantidadRecibida)*100, 1)}}
@@ -151,7 +151,7 @@
   
                     <tr>
                 <td colspan="1">
-                <b>  Motivo del Rechazo: </b>
+                <b>  Motivo rechazo: </b>
                 </td>
                 <td colspan="10">
                 &nbsp;<?php echo ($rep->DescripcionRechazo);?>

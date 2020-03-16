@@ -49,6 +49,13 @@ class Mod07_CalidadController extends Controller
 
 public function RechazoIn(Request $request)   
     {
+        $hoy = strtotime("now");
+        
+        if (strtotime(Input::get('Fech_Rev')) > $hoy) {
+            Session::flash('error', 'Registro No guardado, La fecha de revisión no puede ser mayor a hoy');
+            return response()->redirectTo('home/NUEVO RECHAZO');
+        }
+
     if($request->input('Fech_Recp')<=($request->input('Fech_Rev')))
     {
         $DocItems = DB::table('Siz_Calidad_Rechazos')->where('DocumentoNumero', $request->input('N_Doc'))->get();
@@ -58,7 +65,7 @@ public function RechazoIn(Request $request)
         });
         if (count($busqueda) == 1) {
             
-            Session::flash('error', 'Error, Ya existe un registro con el mismo "Numero de Fac." y "Código de Material"');
+            Session::flash('error', 'Registro No guardado, Ya existe un registro con el mismo "Numero de Fac." y "Código de Material"');
             return response()->redirectTo('home/NUEVO RECHAZO');
         }
         DB::table('Siz_Calidad_Rechazos')->insert(
@@ -87,7 +94,7 @@ public function RechazoIn(Request $request)
           return response()->redirectTo('home/NUEVO RECHAZO');
     } 
 else{
-    Session::flash('error', 'Error, La fecha Revisión es menor a la fecha de Recepción');
+    Session::flash('error', 'Registro No guardado, La fecha Revisión es menor a la fecha de Recepción');
     return response()->redirectTo('home/NUEVO RECHAZO');
     
 }
@@ -141,9 +148,10 @@ else{
     switch ($btnradio) {
         case 0:
         $rechazo=DB::table('Siz_Calidad_Rechazos')
-        ->whereBetween('fechaRevision',[$fechaIni ,$fechaFin])
+        ->whereBetween('fechaRevision',[$fechaIni. ' 00:00:00' ,$fechaFin. ' 23:59:59'])
         ->where('proveedorId','LIKE','%'.$prov1.'%')
         ->where('materialCodigo','LIKE','%'.$artic1.'%')
+        ->where('Borrado','N')
         ->get();
             break;
         case 1:
@@ -151,6 +159,7 @@ else{
         ->where('proveedorId','LIKE','%'.$prov1.'%')
         ->where('materialCodigo','LIKE','%'.$artic1.'%')
         ->where('cantidadRechazada',">",0)
+        ->where('Borrado','N')
         ->get();
 
             break;
@@ -160,6 +169,7 @@ else{
         ->where('proveedorId','LIKE','%'.$prov1.'%')
         ->where('materialCodigo','LIKE','%'.$artic1.'%')
         ->where('cantidadRechazada',0)
+        ->where('Borrado','N')
         ->get();
 
             break;
@@ -225,20 +235,19 @@ else{
      $consulta = collect($consulta);
             return Datatables::of($consulta)             
                  ->addColumn('action', function ($item) {                     
-                      return  '<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mymodal" data-whatever="'.$item->id.'">
+                      return  '<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#confirma" data-whatever="'.$item->id.'">
                                         <i class="fa fa-trash" aria-hidden="true"></i>
                                     </button>';
                     }
                     )
                 ->make(true);
     }
-    public function UPT_Cancelado($id){
-     
+    public function UPT_Cancelado(){    
+       // dd(Input::get('code')); 
         DB::table('Siz_Calidad_Rechazos')
-         ->where('id', $id)
+         ->where('id', Input::get('code'))
          ->update(['Borrado' => 'S']);
-        
-                 
+                         
          return redirect()->back();
      }
      public function Historial()

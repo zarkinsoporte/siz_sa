@@ -194,8 +194,8 @@ Route::get('home/CANCELACIONES', 'Mod07_CalidadController@Cancelado')->middlewar
 
 Route::get('datatables.cancelacionrechazos', 'Mod07_CalidadController@DataShowCancelaciones')->name('datatables.cancelacionrechazos');
 
-Route::get('borrado/{id}', 'Mod07_CalidadController@UPT_Cancelado');
-Route::post('/borrado', 'Mod07_CalidadController@UPT_Cancelado');
+//Route::get('borrado/{id}', 'Mod07_CalidadController@UPT_Cancelado');
+Route::post('home/cancelaciones/quitar', 'Mod07_CalidadController@UPT_Cancelado');
 Route::get('home/HISTORIAL', 'Mod07_CalidadController@Historial')->middleware('routelog');
 Route::post('/excel', 'Mod07_CalidadController@excel');
 ////reporte calidad
@@ -375,25 +375,9 @@ Route::get('home/reporte/PRODUCCION POR AREAS', 'Reportes_ProduccionController@r
 Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@produccionxareasXLS');
 
 Route::get('/pruebas', function (Request $request) {
-    $consulta = DB::table('SIZ_SolicitudesMP')
-        ->join('SIZ_MaterialesSolicitudes', 'SIZ_MaterialesSolicitudes.Id_Solicitud', '=', 'SIZ_SolicitudesMP.Id_Solicitud')
-        ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')
-        ->leftjoin('OUDP', 'OUDP.Code', '=', 'dept')
-        ->groupBy('SIZ_SolicitudesMP.Id_Solicitud', 'SIZ_SolicitudesMP.FechaCreacion', 'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'firstName', 'lastName', 'dept', 'Name')
-        ->select(
-            'SIZ_SolicitudesMP.Id_Solicitud',
-            'SIZ_SolicitudesMP.FechaCreacion',
-            'SIZ_SolicitudesMP.Usuario',
-            'SIZ_SolicitudesMP.Status',
-            'OHEM.firstName',
-            'OHEM.lastName',
-            'OHEM.dept',
-            'OUDP.Name as depto'
-        )
-        ->whereIn('SIZ_SolicitudesMP.Status', ['Pendiente', 'Regresada', 'En Proceso'])
-        ->whereIn('SIZ_MaterialesSolicitudes.EstatusLinea', ['S', 'P', 'N']);
-    //$consulta = 
-    dd($consulta->get());
+   $var1= \Artisan::call('cache:clear');
+   $var= Artisan::call('config:cache');
+    dd($var1);
     $tareas = DB::table('Siz_Tarea_Menu')->get();
 
     foreach ($tareas as $k) {

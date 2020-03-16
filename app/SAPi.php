@@ -46,14 +46,14 @@ public static function ReciboProduccion($docEntry, $whs, $Cant, $comentario, $me
         $vItem->Lines->BaseType = '202'; 
         $vItem->Lines->TransactionType = '0'; // botrntComplete
         $vItem->Lines->Quantity = $Cant;
-        $vItem->Lines->WarehouseCode = $whs;
+        //$vItem->Lines->WarehouseCode = $whs;
         $vItem->Lines->Add(); 
         if ($vItem->Add() == 0) {// cero es correcto   
                 return 'Recibo creado correctamente';
         } else {
                 $descripcionError = self::$vCmp->GetLastErrorDescription();    
                 if (strpos($descripcionError, 'IGN1.WhsCode][line: 1') !== false) {
-                $descripcionError = $descripcionError.' Uno o más materiales tienen stock negativo.';
+                $descripcionError = $descripcionError.' Uno o más materiales tienen stock negativo. Actualiza Reporte "POSIBLE ROMPIMIENTOS"';
                 }
                 return 'Error SAP: '.$descripcionError;
         }  

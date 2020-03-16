@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App;
+use Artisan;
 use App\Http\Controllers\Controller;
 use App\Modelos\MOD01\LOGOF;
 use App\Modelos\MOD01\LOGOT;
@@ -224,7 +225,7 @@ class Mod01_ProduccionController extends Controller
                     $est_Av = $t_user->U_CP_CT;
                     $Fil_Est = explode(",", $est_Av); //ARRAY SIMPLE
                     $rutasConNombres = self::getNombresRutas($Fil_Est); //ARRAY LLAVE VALOR
-                     
+                    
                     return view('Mod01_Produccion.traslados', ['rutasConNombres' => $rutasConNombres, 't_user' => $t_user, 'est_Av' => $est_Av, 'Fil_Est' => $Fil_Est, 'actividades' => $actividades, 'ultimo' => count($actividades), 't_user' => $t_user]);
                 } else {
                     return redirect()->back()->withErrors(array('message' => 'Error de autenticación.'));
@@ -434,7 +435,7 @@ class Mod01_ProduccionController extends Controller
                 ]);
                 ////RUTA RETROCESO
                 $Ruta = (OP::getRutaNombres($op));
-                
+              
                 return view('Mod01_Produccion.traslados',
                  ['actividades' => $actividades, 
                  'ultimo' => count($actividades), 
@@ -1177,26 +1178,28 @@ public function repCortePielExl(){
 }
 }
 
-public function terminarOP(){
+public function terminarOP(Request $request){
     
-                $id = Input::get('userId');  
-                Session::flash('op', Input::get('orden')); 
+                $id = $request->input('userId');  
+                Session::flash('op', $request->input('orden')); 
                 Session::put('return', 1);    
                 
 
    $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
         if (count($rates) >= 3) {
-            $Code_actual = OP::find(Input::get('code'));
-            $orden_owor = DB::table('OWOR')->where('DocNum', Input::get('orden'))->first();
-            if (($orden_owor->PlannedQty) >= (floatval ( $orden_owor->CmpltQty) + floatval ( Input::get('cant')))) {
+            $Code_actual = OP::find($request->input('code'));
+            $orden_owor = DB::table('OWOR')->where('DocNum', $request->input('orden'))->first();
+            //dd($orden_owor);
+           
+            if (($orden_owor->PlannedQty) >= (floatval ( $orden_owor->CmpltQty) + floatval ( $request->input('cant')))) {
                 $apellido = Self::getApellidoPaternoUsuario(explode(' ',Auth::user()->lastName));
                 $usuario_reporta = explode(' ', Auth::user()->firstName)[0].' '.$apellido;
-                $result = SAPi::ReciboProduccion(Input::get('orden'), $orden_owor->Warehouse, Input::get('cant'), "Reportado por: ".$usuario_reporta, "Recibo de producción");
+                $result = SAPi::ReciboProduccion($request->input('orden'), $orden_owor->Warehouse, $request->input('cant'), "Reportado por: ".$usuario_reporta, "Recibo de producción");
                 if (strpos($result, 'Recibo') !== false) {
                 //agregar linea en LOGOF del avance
                     $dt = date('Ymd h:m:s');
-                    $user = User::find(Input::get('userId'));
-//$Code_actual = OP::find(Input::get('code'));
+                    $user = User::find($request->input('userId'));
+//$Code_actual = OP::find($request->input('code'));
 
                     $Con_Logof = DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOF]');
                     $log = new LOGOF();
@@ -1208,22 +1211,22 @@ public function terminarOP(){
                     $log->U_Status = "T";
                     $log->U_FechaHora = $dt;
                     $log->U_DocEntry = $Code_actual->U_DocEntry;
-                    $log->U_Cantidad = Input::get('cant');
+                    $log->U_Cantidad = $request->input('cant');
                     $log->U_Reproceso = 'N';
                     $log->save();
                 //borrar OP de control Piso
                $orden_owor = NULL;
-               $orden_owor = DB::table('OWOR')->where('DocNum', Input::get('orden'))->first();
+               $orden_owor = DB::table('OWOR')->where('DocNum', $request->input('orden'))->first();
             if ($orden_owor->PlannedQty == floatval ( $orden_owor->CmpltQty) ) {
-                DB::table('@CP_OF')->where('Code', Input::get('code'))->delete(); 
+                DB::table('@CP_OF')->where('Code', $request->input('code'))->delete(); 
             }
                 
                 //validar OP para cerrar 
                 $cerrar = DB::select("
                             SELECT T0.[DocNum] as Orden, T0.[ItemCode] as Codigo, T0.[PlannedQty] as Planeado, T0.[CmpltQty] as Terminado ,T0.UpdateDate as Actualizado FROM OWOR T0 LEFT JOIN (SELECT OWOR.DocNum as OP,sum(WOR1.PlannedQty) as Cantidad FROM OWOR inner join WOR1 on WOR1.DocEntry = OWOR.DocEntry inner join OITM A1 on WOR1.ItemCode=A1.ItemCode WHERE OWOR.[PlannedQty] <= OWOR.[CmpltQty] and  OWOR.[status] <> 'L' and WOR1.IssueType = 'M' and WOR1.IssuedQty < WOR1.PlannedQty and A1.ItmsGrpCod<> 113 group by OWOR.DocNum ) VAL on T0.DocNum = VAL.OP WHERE  T0.DocNum=? and T0.[PlannedQty] <=  T0.[CmpltQty] and  T0.[status] <> 'L' and VAL.Cantidad is null
-                            ", [Input::get('orden')]);
+                            ", [$request->input('orden')]);
                 if(count($cerrar) > 0){
-                    SAP::ProductionOrderStatus(Input::get('orden'), 2); //cerrar Orden en SAP
+                    SAP::ProductionOrderStatus($request->input('orden'), 2); //cerrar Orden en SAP
                 }
                 Session::flash('mensaje', $result);
                 Session::put('recibo', 1);   
@@ -1234,6 +1237,7 @@ public function terminarOP(){
                 return redirect()->action('Mod01_ProduccionController@getOP', $id);
             }
             } else {
+
                 Session::flash('error', 'La cantidad Completada no puede ser mayor a la Planeada');
                 return redirect()->action('Mod01_ProduccionController@getOP', $id);
             }

@@ -49,7 +49,7 @@
                        @include('partials.alertas')
                   </div>
                   <div class="form-group">
-                      <label for="date_range" class="control-label">Rango de Fechas:</label><br>
+                      <label for="date_range" class="control-label">Rango Fecha de Revisión:</label><br>
                        Desde:<input type="date" id="FechIn" name="FechIn" class="form-control" required>
                       Hasta:<input type="date" id="FechaFa" name="FechaFa" class="form-control" required >
                       </div>

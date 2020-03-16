@@ -84,22 +84,61 @@ padding: 1px 5px 1px 5px;
 
     </div>
     @yield('subcontent-01')
+
+    <div class="modal fade" id="confirma" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="pwModalLabel">Quitar</h4>
+                </div>
+     {!! Form::open(['url' => 'home/cancelaciones/quitar', 'method' => 'POST']) !!}
+                <div class="modal-body">
+    
+                    <div class="form-group">
+                      
+                            <input type="hidden" name="code" class="form-control" id="code" value="" />
+                            <h4>¿Desea continuar?</h4>
+                        
+                    </div>
+    
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" id="submitBtn" class="btn btn-primary">Quitar</button>
+                </div>
+    {!! Form::close() !!}
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 
 @section('script')
 
+$('#confirma').on('show.bs.modal', function (event) {
+var button = $(event.relatedTarget) // Button that triggered the modal
+var recipient = button.data('whatever') // Extract info from data-* attributes
+// If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+// Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+var modal = $(this)
 
+modal.find('#code').val(recipient)
+});
 
 var table = $('#tsolicitudes').DataTable({
 dom: 'frtip',
-"order": [[ 0, "asc" ]],
+"order": [[ 0, "desc" ]],
 orderCellsTop: true,
 scrollX: true,
 paging: true,
 processing: true,
 responsive: true,
 deferRender: true,
+fixedColumns: {
+leftColumns: 2
+},
 ajax: {
 url: '{!! route('datatables.cancelacionrechazos') !!}',
 data: function () {
@@ -129,7 +168,8 @@ columns: [
 "url": "{{ asset('assets/lang/Spanish.json') }}",
 },
 columnDefs: [
-],
+    {"targets":0, "type":"date-eu"}
+]
 //revision
 
 });
