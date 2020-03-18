@@ -58,7 +58,7 @@ class HomeController extends Controller
                 'OUDP.Name as depto'
             )
             ->whereNotNull('SIZ_SolicitudesMP.AlmacenOrigen')
-            ->where('SIZ_MaterialesTraslados.Cant_Pendiente', '>', 0)
+            ->where('SIZ_MaterialesTraslados.Cant_PendienteA', '>', 0)
             ->where('SIZ_AlmacenesTransferencias.dept', Auth::user()->dept)
             ->whereIn('SIZ_MaterialesTraslados.EstatusLinea', ['S', 'P'])
             ->where('SIZ_SolicitudesMP.Status', 'Pendiente')->get();

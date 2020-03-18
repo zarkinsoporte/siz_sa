@@ -58,7 +58,10 @@ public function RechazoIn(Request $request)
 
     if($request->input('Fech_Recp')<=($request->input('Fech_Rev')))
     {
-        $DocItems = DB::table('Siz_Calidad_Rechazos')->where('DocumentoNumero', $request->input('N_Doc'))->get();
+        $DocItems = DB::table('Siz_Calidad_Rechazos')
+        ->where('DocumentoNumero', $request->input('N_Doc'))
+        ->where('Borrado', 'N')
+        ->get();
         $item = $request->input('Codigo');
         $busqueda = array_where($DocItems, function ($key, $value) use($item) {
             return $value->materialCodigo = $item;

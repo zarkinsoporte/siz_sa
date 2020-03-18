@@ -145,12 +145,11 @@ class SAP extends Model
                 }
                //agregar lineaS               
                if ($data['almacen_origen'] == 'APG-PA') {
-                    if ($item->Cant_Pendiente >= $item->CA) {
+                    if ($item->Cant_PendienteA >= $item->CA) {
                         $vItem->Lines->Quantity = $item->CA;
                         DB::table('SIZ_MaterialesSolicitudes')
                         ->where('Id', $item->Id)
                         ->update(['Cant_PendienteA' => ($item->Cant_PendienteA - $item->CA),
-                        'Cant_Pendiente' => ($item->Cant_PendienteA - $item->CA),
                         'Cant_ASurtir_Origen_A' => 0]);
                         $vItem->Lines->ItemCode = $item->ItemCode;
                         $vItem->Lines->WarehouseCode = trim($varDestino[0]);
@@ -183,12 +182,11 @@ class SAP extends Model
                     }
                 } elseif ($data['almacen_origen'] == 'AMP-ST') {
                    
-                    if ($item->Cant_Pendiente >= $item->CB) {
+                    if ($item->Cant_PendienteA >= $item->CB) {
                         $vItem->Lines->Quantity = $item->CB; 
                         DB::table('SIZ_MaterialesSolicitudes')
                         ->where('Id', $item->Id)
                         ->update(['Cant_PendienteA' => ($item->Cant_PendienteA - $item->CB),
-                        'Cant_Pendiente' => ($item->Cant_PendienteA - $item->CB),
                         'Cant_ASurtir_Origen_B' => 0]);
                         $vItem->Lines->ItemCode = $item->ItemCode;
                         $vItem->Lines->WarehouseCode = trim($varDestino[0]);
@@ -263,12 +261,11 @@ class SAP extends Model
             foreach ($data['items'] as $item) {
                 $varDestino = explode(' - ',$item->Destino);
                //agregar lineaS 
-                    if ($item->Cant_Pendiente >= $item->CA) {
+                    if ($item->Cant_PendienteA >= $item->CA) {
                         $vItem->Lines->Quantity = $item->CA;
                         DB::table('SIZ_MaterialesTraslados')
                         ->where('Id', $item->Id)
                         ->update(['Cant_PendienteA' => ($item->Cant_PendienteA - $item->CA),
-                        'Cant_Pendiente' => ($item->Cant_PendienteA - $item->CA),
                         'Cant_ASurtir_Origen_A' => ($item->Cant_PendienteA - $item->CA)]);
                         $vItem->Lines->ItemCode = $item->ItemCode;
                         $vItem->Lines->WarehouseCode = trim($varDestino[0]);

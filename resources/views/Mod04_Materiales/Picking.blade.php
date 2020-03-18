@@ -28,6 +28,12 @@
         Favor de Especificar Lotes correctamente para los materiales que corresponde.
       </div>
       @endif
+      @if($todosCantScan == 0)
+      
+      <div class="alert alert-info" role="alert">
+        Existen Materiales sin Cantidad Escaneada. 
+      </div>
+      @endif
       @if($showmodal == 1)
     <div id="qr" data-field-id="{{$showmodal}}" 
     data-qrcant="{{$qr_cant}}"    
@@ -36,64 +42,119 @@
     data-maxapgpa="{{$qr_item[0]->APGPA}}"
     data-maxampst="{{$qr_item[0]->AMPST}}"
     data-id="{{$qr_item[0]->Id}}"
-    data-cantr="{{$qr_item[0]->Cant_Autorizada}}"
-    data-canta="{{$qr_item[0]->Cant_ASurtir_Origen_A}}"
-    data-cantb="{{$qr_item[0]->Cant_ASurtir_Origen_B}}"
+    data-cantr="{{floatval($qr_item[0]->Cant_Autorizada)}}"
+    data-canta="{{floatval($qr_item[0]->Cant_ASurtir_Origen_A)}}"
+    data-cantb="{{floatval($qr_item[0]->Cant_ASurtir_Origen_B)}}"
     data-cantp="{{$qr_item[0]->Cant_PendienteA}}">
       </div>
       @endif
 
     </div>
   </div>
-  <style>
+ <style>
     td {
+      white-space: nowrap;
       font-family: 'Helvetica';
       font-size: 80%;
     }
-
+  
     th {
       font-family: 'Helvetica';
       font-size: 90%;
+      
+    }
+  </style>
+  <style>
+    .sticky-column {
+    position: sticky;
+    position: -webkit-sticky;
+    left: 0;
+    z-index: 6;
+    background-color: aliceblue;
+    }
+    .table-scroll {
+      position: relative;
+    }
+  
+    .table-scroll thead th {
+      position: -webkit-sticky;
+      position: sticky;
+      top: 0;
+    }
+  
+    .table-scroll tfoot,
+    .table-scroll tfoot th,
+    .table-scroll tfoot td {
+      position: -webkit-sticky;
+      position: sticky;
+      bottom: 0;
+      z-index: 4;
+    }
+  
+    th:first-child {
+      position: -webkit-sticky;
+      position: sticky;
+      left: 0;
+      z-index: 2;
+  
+    }
+  
+    thead th:first-child,
+    tfoot th:first-child {
+      z-index: 5;
+    }
+  
+    .pane {
+      overflow: auto;
+      max-height: 300px;
     }
   </style>
   @if (count($articulos_validos)>0)
   <div class="row">
     <div class="col-md-12">
       <span class="pull-right">
+     
         <a class="btn btn-primary btn-sm" href="{{url('/home/2 PICKING ARTICULOS')}}"><i class="fa fa-angle-left"></i>
           Atras</a>
         <a class="btn btn-danger btn-sm" href="{{url('home/PICKING ARTICULOS/solicitud/PDF/'.$id)}}" target="_blank"><i class="fa fa-file-pdf-o"></i> PDF</a>
-        @if ($itemsConLotes > 0)
-        <a class="btn btn-success btn-sm" disabled><i class="fa fa-send"></i> Enviar a Traslados</a>
-        @else
-        <a class="btn btn-success btn-sm" href="{{url('home/PICKING ARTICULOS/solicitud/update/'.$id)}}"><i class="fa fa-send"></i> Enviar a Traslados</a>
-        @endif
+        @if ($itemsConLotes <= 0 && $todosCantScan==0) <a class="btn btn-success btn-sm"
+            href="{{url('home/PICKING ARTICULOS/solicitud/update/'.$id)}}"><i class="fa fa-send"></i> Enviar a Traslados (Sin
+            Escanear)</a>
+            @else
+            @if ($itemsConLotes > 0 || $todosCantScan == 0)
+            <a class="btn btn-success btn-sm" disabled><i class="fa fa-send"></i> Enviar a Traslados</a>
+            @else
+            <a class="btn btn-success btn-sm" href="{{url('home/PICKING ARTICULOS/solicitud/update/'.$id)}}"><i
+                class="fa fa-send"></i> Enviar a Traslados</a>
+            @endif
+            @endif
 
       </span>
+      
+        </div>
+      </div>
       <!-- /.row -->
-
+<div class="row">
+  <div class="col-md-12">
       <h4>Material a Surtir</h4>
-      <table>
+      <div class="pane">
+      <table class="table table-striped main-table table-scroll" style="margin-bottom:0px">
         <thead>
-          <tr>
-            <th colspan="3">Artículo</th>
-            <th colspan="3">Cantidad</th>
-            <th colspan="2">Almacén Origen</th>
-            <th colspan="3">Stock Disponible</th>
-          </tr>
+          
           <tr>
 
             <th>Código</th>
             <th>Descripción</th>
             <th>UM</th>
-            <th>Autorizada</th>
-            <th>Surtida</th>
+            <th>Cant. Autorizada</th>
+            <th>Cant. Surtida</th>
             <th>A Surtir</th>
-            <th>APG-PA</th>
-            <th>AMP-ST</th>
-            <th>APG-PA</th>
-            <th>AMP-ST</th>
-            <th>Total</th>
+            <th style="color:limegreen">Cant. Escáner</th>
+
+            <th>Cant. <div style="white-space: nowrap">APG-PA</div></th>
+            <th>Cant. <div style="white-space: nowrap">AMP-ST</div></th>
+            <th>Stock <div style="white-space: nowrap">APG-PA</div></th>
+            <th>Stock <div style="white-space: nowrap">AMP-ST</div></th>           
             <th>Acciones</th>
           </tr>
         </thead>
@@ -102,13 +163,14 @@
           @foreach ($articulos_validos as $art)
           <tr <?php ?>>
 
-            <td><a href="{{url('home/DATOS MAESTROS ARTICULO/'.$art->ItemCode)}}"><i class="fa fa-hand-o-right"></i>
+            <td class="sticky-column"><a href="{{url('home/DATOS MAESTROS ARTICULO/'.$art->ItemCode)}}"><i class="fa fa-hand-o-right"></i>
                 {{$art->ItemCode}}</a></td>
             <td>{{$art->ItemName}}</td>
             <td>{{$art->UM}}</td>
             <td>{{$art->Cant_Autorizada}}</td>
             <td>{{number_format(($art->Cant_Autorizada - $art->Cant_PendienteA), 2)}}</td>
             <td>{{number_format($art->Cant_ASurtir_Origen_A + $art->Cant_ASurtir_Origen_B, 2)}}</td>
+            <td>{{$art->Cant_scan}}</td>
             <td>{{$art->Cant_ASurtir_Origen_A}}</td>
             <td>{{$art->Cant_ASurtir_Origen_B}}</td>
             @if ($art->APGPA > 0 && $art->BatchNum > 0)
@@ -126,8 +188,7 @@
             </td>
             @else
             <td>{{number_format($art->AMPST, 2)}}</td>
-            @endif
-            <td>{{number_format($art->Disponible, 2)}}</td>
+            @endif           
             <td>
               <div class="btn-group" role="group" aria-label="...">
 
@@ -146,6 +207,7 @@
 
         </tbody>
       </table>
+      </div>
     </div>
   </div> <!-- /.row -->
   @else
@@ -328,6 +390,80 @@
       </div>
     </div>
   </div>
+
+  <div class="modal fade" id="edit2" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+  {!! Form::open(['url' => 'home/PICKING ARTICULOS/solicitud/articulos/edit', 'method' => 'POST']) !!}
+  
+          
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+              aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Detalle de Surtido (<codigo id='tituloedit'></codigo>)</h4>
+        </div>
+  
+        <div class="modal-body">
+          <div class="row">
+            <div class="form-group">
+              @include('partials.alertas-modal')
+            </div>
+            <div class="col-md-12">
+              <div ng-if="pendiente < (canta -- cantb)" class="alert alert-danger" role="alert">
+  
+                <strong>Las cantidad a surtir debe ser menor o igual @{{pendiente}}</strong><br>
+  
+              </div>
+            </div>
+  
+            <div>
+              <div class="form-group col-md-6">
+  
+                <label for="canta">Tomar de APG-PA: <apgpa id="stockAPGPA"></apgpa></label>
+                <input string-to-number  ng-model="canta" id="canta" name="canta" type="number"
+                  class="form-control" min="0" step="any" required readonly>
+              </div>
+              <div class="form-group col-md-6">
+                <label for="canta">Tomar de AMP-ST: <ampst id="stockAMPST"></ampst></label>
+                <input string-to-number  ng-model="cantb" id="cantb" name="cantb" type="number"
+                  class="form-control" min="0" step="any" required readonly>
+              </div>
+            </div>
+           
+           
+            <div class="form-group col-md-12 menorcantidaddiv" >
+              <h5>¿Cuál es la razón por la que se surtirá una cantidad menor?</h5>
+              <input type="radio" name="reason" value="Se posterga" checked>
+              Se posterga entrega<br>
+              <input type="radio" name="reason" value="No hay existencia">
+              No hay existencia<br>
+            </div>
+            <div class="form-group col-md-12">
+              <input type="hidden" id="articulo-id" name="articulo">
+              <input type="hidden" value="@{{pendiente}}" id="pendiente" name="pendiente">
+              <input type="hidden" id="itemcode" name="itemcode">
+              <input type="hidden" id="idsol" name="idsol" value="{{$id}}">
+              <input type="hidden" id="qrinput" name="qrinput" value="1">
+              <span class="ng-hide">
+                <h6>NOTA:</h6>
+                <h6>* La Cantidad a Surtir puede ser menor a la cantidad Pendiente</h6>
+                <h6>* La Cantidad a Surtir puede modificarse con las Cantidades de los Almacenes</h6>
+              </span>
+            </div>
+          </div>
+  
+        </div>
+        <br>
+        <div class="modal-footer">
+  
+         
+          <button id="editbtn" type="submit"
+           class="btn btn-primary">Guardar</button>
+        </div>
+  {!! Form::close() !!}
+      </div>
+    </div>
+  </div>
   @endsection
 
   @section('homescript')
@@ -356,10 +492,16 @@ var cantb = $('#qr').data("cantb");
 var cantp = $('#qr').data("cantp");
 var qrcant = $('#qr').data("qrcant");
 $( "#editbtn" ).prop( "disabled", false );
-
+console.log( (canta + cantb));
+console.log( cantr);
+if(cantr > (canta + cantb)){
+ $( ".menorcantidaddiv" ).show();
+}else{
+$( ".menorcantidaddiv" ).hide();
+}
 if(qrcode == 1){
   if(canta >= qrcant){
-    canta = qrcant;
+    canta = qrcant;  
   }else if (cantb >= qrcant){
     cantb = qrcant;
   }else{
@@ -368,7 +510,7 @@ if(qrcode == 1){
 $.get("{!! url('disponibilidadAlmacenMP') !!}",
 { codigo: qritemcode },
 function(data) {
-var modal = $('#edit').modal(
+var modal = $('#edit2').modal(
 {
 show: true,
 backdrop: 'static',

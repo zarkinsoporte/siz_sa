@@ -556,7 +556,8 @@ public function DataSolicitudes(){
                      'OHEM.lastName', 'OHEM.dept', 'OUDP.Name as depto')
                     ->whereIn('SIZ_SolicitudesMP.Status', ['Pendiente', 'Regresada', 'En Proceso'])
                     ->whereIn('SIZ_MaterialesSolicitudes.EstatusLinea', ['S', 'P', 'N']);
-     //$consulta = collect($consulta);
+   
+                    //$consulta = collect($consulta);
             return Datatables::of($consulta)             
                  ->addColumn('folio', function ($item) {                     
                        return  '<a href="2 PICKING ARTICULOS/solicitud/'.$item->Id_Solicitud.'"><i class="fa fa-hand-o-right"></i> '.$item->Id_Solicitud.'</a>';           
@@ -589,7 +590,7 @@ public function DataTraslados(){
                     ->select('SIZ_SolicitudesMP.Id_Solicitud', 'SIZ_SolicitudesMP.FechaCreacion', 
                     'SIZ_SolicitudesMP.Usuario', 'SIZ_SolicitudesMP.Status', 'OHEM.firstName',
                      'OHEM.lastName', 'OHEM.dept', 'OUDP.Name as depto')
-                    ->where('SIZ_MaterialesSolicitudes.Cant_Pendiente', '>', 0)
+                    ->where('SIZ_MaterialesSolicitudes.Cant_PendienteA', '>', 0)
                     ->where('SIZ_SolicitudesMP.Status', 'Traslado');
      //$consulta = collect($consulta);
             return Datatables::of($consulta)             
@@ -726,7 +727,7 @@ public function saveArt(Request $request){
                     DB::table('SIZ_MaterialesSolicitudes')->insert(
                         ['Id_Solicitud' => $id, 'ItemCode' => $art['pKey'], 
                         'Cant_Requerida' => $art['cant'], 'Destino' => $art['labelDestino'], 
-                        'Cant_Autorizada' =>  $art['cant'], 'Cant_Pendiente' =>  $art['cant'], 
+                        'Cant_Autorizada' =>  $art['cant'], 'Cant_scan' =>  0, 
                         'Cant_PendienteA' =>  $art['cant'],
                         'EstatusLinea' => 'S', 'Cant_ASurtir_Origen_A' => 0, 
                         'Cant_ASurtir_Origen_B' => 0]
@@ -781,7 +782,7 @@ public function ShowDetalleSolicitud($id, $qr_itemcode = null, $qr_cant = null){
     Session::put('solicitud_picking', $id);
       // $solicitudes = DB::table('SIZ_SolicitudesMP');
     $articulos = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as UM, OITM.ItemName, mat.Destino, 
-                    mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente, mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A, mat.Cant_ASurtir_Origen_B,
+                    mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_scan, mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A, mat.Cant_ASurtir_Origen_B,
                      ALMACENES.APGPA, ALMACENES.AMPST, (APGPA + AMPST) AS Disponible, mat.EstatusLinea  from SIZ_MaterialesSolicitudes mat
                     LEFT JOIN OITM on OITM.ItemCode = mat.ItemCode
                     LEFT JOIN 
@@ -791,12 +792,17 @@ public function ShowDetalleSolicitud($id, $qr_itemcode = null, $qr_cant = null){
                     GROUP BY ItemCode) AS ALMACENES ON OITM.ItemCode = ALMACENES.ItemCode
                     WHERE mat.EstatusLinea <> \'C\' AND Id_Solicitud = ? AND Cant_PendienteA > 0', [$id]);
                     $step = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $id)->first();
-                    if ($step->Status != 'Autorizacion') {
-                         self::asignaAlmacenesOrigen($articulos);                    
+                    if ($step->Status != 'Autorizacion') {                        
+                        if (!is_null($qr_itemcode) ){
+                            self::asignaAlmacenesOrigen($articulos, 0);   
+                            //     dd(!is_null($qr_itemcode));
+                         } else {
+                            self::asignaAlmacenesOrigen($articulos, 1); // se asigna por Cant_PendienteA                    
+                         }
 
                         $articulos = DB::select(
                     'select mat.Id, mat.ItemCode, OITM.InvntryUom as UM, OITM.ItemName, mat.Destino, 
-                                        mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente, mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A, mat.Cant_ASurtir_Origen_B,
+                                        mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_scan, mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A, mat.Cant_ASurtir_Origen_B,
                                         ALMACENES.APGPA, ALMACENES.AMPST, (APGPA + AMPST) AS Disponible, 
                                         mat.EstatusLinea, LOTES.BatchNum, CASE WHEN (mat.Cant_ASurtir_Origen_A + mat.Cant_ASurtir_Origen_B) = L.Asignado THEN \'Y\' ELSE \'N\' END AS Preparado
                                         from SIZ_MaterialesSolicitudes mat
@@ -832,6 +838,7 @@ public function ShowDetalleSolicitud($id, $qr_itemcode = null, $qr_cant = null){
     //$step = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $id)->value('Status');
     $showmodal = false;
     $qr_item = null;
+    $todosCantScan = 0;
     if ($step->Status == 'Autorizacion') {
         $itemsConLotes = 0;
         $articulos_validos = array_where($articulos, function ($key,$item) {
@@ -843,14 +850,22 @@ public function ShowDetalleSolicitud($id, $qr_itemcode = null, $qr_cant = null){
     } else {    //para Picking
         $articulos_validos = array_where($articulos, function ($key,$item) {
             return $item->EstatusLinea == 'S' || $item->EstatusLinea == 'P';
-        });                       
+        });    
+        //verificamos si hay algun articulo que no tenga cantidad Scanner 
+         $scan_item = array_where($articulos_validos, function ($key,$item){
+            return $item->Cant_scan == 0;
+            });     
+         if (count($scan_item) == 0) {
+             $todosCantScan = 1;
+         } 
+                         
         if (!is_null($qr_itemcode) && count($articulos_validos) > 0) { 
             //verificar que venimos de escanear qr 
             //y que el material escaneado sea de los articulos validos           
             $qr_item = array_where($articulos_validos, function ($key,$item) use ($qr_itemcode) {
             return $item->ItemCode == $qr_itemcode;
             });
-            //dd($qr_item);
+           
             if (count($qr_item) !== 1) {
                 //si el material no esta en los validos entonces esta en los que no se surtiran
               
@@ -859,7 +874,9 @@ public function ShowDetalleSolicitud($id, $qr_itemcode = null, $qr_cant = null){
             }else{
                 $showmodal = true;
             }
-
+            if (is_null($qr_cant)) {
+                $showmodal = 0;
+            }
         }else{
             if (Session::has('notfound')) {
             Session::flash('error', Session::pull('notfound'));
@@ -889,7 +906,8 @@ public function ShowDetalleSolicitud($id, $qr_itemcode = null, $qr_cant = null){
         'comentario' => $step->ComentarioUsuario,
         'qr_item' => $qr_item,
         'qr_cant' => $qr_cant,
-        'showmodal' => $showmodal
+        'showmodal' => $showmodal,
+        'todosCantScan' => $todosCantScan
     );
     if ($step->Status == 'Autorizacion') {
         return view('Mod04_Materiales.Autorizacion', $param);
@@ -908,7 +926,7 @@ public function ShowDetalleTraslado($id){
       // $solicitudes = DB::table('SIZ_SolicitudesMP');                
 
     $articulos = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as UM, OITM.ItemName, mat.Destino, 
-                    mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente, mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A, mat.Cant_ASurtir_Origen_B,
+                    mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_scan, mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A, mat.Cant_ASurtir_Origen_B,
                      ALMACENES.APGPA, ALMACENES.AMPST, (APGPA + AMPST) AS Disponible, 
                      CASE WHEN ((APGPA + AMPST)  < (mat.Cant_ASurtir_Origen_A + mat.Cant_ASurtir_Origen_B)) and mat.EstatusLinea = \'S\' THEN \'N\' ELSE mat.EstatusLinea END AS EstatusLinea
                       from SIZ_MaterialesSolicitudes mat
@@ -918,7 +936,7 @@ public function ShowDetalleTraslado($id){
 					SUM(CASE WHEN WhsCode = \'AMP-ST\'  THEN OnHand ELSE 0 END) AS AMPST
                     FROM dbo.OITW
                     GROUP BY ItemCode) AS ALMACENES ON OITM.ItemCode = ALMACENES.ItemCode
-                    WHERE Id_Solicitud = ? AND mat.Cant_Pendiente > 0', [$id]);
+                    WHERE Id_Solicitud = ? AND mat.Cant_PendienteA > 0', [$id]);
 
                     $articulos_validos = array_where($articulos, function ($key,$item) {
                         return ($item->EstatusLinea == 'S') && (($item->Cant_ASurtir_Origen_A + $item->Cant_ASurtir_Origen_B) > 0);
@@ -958,11 +976,11 @@ public function ShowDetallePdf($id){
           $t = 'SIZ_MaterialesTraslados';
       }    
     $articulos = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as UM, OITM.ItemName, mat.Destino, 
-                    mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente, mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A, mat.Cant_ASurtir_Origen_B,                    
+                    mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_scan, mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A, mat.Cant_ASurtir_Origen_B,                    
                     mat.EstatusLinea, mat.Destino 
                       from '.$t.' mat
                     LEFT JOIN OITM on OITM.ItemCode = mat.ItemCode                  
-                    WHERE Id_Solicitud = ? AND mat.Cant_Pendiente > 0', [$id]);
+                    WHERE Id_Solicitud = ? AND mat.Cant_PendienteA > 0', [$id]);
   
                     $articulos_validos = array_where($articulos, function ($key,$item) {
                         return $item->EstatusLinea == 'S';
@@ -993,11 +1011,18 @@ public function ShowDetallePdf($id){
         return redirect()->route('auth/login');
     }
 }
-public function asignaAlmacenesOrigen($articulos){
+public function asignaAlmacenesOrigen($articulos, $opcion){ 
+  //  dd('asignacion');
     foreach ($articulos as $art) {
-        if (($art->Cant_ASurtir_Origen_A + $art->Cant_ASurtir_Origen_B) == 0) {
-            $Cant = $art->Cant_Pendiente; 
-                $P = $art->Cant_Pendiente; 
+        if (true) {
+            if ($opcion == 1) {
+                $Cant = $art->Cant_PendienteA; 
+                $P = $art->Cant_PendienteA; 
+            } else { //0
+                $Cant = $art->Cant_scan; 
+                $P = $art->Cant_scan; 
+            }
+           
                 $A = $art->APGPA; 
                 $B = $art->AMPST;
                 $ALMA = 0;      
@@ -1128,21 +1153,28 @@ public function removeArticuloNoAutorizado(){
 }
 public function editArticulo(){
     if (Auth::check()) {
-        DB::update('UPDATE SIZ_MaterialesSolicitudes SET Cant_Autorizada = ? , Cant_Pendiente = ?, Cant_PendienteA = ?, Razon_AutorizaCantMenor = ? WHERE Id = ?', [Input::get('canta'), Input::get('canta'), Input::get('canta'), Input::get('reason'), Input::get('articulo')]);
+        DB::update('UPDATE SIZ_MaterialesSolicitudes SET Cant_Autorizada = ? , Cant_PendienteA = ?, Razon_AutorizaCantMenor = ? WHERE Id = ?', 
+        [Input::get('canta'), Input::get('canta'), 
+        Input::get('reason'), Input::get('articulo')]);
         return redirect()->back();
     } else {
         return redirect()->route('auth/login');
     }
 }
 public function editArticuloPicking(){
-  
+    
     if (Auth::check()) {
-
+        if (Session::has('solicitud_picking')) {
+            Session::forget('solicitud_picking');
+        }
     if (Input::get('pendiente') < (Input::get('canta')+Input::get('cantb'))) {
         Session::flash('error', 'La Cantidad a Surtir debe ser igual o menor a '.Input::get('pendiente'));
         return redirect()->back();
     }
-
+    $art = DB::table('SIZ_MaterialesSolicitudes')
+            ->join('OITM', 'OITM.ItemCode', '=' , 'SIZ_MaterialesSolicitudes.ItemCode')
+            ->select('SIZ_MaterialesSolicitudes.*', 'OITM.ItemName', 'OITM.InvntryUom')        
+            ->where('Id', Input::get('articulo'))->first();
     if (Input::get('canta') + Input::get('cantb') == Input::get('pendiente')) {
         DB::update('UPDATE SIZ_MaterialesSolicitudes SET  Cant_ASurtir_Origen_A = ?, Cant_ASurtir_Origen_B = ?, Razon_PickingCantMenor = ? WHERE Id = ?', [Input::get('canta'), Input::get('cantb'), '', Input::get('articulo')]);
     } elseif(Input::get('canta') + Input::get('cantb') < Input::get('pendiente')){
@@ -1150,10 +1182,7 @@ public function editArticuloPicking(){
         
         if (strpos(Input::get('reason'), 'existencia') !== false) {
            
-            $art = DB::table('SIZ_MaterialesSolicitudes')
-            ->join('OITM', 'OITM.ItemCode', '=' , 'SIZ_MaterialesSolicitudes.ItemCode')
-            ->select('SIZ_MaterialesSolicitudes.*', 'OITM.ItemName', 'OITM.InvntryUom')        
-            ->where('Id', Input::get('articulo'))->first();
+           
                     
             $correos_db = DB::select("
                 SELECT 
@@ -1178,7 +1207,11 @@ public function editArticuloPicking(){
           Session::flash('error', 'No se pudo actualizar...');
     }
     $id_sol =Input::get('idsol');
-    $item = null;
+    if (Input::has('qrinput')) {
+       $item = $art->ItemCode;
+    } else {
+       $item = null;
+    }
     $cant = null;
      return redirect()
                 ->action('Mod04_MaterialesController@ShowDetalleSolicitud', compact('id_sol', 'item', 'cant'));
@@ -1199,7 +1232,7 @@ public function SolicitudPDF($id){
         $comment = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $id)->value('ComentarioUsuario');
         DB::update('UPDATE SIZ_SolicitudesMP SET Status = ? WHERE Id_Solicitud = ?', ['En Proceso', $id]);
         $articulos = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as UM, OITM.ItemName, mat.Destino,
-          mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente, mat.Cant_PendienteA, (mat.Cant_ASurtir_Origen_A + mat.Cant_ASurtir_Origen_B) AS Cant_Surtir,
+          mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_PendienteA, (mat.Cant_ASurtir_Origen_A + mat.Cant_ASurtir_Origen_B) AS Cant_Surtir,
          ALMACENES.APGPA, ALMACENES.AMPST, (APGPA + AMPST) AS Disponible from SIZ_MaterialesSolicitudes mat
                     LEFT JOIN OITM on OITM.ItemCode = mat.ItemCode
                     LEFT JOIN 
@@ -1240,7 +1273,7 @@ public function SolicitudPDF_Traslados($id){
     }
 $transfer1 = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as unitMsr, 
 OITM.ItemName as Dscription, mat.Destino as WhsCode,
-      mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente, 
+      mat.Cant_Requerida, mat.Cant_Autorizada,
       mat.Cant_PendienteA, (mat.Cant_ASurtir_Origen_A + mat.Cant_ASurtir_Origen_B) AS Quantity
       from '.$t.' mat
                     LEFT JOIN OITM on OITM.ItemCode = mat.ItemCode
@@ -1266,7 +1299,7 @@ OITM.ItemName as Dscription, mat.Destino as WhsCode,
         $comment = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $id)->value('ComentarioUsuario');
         DB::update('UPDATE SIZ_SolicitudesMP SET Status = ? WHERE Id_Solicitud = ?', ['En Proceso', $id]);
         $articulos = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as UM, OITM.ItemName, mat.Destino,
-          mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente, mat.Cant_PendienteA, (mat.Cant_ASurtir_Origen_A + mat.Cant_ASurtir_Origen_B) AS Cant_Surtir,
+          mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_PendienteA, (mat.Cant_ASurtir_Origen_A + mat.Cant_ASurtir_Origen_B) AS Cant_Surtir,
           from SIZ_Traslados mat
                     LEFT JOIN OITM on OITM.ItemCode = mat.ItemCode
                     LEFT JOIN 
@@ -1286,6 +1319,7 @@ OITM.ItemName as Dscription, mat.Destino as WhsCode,
 }
 public function Solicitud_A_Traslados($id){
  if (Auth::check()) {
+
         $cantLineas = DB::table('SIZ_MaterialesSolicitudes')
         ->where('EstatusLinea', 'S')
         ->where('Id_Solicitud', $id)
@@ -1408,7 +1442,7 @@ public function HacerTraslados($id){
             $apellido = Self::getApellidoPaternoUsuario(explode(' ',$solicitante->lastName));
             $nombreCompleto = explode(' ',$solicitante->firstName)[0].' '.$apellido;
             //articulos validos para transferencia
-            $articulos = DB::select('select mat.Id, mat.ItemCode, mat.Destino, mat.Cant_Pendiente, 
+            $articulos = DB::select('select mat.Id, mat.ItemCode, mat.Destino,
                 mat.Cant_ASurtir_Origen_A as CA, mat.Cant_ASurtir_Origen_B AS CB, mat.Cant_PendienteA,
                 ALMACENES.APGPA, ALMACENES.AMPST, mat.Cant_Autorizada, LOTES.BatchNum from SIZ_MaterialesSolicitudes mat                                
                 LEFT JOIN(SELECT ItemCode, SUM(CASE WHEN WhsCode = \'APG-PA\'  THEN OnHand ELSE 0 END) AS APGPA,
@@ -1722,7 +1756,7 @@ public function getPdfSolicitud(){
     public function HacerEntrega($almacen_origen, $id){
         //sreturn redirect()->back();
         $todosArticulos = DB::select('select mat.Id, mat.ItemCode, OITM.ItemName,
-        mat.Destino, mat.Cant_ASurtir_Origen_A as CA, mat.Cant_PendienteA, mat.Cant_Pendiente,
+        mat.Destino, mat.Cant_ASurtir_Origen_A as CA, mat.Cant_PendienteA,
         ALMACENES.AlmacenOrigen, LOTES.BatchNum, mat.EstatusLinea, OITM.InvntryUom as UM,
         CASE WHEN (mat.Cant_ASurtir_Origen_A ) = L.Asignado THEN \'Y\' ELSE \'N\' END AS Preparado
         from SIZ_MaterialesTraslados mat 
@@ -1902,7 +1936,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                 [
                     'Id_Solicitud' => $id, 'ItemCode' => $art['pKey'],
                     'Cant_Requerida' => $art['cant'], 'Destino' => trim($art['labelDestino']),
-                    'Cant_Autorizada' =>  $art['cant'], 'Cant_Pendiente' =>  $art['cant'],
+                    'Cant_Autorizada' =>  $art['cant'], 
                     'Cant_PendienteA' =>  $art['cant'],
                     'EstatusLinea' => $statusL, 'Cant_ASurtir_Origen_A' => $art['cant'], 'Cant_ASurtir_Origen_B' => 0
                 ]
@@ -1916,7 +1950,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
             return 'Error: No se guardo la solicitud, favor de notificar a Sistemas';
         } 
         $todosArticulos = DB::select('select mat.Id, mat.ItemCode, OITM.ItemName,
-        mat.Destino, mat.Cant_ASurtir_Origen_A as CA, mat.Cant_PendienteA, mat.Cant_Pendiente,
+        mat.Destino, mat.Cant_ASurtir_Origen_A as CA, mat.Cant_PendienteA, 
         ALMACENES.AlmacenOrigen, LOTES.BatchNum, mat.EstatusLinea, OITM.InvntryUom as UM,
          CASE WHEN (mat.Cant_ASurtir_Origen_A ) = L.Asignado THEN \'Y\' ELSE \'N\' END AS Preparado
         from SIZ_MaterialesTraslados mat  
@@ -2088,7 +2122,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
             //consulta validada
                 $todosArticulos = DB::select('
                 select mat.Id, mat.ItemCode, OITM.InvntryUom as UM, OITM.ItemName, mat.Destino, 
-                                        mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente,
+                                        mat.Cant_Requerida, mat.Cant_Autorizada,
                                          mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A AS CA,
                 ALMACENES.AlmacenOrigen,
                 CASE WHEN (mat.Cant_ASurtir_Origen_A > AlmacenOrigen) THEN \'N\' ELSE mat.EstatusLinea END EstatusLinea, LOTES.BatchNum, 
@@ -2200,7 +2234,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                 'OUDP.Name as depto'
             )
             ->whereNotNull('SIZ_SolicitudesMP.AlmacenOrigen')
-            ->where('SIZ_MaterialesTraslados.Cant_Pendiente', '>', 0)
+            ->where('SIZ_MaterialesTraslados.Cant_PendienteA', '>', 0)
             ->where('SIZ_AlmacenesTransferencias.dept', Auth::user()->dept)
             ->whereIn('SIZ_MaterialesTraslados.EstatusLinea', ['S', 'P'])
             ->where('SIZ_SolicitudesMP.Status', 'Pendiente');
@@ -2235,7 +2269,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
             $solicitud = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $id)->first();
                      
             $articulos = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as UM, OITM.ItemName, mat.Destino, 
-                    mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente, mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A, 
+                    mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A, 
                     ALMACENES.AlmacenOrigen, CASE WHEN mat.Cant_ASurtir_Origen_A > AlmacenOrigen THEN \'N\'  ELSE mat.EstatusLinea END as EstatusLinea  
                     from SIZ_MaterialesTraslados mat
                     LEFT JOIN OITM on OITM.ItemCode = mat.ItemCode
@@ -2246,7 +2280,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                     inner join SIZ_AlmacenesTransferencias on SIZ_AlmacenesTransferencias.Code = SUBSTRING(Destino, 1, 6) 
                     and SIZ_AlmacenesTransferencias.Dept = '.Auth::user()->dept.' and SIZ_AlmacenesTransferencias.TrasladoDeptos <> \'D\' and TrasladoDeptos is not null 
                     WHERE Id_Solicitud = ? AND Cant_PendienteA > 0
-                    group by Id, mat.ItemCode, OITM.InvntryUom, OITM.ItemName, mat.Destino,  mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_Pendiente, mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A, 
+                    group by Id, mat.ItemCode, OITM.InvntryUom, OITM.ItemName, mat.Destino,  mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A, 
                     ALMACENES.AlmacenOrigen, EstatusLinea', [$id]);
               
                 $articulos_validos = array_where($articulos, function ($key, $item) {
@@ -2411,7 +2445,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                 $nombreCompleto = explode(' ',$solicitud->firstName)[0].' '.$apellido;   
                
                 $articulos = DB::select('select mat.Id, mat.ItemCode, mat.Destino, 
-                mat.Cant_ASurtir_Origen_A as CA, mat.Cant_PendienteA, mat.Cant_Pendiente,
+                mat.Cant_ASurtir_Origen_A as CA, mat.Cant_PendienteA,
                 ALMACENES.AlmacenOrigen, LOTES.BatchNum from SIZ_MaterialesTraslados mat                                
                 LEFT JOIN (SELECT ItemCode, SUM(CASE WHEN WhsCode = \''.$solicitud->AlmacenOrigen.'\' THEN OnHand ELSE 0 END) AS AlmacenOrigen
                     FROM dbo.OITW
@@ -2425,7 +2459,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                 WHERE Id_Solicitud = ? AND mat.EstatusLinea = \'S\' 
                 AND mat.Cant_ASurtir_Origen_A <= AlmacenOrigen 
                  group by Id, mat.ItemCode, mat.Destino, 
-                mat.Cant_Pendiente, mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A, 
+                mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A, 
                 ALMACENES.AlmacenOrigen, BatchNum', [$id]);
                 
                 $stat3 = 0;
@@ -2859,7 +2893,7 @@ foreach($consultaj as $item)
              SIZ_MaterialesSolicitudes.ItemCode AS CODIGO,
              OITM.ItemName AS DESCRIPCION,
              OITM.InvntryUom AS UDM,
-             SIZ_MaterialesSolicitudes.Cant_Pendiente AS PENDIENTE,
+             SIZ_MaterialesSolicitudes.Cant_PendienteA AS PENDIENTE,
              SIZ_MaterialesSolicitudes.EstatusLinea AS ST_LIN
 From SIZ_SolicitudesMP
 inner join SIZ_MaterialesSolicitudes on SIZ_MaterialesSolicitudes.Id_Solicitud = SIZ_SolicitudesMP.Id_Solicitud
@@ -2876,7 +2910,7 @@ Select      'TRASLADOS' AS TIPO_DOC,
              SIZ_MaterialesTraslados.ItemCode AS CODIGO,
              OITM.ItemName AS DESCRIPCION,
              OITM.InvntryUom AS UDM,
-             SIZ_MaterialesTraslados.Cant_Pendiente AS PENDIENTE,
+             SIZ_MaterialesTraslados.Cant_PendienteA AS PENDIENTE,
              SIZ_MaterialesTraslados.EstatusLinea AS ST_LIN
 From SIZ_SolicitudesMP
 inner join SIZ_MaterialesTraslados on SIZ_MaterialesTraslados.Id_Solicitud = SIZ_SolicitudesMP.Id_Solicitud
@@ -2951,7 +2985,7 @@ $consultaj = collect($consulta);
         $cant = Input::get('cantx_bulto');
         $separador = ' - ';
         $CodigoQR = QrCode::margin(1)->format('png')->size(100)
-        ->generate("http://187.189.177.39:8081/sizb/public/qr/".
+        ->generate("http://187.189.177.39:8081/siz/public/qr/".
         $pKey."/".$cardCode."/".$cant);
 
         $pdf = \PDF::loadView('Mod04_Materiales.etiquetaQrPDF', 
@@ -2968,19 +3002,50 @@ $consultaj = collect($consulta);
             ->where('id_solicitud', $id_sol)
             ->lists('itemCode');
             $values = array();
-            if (in_array($itemCode ,$items)) {
-                Session::put('qrfound', $id_sol);
-                return redirect()
-                ->action('Mod04_MaterialesController@ShowDetalleSolicitud', compact('id_sol', 'itemCode', 'cantXbulto'));
-               
+            if (in_array($itemCode ,$items)) {                                            
+                $mi_material = DB::table('SIZ_MaterialesSolicitudes')
+                ->where('Id_Solicitud', $id_sol)
+                ->where('ItemCode', $itemCode)
+                ->first();
+                if ($mi_material->Cant_Autorizada >= ($cantXbulto + $mi_material->Cant_scan)) {
+                    Session::put('qrfound', $id_sol);
+                    Session::flash('mensaje','¡Cantidad Actualizada!. Cantidad escaneada: '. $cantXbulto);
+                    DB::update('UPDATE SIZ_MaterialesSolicitudes SET Cant_scan = ? WHERE Id_Solicitud = ? AND ItemCode=?', [($cantXbulto + $mi_material->Cant_scan), $id_sol, $itemCode]);
+                    $cantXbulto = floatval($cantXbulto) + floatval($mi_material->Cant_scan); 
+                    return redirect()                     
+                ->action('Mod04_MaterialesController@ShowDetalleSolicitud', compact('id_sol', 'itemCode', 'cantXbulto')); 
+                } else {
+                  /*  if ($mi_material->Cant_Autorizada == $mi_material->Cant_scan) {
+                        Session::flash('info','El material '.$itemCode.' está completo');              
+                        $item = null;
+                        $cant = null;
+                        return redirect()
+                        ->action('Mod04_MaterialesController@ShowDetalleSolicitud', compact('id_sol', 'item', 'cant'));
+                    } else {
+                        */
+                        if ($mi_material->Cant_Autorizada >= $cantXbulto) {
+                            Session::flash('mensaje','Cantidad escaneada: '. $cantXbulto);
+                            Session::put('qrfound', $id_sol);
+                            DB::update('UPDATE SIZ_MaterialesSolicitudes SET Cant_scan = ? WHERE Id_Solicitud = ? AND ItemCode=?', [$cantXbulto, $id_sol, $itemCode]);
+                             return redirect()
+                ->action('Mod04_MaterialesController@ShowDetalleSolicitud', compact('id_sol', 'itemCode', 'cantXbulto')); 
+                        } else {
+                            Session::flash('error','La Cantidad Escaneada rebasa la Cantidad Autorizada');              
+                            $item = null;
+                            $cant = null;
+                            return redirect()
+                            ->action('Mod04_MaterialesController@ShowDetalleSolicitud', compact('id_sol', 'item', 'cant'));
+                        }                        
+                   // }                    
+                }                                
+                             
             } else {
                 Session::put('notfound','El material escaneado no esta en la solicitud #'.$id_sol);
               
                 $item = null;
                 $cant = null;
                 return redirect()
-                ->action('Mod04_MaterialesController@ShowDetalleSolicitud', compact('id_sol', 'item', 'cant'));
-               
+                ->action('Mod04_MaterialesController@ShowDetalleSolicitud', compact('id_sol', 'item', 'cant'));        
             }
             
         }

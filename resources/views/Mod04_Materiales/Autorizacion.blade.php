@@ -90,8 +90,10 @@
                 <th scope="col">UM</th>
                 <th scope="col">Cant. Requerida</th>
                 <th scope="col">Cant. Autorizada</th>
-                <th scope="col">APG-PA</th>
-                <th scope="col">AMP-ST</th>
+                <th>Stock <div style="white-space: nowrap">APG-PA</div>
+                </th>
+                <th>Stock <div style="white-space: nowrap">AMP-ST</div>
+                </th>
                 <th scope="col">Total Disponible</th>
                 <th scope="col">Destino</th>
 

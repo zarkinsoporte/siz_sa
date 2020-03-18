@@ -39,7 +39,7 @@
         <div class="row">
                 <!-- small box -->
             @foreach ($links as $link)
-            <div class="col-md-4 col-sm-12 col-xs-12">
+            <div class="col-md-4 col-sm-6 col-xs-12">
                 
                 <div class="thumbnail">
                     <div class="caption">
