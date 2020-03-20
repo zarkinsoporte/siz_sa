@@ -3,7 +3,13 @@
 @section('subcontent-01')
        <h4>PLANTILLA DE {{$depto}}</h4>
    <div class="row">
-
+<style>
+    .dataTables_wrapper .dataTables_filter {
+        float: right;
+        text-align: right;
+        visibility: visible;
+    }
+</style>
 
                <div class="col-md-12">
 
@@ -71,6 +77,7 @@
                         });
 
                         $('#users-table2').DataTable({
+                            dom: 'lfrtip',
                             processing: true,
                             serverSide: true,
                             ajax: {

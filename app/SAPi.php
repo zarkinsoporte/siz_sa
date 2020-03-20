@@ -34,8 +34,29 @@ class SAPi extends Model
 
    
 public static function ReciboProduccion($docEntry, $whs, $Cant, $comentario, $memo){
-    //dd($docEntry);
-       (self::$vCmp == false) ? self::Connect(): '';
+
+   if (self::$vCmp == false) {
+       $cnn = self::Connect();
+      if ( $cnn == 'Conectado') {
+        
+      }else{
+        self::$vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
+        self::$vCmp->DbServerType="6"; 
+        self::$vCmp->server = "SERVER-SAPBO";
+        self::$vCmp->LicenseServer = "SERVER-SAPBO:30000";
+        self::$vCmp->CompanyDB = "SALOTTO";
+        self::$vCmp->username = "controlp";
+        self::$vCmp->password = "190109";
+        self::$vCmp->DbUserName = "sa";
+        self::$vCmp->DbPassword = "B1Admin";
+        self::$vCmp->UseTrusted = false;
+        self::$vCmp->language = "6";
+        $lRetCode = self::$vCmp->Connect;
+          if ($lRetCode <> 0) {
+           dd(self::$vCmp->GetLastErrorDescription());
+        } 
+      }
+   } 
    
     $vItem = self::$vCmp->GetBusinessObject("59");
 

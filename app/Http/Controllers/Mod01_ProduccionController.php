@@ -1188,18 +1188,23 @@ public function terminarOP(Request $request){
    $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
         if (count($rates) >= 3) {
             $Code_actual = OP::find($request->input('code'));
-            $orden_owor = DB::table('OWOR')->where('DocNum', $request->input('orden'))->first();
-            //dd($orden_owor);
-           
-            if (($orden_owor->PlannedQty) >= (floatval ( $orden_owor->CmpltQty) + floatval ( $request->input('cant')))) {
-                $apellido = Self::getApellidoPaternoUsuario(explode(' ',Auth::user()->lastName));
-                $usuario_reporta = explode(' ', Auth::user()->firstName)[0].' '.$apellido;
-                $result = SAPi::ReciboProduccion($request->input('orden'), $orden_owor->Warehouse, $request->input('cant'), "Reportado por: ".$usuario_reporta, "Recibo de producción");
+            $orden_owor = DB::table('OWOR')->where('DocNum', $request->input('orden'))->first();          
+            $apellido = Self::getApellidoPaternoUsuario(explode(' ',Auth::user()->lastName));
+            $usuario_reporta = explode(' ', Auth::user()->firstName)[0].' '.$apellido;
+
+                if (($orden_owor->PlannedQty) >= (floatval ( $orden_owor->CmpltQty) + floatval ( $request->input('cant')))) { // la cantidad procede
+                    $result = SAPi::ReciboProduccion($request->input('orden'), $orden_owor->Warehouse, $request->input('cant'), "Reportado por: ".$usuario_reporta, "Recibo de producción");
+                }else if(($orden_owor->PlannedQty) == (floatval ( $orden_owor->CmpltQty))){ //la cantidad es igual
+                    $result = 'Recibo creado SIZ';  //'Recibo creado antes, correccion SIZ';    
+                } else { // la cantidad seria mayor
+                    Session::flash('error', 'La cantidad Completada no puede ser mayor a la Planeada');
+                    return redirect()->action('Mod01_ProduccionController@getOP', $id);
+                }
+
                 if (strpos($result, 'Recibo') !== false) {
                 //agregar linea en LOGOF del avance
                     $dt = date('Ymd h:m:s');
                     $user = User::find($request->input('userId'));
-//$Code_actual = OP::find($request->input('code'));
 
                     $Con_Logof = DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOF]');
                     $log = new LOGOF();
@@ -1218,9 +1223,8 @@ public function terminarOP(Request $request){
                $orden_owor = NULL;
                $orden_owor = DB::table('OWOR')->where('DocNum', $request->input('orden'))->first();
             if ($orden_owor->PlannedQty == floatval ( $orden_owor->CmpltQty) ) {
-                DB::table('@CP_OF')->where('Code', $request->input('code'))->delete(); 
-            }
-                
+               // DB::table('@CP_OF')->where('Code', $request->input('code'))->delete(); 
+                $Code_actual->delete();
                 //validar OP para cerrar 
                 $cerrar = DB::select("
                             SELECT T0.[DocNum] as Orden, T0.[ItemCode] as Codigo, T0.[PlannedQty] as Planeado, T0.[CmpltQty] as Terminado ,T0.UpdateDate as Actualizado FROM OWOR T0 LEFT JOIN (SELECT OWOR.DocNum as OP,sum(WOR1.PlannedQty) as Cantidad FROM OWOR inner join WOR1 on WOR1.DocEntry = OWOR.DocEntry inner join OITM A1 on WOR1.ItemCode=A1.ItemCode WHERE OWOR.[PlannedQty] <= OWOR.[CmpltQty] and  OWOR.[status] <> 'L' and WOR1.IssueType = 'M' and WOR1.IssuedQty < WOR1.PlannedQty and A1.ItmsGrpCod<> 113 group by OWOR.DocNum ) VAL on T0.DocNum = VAL.OP WHERE  T0.DocNum=? and T0.[PlannedQty] <=  T0.[CmpltQty] and  T0.[status] <> 'L' and VAL.Cantidad is null
@@ -1228,6 +1232,13 @@ public function terminarOP(Request $request){
                 if(count($cerrar) > 0){
                     SAP::ProductionOrderStatus($request->input('orden'), 2); //cerrar Orden en SAP
                 }
+                
+            } else if ($orden_owor->PlannedQty > floatval ( $orden_owor->CmpltQty)) {                
+                $Code_actual->U_Entregado += floatval ($request->input('cant'));
+                $Code_actual->U_Procesado += floatval ($request->input('cant'));
+                $Code_actual->save(); 
+            }                
+
                 Session::flash('mensaje', $result);
                 Session::put('recibo', 1);   
                 return redirect()->action('Mod01_ProduccionController@getOP', $id);
@@ -1236,11 +1247,7 @@ public function terminarOP(Request $request){
                 Session::flash('error', $result);
                 return redirect()->action('Mod01_ProduccionController@getOP', $id);
             }
-            } else {
-
-                Session::flash('error', 'La cantidad Completada no puede ser mayor a la Planeada');
-                return redirect()->action('Mod01_ProduccionController@getOP', $id);
-            }
+            
            
              
         }else{

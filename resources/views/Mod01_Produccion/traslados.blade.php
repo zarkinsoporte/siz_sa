@@ -298,7 +298,7 @@ break;
                                                 </a> </td>
 
                                                     <!--Boton Avanzar-->
-                     <td>                       
+                             <td>               
                 @if($of->U_CT_SIG !== "Terminar OP")
                     @if($of->U_CT_SIG == "Error en ruta")
                         <a class="btn btn-danger disabled" >
@@ -592,7 +592,7 @@ break;
                        @if(isset($op)) value="{{$op}}" @endif
          >
                        <label for="cant" class="control-label">Cantidad a Procesar:</label>
-                       <input id="cant" type="text" class="form-control" name="cant"  readonly>
+                       <input id="cant" type="number" class="form-control" name="cant"  step="1" min="1">
 
                    </div>
                  
