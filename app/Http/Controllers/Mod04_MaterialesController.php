@@ -1182,10 +1182,16 @@ public function editArticuloPicking(){
             ->join('OITM', 'OITM.ItemCode', '=' , 'SIZ_MaterialesSolicitudes.ItemCode')
             ->select('SIZ_MaterialesSolicitudes.*', 'OITM.ItemName', 'OITM.InvntryUom')        
             ->where('Id', Input::get('articulo'))->first();
+            if (Input::has('qrinput')) {
+                $cant_scanner = '';
+            }else{
+                $cant_scanner = 'Cant_scan = 0,';   
+            }
+
     if (Input::get('canta') + Input::get('cantb') == Input::get('pendiente')) {
-        DB::update('UPDATE SIZ_MaterialesSolicitudes SET  Cant_ASurtir_Origen_A = ?, Cant_ASurtir_Origen_B = ?, Cant_scan = 0, Razon_PickingCantMenor = ? WHERE Id = ?', [Input::get('canta'), Input::get('cantb'), '', Input::get('articulo')]);
+        DB::update('UPDATE SIZ_MaterialesSolicitudes SET  Cant_ASurtir_Origen_A = ?, Cant_ASurtir_Origen_B = ?, '.$cant_scanner.' Razon_PickingCantMenor = ? WHERE Id = ?', [Input::get('canta'), Input::get('cantb'), '', Input::get('articulo')]);
     } elseif(Input::get('canta') + Input::get('cantb') < Input::get('pendiente')){
-        DB::update('UPDATE SIZ_MaterialesSolicitudes SET  Cant_ASurtir_Origen_A = ?, Cant_ASurtir_Origen_B = ?, Cant_scan = 0, Razon_PickingCantMenor = ? WHERE Id = ?', [Input::get('canta'), Input::get('cantb'), Input::get('reason'), Input::get('articulo')]);
+        DB::update('UPDATE SIZ_MaterialesSolicitudes SET  Cant_ASurtir_Origen_A = ?, Cant_ASurtir_Origen_B = ?, '.$cant_scanner.' Razon_PickingCantMenor = ? WHERE Id = ?', [Input::get('canta'), Input::get('cantb'), Input::get('reason'), Input::get('articulo')]);
         
         if (strpos(Input::get('reason'), 'existencia') !== false) {
            
