@@ -275,10 +275,9 @@ class Reportes_ProduccionController extends Controller
                 $text_selCuatro = 'Selecciona Departamento';
                 $data_selCuatro = $deptos;
             break;
-            case "009 CATALOGO DE EMPLEADOS":
-                $sizeModal = 'modal-md';
-                $text_selCinco = 'Escoje una opción';
-                $data_selCinco = $request->get('opciones');
+            case "CALIDAD CAPTURA DEFECTIVOS":
+                $Text = "Ingresa a una OP para iniciar captura"; 
+                $fieldOtroNumber = 'OP'; 
             break;
 
         }
@@ -668,7 +667,7 @@ class Reportes_ProduccionController extends Controller
                 $excel->sheet('B.O.', function($sheet) use($data){
                 
                 $sheet->cell('A4', function ($cell) {
-                    $cell->setValue(\AppHelper::instance()->getHumanDate(date("Y-m-d H:i:s")));
+                    $cell->setValue((date("Y-m-d H:i:s")));
                 });
                 $sheet->cell('N4', function ($cell) {
                     $cell->setValue( date("H:i:s"));

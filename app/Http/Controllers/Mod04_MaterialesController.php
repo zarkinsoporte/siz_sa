@@ -868,10 +868,10 @@ public function ShowDetalleSolicitud($id, $qr_itemcode = null, $qr_cant = null){
         if (!is_null($qr_itemcode) && count($articulos_validos) > 0) { 
             //verificar que venimos de escanear qr 
             //y que el material escaneado sea de los articulos validos           
-            $qr_item = array_where($articulos_validos, function ($key,$item) use ($qr_itemcode) {
+            $qr_item_search = array_where($articulos_validos, function ($key,$item) use ($qr_itemcode) {
             return $item->ItemCode == $qr_itemcode;
             });
-           
+            $qr_item = array_values($qr_item_search);
             if (count($qr_item) !== 1) {
                 //si el material no esta en los validos entonces esta en los que no se surtiran
               
@@ -915,6 +915,7 @@ public function ShowDetalleSolicitud($id, $qr_itemcode = null, $qr_cant = null){
         'showmodal' => $showmodal,
         'todosCantScan' => $todosCantScan
     );
+    
     if ($step->Status == 'Autorizacion') {
         return view('Mod04_Materiales.Autorizacion', $param);
     } else {
@@ -1182,16 +1183,15 @@ public function editArticuloPicking(){
             ->join('OITM', 'OITM.ItemCode', '=' , 'SIZ_MaterialesSolicitudes.ItemCode')
             ->select('SIZ_MaterialesSolicitudes.*', 'OITM.ItemName', 'OITM.InvntryUom')        
             ->where('Id', Input::get('articulo'))->first();
-            if (Input::has('qrinput')) {
+             if (Input::has('qrinput')) {
                 $cant_scanner = '';
             }else{
                 $cant_scanner = 'Cant_scan = 0,';   
             }
-
     if (Input::get('canta') + Input::get('cantb') == Input::get('pendiente')) {
-        DB::update('UPDATE SIZ_MaterialesSolicitudes SET  Cant_ASurtir_Origen_A = ?, Cant_ASurtir_Origen_B = ?, '.$cant_scanner.' Razon_PickingCantMenor = ? WHERE Id = ?', [Input::get('canta'), Input::get('cantb'), '', Input::get('articulo')]);
+        DB::update('UPDATE SIZ_MaterialesSolicitudes SET  Cant_ASurtir_Origen_A = ?, Cant_ASurtir_Origen_B = ?, Cant_scan = 0, Razon_PickingCantMenor = ? WHERE Id = ?', [Input::get('canta'), Input::get('cantb'), '', Input::get('articulo')]);
     } elseif(Input::get('canta') + Input::get('cantb') < Input::get('pendiente')){
-        DB::update('UPDATE SIZ_MaterialesSolicitudes SET  Cant_ASurtir_Origen_A = ?, Cant_ASurtir_Origen_B = ?, '.$cant_scanner.' Razon_PickingCantMenor = ? WHERE Id = ?', [Input::get('canta'), Input::get('cantb'), Input::get('reason'), Input::get('articulo')]);
+        DB::update('UPDATE SIZ_MaterialesSolicitudes SET  Cant_ASurtir_Origen_A = ?, Cant_ASurtir_Origen_B = ?, Cant_scan = 0, Razon_PickingCantMenor = ? WHERE Id = ?', [Input::get('canta'), Input::get('cantb'), Input::get('reason'), Input::get('articulo')]);
         
         if (strpos(Input::get('reason'), 'existencia') !== false) {
            
@@ -2284,7 +2284,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                      
             $articulos = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as UM, OITM.ItemName, mat.Destino, 
                     mat.Cant_Requerida, mat.Cant_Autorizada, mat.Cant_PendienteA, mat.Cant_ASurtir_Origen_A, 
-                    ALMACENES.AlmacenOrigen, CASE WHEN mat.Cant_ASurtir_Origen_A > AlmacenOrigen THEN \'N\'  ELSE mat.EstatusLinea END as EstatusLinea  
+                    ALMACENES.AlmacenOrigen, CASE WHEN (mat.Cant_ASurtir_Origen_A > AlmacenOrigen) AND mat.EstatusLinea <> \'C\'  THEN \'N\'  ELSE mat.EstatusLinea END as EstatusLinea  
                     from SIZ_MaterialesTraslados mat
                     LEFT JOIN OITM on OITM.ItemCode = mat.ItemCode
                     LEFT JOIN 
@@ -2331,13 +2331,14 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
         $id_sol = $item->Id_Solicitud;
         if (Auth::check()) {
             if (strpos(Input::get('reason'), 'Material') !== false) {
+     
                 DB::update('UPDATE SIZ_MaterialesTraslados SET EstatusLinea = ? , Razon = ?
             WHERE Id = ?', ['C', Input::get('reason'), Input::get('articulo')]);
 
-                $articulosvalidos = DB::table('SIZ_MaterialesSolicitudes')
+                $articulosvalidos = DB::table('SIZ_MaterialesTraslados')
                     ->whereIn('EstatusLinea', ['S', 'N', 'I'])
                     ->where('Id_Solicitud', $id_sol)->count();
-
+                
                 if ($articulosvalidos == 0) {
                     DB::update(
                         'UPDATE SIZ_SolicitudesMP SET Status = ? 
@@ -2377,7 +2378,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                             $msj->to($correos); //Correo del destinatario
                         });
                     }
-                    Session::flash('mensaje', 'Solicitud #' . $id_sol . ' Cancelada');
+                    Session::flash('mensaje', 'Solicitud #' . $id_sol . ' Cerrada');
                 }
             } else {
                 DB::update('UPDATE SIZ_MaterialesTraslados SET EstatusLinea = ? , Razon= ?
@@ -2999,7 +3000,7 @@ $consultaj = collect($consulta);
         $cant = Input::get('cantx_bulto');
         $separador = ' - ';
         $CodigoQR = QrCode::margin(1)->format('png')->size(100)
-        ->generate("http://187.189.177.39:8081/siz/public/qr/".
+        ->generate("http://192.168.7/sizb/public/qr/".
         $pKey."/".$cardCode."/".$cant);
 
         $pdf = \PDF::loadView('Mod04_Materiales.etiquetaQrPDF', 

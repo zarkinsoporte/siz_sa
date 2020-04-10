@@ -38,6 +38,9 @@
         </div>
         <div class="row">
                 <!-- small box -->
+                <?php
+                $indice = 0
+                ?>
             @foreach ($links as $link)
             <div class="col-md-4 col-sm-6 col-xs-12">
                 
@@ -50,7 +53,7 @@
                         @else
                         Pendiente    
                         @endif</span>
-                    @endif
+   eber                 @endif
                     </p>
                         <p align="right">                           
                         <a href="{!! url('home/'.$link->route) !!}" class="btn btn-default" role="button">
@@ -59,6 +62,12 @@
                         </p>
                     </div>
                 </div>
+                <?php 
+               $indice++;                
+                ?>
+                @if ($indice % 3 == 0)
+                    </div><div class="row">
+                @endif
             </div>
             @endforeach
             <!-- ./col -->

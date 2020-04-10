@@ -268,7 +268,7 @@ var table = $('#tentradas').DataTable({
        
     ],
     "language": {
-        "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json",
+        "url": "{{ asset('assets/lang/Spanish.json') }}",
         buttons: {
             copyTitle: 'Copiar al portapapeles',
             copyKeys: 'Presiona <i>ctrl</i> + <i>C</i> para copiar o la tecla <i>Esc</i> para continuar.',

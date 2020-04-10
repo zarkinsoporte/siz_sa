@@ -319,4 +319,204 @@ $Indatos = DB::table('Siz_Calidad_Depto')->orderBy('Semana','asc')->get();
         return redirect()->route('auth/login');
     }
 }
+
+public function showCapturaDefectivos(Request $request){
+
+   //dd($request->get('input-op'));
+    if (Auth::check()) {
+        $rules = [
+             'fieldOtroNumber' => 'required|exists:@CP_OF,U_DocEntry',
+           // 'FechIn' => 'required|date|before:tomorrow',
+           // 'FechaFa' => 'required|date',              
+        ];
+        $customMessages = [
+            'fieldOtroNumber.required' => 'Ingresa OP',               
+            'fieldOtroNumber.exists' => 'OP no encontrada',               
+            //'fieldText.exists' => 'El Código no existe.'
+        ];
+
+        if ($request->get('input-op') != null && is_numeric($request->get('input-op'))) {
+            $op = $request->get('input-op');
+        } else {         
+            $valid = Validator::make( $request->all(), $rules, $customMessages);
+            
+            if ($valid->fails()) {
+                return redirect()->back()
+                    ->withErrors($valid)
+                    ->withInput($request->input());
+            }
+            $op = $request->input('fieldOtroNumber');    
+        }
+        $user = Auth::user();
+        $actividades = $user->getTareas();  
+        $data = array(        
+            'actividades' => $actividades,
+            'ultimo' => count($actividades),
+            'op' => $op         
+        );
+        return view('Mod07_Calidad.DefectivosCaptura', $data);
+
+
+    } else {
+        return redirect()->route('auth/login');
+    }
+}
+
+public function showDefectivosTabla(){
+     if (Auth::check()) {
+        $user = Auth::user();
+        $actividades = $user->getTareas();  
+        $data = array(        
+            'actividades' => $actividades,
+            'ultimo' => count($actividades),         
+        );
+        return view('Mod07_Calidad.DefectivosTabla', $data);
+    } else {
+        return redirect()->route('auth/login');
+    }
+}
+public function DataShowDefectivosTabla(){
+    $consulta = DB::table('SIZ_Calidad_Defectivos')
+    ->leftjoin('OUDP', 'OUDP.Code', '=', 'cda_depto')
+    ->select('SIZ_Calidad_Defectivos.*',  'OUDP.Name as depto');           
+        return Datatables::of($consulta)
+            ->addColumn(
+                'acciones',
+                function ($item) {
+
+                 return    '<button type="button" class="btn btn-primary" id="boton-editar" data-toggle="tooltip"
+    data-placement="right" title="Editar"><span class="glyphicon glyphicon-pencil"></span></button>' .
+'<button type="button" class="btn btn-danger" id="boton-eliminar" data-toggle="tooltip" data-placement="right"
+    title="Eliminar"><span class="glyphicon glyphicon-trash"></span></button>';
+
+                    // '<a href="TRASLADO RECEPCION/solicitud/' . $item->cda_id . '"><i class="fa fa-hand-o-right"></i> </a>';
+                }
+            )
+           ->addColumn(
+                'activo',
+                function ($item) {
+                    return  ($item->cda_activo == 1) ? 'ACTIVO' : 'NO ACTIVO' ;
+                }
+            )
+
+            ->make(true);
+}
+public function DataShowDefectivosCaptura(Request $request){
+    $consulta = DB::table('SIZ_Calidad_Defectivos_Estadistico')
+    ->leftjoin('OUDP', 'OUDP.Code', '=', 'cde_depto')
+    ->leftjoin('OHEM as o1', 'o1.U_EmpGiro', '=', 'SIZ_Calidad_Defectivos_Estadistico.cde_operario')  
+    ->leftjoin('OHEM as o2', 'o2.U_EmpGiro', '=', 'SIZ_Calidad_Defectivos_Estadistico.cde_inspector')  
+    ->select('SIZ_Calidad_Defectivos_Estadistico.*',  'OUDP.Name as depto', DB::raw("CONCAT (o1.firstName ,' ', o1.lastName) as operario"), DB::raw("CONCAT (o2.firstName ,' ', o2.lastName) as inspector"))
+    ->where('SIZ_Calidad_Defectivos_Estadistico.cde_op', $request->get('op')); 
+ //dd($request->get('op'));
+        return Datatables::of($consulta)
+            ->addColumn(
+                'acciones',
+                function ($item) {
+
+                 return    '<button type="button" class="btn btn-primary" id="boton-editar" data-toggle="tooltip"
+    data-placement="right" title="Editar"><span class="glyphicon glyphicon-pencil"></span></button>' .
+'<button type="button" class="btn btn-danger" id="boton-eliminar" data-toggle="tooltip" data-placement="right"
+    title="Eliminar"><span class="glyphicon glyphicon-trash"></span></button>';
+
+                    // '<a href="TRASLADO RECEPCION/solicitud/' . $item->cda_id . '"><i class="fa fa-hand-o-right"></i> </a>';
+                }
+            )         
+            ->make(true);
+}
+
+   public function combobox(){
+       //para Tabla_de_Defectivos
+        $deptos = DB::select("select Code as [llave], Name as [valor] from OUDP where Code > 0 order by Name asc");
+        return compact('deptos');
+    }
+   public function comboboxCapturaDefectivos(){        
+        $deptos = DB::select("select Code as [llave], Name as [valor] from OUDP where Code > 0 order by Name asc");                                            
+        return compact('deptos');
+    }
+   public function comboboxCapturaDefectivosOperarios(Request $request){        
+        $defectos = DB::select("select cda_descripcion as llave, cda_descripcion as valor from SIZ_Calidad_Defectivos where cda_depto = ? and cda_activo = 1 order by cda_descripcion", [$request->get('departamento')]);
+        $operarios = DB::select("select U_EmpGiro as [llave] ,firstName + ' ' + lastName as [valor] from OHEM where dept = ? and status = 1 order by firstName", [$request->get('departamento')]);              
+        return compact('operarios', 'defectos');
+    }
+
+    public function defectivos_addorupdate(){        
+        if (array_key_exists ('cda_activo', Input::all())) {
+            $act = 1;
+        } else {
+            $act = 0;
+        }
+        
+        if (Input::get('input-accion') == 'nuevo') {
+            DB::table('SIZ_Calidad_Defectivos')
+            ->insert([
+                'cda_depto' => Input::get('depto'), 
+                'cda_descripcion' => Input::get('cda_descripcion'),            
+                'cda_pond' => Input::get('cda_pond'),            
+                'cda_activo' => $act,            
+            ]); 
+           
+        } else {
+            DB::table('SIZ_Calidad_Defectivos')
+            ->where('cda_id', Input::get('input-id'))
+            ->update([
+                'cda_depto' => Input::get('depto'), 
+                'cda_descripcion' => Input::get('cda_descripcion'),            
+                'cda_pond' => Input::get('cda_pond'),            
+                'cda_activo' => $act,            
+            ]);
+          
+        }
+        
+        Session::flash('mensaje', 'Guardado correctamente');
+        return redirect()->back();
+    }
+
+    public function capturadefectivos_addorupdate(Request $request){               
+       // dd(Input::all());
+        if (Input::get('input-accion') == 'nuevo') {
+            DB::table('SIZ_Calidad_Defectivos_Estadistico')
+            ->insert([
+                'cde_cda' => Input::get('descripcion'), 
+                'cde_depto' => Input::get('depto'), 
+                'cde_op' => Input::get('input-op'),            
+                'cde_operario' => Input::get('operario'),            
+                'cde_cantidad' => Input::get('cde_cantidad'),            
+                'cde_fecha' => Input::get('cde_fecha'),            
+                'cde_inspector' => Input::get('cde_inspector'),                                      
+            ]); 
+           
+        }else if (Input::get('input-accion') == 'editar'){
+            DB::table('SIZ_Calidad_Defectivos_Estadistico')
+            ->where('cde_id', Input::get('input-id'))
+            ->update([
+                'cde_cda' => Input::get('descripcion'), 
+                'cde_depto' => Input::get('depto'),            
+                'cde_operario' => Input::get('operario'),            
+                'cde_cantidad' => Input::get('cde_cantidad'),            
+                'cde_fecha' => Input::get('cde_fecha'),            
+                'cde_inspector' => Input::get('cde_inspector'),                                       
+            ]);
+          
+        }
+        
+        Session::flash('mensaje', 'Guardado correctamente');
+        return redirect()->route('defectoscaptura', [$request]);
+        
+    }
+
+      public function CDA_quitar(){    
+        DB::table('SIZ_Calidad_Defectivos')
+        ->where('cda_id', Input::get('code'))
+        ->delete();
+        Session::flash('mensaje', 'Registro eliminado');                 
+        return redirect()->back();
+     }
+      public function CDE_quitar(){    
+        DB::table('SIZ_Calidad_Defectivos_Estadistico')
+        ->where('cde_id', Input::get('code'))
+        ->delete();
+        Session::flash('mensaje', 'Registro eliminado');                 
+        return redirect()->back();
+     }
 }

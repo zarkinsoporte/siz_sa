@@ -164,6 +164,13 @@
                                             <option>LAPTOP</option>
                                             <option>ALL IN ONE</option>
                                             <option>SERVIDOR</option>
+                                            <option>TABLET</option>
+                                            <option>TELEFONO ANALOGO</option>
+                                            <option>TELEFONO DIGITAL</option>
+                                            <option>SMARTPHONE</option>
+                                            <option>RADIO (Walkie-talkies)</option>
+                                            <option>NO BREAK (UPS)</option>
+                                            <option>EQUIPO INFORMATICO (OTRO)</option>
                                         </select>
                                     </div>
                                 </div>

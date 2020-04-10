@@ -266,3 +266,8 @@ $(".DTFC_LeftHeadWrapper").find("input").on( 'keyup change', function () {
 
 
         oItem.UserFields.Fields.Item("U_FIELDNAME").Value
+
+
+        <h5>Actualizado: {{date('d-m-Y h:i a', strtotime("now"))}}</h5>
+
+        https://laracasts.com/discuss/channels/laravel/how-to-give-page-numbers-for-printout-in-barryvdhlaravel-dompdf

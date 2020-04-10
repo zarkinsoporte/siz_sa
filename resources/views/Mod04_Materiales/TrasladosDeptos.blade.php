@@ -142,7 +142,7 @@
                   @endif
                   role="button" class="btn btn-default"><i class="fa fa-arrow-circle-o-up fa-lg"
                     style="color:royalblue"></i></a>
-                    <a role="button" data-toggle="modal" data-target="#remove2" data-id="{{$art->Id}}"
+              <a role="button" data-toggle="modal" data-target="#remove2" data-id="{{$art->Id}}"
                 class="btn btn-default"><i class="fa fa-arrow-circle-o-down fa-lg" style="color:red"></i></a>
 
             </td>
@@ -244,11 +244,11 @@
             <input type="hidden" id="articulo-id" name="articulo">
             <h4>¿Cuál es la razón por la que no recibe este artículo?</h4>
 
-            <input type="radio" name="reason" value="Material Dañado / Incompleto" checked>
+            <input type="radio" name="reason" value="Material No se encuentra" checked>
+            El Material no se encuentra<br>
+            <input type="radio" name="reason" value="Material Dañado / Incompleto">
             Material Dañado / Incompleto<br>
 
-            <input type="radio" name="reason" value="Material No se encuentra">
-            El Material no se encuentra<br>
 
 
           </div>

@@ -396,9 +396,25 @@ Route::get('OITM.show', 'HomeController@ShowArticulos')->name('OITM.show');
 Route::get('qr/{itemCode}/{proveedor}/{cantXbulto}', 'GuestController@getArticulo')->name('qr')->middleware('guest');
 Route::get('qr/{itemCode}/{proveedor}/{cantXbulto}', 'Mod04_MaterialesController@getArticulo')->name('qr2');
 
+//CAPTURA DEFECTIVOS
+Route::get('home/CALIDAD CAPTURA DEFECTIVOS', 'Reportes_ProduccionController@showModal')->middleware('routelog');
+Route::post('home/reporte/CALIDAD CAPTURA DEFECTIVOS', 'Mod07_CalidadController@showCapturaDefectivos');
+Route::any('home/reporte/CALIDAD CAPTURA DEFECTIVOS', 'Mod07_CalidadController@showCapturaDefectivos')->name('defectoscaptura');
 
-//itk
-Route::get('home/009 CATALOGO EMPLEADOS', 'Reportes_ProduccionController@showModal')->middleware('routelog');
+Route::get('datatables.defectivoscaptura', 'Mod07_CalidadController@DataShowDefectivosCaptura')->name('datatables.defectivoscaptura');
+Route::any('calidad/capturadefectivos/combobox', 'Mod07_CalidadController@comboboxCapturaDefectivos');
+Route::any('calidad/capturadefectivos/combobox2', 'Mod07_CalidadController@comboboxCapturaDefectivosOperarios');
+Route::post('home/calidad/capturadefectivos/addorupdate', 'Mod07_CalidadController@capturadefectivos_addorupdate');
+Route::post('home/capturadefectivos/quitar', 'Mod07_CalidadController@CDE_quitar');
+
+//TABLA DEFECTIVOS
+Route::get('home/CALIDAD DEFECTIVOS X AREA', 'Mod07_CalidadController@showDefectivosTabla')->middleware('routelog');
+Route::get('datatables.defectivostabla', 'Mod07_CalidadController@DataShowDefectivosTabla')->name('datatables.defectivostabla');
+Route::any('calidad/tabladefectivos/combobox', 'Mod07_CalidadController@combobox');
+Route::post('home/calidad/tabladefectivos/addorupdate', 'Mod07_CalidadController@defectivos_addorupdate');
+Route::post('home/tabladefectivos/quitar', 'Mod07_CalidadController@CDA_quitar');
+
+
 Route::get('home/009 CATALOGO DE EMPLEADOS', 'Reportes_ProduccionController@showModal')->name('home/009 CATALOGO DE EMPLEADOS');
 Route::post('home/reporte/009 CATALOGO EMPLEADOS', 'Reportes_ProduccionController@opcionesCatalogo');
 Route::post('home/reporte/009 CATALOGO DE EMPLEADOS', 'Reportes_ProduccionController@R009');

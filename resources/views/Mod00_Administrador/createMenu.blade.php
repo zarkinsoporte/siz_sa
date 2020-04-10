@@ -215,7 +215,7 @@
     { data: 'action', name: 'action', orderable: false, searchable: false}
     ],
     "language": {
-    "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+   "url": "{{ asset('assets/lang/Spanish.json') }}",
     },
     "columnDefs": [
     { "width": "5%", "targets":0 },
