@@ -96,6 +96,7 @@
 
                     <div class="form-group">
                         <input type="hidden" name="code" id="confirma-id" class="form-control" value="" />
+                        <input type="text" name="input-op" id="input-op" value="{{$op}}" class="form-control" style="display: none" />
                         <h4>¿Desea continuar?</h4>
 
                     </div>
@@ -132,7 +133,7 @@
 
                                 <input type="text" name="input-accion" id="input-accion" class="form-control" style="display: none" />
                                 <input type="text" name="input-id" id="input-id" class="form-control" style="display: none" />
-                            <input type="text" name="input-op" id="input-op" value="{{$op}}" class="form-control" style="display: none"  />
+                                <input type="text" name="input-op" id="input-op" value="{{$op}}" class="form-control" style="display: none"  />
 
                                <div class="form-group">
                                     <label class="col-md-3 control-label">Departamento</label>

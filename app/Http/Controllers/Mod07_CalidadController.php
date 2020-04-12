@@ -512,11 +512,11 @@ public function DataShowDefectivosCaptura(Request $request){
         Session::flash('mensaje', 'Registro eliminado');                 
         return redirect()->back();
      }
-      public function CDE_quitar(){    
+      public function CDE_quitar(Request $request){    
         DB::table('SIZ_Calidad_Defectivos_Estadistico')
         ->where('cde_id', Input::get('code'))
         ->delete();
         Session::flash('mensaje', 'Registro eliminado');                 
-        return redirect()->back();
+        return redirect()->route('defectoscaptura', [$request]);
      }
 }

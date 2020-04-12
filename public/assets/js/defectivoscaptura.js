@@ -163,7 +163,7 @@ function InicializaComboBox() {
     $("#cda_depto").empty();
     $('#cda_depto').selectpicker('destroy');
     $('#cda_depto').append(options).selectpicker('refresh');
-    $('#input-accion').val('');
+   
     $.ajax({
         url: '/calidad/capturadefectivos/combobox',
         type: 'GET',
