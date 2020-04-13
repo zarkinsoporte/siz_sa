@@ -7,6 +7,8 @@ use DB;
 use \COM;
 use Session;
 use Illuminate\Support\Facades\Auth;
+ini_set("memory_limit", '512M');
+ini_set('max_execution_time', 0);
 class SAPi extends Model
 {
      private static $vCmp = false;
@@ -34,7 +36,6 @@ class SAPi extends Model
 
    
 public static function ReciboProduccion($docEntry, $whs, $Cant, $comentario, $memo){
-
    if (self::$vCmp == false) {
        $cnn = self::Connect();
       if ( $cnn == 'Conectado') {

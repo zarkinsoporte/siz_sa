@@ -148,7 +148,7 @@ class SAP extends Model
                         $vItem->Lines->Quantity = $item->CA;
                         DB::table('SIZ_MaterialesSolicitudes')
                         ->where('Id', $item->Id)
-                        ->update(['Cant_PendienteA' => ($item->Cant_PendienteA - $item->CA),                      
+                        ->update(['Cant_PendienteA' => ($item->Cant_PendienteA - $item->CA),                        
                         'Cant_ASurtir_Origen_A' => 0]);
                         $vItem->Lines->ItemCode = $item->ItemCode;
                         $vItem->Lines->WarehouseCode = trim($varDestino[0]);
@@ -264,7 +264,7 @@ class SAP extends Model
                         $vItem->Lines->Quantity = $item->CA;
                         DB::table('SIZ_MaterialesTraslados')
                         ->where('Id', $item->Id)
-                        ->update(['Cant_PendienteA' => ($item->Cant_PendienteA - $item->CA),                      
+                        ->update(['Cant_PendienteA' => ($item->Cant_PendienteA - $item->CA),                        
                         'Cant_ASurtir_Origen_A' => ($item->Cant_PendienteA - $item->CA)]);
                         $vItem->Lines->ItemCode = $item->ItemCode;
                         $vItem->Lines->WarehouseCode = trim($varDestino[0]);              
@@ -316,8 +316,8 @@ class SAP extends Model
         }  
    }
 
-    public static function ReciboProduccion($docEntry, $Cant){
-        (self::$vCmp == false) ? self::Connect(): '';
+    public static function setReciboProduccion($docEntry, $Cant){
+       (self::$vCmp == false) ? self::Connect(): '';
    
         $vItem = self::$vCmp->GetBusinessObject("59");
         $vItem->Lines->BaseEntry = $docEntry; 
