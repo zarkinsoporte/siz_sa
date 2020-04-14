@@ -9,7 +9,7 @@
             <div class="hidden-lg"><br></div>
             <h3 class="page-header">
                 Captura de Defectivos OP #{{$op}}
-                <small>Calidad</small>
+                <small>{{$descripcion}}</small>
             </h3>
 
         </div>

@@ -12,7 +12,7 @@ var handleDataTableTools = function () {
          
         $('#cde_depto').val(datos['cde_depto']).selectpicker('refresh');
         $.ajax({
-            url: '/calidad/capturadefectivos/combobox2',
+            url: 'calidad/capturadefectivos/combobox2',
             type: 'GET',
             data: {
                 departamento: datos['cde_depto']
@@ -165,12 +165,12 @@ function InicializaComboBox() {
     $('#cda_depto').append(options).selectpicker('refresh');
    
     $.ajax({
-        url: '/calidad/capturadefectivos/combobox',
+        url: 'calidad/capturadefectivos/combobox',
         type: 'GET',
         success: function (data) {        
             var options = [];       
             for (var i = 0; i < data.deptos.length; i++) {
-                options.push('<option value="' + data.deptos[i]['llave'] + '">' + data.deptos[i]['llave'] + ' - ' + data.deptos[i]['valor'] + '</option>');
+                options.push('<option value="' + data.deptos[i]['llave'] + '">' + data.deptos[i]['valor'] + '</option>');
             }
             $('#cde_depto').append(options).selectpicker('refresh');                                                                                       
         },
@@ -200,7 +200,7 @@ function InicializaComboBox2() {
     $('#cde_cda').selectpicker('destroy');
     $('#cde_operario').selectpicker('destroy');
     $.ajax({
-        url: '/calidad/capturadefectivos/combobox2',
+        url: 'calidad/capturadefectivos/combobox2',
         type: 'GET',
         data:{
             departamento : $("#cde_depto").val()

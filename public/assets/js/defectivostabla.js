@@ -116,12 +116,12 @@ function InicializaComboBox() {
     $('#cda_depto').append(options).selectpicker('refresh');
 
     $.ajax({
-        url: '/calidad/tabladefectivos/combobox',
+        url: 'calidad/tabladefectivos/combobox',
         type: 'GET',
         success: function (data) {        
             var options = [];       
             for (var i = 0; i < data.deptos.length; i++) {
-                options.push('<option value="' + data.deptos[i]['llave'] + '">' + data.deptos[i]['llave'] + ' - ' + data.deptos[i]['valor'] + '</option>');
+                options.push('<option value="' + data.deptos[i]['llave'] + '">' + data.deptos[i]['valor'] + '</option>');
             }
             $('#cda_depto').append(options).selectpicker('refresh');
         },

@@ -180,4 +180,11 @@ return $data1;
     return $rs;
 
    }
+   public static function getDescripcion($op){
+   $rs = DB::table('OWOR')    
+    ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')       
+    ->where('OWOR.DocEntry', $op)->value('ItemName');
+    return $rs;
+
+   }
 }

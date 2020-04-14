@@ -24,6 +24,7 @@ use App;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
 use Datatables;
+use App\OP;
 class Mod07_CalidadController extends Controller
 {
     public function Rechazo()
@@ -352,7 +353,8 @@ public function showCapturaDefectivos(Request $request){
         $data = array(        
             'actividades' => $actividades,
             'ultimo' => count($actividades),
-            'op' => $op         
+            'op' => $op,
+            'descripcion' => OP::getDescripcion($op)         
         );
         return view('Mod07_Calidad.DefectivosCaptura', $data);
 
@@ -406,7 +408,7 @@ public function DataShowDefectivosCaptura(Request $request){
     ->leftjoin('OUDP', 'OUDP.Code', '=', 'cde_depto')
     ->leftjoin('OHEM as o1', 'o1.U_EmpGiro', '=', 'SIZ_Calidad_Defectivos_Estadistico.cde_operario')  
     ->leftjoin('OHEM as o2', 'o2.U_EmpGiro', '=', 'SIZ_Calidad_Defectivos_Estadistico.cde_inspector')  
-    ->select('SIZ_Calidad_Defectivos_Estadistico.*',  'OUDP.Name as depto', DB::raw("CONCAT (o1.firstName ,' ', o1.lastName) as operario"), DB::raw("CONCAT (o2.firstName ,' ', o2.lastName) as inspector"))
+    ->select('SIZ_Calidad_Defectivos_Estadistico.*',  'OUDP.Name as depto', DB::raw("(o1.firstName +' '+ o1.lastName) as operario"), DB::raw("(o2.firstName +' '+ o2.lastName) as inspector"))
     ->where('SIZ_Calidad_Defectivos_Estadistico.cde_op', $request->get('op')); 
  //dd($request->get('op'));
         return Datatables::of($consulta)

@@ -402,15 +402,15 @@ Route::post('home/reporte/CALIDAD CAPTURA DEFECTIVOS', 'Mod07_CalidadController@
 Route::any('home/reporte/CALIDAD CAPTURA DEFECTIVOS', 'Mod07_CalidadController@showCapturaDefectivos')->name('defectoscaptura');
 
 Route::get('datatables.defectivoscaptura', 'Mod07_CalidadController@DataShowDefectivosCaptura')->name('datatables.defectivoscaptura');
-Route::any('calidad/capturadefectivos/combobox', 'Mod07_CalidadController@comboboxCapturaDefectivos');
-Route::any('calidad/capturadefectivos/combobox2', 'Mod07_CalidadController@comboboxCapturaDefectivosOperarios');
+Route::any('home/reporte/calidad/capturadefectivos/combobox', 'Mod07_CalidadController@comboboxCapturaDefectivos');
+Route::any('home/reporte/calidad/capturadefectivos/combobox2', 'Mod07_CalidadController@comboboxCapturaDefectivosOperarios');
 Route::post('home/calidad/capturadefectivos/addorupdate', 'Mod07_CalidadController@capturadefectivos_addorupdate');
 Route::post('home/capturadefectivos/quitar', 'Mod07_CalidadController@CDE_quitar');
 
 //TABLA DEFECTIVOS
 Route::get('home/CALIDAD DEFECTIVOS X AREA', 'Mod07_CalidadController@showDefectivosTabla')->middleware('routelog');
 Route::get('datatables.defectivostabla', 'Mod07_CalidadController@DataShowDefectivosTabla')->name('datatables.defectivostabla');
-Route::any('calidad/tabladefectivos/combobox', 'Mod07_CalidadController@combobox');
+Route::any('home/calidad/tabladefectivos/combobox', 'Mod07_CalidadController@combobox');
 Route::post('home/calidad/tabladefectivos/addorupdate', 'Mod07_CalidadController@defectivos_addorupdate');
 Route::post('home/tabladefectivos/quitar', 'Mod07_CalidadController@CDA_quitar');
 
