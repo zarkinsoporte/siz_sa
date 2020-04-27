@@ -181,6 +181,7 @@ class Reportes_ProduccionController extends Controller
     {
         $nombre = str_replace('%20', ' ', explode('/', $request->path())[1]);
         $fechas = false;
+        $unafecha = false;
         $fieldOtroNumber = '';
         $Text = '';
         $fieldText = '';
@@ -264,17 +265,7 @@ class Reportes_ProduccionController extends Controller
                 $text_selCuatro = 'Almacenes a Considerar';
                 $data_selCuatro = $almacenes;
             break;
-            case "009 CATALOGO EMPLEADOS":
-                $sizeModal = 'modal-md';
-                $btnSubmitText = 'Continuar';
-                $deptos = DB::table('itekniaA.dbo.Departamentos')
-                    ->select('DEP_Nombre as llave', 'DEP_Nombre as valor')
-                    ->where('DEP_Eliminado', '0')
-                    ->orderBy('DEP_Nombre')                    
-                    ->get();                
-                $text_selCuatro = 'Selecciona Departamento';
-                $data_selCuatro = $deptos;
-            break;
+            
             case "CALIDAD CAPTURA DEFECTIVOS":
                 $Text = "Ingresa a una OP para iniciar captura"; 
                 $fieldOtroNumber = 'OP'; 
@@ -306,7 +297,8 @@ class Reportes_ProduccionController extends Controller
             'sizeModal' => $sizeModal,
             'data_table' => $data_table,
             'btn3' => $btn3,
-            'btnSubmitText' => $btnSubmitText
+            'btnSubmitText' => $btnSubmitText,
+            'unafecha' => $unafecha
             ]);
         } else {
             return redirect()->route('auth/login');

@@ -81,6 +81,11 @@ https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css
 {!! Html::style('assets/css/responsive.css') !!}
 {!! Html::script('assets/js/headerdatatables.js') !!}
 {!! Html::style('assets/css/jquery.datatables.yadcf.css') !!}
+<!-- Bootstrap Date-Picker Plugin -->
+{!! Html::script('assets/datepicker/js/js/bootstrap-datepicker.min.js') !!}
+{!! Html::script('assets/datepicker/js/locales/bootstrap-datepicker.es.min.js') !!}
+{!! Html::style('assets/datepicker/js/css/bootstrap-datepicker.min.css') !!}
+
 <style>
 .zrk-gris{
     background-color: #4c4c4c;
@@ -120,6 +125,7 @@ https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css
 }
 .container {
 width: 100%;
+height: 100%;
 }
 </style>
 

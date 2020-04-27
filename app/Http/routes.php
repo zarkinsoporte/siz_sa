@@ -414,8 +414,9 @@ Route::any('home/calidad/tabladefectivos/combobox', 'Mod07_CalidadController@com
 Route::post('home/calidad/tabladefectivos/addorupdate', 'Mod07_CalidadController@defectivos_addorupdate');
 Route::post('home/tabladefectivos/quitar', 'Mod07_CalidadController@CDA_quitar');
 
+//REPORTE DEFECTIVOS
 
-Route::get('home/009 CATALOGO DE EMPLEADOS', 'Reportes_ProduccionController@showModal')->name('home/009 CATALOGO DE EMPLEADOS');
-Route::post('home/reporte/009 CATALOGO EMPLEADOS', 'Reportes_ProduccionController@opcionesCatalogo');
+Route::get('home/CALIDAD REPORTE DEFECTIVOS', 'Mod07_CalidadController@showReporteDefectivos')->middleware('routelog');
+Route::post('home/reporte/CALIDAD REPORTE DEFECTIVOS', 'Mod07_CalidadController@exportarReporteDefectivos');
 Route::post('home/reporte/009 CATALOGO DE EMPLEADOS', 'Reportes_ProduccionController@R009');
 Route::get('datatables.R009', 'Reportes_ProduccionController@DataShow009')->name('datatables.R009');

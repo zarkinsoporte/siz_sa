@@ -53,7 +53,7 @@
                         @else
                         Pendiente    
                         @endif</span>
-   eber                 @endif
+                    @endif
                     </p>
                         <p align="right">                           
                         <a href="{!! url('home/'.$link->route) !!}" class="btn btn-default" role="button">

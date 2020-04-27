@@ -66,6 +66,14 @@
                                             Hasta:<input type="date" id="FechaFa" name="FechaFa" value="{{ old('FechaFa') }}" class="form-control" required>
                                         </div>
                                         @endif
+                                        @if($unafecha == true)
+                                        <div class="form-group">
+                                            <label for="date_range" class="control-label">Fecha:</label><br>
+                                            <input type="date" id="FechIn" name="FechIn" value="{{ old('Fecha') }}" class="form-control" autofocus
+                                                required>
+                                           
+                                        </div>
+                                        @endif
                                         @if($fieldOtroNumber <> '')                                    
                                         <div class="form-group">
                                         Escribe {{$fieldOtroNumber}}:<input type="number" id="fieldOtroNumber" name="fieldOtroNumber" value="{{ old('fieldOtroNumber') }}" class="form-control" autofocus required>

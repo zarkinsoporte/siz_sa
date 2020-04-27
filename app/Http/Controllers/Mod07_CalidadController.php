@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Input;
 use Session;
 use Auth;
 use Lava;
+use Carbon\Carbon;
 //excel
 use Maatwebsite\Excel\Facades\Excel;
 //DOMPDF
@@ -520,5 +521,309 @@ public function DataShowDefectivosCaptura(Request $request){
         ->delete();
         Session::flash('mensaje', 'Registro eliminado');                 
         return redirect()->route('defectoscaptura', [$request]);
+     }
+
+     public function showReporteDefectivos(){
+         if (Auth::check()) {
+        $user = Auth::user();
+        $actividades = $user->getTareas(); 
+         $deptos = DB::select("select Code as [llave], Name as [valor] from OUDP where Code > 0 order by Name asc");
+        $data = array(        
+            'actividades' => $actividades,
+            'deptos' => $deptos,
+            'ultimo' => count($actividades),         
+        );
+        return view('Mod07_Calidad.DefectivosReporte', $data);
+    } else {
+        return redirect()->route('auth/login');
+    }
+     }
+
+     public function exportarReporteDefectivos(Request $request){
+        $excel = new \PHPExcel();
+
+        $excel->createSheet();
+        $excel->setActiveSheetIndex(1);
+        $excel->getActiveSheet()->setTitle('ChartTest');
+
+        $objWorksheet = $excel->getActiveSheet();
+        $objWorksheet->fromArray(
+                array(
+                    array('', 'Rainfall (mm)', 'Temperature (°F)', 'Humidity (%)'),
+                    array('Jan', 78, 52, 61),
+                    array('Feb', 64, 54, 62),
+                    array('Mar', 62, 57, 63),
+                    array('Apr', 21, 62, 59),
+                    array('May', 11, 75, 60),
+                    array('Jun', 1, 75, 57),
+                    array('Jul', 1, 79, 56),
+                    array('Aug', 1, 79, 59),
+                    array('Sep', 10, 75, 60),
+                    array('Oct', 40, 68, 63),
+                    array('Nov', 69, 62, 64),
+                    array('Dec', 89, 57, 66),
+                )
+        );
+
+        $dataseriesLabels1 = array(
+            new \PHPExcel_Chart_DataSeriesValues('String', 'Grafico!$B$1', NULL, 1), //  Temperature
+        );
+        $dataseriesLabels2 = array(
+            new \PHPExcel_Chart_DataSeriesValues('String', 'Grafico!$C$1', NULL, 1), //  Rainfall
+        );
+        $dataseriesLabels3 = array(
+            new \PHPExcel_Chart_DataSeriesValues('String', 'Grafico!$D$1', NULL, 1), //  Humidity
+        );
+
+        $xAxisTickValues = array(
+            new \PHPExcel_Chart_DataSeriesValues('String', 'Grafico!$A$2:$A$13', NULL, 12), //  Jan to Dec
+        );
+
+        $dataSeriesValues1 = array(
+            new \PHPExcel_Chart_DataSeriesValues('Number', 'Grafico!$B$2:$B$13', NULL, 12),
+        );
+
+        //  Build the dataseries
+        $series1 = new \PHPExcel_Chart_DataSeries(
+                \PHPExcel_Chart_DataSeries::TYPE_BARCHART, // plotType
+                \PHPExcel_Chart_DataSeries::GROUPING_CLUSTERED, // plotGrouping
+                range(0, count($dataSeriesValues1) - 1), // plotOrder
+                $dataseriesLabels1, // plotLabel
+                $xAxisTickValues, // plotCategory
+                $dataSeriesValues1                              // plotValues
+        );
+        //  Set additional dataseries parameters
+        //      Make it a vertical column rather than a horizontal bar graph
+        $series1->setPlotDirection(\PHPExcel_Chart_DataSeries::DIRECTION_COL);
+
+        $dataSeriesValues2 = array(
+            new \PHPExcel_Chart_DataSeriesValues('Number', 'Grafico!$C$2:$C$13', NULL, 12),
+        );
+
+        //  Build the dataseries
+        $series2 = new \PHPExcel_Chart_DataSeries(
+                \PHPExcel_Chart_DataSeries::TYPE_LINECHART, // plotType
+                \PHPExcel_Chart_DataSeries::GROUPING_STANDARD, // plotGrouping
+                range(0, count($dataSeriesValues2) - 1), // plotOrder
+                $dataseriesLabels2, // plotLabel
+                NULL, // plotCategory
+                $dataSeriesValues2                              // plotValues
+        );
+
+        $dataSeriesValues3 = array(
+            new \PHPExcel_Chart_DataSeriesValues('Number', 'Grafico!$D$2:$D$13', NULL, 12),
+        );
+
+        //  Build the dataseries
+        $series3 = new \PHPExcel_Chart_DataSeries(
+                \PHPExcel_Chart_DataSeries::TYPE_AREACHART, // plotType
+                \PHPExcel_Chart_DataSeries::GROUPING_STANDARD, // plotGrouping
+                range(0, count($dataSeriesValues2) - 1), // plotOrder
+                $dataseriesLabels3, // plotLabel
+                NULL, // plotCategory
+                $dataSeriesValues3                              // plotValues
+        );
+
+
+        //  Set the series in the plot area
+        $plotarea = new \PHPExcel_Chart_PlotArea(NULL, array($series1, $series2, $series3));
+        $legend = new \PHPExcel_Chart_Legend(\PHPExcel_Chart_Legend::POSITION_RIGHT, NULL, false);
+        $title = new \PHPExcel_Chart_Title('Grafica anhelada maternofetal :(');
+
+        //  Create the chart
+        $chart = new \PHPExcel_Chart(
+                'chart1', // name
+                $title, // title
+                $legend, // legend
+                $plotarea, // plotArea
+                true, // plotVisibleOnly
+                0, // displayBlanksAs
+                NULL, // xAxisLabel
+                NULL            // yAxisLabel
+        );
+
+        //  Set the position where the chart should appear in the worksheet
+        $chart->setTopLeftPosition('F2');
+        $chart->setBottomRightPosition('O16');
+
+           //  Add the chart to the worksheet
+        $objWorksheet->addChart($chart);
+        
+        $writer = \PHPExcel_IOFactory::createWriter($excel, 'Excel2007');
+        
+        $writer->setIncludeCharts(true);
+            $writer->save('export.xlsx');
+            header('Content-Type: application/vnd.ms-excel');
+            header('Content-Disposition: attachment; filename="export.xlsx"');
+            $writer->save("php://output");
+            exit;
+     }
+
+     public function ddx(){   
+        $fecha = Carbon::createFromFormat('d/m/Y', $request->get('date')); 
+        $fecha_desde = $fecha->format('d-m-Y');                             
+        for ($i=0; $i < 4 ; $i++) { 
+
+            $fechaIni = $fecha->format('d-m-Y');
+            $fechaEnd = $fecha->endOfWeek()->format('d-m-Y H:i');                      
+            $fecha = $fecha->addSeconds(61);                       
+
+            $rs = DB::select("select 
+            cde_fecha,
+            cde_op,
+            OWOR.ItemCode as codigo,
+            OITM.ItemName as modelo,
+            OUDP.Name as departamento,
+            cde_cda as defectivo,
+            Operario.firstName + ' '+ Operario.lastName as operario,
+            cde_cantidad,
+            OITM.U_VS as vs,
+            Inspector.firstName + ' '+ Inspector.lastName as inspector
+            from SIZ_Calidad_Defectivos_Estadistico
+            left join OUDP on OUDP.Code = cde_depto
+            left join OWOR on OWOR.DocEntry = cde_op
+            left join OITM on OITM.ItemCode = OWOR.ItemCode 
+            left join OHEM Inspector on Inspector.U_EmpGiro = cde_inspector
+            left join OHEM Operario on Operario.U_EmpGiro = cde_operario
+            where 
+            cde_depto = ".$request->get('departamento')." AND
+            cde_fecha BETWEEN '".$fechaIni."' AND  '".$fechaEnd."'
+            ");
+            $data[$i] = $rs;
+            
+        }
+            $rs = null;
+            $fecha_hasta = $fechaEnd;
+
+         if ($request->get('exportar') == 'xls') {
+                $path = public_path() . '/assets/plantillas_excel/Mod_07/calidad_estadistico.xlsx';
+                $fechaActualizado = 'Del: '. \AppHelper::instance()->getHumanDate($fecha_desde).' al: '.
+                \AppHelper::instance()->getHumanDate($fecha_hasta);
+$data2 = DB::select("select            
+            Operario.firstName + ' '+ Operario.lastName as operario,
+            sum (cde_cantidad) as cantidad
+            from SIZ_Calidad_Defectivos_Estadistico        
+            left join OHEM Operario on Operario.U_EmpGiro = cde_operario
+            where 
+            cde_depto = ".$request->get('departamento')." AND
+            cde_fecha BETWEEN '".$fecha_desde."' AND  '".$fecha_hasta."'
+            GROUP BY Operario.firstName, Operario.lastName ");
+          
+
+                Excel::load($path, function ($excel) use ($data, $data2, $fechaActualizado) {
+
+
+                $excel->sheet('Reporte', function ($sheet) use ($data, $fechaActualizado) {
+                $sheet->cell('B3', function ($cell) {
+                    $cell->setValue('Actualizado: '.\AppHelper::instance()->getHumanDate(date("Y-m-d H:i:s")).' '. date("H:i:s"));
+                });
+                $sheet->cell('B2', function ($cell) use ($fechaActualizado) {
+                    $cell->setValue($fechaActualizado);
+                });
+                $index = 9;   
+                foreach ($data as $d) {
+                    foreach ($d as $row) {
+                        $dateA = date_create($row->cde_fecha);
+                        $sheet->row($index, [
+                            '',
+                            $dateA,
+                            $row->cde_op, 
+                            $row->codigo,
+                            $row->modelo,
+                            $row->departamento,
+                            $row->defectivo,
+                            $row->operario,
+                            $row->cde_cantidad,
+                            $row->vs,
+                            $row->inspector,                                        
+                    ]);
+                    $index++;
+                    }
+                }
+            });//termina Hoja1
+             
+            
+              $excel->sheet('Operarios', function($sheet) use ($data2) {
+          
+            $datos = array(
+                array("Operario", "Cantidad")
+            );
+
+            foreach ($data2 as $producto){
+                $fila = array($producto->operario, $producto->cantidad);
+                array_push($datos, $fila);
+            }
+            //dd($datos);
+            //agregamos los datos al excel
+            $index = 1;
+              foreach ($datos as $row) {
+                        $sheet->row($index, [                            
+                            $row[0],
+                            $row[1]                                                      
+                    ]);
+                    $index++;
+                    }
+
+
+            //seleccionamos el campo que tiene la leyenda, "Cantidad" en la celda B1
+            $dataSeriesLabels = array(
+                new \PHPExcel_Chart_DataSeriesValues('String', 'Operarios!$B$1', NULL, 1),
+            );
+
+            //seleccionamos las categorias etc que que para este ejemplo se encuentran en A2 hasta A4
+            $contador = count($data2)+1;
+            $xAxisTickValues = array(
+                new \PHPExcel_Chart_DataSeriesValues('String', 'Operarios!$A$2:$A$6', NULL, 20),
+            );
+
+            //seleccionamos los valores totales que para este ejemplo se encuentran en B2 hasta B4
+            $dataSeriesValues = array(
+                new \PHPExcel_Chart_DataSeriesValues('Number', 'Operarios!$B$2:$B$6', NULL, 10),
+            );
+
+          //  dd($dataSeriesValues);
+            //todo lo que sigue crea el chart en base a lo que seleccionamos anteriormente
+          
+            $series = new \PHPExcel_Chart_DataSeries(
+              \PHPExcel_Chart_DataSeries::TYPE_LINECHART,
+                    \PHPExcel_Chart_DataSeries::GROUPING_STANDARD,                           //          tipo de agrupamiento
+                range(0, count($dataSeriesValues)-1),       //          plotOrder
+                $dataSeriesLabels,                          //          plotLabel
+                $xAxisTickValues,                           //          plotCategory
+                $dataSeriesValues                           //          plotValues
+            );
+
+          
+            $plotArea = new \PHPExcel_Chart_PlotArea(null, array($series));
+            $legend = new \PHPExcel_Chart_Legend(\PHPExcel_Chart_Legend::POSITION_RIGHT, NULL, false);
+            $title = new \PHPExcel_Chart_Title("titulo del chart");
+ 
+        
+      $chart= new \PHPExcel_Chart(
+                    'chart1',
+                    $title,
+                    $legend,
+                    $plotArea,
+                    true,
+                    0,
+                    NULL, 
+                    NULL
+                    );
+            //seteamos en que posicion queremos que se vea el chart
+        $chart->setTopLeftPosition('K1');
+$chart->setBottomRightPosition('M5');
+
+            //lo agregamos al excel.
+            $sheet->addChart($chart);
+        });
+        })
+                    ->setFilename("SIZ Defectivos ".$request->get('departamento'))
+                    
+                    ->export('xlsx');
+            } else if ($request->get('exportar') == 'pdf') {
+                //action for delete
+            } else {
+                //invalid action!
+            }
      }
 }
