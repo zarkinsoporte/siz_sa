@@ -539,7 +539,88 @@ public function DataShowDefectivosCaptura(Request $request){
     }
      }
 
-     public function exportarReporteDefectivos(Request $request){
+     public function exportarReporteDefectivos(Request $request){        
+        $fecha = Carbon::createFromFormat('d/m/Y', $request->get('date')); 
+        $fecha_desde = $fecha->format('d-m-Y');                             
+        for ($i=0; $i < 4 ; $i++) { 
+
+            $fechaIni = $fecha->format('d-m-Y');
+            $fechaEnd = $fecha->endOfWeek()->format('d-m-Y H:i');                      
+            $fecha = $fecha->addSeconds(61);                       
+
+            $rs = DB::select("select 
+            cde_fecha,
+            cde_op,
+            OWOR.ItemCode as codigo,
+            OITM.ItemName as modelo,
+            OUDP.Name as departamento,
+            cde_cda as defectivo,
+            Operario.firstName + ' '+ Operario.lastName as operario,
+            cde_cantidad,
+            OITM.U_VS as vs,
+            Inspector.firstName + ' '+ Inspector.lastName as inspector
+            from SIZ_Calidad_Defectivos_Estadistico
+            left join OUDP on OUDP.Code = cde_depto
+            left join OWOR on OWOR.DocEntry = cde_op
+            left join OITM on OITM.ItemCode = OWOR.ItemCode 
+            left join OHEM Inspector on Inspector.U_EmpGiro = cde_inspector
+            left join OHEM Operario on Operario.U_EmpGiro = cde_operario
+            where 
+            cde_depto = ".$request->get('departamento')." AND
+            cde_fecha BETWEEN '".$fechaIni."' AND  '".$fechaEnd."'
+            ");
+            $data[$i] = $rs;
+            
+        }
+            $rs = null;
+            $fecha_hasta = $fechaEnd;
+            if ($request->get('exportar') == 'xls') {
+                $excel = new \PHPExcel();
+
+                $excel->createSheet();
+                $excel->setActiveSheetIndex(1);
+                $excel->getActiveSheet()->setTitle('Detalle');
+                $objWorksheet = $excel->getActiveSheet();
+                                $excel->sheet('Reporte', function ($sheet) use ($data, $fechaActualizado) {
+                $sheet->cell('B3', function ($cell) {
+                    $cell->setValue('Actualizado: '.\AppHelper::instance()->getHumanDate(date("Y-m-d H:i:s")).' '. date("H:i:s"));
+                });
+                $sheet->cell('B2', function ($cell) use ($fechaActualizado) {
+                    $cell->setValue($fechaActualizado);
+                });
+                $index = 9;   
+                foreach ($data as $d) {
+                    foreach ($d as $row) {
+                        $dateA = date_create($row->cde_fecha);
+                        $sheet->row($index, [
+                            '',
+                            $dateA,
+                            $row->cde_op, 
+                            $row->codigo,
+                            $row->modelo,
+                            $row->departamento,
+                            $row->defectivo,
+                            $row->operario,
+                            $row->cde_cantidad,
+                            $row->vs,
+                            $row->inspector,                                        
+                    ]);
+                    $index++;
+                    }
+                }
+                });//termina Hoja1
+                 $writer = \PHPExcel_IOFactory::createWriter($excel, 'Excel2007');
+        
+            $writer->setIncludeCharts(true);
+            $writer->save('export.xlsx');
+            header('Content-Type: application/vnd.ms-excel');
+            header('Content-Disposition: attachment; filename="export.xlsx"');
+            $writer->save("php://output");
+            exit;
+            }//end if excel
+    }
+     public function exportarReporteDefs(Request $request){
+        
         $excel = new \PHPExcel();
 
         $excel->createSheet();

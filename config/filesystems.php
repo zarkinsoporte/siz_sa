@@ -49,7 +49,7 @@ return [
         ],
         'nas' => [
             'driver' => 'local',
-            'root'   => 'C:\\Apache24\\htdocs\\reportik\\public2\\images'
+            'root'   => 'C:\\Apache24\\htdocs\\siz\\images\\siz_articulos'
             
         ],
         'ftp' => [
