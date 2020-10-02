@@ -668,6 +668,7 @@ $interpolateProvider.startSymbol('<%');
                 $scope.btnshow = true;
             }
             if ($scope.successVar.includes('Entrega')){
+                console.log($scope.successVar);
                 var aux = $scope.successVar.split('#')
                 $scope.mensaje3 = aux[1] * 1;
                 $scope.btnshow = true;

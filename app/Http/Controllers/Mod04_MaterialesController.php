@@ -1265,7 +1265,7 @@ public function SolicitudPDF($id){
     }
 }
 public function SolicitudPDF_Traslados($id){  
-    $solicitud =     DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $id)->first();
+    $solicitud = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $id)->first();
     $almacenOrigen = $solicitud->AlmacenOrigen;
     $transfer = 'Por Definir ';
      $solicitante = DB::table('OHEM')
@@ -2106,7 +2106,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                 return 'Mensaje:'.$mensaje_traslado_interno; //link pdf
             }
         } else if(count($traslado_externo) > 0) {
-            return 'Entrega #' . $id .' ha sido enviada.';    
+            return ' Ha sido enviada la Entrega #' . $id;    
         }                      
         
     }
