@@ -87,7 +87,11 @@
 
             <div class="content">
                 <div class="title m-b-md">
-                    <a  href="{{ url('/home') }}">Fusion Confort</a>
+                    <a  href="{{ url('/home') }}">SALOTTO
+                    @if(Session::has('sap'))
+                    {{Session::get('sap')}}               
+@endif
+                    </a>
                 </div>
 
                {{-- <div class="links">

@@ -124,7 +124,7 @@ class SAP extends Model
             $vItem->FromWarehouse = $data['almacen_origen']; //origen
             $vItem->PriceList = $data['pricelist'];
             $vItem->FolioNumber = $id;//**/Vale:solicitud
-            $vItem->Comments = "SIZ VALE #".$id." Solicitado por:". $data['nombre_completo'];
+            $vItem->Comments = $data['observaciones'];
             $vItem->JournalMemo = "Traslados -";
             
             foreach ($data['items'] as $item) {
@@ -134,13 +134,13 @@ class SAP extends Model
                     from WTR1 
                     inner join SIZ_TransferSolicitudesMP as t on t.DocEntry_Transfer = WTR1.DocEntry
                     left join SIZ_MaterialesSolicitudes as s on s.Id_Solicitud = t.Id_Solicitud and s.ItemCode = WTR1.ItemCode
-                    where t.Id_Solicitud = ?
-                    group by WTR1.ItemCode', [$id]);
+                    where t.Id_Solicitud = ? AND s.ItemCode = ?
+                    group by WTR1.ItemCode', [$id, $item->ItemCode]);
                 
                 $CantSurtida = array_sum(array_pluck($surtido, 'Cant'));
                 if ($CantSurtida >= $item->Cant_Autorizada) {
                     DB::rollBack();
-                    return 'Error, Material ' . $item->ItemCode . ' no se puede surtir';
+                    return 'Error, Material ' . $item->ItemCode . ' ya fue surtido.';
                 }
                //agregar lineaS               
                if ($data['almacen_origen'] == 'APG-PA') {
@@ -148,8 +148,7 @@ class SAP extends Model
                         $vItem->Lines->Quantity = $item->CA;
                         DB::table('SIZ_MaterialesSolicitudes')
                         ->where('Id', $item->Id)
-                        ->update(['Cant_PendienteA' => ($item->Cant_PendienteA - $item->CA),
-                        
+                        ->update(['Cant_PendienteA' => ($item->Cant_PendienteA - $item->CA),                        
                         'Cant_ASurtir_Origen_A' => 0]);
                         $vItem->Lines->ItemCode = $item->ItemCode;
                         $vItem->Lines->WarehouseCode = trim($varDestino[0]);
@@ -255,7 +254,7 @@ class SAP extends Model
             $vItem->FromWarehouse = $data['almacen_origen']; //origen
             $vItem->PriceList = $data['pricelist'];
             $vItem->FolioNumber = $id;//**/Vale:solicitud
-            $vItem->Comments = "SIZ VALE #".$id." Solicitado por:". $data['nombre_completo'];
+            $vItem->Comments = $data['observaciones'];
             $vItem->JournalMemo = "Traslados -";
             
             foreach ($data['items'] as $item) {
@@ -265,13 +264,29 @@ class SAP extends Model
                         $vItem->Lines->Quantity = $item->CA;
                         DB::table('SIZ_MaterialesTraslados')
                         ->where('Id', $item->Id)
-                        ->update(['Cant_PendienteA' => ($item->Cant_PendienteA - $item->CA),                      
-                        'Cant_ASurtir_Origen_A' => 0]);
+                        ->update(['Cant_PendienteA' => ($item->Cant_PendienteA - $item->CA),                        
+                        'Cant_ASurtir_Origen_A' => ($item->Cant_PendienteA - $item->CA)]);
                         $vItem->Lines->ItemCode = $item->ItemCode;
                         $vItem->Lines->WarehouseCode = trim($varDestino[0]);              
+                        if ($item->BatchNum > 0) {
+                            $lotes = DB::table('SIZ_MaterialesLotes')
+                                ->where('Id_Item', $item->Id)
+                                ->where('alm', $data['almacen_origen'])
+                                ->get();
+                            if (count($lotes) > 0) {
+                                foreach ($lotes as $l) {
+                                    $vItem->Lines->BatchNumbers->BatchNumber = $l->lote;
+                                    $vItem->Lines->BatchNumbers->Quantity = $l->Cant;
+                                    $vItem->Lines->BatchNumbers->Add();
+                                }
+                            } else {
+                                DB::rollBack();
+                                return 'Error, Material ' . $item->ItemCode . ' sin lotes asignados';
+                            }
+                        }              
                         $vItem->Lines->Add(); 
                         if (($item->Cant_PendienteA - $item->CA) == 0) {
-                            DB::table('SIZ_MaterialesSolicitudes')
+                            DB::table('SIZ_MaterialesTraslados')
                             ->where('Id', $item->Id)
                             ->update(['EstatusLinea' => 'T']);                   
                             
@@ -298,6 +313,27 @@ class SAP extends Model
             DB::rollBack();
             return 'Error desde SAP: '.self::$vCmp->GetLastErrorDescription();
            
+        }  
+   }
+
+    public static function setReciboProduccion($docEntry, $Cant){
+       (self::$vCmp == false) ? self::Connect(): '';
+   
+        $vItem = self::$vCmp->GetBusinessObject("59");
+        $vItem->Lines->BaseEntry = $docEntry; 
+        $vItem->Lines->BaseType = '202'; 
+        $vItem->Lines->TransactionType = '0'; // botrntComplete
+        $vItem->Lines->Quantity = $Cant;
+        $vItem->Lines->WarehouseCode = 'APT-ST';
+        $vItem->Lines->Add(); 
+        if ($vItem->Add() == 0) {// cero es correcto   
+                return 'Recibo de producción creado correctamente';
+        } else {
+                $descripcionError = self::$vCmp->GetLastErrorDescription();    
+                if (strpos($descripcionError, 'IGN1.WhsCode][line: 1') !== false) {
+                $descripcionError = $descripcionError.' Uno o más materiales tienen stock negativo.';
+                }
+                return 'Error SAP: '.$descripcionError;
         }  
    }
 }

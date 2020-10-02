@@ -386,6 +386,28 @@ Route::get('/pruebas', function (Request $request) {
    
 });
 
+Route::get('/sap-test', function (Request $request) {
+    $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
+    $vCmp->DbServerType="6"; 
+    $vCmp->server = "SERVER-SAPBO";
+    $vCmp->LicenseServer = "SERVER-SAPBO:30000";
+    $vCmp->CompanyDB = "SALOTTO";
+    $vCmp->username = "controlp";
+    $vCmp->password = "190109";
+    $vCmp->DbUserName = "sa";
+    $vCmp->DbPassword = "B1Admin";
+    $vCmp->UseTrusted = false;
+    $vCmp->language = "6";
+    $lRetCode = $vCmp->Connect;
+    if ($lRetCode <> 0) {
+       Session::flash('sap', $vCmp->GetLastErrorDescription());
+    } else {
+        Session::flash('sap',' - conexión con SAP DI API exitosa!!');
+    }  
+    return view('welcome');
+    
+ });
+
 Route::post('home/traslados/terminar', 'Mod01_ProduccionController@terminarOP');
 //IMPRESION ETIQUETAS QR
 Route::get('home/GENERACION ETIQUETAS', 'Reportes_ProduccionController@showModal')->middleware('routelog');
