@@ -2250,7 +2250,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
             ->whereNotNull('SIZ_SolicitudesMP.AlmacenOrigen')
             ->where('SIZ_MaterialesTraslados.Cant_PendienteA', '>', 0)
             ->where('SIZ_AlmacenesTransferencias.dept', Auth::user()->dept)
-            ->whereIn('SIZ_MaterialesTraslados.EstatusLinea', ['S', 'P'])
+            ->whereIn('SIZ_MaterialesTraslados.EstatusLinea', ['S', 'P', 'N'])
             ->where('SIZ_SolicitudesMP.Status', 'Pendiente');
        
         return Datatables::of($consulta)
