@@ -53,7 +53,7 @@
       </span>
       <!-- /.row -->
 
-      <h4>Material a Entregar</h4><small> #{{$id}} de {{$almacen_origen}}</small>
+      <h4>Material a Entregar<small> #{{$id}} de {{$almacen_origen}}</small></h4>
       <table>
         <thead>
           <tr>
@@ -115,7 +115,7 @@
   @if (count($articulos_novalidos)>0)
   <div class="row">
     <div class="col-md-12">
-      <h4>Material retirado de entrega</h4><small> #{{$id}} de {{$almacen_origen}}</small>
+      <h4>Material retirado de entrega<small> #{{$id}} de {{$almacen_origen}}</small></h4>
       <table>
         <thead>
           <tr>
