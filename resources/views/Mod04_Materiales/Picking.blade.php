@@ -28,13 +28,13 @@
         Favor de Especificar Lotes correctamente para los materiales que corresponde.
       </div>
       @endif
-      @if($todosCantScan == 0)
+      @if(false)  <!--($todosCantScan == 0)-->
       
       <div class="alert alert-info" role="alert">
-        Existen Materiales sin Cantidad Escaneada. 
+        <!-- Existen Materiales sin Cantidad Escaneada. -->
       </div>
       @endif
-      @if($showmodal == 1)
+      @if($showmodal == true)
     <div id="qr" data-field-id="{{$showmodal}}" 
     data-qrcant="{{$qr_cant}}"    
     data-itemcode="{{$qr_item[0]->ItemCode}}"
@@ -148,8 +148,8 @@
             <th>UM</th>
             <th>Cant. Autorizada</th>
             <th>Cant. Surtida</th>
-            <th>A Surtir</th>
-            <th style="color:limegreen">Cant. Escáner</th>
+            <th style="color:limegreen">A Surtir</th>
+         
 
             <th>Cant. <div style="white-space: nowrap">APG-PA</div></th>
             <th>Cant. <div style="white-space: nowrap">AMP-ST</div></th>
@@ -170,7 +170,7 @@
             <td>{{$art->Cant_Autorizada}}</td>
             <td>{{number_format(($art->Cant_Autorizada - $art->Cant_PendienteA), 2)}}</td>
             <td>{{number_format($art->Cant_ASurtir_Origen_A + $art->Cant_ASurtir_Origen_B, 2)}}</td>
-            <td>{{$art->Cant_scan}}</td>
+           
             <td>{{$art->Cant_ASurtir_Origen_A}}</td>
             <td>{{$art->Cant_ASurtir_Origen_B}}</td>
             @if ($art->APGPA > 0 && $art->BatchNum > 0)
@@ -400,13 +400,18 @@
           
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
               aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title">Detalle de Surtido (<codigo id='tituloedit'></codigo>)</h4>
+          <h4 class="modal-title">Origen de Surtido (<codigo id='tituloedit'></codigo>)</h4>
         </div>
   
         <div class="modal-body">
           <div class="row">
             <div class="form-group">
               @include('partials.alertas-modal')
+              @if(Session::has('qrmsg'))              
+                <div class="alert alert-success" role="alert">
+                  {{ Session::get('qrmsg') }}
+                </div>
+              @endif
             </div>
             <div class="col-md-12">
               <div ng-if="pendiente < (canta -- cantb)" class="alert alert-danger" role="alert">
@@ -456,9 +461,9 @@
         <br>
         <div class="modal-footer">
   
-         
-          <button id="editbtn" type="submit"
-           class="btn btn-primary">Guardar</button>
+           <button type="button" class="btn btn-primary" data-dismiss="modal" aria-label="">
+             Ok
+           </button>
         </div>
   {!! Form::close() !!}
       </div>

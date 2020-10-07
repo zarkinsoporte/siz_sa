@@ -560,7 +560,7 @@ public function DataSolicitudes(){
                     //$consulta = collect($consulta);
             return Datatables::of($consulta)             
                  ->addColumn('folio', function ($item) {                     
-                       return  '<a href="2 PICKING ARTICULOS/solicitud/'.$item->Id_Solicitud.'"><i class="fa fa-hand-o-right"></i> '.$item->Id_Solicitud.'</a>';           
+                       return  '<a href="' . url('home/2 PICKING ARTICULOS/solicitud/'.$item->Id_Solicitud).'"><i class="fa fa-hand-o-right"></i> '.$item->Id_Solicitud.'</a>';                
                     }
                     )
                     ->addColumn('user_name', function ($item) {
@@ -774,7 +774,7 @@ public function saveArt(Request $request){
     
     
 }
-public function ShowDetalleSolicitud($id, $qr_itemcode = null, $qr_cant = null){
+public function ShowDetalleSolicitud($id, $qr_itemcode = null, $qr_cant = null, $showmodalqr = false){
    
     if (Auth::check()) {
     $user = Auth::user();
@@ -800,7 +800,7 @@ public function ShowDetalleSolicitud($id, $qr_itemcode = null, $qr_cant = null){
                                           
                         if (!is_null($qr_itemcode) ){
                             self::asignaAlmacenesOrigen($articulos, 0);   
-                            //     dd(!is_null($qr_itemcode));
+                            //     se rige por cant escaneada
                          } else {                             
                             self::asignaAlmacenesOrigen($articulos, 1); // se asigna por Cant_PendienteA                                                                             
                          }
@@ -878,7 +878,10 @@ public function ShowDetalleSolicitud($id, $qr_itemcode = null, $qr_cant = null){
                 $qr_item = null;
                 Session::flash('error', 'El material escaneado esta en la lista de materiales que no se surtirán');
             }else{
-                $showmodal = true;
+                if ($showmodalqr) {
+                   $showmodal = true;
+                }
+               
             }
             if (is_null($qr_cant)) {
                 $showmodal = 0;
@@ -1227,8 +1230,9 @@ public function editArticuloPicking(){
     }
     $cant = null;
     Session::flash('noAsignarAlm', 1);
+    $showmodalqr = true;
      return redirect()
-                ->action('Mod04_MaterialesController@ShowDetalleSolicitud', compact('id_sol', 'qr_itemcode', 'cant'));
+                ->action('Mod04_MaterialesController@ShowDetalleSolicitud', compact('id_sol', 'qr_itemcode', 'cant', 'showmodalqr'));
     } else {
         return redirect()->route('auth/login');
     }
@@ -3034,11 +3038,12 @@ $consultaj = collect($consulta);
                 ->first();
                 if ($mi_material->Cant_Autorizada >= ($cantXbulto + $mi_material->Cant_scan)) {
                     Session::put('qrfound', $id_sol);
-                    Session::flash('mensaje','¡Cantidad Actualizada!. Cantidad escaneada: '. $cantXbulto);
+                    Session::flash('qrmsg','Cantidad agregada: '. $cantXbulto);
                     DB::update('UPDATE SIZ_MaterialesSolicitudes SET Cant_scan = ? WHERE Id_Solicitud = ? AND ItemCode=?', [($cantXbulto + $mi_material->Cant_scan), $id_sol, $itemCode]);
-                    $cantXbulto = floatval($cantXbulto) + floatval($mi_material->Cant_scan); 
+                    $cantXbulto =(floatval($cantXbulto) + floatval($mi_material->Cant_scan)) * 1; 
+                    $showmodalqr = true;
                     return redirect()                     
-                ->action('Mod04_MaterialesController@ShowDetalleSolicitud', compact('id_sol', 'itemCode', 'cantXbulto')); 
+                ->action('Mod04_MaterialesController@ShowDetalleSolicitud', compact('id_sol', 'itemCode', 'cantXbulto', 'showmodalqr')); 
                 } else {
                   /*  if ($mi_material->Cant_Autorizada == $mi_material->Cant_scan) {
                         Session::flash('info','El material '.$itemCode.' está completo');              
@@ -3048,18 +3053,22 @@ $consultaj = collect($consulta);
                         ->action('Mod04_MaterialesController@ShowDetalleSolicitud', compact('id_sol', 'item', 'cant'));
                     } else {
                         */
-                        if ($mi_material->Cant_Autorizada >= $cantXbulto) {
-                            Session::flash('mensaje','Cantidad escaneada: '. $cantXbulto);
-                            Session::put('qrfound', $id_sol);
-                            DB::update('UPDATE SIZ_MaterialesSolicitudes SET Cant_scan = ? WHERE Id_Solicitud = ? AND ItemCode=?', [$cantXbulto, $id_sol, $itemCode]);
-                             return redirect()
-                ->action('Mod04_MaterialesController@ShowDetalleSolicitud', compact('id_sol', 'itemCode', 'cantXbulto')); 
-                        } else {
-                            Session::flash('error','La Cantidad Escaneada rebasa la Cantidad Autorizada');              
-                            $item = null;
-                            $cant = null;
+
+
+                        // creo que esto de que reinicie el escaneo cuando rebase la cantidad confunde a los usuarios
+                            //por eso se mejor se quita
+                        //         if ($mi_material->Cant_Autorizada >= $cantXbulto) {
+                //             Session::flash('mensaje','Cantidad escaneada: '. $cantXbulto);
+                //             Session::put('qrfound', $id_sol);
+                //             DB::update('UPDATE SIZ_MaterialesSolicitudes SET Cant_scan = ? WHERE Id_Solicitud = ? AND ItemCode=?', [$cantXbulto, $id_sol, $itemCode]);
+                //              return redirect()
+                // ->action('Mod04_MaterialesController@ShowDetalleSolicitud', compact('id_sol', 'itemCode', 'cantXbulto')); 
+                       // } else {
+                            Session::flash('error','No se agregó la cantidad.
+                            Razón: se rebasaría la Cantidad Autorizada, intente con otra etiqueta'); 
+                            $showmodalqr = false;             
                             return redirect()
-                            ->action('Mod04_MaterialesController@ShowDetalleSolicitud', compact('id_sol', 'item', 'cant'));
+                            ->action('Mod04_MaterialesController@ShowDetalleSolicitud', compact('id_sol', 'itemCode', 'cantXbulto', 'showmodalqr')); 
                         }                        
                    // }                    
                 }                                
@@ -3069,11 +3078,12 @@ $consultaj = collect($consulta);
               
                 $item = null;
                 $cant = null;
+                $showmodalqr = false;
                 return redirect()
-                ->action('Mod04_MaterialesController@ShowDetalleSolicitud', compact('id_sol', 'item', 'cant'));        
+                ->action('Mod04_MaterialesController@ShowDetalleSolicitud', compact('id_sol', 'item', 'cant', 'showmodalqr'));        
             }
             
-        }
+        
 
             $cardName = DB::table('OCRD')->where('CardCode', $proveedor)
             ->value('CardName'); 
