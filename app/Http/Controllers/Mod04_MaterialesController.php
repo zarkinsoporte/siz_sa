@@ -453,10 +453,11 @@ public static function getParam_DM_Articulos($request, $item){
         
         $tareas = json_decode(json_encode($actividades), true);
         foreach ($tareas as $tarea) {
-            $ruta = str_replace('%20', ' ', explode('/', $request->path())[0]);
+            $arrayurl = explode('/', $request->path());
+            $ruta = str_replace('%20', ' ', $arrayurl[count($arrayurl)-1]);
             $ruta = str_replace('%C3%B7', '&#247;', $ruta);
             $privilegioTarea = array_search($ruta, $tarea);
-
+           
             if ($privilegioTarea != false) {
                 $privilegioTarea = $tarea['privilegio_tarea'];
                 break;
