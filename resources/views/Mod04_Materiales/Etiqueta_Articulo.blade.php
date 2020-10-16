@@ -39,9 +39,7 @@ padding-left: 15px;
 margin-right: 15px;
 margin-left: 10px;
 }
-.green-edit-field {
-border: 1px solid #000000;
-}
+
 .boot-select{
     padding-bottom: 10px !important;
 }
@@ -115,7 +113,7 @@ width: 100% !important;
        
         <div class="col-md-7 col-sm-12">
             <ul>
-                <li class="list-group-item green-edit-field">
+                <li class="list-group-item ">
                     <div>
                         <h5>Proveedor</h5>                    
                         <div class="input-group">
@@ -142,7 +140,7 @@ width: 100% !important;
     <div class="row">
     <div class="col-md-3">
        <ul>
-        <li class="list-group-item green-edit-field">
+        <li class="list-group-item ">
                 <div>
                     <h5 class="my-0">CANT X BULTO</h5>
                     <input type="number" step="0.01" min="0" class="form-control" name="cantx_bulto" id="cantx_bulto" value="{{old('factor', number_format($data[0]->Factor, 2, '.', ','))}}" {{$privilegioTarea}}>
@@ -150,8 +148,7 @@ width: 100% !important;
                 </div>
             
             </li>
-            </ul>
-            <ul>
+           
         <li class="list-group-item">
                 <div>
                     <h5 class="my-0">FACTOR CONV.
@@ -168,20 +165,18 @@ width: 100% !important;
     <div class="col-md-3">
         <ul>
             <li class="list-group-item">
-                <div>
+               <div>
+                <h5 class="my-0">FECHA RECIBO</h5>                
+                <input type="text" class="form-control" name="date" required>
+            </div>
+            
+            </li>
+            <li class="list-group-item">
+                 <div>
                     <h5 class="my-0">UM INVENTARIO<small ><span
                                 class="pull-right">{{ $data[0]->UM}}</span></small> </h5>
                      <input type="hidden" name="um" value="{{$data[0]->UM}}">
                 </div>
-            
-            </li>
-            <li class="list-group-item">
-                <div>
-                    <h5 class="my-0">UM COMPRA<small ><span
-                                class="pull-right">{{ $data[0]->UM_Com}}</span></small> </h5>
-                    <h5 class="my-0"></h5>
-                </div>
-            
             </li>
         </ul>
         </div> <!-- /.md-3 -->
@@ -231,4 +226,12 @@ $('.imagepreview').attr('src', $("#showImg").attr('src'));
 $('#imagemodal').modal('show');
 
 });
+var date_input=$('input[name="date"]'); //our date input has the name "date"
+
+date_input.datepicker({
+format: 'dd/mm/yyyy',
+todayHighlight: true,
+language: "es",
+autoclose: true,
+}).datepicker("setDate", new Date());
 @endsection

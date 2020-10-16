@@ -22,6 +22,7 @@ use Validator;
 use QrCode;
 ini_set("memory_limit", '512M');
 ini_set('max_execution_time', 0);
+
 class Mod04_MaterialesController extends Controller
 {
 public function reporteEntradasAlmacen()
@@ -3001,7 +3002,8 @@ $consultaj = collect($consulta);
         $cardName = DB::table('OCRD')->where('CardCode', Input::get('proveedor'))
         ->value('CardName');
         $um = Input::get('um');
-
+        $fechar = Input::get('date');
+        $fechar = \AppHelper::instance()->getHumanDateFromFormat($fechar);
         $cant = Input::get('cantx_bulto');
         $separador = ' - ';
         $CodigoQR = QrCode::margin(1)->format('png')->size(100)
@@ -3009,7 +3011,7 @@ $consultaj = collect($consulta);
         $pKey."/".$cardCode."/".$cant);
 
         $pdf = \PDF::loadView('Mod04_Materiales.etiquetaQrPDF', 
-        compact('separador', 'itemName', 'pKey', 'cardCode',  'cardName', 'um','cant', 'CodigoQR'));
+        compact('separador', 'itemName', 'pKey', 'cardCode',  'cardName', 'um','cant', 'CodigoQR', 'fechar'));
         //  $pdf->setPaper([0, 0, 90, 144], 'landscape')->setOptions(['isPhpEnabled'=>true]);
         $pdf->setPaper([0, 0, 90, 144],'landscape')->setOptions(['isPhpEnabled'=>true]);             
         return $pdf->stream('Siz_QR_'.$pKey . ' - ' .date("d/m/Y") . '.Pdf');

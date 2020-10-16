@@ -174,9 +174,9 @@ class SAP extends Model
                             ->where('Id', $item->Id)
                             ->update(['EstatusLinea' => 'T']);
                         } elseif (($item->Cant_PendienteA - $item->CA) > 0) {
-                            DB::table('SIZ_MaterialesSolicitudes')
-                                ->where('Id', $item->Id)
-                                ->update(['EstatusLinea' => 'P']);
+                            // DB::table('SIZ_MaterialesSolicitudes')
+                            //     ->where('Id', $item->Id)
+                            //     ->update(['EstatusLinea' => 'P']);
                         }
                     }
                 } elseif ($data['almacen_origen'] == 'AMP-ST') {
@@ -211,9 +211,9 @@ class SAP extends Model
                             ->where('Id', $item->Id)
                             ->update(['EstatusLinea' => 'T']);                                               
                         }elseif (($item->Cant_PendienteA - $item->CB) > 0) {
-                            DB::table('SIZ_MaterialesSolicitudes')
-                            ->where('Id', $item->Id)
-                            ->update(['EstatusLinea' => 'P']);
+                            // DB::table('SIZ_MaterialesSolicitudes')
+                            // ->where('Id', $item->Id)
+                            // ->update(['EstatusLinea' => 'P']);
                         }
                     }
                 }

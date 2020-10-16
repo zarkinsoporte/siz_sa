@@ -22,6 +22,15 @@ class AppHelper
         $inputs = $weekday.', '.$fecha->format('d') . ' de ' . $mes . ' de ' . $fecha->format('Y');  
         return $inputs;
       }
+    public function getHumanDateFromFormat($stringDate)
+      {
+        $fecha = Carbon::createFromFormat('d/m/Y',$stringDate);
+        $dayOfTheWeek = $fecha->dayOfWeek;
+        $weekday = $this->diasSem_min[$dayOfTheWeek];
+        $mes = $this->meses[($fecha->format('n')) - 1];
+        $inputs = $weekday.', '.$fecha->format('d') . ' de ' . $mes . ' de ' . $fecha->format('Y');  
+        return $inputs;
+      }
     public function getHumanDate_format($strDate, $format)
       {
         $fecha = Carbon::parse($strDate);

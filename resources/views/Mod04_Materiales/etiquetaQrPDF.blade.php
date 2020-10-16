@@ -35,6 +35,7 @@ margin: 7mm 2mm 0mm 2mm;
             $font = $fontMetrics->get_font("Arial, Helvetica, sans-serif","normal"); 
             
             $codigos = '<?php echo $pKey ?>';
+            $fecha = '<?php echo $fechar ?>';
             $FACTOR_UM = '<?php echo 'Cant: '.$cant.$separador. ' UM: '.$um; ?>';
             $itemName = '<?php echo $itemName; ?>';
             $cardName = '<?php echo $cardCode.' '.$cardName; ?>';
@@ -45,6 +46,7 @@ margin: 7mm 2mm 0mm 2mm;
             $pdf->page_text(7, 7, $itemName, $font, $size2); 
             $pdf->page_text(7, 15, $cardName, $font, $size2); 
             $pdf->page_text(7, 22, $FACTOR_UM, $font, $size2); 
+            $pdf->page_text(40, 77, $fecha, $font, $size2); 
         </script>
     </div>
 </body>
