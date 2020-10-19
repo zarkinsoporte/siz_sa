@@ -27,7 +27,7 @@ class SAPi extends Model
         self::$vCmp->UseTrusted = false;
         self::$vCmp->language = "6";
         $lRetCode = self::$vCmp->Connect;
-        if ($lRetCode <> 0) {
+        if ($lRetCode != 0) {
            return self::$vCmp->GetLastErrorDescription();
         } else {
             return 'Conectado';
@@ -53,12 +53,22 @@ public static function ReciboProduccion($docEntry, $whs, $Cant, $comentario, $me
         self::$vCmp->UseTrusted = false;
         self::$vCmp->language = "6";
         $lRetCode = self::$vCmp->Connect;
-          if ($lRetCode <> 0) {
+          if ($lRetCode != 0) {
            dd(self::$vCmp->GetLastErrorDescription());
         } 
       }
-   } 
-   
+   }
+   //bloque actualiza fecha de la orden
+        $vItem = self::$vCmp->GetBusinessObject("17");
+        $RetVal = $vItem->GetByKey($docEntry);
+        $vItem->DueDate = date('d-m-Y');
+        
+        $retCode = $vItem->Update;
+        if ($retCode != 0) {
+            return 'Error SAP: '.self::$vCmp->GetLastErrorDescription();
+        }
+        $vItem = null;
+        //fin bloque actualiza fecha de la orden
     $vItem = self::$vCmp->GetBusinessObject("59");
 
     $vItem->Comments = utf8_decode($comentario);
@@ -79,6 +89,51 @@ public static function ReciboProduccion($docEntry, $whs, $Cant, $comentario, $me
                 }
                 return 'Error SAP: '.$descripcionError;
         }  
+   }
+
+   public static function CreateOrder(){
+        if (self::$vCmp == false) {
+            $cnn = self::Connect();
+            if ($cnn == 'Conectado') {
+            } else {
+                self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
+                self::$vCmp->DbServerType = "6";
+                self::$vCmp->server = "SERVER-SAPBO";
+                self::$vCmp->LicenseServer = "SERVER-SAPBO:30000";
+                self::$vCmp->CompanyDB = "SALOTTO";
+                self::$vCmp->username = "controlp";
+                self::$vCmp->password = "190109";
+                self::$vCmp->DbUserName = "sa";
+                self::$vCmp->DbPassword = "B1Admin";
+                self::$vCmp->UseTrusted = false;
+                self::$vCmp->language = "6";
+                $lRetCode = self::$vCmp->Connect;
+                if ($lRetCode != 0) {
+                    dd(self::$vCmp->GetLastErrorDescription());
+                }
+            }
+        }
+        //CTRL+G 13057
+        $vItem = self::$vCmp->GetBusinessObject("17");
+
+        $vItem->CardCode = "C0349"; //cliente
+        //DueDate //puede ser este campo
+        $vItem->DueDate = "06/04/2021"; //fecha finalizacion
+
+        $vItem->Lines->Itemcode = "10001"; //tuerca
+
+        $vItem->Quantity = 10;
+        //$vItem->Lines->Add(); //no se si va aqui
+        $RetCode = $vItem->Add();
+
+        $Nk = "";
+
+        if ($RetCode == 0) {
+
+            dd ("Orden - " . $vCmp->GetNewObjectCode($Nk));
+        }else if ($lRetCode != 0) {
+            dd(self::$vCmp->GetLastErrorDescription());
+        }
    }
 }
 

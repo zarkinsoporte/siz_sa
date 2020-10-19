@@ -386,6 +386,10 @@ Route::get('/pruebas', function (Request $request) {
    
 });
 
+Route::get('/crear-orden', function (Request $request) {
+\AppHelper::instance()->CreateOrder();
+});
+
 Route::get('/sap-test', function (Request $request) {
     $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
     $vCmp->DbServerType="6"; 
