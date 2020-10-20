@@ -59,7 +59,7 @@ public static function ReciboProduccion($docEntry, $whs, $Cant, $comentario, $me
       }
    }
    //bloque actualiza fecha de la orden
-        $vItem = self::$vCmp->GetBusinessObject("17");
+        $vItem = self::$vCmp->GetBusinessObject("202");
         $RetVal = $vItem->GetByKey($docEntry);
         $vItem->DueDate = date('d-m-Y');
         
