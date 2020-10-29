@@ -26,20 +26,23 @@
       </div>       
  </div>                          
  <div class="row">
-        <div class="col-md-2">
-            <h4>Número de O.C:</h4>
-        </div>    
-       <div class="col-md-2">
-          <input name="NumOC" type="number" class="form-control" required min ="1" autofocus>                                                      
-       </div> 
-      <div class="col-md-2">
-            <button type="submit" class="btn btn-primary">Consultar</button></div> 
-      </div>     
- </div>     
+    <div class="col-md-2">
+        <h4>Número de O.C:</h4>
+    </div>    
+    <div class="col-md-2">
+        <input name="NumOC" type="number" class="form-control" required min ="1" autofocus>                                                      
+    </div> 
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary">Consultar</button>
+    </div> 
+</div>     
+     
     {!! Form::close() !!} 
     <br>
-    @if (isset($pedido))
+    @if (Session::has('OrdenCompra'))
+
     <?php 
+         
           $date=date_create($pedido[0]->FechOC); 
           $fecha_actual = strtotime(date("d-m-Y H:i:00",time()));
           $fecha_entrada = strtotime($pedido[0]->FechOC);

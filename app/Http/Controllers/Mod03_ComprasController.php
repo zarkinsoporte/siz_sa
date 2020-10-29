@@ -28,7 +28,10 @@ public function pedidosCsv()
 {
     if (Auth::check()) {
         $user = Auth::user();
-        $actividades = $user->getTareas();       
+        $actividades = $user->getTareas(); 
+        if (Session::has('OrdenCompra')) {
+           Session::forget('OrdenCompra');
+        }      
          return view('Mod03_Compras.Pedidos',
              ['actividades' => $actividades,
                  'ultimo' => count($actividades),                           
