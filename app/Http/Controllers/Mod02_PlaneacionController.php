@@ -71,8 +71,7 @@ public function indexGenerarOP(){
 public function generarOP(Request $request){
         ini_set('memory_limit', '-1');
         set_time_limit(0);   
-       // dd($request->input('ordenesvta'));
-      
+       //dd($request->input('ordenesvta'));
         $vari = SAP::crearOrden($request->input('ordenesvta'));
         dd($vari);
 }

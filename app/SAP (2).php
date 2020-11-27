@@ -342,7 +342,12 @@ public static function crearOrden($ov)
     {
         $Items_OV = DB::select('select * from RDR1 where RDR1.DocEntry = ?', [$ov]);       
         $OV = DB::table('ORDR')->where('DocEntry', $ov)->first();
-       
+        //$fecha = Carbon::parse($OV->DocDueDate);
+        //$fecha = $fecha->subDays(21);
+        //if ($fecha->lessThan(Carbon::now())) {
+        //    $fecha = Carbon::now();
+        //} 
+        //return $fecha->format('Y-m-d H:i:s');
         if (self::$vCmp == false) {
             $cnn = self::Connect();
             if ($cnn == 'Conectado') {
@@ -391,14 +396,13 @@ foreach ($Items_OV as $key => $itemOV) {
             if ($fecha->lessThan(Carbon::now())) {
                 $fecha = Carbon::now();
             }        
-        $vItem->DueDate = $fecha; //fecha de finalizacion
+        $vItem->DueDate = $fecha->format('Y-m-d H:i:s'); //fecha de finalizacion
         //--Usuario: El del Sistema //auto
         //--Origen: Manual
         $vItem->ProductionOrderOriginEntry = $ov;// Num pedido (DocEntry de ORDR)
         //$vItem->CustomerCode = // aqui iria cliente
 
     //CAMPOS DEFINIDOS X USUARIO EN SAP
-        //obtener ruta
         //$rutaOP = (usar VALUE) SELECT b.U_Ruta FROM OITM b WHERE b.ItemCode=       
         $rutaOP = DB::table('OITM')
                     ->where('ItemCode', $itemOV->ItemCode)
@@ -452,7 +456,7 @@ foreach ($Items_OV as $key => $itemOV) {
             if ($fecha->lessThan(Carbon::now())) {
                 $fecha = Carbon::now();
             }
-        $vItem->UserFields->Fields->Item('U_FProduccion')->Value = $OV->U_comp; //
+        $vItem->UserFields->Fields->Item('U_FProduccion')->Value = $fecha->format('Y-m-d H:i:s'); //
 
         //Nota: Si el Producto no cuenta con LDM No se puede realizar la OP
 
