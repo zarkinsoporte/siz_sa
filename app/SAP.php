@@ -342,7 +342,7 @@ class SAP extends Model
     {
         $Items_OV = DB::select('select * from RDR1 where RDR1.DocEntry = ?', [$ov]);
         $OV = DB::table('ORDR')->where('DocEntry', $ov)->first();
-        //return ($ordenesOV);
+
         if (self::$vCmp == false) {
             $cnn = self::Connect();
             if ($cnn == 'Conectado') {
@@ -388,6 +388,9 @@ class SAP extends Model
             //fecha de finalizacion Fecha Entrega – 21 días (Compra de Materiales)
             $fecha = Carbon::parse($OV->DocDueDate);
             $fecha = $fecha->subDays(21);
+            if ($fecha->lessThan(Carbon::now())) {
+                $fecha = Carbon::now();
+            }
             $vItem->DueDate = $fecha; //fecha de finalizacion
             //--Usuario: El del Sistema //auto
             //--Origen: Manual
@@ -443,14 +446,15 @@ class SAP extends Model
             $vItem->UserFields->Fields->Item('U_AteEspecial')->Value = $atencion_especial; //S o N
             $vItem->UserFields->Fields->Item('U_cc')->Value = $OV->U_comp; //
 
-
-            //Fecha de produccion
             //Fecha de Producción = Fecha Entrega – 7 días (Entrega producción)
+            $fecha = Carbon::parse($OV->DocDueDate);
+            $fecha = $fecha->subDays(7);
+            if ($fecha->lessThan(Carbon::now())) {
+                $fecha = Carbon::now();
+            }
+            $vItem->UserFields->Fields->Item('U_FProduccion')->Value = $OV->U_comp; //
 
             //Nota: Si el Producto no cuenta con LDM No se puede realizar la OP
-
-
-            //CTRL+G 13057        
 
             $RetCode = $vItem->Add();
 
@@ -462,7 +466,7 @@ class SAP extends Model
             } else if ($lRetCode != 0) {
                 dd(self::$vCmp->GetLastErrorDescription());
             }
-        } //end foreach
+        }//end foreach
     }
 }
 /*
