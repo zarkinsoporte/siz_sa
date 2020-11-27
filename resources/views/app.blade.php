@@ -58,9 +58,8 @@
     <script src="{{ URL::asset('assets/DataTables/js/dataTables.tableTools.js')}}"></script>
     {!! Html::script('assets/js/dataTables.editor.min.js') !!}
     
-    <script src="{{ URL::asset('plugins/bootstrap-dialog/prettify/run_prettify.js')}}"></script>
-    <script src="{{ URL::asset('plugins/bootstrap-dialog/js/bootstrap-dialog.min.js')}}"></script>
-    <script src="{{ URL::asset('assets/bootbox/bootbox.min.js' )}}"></script>
+   
+    
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -253,6 +252,8 @@ li.dt-button.active a::before{
 {!! Html::script('assets/js/bootstrap-switch.js') !!}
 
 <!--<script src="//cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>-->
+<script async src="{{ URL::asset('plugins/bootbox/bootbox.min.js')}}"></script>
+<script src="{{ URL::asset('plugins/blockui/jquery.blockUI.js')}}"></script>
 
 {!! Html::script('assets/js/bootstrap.min.js') !!}
 <!--<script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>-->

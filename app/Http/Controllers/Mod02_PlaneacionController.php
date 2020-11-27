@@ -17,6 +17,7 @@ use Session;
 use Maatwebsite\Excel\Facades\Excel;
 use Datatables;
 use Illuminate\Database\Eloquent\Collection;
+use App\SAP;
 
 ini_set("memory_limit", '512M');
 ini_set('max_execution_time', 0);
@@ -53,7 +54,135 @@ public function reporteMRP()
         return redirect()->route('auth/login');
     }
 }
+public function indexGenerarOP(){
+        if (Auth::check()) {
+            $user = Auth::user();
+            $actividades = $user->getTareas();
 
+            $data = array(
+                'actividades' => $actividades,
+                'ultimo' => count($actividades),
+            );
+            return view('Mod02_Planeacion.generarOP', $data);
+        } else {
+            return redirect()->route('auth/login');
+        }
+}
+public function generarOP(Request $request){
+        ini_set('memory_limit', '-1');
+        set_time_limit(0);   
+       // dd($request->input('ordenesvta'));
+      
+        $vari = SAP::crearOrden($request->input('ordenesvta'));
+        dd($vari);
+}
+public function registros_gop(Request $request){
+        try {
+            ini_set('memory_limit', '-1');
+            set_time_limit(0);            
+            $sel = "SELECT
+                [Selec],
+                [Individual],
+                CONVERT (VARCHAR, [Fecha inicio], 103) AS FechaInicio,
+                Prioridad,
+                [Número de cliente] + ' - ' + [Razón social] AS Cliente,
+                OC,
+                DocEntry,
+                Pedido AS [Pedido],
+                CONVERT (VARCHAR, [Fecha entrega], 103) AS FechaEntrega,
+                Estatus 
+                FROM
+                (
+                    SELECT
+                        'N' AS [Selec],
+                        'N' AS [Individual],
+                        TaxDate AS [Fecha inicio],
+                        DocTime,
+                        (
+                            SELECT
+                            FldValue 
+                            FROM
+                            UFD1 
+                            WHERE
+                            FldValue = U_Prioridad 
+                            AND TableID = 'ORDR' 
+                            AND FieldID = 
+                            (
+                                SELECT
+                                    FieldID 
+                                FROM
+                                    CUFD 
+                                WHERE
+                                    TableID = 'ORDR' 
+                                    AND AliasID = 'Prioridad'
+                            )
+                        )
+                        AS ValorPrioridad,
+                        (
+                            SELECT
+                            Descr 
+                            FROM
+                            UFD1 
+                            WHERE
+                            FldValue = U_Prioridad 
+                            AND TableID = 'ORDR' 
+                            AND FieldID = 
+                            (
+                                SELECT
+                                    FieldID 
+                                FROM
+                                    CUFD 
+                                WHERE
+                                    TableID = 'ORDR' 
+                                    AND AliasID = 'Prioridad'
+                            )
+                        )
+                        AS Prioridad,
+                        CardCode AS [Número de cliente],
+                        CardName AS [Razón social],
+                        NumAtCard AS OC,
+                        DocNum AS Pedido,
+                        DocDueDate AS [Fecha entrega],
+                        (
+                            CASE
+                            WHEN
+                                DocStatus = 'C' 
+                            THEN
+                                'Cerrado' 
+                            ELSE
+                                'Abierto' 
+                            END
+                        )
+                        AS Estatus, DocEntry 
+                    FROM
+                        ORDR 
+                    WHERE
+                        U_Prioridad is not NULL 
+                        AND 
+                        (
+                            U_Procesado = 'N'
+                        )
+                        AND DocStatus = 'O' 
+                )
+                TMP 
+                ORDER BY
+                ValorPrioridad, [Fecha inicio], DocTime";
+            $sel =  preg_replace('/[ ]{2,}|[\t]|[\n]|[\r]/', ' ', ($sel));
+            $consulta = DB::select($sel);
+
+            $pedidos_gop = collect($consulta);
+            return compact('pedidos_gop');
+        } catch (\Exception $e) {
+            header('HTTP/1.1 500 Internal Server Error');
+            header('Content-Type: application/json; charset=UTF-8');
+            die(json_encode(array(
+                "mensaje" => $e->getMessage(),
+                "codigo" => $e->getCode(),
+                "clase" => $e->getFile(),
+                "linea" => $e->getLine()
+            )));
+        }
+}
 public function actualizaMRP(){
         DB::update("exec SIZ_NEWMRP");
         
@@ -317,5 +446,12 @@ public function actualizaMRP(){
         } else {
         return redirect()->route('auth/login');
         }
+    }
+    public static function crearOrden(Request $request)
+    {
+
+        $ov = DB::table('OITM');
+        //$r = SAP::crearOrden();
+        //$dt = date('Ymd h:i');
     }
 }

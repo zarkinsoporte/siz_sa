@@ -366,6 +366,14 @@ Route::get('home/ayudas_pdf/{PdfName}', 'HomeController@showPdf');
 Route::get('home/{r0}/ayudas_pdf/{PdfName}', 'HomeController@showPdf2');
 //
 //-------------------------//
+//PLANEACION GENERAR OP//---------------------------------------------------------
+//-------------------------//
+//
+Route::get('home/GENERAR OP', 'Mod02_PlaneacionController@indexGenerarOP')->middleware('routelog');
+Route::any('datatables.gop', 'Mod02_PlaneacionController@registros_gop')->name('datatables.gop');
+Route::any('generarOP', 'Mod02_PlaneacionController@generarOP')->name('generarOP');
+//
+//-------------------------//
 //RUTAS DE PRODUCCION POR AREAS//---------------------------------------------------------
 //-------------------------//
 //
@@ -386,9 +394,7 @@ Route::get('/pruebas', function (Request $request) {
    
 });
 
-Route::get('/crear-orden', function (Request $request) {
-\AppHelper::instance()->CreateOrder();
-});
+Route::get('/crear-orden', 'Mod02_PlaneacionController@crearOrden');
 
 Route::get('/sap-test', function (Request $request) {
     $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");

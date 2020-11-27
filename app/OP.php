@@ -185,6 +185,5 @@ return $data1;
     ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')       
     ->where('OWOR.DocEntry', $op)->value('ItemName');
     return $rs;
-
    }
 }

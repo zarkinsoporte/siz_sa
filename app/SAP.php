@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use DB;
 use \COM;
 use Session;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 class SAP extends Model
 {
@@ -336,8 +337,134 @@ class SAP extends Model
                 return 'Error SAP: '.$descripcionError;
         }  
    }
-}
 
+    public static function crearOrden($ov)
+    {
+        $Items_OV = DB::select('select * from RDR1 where RDR1.DocEntry = ?', [$ov]);
+        $OV = DB::table('ORDR')->where('DocEntry', $ov)->first();
+        //return ($ordenesOV);
+        if (self::$vCmp == false) {
+            $cnn = self::Connect();
+            if ($cnn == 'Conectado') {
+            } else {
+                self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
+                self::$vCmp->DbServerType = "6";
+                self::$vCmp->server = "SERVER-SAPBO";
+                self::$vCmp->LicenseServer = "SERVER-SAPBO:30000";
+                self::$vCmp->CompanyDB = "SALOTTO";
+                self::$vCmp->username = "controlp";
+                self::$vCmp->password = "190109";
+                self::$vCmp->DbUserName = "sa";
+                self::$vCmp->DbPassword = "B1Admin";
+                self::$vCmp->UseTrusted = false;
+                self::$vCmp->language = "6";
+                $lRetCode = self::$vCmp->Connect;
+                if ($lRetCode != 0) {
+                    dd(self::$vCmp->GetLastErrorDescription());
+                }
+            }
+        }
+
+        //-----------------------GENERACION OP DI API SAP BO-----------------------------------
+        //DEFINICIONES
+        //bopotStandard	    0	A production order type for producing a regular production item (default), using a production bill of materials.
+        //bopotSpecial	    1	A production order type for producing and repairing items that can be any inventory item.
+        //bopotDisassembly	2	A production order type for dismantling a parent item to its components, using a production Bill of Materials.
+        //CREACION DE OBJETO
+        //businessObject = (ProductionOrders)Globals.oCompany.GetBusinessObject(BoObjectTypes.oProductionOrders);
+        $vItem = self::$vCmp->GetBusinessObject("202");
+
+        foreach ($Items_OV as $key => $itemOV) {
+
+
+            //CABECERA IZQ
+            $vItem->ProductionOrderType = 0; //Estandar
+            $vItem->ProductionOrderStatus = 0; //Orden planeada
+            $vItem->ItemNo = $itemOV->ItemCode; // codigo del Articulo
+            $vItem->PlannedQuantity = $itemOV->Quantity; //cant con la que se hace la orden
+            $vItem->Warehouse = 'APT-ST';
+
+            //CABECERA DER (2)
+            //fecha de finalizacion Fecha Entrega – 21 días (Compra de Materiales)
+            $fecha = Carbon::parse($OV->DocDueDate);
+            $fecha = $fecha->subDays(21);
+            $vItem->DueDate = $fecha; //fecha de finalizacion
+            //--Usuario: El del Sistema //auto
+            //--Origen: Manual
+            $vItem->ProductionOrderOriginEntry = $ov; // Num pedido (DocEntry de ORDR)
+            //$vItem->CustomerCode = // aqui iria cliente
+
+            //CAMPOS DEFINIDOS X USUARIO EN SAP
+            //obtener ruta
+            //$rutaOP = (usar VALUE) SELECT b.U_Ruta FROM OITM b WHERE b.ItemCode=       
+            $rutaOP = DB::table('OITM')
+                ->where('ItemCode', $itemOV->ItemCode)
+                ->value('U_Ruta');
+            //set ruta
+            $vItem->UserFields->Fields->Item('U_Ruta')->Value = $rutaOP;
+
+            //$vItem->UserFields->Fields->Item('U_LineNum')->Value = '';
+            $vItem->UserFields->Fields->Item('U_Status')->Value = '03'; //Falta de material
+            //$vItem->UserFields->Fields->Item('U_NoSerie')->Value = '1';
+
+            //Con Orden: Del pedido se toma la Prioridad y con ella se determina
+            //esto. Si es Prioridad 1 = Con Orden. Prioridad 2 seria = Sin Orden y
+            // la 3 seria = Pronostico.
+            //1_Alta-C 2_Media-S 3_Baja-P
+
+            switch ($OV->U_Prioridad) {
+                case '1':
+                    $item_uc_orden = 'C';
+                    break;
+                case '2':
+                    $item_uc_orden = 'S';
+                    break;
+                case '3':
+                    $item_uc_orden = 'P';
+                    break;
+                default:
+                    $item_uc_orden = 'C';
+                    break;
+            }
+            switch ($OV->U_Especial) {
+                case 'L':
+                    $atencion_especial = 'N';
+                    break;
+                case 'E':
+                    $atencion_especial = 'S';
+                    break;
+
+                default:
+                    $atencion_especial = 'N';
+                    break;
+            }
+
+            $vItem->UserFields->Fields->Item('U_C_Orden')->Value = $item_uc_orden; //S,C o P
+            $vItem->UserFields->Fields->Item('U_AteEspecial')->Value = $atencion_especial; //S o N
+            $vItem->UserFields->Fields->Item('U_cc')->Value = $OV->U_comp; //
+
+
+            //Fecha de produccion
+            //Fecha de Producción = Fecha Entrega – 7 días (Entrega producción)
+
+            //Nota: Si el Producto no cuenta con LDM No se puede realizar la OP
+
+
+            //CTRL+G 13057        
+
+            $RetCode = $vItem->Add();
+
+            $Nk = "";
+
+            if ($RetCode == 0) {
+
+                dd("Orden - " . $vCmp->GetNewObjectCode($Nk));
+            } else if ($lRetCode != 0) {
+                dd(self::$vCmp->GetLastErrorDescription());
+            }
+        } //end foreach
+    }
+}
 /*
     Thanks a lot for this post.
 
