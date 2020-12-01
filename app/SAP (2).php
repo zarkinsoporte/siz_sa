@@ -466,7 +466,7 @@ foreach ($Items_OV as $key => $itemOV) {
 
             if ($RetCode == 0) {
 
-                dd("Orden - " . $vCmp->GetNewObjectCode($Nk));
+                dd("Orden - " . self::$vCmp->GetNewObjectCode($Nk));
             } else if ($lRetCode != 0) {
                 dd(self::$vCmp->GetLastErrorDescription());
             }

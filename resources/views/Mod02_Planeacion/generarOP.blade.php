@@ -97,7 +97,7 @@
                                                                     <table id="tabla_pedidos" class="table table-striped table-bordered hover" width="100%">
                                                                         <thead>
                                                                             <tr>                                                                              
-                                                                                <th>Individual</th>
+                                                                                <th>Grupal</th>
                                                                                 <th>Inicio</th>
                                                                                 <th>Prioridad</th>
                                                                                 <th>Cliente</th>
@@ -193,7 +193,7 @@
                 deferRender: true,        
                    
                     columns: [                   
-                    {data: "Individual"},
+                    {data: "Grupal"},
                     {data: "FechaInicio"},
                     {data: "Prioridad"},
                     {data: "Cliente"},
@@ -208,8 +208,9 @@
                         'orderable': false,
                         'className': 'dt-body-center',
                         'render': function (data, type, full, meta){
-                            return '<input type="checkbox" name="id[]" value="' + $('<div/>').text(data).html() + '">';
+                           return '<input type="checkbox" name="selectCheck" value="' + $('<div/>').text(data).html() + '">';
                         }
+                        
                     },
                     ],
                     });
@@ -237,17 +238,17 @@
      $('#btn_enviar').on('click', function(e) {
         e.preventDefault();
         var ordvta = table.rows('.selected').data();
+        //var ordvtac = table.rows('.selected').node();
+        //console.log(ordvtac[0])
         var ovs = '';
         var registros = ordvta == null ? 0 : ordvta.length;
         for(var i=0; i < registros; i++){
             if (i == registros - 1) {
-                ovs += ordvta[i].Pedido + '';
+                ovs += ordvta[i].Pedido + "&" + ordvta[i].Grupal;
             } else {
-                ovs += ordvta[i].Pedido + ", ";
+                ovs += ordvta[i].Pedido + "&"+ ordvta[i].Grupal + ", ";
             }
-            console.log(ovs);
-         
-           
+            //console.log(ordvta[i]);         
         }
         var oper = $('#btn_enviar').attr('data-operacion');
        $.ajax({
@@ -287,6 +288,27 @@
     function enviaOrdenes(item, index) {
         console.log(item);
     }
+
+    $('#tabla_pedidos tbody').on( 'change', 'td input', function (e) {
+
+    e.preventDefault();
+
+    //var tbl = $('#tableFacturas').DataTable();
+    var fila = $(this).closest('tr');
+    console.log(fila)
+    var datos = table.row(fila).data();
+    console.log(datos)
+    var check = datos['Grupal'];
+    console.log(check)
+    
+
+    if(check == 0){
+        datos['Grupal'] = 1;
+    } else {
+        datos['Grupal'] = 0;
+    }
+    console.log(datos) 
+});
                     @endsection                                      
                 <script>                  
                    function val_btn(val) {                     
