@@ -59,7 +59,11 @@
     {!! Html::script('assets/js/dataTables.editor.min.js') !!}
     
    
+<<<<<<< HEAD
     <script src="{{ URL::asset('assets/bootbox/bootbox.min.js' )}}"></script>
+=======
+    
+>>>>>>> b0676f2261a9621ad5e79173815e6ecc5e1e94a4
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -252,6 +256,8 @@ li.dt-button.active a::before{
 {!! Html::script('assets/js/bootstrap-switch.js') !!}
 
 <!--<script src="//cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>-->
+<script async src="{{ URL::asset('plugins/bootbox/bootbox.min.js')}}"></script>
+<script src="{{ URL::asset('plugins/blockui/jquery.blockUI.js')}}"></script>
 
 {!! Html::script('assets/js/bootstrap.min.js') !!}
 <!--<script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>-->

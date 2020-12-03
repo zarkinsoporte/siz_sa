@@ -17,6 +17,7 @@ use Session;
 use Maatwebsite\Excel\Facades\Excel;
 use Datatables;
 use Illuminate\Database\Eloquent\Collection;
+use App\SAP;
 
 ini_set("memory_limit", '512M');
 ini_set('max_execution_time', 0);
@@ -67,13 +68,27 @@ public function indexGenerarOP(){
             return redirect()->route('auth/login');
         }
 }
+<<<<<<< HEAD
+=======
+public function generarOP(Request $request){
+        ini_set('memory_limit', '-1');
+        set_time_limit(0);   
+       dd($request->input('ordenesvta'));
+        $vari = SAP::crearOrden($request->input('ordenesvta'));
+        dd($vari);
+}
+>>>>>>> b0676f2261a9621ad5e79173815e6ecc5e1e94a4
 public function registros_gop(Request $request){
         try {
             ini_set('memory_limit', '-1');
             set_time_limit(0);            
             $sel = "SELECT
+<<<<<<< HEAD
                 [Selec],
                 [Individual],
+=======
+                '0' [Grupal],
+>>>>>>> b0676f2261a9621ad5e79173815e6ecc5e1e94a4
                 CONVERT (VARCHAR, [Fecha inicio], 103) AS FechaInicio,
                 Prioridad,
                 [Número de cliente] + ' - ' + [Razón social] AS Cliente,
@@ -85,8 +100,11 @@ public function registros_gop(Request $request){
                 FROM
                 (
                     SELECT
+<<<<<<< HEAD
                         'N' AS [Selec],
                         'N' AS [Individual],
+=======
+>>>>>>> b0676f2261a9621ad5e79173815e6ecc5e1e94a4
                         TaxDate AS [Fecha inicio],
                         DocTime,
                         (
@@ -437,5 +455,12 @@ public function actualizaMRP(){
         } else {
         return redirect()->route('auth/login');
         }
+    }
+    public static function crearOrden(Request $request)
+    {
+
+        $ov = DB::table('OITM');
+        //$r = SAP::crearOrden();
+        //$dt = date('Ymd h:i');
     }
 }

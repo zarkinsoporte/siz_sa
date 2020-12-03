@@ -17,11 +17,11 @@ class route_log
      */
     public function handle($request, Closure $next)
     {
-         if (!Auth::check()) {
-              
+         if (!Auth::check()) {              
             return redirect()->route('auth/login');
         }
-        $ruta = str_replace('%20', ' ', explode('/', $request->path())[1]);
+        $arrayurl = explode('/', $request->path());
+        $ruta = str_replace('%20', ' ', $arrayurl[count($arrayurl) - 1]);
         $ruta = str_replace('%C3%B7', '&#247;', $ruta);
         
         $result = DB::table('SIZ_routes_log')

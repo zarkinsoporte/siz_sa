@@ -50,7 +50,14 @@
                             <h3 class="page-header">
                                PLANEACION SIZ
                                 <small><b>Ordenes de Producción:</b></small>
+<<<<<<< HEAD
                             
+=======
+                            <div class="pull-right width-full">
+                                <a id="btn_enviar" class="btn btn-success btn-sm" data-operacion='1' 
+                                    ><i class="fa fa-send"></i> Enviar</a>
+                            </div>
+>>>>>>> b0676f2261a9621ad5e79173815e6ecc5e1e94a4
                             </h3>                                        
                         </div>
                           
@@ -93,9 +100,14 @@
                                                                 <div class="table-scroll" id="registros-ordenes-venta">
                                                                     <table id="tabla_pedidos" class="table table-striped table-bordered hover" width="100%">
                                                                         <thead>
+<<<<<<< HEAD
                                                                             <tr>
                                                                                 <th>Selección</th>
                                                                                 <th>Individual</th>
+=======
+                                                                            <tr>                                                                              
+                                                                                <th>Grupal</th>
+>>>>>>> b0676f2261a9621ad5e79173815e6ecc5e1e94a4
                                                                                 <th>Inicio</th>
                                                                                 <th>Prioridad</th>
                                                                                 <th>Cliente</th>
@@ -190,9 +202,14 @@
                     scrollCollapse: true,
                 deferRender: true,        
                    
+<<<<<<< HEAD
                     columns: [
                     {data: "Selec"},
                     {data: "Individual"},
+=======
+                    columns: [                   
+                    {data: "Grupal"},
+>>>>>>> b0676f2261a9621ad5e79173815e6ecc5e1e94a4
                     {data: "FechaInicio"},
                     {data: "Prioridad"},
                     {data: "Cliente"},
@@ -207,6 +224,7 @@
                         'orderable': false,
                         'className': 'dt-body-center',
                         'render': function (data, type, full, meta){
+<<<<<<< HEAD
                             return '<input type="checkbox" name="id[]" value="' + $('<div/>').text(data).html() + '">';
                         }
                     },
@@ -219,6 +237,13 @@
                             return '<input type="checkbox" name="id[]" value="' + $('<div/>').text(data).html() + '">';
                         }
                     }],
+=======
+                           return '<input type="checkbox" name="selectCheck" value="' + $('<div/>').text(data).html() + '">';
+                        }
+                        
+                    },
+                    ],
+>>>>>>> b0676f2261a9621ad5e79173815e6ecc5e1e94a4
                     });
                 {{--FIN GENERAR OP--}}
                 $.ajax({
@@ -238,7 +263,92 @@
                 $("#tabla_pedidos").dataTable().fnAddData(data.pedidos_gop);           
         }
     });
+<<<<<<< HEAD
                     @endsection                                      
                 <script>                  
                    
+=======
+    $('#tabla_pedidos tbody').on( 'click', 'tr', function () {
+        $(this).toggleClass('selected');
+    } );
+     $('#btn_enviar').on('click', function(e) {
+        e.preventDefault();
+        var ordvta = table.rows('.selected').data();
+        //var ordvtac = table.rows('.selected').node();
+        //console.log(ordvtac[0])
+        var ovs = '';
+        var registros = ordvta == null ? 0 : ordvta.length;
+        for(var i=0; i < registros; i++){
+            if (i == registros - 1) {
+                ovs += ordvta[i].Pedido + "&" + ordvta[i].Grupal;
+            } else {
+                ovs += ordvta[i].Pedido + "&"+ ordvta[i].Grupal + ", ";
+            }
+            //console.log(ordvta[i]);         
+        }
+        var oper = $('#btn_enviar').attr('data-operacion');
+       $.ajax({
+    type: 'POST',
+    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+    data: {
+    "_token": "{{ csrf_token() }}",
+    ordenesvta: ovs,
+   
+    },
+    url: '{!! route('generarOP') !!}',
+    beforeSend: function() {
+    $.blockUI({
+    message: '<h2>Procesando</h2><h3>espere...<i class="fa fa-spin fa-spinner"></i></h3>',
+    css: {
+    border: 'none',
+    padding: '16px',
+    width: '50%',
+    top: '40%',
+    left: '30%',
+    backgroundColor: '#fefefe',
+    '-webkit-border-radius': '10px',
+    '-moz-border-radius': '10px',
+    opacity: .7,
+    color: '#000000'
+    }
+    });
+    },
+    complete: function() {
+        setTimeout($.unblockUI, 1500);
+    },
+    success: function(data){   
+      
+    }
+    });            
+    });
+    function enviaOrdenes(item, index) {
+        console.log(item);
+    }
+
+    $('#tabla_pedidos tbody').on( 'change', 'td input', function (e) {
+
+    e.preventDefault();
+
+    //var tbl = $('#tableFacturas').DataTable();
+    var fila = $(this).closest('tr');
+    console.log(fila)
+    var datos = table.row(fila).data();
+    console.log(datos)
+    var check = datos['Grupal'];
+    console.log(check)
+    
+
+    if(check == 0){
+        datos['Grupal'] = 1;
+    } else {
+        datos['Grupal'] = 0;
+    }
+    console.log(datos) 
+});
+                    @endsection                                      
+                <script>                  
+                   function val_btn(val) {                     
+                          $('#btn_enviar').attr('data-operacion', val);                                                     
+                    } 
+>>>>>>> b0676f2261a9621ad5e79173815e6ecc5e1e94a4
                 </script>
