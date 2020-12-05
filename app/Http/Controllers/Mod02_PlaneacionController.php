@@ -79,6 +79,7 @@ public function generarOP(Request $request){
             return 'No se ha seleccionado ninguna OV';
         }
 }
+
 public function registros_gop(Request $request){
         try {
             ini_set('memory_limit', '-1');
