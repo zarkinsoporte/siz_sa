@@ -337,17 +337,19 @@ class SAP extends Model
                 return 'Error SAP: '.$descripcionError;
         }  
    }
-
-public static function crearOrden($ov)
-    {
-        $Items_OV = DB::select('select * from RDR1 where RDR1.DocEntry = ?', [$ov]);       
-        $OV = DB::table('ORDR')->where('DocEntry', $ov)->first();
-        //$fecha = Carbon::parse($OV->DocDueDate);
-        //$fecha = $fecha->subDays(21);
-        //if ($fecha->lessThan(Carbon::now())) {
-        //    $fecha = Carbon::now();
-        //} 
-        //return $fecha->format('Y-m-d H:i:s');
+public function getApellidoPaternoUsuario($apellido){
+        $preposiciones = ["DE", "LA", "LAS", "D", "LOS", "DEL"]; 
+        if (in_array($apellido[0], $preposiciones) && count($apellido)>1 ) {
+            if (in_array($apellido[1], $preposiciones) && count($apellido)>2 ) {
+               return $apellido[0].' '.$apellido[1].' '.$apellido[2];
+            } else {
+                return $apellido[0].' '.$apellido[1];
+            }            
+        } else {
+            return $apellido[0];
+        }
+}
+public function crearOPs($Items_OV, $OV, $cantidadOP, $repetir){
         if (self::$vCmp == false) {
             $cnn = self::Connect();
             if ($cnn == 'Conectado') {
@@ -369,108 +371,156 @@ public static function crearOrden($ov)
                 }
             }
         }
-       
-    //-----------------------GENERACION OP DI API SAP BO-----------------------------------
-    //DEFINICIONES
-            //bopotStandard	    0	A production order type for producing a regular production item (default), using a production bill of materials.
-            //bopotSpecial	    1	A production order type for producing and repairing items that can be any inventory item.
-            //bopotDisassembly	2	A production order type for dismantling a parent item to its components, using a production Bill of Materials.
+        $resultadoEjecucion = [];
+        //-----------------------GENERACION OP DI API SAP BO-----------------------------------
+        //DEFINICIONES
+        //bopotStandard	    0	A production order type for producing a regular production item (default), using a production bill of materials.
+        //bopotSpecial	    1	A production order type for producing and repairing items that can be any inventory item.
+        //bopotDisassembly	2	A production order type for dismantling a parent item to its components, using a production Bill of Materials.
         //CREACION DE OBJETO
         //businessObject = (ProductionOrders)Globals.oCompany.GetBusinessObject(BoObjectTypes.oProductionOrders);
         $vItem = self::$vCmp->GetBusinessObject("202");
 
-foreach ($Items_OV as $key => $itemOV) {
-    
+        foreach ($Items_OV as $key => $itemOV) {
+            for ($i=0; $i < $repetir; $i++) { //este ciclo es para las op que no son grupales
+                //CABECERA IZQ
+                $vItem->ProductionOrderType = 0; //Estandar
+                $vItem->ProductionOrderStatus = 0; //Orden planeada
+                $vItem->ItemNo = $itemOV->ItemCode; // codigo del Articulo
+                $vItem->PlannedQuantity = $cantidadOP; //cant con la que se hace la orden
+                $vItem->Warehouse = 'APT-ST';
 
-    //CABECERA IZQ
-        $vItem->ProductionOrderType = 0; //Estandar
-        $vItem->ProductionOrderStatus = 0; //Orden planeada
-        $vItem->ItemNo = $itemOV->ItemCode;// codigo del Articulo
-        $vItem->PlannedQuantity = $itemOV->Quantity; //cant con la que se hace la orden
-        $vItem->Warehouse = 'APT-ST';
+                //CABECERA DER (2)
+                //fecha de finalizacion Fecha Entrega – 21 días (Compra de Materiales)
+                $fecha = Carbon::parse($OV->DocDueDate);
+                //$fecha = $fecha->subDays(21);
+                if ($fecha->lessThan(Carbon::now())) {
+                    $fecha = Carbon::now();
+                }
+                $vItem->DueDate = $fecha->format('Y-m-d H:i:s'); //fecha de finalizacion
+                //--Usuario: El del Sistema //auto
+                //--Origen: Manual
+                $vItem->ProductionOrderOriginEntry = $ov; // Num pedido (DocEntry de ORDR)
 
-    //CABECERA DER (2)
-        //fecha de finalizacion Fecha Entrega – 21 días (Compra de Materiales)
-        $fecha = Carbon::parse($OV->DocDueDate);
-        $fecha = $fecha->subDays(21);
-            if ($fecha->lessThan(Carbon::now())) {
-                $fecha = Carbon::now();
-            }        
-        $vItem->DueDate = $fecha->format('Y-m-d H:i:s'); //fecha de finalizacion
-        //--Usuario: El del Sistema //auto
-        //--Origen: Manual
-        $vItem->ProductionOrderOriginEntry = $ov;// Num pedido (DocEntry de ORDR)
-        //$vItem->CustomerCode = // aqui iria cliente
+                $apellido = Self::getApellidoPaternoUsuario(explode(' ', Auth::user()->lastName));
+                $usuario_reporta = explode(' ', Auth::user()->firstName)[0] . ' ' . $apellido;
+                //validacion de longitud 50
+                $vItem->JournalRemarks = $OV->Comments. ', Elaboro:'. $usuario_reporta;// observaciones
 
-    //CAMPOS DEFINIDOS X USUARIO EN SAP
-        //$rutaOP = (usar VALUE) SELECT b.U_Ruta FROM OITM b WHERE b.ItemCode=       
-        $rutaOP = DB::table('OITM')
+                //CAMPOS DEFINIDOS X USUARIO EN SAP
+                //$rutaOP = (usar VALUE) SELECT b.U_Ruta FROM OITM b WHERE b.ItemCode=       
+                $rutaOP = DB::table('OITM')
                     ->where('ItemCode', $itemOV->ItemCode)
                     ->value('U_Ruta');
-        //set ruta
-        $vItem->UserFields->Fields->Item('U_Ruta')->Value = $rutaOP;
-        
-        //$vItem->UserFields->Fields->Item('U_LineNum')->Value = '';
-        $vItem->UserFields->Fields->Item('U_Status')->Value = '03'; //Falta de material
-        //$vItem->UserFields->Fields->Item('U_NoSerie')->Value = '1';
-        
-        //Con Orden: Del pedido se toma la Prioridad y con ella se determina
-        //esto. Si es Prioridad 1 = Con Orden. Prioridad 2 seria = Sin Orden y
-       // la 3 seria = Pronostico.
-       //1_Alta-C 2_Media-S 3_Baja-P
-       
-       switch ($OV->U_Prioridad) {
-           case '1':
-               $item_uc_orden = 'C';
-               break;
-           case '2':
-                $item_uc_orden = 'S';
-               break;
-           case '3':
-                $item_uc_orden = 'P';
-               break;
-                default:
-                    $item_uc_orden = 'C';
-                    break;
-       }
-       switch ($OV->U_Especial) {
-           case 'L':
-               $atencion_especial = 'N';
-               break;
-           case 'E':
-               $atencion_especial = 'S';
-               break;
-           
-           default:
-                    $atencion_especial = 'N';
-               break;
-       }
-        
-        $vItem->UserFields->Fields->Item('U_C_Orden')->Value = $item_uc_orden; //S,C o P
-        $vItem->UserFields->Fields->Item('U_AteEspecial')->Value = $atencion_especial; //S o N
-        $vItem->UserFields->Fields->Item('U_cc')->Value = $OV->U_comp; //
-        
-        //Fecha de Producción = Fecha Entrega – 7 días (Entrega producción)
-        $fecha = Carbon::parse($OV->DocDueDate);
-        $fecha = $fecha->subDays(7);
-            if ($fecha->lessThan(Carbon::now())) {
-                $fecha = Carbon::now();
-            }
-        $vItem->UserFields->Fields->Item('U_FProduccion')->Value = $fecha->format('Y-m-d H:i:s'); //
+                //set ruta
+                $vItem->UserFields->Fields->Item('U_Ruta')->Value = $rutaOP;
 
-        //Nota: Si el Producto no cuenta con LDM No se puede realizar la OP
+                //$vItem->UserFields->Fields->Item('U_LineNum')->Value = '';
+                $vItem->UserFields->Fields->Item('U_Status')->Value = '03'; //Falta de material
+                //$vItem->UserFields->Fields->Item('U_NoSerie')->Value = '1';
 
-        $RetCode = $vItem->Add();
+                //Con Orden: Del pedido se toma la Prioridad y con ella se determina
+                //esto. Si es Prioridad 1 = Con Orden. Prioridad 2 seria = Sin Orden y
+                // la 3 seria = Pronostico.
+                //1_Alta-C 2_Media-S 3_Baja-P
 
-        $Nk = "";
+                switch ($OV->U_Prioridad) {
+                    case '1':
+                        $item_uc_orden = 'C';
+                        break;
+                    case '2':
+                        $item_uc_orden = 'S';
+                        break;
+                    case '3':
+                        $item_uc_orden = 'P';
+                        break;
+                    default:
+                        $item_uc_orden = 'C';
+                        break;
+                }
+                switch ($OV->U_Especial) {
+                    case 'L':
+                        $atencion_especial = 'N';
+                        break;
+                    case 'E':
+                        $atencion_especial = 'S';
+                        break;
 
-            if ($RetCode == 0) {
+                    default:
+                        $atencion_especial = 'N';
+                        break;
+                }
 
-                dd("Orden - " . self::$vCmp->GetNewObjectCode($Nk));
-            } else if ($lRetCode != 0) {
-                dd(self::$vCmp->GetLastErrorDescription());
-            }
+                $vItem->UserFields->Fields->Item('U_C_Orden')->Value = $item_uc_orden; //S,C o P
+                $vItem->UserFields->Fields->Item('U_AteEspecial')->Value = $atencion_especial; //S o N
+                $vItem->UserFields->Fields->Item('U_cc')->Value = $OV->U_comp; //
+
+                //Fecha de Producción = Fecha Entrega – 7 días (Entrega producción)
+                $fechaProduccion = Carbon::now(); //vamos a guardar
+
+                $fechaEntregaOV = Carbon::parse($OV->DocDueDate); //fecha Entrega 
+                $fechaContabilizacionOV = Carbon::parse($OV->DocDate); //fecha contabilizacion
+                $fechaContabilizacion_mas30 = $fechaContabilizacionOV->addDays(30); //+30
+
+                if ($fechaEntregaOV->lessThan($fechaContabilizacion_mas30)) { 
+                    $fechaProduccion = $fechaContabilizacion_mas30;   
+                }else{
+                    $fechaProduccion = $fechaEntregaOV;
+                }
+                $fechaProduccion = $fechaProduccion->subDays(7);
+
+                $vItem->UserFields->Fields->Item('U_FProduccion')->Value = $fechaProduccion->format('Y-m-d H:i:s'); //
+                
+
+                $fechaCompras = Carbon::now(); //vamos a guardar
+
+                if ($fechaEntregaOV->lessThan($fechaContabilizacion_mas30)) {
+                    $fechaCompras = $fechaContabilizacion_mas30;
+                } else {
+                    $fechaCompras = $fechaEntregaOV;
+                }
+                $fechaCompras = $fechaCompras->subDays(21);
+
+                $vItem->UserFields->Fields->Item('U_FCompras')->Value = $fechaCompras->format('Y-m-d H:i:s'); //
+
+                //Nota: Si el Producto no cuenta con LDM No se puede realizar la OP
+
+                $RetCode = $vItem->Add();
+
+                $Nk = "";
+
+                if ($RetCode == 0) {
+                    array_push($resultadoEjecucion, self::$vCmp->GetNewObjectCode($Nk));
+                    
+                } else if ($lRetCode != 0) {
+                    array_push($resultadoEjecucion, self::$vCmp->GetLastErrorDescription());
+                }
+            } //end for
         }//end foreach
+        return $resultadoEjecucion;
+}
+public static function crearOrdenesOV($ov)
+    {
+        $Items_OV = DB::select('select * from RDR1 where RDR1.DocEntry = ?', [$ov]);       
+        $OV = DB::table('ORDR')->where('DocEntry', $ov)->first();
+
+        $preOrdenes = explode(',', $request->input('ordenesvta'));
+        foreach ($preOrdenes as $key => $preorden) {
+            $orden = explode('&', $preorden);
+            $grupal = $orden[1];
+            $ov = $orden[0];
+            if ($grupal == 1) {
+                $cantidadOP = $itemOV->Quantity;
+                Self::crearOPs($Items_OV, $OV, $cantidadOP, 1);
+
+            } else if ($grupal == 0) {
+                $cantidadOP = 1;
+                $repetir = $itemOV->Quantity;
+                Self::crearOPs($Items_OV, $OV, $cantidadOP, $repetir);
+            }
+        }
+
+       
     }
 }
 /*

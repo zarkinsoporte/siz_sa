@@ -68,12 +68,16 @@ public function indexGenerarOP(){
             return redirect()->route('auth/login');
         }
 }
+
 public function generarOP(Request $request){
         ini_set('memory_limit', '-1');
-        set_time_limit(0);   
-       dd($request->input('ordenesvta'));
-        $vari = SAP::crearOrden($request->input('ordenesvta'));
-        dd($vari);
+        set_time_limit(0);
+        if(strlen($request->input('ordenesvta')) > 0 ){                     
+            $orders = SAP::crearOrdenesOV($request->input('ordenesvta'));
+            return $orders;
+        }else{
+            return 'No se ha seleccionado ninguna OV';
+        }
 }
 public function registros_gop(Request $request){
         try {
@@ -443,11 +447,5 @@ public function actualizaMRP(){
         return redirect()->route('auth/login');
         }
     }
-    public static function crearOrden(Request $request)
-    {
-
-        $ov = DB::table('OITM');
-        //$r = SAP::crearOrden();
-        //$dt = date('Ymd h:i');
-    }
+  
 }

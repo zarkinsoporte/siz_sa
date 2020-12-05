@@ -246,7 +246,7 @@
             if (i == registros - 1) {
                 ovs += ordvta[i].Pedido + "&" + ordvta[i].Grupal;
             } else {
-                ovs += ordvta[i].Pedido + "&"+ ordvta[i].Grupal + ", ";
+                ovs += ordvta[i].Pedido + "&"+ ordvta[i].Grupal + ",";
             }
             //console.log(ordvta[i]);         
         }
