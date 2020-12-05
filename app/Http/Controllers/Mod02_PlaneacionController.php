@@ -68,7 +68,6 @@ public function indexGenerarOP(){
             return redirect()->route('auth/login');
         }
 }
-
 public function generarOP(Request $request){
         ini_set('memory_limit', '-1');
         set_time_limit(0);
@@ -79,7 +78,6 @@ public function generarOP(Request $request){
             return 'No se ha seleccionado ninguna OV';
         }
 }
-
 public function registros_gop(Request $request){
         try {
             ini_set('memory_limit', '-1');
