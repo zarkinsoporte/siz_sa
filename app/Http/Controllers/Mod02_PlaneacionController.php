@@ -68,8 +68,6 @@ public function indexGenerarOP(){
             return redirect()->route('auth/login');
         }
 }
-<<<<<<< HEAD
-=======
 public function generarOP(Request $request){
         ini_set('memory_limit', '-1');
         set_time_limit(0);   
@@ -77,18 +75,12 @@ public function generarOP(Request $request){
         $vari = SAP::crearOrden($request->input('ordenesvta'));
         dd($vari);
 }
->>>>>>> b0676f2261a9621ad5e79173815e6ecc5e1e94a4
 public function registros_gop(Request $request){
         try {
             ini_set('memory_limit', '-1');
             set_time_limit(0);            
             $sel = "SELECT
-<<<<<<< HEAD
-                [Selec],
-                [Individual],
-=======
                 '0' [Grupal],
->>>>>>> b0676f2261a9621ad5e79173815e6ecc5e1e94a4
                 CONVERT (VARCHAR, [Fecha inicio], 103) AS FechaInicio,
                 Prioridad,
                 [Número de cliente] + ' - ' + [Razón social] AS Cliente,
@@ -100,11 +92,6 @@ public function registros_gop(Request $request){
                 FROM
                 (
                     SELECT
-<<<<<<< HEAD
-                        'N' AS [Selec],
-                        'N' AS [Individual],
-=======
->>>>>>> b0676f2261a9621ad5e79173815e6ecc5e1e94a4
                         TaxDate AS [Fecha inicio],
                         DocTime,
                         (
