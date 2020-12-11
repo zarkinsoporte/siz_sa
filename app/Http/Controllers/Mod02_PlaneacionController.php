@@ -84,7 +84,7 @@ public function updateOV(Request $request){
         //if(strlen($request->input('ordenvta')) > 0 ){                     
        //     $orders = SAP::updateOV($request->input('ordenvta'));
         if(true ){
-            $Item = DB::table('RDR1')->where('DocEntry', $ov)->where('ItemCode', '3086-02-P0233')->first();                     
+            $Item = DB::table('RDR1')->where('DocEntry', '2208')->where('ItemCode', '3086-02-P0233')->first();                     
             $orders = SAP::updateOV('2208', $Item, 1);
             return $orders;
         }else{
