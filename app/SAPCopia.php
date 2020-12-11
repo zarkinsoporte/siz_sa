@@ -9,7 +9,7 @@ use Session;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
-class SAP extends Model
+class SAPCopia extends Model
 {
     private static $vCmp = false;
 

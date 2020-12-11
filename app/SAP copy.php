@@ -7,7 +7,7 @@ use DB;
 use \COM;
 use Session;
 use Illuminate\Support\Facades\Auth;
-class SAP extends Model
+class SAPcopy extends Model
 {
      private static $vCmp = false;
 
