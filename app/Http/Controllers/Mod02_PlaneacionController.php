@@ -72,7 +72,20 @@ public function generarOP(Request $request){
         ini_set('memory_limit', '-1');
         set_time_limit(0);
         if(strlen($request->input('ordenesvta')) > 0 ){                     
-            $orders = SAP::crearOrdenesOV($request->input('ordenesvta'));
+            $orders = SAP::crearOrdenesProduccion($request->input('ordenesvta'));
+            return $orders;
+        }else{
+            return 'No se ha seleccionado ninguna OV';
+        }
+}
+public function updateOV(Request $request){
+    ini_set('memory_limit', '-1');
+        set_time_limit(0);
+        //if(strlen($request->input('ordenvta')) > 0 ){                     
+       //     $orders = SAP::updateOV($request->input('ordenvta'));
+        if(true ){
+            $Item = DB::table('RDR1')->where('DocEntry', $ov)->where('ItemCode', '3086-02-P0233')->first();                     
+            $orders = SAP::updateOV('2208', $Item, 1);
             return $orders;
         }else{
             return 'No se ha seleccionado ninguna OV';

@@ -381,10 +381,12 @@ Route::get('home/PRODUCCION POR AREAS', 'Reportes_ProduccionController@showModal
 Route::post('home/reporte/PRODUCCION POR AREAS', 'Reportes_ProduccionController@reporteProdxAreas');
 Route::get('home/reporte/PRODUCCION POR AREAS', 'Reportes_ProduccionController@reporteProdxAreasPDF');
 Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@produccionxareasXLS');
+Route::get('/pruebassap', 'Mod02_PlaneacionController@updateOV');
 
 Route::get('/pruebas', function (Request $request) {
-   $var1= \Artisan::call('cache:clear');
+   $var1= Artisan::call('cache:clear');
    $var= Artisan::call('config:cache');
+   
     dd($var1);
     $tareas = DB::table('Siz_Tarea_Menu')->get();
 
