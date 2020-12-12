@@ -525,7 +525,7 @@ public static function crearOrdenesProduccion($ovs)
 public static function updateOV($ov, $Item, $cantProcesada)
     { 
         $order = DB::select('select sum (COALESCE(Quantity, 0)) as sum_cant, SUM(COALESCE(U_Procesado, 0)) as sum_procesado from RDR1 
-        where  Docentry =  ? AND ItemCode = ? AND LineNum = ?', [$ov]);
+        where  Docentry =  ? ', [$ov]);
        
         if (count ($order) > 0) { //verificar la existencia de la OV
             if ($order[0]->sum_cant > $order[0]->sum_procesado) { //si la cantidad de la OV es mayor a la procesada
@@ -536,7 +536,7 @@ public static function updateOV($ov, $Item, $cantProcesada)
                     $cantActualProcesado = $cantActual + $cantProcesada;
                     DB::update('UPDATE RDR1 SET U_Procesado = ? WHERE DocEntry = ? AND ItemCode = ? AND LineNum = ?', [$cantActualProcesado, $ov, $Item->ItemCode, $Item->LineNum]);
                     $order = DB::select('select sum (COALESCE(Quantity, 0)) as sum_cant, SUM(COALESCE(U_Procesado, 0)) as sum_procesado from RDR1 
-                        where  Docentry =  ? AND ItemCode = ? AND LineNum = ?', [$ov]);
+                        where  Docentry =  ? ', [$ov]);
                     if (count($order) > 0) {
                         if ($order[0]->sum_cant == $order[0]->sum_procesado) { //si la cantidad de la OV es mayor a la procesada
                             self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
@@ -563,11 +563,13 @@ public static function updateOV($ov, $Item, $cantProcesada)
                             if ($retCode != 0) {
                                 return self::$vCmp->GetLastErrorDescription();
                             } else {
-                                return '1';
+                                return '2';
                             }
                         }
-                    }    
+                    } 
+
                 }
+                return '1';
             }
         }
             
