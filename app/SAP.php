@@ -523,26 +523,54 @@ public static function crearOrdenesProduccion($ovs)
        
     }
 public static function updateOV($ov, $Item, $cantProcesada)
-    {
-        (self::$vCmp == false) ? self::Connect() : '';
-        //self::$vCmp->XmlExportType("xet_ExportImportMode");
+    { 
+        $order = DB::select('select sum (COALESCE(Quantity, 0)) as sum_cant, SUM(COALESCE(U_Procesado, 0)) as sum_procesado from RDR1 
+        where  Docentry =  ? AND ItemCode = ? AND LineNum = ?', [$ov]);
        
-        //$Item = DB::table('RDR1')->where('DocEntry', $ov)->where('ItemCode', $itemCode)->first();
-        //$OV = DB::table('ORDR')->where('DocEntry', $ov)->first();
+        if (count ($order) > 0) { //verificar la existencia de la OV
+            if ($order[0]->sum_cant > $order[0]->sum_procesado) { //si la cantidad de la OV es mayor a la procesada
+                $orderLine = DB::select('select sum (COALESCE(Quantity, 0)) as sum_cant, SUM(COALESCE(U_Procesado, 0)) as sum_procesado from RDR1 
+                where  Docentry =  ? AND ItemCode = ? AND LineNum = ?', [$ov, $Item->ItemCode, $Item->LineNum]);
+                if ($orderLine[0]->sum_cant > $orderLine[0]->sum_procesado) {
+                    $cantActual = (is_null($Item->U_Procesado)) ? 0 : ($Item->U_Procesado) * 1;
+                    $cantActualProcesado = $cantActual + $cantProcesada;
+                    DB::update('UPDATE RDR1 SET U_Procesado = ? WHERE DocEntry = ? AND ItemCode = ? AND LineNum = ?', [$cantActualProcesado, $ov, $Item->ItemCode, $Item->LineNum]);
+                    $order = DB::select('select sum (COALESCE(Quantity, 0)) as sum_cant, SUM(COALESCE(U_Procesado, 0)) as sum_procesado from RDR1 
+                        where  Docentry =  ? AND ItemCode = ? AND LineNum = ?', [$ov]);
+                    if (count($order) > 0) {
+                        if ($order[0]->sum_cant == $order[0]->sum_procesado) { //si la cantidad de la OV es mayor a la procesada
+                            self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
+                            self::$vCmp->DbServerType = "6";
+                            self::$vCmp->server = "SERVER-SAPBO";
+                            self::$vCmp->LicenseServer = "SERVER-SAPBO:30000";
+                            self::$vCmp->CompanyDB = "SALOTTO";
+                            self::$vCmp->username = "controlp";
+                            self::$vCmp->password = "190109";
+                            self::$vCmp->DbUserName = "sa";
+                            self::$vCmp->DbPassword = "B1Admin";
+                            self::$vCmp->UseTrusted = false;
+                            self::$vCmp->language = "6";
+                            $lRetCode = self::$vCmp->Connect;
+                            if ($lRetCode != 0) {
+                                dd(self::$vCmp->GetLastErrorDescription());
+                            }
 
-        $oOrder = self::$vCmp->GetBusinessObject("17");
-        $RetVal = $oOrder->GetByKey($ov);
-        $oOrder->Lines->SetCurrentLine($Item->LineNum);
-        $oOrder->Lines->UserFields->Fields->Item("U_Procesado")->Value = ($Item->U_Procesado * 1) - $cantProcesada;  
-        $oOrder->UserFields->Fields->Item('U_Procesado')->Value = 'S';
-      
-        $retCode = $oOrder->Update;
-        if ($retCode != 0) {
-            return self::$vCmp->GetLastErrorDescription();
-        } else {
-            return true;
-        }  
+                            $oOrder = self::$vCmp->GetBusinessObject("17");
+                            $RetVal = $oOrder->GetByKey($ov);
+                            $oOrder->UserFields->Fields->Item('U_Procesado')->Value = 'S';
+                            $retCode = $oOrder->Update;
 
+                            if ($retCode != 0) {
+                                return self::$vCmp->GetLastErrorDescription();
+                            } else {
+                                return '1';
+                            }
+                        }
+                    }    
+                }
+            }
+        }
+            
     }
 }
 /*
