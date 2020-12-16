@@ -402,7 +402,7 @@ public function crearOPs($itemOV, $OV, $cantidadOP, $repetir){
                 //--Origen: Manual
                 $vItem->ProductionOrderOriginEntry = $ov; // Num pedido (DocEntry de ORDR)
 
-                $apellido = Self::getApellidoPaternoUsuario(explode(' ', Auth::user()->lastName));
+                $apellido = getApellidoPaternoUsuario(explode(' ', Auth::user()->lastName));
                 $usuario_reporta = explode(' ', Auth::user()->firstName)[0] . ' ' . $apellido;
                 //validacion de longitud 50
                 $vItem->JournalRemarks = $OV->Comments. ', Elaboro:'. $usuario_reporta;// observaciones
@@ -491,7 +491,7 @@ public function crearOPs($itemOV, $OV, $cantidadOP, $repetir){
 
                 if ($RetCode == 0) {
                     array_push($resultadoEjecucion, self::$vCmp->GetNewObjectCode($Nk));
-                    self::updateOV($ov, $itemOV, $cantidadOP);
+                    updateOV($ov, $itemOV, $cantidadOP);
                 } else if ($lRetCode != 0) {
                     array_push($resultadoEjecucion, self::$vCmp->GetLastErrorDescription());
                 }
@@ -513,18 +513,18 @@ public static function crearOrdenesProduccion($ovs)
                 $OV = DB::table('ORDR')->where('DocEntry', $ov)->first();
                 if ($grupal == 1) {
                     $cantidadOP = $Item->Quantity;
-                    Self::crearOPs($Item, $OV, $cantidadOP, 1);
+                    crearOPs($Item, $OV, $cantidadOP, 1);
                 } else if ($grupal == 0) {
                     $cantidadOP = 1;
                     $repetir = $Item->Quantity;
-                    Self::crearOPs($Item, $OV, $cantidadOP, $repetir);
+                    crearOPs($Item, $OV, $cantidadOP, $repetir);
                 }
             }
         }
 
        
     }
-public static function updateOV($ov, $Item, $cantProcesada)
+public function updateOV($ov, $Item, $cantProcesada)
     { 
         $order = DB::select('select sum (COALESCE(Quantity, 0)) as sum_cant, SUM(COALESCE(U_Procesado, 0)) as sum_procesado from RDR1 
         where  Docentry =  ? ', [$ov]);

@@ -250,6 +250,7 @@
     $('#tabla_pedidos tbody').on( 'click', 'tr', function () {
         $(this).toggleClass('selected');
     } );
+   
      $('#btn_enviar').on('click', function(e) {
         e.preventDefault();
         var ordvta = table.rows('.selected').data();
@@ -266,40 +267,53 @@
             //console.log(ordvta[i]);         
         }
         var oper = $('#btn_enviar').attr('data-operacion');
-       $.ajax({
-    type: 'POST',
-    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-    data: {
-    "_token": "{{ csrf_token() }}",
-    ordenesvta: ovs,
-   
-    },
-    url: '{!! route('generarOP') !!}',
-    beforeSend: function() {
-    $.blockUI({
-    message: '<h2>Procesando</h2><h3>espere...<i class="fa fa-spin fa-spinner"></i></h3>',
-    css: {
-    border: 'none',
-    padding: '16px',
-    width: '50%',
-    top: '40%',
-    left: '30%',
-    backgroundColor: '#fefefe',
-    '-webkit-border-radius': '10px',
-    '-moz-border-radius': '10px',
-    opacity: .7,
-    color: '#000000'
-    }
-    });
-    },
-    complete: function() {
-        setTimeout($.unblockUI, 1500);
-        reloadOrdenesPedidos();
-    },
-    success: function(data){   
-      
-    }
-    });            
+        if(registros > 0){
+                $.ajax({
+                type: 'POST',
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                data: {
+                "_token": "{{ csrf_token() }}",
+                ordenesvta: ovs,
+            
+                },
+                url: '{!! route('generarOP') !!}',
+                beforeSend: function() {
+                $.blockUI({
+                message: '<h2>Procesando</h2><h3>espere...<i class="fa fa-spin fa-spinner"></i></h3>',
+                css: {
+                border: 'none',
+                padding: '16px',
+                width: '50%',
+                top: '40%',
+                left: '30%',
+                backgroundColor: '#fefefe',
+                '-webkit-border-radius': '10px',
+                '-moz-border-radius': '10px',
+                opacity: .7,
+                color: '#000000'
+                }
+                });
+                },
+                complete: function() {
+                    setTimeout($.unblockUI, 1500);
+                    reloadOrdenesPedidos();
+                },
+                success: function(data){   
+                
+                }
+                }); 
+        }else{
+              bootbox.dialog({
+                title: "Mensaje",
+                message: "<div class='alert alert-danger m-b-0'>No hay registros seleccionados.</div>",
+                buttons: {
+                success: {
+                label: "Ok",
+                className: "btn-success m-r-5 m-b-5"
+                }
+                }
+                }).find('.modal-content').css({'font-size': '14px'} );
+        }           
     });
     function enviaOrdenes(item, index) {
         console.log(item);
