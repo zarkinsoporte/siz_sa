@@ -240,7 +240,12 @@
            // setTimeout($.unblockUI, 1500);
         },
         success: function(data){            
-                $("#tabla_pedidos").dataTable().fnAddData(data.pedidos_gop);           
+                   
+                if(data.pedidos_gop.length > 0){
+                $("#tabla_pedidos").dataTable().fnAddData(data.pedidos_gop);
+                }else{
+                
+                }        
         }
     });
     $('#tabla_pedidos tbody').on( 'click', 'tr', function () {
@@ -354,7 +359,7 @@ function reloadOrdenesPedidos(){
             if(data.pedidos_gop.length > 0){
                 $("#tabla_pedidos").dataTable().fnAddData(data.pedidos_gop);           
             }else{ 
-                
+
             }        
         }
     });
