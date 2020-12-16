@@ -350,8 +350,12 @@ function reloadOrdenesPedidos(){
         complete: function() {
            // setTimeout($.unblockUI, 1500);
         },
-        success: function(data){            
+        success: function(data){   
+            if(data.pedidos_gop.length > 0){
                 $("#tabla_pedidos").dataTable().fnAddData(data.pedidos_gop);           
+            }else{ 
+                
+            }        
         }
     });
 }
