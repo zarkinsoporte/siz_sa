@@ -101,10 +101,15 @@ public function registros_gop(Request $request){
                 Prioridad,
                 [Número de cliente] + ' - ' + [Razón social] AS Cliente,
                 OC,
-                DocEntry,
-                Pedido AS [Pedido],
+                TMP.Pedido AS [Pedido],
                 CONVERT (VARCHAR, [Fecha entrega], 103) AS FechaEntrega,
-                Estatus 
+				 Item.[Codigo],
+					   Item.[Descripcion],
+					   Item.[Cantidad], 
+					   Item.[CantidadCompletada],
+					    Item.[CantidadSolicitada],
+						Item.[Procesado],
+	Item.[Pendiente]
                 FROM
                 (
                     SELECT
@@ -154,20 +159,11 @@ public function registros_gop(Request $request){
                         CardName AS [Razón social],
                         NumAtCard AS OC,
                         DocNum AS Pedido,
-                        DocDueDate AS [Fecha entrega],
-                        (
-                            CASE
-                            WHEN
-                                DocStatus = 'C' 
-                            THEN
-                                'Cerrado' 
-                            ELSE
-                                'Abierto' 
-                            END
-                        )
-                        AS Estatus, DocEntry 
+                        DocDueDate AS [Fecha entrega]
+                      
                     FROM
-                        ORDR 
+                        ORDR
+						 
                     WHERE
                         U_Prioridad is not NULL 
                         AND 
@@ -175,9 +171,20 @@ public function registros_gop(Request $request){
                             U_Procesado = 'N'
                         )
                         AND DocStatus = 'O' 
-                )
-                TMP 
-                ORDER BY
+                )     TMP 
+				LEFT JOIN (
+						SELECT T0.DocEntry, T0.DocNum[Pedido], T1.LineNum, T1.ItemCode[Codigo],
+	T1.Dscription[Descripcion], (T1.Quantity-ISNULL(T1.U_Procesado,0))[Cantidad], 
+	ISNULL((SELECT SUM(ISNULL(CmpltQty,0)) FROM OWOR WHERE U_LineNum = T1.LineNum AND 
+	ItemCode = T1.ItemCode And OriginAbs = T0.DocEntry ),0) [CantidadCompletada],
+	T1.WhsCode[Almacen], T1.Quantity[CantidadSolicitada],ISNULL(T1.U_Procesado,0)[Procesado],
+	(T1.Quantity-ISNULL(T1.U_Procesado,0))[Pendiente]
+	FROM dbo.ORDR T0
+	INNER JOIN dbo.RDR1 T1 ON T0.DocEntry = T1.DocEntry
+	WHERE  T1.Quantity > ISNULL(T1.U_Procesado,0)
+						) as Item on Item.Pedido = TMP.Pedido
+						
+	ORDER BY
                 ValorPrioridad, [Fecha inicio], DocTime";
             $sel =  preg_replace('/[ ]{2,}|[\t]|[\n]|[\r]/', ' ', ($sel));
             $consulta = DB::select($sel);

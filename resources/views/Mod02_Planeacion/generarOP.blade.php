@@ -10,7 +10,7 @@
                     background: #dadada;
                     color: black;
                     font-weight: bold;
-                    font-style: italic;
+                    font-style: italic; 
                     font-family: 'Helvetica';
                     font-size: 12px;
                     border: 0px;
@@ -40,6 +40,11 @@
                 .width-full{
                     margin: 5px;
                 }
+                .dataTables_wrapper.no-footer .dataTables_scrollBody {
+                border-bottom: 1px solid #111;
+                max-height: 250px;
+                }
+                div.dataTables_wrapper { }
             </style>
 
                 <div class="container" >
@@ -100,12 +105,16 @@
                                                                                 <th>Grupal</th>
                                                                                 <th>Inicio</th>
                                                                                 <th>Prioridad</th>
-                                                                                <th>Cliente</th>
-                                        
+                                                                                <th>Cliente</th>                                        
                                                                                 <th>Pedido</th>
                                                                                 <th>Entrega</th>
-                                                                                <th>Estatus</th>
-                                        
+                                                                                <th>Código</th>                                                                
+                                                                                <th>Descripcion</th>
+                                                                                <th>Cantidad</th>
+                                                                                <th>Cant. Completada</th>
+                                                                                <th>Cant. Solicitada</th>
+                                                                                <th>Procesado</th>
+                                                                                <th>Pendiente</th>                                       
                                                                             </tr>
                                                                         </thead>
                                                                     </table>
@@ -191,7 +200,7 @@
                  
                     scrollCollapse: true,
                 deferRender: true,        
-                   
+                   pageLength:-1,
                     columns: [                   
                     {data: "Grupal"},
                     {data: "FechaInicio"},
@@ -199,7 +208,13 @@
                     {data: "Cliente"},
                     {data: "Pedido"},
                     {data: "FechaEntrega"},
-                    {data: "Estatus"},
+                    {data: "Codigo"},
+                    {data: "Descripcion"},
+                    {data: "Cantidad"},
+                    {data: "CantidadCompletada"},
+                    {data: "CantidadSolicitada"},
+                    {data: "Procesado"},
+                    {data: "Pendiente"},
 
                     ],
                     'columnDefs': [{
@@ -244,9 +259,9 @@
         var registros = ordvta == null ? 0 : ordvta.length;
         for(var i=0; i < registros; i++){
             if (i == registros - 1) {
-                ovs += ordvta[i].Pedido + "&" + ordvta[i].Grupal;
+                ovs += ordvta[i].Pedido + "&" + ordvta[i].Grupal + "&" + ordvta[i].Codigo;
             } else {
-                ovs += ordvta[i].Pedido + "&"+ ordvta[i].Grupal + ",";
+                ovs += ordvta[i].Pedido + "&"+ ordvta[i].Grupal + "&" + ordvta[i].Codigo + ",";
             }
             //console.log(ordvta[i]);         
         }

@@ -349,7 +349,7 @@ public function getApellidoPaternoUsuario($apellido){
             return $apellido[0];
         }
 }
-public function crearOPs($Items_OV, $OV, $cantidadOP, $repetir){
+public function crearOPs($itemOV, $OV, $cantidadOP, $repetir){
         if (self::$vCmp == false) {
             $cnn = self::Connect();
             if ($cnn == 'Conectado') {
@@ -381,7 +381,7 @@ public function crearOPs($Items_OV, $OV, $cantidadOP, $repetir){
         //businessObject = (ProductionOrders)Globals.oCompany.GetBusinessObject(BoObjectTypes.oProductionOrders);
         $vItem = self::$vCmp->GetBusinessObject("202");
 
-        foreach ($Items_OV as $key => $itemOV) {
+        //foreach ($Items_OV as $key => $itemOV) {
             for ($i=0; $i < $repetir; $i++) { //este ciclo es para las op que no son grupales
                 //CABECERA IZQ
                 $vItem->ProductionOrderType = 0; //Estandar
@@ -496,26 +496,28 @@ public function crearOPs($Items_OV, $OV, $cantidadOP, $repetir){
                     array_push($resultadoEjecucion, self::$vCmp->GetLastErrorDescription());
                 }
             } //end for
-        }//end foreach
+        //}//end foreach
         return $resultadoEjecucion;
 }
 public static function crearOrdenesProduccion($ovs)
     {        
-        $preOrdenes = explode(',', $ovs);
+        $preOrdenes = explode(',', $ovs);  
         foreach ($preOrdenes as $key => $preorden) {
             $orden = explode('&', $preorden);
-            if (count($orden) == 2) {
+            if (count($orden) == 3) {
                 $grupal = $orden[1];
                 $ov = $orden[0];
-                $Items_OV = DB::select('select * from RDR1 where RDR1.DocEntry = ?', [$ov]);
+                $itemCode = $orden[2];
+                //$Items_OV = DB::select('select * from RDR1 where RDR1.DocEntry = ?', [$ov]);
+                $Item = DB::table('RDR1')->where('DocEntry', $ov)->where('ItemCode', $itemCode)->first();                 
                 $OV = DB::table('ORDR')->where('DocEntry', $ov)->first();
                 if ($grupal == 1) {
-                    $cantidadOP = $itemOV->Quantity;
-                    Self::crearOPs($Items_OV, $OV, $cantidadOP, 1);
+                    $cantidadOP = $Item->Quantity;
+                    Self::crearOPs($Item, $OV, $cantidadOP, 1);
                 } else if ($grupal == 0) {
                     $cantidadOP = 1;
-                    $repetir = $itemOV->Quantity;
-                    Self::crearOPs($Items_OV, $OV, $cantidadOP, $repetir);
+                    $repetir = $Item->Quantity;
+                    Self::crearOPs($Item, $OV, $cantidadOP, $repetir);
                 }
             }
         }
