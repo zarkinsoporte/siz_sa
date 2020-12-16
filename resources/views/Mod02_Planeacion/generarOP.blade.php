@@ -208,9 +208,15 @@
                     {data: "FechaEntrega"},
                     {data: "Codigo"},
                     {data: "Descripcion"},
-                    {data: "CantidadSolicitada"},
+                    {data: "CantidadSolicitada",
+                    render: function(data){                     
+                        return parseInt(data);
+                    }},
                     {data: "Procesado"},
-                    {data: "Pendiente"},
+                    {data: "Pendiente",
+                    render: function(data){
+                        return parseInt(data);
+                    }},
 
                     ],
                     'columnDefs': [{
