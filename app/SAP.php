@@ -414,7 +414,7 @@ class SAP extends Model
             $apellido = self::getApellidoPaternoUsuario(explode(' ', Auth::user()->lastName));
             $usuario_reporta = explode(' ', Auth::user()->firstName)[0] . ' ' . $apellido;
             //validacion de longitud 50
-            $vItem->JournalRemarks = 'Elaboro:' . $usuario_reporta; // observaciones
+            $vItem->Remarks = $OV->Comments. ' Elaboro:'. $usuario_reporta;// observaciones
 
             //CAMPOS DEFINIDOS X USUARIO EN SAP
             //$rutaOP = (usar VALUE) SELECT b.U_Ruta FROM OITM b WHERE b.ItemCode=       
