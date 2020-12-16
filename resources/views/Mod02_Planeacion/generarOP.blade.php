@@ -110,8 +110,6 @@
                                                                                 <th>Entrega</th>
                                                                                 <th>Código</th>                                                                
                                                                                 <th>Descripcion</th>
-                                                                                <th>Cantidad</th>
-                                                                                <th>Cant. Completada</th>
                                                                                 <th>Cant. Solicitada</th>
                                                                                 <th>Procesado</th>
                                                                                 <th>Pendiente</th>                                       
@@ -210,8 +208,6 @@
                     {data: "FechaEntrega"},
                     {data: "Codigo"},
                     {data: "Descripcion"},
-                    {data: "Cantidad"},
-                    {data: "CantidadCompletada"},
                     {data: "CantidadSolicitada"},
                     {data: "Procesado"},
                     {data: "Pendiente"},

@@ -174,7 +174,7 @@ public function registros_gop(Request $request){
                 )     TMP 
 				LEFT JOIN (
 						SELECT T0.DocEntry, T0.DocNum[Pedido], T1.LineNum, T1.ItemCode[Codigo],
-	T1.Dscription[Descripcion], (T1.Quantity-ISNULL(T1.U_Procesado,0))[Cantidad], 
+	T1.Dscription[Descripcion],
 	ISNULL((SELECT SUM(ISNULL(CmpltQty,0)) FROM OWOR WHERE U_LineNum = T1.LineNum AND 
 	ItemCode = T1.ItemCode And OriginAbs = T0.DocEntry ),0) [CantidadCompletada],
 	T1.WhsCode[Almacen], T1.Quantity[CantidadSolicitada],ISNULL(T1.U_Procesado,0)[Procesado],
