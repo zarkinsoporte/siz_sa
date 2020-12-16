@@ -380,7 +380,7 @@ class SAP extends Model
                 }
             }
         }
-        $resultadoEjecucion = [];
+        $resultadoEjecucion = 0;
         //-----------------------GENERACION OP DI API SAP BO-----------------------------------
         //DEFINICIONES
         //bopotStandard	    0	A production order type for producing a regular production item (default), using a production bill of materials.
@@ -499,45 +499,11 @@ class SAP extends Model
             $Nk = "";
 
             if ($RetCode == 0) {
-                $order = DB::select('select sum (COALESCE(Quantity, 0)) as sum_cant, SUM(COALESCE(U_Procesado, 0)) as sum_procesado from RDR1 
-        where  Docentry =  ? ', [$OV->DocEntry]);
-
-                if (count($order) > 0) { //verificar la existencia de la OV
-                    if ($order[0]->sum_cant > $order[0]->sum_procesado) { //si la cantidad de la OV es mayor a la procesada
-                        $orderLine = DB::select('select sum (COALESCE(Quantity, 0)) as sum_cant, SUM(COALESCE(U_Procesado, 0)) as sum_procesado from RDR1 
-                where  Docentry =  ? AND ItemCode = ? AND LineNum = ?', [$OV->DocEntry, $itemOV->ItemCode, $itemOV->LineNum]);
-                        if ($orderLine[0]->sum_cant > $orderLine[0]->sum_procesado) {
-                            $cantActual = (is_numeric($itemOV->U_Procesado)) ? $itemOV->U_Procesado: 0;
-                            $cantActualProcesado = $cantActual + $cantidadOP;
-                            DB::update('UPDATE RDR1 SET U_Procesado = ? WHERE DocEntry = ? AND ItemCode = ? AND LineNum = ?', [$cantActualProcesado, $OV->DocEntry, $itemOV->ItemCode, $itemOV->LineNum]);
-                            $order = DB::select('select sum (COALESCE(Quantity, 0)) as sum_cant, SUM(COALESCE(U_Procesado, 0)) as sum_procesado from RDR1 
-                        where  Docentry =  ? ', [$OV->DocEntry]);
-                            if (count($order) > 0) {
-                                if ($order[0]->sum_cant == $order[0]->sum_procesado) { //si la cantidad de la OV es mayor a la procesada                    
-
-                                    $oOrder = self::$vCmp->GetBusinessObject("17");
-                                    $RetVal = $oOrder->GetByKey($OV->DocEntry);
-                                    $oOrder->UserFields->Fields->Item('U_Procesado')->Value = 'S';
-                                    $retCode = $oOrder->Update;
-
-                                    if ($retCode != 0) {
-                                        //return self::$vCmp->GetLastErrorDescription();
-                                    } else {
-                                        //return '2';
-                                    }
-                                } else {
-                                    //return '1';
-                                }
-                            }
-                        } else {
-                            //return '0';
-                        }
-                    }
-                }
-                array_push($resultadoEjecucion, self::$vCmp->GetNewObjectCode($Nk));
+               
+                $resultadoEjecucion = 1;
                 
             } else if ($lRetCode != 0) {
-                array_push($resultadoEjecucion, self::$vCmp->GetLastErrorDescription());
+                $resultadoEjecucion =  self::$vCmp->GetLastErrorDescription();
             }
         } //end for
         //}//end foreach
@@ -558,11 +524,17 @@ class SAP extends Model
                 if ($grupal == 1) {
                     //(T1.Quantity-ISNULL(T1.U_Procesado
                     $cantidadOP = $Item->Quantity - ((is_numeric($Item->U_Procesado))? $Item->U_Procesado: 0);
-                    self::crearOPs($Item, $OV, $cantidadOP, 1);
+                    $rs = self::crearOPs($Item, $OV, $cantidadOP, 1);
+                    if($rs == 1){
+                        self::updateOV($ov, $Item, $cantidadOP);
+                    }
                 } else if ($grupal == 0) {
                     $cantidadOP = 1;
                     $repetir = $Item->Quantity - ((is_numeric($Item->U_Procesado))? $Item->U_Procesado: 0);
-                    self::crearOPs($Item, $OV, $cantidadOP, $repetir);
+                    $rs = self::crearOPs($Item, $OV, $cantidadOP, $repetir);
+                    if ($rs == 1) {
+                        self::updateOV($ov, $Item, $cantidadOP);
+                    }
                 }
             }
         }
