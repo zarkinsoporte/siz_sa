@@ -294,6 +294,7 @@
     },
     complete: function() {
         setTimeout($.unblockUI, 1500);
+        reloadOrdenesPedidos();
     },
     success: function(data){   
       
@@ -324,6 +325,26 @@
     }
     console.log(datos) 
 });
+function reloadOrdenesPedidos(){
+    $("#tabla_pedidos").DataTable().clear().draw();
+    $.ajax({
+        type: 'GET',
+        async: true,       
+        url: '{!! route('datatables.gop') !!}',
+        data: {
+           
+        },
+        beforeSend: function() {
+            
+        },
+        complete: function() {
+           // setTimeout($.unblockUI, 1500);
+        },
+        success: function(data){            
+                $("#tabla_pedidos").dataTable().fnAddData(data.pedidos_gop);           
+        }
+    });
+}
                     @endsection                                      
                 <script>                  
                    function val_btn(val) {                     
