@@ -103,13 +103,12 @@ public function registros_gop(Request $request){
                 OC,
                 TMP.Pedido AS [Pedido],
                 CONVERT (VARCHAR, [Fecha entrega], 103) AS FechaEntrega,
-				 Item.[Codigo],
-					   Item.[Descripcion],
-					   Item.[Cantidad], 
-					   Item.[CantidadCompletada],
-					    Item.[CantidadSolicitada],
-						Item.[Procesado],
-	Item.[Pendiente]
+				Item.[Codigo],
+                Item.[Descripcion],				
+                Item.[CantidadCompletada],
+                Item.[CantidadSolicitada],
+                Item.[Procesado],
+                Item.[Pendiente]
                 FROM
                 (
                     SELECT
