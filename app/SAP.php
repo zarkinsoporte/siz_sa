@@ -556,11 +556,12 @@ class SAP extends Model
                 $Item = DB::table('RDR1')->where('DocEntry', $ov)->where('ItemCode', $itemCode)->first();
                 $OV = DB::table('ORDR')->where('DocEntry', $ov)->first();
                 if ($grupal == 1) {
-                    $cantidadOP = $Item->Quantity;
+                    //(T1.Quantity-ISNULL(T1.U_Procesado
+                    $cantidadOP = $Item->Quantity - ((is_numeric($Item->U_Procesado))? $Item->U_Procesado: 0);
                     self::crearOPs($Item, $OV, $cantidadOP, 1);
                 } else if ($grupal == 0) {
                     $cantidadOP = 1;
-                    $repetir = $Item->Quantity;
+                    $repetir = $Item->Quantity - ((is_numeric($Item->U_Procesado))? $Item->U_Procesado: 0);
                     self::crearOPs($Item, $OV, $cantidadOP, $repetir);
                 }
             }
