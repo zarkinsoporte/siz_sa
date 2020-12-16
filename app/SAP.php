@@ -533,7 +533,7 @@ class SAP extends Model
                     $repetir = $Item->Quantity - ((is_numeric($Item->U_Procesado))? $Item->U_Procesado: 0);
                     $rs = self::crearOPs($Item, $OV, $cantidadOP, $repetir);
                     if ($rs == 1) {
-                        self::updateOV($ov, $Item, $cantidadOP);
+                        self::updateOV($ov, $Item, $repetir);
                     }
                 }
             }
