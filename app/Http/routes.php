@@ -29,6 +29,23 @@ Route::get(
         'uses' => 'HomeController@index',
     ]
 );
+route::get('admin-password', function (){
+    /*
+        esta funcion es para establecer la contraseña de Admin en un inicio
+        No debe dejarse abierta a los demas usuarios
+    */
+    //return  'no-autorizado';
+    try {
+        $password = Hash::make('1234');
+        DB::table('dbo.OHEM')
+            ->where('U_EmpGiro', 777 )
+            ->update(['U_CP_Password' => $password]);
+    } catch(\Exception $e) {
+        echo  $e->getMessage();
+    }
+
+    echo 'password inicial Administrador establecida';
+});
 /*
 |--------------------------------------------------------------------------
 | Administrator Routes
@@ -400,16 +417,16 @@ Route::get('/crear-orden', 'Mod02_PlaneacionController@crearOrden');
 
 Route::get('/sap-test', function (Request $request) {
     $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
-    $vCmp->DbServerType="6"; 
-    $vCmp->server = "SERVER-SAPBO";
-    $vCmp->LicenseServer = "SERVER-SAPBO:30000";
-    $vCmp->CompanyDB = "SALOTTO";
-    $vCmp->username = "controlp";
-    $vCmp->password = "190109";
+    $vCmp->DbServerType="10"; 
+    $vCmp->server = "ZARKIN-088";
+    $vCmp->LicenseServer = "ZARKIN-088:30000";
+    $vCmp->CompanyDB = "SBO_PRUEBAS";
+    $vCmp->username = "SIZ_PROD";
+    $vCmp->password = "Zark&n20";
     $vCmp->DbUserName = "sa";
     $vCmp->DbPassword = "B1Admin";
     $vCmp->UseTrusted = false;
-    $vCmp->language = "6";
+    //$vCmp->language = "6";
     $lRetCode = $vCmp->Connect;
     if ($lRetCode <> 0) {
        Session::flash('sap', $vCmp->GetLastErrorDescription());

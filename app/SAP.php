@@ -17,16 +17,16 @@ class SAP extends Model
     public static function Connect()
     {
         self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
-        self::$vCmp->DbServerType = "6";
-        self::$vCmp->server = "SERVER-SAPBO";
-        self::$vCmp->LicenseServer = "SERVER-SAPBO:30000";
-        self::$vCmp->CompanyDB = "SALOTTO";
-        self::$vCmp->username = "controlp";
-        self::$vCmp->password = "190109";
+        self::$vCmp->DbServerType = "10";
+        self::$vCmp->server = "ZARKIN-088";
+        self::$vCmp->LicenseServer = "ZARKIN-088:30000";
+        self::$vCmp->CompanyDB = "SBO_PRUEBAS";
+        self::$vCmp->username = "SIZ_PROD";
+        self::$vCmp->password = "Zark&n20";
         self::$vCmp->DbUserName = "sa";
         self::$vCmp->DbPassword = "B1Admin";
         self::$vCmp->UseTrusted = false;
-        self::$vCmp->language = "6";
+        //self::$vCmp->language = "6";
         $lRetCode = self::$vCmp->Connect;
         if ($lRetCode <> 0) {
             return self::$vCmp->GetLastErrorDescription();
@@ -67,7 +67,7 @@ class SAP extends Model
         $vItem = self::$vCmp->GetBusinessObject("4");
         $RetVal = $vItem->GetByKey($array['pKey']);
         //Actualizar Proveedor
-        $vItem->Mainsupplier = $array['proveedor'];
+       ///////////////////////////// $vItem->Mainsupplier = $array['proveedor'];
         //Seleccionar lista de Precios
         $vItem->PriceList->SetCurrentLine(8);
         $vItem->PriceList->Price = $array['costocompras'];
@@ -79,9 +79,10 @@ class SAP extends Model
         //'comp' => $vItem->UserFields->Fields->Item('U_Comprador')->Value, 
         //);  
         //dd($arrayName);
-        $vItem->UserFields->Fields->Item('U_Metodo')->Value = $array['metodo'];
-        $vItem->UserFields->Fields->Item('U_GrupoPlanea')->Value = $array['grupop'];
-        $vItem->UserFields->Fields->Item('U_Comprador')->Value = $array['comprador'];
+        
+        ///////////////////$vItem->UserFields->Fields->Item('U_Metodo')->Value = $array['metodo'];
+        ///////////////$vItem->UserFields->Fields->Item('U_GrupoPlanea')->Value = $array['grupop'];
+       ///////////////// $vItem->UserFields->Fields->Item('U_Comprador')->Value = $array['comprador'];
 
         $retCode = $vItem->Update;
         if ($retCode != 0) {
@@ -364,16 +365,16 @@ class SAP extends Model
             if ($cnn == 'Conectado') {
             } else {
                 self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
-                self::$vCmp->DbServerType = "6";
-                self::$vCmp->server = "SERVER-SAPBO";
-                self::$vCmp->LicenseServer = "SERVER-SAPBO:30000";
-                self::$vCmp->CompanyDB = "SALOTTO";
-                self::$vCmp->username = "controlp";
-                self::$vCmp->password = "190109";
+                self::$vCmp->DbServerType = "10";
+                self::$vCmp->server = "ZARKIN-088";
+                self::$vCmp->LicenseServer = "ZARKIN-088:30000";
+                self::$vCmp->CompanyDB = "SBO_PRUEBAS";
+                self::$vCmp->username = "SIZ_PROD";
+                self::$vCmp->password = "Zark&n20";
                 self::$vCmp->DbUserName = "sa";
                 self::$vCmp->DbPassword = "B1Admin";
                 self::$vCmp->UseTrusted = false;
-                self::$vCmp->language = "6";
+                //self::$vCmp->language = "6";
                 $lRetCode = self::$vCmp->Connect;
                 if ($lRetCode != 0) {
                     dd(self::$vCmp->GetLastErrorDescription());
@@ -557,16 +558,16 @@ class SAP extends Model
                     if (count($order) > 0) {
                         if ($order[0]->sum_cant == $order[0]->sum_procesado) { //si la cantidad de la OV es mayor a la procesada
                             self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
-                            self::$vCmp->DbServerType = "6";
-                            self::$vCmp->server = "SERVER-SAPBO";
-                            self::$vCmp->LicenseServer = "SERVER-SAPBO:30000";
-                            self::$vCmp->CompanyDB = "SALOTTO";
-                            self::$vCmp->username = "controlp";
-                            self::$vCmp->password = "190109";
+                            self::$vCmp->DbServerType = "10";
+                            self::$vCmp->server = "ZARKIN-088";
+                            self::$vCmp->LicenseServer = "ZARKIN-088:30000";
+                            self::$vCmp->CompanyDB = "SBO_PRUEBAS";
+                            self::$vCmp->username = "SIZ_PROD";
+                            self::$vCmp->password = "Zark&n20";
                             self::$vCmp->DbUserName = "sa";
                             self::$vCmp->DbPassword = "B1Admin";
                             self::$vCmp->UseTrusted = false;
-                            self::$vCmp->language = "6";
+                            //self::$vCmp->language = "6";
                             $lRetCode = self::$vCmp->Connect;
                             if ($lRetCode != 0) {
                                 dd(self::$vCmp->GetLastErrorDescription());

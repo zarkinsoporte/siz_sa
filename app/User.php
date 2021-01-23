@@ -39,7 +39,7 @@ class User extends Model implements AuthenticatableContract,
      * @var array
      */
     protected $hidden = [
-        'U_CP_Password', 'U_remember_token',
+        'U_CP_Password'
     ];
 
 
@@ -48,20 +48,18 @@ class User extends Model implements AuthenticatableContract,
         return $this->U_CP_Password;
     }
 
-    public function getRememberToken()
+    /**
+   * Overrides the method to ignore the remember token.
+   */
+  public function setAttribute($key, $value)
+  {
+    $isRememberTokenAttribute = $key == $this->getRememberTokenName();
+    if (!$isRememberTokenAttribute)
     {
-        return $this->U_remember_token;
+      parent::setAttribute($key, $value);
     }
+  }
 
-    public function setRememberToken($value)
-    {
-        $this->U_remember_token = $value;
-    }
-
-    public function getRememberTokenName()
-    {
-        return 'U_remember_token';
-    }
 
     Public function  scopeName($query, $name){
 

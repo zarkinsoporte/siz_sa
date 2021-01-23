@@ -49,7 +49,7 @@ return [
         ],
         'nas' => [
             'driver' => 'local',
-            'root'   => 'C:\\xampp\\htdocs\\siz\\images\\siz_articulos'
+            'root'   => 'C:\\xampp\\htdocs\\siz_th\\images\\siz_articulos'
             
         ],
         'ftp' => [
