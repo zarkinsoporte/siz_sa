@@ -119,150 +119,161 @@
 <!-- /.container -->
 @endsection
 
-@section('homescript')
-$('#tentradas thead tr').clone(true).appendTo( '#tentradas thead' );
-
-$('#tentradas thead tr:eq(1) th').each( function (i) {
-var title = $(this).text();
-$(this).html( '<input style="color: black;" type="text" placeholder="Filtro '+title+'" />' );
-
-$( 'input', this ).on( 'keyup change', function () {
-
-if ( table.column(i).search() !== this.value ) {
-table
-.column(i)
-.search(this.value, true, false)
-.draw();
-}
-
-} );
-} );
-
-$(document).on("click", ".imagen", function () {
-console.log('Ok');
-$('.imagepreview').attr('src', $(this).attr('src'));
-$('#imagemodal').modal('show');
-});
-
-var table = $('#tentradas').DataTable({
-"order": [[ 1, "desc" ],[0, "asc"],[2, "asc"]],
-dom: 'Bfrtip',
-orderCellsTop: true,
-scrollY: "300px",
-"pageLength": 50,
-scrollX: true,
-scrollCollapse: true,
-paging: true,
-fixedColumns: false,
-processing: true,
-deferRender: true,
-ajax: {
-url: '{!! route('datatables.R009') !!}',
-data: function (d) {
-d.empleados = $('input[name=option]').val();
-}
-},
-columns: [
-// { data: 'action', name: 'action', orderable: false, searchable: false}
-{ data: 'CODIGO'},
-{ data: 'NOMBRE'},
-{ data: 'DEPARTAMENTO'},
-{ data: 'PUESTO'},
-{ data: 'FEC_INGR',
-render: function(data){
-if (data != null){
-var d = new Date(data);
-return moment(d).format("DD-MM-YYYY");
-}else{
-return '';
-}
-}},
-{ data: 'FEC_BAJA', 
-render: function(data){
-   if (data != null){
-   var d = new Date(data);
-    return moment(d).format("DD-MM-YYYY");
-    }else{
-    return '';
-    }
-
-}},
-{ data: 'ESTADO'},
-
-{
-"data": "DTFOTO",
-"render": function (data) {
-    if(data.includes("image")){
-        return '<a data-toggle="modal" class="imagen"><img height="45" width="45" src="' +data+ '" /> </a>';
-    }else{
-        return data;
-    }
-
-}
-},
-],
-buttons: [
-{
-text: '<i class="fa fa-file-excel-o"></i> Excel',
-className: "btn-success",
-action: function ( e, dt, node, config ) {
-var data=table.rows( { filter : 'applied'} ).data().toArray();
-var json = JSON.stringify( data );
-$.ajax({
-type:'POST',
-url:'ajaxtosession/entradasysalidas',
-headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-data: {
-"_token": "{{ csrf_token() }}",
-"arr": json
-},
-success:function(data){
-window.location.href = 'entradasysalidasXLS';
-}
-});
-}
-},
-{
-text: '<i class="fa fa-file-pdf-o"></i> Pdf',
-className: "btn-danger",
-action: function ( e, dt, node, config ) {
-var data=table.rows( { filter : 'applied'} ).data().toArray();
-var json = JSON.stringify( data );
-$.ajax({
-type:'POST',
-url:'ajaxtosession/entradasysalidas',
-headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-data: {
-"_token": "{{ csrf_token() }}",
-"arr": json
-},
-success:function(data){
-window.open('entradasysalidasPDF', '_blank')
-}
-});
-}
-}
-],
-"language": {
-"url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json",
-buttons: {
-copyTitle: 'Copiar al portapapeles',
-copyKeys: 'Presiona <i>ctrl</i> + <i>C</i> para copiar o la tecla <i>Esc</i> para continuar.',
-copySuccess: {
-_: '%d filas copiadas',
-1: '1 fila copiada'
-}
-}
-},
-columnDefs: [
-
-],
-
-});
-
-
-@endsection
 <script>
+    function js_iniciador() {
+        $('.toggle').bootstrapSwitch();
+        $('[data-toggle="tooltip"]').tooltip();
+        $('.boot-select').selectpicker();
+        $('.dropdown-toggle').dropdown();
+        setTimeout(function() {
+        $('#infoMessage').fadeOut('fast');
+        }, 5000); // <-- time in milliseconds
+        $("#sidebarCollapse").on("click", function() {
+            $("#sidebar").toggleClass("active"); 
+            $("#page-wrapper").toggleClass("content"); 
+            $(this).toggleClass("active"); 
+        });
+        $('#tentradas thead tr').clone(true).appendTo( '#tentradas thead' );
+
+        $('#tentradas thead tr:eq(1) th').each( function (i) {
+        var title = $(this).text();
+        $(this).html( '<input style="color: black;" type="text" placeholder="Filtro '+title+'" />' );
+
+        $( 'input', this ).on( 'keyup change', function () {
+
+        if ( table.column(i).search() !== this.value ) {
+        table
+        .column(i)
+        .search(this.value, true, false)
+        .draw();
+        }
+
+        } );
+        } );
+
+        $(document).on("click", ".imagen", function () {
+        console.log('Ok');
+        $('.imagepreview').attr('src', $(this).attr('src'));
+        $('#imagemodal').modal('show');
+        });
+
+        var table = $('#tentradas').DataTable({
+        "order": [[ 1, "desc" ],[0, "asc"],[2, "asc"]],
+        dom: 'Bfrtip',
+        orderCellsTop: true,
+        scrollY: "300px",
+        "pageLength": 50,
+        scrollX: true,
+        scrollCollapse: true,
+        paging: true,
+        fixedColumns: false,
+        processing: true,
+        deferRender: true,
+        ajax: {
+        url: '{!! route('datatables.R009') !!}',
+        data: function (d) {
+        d.empleados = $('input[name=option]').val();
+        }
+        },
+        columns: [
+        // { data: 'action', name: 'action', orderable: false, searchable: false}
+        { data: 'CODIGO'},
+        { data: 'NOMBRE'},
+        { data: 'DEPARTAMENTO'},
+        { data: 'PUESTO'},
+        { data: 'FEC_INGR',
+        render: function(data){
+        if (data != null){
+        var d = new Date(data);
+        return moment(d).format("DD-MM-YYYY");
+        }else{
+        return '';
+        }
+        }},
+        { data: 'FEC_BAJA', 
+        render: function(data){
+        if (data != null){
+        var d = new Date(data);
+            return moment(d).format("DD-MM-YYYY");
+            }else{
+            return '';
+            }
+
+        }},
+        { data: 'ESTADO'},
+
+        {
+        "data": "DTFOTO",
+        "render": function (data) {
+            if(data.includes("image")){
+                return '<a data-toggle="modal" class="imagen"><img height="45" width="45" src="' +data+ '" /> </a>';
+            }else{
+                return data;
+            }
+
+        }
+        },
+        ],
+        buttons: [
+        {
+        text: '<i class="fa fa-file-excel-o"></i> Excel',
+        className: "btn-success",
+        action: function ( e, dt, node, config ) {
+        var data=table.rows( { filter : 'applied'} ).data().toArray();
+        var json = JSON.stringify( data );
+        $.ajax({
+        type:'POST',
+        url:'ajaxtosession/entradasysalidas',
+        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        data: {
+        "_token": "{{ csrf_token() }}",
+        "arr": json
+        },
+        success:function(data){
+        window.location.href = 'entradasysalidasXLS';
+        }
+        });
+        }
+        },
+        {
+        text: '<i class="fa fa-file-pdf-o"></i> Pdf',
+        className: "btn-danger",
+        action: function ( e, dt, node, config ) {
+        var data=table.rows( { filter : 'applied'} ).data().toArray();
+        var json = JSON.stringify( data );
+        $.ajax({
+        type:'POST',
+        url:'ajaxtosession/entradasysalidas',
+        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        data: {
+        "_token": "{{ csrf_token() }}",
+        "arr": json
+        },
+        success:function(data){
+        window.open('entradasysalidasPDF', '_blank')
+        }
+        });
+        }
+        }
+        ],
+        "language": {
+        "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json",
+        buttons: {
+        copyTitle: 'Copiar al portapapeles',
+        copyKeys: 'Presiona <i>ctrl</i> + <i>C</i> para copiar o la tecla <i>Esc</i> para continuar.',
+        copySuccess: {
+        _: '%d filas copiadas',
+        1: '1 fila copiada'
+        }
+        }
+        },
+        columnDefs: [
+
+        ],
+
+        });
+}
+
     document.onkeyup = function(e) {
    if (e.shiftKey && e.which == 112) {
     window.open("ayudas_pdf/AYM00_00.pdf","_blank");

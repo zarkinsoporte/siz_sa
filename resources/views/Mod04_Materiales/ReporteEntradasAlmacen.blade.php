@@ -113,7 +113,20 @@
     <!-- /.container -->
 @endsection
  
-@section('homescript')
+ <script>
+                        function js_iniciador() {
+                            $('.toggle').bootstrapSwitch();
+                            $('[data-toggle="tooltip"]').tooltip();
+                            $('.boot-select').selectpicker();
+                            $('.dropdown-toggle').dropdown();
+                            setTimeout(function() {
+                            $('#infoMessage').fadeOut('fast');
+                            }, 5000); // <-- time in milliseconds
+                            $("#sidebarCollapse").on("click", function() {
+                                $("#sidebar").toggleClass("active"); 
+                                $("#page-wrapper").toggleClass("content"); 
+                                $(this).toggleClass("active"); 
+                            });
 $('#tentradas thead tr').clone(true).appendTo( '#tentradas thead' );
 
 $('#tentradas thead tr:eq(1) th').each( function (i) {
@@ -314,8 +327,7 @@ var table = $('#tentradas').DataTable({
 
     }
 });
-@endsection
-<script>
+} //js_iniciador
     document.onkeyup = function(e) {
    if (e.shiftKey && e.which == 112) {
     window.open("ayudas_pdf/AYM04_27.pdf","_blank");

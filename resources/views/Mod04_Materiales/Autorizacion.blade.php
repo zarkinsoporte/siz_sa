@@ -270,7 +270,20 @@
   </div>
   @endsection
 
-  @section('homescript')
+   <script>
+                        function js_iniciador() {
+                            $('.toggle').bootstrapSwitch();
+                            $('[data-toggle="tooltip"]').tooltip();
+                            $('.boot-select').selectpicker();
+                            $('.dropdown-toggle').dropdown();
+                            setTimeout(function() {
+                            $('#infoMessage').fadeOut('fast');
+                            }, 5000); // <-- time in milliseconds
+                            $("#sidebarCollapse").on("click", function() {
+                                $("#sidebar").toggleClass("active"); 
+                                $("#page-wrapper").toggleClass("content"); 
+                                $(this).toggleClass("active"); 
+                            });
   $('#remove').on('show.bs.modal', function (event) {
   var button = $(event.relatedTarget) // Button that triggered the modal
   var id = button.data('id') // Extract info from data-* attributes
@@ -294,8 +307,7 @@
   //modal.find('#canta').attr("max",cantr)
 
   });
-  @endsection
-  <script>
+ }  //js_iniciador
     document.onkeyup = function(e) {
    if (e.shiftKey && e.which == 112) {
     window.open("ayudas_pdf/AyM00_00.pdf","_blank");

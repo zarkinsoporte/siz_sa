@@ -199,7 +199,20 @@
                     @endsection
                   @if($data_table <> '')  
                  
-                    @section('homescript')
+                    <script>
+                        function js_iniciador() {
+                            $('.toggle').bootstrapSwitch();
+                            $('[data-toggle="tooltip"]').tooltip();
+                            $('.boot-select').selectpicker();
+                            $('.dropdown-toggle').dropdown();
+                            setTimeout(function() {
+                            $('#infoMessage').fadeOut('fast');
+                            }, 5000); // <-- time in milliseconds 
+                            $("#sidebarCollapse").on("click", function() {
+                                $("#sidebar").toggleClass("active"); 
+                                $("#page-wrapper").toggleClass("content"); 
+                                $(this).toggleClass("active"); 
+                            });
                         $('#pass').modal(
                         {
                             show: true,
@@ -207,8 +220,7 @@
                             keyboard: false
                         }
                         );
-                        
-                                                
+
                         var data,
                         tableName= '#tabla',
                       
@@ -300,24 +312,35 @@
                                 });
                                             
                         $('#tabla thead tr').clone(true).appendTo( '#tabla thead' );                      
-                   
-                    @endsection
+                        }
+                   </script>
                     @else
-                    @section('homescript')
-                    $('#pass').modal(
-                    {
-                    show: true,
-                    backdrop: 'static',
-                    keyboard: false
-                    }
-                    );                                                        
-                    @endsection
+                    <script>
+                        function js_iniciador() {
+                            $('.toggle').bootstrapSwitch();
+                            $('[data-toggle="tooltip"]').tooltip();
+                            $('.boot-select').selectpicker();
+                            $('.dropdown-toggle').dropdown();
+                            setTimeout(function() {
+                            $('#infoMessage').fadeOut('fast');
+                            }, 5000); // <-- time in milliseconds
+                            $("#sidebarCollapse").on("click", function() {
+                                $("#sidebar").toggleClass("active"); 
+                                $("#page-wrapper").toggleClass("content"); 
+                                $(this).toggleClass("active"); 
+                            });
+                            $('#pass').modal(
+                                {
+                                    show: true,
+                                    backdrop: 'static',
+                                    keyboard: false
+                                }
+                            );    
+                        }                                                    
+                    </script>
                     @endif
                     <script>
-
                         function mostrar(){
                             $("#hiddendiv").show();
                         }; 
-                     
-
                     </script>

@@ -188,7 +188,20 @@
          {!! Form::close() !!}
 @endsection
 
-@section('homescript')
+ <script>
+                        function js_iniciador() {
+                            $('.toggle').bootstrapSwitch();
+                            $('[data-toggle="tooltip"]').tooltip();
+                            $('.boot-select').selectpicker();
+                            $('.dropdown-toggle').dropdown();
+                            setTimeout(function() {
+                            $('#infoMessage').fadeOut('fast');
+                            }, 5000); // <-- time in milliseconds
+                            $("#sidebarCollapse").on("click", function() {
+                                $("#sidebar").toggleClass("active"); 
+                                $("#page-wrapper").toggleClass("content"); 
+                                $(this).toggleClass("active"); 
+                            });
 
 
 var myuser = $('#login').data("field-id");
@@ -202,4 +215,5 @@ if(myuser == false){
         }
         );
 }
-@endsection
+}  //js_iniciador
+</script>

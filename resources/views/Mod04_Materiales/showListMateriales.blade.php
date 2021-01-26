@@ -410,7 +410,20 @@
 <!-- /.container -->
 @endsection
 
-@section('homescript')
+ <script>
+                        function js_iniciador() {
+                            $('.toggle').bootstrapSwitch();
+                            $('[data-toggle="tooltip"]').tooltip();
+                            $('.boot-select').selectpicker();
+                            $('.dropdown-toggle').dropdown();
+                            setTimeout(function() {
+                            $('#infoMessage').fadeOut('fast');
+                            }, 5000); // <-- time in milliseconds
+                            $("#sidebarCollapse").on("click", function() {
+                                $("#sidebar").toggleClass("active"); 
+                                $("#page-wrapper").toggleClass("content"); 
+                                $(this).toggleClass("active"); 
+                            });
 
 var data,
 tableName= '#tabla',
@@ -584,7 +597,8 @@ table.cell(rowIdx, 3).data(parseFloat(table.cell(rowIdx, 3).data()) + parseFloat
 })
 .draw();
 })
-@endsection
+} //js_iniciador
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.7.2/angular.min.js"></script>
 <script>
     var app = angular.module('app', [], function($interpolateProvider) {

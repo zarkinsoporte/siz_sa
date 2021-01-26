@@ -117,10 +117,7 @@
 
                     @endsection
 
-                    @section('homescript')
                    
-
-                    @endsection
 
                     <script>
 

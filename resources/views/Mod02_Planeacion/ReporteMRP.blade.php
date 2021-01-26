@@ -105,7 +105,20 @@
     <!-- /.container -->
 @endsection
  
-@section('homescript')
+ <script>
+                        function js_iniciador() {
+                            $('.toggle').bootstrapSwitch();
+                            $('[data-toggle="tooltip"]').tooltip();
+                            $('.boot-select').selectpicker();
+                            $('.dropdown-toggle').dropdown();
+                            setTimeout(function() {
+                            $('#infoMessage').fadeOut('fast');
+                            }, 5000); // <-- time in milliseconds
+                            $("#sidebarCollapse").on("click", function() {
+                                $("#sidebar").toggleClass("active"); 
+                                $("#page-wrapper").toggleClass("content"); 
+                                $(this).toggleClass("active"); 
+                            });
 
 var data,
 tableName= '#tmrp',
@@ -318,8 +331,7 @@ $('#tmrp thead tr').clone(true).appendTo( '#tmrp thead' );
     var delete_cookie = function(name) {
         document.cookie = name + "=; Path=/; expires=Thu, 18 Dec 2013 12:00:00 UTC";        
     }; 
-@endsection
-<script>
+}  //js_iniciador
     document.onkeyup = function(e) {
         if (e.shiftKey && e.which == 112) {
             window.open("ayudas_pdf/AYM00_00.pdf","_blank");

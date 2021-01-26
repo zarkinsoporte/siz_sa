@@ -103,7 +103,20 @@
 <!-- /.container -->
 @endsection
  
-@section('homescript')
+<script>
+    function js_iniciador() {
+                            $('.toggle').bootstrapSwitch();
+                            $('[data-toggle="tooltip"]').tooltip();
+                            $('.boot-select').selectpicker();
+                            $('.dropdown-toggle').dropdown();
+                            setTimeout(function() {
+                            $('#infoMessage').fadeOut('fast');
+                            }, 5000); // <-- time in milliseconds
+                            $("#sidebarCollapse").on("click", function() {
+                                $("#sidebar").toggleClass("active"); 
+                                $("#page-wrapper").toggleClass("content"); 
+                                $(this).toggleClass("active"); 
+                            });
 $('#tbackorder thead tr').clone(true).appendTo( '#tbackorder thead' );
 
 $('#tbackorder thead tr:eq(1) th').each( function (i) {
@@ -364,9 +377,7 @@ var table = $('#tbackorder').DataTable({
     }//endfooter
 });//endDT
      
-@endsection
-
-<script>
+}   //js_iniciador
 
 function checkCookie(){
     var verif = setInterval(isxlscook,500,verif);
