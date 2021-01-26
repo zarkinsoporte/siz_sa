@@ -205,6 +205,14 @@ li.dt-button.active a::before{
                     </a>
                 </div>
                 <!-- Top Menu Items -->
+                <ul class="nav navbar-left top-nav hidden-xs">
+                    <li style="left:350%"><a href="#" style="padding-bottom: 0;
+                padding-top: 3px;">
+                           <a id="sidebarCollapse">
+                            <i class="glyphicon glyphicon-align-left"></i>
+                           </a>
+                        </a></li>
+                </ul>
                 <ul class="nav navbar-right top-nav hidden-xs">
                 @if (Auth::guest())
                      <a href="{{ url('/auth/login') }}" >Login</a>
@@ -240,12 +248,12 @@ li.dt-button.active a::before{
 
         
 
-            </nav>    @yield('content')
+          
 
+            </nav>    
+            @yield('content')
+            
         </div>
-           
-
-
 
 </body>
  
@@ -267,18 +275,11 @@ li.dt-button.active a::before{
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/js/bootstrap-select.min.js"></script>
 
 <script>
-    $(document).ready(function (event) {
-       // $.fn.dataTable.moment( 'HH:mm MMM D, YY' );
-            $('.toggle').bootstrapSwitch();
-            $('[data-toggle="tooltip"]').tooltip();
-            $('.boot-select').selectpicker();
-$('.dropdown-toggle').dropdown();
-        @yield('script');
-        setTimeout(function() {
-    $('#infoMessage').fadeOut('fast');
-}, 5000); // <-- time in milliseconds
+    
+</script>
 
-    });
+<script>
+    $(document).ready(js_iniciador);
 </script>
   
 </html>

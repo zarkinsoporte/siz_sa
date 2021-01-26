@@ -5,13 +5,12 @@
     <div class="container" >
 
         <!-- Page Heading -->
+        
         <div class="row">
-            <div class="col-lg-6.5 col-md-8 col-sm-5">
-            <div class="hidden-lg"><br><br></div>
-                <h3 class="page-header">
+            <div class="col-lg-6.5 col-md-8 col-sm-5">                <h3 class="page-header">
                     {{env('EMPRESA_NAME')}}
                     <small>Sistema Informático Zarkin </small>
-                </h3>
+              
  
             </div>
         </div>
@@ -27,7 +26,7 @@
 }
         </style>
         <!-- /.row -->
-        <div class="row">
+        <div id="content" class="row">
             <div class="col-lg-6.5 col-md-12 col-sm-12 ">
 
                 @include('partials.alertas')
@@ -75,3 +74,22 @@
 
 @endsection
  
+<script>
+    function js_iniciador() {
+        $('.toggle').bootstrapSwitch();
+        $('[data-toggle="tooltip"]').tooltip();
+        $('.boot-select').selectpicker();
+        $('.dropdown-toggle').dropdown();
+        setTimeout(function() {
+        $('#infoMessage').fadeOut('fast');
+        }, 5000); // <-- time in milliseconds 
+
+        $("#sidebarCollapse").on("click", function() {
+        $("#sidebar").toggleClass("active"); 
+        $("#page-wrapper").toggleClass("content"); 
+        $(this).toggleClass("active");
+        });
+        for(i=0;i<4;i++) { $("#sidebarCollapse").fadeTo('slow', 0.5).fadeTo('slow', 1.0); }
+    }  //js_iniciador
+</script>
+    

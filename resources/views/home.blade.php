@@ -12,7 +12,7 @@ $index = 0;
         
     <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
     <div class="collapse navbar-collapse navbar-ex1-collapse">
-        <ul class="nav navbar-nav side-nav ">
+        <nav id="sidebar" class="nav navbar-nav side-nav">
             @foreach($actividades as $n1)
                 <?php
                  $index = $index + 1;
@@ -117,9 +117,9 @@ $index = 0;
         </ul>
     </div>
     <!-- /.navbar-collapse -->
-    </nav>
+</nav>
 
-    <div id="page-wrapper2" ng-app='app'>
+    <div id="page-wrapper" ng-app='app'>
         <style>
             td {
                 font-family: 'Helvetica';
@@ -147,7 +147,24 @@ $index = 0;
                 border-top-left-radius: 4px;
                 border-bottom-left-radius: 4px;
             }
-          
+            #sidebar {
+                min-width: 230px;
+                transition: all 0.3s;
+            }
+            #sidebar.active {
+                margin-left: -450px;
+            }
+            .navbar-collapse.in {
+                background-color: rgb(16, 13, 13);
+            }
+          .content {
+                padding: 10px;
+                margin-left: -230px;
+                transition: all 0.3s;
+            }
+            .page-header {
+                margin: 15px 0 20px;
+            }/* quita espacio blanco al inicio de pagina*/
         </style>
         @yield('homecontent')
 
