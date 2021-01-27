@@ -734,9 +734,7 @@ if (isset($Ruta)) {
 
   });
 
-@endsection
-
-<script>
+    }
 
     function limpiacant() { numcant
         $("#cant").val($("#numcant").val());
