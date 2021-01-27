@@ -138,7 +138,7 @@ return [
         Illuminate\View\ViewServiceProvider::class,
         Barryvdh\DomPDF\ServiceProvider::class,      	
         Maatwebsite\Excel\ExcelServiceProvider::class,
-        
+        Clockwork\Support\Laravel\ClockworkServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -207,6 +207,7 @@ return [
         'Excel'     => Maatwebsite\Excel\Facades\Excel::class,
         'AppHelper' => App\Helpers\AppHelper::class,
         'QrCode' => SimpleSoftwareIO\QrCode\Facades\QrCode::class,
+        'Clockwork' => Clockwork\Support\Laravel\Facade::class,
     ],
 
 ];
