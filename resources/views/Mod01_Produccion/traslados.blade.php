@@ -138,6 +138,9 @@
     td:nth-of-type(9):before { content: "Retroceder OP"; }
     td:nth-of-type(10):before { content: "Avanzar OP"; }
     }
+    svg{
+        padding-top: 26px;
+    }
 </style>
 
 

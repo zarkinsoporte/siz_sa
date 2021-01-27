@@ -179,7 +179,7 @@ li.dt-button.active a::before{
 
 
 </head>
-<body>
+<body style="width: 100%">
         <div id="wrapper">
 
             <!-- Navigation -->
