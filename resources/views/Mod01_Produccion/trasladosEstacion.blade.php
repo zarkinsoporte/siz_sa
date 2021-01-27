@@ -310,9 +310,7 @@ if (isset($Ruta)) {
 
   });
 
-@endsection
-
-<script>
+} // js_iniciador
 
     function limpiacant() { numcant
         $("#cant").val($("#numcant").val());
