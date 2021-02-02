@@ -359,8 +359,8 @@ public static function getParam_DM_Articulos($request, $item){
                     UFD1.Descr as Grupo_Pla, tb.ItmsGrpNam as Grupo,
                     UF.Descr as Comprador, OITM.U_ReOrden AS Reorden, OITM.U_Minimo AS Minimo,
                     OITM.U_Maximo AS Maximo, OITM.LeadTime AS TE,OITM.NumInBuy Conversion,
-                    (SELECT Descr from UFD1 WHERE TableID = 'OITM' AND FieldID = '18' AND FldValue = OITM.U_Metodo) Metodo, 
-                    (SELECT Descr FROM UFD1 WHERE TableID = 'OITM' AND FieldID = '16' AND FldValue = OITM.U_Linea) as Linea,
+                    (SELECT Descr from UFD1 WHERE TableID = 'OITM' AND FieldID = '8' AND FldValue = OITM.U_Metodo) Metodo, 
+                    (SELECT Descr FROM UFD1 WHERE TableID = 'OITM' AND FieldID = '7' AND FldValue = OITM.U_Linea) as Linea,
                      rutas.Name AS Ruta, ordenes.oc as OC 
                     from oitm 
                     left join OCRD on OCRD.CardCode = oitm.CardCode
@@ -395,7 +395,7 @@ public static function getParam_DM_Articulos($request, $item){
                     left join ITM1 Costo9 on Costo9.ItemCode = OITM.ItemCode
                     AND Costo9.PriceList = 9
                     left join UFD1 on UFD1.FldValue = OITM.U_GrupoPlanea AND UFD1.TableID = 'OITM'
-                        AND UFD1.FieldID = 19
+                        AND UFD1.FieldID = 9
                     LEFT OUTER JOIN dbo.UFD1 AS UF ON OITM.U_Comprador = UF.FldValue
                     AND UF.TableID = 'OITM' 
                     left join OITB tb on tb.ItmsGrpCod = OITM.ItmsGrpCod
@@ -443,9 +443,9 @@ public static function getParam_DM_Articulos($request, $item){
             array_push($columns,["data" => $value, "name" => $name]);        
          }
          } 
-        $metodos = DB::select( 'SELECT FldValue, Descr FROM UFD1 WHERE TableID = ? AND FieldID = ? ORDER BY Descr', ['OITM',18]);
-        $compradores = DB::select( 'SELECT FldValue, Descr FROM UFD1 WHERE TableID = ? AND FieldID = ? ORDER BY Descr', ['OITM',10]);
-        $gruposPlaneacion = DB::select( 'SELECT FldValue, Descr FROM UFD1 WHERE TableID = ? AND FieldID = ? ORDER BY Descr', ['OITM',19]);
+        $metodos = DB::select( 'SELECT FldValue, Descr FROM UFD1 WHERE TableID = ? AND FieldID = ? ORDER BY Descr', ['OITM',8]);
+        $compradores = DB::select( 'SELECT FldValue, Descr FROM UFD1 WHERE TableID = ? AND FieldID = ? ORDER BY Descr', ['OITM',5]);
+        $gruposPlaneacion = DB::select( 'SELECT FldValue, Descr FROM UFD1 WHERE TableID = ? AND FieldID = ? ORDER BY Descr', ['OITM',9]);
                  
         $user = Auth::user();
         $actividades = $user->getTareas();  
@@ -3108,8 +3108,8 @@ $consultaj = collect($consulta);
                     UFD1.Descr as Grupo_Pla, tb.ItmsGrpNam as Grupo,
                     UF.Descr as Comprador, OITM.U_ReOrden AS Reorden, OITM.U_Minimo AS Minimo,
                     OITM.U_Maximo AS Maximo, OITM.LeadTime AS TE,OITM.NumInBuy Conversion,
-                    (SELECT Descr from UFD1 WHERE TableID = 'OITM' AND FieldID = '18' AND FldValue = OITM.U_Metodo) Metodo, 
-                    (SELECT Descr FROM UFD1 WHERE TableID = 'OITM' AND FieldID = '16' AND FldValue = OITM.U_Linea) as Linea,
+                    (SELECT Descr from UFD1 WHERE TableID = 'OITM' AND FieldID = '8' AND FldValue = OITM.U_Metodo) Metodo, 
+                    (SELECT Descr FROM UFD1 WHERE TableID = 'OITM' AND FieldID = '7' AND FldValue = OITM.U_Linea) as Linea,
                      rutas.Name AS Ruta, ordenes.oc as OC 
                     from oitm 
                     left join OCRD on OCRD.CardCode = oitm.CardCode
@@ -3144,7 +3144,7 @@ $consultaj = collect($consulta);
                     left join ITM1 Costo9 on Costo9.ItemCode = OITM.ItemCode
                     AND Costo9.PriceList = 9
                     left join UFD1 on UFD1.FldValue = OITM.U_GrupoPlanea AND UFD1.TableID = 'OITM'
-                        AND UFD1.FieldID = 19
+                        AND UFD1.FieldID = 9
                     LEFT OUTER JOIN dbo.UFD1 AS UF ON OITM.U_Comprador = UF.FldValue
                     AND UF.TableID = 'OITM' 
                     left join OITB tb on tb.ItmsGrpCod = OITM.ItmsGrpCod
@@ -3192,9 +3192,9 @@ $consultaj = collect($consulta);
             array_push($columns,["data" => $value, "name" => $name]);        
          }
          } 
-        $metodos = DB::select( 'SELECT FldValue, Descr FROM UFD1 WHERE TableID = ? AND FieldID = ? ORDER BY Descr', ['OITM',18]);
-        $compradores = DB::select( 'SELECT FldValue, Descr FROM UFD1 WHERE TableID = ? AND FieldID = ? ORDER BY Descr', ['OITM',10]);
-        $gruposPlaneacion = DB::select( 'SELECT FldValue, Descr FROM UFD1 WHERE TableID = ? AND FieldID = ? ORDER BY Descr', ['OITM',19]);
+        $metodos = DB::select( 'SELECT FldValue, Descr FROM UFD1 WHERE TableID = ? AND FieldID = ? ORDER BY Descr', ['OITM',8]);
+        $compradores = DB::select( 'SELECT FldValue, Descr FROM UFD1 WHERE TableID = ? AND FieldID = ? ORDER BY Descr', ['OITM',5]);
+        $gruposPlaneacion = DB::select( 'SELECT FldValue, Descr FROM UFD1 WHERE TableID = ? AND FieldID = ? ORDER BY Descr', ['OITM',9]);
                  
          
         $proveedores = DB::select('SELECT CardCode, CardName FROM OCRD WHERE CardType = ? ORDER BY CardName', ['S']);
