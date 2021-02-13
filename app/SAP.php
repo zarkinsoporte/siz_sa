@@ -67,7 +67,7 @@ class SAP extends Model
         $vItem = self::$vCmp->GetBusinessObject("4");
         $RetVal = $vItem->GetByKey($array['pKey']);
         //Actualizar Proveedor
-       ///////////////////////////// $vItem->Mainsupplier = $array['proveedor'];
+        $vItem->Mainsupplier = $array['proveedor'];
         //Seleccionar lista de Precios
         $vItem->PriceList->SetCurrentLine(8);
         $vItem->PriceList->Price = $array['costocompras'];
@@ -80,9 +80,9 @@ class SAP extends Model
         //);  
         //dd($arrayName);
         
-        ///////////////////$vItem->UserFields->Fields->Item('U_Metodo')->Value = $array['metodo'];
-        ///////////////$vItem->UserFields->Fields->Item('U_GrupoPlanea')->Value = $array['grupop'];
-       ///////////////// $vItem->UserFields->Fields->Item('U_Comprador')->Value = $array['comprador'];
+        $vItem->UserFields->Fields->Item('U_Metodo')->Value = $array['metodo'];
+        $vItem->UserFields->Fields->Item('U_GrupoPlanea')->Value = $array['grupop'];
+        $vItem->UserFields->Fields->Item('U_Comprador')->Value = $array['comprador'];
 
         $retCode = $vItem->Update;
         if ($retCode != 0) {
