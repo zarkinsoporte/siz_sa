@@ -43,13 +43,13 @@ print_r($matches);
     }
     </style>
 </head>
-<body class="container-fluid" style=" background-image: url({{ URL::asset('images/fondo.jpg') }});
+<body class="container-fluid" style=" background-image: url({{ URL::asset('images/fondo1.jpg') }});
         background-repeat:no-repeat;
         background-size:cover;
         background-position:center;">
 
 <div class="" id="page"><!-- group -->
-    <div class="" id="slideshowu216"><!-- none box -->
+    <div style="margin-top: 0px;" id="slideshowu216"><!-- none box -->
         &nbsp;
     </div>
     <div class="row" ><!-- column -->
@@ -79,10 +79,10 @@ print_r($matches);
                     <div>                                                                                                    
                         {!! Form::open(['url' => 'passwordUpdate', 'method' => 'POST']) !!}                    
                         <input type="text" min="0" id="userId" name="userId" value="{{Auth::user()->U_EmpGiro}}" hidden>
-                                                <font size="5" style="color: white"><p align="center" class="courier">Hola:</p></font> <br>
-                        <font size="5" style="color: white"><p align="center" class="courier">{{Auth::user()->firstName}}</p></font> <br>
+                                               
+                        <font size="4" style="color: white"><p align="center" class="courier" style="line-height: 150%">{{Auth::user()->firstName}}, Actualiza tu Contraseña</p></font> <br>
                             <div class="form-group label-floating">
-                                <label class="control-label" for="password">Escribe tu contraseña:</label>
+                                <label class="control-label" for="password">Nueva contraseña:</label>
                                 <div class="input-group">
                                     <input type="password" min="0" id="password" name="password" class="form-control" style="color: white" value="{{old('id')}}" required autofocus
                                     data-toggle="tooltip" data-placement="bottom" maxlength="20"> 
@@ -91,7 +91,7 @@ print_r($matches);
                                 </div>
                             </div>
                             <div class="form-group label-floating">
-                                <label class="control-label" for="password_confirmation">Confirma contraseña:</label>
+                                <label class="control-label" for="password_confirmation">Confirma nueva contraseña:</label>
                                 <div class="input-group">
                                     <input type="password" id="password_confirmation" name="password_confirmation" class="form-control"  style="color: white"  required maxlength="20">
                                     <span class="input-group-btn">

@@ -31,14 +31,14 @@ input[type=number]::-webkit-inner-spin-button{
 }
 
 </style>
-<body class="container-fluid" style=" background-image: url({{ URL::asset('images/fondo.jpg') }});
+<body class="container-fluid" style=" background-image: url({{ URL::asset('images/fondo1.jpg') }});
         background-repeat:no-repeat;
         background-size:cover;
         background-position:center;">
 
 <div class="" id="page"><!-- group -->
-    <div class="" id="slideshowu216"><!-- none box -->
-        &nbsp;
+    <div style="margin-top: 0px;" id="slideshowu216"><!-- none box -->
+        
     </div>
     <div class="row" ><!-- column -->
         <p align="center"  ><!-- svg -->
@@ -47,7 +47,7 @@ input[type=number]::-webkit-inner-spin-button{
             <img class="svg visible-xs" id="u196" src={{ URL::asset('images/svg-pegado-150982x45.svg') }}  alt="" data-mu-svgfallback="/siz/public/images/svg%20pegado%20150982x45_poster_.png?crc=4279418901" width="200" height="200"
             style="margin-top: -30%"/>
 
-        <p style="margin-top: 5%" align="center"><!-- none box -->
+        <p  align="center"><!-- none box -->
             &nbsp;          
             <img class="hidden-xs"  alt="Bienvenido" src={{ URL::asset('images/u343-4.png') }} style="height: 7%"/><!-- rasterized frame -->
         </p>
