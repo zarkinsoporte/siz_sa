@@ -114,41 +114,13 @@ $cant = $cant + $val['Cantidad'];
                                         </div>
                                         <div class="form-group">
                                             <label for="dep" class="control-label">Departamento:</label>
-                                            <select class="form-control" id="dep" name="dep" required>
-                                                <option value="100 Ordenes en Planeación">100 Ordenes en Planeación</option>
-                                                <option value="103 Activar Orden es Area">103 Activar Orden es Area</option>
-                                                <option value="106 Preparado Entrega de Piel">106 Preparado Entrega de Piel</option>
-                                                <option value="109 Anaquel de Corte">109 Anaquel de Corte</option>
-                                                <option value="112 Corte de Piel">112 Corte de Piel</option>
-                                                <option value="115 Inspección de Corte">115 Inspección de Corte</option>
-                                                <option value="118 Pegado para Costura">118 Pegado para Costura</option>
-                                                <option value="121 Anaquel Costura">121 Anaquel Costura</option>
-                                                <option value="124 Costura Recta">124 Costura Recta</option>
-                                                <option value="127 Armado de Costura">127 Armado de Costura</option>
-                                                <option value="130 Pespunte o Doble">130 Pespunte o Doble</option>
-                                                <option value="133 Terminado de Costura">133 Terminado de Costura</option>
-                                                <option value="136 Inspeccionar Costura">136 Inspeccionar Costura</option>
-                                                <option value="139 Series Incompletas Costura">139 Series Incompletas Costura</option>
-                                                <option value="140 Pegado de Delcrón">140 Pegado de Delcrón</option>
-                                                <option value="142 Llenado del Cojin">142 Llenado del Cojin</option>
-                                                <option value="145 Acojinado">145 Acojinado</option>
-                                                <option value="148 Fundas Terminadas">148 Fundas Terminadas</option>
-                                                <option value="151 Kitting">151 Kitting</option>
-                                                <option value="154 Enfundado Tapiz">154 Enfundado Tapiz</option>
-                                                <option value="157 Tapizar">157 Tapizar</option>
-                                                <option value="160 Armado de Tapiz">160 Armado de Tapiz</option>
-                                                <option value="163 Complementos">163 Complementos</option>
-                                                <option value="166 Limpieza">166 Limpieza</option>
-                                                <option value="169 Inspeccion Tapiceria">169 Inspeccion Tapiceria</option>
-                                                <option value="172 Empaque">172 Empaque</option>
-                                                <option value="175 Inspeccion Final">175 Inspeccion Final</option>
-                                                <option value="400 Ordenes en Planeación">400 Ordenes en Planeación</option>
-                                                <option value="403 Recepcion Habilitado">403 Recepcion Habilitado</option>
-                                                <option value="406 Armado">406 Armado</option>                                               
-                                                <option value="409 Tapado de Casco">409 Tapado de Casco</option>                                               
-                                                <option value="415 Pegado Hule al Casco">415 Pegado Hule al Casco</option>
-                                                <option value="418 Entrega Casco">418 Entrega Casco</option>
-                                            </select>
+                                            @if (isset($mostrarRutas))                                                
+                                                <select data-style = "btn-success btn-sm" data-live-search="true" data-live-search-style="startsWith" data-size="8" class="form-control" id="dep" name="dep" required> 
+                                                    @foreach ($mostrarRutas as $item)
+                                                    <option value="{{$item->Name}}">{{$item->Name}}</option>
+                                                    @endforeach  
+                                                </select>                                         
+                                            @endif
                                         </div>
 
                                     </div>
@@ -215,7 +187,10 @@ $cant = $cant + $val['Cantidad'];
                                 $("#page-wrapper").toggleClass("content"); 
                                 $(this).toggleClass("active"); 
                             });
-
+                            $('#dep').selectpicker({
+        noneSelectedText: 'Selecciona una opción',
+        noneResultsText: 'Ningún resultado coincide'
+    });
                         var myuser = $('#login').data("field-id");
 
                         if(myuser == false){

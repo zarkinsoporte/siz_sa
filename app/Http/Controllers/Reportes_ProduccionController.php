@@ -54,6 +54,7 @@ class Reportes_ProduccionController extends Controller
                 $fecha_desde = strtotime($request->input('FechIn'));
                 $fecha_hasta = strtotime($request->input('FechaFa'));
                 if ($fecha_hasta >= $fecha_desde) {
+                    //obtener clientes para mostrar reporte de produccion x cliente
                     $clientes = DB::select('SELECT CardName from  "CP_ProdTerminada" WHERE  (fecha>=\'' . $fechaI . '\' AND
   fecha<=\'' . $fechaF . '\') AND
  (Name= (\'' . $departamento . '\')  OR Name= (CASE
@@ -118,8 +119,13 @@ class Reportes_ProduccionController extends Controller
                 return view('Mod01_Produccion.produccionGeneral', $values);
                 $compiled = view('Mod01_Produccion.produccionGeneral', $values)->render();
             } else {
+                $mostrarRutas = DB::table('@PL_RUTAS')
+                ->select('Name')
+                ->where('U_Estatus', 'A')
+                ->where('U_SIZ_ReporteProduccion', '1')->get();
+                //dd($mostrarRutas);
                 Session::flash('Ocultamodal', false);
-                return view('Mod01_Produccion.produccionGeneral', ['actividades' => $actividades, 'ultimo' => count($actividades)]);
+                return view('Mod01_Produccion.produccionGeneral', ['actividades' => $actividades, 'ultimo' => count($actividades), 'mostrarRutas' => $mostrarRutas]);
             }
         } else {
             return redirect()->route('auth/login');

@@ -256,12 +256,7 @@ var table = $('#tbackorder').DataTable({
     processing: true,
     
     deferRender:    true,
-    ajax: {
-        url: '{!! route('datatables.showbackorder') !!}',
-        data: function () {
-                         
-                        }              
-    },
+    ajax:'{!! route('datatables.showbackorder') !!}',
     columns: [        
         // { data: 'action', name: 'action', orderable: false, searchable: false}
 
