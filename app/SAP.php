@@ -426,7 +426,7 @@ class SAP extends Model
             $vItem->UserFields->Fields->Item('U_Ruta')->Value = $rutaOP;
 
             //$vItem->UserFields->Fields->Item('U_LineNum')->Value = '';
-            $vItem->UserFields->Fields->Item('U_Status')->Value = '03'; //Falta de material
+            $vItem->UserFields->Fields->Item('U_Starus')->Value = '03'; //Falta de material
             //$vItem->UserFields->Fields->Item('U_NoSerie')->Value = '1';
 
             //Con Orden: Del pedido se toma la Prioridad y con ella se determina
