@@ -56,12 +56,12 @@
         </head>
 <body>
 <div id="header" >
-<img src="images/Mod01_Produccion/siz1.png" >
+    <img src="{{ url('/images/Mod01_Produccion/siz1.png') }}">
 <!--empieza encabezado, continua cuerpo-->
             <table border="1px">               
                         <tr>
                          <td colspan="6" align="center" bgcolor="#fff">
-                         <b>{{'SALOTTO S.A. de C.V.'}}</b><br>
+                         <b>{{'THENGEL S. A. de C.V.'}}</b><br>
                          <font size="2">
                                 <b>Reporte de Producción General</b><br>
                                 {{$fecha}} <br><br>
@@ -216,7 +216,7 @@ $index++;
                 $pdf->page_text(35, 755, $text, $font, 9);
                 $pdf->page_text(405, 23, $date, $font, 9);
                 $pdf->page_text(420, 755, $tittle, $font, 9);
-                $empresa = 'Sociedad: <?php echo 'SALOTTO S.A. de C.V.'; ?>';
+                $empresa = 'Sociedad: <?php echo 'THENGEL S. A. de C.V.'; ?>';
                 $pdf->page_text(40, 23, $empresa, $font, 9);
                 </script>
         </footer>

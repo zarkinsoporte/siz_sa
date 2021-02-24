@@ -49,8 +49,8 @@ class Reportes_ProduccionController extends Controller
                 $departamento = $request->input('dep');
                 //  $fecha = explode(" - ",$request->input('date_range'));
                 //$dt = date('d-m-Y H:i:s');
-                $fechaI = Date('d-m-y', strtotime(str_replace('-', '/', $request->input('FechIn'))));
-                $fechaF = Date('d-m-y', strtotime(str_replace('-', '/', $request->input('FechaFa'))));
+                $fechaI = Date('Y-m-d', strtotime(str_replace('-', '/', $request->input('FechIn'))));
+                $fechaF = Date('Y-m-d', strtotime(str_replace('-', '/', $request->input('FechaFa'))));
                 $fecha_desde = strtotime($request->input('FechIn'));
                 $fecha_hasta = strtotime($request->input('FechaFa'));
                 if ($fecha_hasta >= $fecha_desde) {
@@ -139,7 +139,7 @@ class Reportes_ProduccionController extends Controller
         $depto = $pdf_array[2];
         $pdf = \PDF::loadView('Mod01_Produccion.produccionGeneralPDF', compact('valores', 'fecha', 'depto'));
         //$pdf = new FPDF('L', 'mm', 'A4');
-        $pdf->setOptions(['isPhpEnabled' => true]);
+        $pdf->setOptions(['isPhpEnabled' => true, 'isRemoteEnabled' => true]);
         //        Session::forget('values');
         return $pdf->stream('Siz_Reporte_Produccion ' . ' - ' .date("d/m/Y") . '.Pdf');
     }
@@ -549,11 +549,11 @@ class Reportes_ProduccionController extends Controller
         ->addColumn('Funda', function ($rowbo) {
             if(is_null ($rowbo->prefunda)){
                 if(is_null ($rowbo->U_Entrega_Piel)){
-                    if(is_null ($rowbo->U_Status)){
+                    if(is_null ($rowbo->U_Starus)){
                         return '00 Por Programar';                    
                     }else{
                         $valuefunda = '00 Por Programar';
-                        switch ($rowbo->U_Status) {
+                        switch ($rowbo->U_Starus) {
                             case "01":
                                 $valuefunda = '00 Detenido Ventas';
                                 break;
@@ -580,11 +580,11 @@ class Reportes_ProduccionController extends Controller
                 } //end_2do_if           
             }else {
                 if (($rowbo->CodFunda == 1 || $rowbo->CodFunda == 2) && (is_null ($rowbo->U_Entrega_Piel))) {
-                    if(is_null ($rowbo->U_Status)){
+                    if(is_null ($rowbo->U_Starus)){
                         return '00 Por Programar';    
                     }else{
                         $valuefunda = '00 Por Programar';
-                        switch ($rowbo->U_Status) {
+                        switch ($rowbo->U_Starus) {
                             case "01":
                                 $valuefunda = '00 Detenido Ventas';
                                 break;
@@ -754,7 +754,7 @@ class Reportes_ProduccionController extends Controller
             "));
             if (strtotime(Input::get('FechaFa')) == strtotime(date("Y-m-d"))){
                 $consulta2 = DB::select(DB::raw("           
-                SELECT T2.SVS FROM ( SELECT Code FROM [@PL_RUTAS] WHERE U_Estatus = 'A' AND Code <= '175' ) T1 LEFT JOIN ( SELECT CodFunda, SUM( VS) as SVS FROM SIZ_View_ReporteBO WHERE u_status= '06' and CodFunda is not null Group By CodFunda ) T2 ON T1.Code = T2.CodFunda Order By Code 
+                SELECT T2.SVS FROM ( SELECT Code FROM [@PL_RUTAS] WHERE U_Estatus = 'A' AND Code <= '175' ) T1 LEFT JOIN ( SELECT CodFunda, SUM( VS) as SVS FROM SIZ_View_ReporteBO WHERE U_Starus= '06' and CodFunda is not null Group By CodFunda ) T2 ON T1.Code = T2.CodFunda Order By Code 
                 "));
                 
                 $consulta5 =  DB::select(DB::raw("

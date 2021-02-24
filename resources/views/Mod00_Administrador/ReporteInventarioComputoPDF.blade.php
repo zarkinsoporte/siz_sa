@@ -64,7 +64,7 @@
 <body>
 
     <div id="header">
-    <img src="images/Mod01_Produccion/siz1.png" >
+    <img src="{{ url('/images/Mod01_Produccion/siz1.png') }}" >
         <!--empieza encabezado, continua cuerpo-->
         <table border="1px" class="table table-striped">
             <thead class="thead-dark">
@@ -174,7 +174,7 @@
                     <script type="text/php">
                         $font = $fontMetrics->get_font("Arial, Helvetica, sans-serif","normal"); 
 
-                        $empresa = 'Sociedad: <?php echo 'SALOTTO S.A. de C.V.'; ?>';
+                        $empresa = 'Sociedad: <?php echo 'THENGEL S. A. de C.V.'; ?>';
                         $date = 'Fecha de impresion:  <?php echo $hoy = date("d-m-Y H:i:s"); ?>';
                         $text = 'Pagina: {PAGE_NUM} / {PAGE_COUNT}'; 
                         $tittle = 'Siz_Reporte_InventarioComputo.Pdf'; 

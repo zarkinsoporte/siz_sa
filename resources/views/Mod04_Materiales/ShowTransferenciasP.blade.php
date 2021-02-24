@@ -109,7 +109,7 @@ var table = $('#tsolicitudes').DataTable({
             text: '<i class="fa fa-file-excel-o"></i> Excel',
             className: "btn-success",
             extend: 'excelHtml5',
-            message: "SALOTTO S.A. DE C.V.\n",
+            message: "THENGEL S. A. DE C.V.\n",
             messagetwo: "TRANSFERENCIAS PENDIENTES (Solicitudes y Traslados).\n",
             messagethree: f,
                      

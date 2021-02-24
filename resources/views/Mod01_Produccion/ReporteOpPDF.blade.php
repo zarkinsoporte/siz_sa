@@ -57,7 +57,7 @@
 <body>
 
 <div id="header" >  
-<img src="images/Mod01_Produccion/siz1.png" >
+<img src="{{ url('/images/Mod01_Produccion/siz1.png') }}" >
 <table border="1px"class="table table-striped">
     <thead>
         <tbody>

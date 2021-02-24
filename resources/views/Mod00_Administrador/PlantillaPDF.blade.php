@@ -57,8 +57,9 @@
         </head>
 <body>
 
-<div id="header" > 
-<img src="images/Mod01_Produccion/siz1.png" >
+<div id="header" >
+
+<img src="{{ url('/images/Mod01_Produccion/siz1.png') }}" >
 <!--empieza encabezado, continua cuerpo-->
                 
             <table border="1px" class="table table-striped">
