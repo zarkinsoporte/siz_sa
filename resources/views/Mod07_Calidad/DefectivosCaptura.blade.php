@@ -210,7 +210,20 @@
 </div>
 @endsection
 
-@section('script')
+<script>
+    function js_iniciador() {
+        $('.toggle').bootstrapSwitch();
+        $('[data-toggle="tooltip"]').tooltip();
+        $('.boot-select').selectpicker();
+        $('.dropdown-toggle').dropdown();
+        setTimeout(function() {
+        $('#infoMessage').fadeOut('fast');
+        }, 5000); // <-- time in milliseconds
+        $("#sidebarCollapse").on("click", function() {
+            $("#sidebar").toggleClass("active"); 
+            $("#page-wrapper").toggleClass("content"); 
+            $(this).toggleClass("active"); 
+        });
 var editor; // use a global for the submit and return data rendering in the examples
 
 $('#confirma').on('show.bs.modal', function (event) {
@@ -285,12 +298,12 @@ columnDefs: [
 $.getScript("{{url('assets/js/defectivoscaptura.js')}}").done(function() {
         TableManageTableToolsEditor.init();
     });
-@endsection
 
-<script>
     document.onkeyup = function(e) {
    if (e.shiftKey && e.which == 112) {
     window.open("ayudas_pdf/AyM00_00.pdf","_blank");
   }
   } 
+
+        }
 </script>

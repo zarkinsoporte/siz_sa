@@ -212,7 +212,7 @@
                     <script type="text/php">
                         $font = $fontMetrics->get_font("Arial, Helvetica, sans-serif","normal"); 
 
-                        $empresa = 'Sociedad: <?php echo 'THENGEL S. A. de C.V.'; ?>';
+                        $empresa = 'Sociedad: <?php echo env('EMPRESA_SOCIEDAD'); ?>';
                         $date = 'Fecha de impresion:  <?php echo $hoy = date("d-m-Y H:i:s"); ?>';
                         $text = 'Pagina: {PAGE_NUM} / {PAGE_COUNT}'; 
                         $tittle = 'Siz_Reporte_BackOrderCasco.Pdf'; 

@@ -64,7 +64,7 @@
                 <thead class="thead-dark">
                         <tr>
                          <td colspan="6" align="center" bgcolor="#fff">
-                         <b><?php echo 'THENGEL S. A. de C.V.'; ?></b><br>
+                         <b><?php echo env('EMPRESA_SOCIEDAD'); ?></b><br>
                          <b>Recursos Humanos</b>
                          <h3>Bonos Área de Corte</h3>
                          <h3></h3></td>
@@ -150,7 +150,7 @@
                 $pdf->page_text(35, 755, $text, $font, 9);
                 $pdf->page_text(405, 23, $date, $font, 9);
                 $pdf->page_text(420, 755, $tittle, $font, 9);
-                $empresa = 'Sociedad: <?php echo 'THENGEL S. A. de C.V.'; ?>';
+                $empresa = 'Sociedad: <?php echo env('EMPRESA_SOCIEDAD'); ?>';
                 $pdf->page_text(40, 23, $empresa, $font, 9);
                 </script>
         </footer>

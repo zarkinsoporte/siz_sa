@@ -82,9 +82,20 @@ Transferencias Pendientes
     </div>
 @endsection
  
-@section('script')
-
-
+<script>
+    function js_iniciador() {
+        $('.toggle').bootstrapSwitch();
+                            $('[data-toggle="tooltip"]').tooltip();
+                            $('.boot-select').selectpicker();
+                            $('.dropdown-toggle').dropdown();
+                            setTimeout(function() {
+                            $('#infoMessage').fadeOut('fast');
+                            }, 5000); // <-- time in milliseconds
+                            $("#sidebarCollapse").on("click", function() {
+                                $("#sidebar").toggleClass("active"); 
+                                $("#page-wrapper").toggleClass("content"); 
+                                $(this).toggleClass("active"); 
+                            });
 var meses = new Array ("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
 var diasSemana = new Array("Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado");
 var f=new Date();
@@ -109,7 +120,7 @@ var table = $('#tsolicitudes').DataTable({
             text: '<i class="fa fa-file-excel-o"></i> Excel',
             className: "btn-success",
             extend: 'excelHtml5',
-            message: "THENGEL S. A. DE C.V.\n",
+            message: $('#EMPRESA_SOCIEDAD').val()+"\n",
             messagetwo: "TRANSFERENCIAS PENDIENTES (Solicitudes y Traslados).\n",
             messagethree: f,
                      
@@ -151,14 +162,13 @@ var table = $('#tsolicitudes').DataTable({
     //revision
   
 });
-@endsection
 
-<script>
 document.onkeyup = function(e) {
    if (e.shiftKey && e.which == 112) {
     window.open("ayudas_pdf/AyM00_00.pdf","_blank");
   }
   } 
+    }
 </script>
 
 
