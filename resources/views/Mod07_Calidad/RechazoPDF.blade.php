@@ -181,7 +181,7 @@
  $pdf->page_text(40, 580, $text, $font, 9);
  $pdf->page_text(603, 23, $date, $font, 9);
  $pdf->page_text(630, 580, $tittle, $font, 9);
- $empresa = 'Sociedad: <?php echo $sociedad ?>';
+ $empresa =  'Sociedad: <?php echo env('EMPRESA_NAME'); ?>';
  $pdf->page_text(40, 23, $empresa, $font, 9); 
 </script> 
     </footer>

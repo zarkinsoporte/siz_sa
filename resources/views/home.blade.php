@@ -3,7 +3,7 @@
 <title>{{ env('EMPRESA_NAME'). ' '}} @yield('page_name')</title>
 @endsection
 @section('content')
-<input type="hidden" name="EMPRESA_SOCIEDAD" id="EMPRESA_SOCIEDAD" value="{{env('EMPRESA_SOCIEDAD')}}">
+<input type="hidden" name="EMPRESA_NAME" id="EMPRESA_NAME" value="{{env('EMPRESA_NAME')}}">
 <?php
 $bnd = null;
 $bnd2 = null;

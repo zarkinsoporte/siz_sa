@@ -6,7 +6,7 @@
             <div class="row">
                     <div class="visible-xs"></div>
                     <h4 class="page-header">
-                      SALOTTO SA de CV  -  Bonos Departamento de Corte  -  Semana: {{$semana}}
+                      {{env('EMPRESA_NAME')}}  -  Bonos Departamento de Corte  -  Semana: {{$semana}}
                     </h4>
                     <div id="login" data-field-id="{{$enviado}}" >
                        <div class= "col-lg-6.5 col-md-12 col-sm-7 hidden-xs hidden-sm">

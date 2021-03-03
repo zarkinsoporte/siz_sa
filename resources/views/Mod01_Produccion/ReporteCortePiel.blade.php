@@ -6,7 +6,7 @@
  <div class="row">
   <div class="col-lg-12">
      <h3 class="page-header">
-        Salotto SA DE CV 
+        {{env('EMPRESA_NAME')}} 
         <small>Reporte 112 Corte de Piel</small>          
     </h3>
        @if($enviado)

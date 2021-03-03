@@ -113,7 +113,7 @@
             <thead class="thead-dark">
                 <tr>
                     <td colspan="6" align="center" bgcolor="#fff">
-                        <div class="fz"><b>{{env('EMPRESA_NAME')}}, S.A de C.V.</b><br>
+                        <div class="fz"><b>{{env('EMPRESA_NAME')}}</b><br>
                             <b>Mod04 - Materiales</b></div>
                         <h2>Reporte de Materia Prima </h2><h3>Entradas / Devoluciones</h3>
                         <h3><b>Del:</b> {{\AppHelper::instance()->getHumanDate(array_get($fechas_entradas,'fi'))}} <b>al:</b> {{\AppHelper::instance()->getHumanDate(array_get($fechas_entradas,'ff'))}}</h3>
@@ -880,7 +880,7 @@
     <footer>
         <script type="text/php">
             $font = $fontMetrics->get_font("Arial, Helvetica, sans-serif","normal"); 
-            $empresa = 'Sociedad: <?php echo env('EMPRESA_SOCIEDAD'); ?>'; 
+            $empresa = 'Sociedad: <?php echo env('EMPRESA_NAME'); ?>'; 
             $date = 'Fecha de impresion: <?php echo date("d-m-Y H:i:s"); ?>'; 
             $text = 'Pagina: {PAGE_NUM} / {PAGE_COUNT}'; 
             $tittle = 'Siz_Reporte_Materia_Prima.Pdf'; 

@@ -61,7 +61,7 @@
             <table border="1px">               
                         <tr>
                          <td colspan="6" align="center" bgcolor="#fff">
-                         <b>{{env('EMPRESA_SOCIEDAD')}}</b><br>
+                         <b>{{env('EMPRESA_NAME')}}</b><br>
                          <font size="2">
                                 <b>Reporte de Producción General</b><br>
                                 {{$fecha}} <br><br>
@@ -216,7 +216,7 @@ $index++;
                 $pdf->page_text(35, 755, $text, $font, 9);
                 $pdf->page_text(405, 23, $date, $font, 9);
                 $pdf->page_text(420, 755, $tittle, $font, 9);
-                $empresa = 'Sociedad: <?php echo env('EMPRESA_SOCIEDAD'); ?>';
+                $empresa = 'Sociedad: <?php echo env('EMPRESA_NAME'); ?>';
                 $pdf->page_text(40, 23, $empresa, $font, 9);
                 </script>
         </footer>
