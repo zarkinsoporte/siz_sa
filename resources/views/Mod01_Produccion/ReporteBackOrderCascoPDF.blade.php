@@ -77,6 +77,7 @@
                         <b>{{env('EMPRESA_NAME')}}</b><br>
 
                         <b>Mod01 - Producción</b>
+                        
                         <h2>Programa de Armado de Casco</h2>                       
                     </td>
 

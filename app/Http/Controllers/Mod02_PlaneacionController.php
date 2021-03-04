@@ -346,7 +346,7 @@ public function actualizaMRP(){
         $data = json_decode(Session::get('mrp'));
       //  dd($data);
         $pdf = \PDF::loadView('Mod02_Planeacion.ReporteMrpPDF', compact('data'));
-        $pdf->setPaper('Letter', 'landscape')->setOptions(['isPhpEnabled' => true]);  
+        $pdf->setPaper('Letter', 'landscape')->setOptions(['isPhpEnabled' => true, 'isRemoteEnabled' => true]);  
         return $pdf->stream('Siz_MRP' . ' - ' . date("d/m/Y") . '.Pdf');
     }
 

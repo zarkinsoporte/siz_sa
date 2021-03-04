@@ -183,12 +183,12 @@ else{
 
     if($Opc_Document==1){
             $pdf = \PDF::loadView('Mod07_Calidad.RechazoPDF',compact('sociedad','rechazo','fechaIni','fechaFin'));
-            $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);
+            $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);
             return $pdf->stream('Siz_Calidad_Reporte_Rechazo.Pdf');
 
     //dd($rechazo);
             $pdf = \PDF::loadView('Mod07_Calidad.RechazoPDF',['sociedad'=>$sociedad,'rechazo'=>$rechazo,'fechaIni'=>$fechaIni,'fechaFin'=>$fechaFin]);
-            return $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true])->stream('Siz_Calidad_Reporte_Rechazo.Pdf');
+            return $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true])->stream('Siz_Calidad_Reporte_Rechazo.Pdf');
 
            // return $pdf->download('ReporteOP.pdf');
         }

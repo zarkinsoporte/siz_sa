@@ -639,7 +639,7 @@ class Reportes_ProduccionController extends Controller
         if (Auth::check()) {       
         $data = json_decode((Session::get('miarr')));      
         $pdf = \PDF::loadView('Mod01_Produccion.ReporteBackOrderPDF_Ventas', compact('data'));
-        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
+        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);             
         return $pdf->stream('Siz_Reporte_BackOrderV ' . ' - ' .date("d/m/Y") . '.Pdf');
         } else {
             return redirect()->route('auth/login');
@@ -651,7 +651,7 @@ class Reportes_ProduccionController extends Controller
             $data = json_decode((Session::get('miarr')));
          
             $pdf = \PDF::loadView('Mod01_Produccion.ReporteBackOrderPDF_Planea', compact('data'));
-            $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
+            $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);             
         return $pdf->stream('Siz_Reporte_BackOrderP ' . ' - ' .date("d/m/Y") . '.Pdf');
         }else {
             return redirect()->route('auth/login');
@@ -816,7 +816,7 @@ class Reportes_ProduccionController extends Controller
         $ff = $repprodxareas['ff'];
        
         $pdf = \PDF::loadView('Mod01_Produccion.reporteProdxAreasPDF', compact('data', 'data2', 'data3', 'data4', 'data5', 'data7', 'fi', 'ff'));
-        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
+        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);             
         return $pdf->stream('Siz_Reporte_ProdxAreas ' . ' - ' .date("d/m/Y") . '.Pdf');
         }else {
             return redirect()->route('auth/login');
@@ -1098,7 +1098,7 @@ class Reportes_ProduccionController extends Controller
                 $totales_pzas['totalvs'] += $item->totalvs;           
         }         
         $pdf = \PDF::loadView('Mod01_Produccion.ReporteBackOrderCascoPDF', compact('data', 'totales_pzas', 'totales_vs'));
-        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
+        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);             
         return $pdf->stream('Siz_Reporte_BackOrderCasco ' . ' - ' .date("d/m/Y") . '.Pdf');
         }else {
             return redirect()->route('auth/login');

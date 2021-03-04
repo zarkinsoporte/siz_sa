@@ -1,6 +1,6 @@
 @extends('app')
 @section('titulo')
-<title>{{ env('EMPRESA_NAME'). ' '}} @yield('page_name')</title>
+<title>{{ env('EMPRESA_ALIAS'). ' '}} @yield('page_name')</title>
 @endsection
 @section('content')
 <input type="hidden" name="EMPRESA_NAME" id="EMPRESA_NAME" value="{{env('EMPRESA_NAME')}}">

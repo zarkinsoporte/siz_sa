@@ -331,7 +331,7 @@ try{
     public function bonosPdf()
     {
         $pdf = \PDF::loadView('Mod10_Rh.ReporteBonosPDF', Session::get('values'));
-        $pdf->setOptions(['isPhpEnabled' => true]);
+        $pdf->setOptions(['isPhpEnabled' => true, 'isRemoteEnabled' => true]);
         return $pdf->stream('Siz_Reporte_Bonos' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
     }
 
@@ -426,7 +426,7 @@ public function calculoBonosCorte()
     public function bonoscortePdf()
     {
         $pdf = \PDF::loadView('Mod10_Rh.bonosCortePDF', Session::get('corteData'));
-        $pdf->setOptions(['isPhpEnabled' => true]);
+        $pdf->setOptions(['isPhpEnabled' => true, 'isRemoteEnabled' => true]);
         return $pdf->stream('Siz_Bonos_Corte' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
     }
     public function bonoscorteEXL(){

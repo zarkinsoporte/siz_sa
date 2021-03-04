@@ -8,7 +8,7 @@
         
         <div class="row">
             <div class="col-lg-6.5 col-md-8 col-sm-5">                <h3 class="page-header">
-                    {{env('EMPRESA_NAME')}}
+                    {{env('EMPRESA_ALIAS')}}
                     <small>Sistema Informático Zarkin </small>
               
  

@@ -116,7 +116,7 @@ return  redirect()->back();
 public function PedidosCsvPDF()
 {
     $pdf = \PDF::loadView('Mod03_Compras.PedidosPDF', Session::get('OrdenCompra'));
-    $pdf->setOptions(['isPhpEnabled' => true]);
+    $pdf->setOptions(['isPhpEnabled' => true, 'isRemoteEnabled' => true]);
     return $pdf->stream('Siz_Orden_Compra' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
 }
 }

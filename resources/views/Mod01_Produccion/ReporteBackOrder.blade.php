@@ -148,45 +148,7 @@ var f = fecha.toUpperCase();
 
 var table = $('#tbackorder').DataTable({
     dom: 'Bfrtip',
-    buttons: [
-        {
-            text: '<i class="fa fa-columns" aria-hidden="true"></i> Columna',
-            className: "btn btn-primary",
-            extend: 'colvis',
-            postfixButtons: [                                  
-                {
-                    text: 'Restaurar columnas',
-                    extend: 'colvisRestore',     
-                }             
-                ]
-        },
-        {
-            text: '<i class="fa fa-copy" aria-hidden="true"></i> Copy', 
-            extend: 'copy',    
-            exportOptions: {
-                columns: ':visible',                
-            }             
-        },
-        {
-            text: '<i class="fa fa-file-excel-o"></i> Excel',
-            className: "btn-success",
-            action: function ( e, dt, node, config ) { 
-                this.text('<i class="fa fa-spinner fa-pulse fa-lg fa-fw"></i> Excel');
-                var $this = $(this);
-                var data=table.rows( { filter : 'applied'} ).data().toArray(); 
-                var json = JSON.stringify( data );
-                $.ajax({ 
-                    type:'POST', 
-                    url:'reporte/backorderPDF', 
-                    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                    data: { "_token": "{{ csrf_token() }}", "arr": json }, 
-                    success:function(){
-                            window.location.href = 'reporte/backorderXLS'; 
-                    },
-                    complete: checkCookie
-                }); 
-            }          
-        }, 
+    buttons: [ 
         {
             extend: 'collection',
             text: '<i class="fa fa-file-pdf-o"></i> Pdf',
@@ -233,17 +195,44 @@ var table = $('#tbackorder').DataTable({
                 },
             ]
         },
-       
         {
-            text: '<i class="fa fa-print"></i> Imprimir',
-           
-            extend: 'print',
-            title: 'Reporte de Back Order',
+            text: '<i class="fa fa-file-excel-o"></i> Excel',
+            className: "btn-success",
+            action: function ( e, dt, node, config ) { 
+                this.text('<i class="fa fa-spinner fa-pulse fa-lg fa-fw"></i> Excel');
+                var $this = $(this);
+                var data=table.rows( { filter : 'applied'} ).data().toArray(); 
+                var json = JSON.stringify( data );
+                $.ajax({ 
+                    type:'POST', 
+                    url:'reporte/backorderPDF', 
+                    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                    data: { "_token": "{{ csrf_token() }}", "arr": json }, 
+                    success:function(){
+                            window.location.href = 'reporte/backorderXLS'; 
+                    },
+                    complete: checkCookie
+                }); 
+            }          
+        },
+        {
+            text: '<i class="fa fa-columns" aria-hidden="true"></i> Columna',
+            className: "btn btn-primary",
+            extend: 'colvis',
+            postfixButtons: [                                  
+                {
+                    text: 'Restaurar columnas',
+                    extend: 'colvisRestore',     
+                }             
+                ]
+        },
+        {
+            text: '<i class="fa fa-copy" aria-hidden="true"></i> Copy', 
+            extend: 'copy',    
             exportOptions: {
                 columns: ':visible',                
-            }
+            }             
         },
-       
     ],
    
     orderCellsTop: true,    

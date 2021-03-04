@@ -143,7 +143,7 @@ public function entradasPDF()
     // dd(\AppHelper::instance()->getHumanDate(array_get( Session::get('fechas_entradas'), 'ff')));
     $data = array('notascredito' => $notascredito, 'entradasL' => $entradasL, 'entradasG' => $entradasG, 'devoluciones' => $devoluciones, 'fechas_entradas' => Session::get('fechas_entradas'));
     $pdf = \PDF::loadView('Mod04_Materiales.ReporteEntradasPDF', $data);
-        $pdf->setPaper('Letter', 'landscape')->setOptions(['isPhpEnabled' => true]);  
+        $pdf->setPaper('Letter', 'landscape')->setOptions(['isPhpEnabled' => true, 'isRemoteEnabled' => true]);  
     return $pdf->stream('SIZ Entradas' . ' - ' . date("d/m/Y") . '.Pdf');
 }
 public function iowhsPDF()
@@ -1264,7 +1264,7 @@ public function SolicitudPDF($id){
   
        //haz el PDF para "Picking"
         $pdf = \PDF::loadView('Mod04_Materiales.SolicitudPDF', compact('articulos', 'id', 'comment'));
-        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
+        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);             
         return $pdf->stream('Siz_Picking_'.$id . ' - ' .date("d/m/Y") . '.Pdf');
     } else {
         return redirect()->route('auth/login');
@@ -1311,7 +1311,7 @@ OITM.ItemName as Dscription, mat.Destino as WhsCode,
         $fechaSol = $solicitud->FechaCreacion;
         $pdf = \PDF::loadView('Mod04_Materiales.TrasladoPDF_SinPrecio', compact('id', 'transfer1', 'fechaSol',
          'total1',  'transfer', 'comentario', 'almacenOrigen', 'recibe', 'tipoDoc', 'entrega'));
-        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
+        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);             
         return $pdf->stream('Siz_Traslado_'.$id . ' - ' .date("d/m/Y") . '.Pdf');
   
 
@@ -1331,7 +1331,7 @@ OITM.ItemName as Dscription, mat.Destino as WhsCode,
   
        //haz el PDF para "Picking"
         $pdf = \PDF::loadView('Mod04_Materiales.SolicitudPDF', compact('articulos', 'id', 'comment'));
-        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
+        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);             
         return $pdf->stream('Siz_Picking_'.$id . ' - ' .date("d/m/Y") . '.Pdf');
     } else {
         return redirect()->route('auth/login');
@@ -1684,7 +1684,7 @@ public function getPdfSolicitud(){
         $pdf = \PDF::loadView('Mod04_Materiales.TrasladoPDF_SinPrecio', 
         compact('info1', 'transfer1', 'fechaSol', 
          'total1',  'transfer', 'comentario','recibe', 'tipoDoc', 'entrega'));
-        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
+        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);             
         return $pdf->stream('Siz_Traslado_'.$info1[0]->FolioNum . ' - ' .date("d/m/Y") . '.Pdf');
   }
     public function trasladoEntrega()
@@ -3013,7 +3013,7 @@ $consultaj = collect($consulta);
         $pdf = \PDF::loadView('Mod04_Materiales.etiquetaQrPDF', 
         compact('separador', 'itemName', 'pKey', 'cardCode',  'cardName', 'um','cant', 'CodigoQR', 'fechar'));
         //  $pdf->setPaper([0, 0, 90, 144], 'landscape')->setOptions(['isPhpEnabled'=>true]);
-        $pdf->setPaper([0, 0, 90, 144],'landscape')->setOptions(['isPhpEnabled'=>true]);             
+        $pdf->setPaper([0, 0, 90, 144],'landscape')->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);             
         return $pdf->stream('Siz_QR_'.$pKey . ' - ' .date("d/m/Y") . '.Pdf');
     }
     public function getArticulo($itemCode, $proveedor, $cantXbulto, Request $request)

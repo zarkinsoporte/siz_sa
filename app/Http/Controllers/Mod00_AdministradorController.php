@@ -112,7 +112,7 @@ class Mod00_AdministradorController extends Controller
   
     $sociedad=DB::table('OADM')->value('CompnyName');
     $pdf = \PDF::loadView('Mod00_Administrador.PlantillaPDF',compact('users','sociedad','clave'));
-    $pdf->setOptions(['isPhpEnabled'=>true]);
+    $pdf->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);
     return $pdf->stream('Siz_Plantilla_Personal'.$clave.' - '.$hoy = date("d/m/Y").'.Pdf');
  }
      
@@ -704,7 +704,7 @@ dd($user);
         $pdf = \PDF::loadView('Mod00_Administrador.pdfInventario',$data);
         //dd($pdf);
         //return $pdf->stream();
-        return $pdf->setOptions(['isPhpEnabled'=>true])->stream();
+        return $pdf->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true])->stream();
     }
 
     public function delete_inv($id)
@@ -879,7 +879,7 @@ public function Noticia()
         $data = json_decode((Session::get('inve')));
         //dd($data);
         $pdf = \PDF::loadView('Mod00_Administrador.ReporteInventarioComputoPDF', compact('data'));
-        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true]);             
+        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);             
         return $pdf->stream('Siz_Reporte_InventarioComputo ' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
         }else {
             return redirect()->route('auth/login');

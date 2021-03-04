@@ -75,7 +75,8 @@ https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css
 <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/3.2.6/css/fixedColumns.dataTables.min.css" type="text/css">
 
 <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/3.2.6/css/fixedColumns.bootstrap.min.css" type="text/css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.bootstrap.min.css" type="text/css">
+
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.5/css/buttons.bootstrap.min.css" type="text/css">
 {!! Html::style('assets/css/sbadmin.css') !!}
 {!! Html::style('assets/css/responsive.css') !!}
 {!! Html::script('assets/js/headerdatatables.js') !!}
@@ -270,6 +271,7 @@ li.dt-button.active a::before{
 <!-- Include Date Range Picker -->
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/css/bootstrap-select.min.css">
+
 
 <!-- Latest compiled and minified JavaScript -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/js/bootstrap-select.min.js"></script>
