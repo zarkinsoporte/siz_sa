@@ -94,16 +94,16 @@ class SAP extends Model
     public static function Connect2()
     {
         self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
-        self::$vCmp->DbServerType = "6";
-        self::$vCmp->server = "SERVER-SAPBO";
-        self::$vCmp->LicenseServer = "SERVER-SAPBO:30000";
-        self::$vCmp->CompanyDB = "SALOTTO";
-        self::$vCmp->username = "sistema3";
-        self::$vCmp->password = "beto";
+        self::$vCmp->DbServerType = "10";
+        self::$vCmp->server = "ZARKIN-088";
+        self::$vCmp->LicenseServer = "ZARKIN-088:30000";
+        self::$vCmp->CompanyDB = "SBO_PRUEBAS";
+        self::$vCmp->username = "SIZ_PROD";
+        self::$vCmp->password = "Zark&n20";
         self::$vCmp->DbUserName = "sa";
         self::$vCmp->DbPassword = "B1Admin";
         self::$vCmp->UseTrusted = false;
-        self::$vCmp->language = "6";
+        //self::$vCmp->language = "6";
         $lRetCode = self::$vCmp->Connect;
         if ($lRetCode <> 0) {
             return self::$vCmp->GetLastErrorDescription();
@@ -266,9 +266,10 @@ class SAP extends Model
             $vItem->FolioNumber = $id; //**/Vale:solicitud
             $vItem->Comments = $data['observaciones'];
             $vItem->JournalMemo = "Traslados -";
-
+            $vItem->ToWarehouse = 'AMP-ST';
             foreach ($data['items'] as $item) {
                 $varDestino = explode(' - ', $item->Destino);
+                //dd($data['almacen_origen']);
                 //agregar lineaS 
                 if ($item->Cant_PendienteA >= $item->CA) {
                     $vItem->Lines->Quantity = $item->CA;
@@ -280,6 +281,7 @@ class SAP extends Model
                         ]);
                     $vItem->Lines->ItemCode = $item->ItemCode;
                     $vItem->Lines->WarehouseCode = trim($varDestino[0]);
+                    
                     if ($item->BatchNum > 0) {
                         $lotes = DB::table('SIZ_MaterialesLotes')
                             ->where('Id_Item', $item->Id)

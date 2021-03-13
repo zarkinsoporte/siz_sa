@@ -1446,7 +1446,7 @@ public function Etiqueta_Articulo($ItemCode){
 public function HacerTraslados($id){
    //dd(Session::get('transfer1'));
     if (Auth::check()) {
-        $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
+        $rates = DB::table('ORTT')->where('RateDate', date('Y-m-d'))->get();
         if (count($rates) >= 3) {
             //GUARDAR USUARIO QUE HACE MOVIMIENTO
             $apellido = Self::getApellidoPaternoUsuario(explode(' ',Auth::user()->lastName));
@@ -1853,7 +1853,7 @@ public function getPdfSolicitud(){
         }
 
 if (count($traslado_interno) > 0) {
-$rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
+$rates = DB::table('ORTT')->where('RateDate', date('Y-m-d'))->get();
         if (count($rates) >= 3) {
        // if (true) {
             //PERSONA QUE SOLICITA
@@ -2048,7 +2048,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
 
 
 if (count($traslado_interno) > 0) {
-$rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
+$rates = DB::table('ORTT')->where('RateDate', date('Y-m-d'))->get();
         if (count($rates) >= 3) {
        // if (true) {
             //PERSONA QUE SOLICITA
@@ -2449,7 +2449,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
     }
     Public function updateArticuloTrasladoDepto($id){
         if (Auth::check()) {
-             $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
+             $rates = DB::table('ORTT')->where('RateDate', date('Y-m-d'))->get();
             if (count($rates) >= 3) {
            // if (true) {
                //GUARDAR EL USUARIO QUE HACE EL MOVIMIENTO

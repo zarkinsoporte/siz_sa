@@ -401,6 +401,8 @@ Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@pr
 Route::get('/pruebassap', 'Mod02_PlaneacionController@updateOV');
 
 Route::get('/pruebas', function (Request $request) {
+    $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
+    dd($rates);
    $var1= Artisan::call('cache:clear');
    $var= Artisan::call('config:cache');
    
