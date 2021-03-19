@@ -197,6 +197,8 @@ class Reportes_ProduccionController extends Controller
         $data_selDos = [];
         $text_selTres = '';
         $data_selTres = [];
+        $text_selSeis = '';
+        $data_selSeis = [];
         $text_selCuatro = '';
         $data_selCuatro = [];
         $text_selCinco = '';
@@ -250,14 +252,23 @@ class Reportes_ProduccionController extends Controller
                     ->where('Dept', Auth::user()->dept)
                     ->whereIn('TrasladoDeptos', ['O', 'OD'])
                     ->get();
+                $almacenesDestino = DB::table('SIZ_AlmacenesTransferencias')
+                ->select('Code as llave', 'Label as valor')
+                ->where('Dept', Auth::user()->dept)
+                ->whereIn('TrasladoDeptos', ['D', 'OD'])->get();
+                //quitar almacen origen de los almacenes destino si existe.
+               
                 $btn3 = ['btnName' => 'Omitir', 
                 'route' => 'home/reporte2/TRASLADO ENTREGA'];
             
                    //    dd(array_pluck($almacenesOrigen, 'Label'));
-                        
-                $Text = "Elije Almacén Origen";
-                $text_selTres = 'Almacén';
-                $data_selTres = $almacenesOrigen;       
+                //dd($almacenesDestino);       
+                $Text = "Selecciona:";
+                $text_selTres = 'Almacén Origen';
+                $data_selTres = $almacenesOrigen; 
+                $text_selSeis = 'Almacén Destino';
+                $data_selSeis = $almacenesDestino; 
+                      
                 break;
             case "ENTRADAS SALIDAS":
                 $fechas = true;
@@ -275,6 +286,17 @@ class Reportes_ProduccionController extends Controller
             case "CALIDAD CAPTURA DEFECTIVOS":
                 $Text = "Ingresa a una OP para iniciar captura"; 
                 $fieldOtroNumber = 'OP'; 
+            break;
+            case "1 SOLICITUD MATERIALES":
+                
+                $almacenesDestino = DB::table('SIZ_AlmacenesTransferencias')
+                ->select('Code as llave', 'Label as valor')
+                ->where('Dept', Auth::user()->dept)
+                ->where('SolicitudMateriales', 'D')->get();    
+                  
+                $Text = "Selecciona:";
+                $text_selSeis = 'Almacén Destino';
+                $data_selSeis = $almacenesDestino;  
             break;
 
         }
@@ -296,6 +318,8 @@ class Reportes_ProduccionController extends Controller
             'data_selDos' => $data_selDos,
             'text_selTres' => $text_selTres,
             'data_selTres' => $data_selTres,
+            'text_selSeis' => $text_selSeis,
+            'data_selSeis' => $data_selSeis,
             'text_selCuatro' => $text_selCuatro,
             'data_selCuatro' => $data_selCuatro,
             'text_selCinco' => $text_selCinco,

@@ -15,17 +15,17 @@ class SAPi extends Model
 
 
     public static function Connect(){
-        self::$vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
-        self::$vCmp->DbServerType="6"; 
-        self::$vCmp->server = "SERVER-SAPBO";
-        self::$vCmp->LicenseServer = "SERVER-SAPBO:30000";
-        self::$vCmp->CompanyDB = "SALOTTO";
-        self::$vCmp->username = "controlp";
-        self::$vCmp->password = "190109";
+        self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
+        self::$vCmp->DbServerType = "10";
+        self::$vCmp->server = "ZARKIN-088";
+        self::$vCmp->LicenseServer = "ZARKIN-088:30000";
+        self::$vCmp->CompanyDB = "SBO_PRUEBAS";
+        self::$vCmp->username = "SIZ_PROD";
+        self::$vCmp->password = "Zark&n20";
         self::$vCmp->DbUserName = "sa";
         self::$vCmp->DbPassword = "B1Admin";
         self::$vCmp->UseTrusted = false;
-        self::$vCmp->language = "6";
+        //self::$vCmp->language = "6";
         $lRetCode = self::$vCmp->Connect;
         if ($lRetCode != 0) {
            return self::$vCmp->GetLastErrorDescription();
@@ -41,17 +41,17 @@ public static function ReciboProduccion($docEntry, $whs, $Cant, $comentario, $me
       if ( $cnn == 'Conectado') {
         
       }else{
-        self::$vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
-        self::$vCmp->DbServerType="6"; 
-        self::$vCmp->server = "SERVER-SAPBO";
-        self::$vCmp->LicenseServer = "SERVER-SAPBO:30000";
-        self::$vCmp->CompanyDB = "SALOTTO";
-        self::$vCmp->username = "controlp";
-        self::$vCmp->password = "190109";
+        self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
+        self::$vCmp->DbServerType = "10";
+        self::$vCmp->server = "ZARKIN-088";
+        self::$vCmp->LicenseServer = "ZARKIN-088:30000";
+        self::$vCmp->CompanyDB = "SBO_PRUEBAS";
+        self::$vCmp->username = "SIZ_PROD";
+        self::$vCmp->password = "Zark&n20";
         self::$vCmp->DbUserName = "sa";
         self::$vCmp->DbPassword = "B1Admin";
         self::$vCmp->UseTrusted = false;
-        self::$vCmp->language = "6";
+        //self::$vCmp->language = "6";
         $lRetCode = self::$vCmp->Connect;
           if ($lRetCode != 0) {
            dd(self::$vCmp->GetLastErrorDescription());

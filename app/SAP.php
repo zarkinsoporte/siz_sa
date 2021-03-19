@@ -133,7 +133,8 @@ class SAP extends Model
             $vItem->FolioNumber = $id; //**/Vale:solicitud
             $vItem->Comments = $data['observaciones'];
             $vItem->JournalMemo = "Traslados -";
-
+            $vItem->ToWarehouse = $data['almacen_destino'];
+            
             foreach ($data['items'] as $item) {
                 $varDestino = explode(' - ', $item->Destino);
 
@@ -266,7 +267,7 @@ class SAP extends Model
             $vItem->FolioNumber = $id; //**/Vale:solicitud
             $vItem->Comments = $data['observaciones'];
             $vItem->JournalMemo = "Traslados -";
-            $vItem->ToWarehouse = 'AMP-ST';
+            $vItem->ToWarehouse = $data['almacen_destino'];
             foreach ($data['items'] as $item) {
                 $varDestino = explode(' - ', $item->Destino);
                 //dd($data['almacen_origen']);

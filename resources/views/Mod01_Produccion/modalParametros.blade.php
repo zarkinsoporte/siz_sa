@@ -114,6 +114,16 @@
                                                 </select>
                                             </div>
                                         @endif
+                                        @if($text_selSeis <> '')
+                                            <div class="form-group">
+                                                <label for="text_selSeis">{{$text_selSeis}}:</label>
+                                                <select class="form-control" id="text_selSeis" name="text_selSeis" autofocus required>
+                                                    @foreach ($data_selSeis as $item)
+                                                        <option value="{{$item->llave}}">{{$item->valor}}</option> 
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        @endif
                                         @if($text_selCinco <> '')
                                             <div class="form-group">
                                                 <label for="text_selCinco">{{$text_selCinco}}:</label>

@@ -99,7 +99,7 @@
 
         <div class="col-md-12">
             <h3 class="page-header">
-                Traslado Entrega de Mercancía <small>@if ($almacenOrigen !== '') Almacén Origen: {{$almacenOrigen}} @endif</small>
+                Traslado Entrega de Mercancía <small>@if ($almacenOrigen !== '') Almacén Origen: <b>{{$almacenOrigen}}</b> ====> Almacén Destino: <b>{{$almacenDestino}}</b> @endif</small>
                 <div class="visible-xs visible-sm"><br></div>
             </h3>
             <span class="">
@@ -193,7 +193,7 @@
                         <th>Descripción</th>
                         <th>Cantidad</th>
                         <th>UM</th>
-                        <th>Destino</th>
+                        
                         <th>Quitar</th>
                     </tr>
                 </thead>
@@ -203,7 +203,7 @@
                         <td><%art.descr%></td>
                         <td><%art.cant%></td>
                         <td><%art.um%></td>
-                        <td><%art.labelDestino%></td>
+                        
                         <td><a id="btnquitar" data-cant="<%art.cant%>" data-index="<%art.index%>" role="button"
                                 ng-click="quitaArt(art)" class="btn btn-default regresacant"><i class="fa fa-trash"
                                     style="color:red"></i></a></td>
@@ -227,13 +227,12 @@
                         <th>Descripción</th>
                         <th>Cantidad</th>
                         <th>UM</th>
-                        <th>Destino</th>
+                        
                         <th>Quitar</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td></td>
                         <td></td>
                         <td></td>
                         <td></td>
@@ -267,7 +266,7 @@
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                                     aria-hidden="true">&times;</span></button>
                             <h4 class="modal-title" id="pwModalLabel">Agregar Artículo <small>Almacén Origen:
-                                    {{$almacenOrigen}}</small></h4>
+                                    {{$almacenOrigen.'  ====>  '}} Almacén Destino: {{$almacenDestino}}</small></h4>
                         </div>
 
                         <div class="modal-body">
@@ -317,15 +316,7 @@
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label for="destino">Almacén destino:</label>
-                                            <select class="form-control" name="destino" id="destino"
-                                                ng-model="insert.destino" required>
-                                                <option value="" hidden disabled>Seleccione destino</option>
-                                                @foreach($almacenesDestino as $key)
-                                                <option value="{{$key->Code}}"
-                                                    {{ ($key->Code == $almacenesDestino[0]->Code) ? 'selected' : '' }}>
-                                                    {{$key->Label}}</option>
-                                                @endforeach
-                                            </select>
+                                            <input type="text" class="form-control" name="destino" id="destino" readonly value="{{$almacenDestino}}">
                                         </div>
                                     </div>
                                 </div>
@@ -425,7 +416,11 @@
                                 $(this).toggleClass("active"); 
                             });
 
-var data,
+
+
+
+$(window).on('load',function(){
+    var data,
 tableName= '#tabla',
 table,
 str,
@@ -437,111 +432,114 @@ almacen :$('input[name=almacen]').val()
 },
 url: '{!! route('OITM.WH.traslados') !!}',
 success: function(data, textStatus, jqXHR) {
-data = JSON.parse(jqxhr.responseText);
+    data = JSON.parse(jqxhr.responseText);
 
-data.columns[3].render = function (data, type, row) {
+    data.columns[3].render = function (data, type, row) {
 
-var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:3}).format(data);
-return val;
-}
+    var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:3}).format(data);
+    return val;
+    }
 
-table = $(tableName).DataTable({
-dom: 'irtp',
-orderCellsTop: true,
-"order": [[ 1, "asc" ]],
-"autoWidth":true,
-scrollY: "200px",
-"pageLength": 50,
-scrollX: true,
-paging: true,
-processing: true,
-deferRender: true,
-scrollCollapse: true,
-data:data.data,
-columns: data.columns,
-"language": {
-"url": "{{ asset('assets/lang/Spanish.json') }}",
-},
-columnDefs: [
-{ width: "7px", targets: 0},
+    table = $(tableName).DataTable({
+    dom: 'irtp',
+    orderCellsTop: true,
+    "order": [[ 1, "asc" ]],
+    "autoWidth": false,
+    "pageLength": 50,
+    scrollX: true,
+    paging: true,
+    processing: true,
+    deferRender: true,
+    scrollCollapse: true,
+    data:data.data,
+    columns: data.columns,
+    "language": {
+    "url": "{{ asset('assets/lang/Spanish.json') }}",
+    },
+    columnDefs: [
+    { width: "7%", targets: 0},
 
-],
-"rowCallback": function( row, data, index ) {
-//console.log(data['Existencia']);
-if ( parseFloat( data['Existencia'] ) == 0 )
-{
-// $(row).addClass("ignoreme");
-$('td',row).addClass("ignoreme");
+    ],
+    "rowCallback": function( row, data, index ) {
+    //console.log(data['Existencia']);
+    if ( parseFloat( data['Existencia'] ) == 0 )
+    {
+    // $(row).addClass("ignoreme");
+    $('td',row).addClass("ignoreme");
 
-}
-},
-"initComplete": function( settings, json ) {
-$('#ajax_processing').hide();
-}
-});
+    }
+    },
+    "initComplete": function( settings, json ) {
+    $('#ajax_processing').hide();
+    }
+    });
 
-$('#tabla thead tr:eq(1) th').each( function (i) {
-var title = $(this).text();
-$(this).html( '<input type="text" placeholder="Filtro '+title+'" />' );
+    $('#tabla thead tr').clone(true).appendTo( '#tabla thead' );
+    $('#tabla thead tr:eq(1) th').each( function (i) {
+    var title = $(this).text();
+    $(this).html( '<input type="text" placeholder="Filtro '+title+'" />' );
 
-$( 'input', this ).on( 'keyup change', function () {
+    $( 'input', this ).on( 'keyup change', function () {
 
-if ( table.column(i).search() !== this.value ) {
-table
-.column(i)
-.search(this.value, true, false)
-.draw();
+    if ( table.column(i).search() !== this.value ) {
+    table
+    .column(i)
+    .search(this.value, true, false)
+    .draw();
 
-}
+    }
 
-} );
-} );
+    } );
+    } );
 
-$('#tabla tbody').on( 'click', 'tr', function () {
-if ( $(this).hasClass('selected') ) {
-$(this).removeClass('selected');
-$('input[name=pKey]').val('');
-$('input[name=descr]').val('');
-$('input[name=um]').val('');
-$('input[name=datatableindex]').val('');
-$('input[name=cant]').val('');
-$('input[name=cant]').blur();
-$('#submitBtn').attr("disabled", true);
-}
-else {
-table.$('tr.selected').removeClass('selected');
-table.$('tr.usel').removeClass('usel');
-$(this).addClass('usel');
-var idx = table.cell('.usel', 0).index();
-var fila = table.rows( idx.row ).data();
-// console.log(fila[0]['Existencia']);
-if(parseFloat( fila[0]['Existencia'] ) == 0){
-$('input[name=pKey]').val('');
-$('input[name=descr]').val('');
-$('input[name=um]').val('');
-$('input[name=datatableindex]').val('');
-$('input[name=cant]').val('');
-$('input[name=cant]').blur();
-$('#submitBtn').attr("disabled", true);
-}else{
-var valor = new Intl.NumberFormat("es-MX", {minimumFractionDigits:3}).format(fila[0]['Existencia']);
-$(this).addClass('selected');
-// console.log(fila[0]['ItemCode']);
-$('input[name=pKey]').val(fila[0]['ItemCode']);
-$('input[name=descr]').val(fila[0]['ItemName']);
-$('input[name=um]').val(fila[0]['UM']);
-$('input[name=datatableindex]').val(idx.row);
-// $('input[name=cant]').attr('title', valor+" en Existencia");
+    $('#tabla tbody').on( 'click', 'tr', function () {
+    if ( $(this).hasClass('selected') ) {
+    $(this).removeClass('selected');
+    $('input[name=pKey]').val('');
+    $('input[name=descr]').val('');
+    $('input[name=um]').val('');
+    $('input[name=datatableindex]').val('');
+    $('input[name=cant]').val('');
+    $('input[name=cant]').blur();
+    $('#submitBtn').attr("disabled", true);
+    }
+    else {
+    table.$('tr.selected').removeClass('selected');
+    table.$('tr.usel').removeClass('usel');
+    $(this).addClass('usel');
+    var idx = table.cell('.usel', 0).index();
+    var fila = table.rows( idx.row ).data();
+    // console.log(fila[0]['Existencia']);
+    if(parseFloat( fila[0]['Existencia'] ) == 0){
+    $('input[name=pKey]').val('');
+    $('input[name=descr]').val('');
+    $('input[name=um]').val('');
+    $('input[name=datatableindex]').val('');
+    $('input[name=cant]').val('');
+    $('input[name=cant]').blur();
+    $('#submitBtn').attr("disabled", true);
+    }else{
+    var valor = new Intl.NumberFormat("es-MX", {minimumFractionDigits:3}).format(fila[0]['Existencia']);
+    $(this).addClass('selected');
+    // console.log(fila[0]['ItemCode']);
+    $('input[name=pKey]').val(fila[0]['ItemCode']);
+    $('input[name=descr]').val(fila[0]['ItemName']);
+    $('input[name=um]').val(fila[0]['UM']);
+    $('input[name=datatableindex]').val(idx.row);
+    // $('input[name=cant]').attr('title', valor+" en Existencia");
 
-$('input[name=cant]').focus();
-$('input[name=cant]').attr('max', fila[0]['Existencia']);
-$('input[name=cant]').attr('min',1);
-$('#submitBtn').attr("disabled", false);
-}
-}
-} );
+    $('input[name=cant]').focus();
+    $('input[name=cant]').attr('max', fila[0]['Existencia']);
+    $('input[name=cant]').attr('min',1);
+    $('#submitBtn').attr("disabled", false);
+    }
+    }
+    } );
 
-},
+    },
+    complete: function () {
+        
+    },
 error: function(jqXHR, textStatus, errorThrown) {
 var msg = '';
 if (jqXHR.status === 0) {
@@ -563,16 +561,12 @@ console.log(msg);
 }
 });
 
-$('#tabla thead tr').clone(true).appendTo( '#tabla thead' );
-
-
-$(window).on('load',function(){
 $('#confirma').modal('show');
 });
 
 $("#submitBtn").click(function(){
 //console.log(($( "#destino option:selected" ).val()).length);
-if(($( "#destino option:selected" ).val()).length > 0){
+
 var idx = table.cell('.usel', 0).index();
 // console.log( idx.row);
 table
@@ -584,7 +578,7 @@ table.cell(rowIdx, 3).data(parseFloat(table.cell(rowIdx, 3).data()) - parseFloat
 .draw();
 //$('input[name=datatableindex]').val($('input[name=cant]').val());
 //angular.element(document.getElementById('MainController')).scope().AddArt();
-}
+
 });
 
 $(document).on('click', '.regresacant', function(event) {
@@ -622,7 +616,7 @@ $interpolateProvider.startSymbol('<%');
         $scope.insert.pKey = $('input[name=pKey]').val();
         $scope.insert.descr = $('input[name=descr]').val();
         $scope.insert.um = $('input[name=um]').val();
-        $scope.insert.labelDestino = $( "#destino option:selected" ).text();
+        //$scope.insert.labelDestino = $( "#destino option:selected" ).text();
        // $scope.articulos.push($scope.insert);
        $scope.insert.index = $('input[name=datatableindex]').val();
         $scope.addOrReplace($scope.articulos, $scope.insert)
@@ -636,8 +630,8 @@ $interpolateProvider.startSymbol('<%');
         const i = array.findIndex(_item => (_item.pKey === item.pKey));
         if (i > -1) {
         array[i].cant += item.cant; // (2)
-        array[i].destino = item.destino; // (2)
-        array[i].labelDestino = item.labelDestino; // (2)
+        //array[i].destino = item.destino; // (2)
+        //array[i].labelDestino = item.labelDestino; // (2)
         }else {
         array.push(item);
         }
@@ -660,6 +654,7 @@ $interpolateProvider.startSymbol('<%');
             "_token": "{{ Session::token() }}",
             "arts": $scope.articulos,
             "almacen" : $('input[name=almacen]').val(),
+            "almacenDestino" : $('input[name=destino]').val(),
             "comentario": $('#comment').val()       
         },
        

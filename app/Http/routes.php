@@ -269,9 +269,10 @@ Route::post('articuloToSap', 'Mod04_MaterialesController@articuloToSap');
 Route::get('OITM.show', 'HomeController@ShowArticulos')->name('OITM.show');
 //
 //SOLICITUD DE MATERIALES
-Route::get('home/1 SOLICITUD MATERIALES', 'Mod04_MaterialesController@solicitudMateriales')->middleware('routelog');
+Route::get('home/1 SOLICITUD MATERIALES', 'Reportes_ProduccionController@showModal')->middleware('routelog');
+Route::post('home/reporte/1 SOLICITUD MATERIALES', 'Mod04_MaterialesController@solicitudMateriales');
 Route::get('OITM.WH.show', 'Mod04_MaterialesController@ShowArticulosWH')->name('OITM.WH.show');
-Route::post('home/saveArt', 'Mod04_MaterialesController@saveArt')->name('home/saveArt');
+Route::post('home/reporte/saveArt', 'Mod04_MaterialesController@saveArt')->name('home/saveArt');
 //AUTORIZACION
 Route::get('home/2 AUTORIZACION', 'Mod04_MaterialesController@AutorizacionSolicitudes')->middleware('routelog');
 Route::get('datatables.Solicitudes_Auht', 'Mod04_MaterialesController@DataSolicitudes_Auht')->name('datatables.Solicitudes_Auht');

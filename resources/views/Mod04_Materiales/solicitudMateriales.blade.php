@@ -89,7 +89,7 @@ border: 1px solid #000000;
          
             <div class="col-md-12">
                 <h3 class="page-header">
-                    Solicitud de Materiales
+                    Solicitud de Materiales <small> Almacén Destino: <b>{{$almacenDestino}}</b></small>
                     <div class="visible-xs visible-sm"><br></div>                 
                 </h3>
                 
@@ -133,7 +133,7 @@ border: 1px solid #000000;
                     <th>Descripción</th>
                     <th>Cantidad</th>
                     <th>UM</th>
-                    <th>Destino</th>
+                   
                     <th>Quitar</th>
                 </tr>
             </thead>
@@ -143,7 +143,7 @@ border: 1px solid #000000;
                     <td><%art.descr%></td>
                     <td><%art.cant%></td>
                     <td><%art.um%></td>
-                    <td><%art.labelDestino%></td>
+                   
                     <td><a id="btnquitar" data-cant="<%art.cant%>" data-index="<%art.index%>" role="button" ng-click="quitaArt(art)"  class="btn btn-default regresacant"><i class="fa fa-trash" style="color:red"></i></a></td>
                 </tr>
             </tbody>
@@ -219,13 +219,8 @@ border: 1px solid #000000;
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="form-group">
-                                                        <label for="destino">Surtirse en:</label>
-                                                    <select class="form-control" name="destino" id="destino" ng-model="insert.destino" required>
-                                                            <option value="" hidden disabled>Seleccione destino</option>
-                                                            @foreach($almacenesDestino as $key)
-                                                            <option value="{{$key->Code}}" {{ ($key->Code == $almacenesDestino[0]->Code) ? 'selected' : '' }}>{{$key->Label}}</option>
-                                                            @endforeach                                                            
-                                                        </select>
+                                                        <label for="destino">Surtir en:</label>
+                                                        <input type="text" class="form-control" name="destino" id="destino" readonly value="{{$almacenDestino}}">
                                                     </div>
                                                 </div>
                                             </div>
@@ -261,6 +256,10 @@ border: 1px solid #000000;
                                 $(this).toggleClass("active"); 
                             });
 
+
+
+
+$(window).on('load',function(){
 var data,
     tableName= '#tabla',
     table,
@@ -299,7 +298,7 @@ var data,
     "url": "{{ asset('assets/lang/Spanish.json') }}",
     },
     columnDefs: [
-    { width: "7px", targets: 0},
+    { width: "7%", targets: 0},
    
     ],
    "rowCallback": function( row, data, index ) {
@@ -400,14 +399,12 @@ var data,
     
     $('#tabla thead tr').clone(true).appendTo( '#tabla thead' );
 
-
-$(window).on('load',function(){
 $('#confirma').modal('show');
 });
 
 $("#submitBtn").click(function(){
     //console.log(($( "#destino option:selected" ).val()).length);
-    if(($( "#destino option:selected" ).val()).length > 0){
+   
         var idx = table.cell('.usel', 0).index();
        // console.log( idx.row);
         table
@@ -419,7 +416,7 @@ $("#submitBtn").click(function(){
         .draw();
         //$('input[name=datatableindex]').val($('input[name=cant]').val());
         //angular.element(document.getElementById('MainController')).scope().AddArt();     
-    }    
+        
 });
 
 $(document).on('click', '.regresacant', function(event) {
@@ -453,7 +450,7 @@ $interpolateProvider.startSymbol('<%');
         $scope.insert.pKey = $('input[name=pKey]').val();
         $scope.insert.descr = $('input[name=descr]').val();
         $scope.insert.um = $('input[name=um]').val();
-        $scope.insert.labelDestino = $( "#destino option:selected" ).text();        
+            
         $scope.insert.index = $('input[name=datatableindex]').val();        
         $scope.addOrReplace($scope.articulos, $scope.insert)
         //$scope.articulos.push($scope.insert);
@@ -473,8 +470,7 @@ $interpolateProvider.startSymbol('<%');
     const i = array.findIndex(_item => (_item.pKey === item.pKey));
         if (i > -1) {
             array[i].cant += item.cant; // (2)            
-            array[i].destino = item.destino; // (2)            
-            array[i].labelDestino = item.labelDestino; // (2)            
+            
         }else {
             array.push(item);
         }        
@@ -490,6 +486,7 @@ $interpolateProvider.startSymbol('<%');
         {
             "_token": "{{ Session::token() }}",
             "arts": $scope.articulos,
+            "almacenDestino" : $('input[name=destino]').val(),
             "comentario": $('#comment').val()       
         },
        

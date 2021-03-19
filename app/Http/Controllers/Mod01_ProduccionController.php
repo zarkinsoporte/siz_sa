@@ -528,8 +528,8 @@ if($Code_actual->U_CT == '106'){
     ->where('WOR1.DocEntry', '=', $Code_actual->U_DocEntry)
     ->value('WOR1.IssuedQty');
 
-if($consumido < 1 || is_null($consumido)){
-return redirect()->back()->withErrors(array('message' => 'Esta orden necesita primero que le carges Piel en SAP'));
+if($consumido < 1 &&  !is_null($consumido)){
+return redirect()->back()->withErrors(array('message' => 'Esta orden necesita primero que le cargues Piel en SAP'));
 }else{
     DB::table('OWOR')
         ->where('DocEntry', '=', $Code_actual->U_DocEntry)

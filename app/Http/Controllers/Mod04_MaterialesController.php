@@ -488,15 +488,12 @@ public function solicitudMateriales(){
      if (Auth::check()) {
         $user = Auth::user();
         $actividades = $user->getTareas();
-        $almacenesDestino = DB::table('SIZ_AlmacenesTransferencias')
-                            ->where('Dept', Auth::user()->dept)
-                            ->where('SolicitudMateriales', 'D')->get();
-    
-
+        $almacenDestino = Input::get('text_selSeis');
+        
         $param = array(        
             'actividades' => $actividades,
             'ultimo' => count($actividades),
-            'almacenesDestino' => $almacenesDestino,  
+            'almacenDestino' => $almacenDestino,  
         );
         return view('Mod04_Materiales.solicitudMateriales', $param);
     } else {
@@ -718,26 +715,31 @@ public function saveArt(Request $request){
         $err = false;
         $id = 0;
         $arts = $request->get('arts');
+        $almacen_destino = $request->get('almacenDestino');
         $usercomment = mb_strtoupper($request->get('comentario'));
-                $dt = new \DateTime();
-                $id = DB::table('SIZ_SolicitudesMP')->insertGetId(
-                    ['FechaCreacion' => $dt, 'Usuario' => Auth::id(), 'Status' => 'Autorizacion', 
-                    'ComentarioUsuario' => $usercomment]
-                );
-                
-                foreach ($arts as $art) {
-                    DB::table('SIZ_MaterialesSolicitudes')->insert(
-                        ['Id_Solicitud' => $id, 'ItemCode' => $art['pKey'], 
-                        'Cant_Requerida' => $art['cant'], 'Destino' => $art['labelDestino'], 
-                        'Cant_Autorizada' =>  $art['cant'], 'Cant_scan' =>  0, 
-                        'Cant_PendienteA' =>  $art['cant'],
-                        'EstatusLinea' => 'S', 'Cant_ASurtir_Origen_A' => 0, 
-                        'Cant_ASurtir_Origen_B' => 0]
-                    );
-                }
-                if (!($id > 0) || is_null($arts) || is_null($id)) {
-                    $err =true;
-                }
+        $dt = new \DateTime();
+        $id = DB::table('SIZ_SolicitudesMP')->insertGetId(
+            ['FechaCreacion' => $dt, 'Usuario' => Auth::id(), 'Status' => 'Autorizacion', 
+            'ComentarioUsuario' => $usercomment]
+        );
+        
+        foreach ($arts as $art) {
+            DB::table('SIZ_MaterialesSolicitudes')->insert(
+                ['Id_Solicitud' => $id, 
+                'ItemCode' => $art['pKey'], 
+                'Cant_Requerida' => $art['cant'], 
+                'Destino' => $almacen_destino, 
+                'Cant_Autorizada' =>  $art['cant'], 
+                'Cant_scan' =>  0, 
+                'Cant_PendienteA' =>  $art['cant'],
+                'EstatusLinea' => 'S', 
+                'Cant_ASurtir_Origen_A' => 0, 
+                'Cant_ASurtir_Origen_B' => 0]
+            );
+        }
+        if (!($id > 0) || is_null($arts) || is_null($id)) {
+            $err =true;
+        }
         
         if ($err) {
             DB::rollBack();       
@@ -1496,6 +1498,7 @@ public function HacerTraslados($id){
                     'id_solicitud' => $id,
                     'pricelist' => '10',
                     'almacen_origen' => 'APG-PA',
+                    'almacen_destino' => $primer_origen[0]->Destino,
                     'items' => $primer_origen,
                     'observaciones' => utf8_decode("SIZ VALE #".$id .", Solicitó: ". $nombreCompleto . $observacionesComplemento . ". ".$solicitante->ComentarioUsuario )
                                         
@@ -1554,6 +1557,7 @@ public function HacerTraslados($id){
                         'id_solicitud' => $id,
                         'pricelist' => '10',
                         'almacen_origen' => 'AMP-ST',
+                        'almacen_destino' => $segundo_origen[0]->Destino,
                         'items' => $segundo_origen,
                         'observaciones' => utf8_decode("SIZ VALE #".$id .", Solicitó: ". $nombreCompleto . $observacionesComplemento.". ". $solicitante->ComentarioUsuario )
                     );
@@ -1692,6 +1696,7 @@ public function getPdfSolicitud(){
         if (Auth::check()) {
             $user = Auth::user();
             $actividades = $user->getTareas();
+            /*
             $almacenesDestino = DB::table('SIZ_AlmacenesTransferencias')
                 ->where('Dept', Auth::user()->dept)
                 ->whereIn('TrasladoDeptos', ['D', 'OD'])->get();
@@ -1704,12 +1709,23 @@ public function getPdfSolicitud(){
             $almacenesDestino = array_where($almacenesDestino, function ($key, $item) use($almacenOrigen){            
                     return $item->Code != $almacenOrigen;
             });
- 
+ */
+            $almacenOrigen = '';
+            $almacenDestino = '';
+            if (Input::has('text_selTres') && Input::has('text_selSeis')) {
+                $almacenOrigen = Input::get('text_selTres');
+                $almacenDestino = Input::get('text_selSeis');
+                if ($almacenOrigen == $almacenDestino) {                
+                    Session::flash('error', 'Almacén Origen y Destino no puede ser el mismo');
+                    return redirect()->back();                   
+                }
+               
+            }
             $param = array(
                 'actividades' => $actividades,
                 'ultimo' => count($actividades),
                 'almacenOrigen' => $almacenOrigen,
-                'almacenesDestino' => array_values($almacenesDestino)
+                'almacenDestino' => $almacenDestino
             );
             return view('Mod04_Materiales.showListMateriales', $param);
         } else {
@@ -1873,6 +1889,7 @@ $rates = DB::table('ORTT')->where('RateDate', date('Y-m-d'))->get();
                     'id_solicitud' => $id,
                     'pricelist' => '10',
                     'almacen_origen' => $solicitud->AlmacenOrigen,
+                    'almacen_destino' => $traslado_interno[0]->Destino,
                     'items' => $traslado_interno,
                     'observaciones' => utf8_decode("SIZ VALE #".$id .", Envió: ". $nombreCompleto.$observacionesComplemento.". ". $solicitud->ComentarioUsuario )
                 );
@@ -1934,31 +1951,37 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
         $id = 0;
         $arts = $request->get('arts');
         $almacen_origen = $request->get('almacen');
+        $almacen_destino = $request->get('almacenDestino');
         $usercomment = mb_strtoupper($request->get('comentario'));
         $dt = new \DateTime();
         
+        //insertar Solicitud
         $id = DB::table('SIZ_SolicitudesMP')->insertGetId(
             [
                 'FechaCreacion' => $dt, 'Usuario' => Auth::id(), 'Status' => 'Pendiente',
                 'ComentarioUsuario' => $usercomment, 'AlmacenOrigen' => $almacen_origen
             ]
         );
+        //obtener Lista de codigos de almacenes
         $almacenesDestino = DB::table('SIZ_AlmacenesTransferencias')                        
                         ->where('Dept', Auth::user()->dept)
                         ->where('TrasladoDeptos', 'OD')->lists('Code');
-                        
+        //insertar materiales               
         foreach ($arts as $art) {            
             $statusL = 'E';
-            if (is_numeric(array_search(trim($art['destino']), $almacenesDestino))) {
+            if (is_numeric(array_search(trim($almacen_destino), $almacenesDestino))) {
                 $statusL = 'I';
             } 
             DB::table('SIZ_MaterialesTraslados')->insert(
                 [
                     'Id_Solicitud' => $id, 'ItemCode' => $art['pKey'],
-                    'Cant_Requerida' => $art['cant'], 'Destino' => trim($art['labelDestino']),
+                    'Cant_Requerida' => $art['cant'], 
+                    'Destino' => trim($almacen_destino),
                     'Cant_Autorizada' =>  $art['cant'], 
                     'Cant_PendienteA' =>  $art['cant'],
-                    'EstatusLinea' => $statusL, 'Cant_ASurtir_Origen_A' => $art['cant'], 'Cant_ASurtir_Origen_B' => 0
+                    'EstatusLinea' => $statusL, 
+                    'Cant_ASurtir_Origen_A' => $art['cant'], 
+                    'Cant_ASurtir_Origen_B' => 0
                 ]
             );                                                 
         }        
@@ -2068,6 +2091,7 @@ $rates = DB::table('ORTT')->where('RateDate', date('Y-m-d'))->get();
                     'id_solicitud' => $id,
                     'pricelist' => '10',
                     'almacen_origen' => $solicitud->AlmacenOrigen,
+                    'almacen_destino' => $almacen_destino,
                     'items' => $traslado_interno,
                     'observaciones' => utf8_decode("SIZ VALE #".$id .", Envió: ". $nombreCompleto. $observacionesComplemento.". ". $solicitud->ComentarioUsuario )
                                         
@@ -2493,6 +2517,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                         'id_solicitud' => $id,
                         'pricelist' => '10',
                         'almacen_origen' => $solicitud->AlmacenOrigen,
+                        'almacen_destino' => $articulos[0]->Destino,
                         'items' => $articulos,
                          'observaciones' => utf8_decode("SIZ VALE #".$id .", Envió: ". $nombreCompleto.$observacionesComplemento.". ". $solicitud->ComentarioUsuario)
                                         
