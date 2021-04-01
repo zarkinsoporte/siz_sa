@@ -69,23 +69,24 @@ public static function ReciboProduccion($docEntry, $whs, $Cant, $comentario, $me
         }
         $vItem = null;
         //fin bloque actualiza fecha de la orden
-    $vItem = self::$vCmp->GetBusinessObject("59");
+    $vItem = self::$vCmp->GetBusinessObject("59");//Crear un recibo de Produccion
 
     $vItem->Comments = utf8_decode($comentario);
     $vItem->JournalMemo = utf8_decode($memo); //Asiento Contable
 
-        $vItem->Lines->BaseEntry = $docEntry; 
+        $vItem->Lines->BaseEntry = $docEntry; //OP
         $vItem->Lines->BaseType = '202'; 
         $vItem->Lines->TransactionType = '0'; // botrntComplete
         $vItem->Lines->Quantity = $Cant;
         //$vItem->Lines->WarehouseCode = $whs;
-        $vItem->Lines->Add(); 
+        $vItem->Lines->Add(); //guardar Recibo de Produccion
         if ($vItem->Add() == 0) {// cero es correcto   
                 return 'Recibo creado correctamente';
         } else {
                 $descripcionError = self::$vCmp->GetLastErrorDescription();    
                 if (strpos($descripcionError, 'IGN1.WhsCode][line: 1') !== false) {
-                $descripcionError = $descripcionError.' Uno o más materiales tienen stock negativo. Actualiza Reporte "POSIBLE ROMPIMIENTOS"';
+                $descripcionError = $descripcionError.
+                ' Uno o más materiales tienen stock negativo. Actualiza Reporte "POSIBLE ROMPIMIENTOS"';
                 }
                 return 'Error SAP: '.$descripcionError;
         }  
