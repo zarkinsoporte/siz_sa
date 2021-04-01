@@ -78,6 +78,39 @@ public function generarOP(Request $request){
             return 'No se ha seleccionado ninguna OV';
         }
 }
+public function asignar_series(Request $request){
+        ini_set('memory_limit', '-1');
+        set_time_limit(0);
+        if(strlen($request->input('ordenes')) > 0 ){
+            $preOrdenes = explode(',', $request->input('ordenes'));
+            $index = 0;
+            $numSerieGrupal = null;
+            foreach ($preOrdenes as $key => $preorden) {
+                $orden = explode('&',$preorden);
+                if (count($orden) == 2) {
+                    $grupal = $orden[1];
+                    $orden = $orden[0];
+                    //obetener siguiente numero de serie
+                    $numSerie = DB::table('OWOR')->max('U_NoSerie');
+                    $numSerie++;
+                    if ($grupal == 1) {
+                       if ($index == 0){
+                           $index = 1;
+                           $numSerieGrupal = $numSerie;
+                       }
+                       if (!is_null($numSerieGrupal)) {
+                           SAP::updateSerieOrden($orden, $numSerieGrupal);                           
+                       }
+                    } else if ($grupal == 0) {
+                        SAP::updateSerieOrden($orden, $numSerie);
+                    }
+                }
+            }
+            
+        }else{
+            return 'No se ha seleccionado ninguna OV';
+        }
+}
 public function updateOV(Request $request){
     ini_set('memory_limit', '-1');
         set_time_limit(0);
@@ -190,6 +223,42 @@ public function registros_gop(Request $request){
 //U_LineNum = T1.LineNum AND
             $pedidos_gop = collect($consulta);
             return compact('pedidos_gop');
+        } catch (\Exception $e) {
+            header('HTTP/1.1 500 Internal Server Error');
+            header('Content-Type: application/json; charset=UTF-8');
+            die(json_encode(array(
+                "mensaje" => $e->getMessage(),
+                "codigo" => $e->getCode(),
+                "clase" => $e->getFile(),
+                "linea" => $e->getLine()
+            )));
+        }
+}
+public function registros_tabla_series(){
+        try {
+            ini_set('memory_limit', '-1');
+            set_time_limit(0);
+            $sel = "SELECT 
+                    '0' [Grupal],
+                    OW.DocEntry as Orden,
+                    T0.DocNum AS Pedido, 
+                    T1.ItemCode AS Codigo,
+                    T1.Dscription AS Descripcion,
+                    (SELECT CardName  FROM OCRD WHERE	OCRD.CardCode = T1.BaseCard) Cliente,
+                    OW.U_NoSerie AS NumSerie,
+                    OW.Status AS Estatus,
+                    (SELECT U_TipoMat  FROM OITM WHERE	OITM.ItemCode = T1.ItemCode) TipoMaterial
+                    FROM dbo.ORDR T0
+                    INNER JOIN dbo.RDR1 T1 ON T0.DocEntry = T1.DocEntry
+                    INNER JOIN OWOR OW on OW.OriginNum = T0.DocEntry 
+                    WHERE T1.Quantity > ISNULL(T1.U_Procesado,0) 
+                    AND U_NoSerie = 1
+                    --AND Status = 'P'
+                    ORDER BY T0.DocEntry";
+            $sel =  preg_replace('/[ ]{2,}|[\t]|[\n]|[\r]/', ' ', ($sel));
+            $consulta = DB::select($sel);
+            $tabla_series = collect($consulta);
+            return compact('tabla_series');
         } catch (\Exception $e) {
             header('HTTP/1.1 500 Internal Server Error');
             header('Content-Type: application/json; charset=UTF-8');

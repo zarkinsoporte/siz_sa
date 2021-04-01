@@ -34,6 +34,28 @@ class SAP extends Model
             return 'Conectado';
         }
     }
+    public static function updateSerieOrden($orden, $numSerie)
+    {
+        /* //EN CASO DE QUE SEA MANUAL
+        DB::table('OWOR')
+        ->where('DocEntry', '=', $orden)
+            ->update(['U_NoSerie' =>  $numSerie]);
+            return $numSerie;
+            */
+        //Cambia el campo de usuario de serie.
+        (self::$vCmp == false) ? self::Connect() : '';
+        $vItem = self::$vCmp->GetBusinessObject("202");
+        $RetVal = $vItem->GetByKey($orden);
+        $vItem->UserFields->Fields->Item('U_NoSerie')->Value = $numSerie;
+       
+        $retCode = $vItem->Update;
+        if ($retCode != 0
+        ) {
+            return 'Error, '.self::$vCmp->GetLastErrorDescription();
+        } else {
+            return $numSerie;
+        }
+    }
     public static function ProductionOrderStatus($orden, $status)
     {
         //Cambia el status de una orden en SAP. el status sigue los siguientes criterios

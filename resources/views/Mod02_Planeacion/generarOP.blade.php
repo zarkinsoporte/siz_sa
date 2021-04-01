@@ -44,7 +44,11 @@
                 border-bottom: 1px solid #111;
                 max-height: 250px;
                 }
-                div.dataTables_wrapper { }
+                .dataTables_wrapper .dataTables_filter {
+                float: right;
+                text-align: right;
+                visibility: visible;
+                }
             </style>
 
                 <div class="container" >
@@ -121,36 +125,29 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div id="hiddendiv" class="progress" style="display: none">
-                                                    <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="100"
-                                                        aria-valuemin="0" aria-valuemax="100" style="width: 50%">
-                                                        <span>Espere un momento...<span class="dotdotdot"></span></span>
-                                                    </div>
-                                                </div>
+                                               
                                             </div>
                                         </div>                                                                                                 
                                     </div> 
                                 </div>
                                                           
-                                <div class="tab-pane fade " id="default-tab-2">
-                                    <div class="container">                                                     
-                                        @include('Mod02_Planeacion.plantillaGenerarOP')
-                                    </div>
+                                <div class="tab-pane fade " id="default-tab-2">                                                                                        
+                                    @include('Mod02_Planeacion.plantillaSeries')                                   
                                 </div>
 
                                 <div class="tab-pane fade " id="default-tab-3">
                                     <div class="container">                                                        
-                                        @include('Mod02_Planeacion.plantillaGenerarOP')
+                                        @include('Mod02_Planeacion.plantillaProgramacion')
                                     </div>
                                 </div>                      
                                 <div class="tab-pane fade " id="default-tab-4">
                                     <div class="container">                         
-                                        @include('Mod02_Planeacion.plantillaGenerarOP')
+                                        @include('Mod02_Planeacion.plantillaLiberacion')
                                     </div>
                                 </div>   
                                 <div class="tab-pane fade " id="default-tab-5">
                                     <div class="container">                                                            
-                                       @include('Mod02_Planeacion.plantillaGenerarOP')
+                                       @include('Mod02_Planeacion.plantillaImpresion')
                                     </div>
                                 </div>                                                               
                                                    
@@ -195,21 +192,18 @@
                             }
                             });
 
-                            {{-- window.open("{{ URL::asset('ayudas_pdf') }}"+"/AY_00.pdf","_blank"); --}}
-                           // var namefile= 'RG_'+$('#btn_pdf').attr('ayudapdf')+'.pdf';
-                            //var pathfile = "{{ URL::asset('ayudas_pdf') }}"+"/"+namefile;                           
-                           // window.open(pathfile,"_blank");
+                           
                         }
                     }
-                  
-                {{-- GENERAR OP--}}
+      $(window).on('load',function(){            
+                /*GENERAR OP*/
                 var table = $("#tabla_pedidos").DataTable({
                 language:{
                 "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
                 }, 
                 scrollX: true,
-                 
-                    scrollCollapse: true,
+                dom: 'lfrtip',
+                scrollCollapse: true,
                 deferRender: true,        
                    pageLength:-1,
                     columns: [                   
@@ -244,7 +238,7 @@
                     },
                     ],
                     });
-                {{--FIN GENERAR OP--}}
+               
                 $.ajax({
         type: 'GET',
         async: true,       
@@ -273,6 +267,30 @@
    
      $('#btn_enviar').on('click', function(e) {
         e.preventDefault();
+        var oper = $('#btn_enviar').attr('data-operacion');
+        console.log(oper);
+        switch (oper) {
+            case '1':
+                click_pedidos();
+                break;
+            case '2':
+                click_series();
+                break;
+            case '3':
+                click_series();
+                break;
+            case '4':
+                click_series();
+                break;
+            case '5':
+                click_series();
+                break;
+        
+            default:
+                break;
+        }
+     });
+     function click_pedidos() {
         var ordvta = table.rows('.selected').data();
         //var ordvtac = table.rows('.selected').node();
         //console.log(ordvtac[0])
@@ -286,7 +304,7 @@
             }
             //console.log(ordvta[i]);         
         }
-        var oper = $('#btn_enviar').attr('data-operacion');
+        
         if(registros > 0){
                 $.ajax({
                 type: 'POST',
@@ -334,7 +352,7 @@
                 }
                 }).find('.modal-content').css({'font-size': '14px'} );
         }           
-    });
+    }
     function enviaOrdenes(item, index) {
         console.log(item);
     }
@@ -383,7 +401,201 @@ function reloadOrdenesPedidos(){
         }
     });
 }
-}  //js_iniciador               
+// FIN GENERAR OP
+// INICIO GENERAR SERIES
+ var tabla_series = $("#tabla_series").DataTable({
+                language:{
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                }, 
+                dom: 'lfrtip',
+                scrollX: true,
+                 scrollY: "200px",
+                    scrollCollapse: true,
+                deferRender: true,        
+                   pageLength:-1,
+                    columns: [                   
+                    {data: "Grupal"},
+                    {data: "Orden"},
+                    {data: "Codigo"},
+                    {data: "Descripcion"},
+                    {data: "Pedido"},
+                    {data: "Cliente"},
+                    ],
+                    'columnDefs': [{
+                        'targets': 0,
+                        'searchable': false,
+                        'orderable': false,
+                        'className': 'dt-body-center',
+                        'render': function (data, type, full, meta){
+                           return '<input type="checkbox" name="selectCheck" value="' + $('<div/>').text(data).html() + '">';
+                        }
+                        
+                    },
+                    ],
+                    });
+               
+                $.ajax({
+        type: 'GET',
+        async: true,       
+        url: '{!! route('datatables.tabla_series') !!}',
+        data: {
+           
+        },
+        beforeSend: function() {
+            
+        },
+        complete: function() {
+           // setTimeout($.unblockUI, 1500);
+        },
+        success: function(data){            
+                   
+                if(data.tabla_series.length > 0){
+                $("#tabla_series").dataTable().fnAddData(data.tabla_series);
+                }else{
+                
+                } 
+                tabla_series.columns.adjust().draw();       
+        }
+    });
+    $('#tabla_series tbody').on( 'click', 'tr', function () {
+        $(this).toggleClass('selected');
+    } );
+   
+    function click_series() {
+        
+        var ordvta = tabla_series.rows('.selected').data();
+        
+        var ovs = '';
+        var registros = ordvta == null ? 0 : ordvta.length;
+        for(var i=0; i < registros; i++){
+            if (i == registros - 1) {
+                ovs += ordvta[i].Orden + "&" + ordvta[i].Grupal;
+            } else {
+                ovs += ordvta[i].Orden + "&"+ ordvta[i].Grupal +  ",";
+            }
+            //console.log(ordvta[i]);         
+        }
+        console.log(ovs)
+        if(registros > 0){
+        
+                $.ajax({
+                type: 'POST',
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                data: {
+                "_token": "{{ csrf_token() }}",
+                ordenes: ovs,
+            
+                },
+                url: '{!! route('asignar_series') !!}',
+                beforeSend: function() {
+                $.blockUI({
+                message: '<h2>Procesando</h2><h3>espere...<i class="fa fa-spin fa-spinner"></i></h3>',
+                css: {
+                border: 'none',
+                padding: '16px',
+                width: '50%',
+                top: '40%',
+                left: '30%',
+                backgroundColor: '#fefefe',
+                '-webkit-border-radius': '10px',
+                '-moz-border-radius': '10px',
+                opacity: .7,
+                color: '#000000'
+                }
+                });
+                },
+                complete: function() {
+                    setTimeout($.unblockUI, 1500);
+                    reloadOrdenesSeries();
+                },
+                success: function(data){   
+                
+                }
+                }); 
+        }else{
+              bootbox.dialog({
+                title: "Mensaje",
+                message: "<div class='alert alert-danger m-b-0'>No hay registros seleccionados.</div>",
+                buttons: {
+                success: {
+                label: "Ok",
+                className: "btn-success m-r-5 m-b-5"
+                }
+                }
+                }).find('.modal-content').css({'font-size': '14px'} );
+        }           
+    }
+
+    $('#tabla_series tbody').on( 'change', 'td input', function (e) {
+
+    e.preventDefault();
+
+    //var tbl = $('#tableFacturas').DataTable();
+    var fila = $(this).closest('tr');
+    console.log(fila)
+    var datos = tabla_series.row(fila).data();
+    console.log(datos)
+    var check = datos['Grupal'];
+    console.log(check)
+    
+
+    if(check == 0){
+        datos['Grupal'] = 1;
+    } else {
+        datos['Grupal'] = 0;
+    }
+    console.log(datos) 
+});
+function reloadOrdenesSeries(){
+    $("#tabla_series").DataTable().clear().draw();
+    $.ajax({
+        type: 'GET',
+        async: true,       
+        url: '{!! route('datatables.tabla_series') !!}',
+        data: {
+           
+        },
+        beforeSend: function() {
+            
+        },
+        complete: function() {
+           // setTimeout($.unblockUI, 1500);
+        },
+        success: function(data){   
+            if(data.tabla_series.length > 0){
+                $("#tabla_series").dataTable().fnAddData(data.tabla_series);           
+            }else{ 
+
+            }        
+        }
+    });
+}
+// FIN GENERAR SERIES
+
+/* NOTA: cuando la tabla esta dentro de elementos ocultos por ejemplo en tab
+o en un collapsable hay que ajustar las cabeceras cuando la tabla va 
+a ser visible:
+
+If table is in the collapsible element, you need to adjust headers when collapsible element becomes visible.
+For example, for Bootstrap Collapse plugin:
+$('#myCollapsible').on('shown.bs.collapse', function () {
+$($.fn.dataTable.tables(true)).DataTable()
+.columns.adjust();
+});
+
+If table is in the tab, you need to adjust headers when tab becomes visible.
+For example, for Bootstrap Tab plugin:
+$('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
+$($.fn.dataTable.tables(true)).DataTable()
+.columns.adjust();
+});
+*/
+$('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
+$($.fn.dataTable.tables(true)).DataTable()
+.columns.adjust();
+});
+      });//fin on load
+}  //fin js_iniciador               
                    function val_btn(val) {                     
                           $('#btn_enviar').attr('data-operacion', val);                                                     
                     } 

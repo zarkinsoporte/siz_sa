@@ -390,6 +390,8 @@ Route::get('home/{r0}/ayudas_pdf/{PdfName}', 'HomeController@showPdf2');
 Route::get('home/GENERAR OP', 'Mod02_PlaneacionController@indexGenerarOP')->middleware('routelog');
 Route::any('datatables.gop', 'Mod02_PlaneacionController@registros_gop')->name('datatables.gop');
 Route::any('generarOP', 'Mod02_PlaneacionController@generarOP')->name('generarOP');
+Route::any('datatables.tabla_series', 'Mod02_PlaneacionController@registros_tabla_series')->name('datatables.tabla_series');
+Route::any('asignar_series', 'Mod02_PlaneacionController@asignar_series')->name('asignar_series');
 //
 //-------------------------//
 //RUTAS DE PRODUCCION POR AREAS//---------------------------------------------------------
