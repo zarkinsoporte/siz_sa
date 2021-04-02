@@ -71,12 +71,13 @@ public function indexGenerarOP(){
 public function generarOP(Request $request){
         ini_set('memory_limit', '-1');
         set_time_limit(0);
+        $orders = '';
         if(strlen($request->input('ordenesvta')) > 0 ){                     
-            $orders = SAP::crearOrdenesProduccion($request->input('ordenesvta'));
-            return $orders;
+            $orders = SAP::crearOrdenesProduccion($request->input('ordenesvta'));                        
         }else{
-            return 'No se ha seleccionado ninguna OV';
+            $orders = 'Error, No se ha seleccionado ninguna OV';
         }
+        return compact('orders');
 }
 public function asignar_series(Request $request){
         ini_set('memory_limit', '-1');
@@ -85,6 +86,7 @@ public function asignar_series(Request $request){
             $preOrdenes = explode(',', $request->input('ordenes'));
             $index = 0;
             $numSerieGrupal = null;
+            $mensajeErrr= '';
             foreach ($preOrdenes as $key => $preorden) {
                 $orden = explode('&',$preorden);
                 if (count($orden) == 2) {
@@ -99,14 +101,20 @@ public function asignar_series(Request $request){
                            $numSerieGrupal = $numSerie;
                        }
                        if (!is_null($numSerieGrupal)) {
-                           SAP::updateSerieOrden($orden, $numSerieGrupal);                           
+                        $rs = SAP::updateSerieOrden($orden, $numSerieGrupal); 
+                           if(!is_numeric($rs)){
+                               $mensajeErrr = $mensajeErrr.$rs;
+                            }                         
                        }
                     } else if ($grupal == 0) {
-                        SAP::updateSerieOrden($orden, $numSerie);
+                        $rs = SAP::updateSerieOrden($orden, $numSerie);
+                        if(!is_numeric($rs)){
+                            $mensajeErrr = $mensajeErrr.$rs;
+                         }
                     }
                 }
             }
-            
+            return compact('mensajeErrr');
         }else{
             return 'No se ha seleccionado ninguna OV';
         }
@@ -251,12 +259,19 @@ public function registros_tabla_series(){
                     FROM dbo.ORDR T0
                     INNER JOIN dbo.RDR1 T1 ON T0.DocEntry = T1.DocEntry
                     INNER JOIN OWOR OW on OW.OriginNum = T0.DocEntry 
-                    WHERE T1.Quantity > ISNULL(T1.U_Procesado,0) 
-                    AND U_NoSerie = 1
-                    --AND Status = 'P'
+                    WHERE  
+                    U_NoSerie = 1
+                    AND Status = 'P'
                     ORDER BY T0.DocEntry";
             $sel =  preg_replace('/[ ]{2,}|[\t]|[\n]|[\r]/', ' ', ($sel));
             $consulta = DB::select($sel);
+            $sel = "select O.u_tipoMat, OW.DocEntry from OWOR OW
+					INNER JOIN OITM O on OW.ItemCode = O.ItemCode
+					WHERE U_NoSerie = 1 AND Status = 'P' AND O.U_TipoMat <> 'PT'";
+            $subensambles = DB::select($sel);
+            foreach ($subensambles as $key => $value) {
+                SAP::updateSerieOrden($value->DocEntry, '2');
+            }
             $tabla_series = collect($consulta);
             return compact('tabla_series');
         } catch (\Exception $e) {

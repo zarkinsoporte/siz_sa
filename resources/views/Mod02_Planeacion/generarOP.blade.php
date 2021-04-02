@@ -307,7 +307,7 @@
         
         if(registros > 0){
                 $.ajax({
-                type: 'POST',
+                type: 'GET',
                 headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                 data: {
                 "_token": "{{ csrf_token() }}",
@@ -337,7 +337,18 @@
                     reloadOrdenesPedidos();
                 },
                 success: function(data){   
-                
+                    if (data.orders.includes('Error')) {
+                        bootbox.dialog({
+                            title: "Mensaje",
+                            message: "<div class='alert alert-danger m-b-0'>"+data.orders+"</div>",
+                            buttons: {
+                            success: {
+                            label: "Ok",
+                            className: "btn-success m-r-5 m-b-5"
+                            }
+                            }
+                            }).find('.modal-content').css({'font-size': '14px'} );
+                    }
                 }
                 }); 
         }else{
@@ -409,8 +420,8 @@ function reloadOrdenesPedidos(){
                 }, 
                 dom: 'lfrtip',
                 scrollX: true,
-                 scrollY: "200px",
-                    scrollCollapse: true,
+                scrollY: "200px",
+                scrollCollapse: true,
                 deferRender: true,        
                    pageLength:-1,
                     columns: [                   
@@ -418,8 +429,8 @@ function reloadOrdenesPedidos(){
                     {data: "Orden"},
                     {data: "Codigo"},
                     {data: "Descripcion"},
-                    {data: "Pedido"},
                     {data: "Cliente"},
+                    {data: "Pedido"},
                     ],
                     'columnDefs': [{
                         'targets': 0,
@@ -479,7 +490,7 @@ function reloadOrdenesPedidos(){
         if(registros > 0){
         
                 $.ajax({
-                type: 'POST',
+                type: 'GET',
                 headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                 data: {
                 "_token": "{{ csrf_token() }}",
@@ -509,7 +520,18 @@ function reloadOrdenesPedidos(){
                     reloadOrdenesSeries();
                 },
                 success: function(data){   
-                
+                    if (data.mensajeErrr.includes('Error')) {
+                        bootbox.dialog({
+                            title: "Mensaje",
+                            message: "<div class='alert alert-danger m-b-0'>"+data.mensajeErrr+"</div>",
+                            buttons: {
+                            success: {
+                            label: "Ok",
+                            className: "btn-success m-r-5 m-b-5"
+                            }
+                            }
+                            }).find('.modal-content').css({'font-size': '14px'} );
+                    }
                 }
                 }); 
         }else{

@@ -421,6 +421,8 @@ Route::get('/pruebas', function (Request $request) {
 Route::get('/crear-orden', 'Mod02_PlaneacionController@crearOrden');
 
 Route::get('/sap-test', function (Request $request) {
+    
+    
     $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
     $vCmp->DbServerType="10"; 
     $vCmp->server = "ZARKIN-088";
@@ -434,11 +436,13 @@ Route::get('/sap-test', function (Request $request) {
     //$vCmp->language = "6";
     $lRetCode = $vCmp->Connect;
     if ($lRetCode <> 0) {
-       Session::flash('sap', $vCmp->GetLastErrorDescription());
+       Session::flash('error', $vCmp->GetLastErrorDescription());
     } else {
-        Session::flash('sap',' - conexión con SAP DI API exitosa!!');
-    }  
-    return view('welcome');
+        Session::flash('info',' - conexión con SAP DI API exitosa!!');
+    } 
+    Session::flash('error', $vCmp->GetLastErrorDescription());
+    return redirect('home');
+    //return view('welcome');
     
  });
 

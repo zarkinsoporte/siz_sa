@@ -46,11 +46,9 @@ class SAP extends Model
         (self::$vCmp == false) ? self::Connect() : '';
         $vItem = self::$vCmp->GetBusinessObject("202");
         $RetVal = $vItem->GetByKey($orden);
-        $vItem->UserFields->Fields->Item('U_NoSerie')->Value = $numSerie;
-       
+        $vItem->UserFields->Fields->Item('U_NoSerie')->Value = ''.$numSerie;
         $retCode = $vItem->Update;
-        if ($retCode != 0
-        ) {
+        if ($retCode != 0) {
             return 'Error, '.self::$vCmp->GetLastErrorDescription();
         } else {
             return $numSerie;
@@ -385,6 +383,7 @@ class SAP extends Model
     }
     public static function crearOPs($itemOV, $OV, $cantidadOP, $repetir)
     {
+        
         if (self::$vCmp == false) {
             $cnn = self::Connect();
             if ($cnn == 'Conectado') {
@@ -406,7 +405,7 @@ class SAP extends Model
                 }
             }
         }
-        $resultadoEjecucion = 0;
+        $resultadoEjecucion = '';
         //-----------------------GENERACION OP DI API SAP BO-----------------------------------
         //DEFINICIONES
         //bopotStandard	    0	A production order type for producing a regular production item (default), using a production bill of materials.
@@ -488,6 +487,9 @@ class SAP extends Model
 
             $vItem->UserFields->Fields->Item('U_C_Orden')->Value = $item_uc_orden; //S,C o P
             $vItem->UserFields->Fields->Item('U_AteEspecial')->Value = $atencion_especial; //S o N
+            if (is_null( $OV->U_comp )) {
+                $resultadoEjecucion = $resultadoEjecucion .' Error Complejo NO capturado,  (OV:'.$ov.') ';
+            }
             $vItem->UserFields->Fields->Item('U_cc')->Value = $OV->U_comp; //
 
             //Fecha de Producción = Fecha Entrega – 7 días (Entrega producción)
@@ -524,12 +526,12 @@ class SAP extends Model
 
             $Nk = "";
 
-            if ($RetCode == 0) {
+            if (intval($RetCode) == 0) {
                
                 $resultadoEjecucion = 1;
                 
-            } else if ($lRetCode != 0) {
-                $resultadoEjecucion =  self::$vCmp->GetLastErrorDescription();
+            } else  {
+                $resultadoEjecucion = $resultadoEjecucion .  'Error, '.self::$vCmp->GetLastErrorDescription();
             }
         } //end for
         //}//end foreach
@@ -538,6 +540,7 @@ class SAP extends Model
     public static function  crearOrdenesProduccion($ovs)
     {
         $preOrdenes = explode(',', $ovs);
+        $mensajeErrr= '';
         foreach ($preOrdenes as $key => $preorden) {
             $orden = explode('&', $preorden);
             if (count($orden) == 3) {
@@ -551,19 +554,28 @@ class SAP extends Model
                     //(T1.Quantity-ISNULL(T1.U_Procesado
                     $cantidadOP = $Item->Quantity - ((is_numeric($Item->U_Procesado))? $Item->U_Procesado: 0);
                     $rs = self::crearOPs($Item, $OV, $cantidadOP, 1);
-                    if($rs == 1){
-                        self::updateOV($ov, $Item, $cantidadOP);
+                    if(is_numeric($rs)){
+                        if ($rs == 1) {
+                            self::updateOV($ov, $Item, $cantidadOP);
+                        }
+                    }else{
+                        $mensajeErrr = $mensajeErrr.$rs;
                     }
                 } else if ($grupal == 0) {
                     $cantidadOP = 1;
                     $repetir = $Item->Quantity - ((is_numeric($Item->U_Procesado))? $Item->U_Procesado: 0);
                     $rs = self::crearOPs($Item, $OV, $cantidadOP, $repetir);
-                    if ($rs == 1) {
-                        self::updateOV($ov, $Item, $repetir);
+                    if(is_numeric($rs)){
+                        if ($rs == 1) {
+                            self::updateOV($ov, $Item, $repetir);
+                        }
+                    }else{
+                        $mensajeErrr = $mensajeErrr.$rs;
                     }
                 }
             }
         }
+        return $mensajeErrr;
     }
     public static function updateOV($ov, $Item, $cantProcesada)
     {
@@ -605,15 +617,14 @@ class SAP extends Model
 
                             if ($retCode != 0) {
                                 return self::$vCmp->GetLastErrorDescription();
-                            } else {
-                                return '2';
-                            }
-                        } else {
-                            return '1';
+                            } 
+                        }else{
+                            return 'Error, No se marco OV como procesada, marcar manualmente en SAP (OV:'.$ov.') ';
                         }
+                        
                     }
                 } else {
-                    return '0';
+                    return 'Error, No hay mas para procesar (OV:'.$ov.', Item:'.$Item->ItemCode.') ';
                 }
             }
         }
