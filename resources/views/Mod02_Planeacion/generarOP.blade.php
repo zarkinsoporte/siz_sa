@@ -59,10 +59,7 @@
                             <h3 class="page-header">
                                PLANEACION SIZ
                                 <small><b>Ordenes de Producción:</b></small>
-                            <div class="pull-right width-full">
-                                <a id="btn_enviar" class="btn btn-success btn-sm" data-operacion='1' 
-                                    ><i class="fa fa-send"></i> Enviar</a>
-                            </div>
+                            
                             </h3>                                        
                         </div>
                           
@@ -72,6 +69,7 @@
                     </div>
                          <div class="row" id="panel-body-datos">
                             <input type="text" style="display: none" class="form-control input-sm" id="input-cliente-id">
+                            
                             <ul class="nav nav-tabs" >
                                 <li id="lista-tab1" class="active"><a onclick = "val_btn(1)" href="#default-tab-1" data-toggle="tab"
                                     aria-expanded="true">Generar OP</a></li>
@@ -83,6 +81,9 @@
                                     aria-expanded="false">Liberar</a></li>
                                 <li id="lista-tab5" class=""><a onclick = "val_btn(5)" href="#default-tab-5" data-toggle="tab" 
                                     aria-expanded="false">Impresión</a></li>
+                                <div class="pull-right">
+                                    <a style="margin-right: 30px;" id="btn_enviar" class="btn btn-success btn-sm" data-operacion='1'><i class="fa fa-send"></i> Enviar</a>
+                                </div>
                                 
                             </ul>
                             <div class="tab-content">
