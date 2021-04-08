@@ -594,6 +594,83 @@ function reloadOrdenesSeries(){
     });
 }
 // FIN GENERAR SERIES
+// INICIO LIBERACION
+var tabla_liberacion = $("#tabla_liberacion").DataTable({
+                language:{
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                }, 
+                dom: 'lfrtip',
+                scrollX: true,
+                scrollY: "200px",
+                scrollCollapse: true,
+                deferRender: true,        
+                   pageLength:-1,
+                    columns: [                   
+                    {data: "Estado"},
+                    {data: "Pedido"},
+                    {data: "OP"},
+                    {data: "Codigo"},
+                    {data: "Descripcion"},
+                    {data: "Cliente"}
+                    ],
+                    'columnDefs': [
+                        
+                    ],
+                    });
+               
+                $.ajax({
+        type: 'GET',
+        async: true,       
+        url: '{!! route('datatables.tabla_liberacion') !!}',
+        data: {
+           
+        },
+        beforeSend: function() {
+            
+        },
+        complete: function() {
+           // setTimeout($.unblockUI, 1500);
+        },
+        success: function(data){            
+                   
+                if(data.tabla_liberacion.length > 0){
+                $("#tabla_liberacion").dataTable().fnAddData(data.tabla_liberacion);
+                }else{
+                
+                } 
+                tabla_liberacion.columns.adjust().draw();       
+        }
+    });
+    $('#tabla_liberacion tbody').on( 'click', 'tr', function () {
+        $(this).toggleClass('selected');
+    } );
+
+   function reloadOrdenesLiberacion(){
+    $("#tabla_liberacion").DataTable().clear().draw();
+    $.ajax({
+        type: 'GET',
+        async: true,       
+        url: '{!! route('datatables.tabla_liberacion') !!}',
+        data: {
+           
+        },
+        beforeSend: function() {
+            
+        },
+        complete: function() {
+           // setTimeout($.unblockUI, 1500);
+        },
+        success: function(data){   
+            if(data.tabla_liberacion.length > 0){
+                $("#tabla_liberacion").dataTable().fnAddData(data.tabla_liberacion);           
+            }else{ 
+
+            }        
+        }
+    });
+}
+// FIN LIBERACION
+
 
 /* NOTA: cuando la tabla esta dentro de elementos ocultos por ejemplo en tab
 o en un collapsable hay que ajustar las cabeceras cuando la tabla va 

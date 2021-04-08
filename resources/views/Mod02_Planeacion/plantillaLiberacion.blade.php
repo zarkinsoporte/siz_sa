@@ -1,9 +1,8 @@
- {{-- cambiar id's --}}   
-<div class="container">                                                                                                                  
+<div class="container">
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
-    
+
                 <div class="panel-body">
                     <div>
                         @if (false)
@@ -14,21 +13,29 @@
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            
+                            <div class="table-scroll" id="registros-liberacion">
+                                <table id="tabla_liberacion" class="table table-striped table-bordered hover" width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th>Estado</th>
+                                            <th>Pedido</th>
+                                            <th>OP</th>
+                                            <th>Codigo</th>
+                                            <th>Descripción</th>
+                                            <th>Cliente</th>
+
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div id="hiddendiv" class="progress" style="display: none">
-                <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="100"
-                    aria-valuemin="0" aria-valuemax="100" style="width: 50%">
-                    <span>Espere un momento...<span class="dotdotdot"></span></span>
-                </div>
-            </div>
         </div>
-    </div>                                                                                                 
-</div> 
+    </div>
+</div>
 
 <script>
-   
+
 </script>

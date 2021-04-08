@@ -242,6 +242,42 @@ public function registros_gop(Request $request){
             )));
         }
 }
+public function registros_tabla_liberacion(){
+        try {
+            ini_set('memory_limit', '-1');
+            set_time_limit(0);
+            $sel = "SELECT
+					CASE OWOR.Status
+				WHEN 'R' THEN 'LIBERADA'
+				WHEN 'P' THEN 'PLANIFICADA' END Estado,
+				dbo.ORDR.DocNum AS Pedido,
+					--dbo.ORDR.DocDate AS FechaPedido,  
+					dbo.OWOR.DocNum AS OP, 
+                dbo.OWOR.ItemCode AS Codigo, 
+                dbo.OITM.ItemName AS Descripcion,
+				dbo.ORDR.CardCode +' - '+ dbo.ORDR.CardName AS Cliente
+                FROM      dbo.ORDR INNER JOIN
+                                dbo.OWOR ON dbo.ORDR.DocNum = dbo.OWOR.OriginNum INNER JOIN
+                                dbo.OITM ON dbo.OWOR.ItemCode = dbo.OITM.ItemCode
+                WHERE   (Status = 'P' OR Status = 'R') AND (dbo.OITM.U_TipoMat = 'PT')
+                AND U_NoSerie > 2
+                ORDER BY Pedido";
+            $sel =  preg_replace('/[ ]{2,}|[\t]|[\n]|[\r]/', ' ', ($sel));
+            $consulta = DB::select($sel);
+            
+            $tabla_liberacion = collect($consulta);
+            return compact('tabla_liberacion');
+        } catch (\Exception $e) {
+            header('HTTP/1.1 500 Internal Server Error');
+            header('Content-Type: application/json; charset=UTF-8');
+            die(json_encode(array(
+                "mensaje" => $e->getMessage(),
+                "codigo" => $e->getCode(),
+                "clase" => $e->getFile(),
+                "linea" => $e->getLine()
+            )));
+        }
+}
 public function registros_tabla_series(){
         try {
             ini_set('memory_limit', '-1');
@@ -261,7 +297,7 @@ public function registros_tabla_series(){
                     INNER JOIN OWOR OW on OW.OriginNum = T0.DocEntry 
                     WHERE  
                     U_NoSerie = 1
-                    AND Status = 'P'
+                    AND Status = 'P' AND T0.DocStatus = 'O'
                     ORDER BY T0.DocEntry";
             $sel =  preg_replace('/[ ]{2,}|[\t]|[\n]|[\r]/', ' ', ($sel));
             $consulta = DB::select($sel);

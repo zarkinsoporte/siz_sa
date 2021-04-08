@@ -21,7 +21,7 @@
                                             <th>Grupal</th>
                                             <th>Orden</th>
                                             <th>Código</th>                                                                
-                                            <th>Descripcion</th>                                            
+                                            <th>Descripción</th>                                            
                                             <th>Cliente</th>                                        
                                             <th>Pedido</th>
                                                                                 
