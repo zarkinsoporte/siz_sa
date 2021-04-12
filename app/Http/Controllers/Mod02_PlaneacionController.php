@@ -18,6 +18,9 @@ use Maatwebsite\Excel\Facades\Excel;
 use Datatables;
 use Illuminate\Database\Eloquent\Collection;
 use App\SAP;
+use App\OP;
+use App\Modelos\MOD01\LOGOF;
+use App\Modelos\MOD01\LOGOT;
 
 ini_set("memory_limit", '512M');
 ini_set('max_execution_time', 0);
@@ -62,6 +65,8 @@ public function indexGenerarOP(){
             $data = array(
                 'actividades' => $actividades,
                 'ultimo' => count($actividades),
+                'tipo' => ['PT', 'CA', 'OTRO'],
+                'estado' => ['Planificadas', 'Liberadas']
             );
             return view('Mod02_Planeacion.generarOP', $data);
         } else {
@@ -78,6 +83,86 @@ public function generarOP(Request $request){
             $orders = 'Error, No se ha seleccionado ninguna OV';
         }
         return compact('orders');
+}
+public function liberacion_op(Request $request){
+        ini_set('memory_limit', '-1');
+        set_time_limit(0);
+        if(strlen($request->input('ordenes')) > 0 ){
+            $preOrdenes = explode(',', $request->input('ordenes'));
+            $index = 0;
+            $numSerieGrupal = null;
+            $mensajeErrr= '';
+            foreach ($preOrdenes as $key => $preorden) {
+                $orden = explode('&',$preorden);
+                if (count($orden) == 2) {
+                    $op = $orden[1];
+                    $estado = $orden[0];
+                                 
+                    if ($estado == 'PLANIFICADA') { //PLANIFICADO
+                       //liberar en SAP
+                       $rs = SAP::ProductionOrderStatus($op, 1); 
+                       if(!($rs)){
+                           $mensajeErrr = 'Error No se logro cambiar(planificar) el estado en SAP. OP#'.$op;
+                        }else {
+                            //poner en Control Piso
+                            try {
+                                //DB::beginTransaction();
+                                $PlannedQty = DB::table('OWOR')->where('DocNum', $op)->value('PlannedQty');
+                                //dd($PlannedQty);
+                                $dt = date('Ymd h:i');
+                                //esta linea obtiene el consecutivo del numero
+                                $consecutivo = DB::select('select max (CONVERT(INT,Code)) as Code from [@CP_OF]');
+                                //aqui acaba num consecutivo
+                                $newCode = new OP();
+                                $newCode->Code = ((int) $consecutivo[0]->Code) + 1;
+                                $newCode->Name = ((int) $consecutivo[0]->Code) + 1;
+                                $newCode->U_DocEntry = $op;
+                                $newCode->U_CT = '100';
+                                $newCode->U_Entregado = 0;
+                                $newCode->U_Orden = '100';
+                                $newCode->U_Procesado = 0;
+                                $newCode->U_Recibido = intval($PlannedQty);
+                                $newCode->U_Reproceso = "N";
+                                $newCode->U_Defectuoso = 0;
+                                $newCode->U_Comentarios = "";
+                                $newCode->U_CTCalidad = 0;
+                                $newCode->save();
+                                //save=insert select max (CONVERT(INT,Code)) as Code
+                                $consecutivologot = DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOT]');
+                                $lot = new LOGOT();
+                                $lot->Code = ((int) $consecutivologot[0]->Code) + 1;
+                                $lot->Name = ((int) $consecutivologot[0]->Code) + 1;
+                                $lot->U_idEmpleado = Auth::user()->empID;
+                                $lot->U_CT = '100';
+                                $lot->U_Status = "O";
+                                $lot->U_FechaHora = $dt;
+                                $lot->U_OP = $op;
+                                $lot->save();
+                               // DB::commit();
+                            } catch (Exception $e) {
+                                DB::rollBack();
+                                $mensajeErrr = 'Error al guardar nuevo registro en CP_OF.';
+                            }
+                        }
+                       
+                    } else if ($estado == 'LIBERADA') { //LIBERADO
+                       //planificar en SAP
+                       $rs = SAP::ProductionOrderStatus($op, 0); 
+                       if(!($rs)){
+                           $mensajeErrr = 'Error No se logro cambiar(liberar) el estado en SAP. OP#'.$op;
+                        }else {
+                            //quitar de CP
+                            $code = OP::where('U_DocEntry', $op)->first();                            
+                            $code->delete();
+                        }
+                       
+                    }
+                }
+            }
+            return compact('mensajeErrr');
+        }else{
+            return 'No se ha seleccionado ninguna OV';
+        }
 }
 public function asignar_series(Request $request){
         ini_set('memory_limit', '-1');
@@ -242,29 +327,62 @@ public function registros_gop(Request $request){
             )));
         }
 }
-public function registros_tabla_liberacion(){
+public function registros_tabla_liberacion(Request $request){
+             //dd($request->all());
         try {
             ini_set('memory_limit', '-1');
             set_time_limit(0);
+            $estado = $request->input('estado');
+            $tipo = $request->input('tipo');
+            /*
+            'tipo' => ['PT', 'CA', 'OTRO'],
+            'estado' => ['Planificadas', 'Liberadas']
+            */
+            switch ($estado) {
+                case 0:
+                    $estado = 'P'; //PLANIFICADAS
+                    break;
+                case 1:
+                    $estado = 'R'; //LIBERADAS
+                    break;
+                    default:
+                    $estado = 'P';
+                    break;
+            }
+            switch ($tipo) {
+                case 0:
+                    $tipo = "dbo.OITM.U_TipoMat = 'PT'";//PRODUCTO TERMINADO
+                    break;
+                case 1:
+                    $tipo = "dbo.OITM.U_TipoMat = 'CA'"; //CASCO
+                    break;
+                case 2:
+                    $tipo = "dbo.OITM.U_TipoMat <> 'PT' AND dbo.OITM.U_TipoMat <> 'CA'"; //DIFENTES A LAS ANTERIORES (SUBENSAMBLES)
+                    break;
+                    default:
+                    $tipo = "dbo.OITM.U_TipoMat = 'PT'";//PRODUCTO TERMINADO
+                    break;
+            }
+            //dd([$estado, $tipo]);
+
             $sel = "SELECT
 					CASE OWOR.Status
-				WHEN 'R' THEN 'LIBERADA'
-				WHEN 'P' THEN 'PLANIFICADA' END Estado,
+                    WHEN 'R' THEN 'LIBERADA'
+                    WHEN 'P' THEN 'PLANIFICADA' END Estado,
 				dbo.ORDR.DocNum AS Pedido,
-					--dbo.ORDR.DocDate AS FechaPedido,  
-					dbo.OWOR.DocNum AS OP, 
+				dbo.OWOR.DocNum AS OP, 
                 dbo.OWOR.ItemCode AS Codigo, 
                 dbo.OITM.ItemName AS Descripcion,
 				dbo.ORDR.CardCode +' - '+ dbo.ORDR.CardName AS Cliente
                 FROM      dbo.ORDR INNER JOIN
                                 dbo.OWOR ON dbo.ORDR.DocNum = dbo.OWOR.OriginNum INNER JOIN
                                 dbo.OITM ON dbo.OWOR.ItemCode = dbo.OITM.ItemCode
-                WHERE   (Status = 'P' OR Status = 'R') AND (dbo.OITM.U_TipoMat = 'PT')
-                AND U_NoSerie > 2
+                WHERE   (Status = '". $estado ."') AND (". $tipo .")
+                AND U_NoSerie > 1
                 ORDER BY Pedido";
             $sel =  preg_replace('/[ ]{2,}|[\t]|[\n]|[\r]/', ' ', ($sel));
             $consulta = DB::select($sel);
-            
+            //dd($sel);
             $tabla_liberacion = collect($consulta);
             return compact('tabla_liberacion');
         } catch (\Exception $e) {

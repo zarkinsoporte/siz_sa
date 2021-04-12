@@ -56,6 +56,18 @@ class SAP extends Model
     }
     public static function ProductionOrderStatus($orden, $status)
     {
+        self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
+        self::$vCmp->DbServerType = "10";
+        self::$vCmp->server = "ZARKIN-088";
+        self::$vCmp->LicenseServer = "ZARKIN-088:30000";
+        self::$vCmp->CompanyDB = "SBO_PRUEBAS";
+        self::$vCmp->username = "SIZ_PROD";
+        self::$vCmp->password = "Zark&n20";
+        self::$vCmp->DbUserName = "sa";
+        self::$vCmp->DbPassword = "B1Admin";
+        self::$vCmp->UseTrusted = false;
+        //self::$vCmp->language = "6";
+        $lRetCode = self::$vCmp->Connect;
         //Cambia el status de una orden en SAP. el status sigue los siguientes criterios
         //--P -> 0 OP95 planificado
         //--R -> 1 OP271 liberado
