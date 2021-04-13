@@ -199,24 +199,30 @@ class Mod01_ProduccionController extends Controller
             $mipassword = $request->input('pass', 'cambuser', 'cambiaruser'); 
             $mipasswor2 = Session::get('pass2');    
         }
-       
-//dd($request->input('miusuario'), $enviado);
 
         if (Auth::check()) {
             $user = Auth::user();
             $actividades = $user->getTareas();
        
-            if ($enviado == 'send') {
+            if ($enviado == 'send') {//POST
                 if (strlen($miusuario) == null) {
+                    //el usuario autenticado sera quien haga el movimiento
                     $t_user = Auth::user();
                 } else {
+                    //el usuario autenticado especifica un empleado para el movimiento de la orden
                     $t_user = User::find($miusuario);
+                    
                     if ($t_user == null) {
-                        return redirect()->back()->withErrors(array('message' => 'Error, el usuario no existe.'));
+                        return redirect()->back()->withErrors(array('message' => 'Error, El usuario no existe.'));
+                    }else if($t_user->status != 1){
+                        return redirect()->back()->withErrors(array('message' => 'Error, Usuario no activo.'));
                     }
                 }
                 
-                if (($mipassword == '0123' && $mipasswor2 == '1234')||Hash::check($mipassword, $t_user->U_CP_Password) || ($mipassword == '0123' && $request->input('pass2') == '1234')) {
+                if (($mipassword == '0123' && $mipasswor2 == '1234')
+                ||Hash::check($mipassword, $t_user->U_CP_Password) 
+                || ($mipassword == '0123' && $request->input('pass2') == '1234')) 
+                {
                     Session::flash('usertraslados', 1);
                     if ($request->input('Recordarpass') == 1) { //revisar si esta checado el de recordar contraseña
                         Session::put('Rec_pass', $mipassword);
@@ -227,11 +233,11 @@ class Mod01_ProduccionController extends Controller
                     $rutasConNombres = self::getNombresRutas($Fil_Est); //ARRAY LLAVE VALOR
                     
                     return view('Mod01_Produccion.traslados', ['rutasConNombres' => $rutasConNombres, 't_user' => $t_user, 'est_Av' => $est_Av, 'Fil_Est' => $Fil_Est, 'actividades' => $actividades, 'ultimo' => count($actividades), 't_user' => $t_user]);
-                } else {
+                } else { 
                     return redirect()->back()->withErrors(array('message' => 'Error de autenticación.'));
                 }
 
-            } else {
+            } else {///GET
 
                 Session::flash('usertraslados', false);
             }
