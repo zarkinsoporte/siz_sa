@@ -278,19 +278,94 @@
                 click_series();
                 break;
             case '3':
-                click_series();
+                //click_series();
                 break;
             case '4':
-                click_series();
+                console.log(' click liberar');
+                click_liberacion();
                 break;
             case '5':
-                click_series();
+                //click_series();
                 break;
         
             default:
                 break;
         }
      });
+     function click_liberacion() {
+        var ordvta = tabla_liberacion.rows('.selected').data();
+        //var ordvtac = table.rows('.selected').node();
+        //console.log(ordvtac[0])
+        var ops = '';
+        var registros = ordvta == null ? 0 : ordvta.length;
+        for(var i=0; i < registros; i++){
+            if (i == registros - 1) {
+                ops += ordvta[i].Estado + "&" + ordvta[i].OP;
+            } else {
+                ops += ordvta[i].Estado + "&"+ ordvta[i].OP + ",";
+            }
+            //console.log(ordvta[i]);         
+        }
+        
+        if(registros > 0){
+                $.ajax({
+                type: 'GET',
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                data: {
+                "_token": "{{ csrf_token() }}",
+                ordenes: ops,
+            
+                },
+                url: '{!! route('liberacionOP') !!}',
+                beforeSend: function() {
+                $.blockUI({
+                message: '<h2>Procesando</h2><h3>espere...<i class="fa fa-spin fa-spinner"></i></h3>',
+                css: {
+                border: 'none',
+                padding: '16px',
+                width: '50%',
+                top: '40%',
+                left: '30%',
+                backgroundColor: '#fefefe',
+                '-webkit-border-radius': '10px',
+                '-moz-border-radius': '10px',
+                opacity: .7,
+                color: '#000000'
+                }
+                });
+                },
+                complete: function() {
+                    setTimeout($.unblockUI, 1500);
+                    reloadOrdenesLiberacion();
+                },
+                success: function(data){   
+                    if (data.mensajeErrr.includes('Error')) {
+                        bootbox.dialog({
+                            title: "Mensaje",
+                            message: "<div class='alert alert-danger m-b-0'>"+data.orders+"</div>",
+                            buttons: {
+                            success: {
+                            label: "Ok",
+                            className: "btn-success m-r-5 m-b-5"
+                            }
+                            }
+                            }).find('.modal-content').css({'font-size': '14px'} );
+                    }
+                }
+                }); 
+        }else{
+              bootbox.dialog({
+                title: "Mensaje",
+                message: "<div class='alert alert-danger m-b-0'>No hay registros seleccionados.</div>",
+                buttons: {
+                success: {
+                label: "Ok",
+                className: "btn-success m-r-5 m-b-5"
+                }
+                }
+                }).find('.modal-content').css({'font-size': '14px'} );
+        }           
+    }
      function click_pedidos() {
         var ordvta = table.rows('.selected').data();
         //var ordvtac = table.rows('.selected').node();
@@ -597,9 +672,30 @@ function reloadOrdenesSeries(){
 // INICIO LIBERACION
 var tabla_liberacion = $("#tabla_liberacion").DataTable({
                 language:{
-                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                    "url": "{{ asset('assets/lang/Spanish.json') }}",
                 }, 
-                dom: 'lfrtip',
+                dom: 'Bfrtip',
+                buttons: [
+                    {
+text: '<i class="fa fa-check-square"></i>',
+titleAttr: 'seleccionar',
+action: function() {
+    tabla_liberacion.rows({
+page: 'current'
+}).select();
+}
+},
+{
+text: '<i class="fa fa-square"></i>',
+titleAttr: 'deseleccionar',
+action: function() {
+    tabla_liberacion.rows({
+page: 'current'
+}).deselect();
+}
+},
+       
+    ],
                 scrollX: true,
                 scrollY: "200px",
                 scrollCollapse: true,
@@ -646,13 +742,19 @@ var tabla_liberacion = $("#tabla_liberacion").DataTable({
     } );
 
    function reloadOrdenesLiberacion(){
+    var estado = $('#cbo_estadoOP').val();
+    var tipo = $('#cbo_tipoOP').val();
+    console.log(estado);
+    console.log(tipo);
     $("#tabla_liberacion").DataTable().clear().draw();
     $.ajax({
         type: 'GET',
         async: true,       
         url: '{!! route('datatables.tabla_liberacion') !!}',
         data: {
-           
+            "_token": "{{ csrf_token() }}",
+            estado: estado,
+            tipo: tipo,
         },
         beforeSend: function() {
             
@@ -669,6 +771,11 @@ var tabla_liberacion = $("#tabla_liberacion").DataTable({
         }
     });
 }
+$('#boton-mostrar').on('click', function(e) {
+    e.preventDefault();
+    reloadOrdenesLiberacion();
+});
+
 // FIN LIBERACION
 
 

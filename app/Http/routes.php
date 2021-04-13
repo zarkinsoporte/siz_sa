@@ -393,6 +393,7 @@ Route::any('generarOP', 'Mod02_PlaneacionController@generarOP')->name('generarOP
 Route::any('datatables.tabla_series', 'Mod02_PlaneacionController@registros_tabla_series')->name('datatables.tabla_series');
 Route::any('datatables.tabla_liberacion', 'Mod02_PlaneacionController@registros_tabla_liberacion')->name('datatables.tabla_liberacion');
 Route::any('asignar_series', 'Mod02_PlaneacionController@asignar_series')->name('asignar_series');
+Route::any('liberacionOP', 'Mod02_PlaneacionController@liberacion_op')->name('liberacionOP');
 //
 //-------------------------//
 //RUTAS DE PRODUCCION POR AREAS//---------------------------------------------------------
