@@ -335,8 +335,8 @@
                 });
                 },
                 complete: function() {
-                    setTimeout($.unblockUI, 1500);
                     reloadOrdenesLiberacion();
+                    setTimeout($.unblockUI, 1500);
                 },
                 success: function(data){   
                     if (data.mensajeErrr.includes('Error')) {
@@ -409,8 +409,9 @@
                 });
                 },
                 complete: function() {
-                    setTimeout($.unblockUI, 1500);
                     reloadOrdenesPedidos();
+                    reloadOrdenesSeries();
+                    setTimeout($.unblockUI, 1500);
                 },
                 success: function(data){   
                     if (data.orders.includes('Error')) {
@@ -592,8 +593,8 @@ function reloadOrdenesPedidos(){
                 });
                 },
                 complete: function() {
-                    setTimeout($.unblockUI, 1500);
                     reloadOrdenesSeries();
+                    setTimeout($.unblockUI, 1500);
                 },
                 success: function(data){   
                     if (data.mensajeErrr.includes('Error')) {
