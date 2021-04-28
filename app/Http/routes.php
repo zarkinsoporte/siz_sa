@@ -395,6 +395,7 @@ Route::any('datatables.tabla_liberacion', 'Mod02_PlaneacionController@registros_
 Route::any('datatables.tabla_impresion', 'Mod02_PlaneacionController@registros_tabla_impresion')->name('datatables.tabla_impresion');
 Route::any('asignar_series', 'Mod02_PlaneacionController@asignar_series')->name('asignar_series');
 Route::any('liberacionOP', 'Mod02_PlaneacionController@liberacion_op')->name('liberacionOP');
+Route::any('impresionOP', 'Mod02_PlaneacionController@impresion_op')->name('impresionOP');
 //
 //-------------------------//
 //RUTAS DE PRODUCCION POR AREAS//---------------------------------------------------------
@@ -446,18 +447,19 @@ Route::get('/sap-test/{var?}', function (Request $request) {
     Session::flash('error', $vCmp->GetLastErrorDescription());
     //return view('welcome');
     
-    $vItem = self::$vCmp->GetBusinessObject("202");
-    $RetVal = $vItem->GetByKey($var);
+    $vItem = $vCmp->GetBusinessObject("202");
+    $RetVal = $vItem->GetByKey('12');
     //dd($vItem->Printed);
-    $vItem->Printed = 'Y';
+    $vItem->Printed = '';
     $retCode = $vItem->Update;
+    $retCode = 0;
+    Session::flash('info', $vItem->Printed);
     if ($retCode != 0) {
         return 'Error, ' . self::$vCmp->GetLastErrorDescription();
     } else {
-        Session::flash('info', $vItem->Printed);
        // return $numSerie;
-        return redirect('home');
     }
+    return redirect('home');
     
 });
 

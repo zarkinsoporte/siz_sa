@@ -161,8 +161,24 @@ public function liberacion_op(Request $request){
             }
             return compact('mensajeErrr');
         }else{
-            return 'No se ha seleccionado ninguna OV';
+            return 'No se ha seleccionado ninguna Orden';
         }
+}
+public function impresion_op(Request $request){
+    ini_set('memory_limit', '-1');
+    set_time_limit(0);
+    if(strlen($request->input('ordenes')) > 0 ){
+        $preOrdenes = explode(',', $request->input('ordenes'));
+        $index = 0;
+        $numSerieGrupal = null;
+        $mensajeErrr= '';
+        foreach ($preOrdenes as $key => $orden) {
+            
+        }
+        return compact('mensajeErrr');
+    }else{
+        return 'No se ha seleccionado ninguna Orden';
+    }
 }
 public function asignar_series(Request $request){
         ini_set('memory_limit', '-1');
@@ -201,7 +217,7 @@ public function asignar_series(Request $request){
             }
             return compact('mensajeErrr');
         }else{
-            return 'No se ha seleccionado ninguna OV';
+            return 'No se ha seleccionado ninguna Orden';
         }
 }
 public function updateOV(Request $request){
