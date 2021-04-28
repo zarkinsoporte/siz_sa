@@ -396,6 +396,79 @@ public function registros_tabla_liberacion(Request $request){
             )));
         }
 }
+    public function registros_tabla_impresion(Request $request)
+    {
+        //dd($request->all());
+        try {
+            ini_set('memory_limit', '-1');
+            set_time_limit(0);
+            $estado = $request->input('estado');
+            $tipo = $request->input('tipo');
+            /*
+            'tipo' => ['PT', 'CA', 'OTRO'],
+            'estado' => ['Planificadas', 'Liberadas']
+            */
+            /*
+            switch ($estado) {
+                case 0:
+                    $estado = 'P'; //PLANIFICADAS
+                    break;
+                case 1:
+                    $estado = 'R'; //LIBERADAS
+                    break;
+                default:
+                    $estado = 'P';
+                    break;
+            }
+            switch ($tipo) {
+                case 0:
+                    $tipo = "dbo.OITM.U_TipoMat = 'PT'"; //PRODUCTO TERMINADO
+                    break;
+                case 1:
+                    $tipo = "dbo.OITM.U_TipoMat = 'CA'"; //CASCO
+                    break;
+                case 2:
+                    $tipo = "dbo.OITM.U_TipoMat <> 'PT' AND dbo.OITM.U_TipoMat <> 'CA'"; //DIFENTES A LAS ANTERIORES (SUBENSAMBLES)
+                    break;
+                default:
+                    $tipo = "dbo.OITM.U_TipoMat = 'PT'"; //PRODUCTO TERMINADO
+                    break;
+            }
+            //dd([$estado, $tipo]);
+            */
+            $estado = 'R';
+            $tipo = "dbo.OITM.U_TipoMat = 'PT'";
+            $sel = "SELECT
+					CASE OWOR.Status
+                    WHEN 'R' THEN 'LIBERADA'
+                    WHEN 'P' THEN 'PLANIFICADA' END Estado,
+				dbo.ORDR.DocNum AS Pedido,
+				dbo.OWOR.DocNum AS OP, 
+                dbo.OWOR.ItemCode AS Codigo, 
+                dbo.OITM.ItemName AS Descripcion,
+				dbo.ORDR.CardCode +' - '+ dbo.ORDR.CardName AS Cliente
+                FROM      dbo.ORDR INNER JOIN
+                                dbo.OWOR ON dbo.ORDR.DocNum = dbo.OWOR.OriginNum INNER JOIN
+                                dbo.OITM ON dbo.OWOR.ItemCode = dbo.OITM.ItemCode
+                WHERE   (Status = '" . $estado . "') AND (" . $tipo . ")
+                AND U_NoSerie > 1 
+                ORDER BY Pedido";
+            $sel =  preg_replace('/[ ]{2,}|[\t]|[\n]|[\r]/', ' ', ($sel));
+            $consulta = DB::select($sel);
+            //dd($sel);
+            $tabla_impresion = collect($consulta);
+            return compact('tabla_impresion');
+        } catch (\Exception $e) {
+            header('HTTP/1.1 500 Internal Server Error');
+            header('Content-Type: application/json; charset=UTF-8');
+            die(json_encode(array(
+                "mensaje" => $e->getMessage(),
+                "codigo" => $e->getCode(),
+                "clase" => $e->getFile(),
+                "linea" => $e->getLine()
+            )));
+        }
+    }
 public function registros_tabla_series(){
         try {
             ini_set('memory_limit', '-1');

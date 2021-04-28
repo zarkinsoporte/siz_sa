@@ -392,6 +392,7 @@ Route::any('datatables.gop', 'Mod02_PlaneacionController@registros_gop')->name('
 Route::any('generarOP', 'Mod02_PlaneacionController@generarOP')->name('generarOP');
 Route::any('datatables.tabla_series', 'Mod02_PlaneacionController@registros_tabla_series')->name('datatables.tabla_series');
 Route::any('datatables.tabla_liberacion', 'Mod02_PlaneacionController@registros_tabla_liberacion')->name('datatables.tabla_liberacion');
+Route::any('datatables.tabla_impresion', 'Mod02_PlaneacionController@registros_tabla_impresion')->name('datatables.tabla_impresion');
 Route::any('asignar_series', 'Mod02_PlaneacionController@asignar_series')->name('asignar_series');
 Route::any('liberacionOP', 'Mod02_PlaneacionController@liberacion_op')->name('liberacionOP');
 //
@@ -422,7 +423,7 @@ Route::get('/pruebas', function (Request $request) {
 
 Route::get('/crear-orden', 'Mod02_PlaneacionController@crearOrden');
 
-Route::get('/sap-test', function (Request $request) {
+Route::get('/sap-test/{var?}', function (Request $request) {
     
     
     $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
@@ -443,10 +444,22 @@ Route::get('/sap-test', function (Request $request) {
         Session::flash('info',' - conexión con SAP DI API exitosa!!');
     } 
     Session::flash('error', $vCmp->GetLastErrorDescription());
-    return redirect('home');
     //return view('welcome');
     
- });
+    $vItem = self::$vCmp->GetBusinessObject("202");
+    $RetVal = $vItem->GetByKey($var);
+    //dd($vItem->Printed);
+    $vItem->Printed = 'Y';
+    $retCode = $vItem->Update;
+    if ($retCode != 0) {
+        return 'Error, ' . self::$vCmp->GetLastErrorDescription();
+    } else {
+        Session::flash('info', $vItem->Printed);
+       // return $numSerie;
+        return redirect('home');
+    }
+    
+});
 
 Route::post('home/traslados/terminar', 'Mod01_ProduccionController@terminarOP');
 //IMPRESION ETIQUETAS QR

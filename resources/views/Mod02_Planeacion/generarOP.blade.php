@@ -203,6 +203,7 @@
                 "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
                 }, 
                 scrollX: true,
+                scrollY: "240px",
                 dom: 'lfrtip',
                 scrollCollapse: true,
                 deferRender: true,        
@@ -285,7 +286,7 @@
                 click_liberacion();
                 break;
             case '5':
-                //click_series();
+                click_impresion();
                 break;
         
             default:
@@ -336,6 +337,81 @@
                 },
                 complete: function() {
                     reloadOrdenesLiberacion();
+                    reloadOrdenesImpresion();
+                    setTimeout($.unblockUI, 1500);
+                },
+                success: function(data){   
+                    if (data.mensajeErrr.includes('Error')) {
+                        bootbox.dialog({
+                            title: "Mensaje",
+                            message: "<div class='alert alert-danger m-b-0'>"+data.orders+"</div>",
+                            buttons: {
+                            success: {
+                            label: "Ok",
+                            className: "btn-success m-r-5 m-b-5"
+                            }
+                            }
+                            }).find('.modal-content').css({'font-size': '14px'} );
+                    }
+                }
+                }); 
+        }else{
+              bootbox.dialog({
+                title: "Mensaje",
+                message: "<div class='alert alert-danger m-b-0'>No hay registros seleccionados.</div>",
+                buttons: {
+                success: {
+                label: "Ok",
+                className: "btn-success m-r-5 m-b-5"
+                }
+                }
+                }).find('.modal-content').css({'font-size': '14px'} );
+        }           
+    }
+    function click_impresion() {
+        var ordvta = tabla_impresion.rows('.selected').data();
+        //var ordvtac = table.rows('.selected').node();
+        //console.log(ordvtac[0])
+        var ops = '';
+        var registros = ordvta == null ? 0 : ordvta.length;
+        for(var i=0; i < registros; i++){
+            if (i == registros - 1) {
+                ops += ordvta[i].OP;
+            } else {
+                ops += ordvta[i].OP + ",";
+            }
+            //console.log(ordvta[i]);         
+        }
+        
+        if(registros > 0){
+                $.ajax({
+                type: 'GET',
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                data: {
+                "_token": "{{ csrf_token() }}",
+                ordenes: ops,
+            
+                },
+                url: '{!! route('impresionOP') !!}',
+                beforeSend: function() {
+                $.blockUI({
+                message: '<h2>Procesando</h2><h3>espere...<i class="fa fa-spin fa-spinner"></i></h3>',
+                css: {
+                border: 'none',
+                padding: '16px',
+                width: '50%',
+                top: '40%',
+                left: '30%',
+                backgroundColor: '#fefefe',
+                '-webkit-border-radius': '10px',
+                '-moz-border-radius': '10px',
+                opacity: .7,
+                color: '#000000'
+                }
+                });
+                },
+                complete: function() {
+                    reloadOrdenesImpresion();
                     setTimeout($.unblockUI, 1500);
                 },
                 success: function(data){   
@@ -497,7 +573,7 @@ function reloadOrdenesPedidos(){
                 }, 
                 dom: 'lfrtip',
                 scrollX: true,
-                scrollY: "200px",
+                scrollY: "240px",
                 scrollCollapse: true,
                 deferRender: true,        
                    pageLength:-1,
@@ -673,7 +749,7 @@ function reloadOrdenesSeries(){
 // INICIO LIBERACION
 var tabla_liberacion = $("#tabla_liberacion").DataTable({
                 language:{
-                    "url": "{{ asset('assets/lang/Spanish.json') }}",
+                    "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
                 }, 
                 dom: 'Bfrtip',
                 buttons: [
@@ -698,7 +774,7 @@ page: 'current'
        
     ],
                 scrollX: true,
-                scrollY: "200px",
+                scrollY: "240px",
                 scrollCollapse: true,
                 deferRender: true,        
                    pageLength:-1,
@@ -778,6 +854,103 @@ $('#boton-mostrar').on('click', function(e) {
 });
 
 // FIN LIBERACION
+// INICIO IMPRESION
+var tabla_impresion = $("#tabla_impresion").DataTable({
+                language:{
+                    "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                }, 
+                dom: 'Bfrtip',
+                buttons: [
+                    {
+                text: '<i class="fa fa-check-square"></i>',
+                titleAttr: 'seleccionar',
+                action: function() {
+                    tabla_impresion.rows({
+                page: 'current'
+                }).select();
+                }
+                },
+                {
+                text: '<i class="fa fa-square"></i>',
+                titleAttr: 'deseleccionar',
+                action: function() {
+                    tabla_impresion.rows({
+                page: 'current'
+                }).deselect();
+                }
+                },
+                    
+                    ],
+                scrollX: true,
+                scrollY: "240px",
+                scrollCollapse: true,
+                deferRender: true,        
+                   pageLength:-1,
+                    columns: [                   
+                    
+                    {data: "Pedido"},
+                    {data: "OP"},
+                    {data: "Codigo"},
+                    {data: "Descripcion"},
+                    {data: "Cliente"}
+                    ],
+                    'columnDefs': [
+                        
+                    ],
+                    });
+               
+                $.ajax({
+        type: 'GET',
+        async: true,       
+        url: '{!! route('datatables.tabla_impresion') !!}',
+        data: {
+           
+        },
+        beforeSend: function() {
+            
+        },
+        complete: function() {
+           // setTimeout($.unblockUI, 1500);
+        },
+        success: function(data){            
+                   
+                if(data.tabla_impresion.length > 0){
+                $("#tabla_impresion").dataTable().fnAddData(data.tabla_impresion);
+                }else{
+                
+                } 
+                tabla_impresion.columns.adjust().draw();       
+        }
+    });
+    $('#tabla_impresion tbody').on( 'click', 'tr', function () {
+        $(this).toggleClass('selected');
+    } );
+
+   function reloadOrdenesImpresion(){
+    
+    $("#tabla_impresion").DataTable().clear().draw();
+    $.ajax({
+        type: 'GET',
+        async: true,       
+        url: '{!! route('datatables.tabla_impresion') !!}',
+        data: {
+            "_token": "{{ csrf_token() }}",
+        },
+        beforeSend: function() {
+            
+        },
+        complete: function() {
+           // setTimeout($.unblockUI, 1500);
+        },
+        success: function(data){   
+            if(data.tabla_impresion.length > 0){
+                $("#tabla_impresion").dataTable().fnAddData(data.tabla_impresion);           
+            }else{ 
+
+            }        
+        }
+    });
+}
 
 
 /* NOTA: cuando la tabla esta dentro de elementos ocultos por ejemplo en tab
