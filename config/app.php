@@ -152,6 +152,7 @@ return [
         Khill\Lavacharts\Laravel\LavachartsServiceProvider::class,
         Yajra\Datatables\DatatablesServiceProvider::class,
         SimpleSoftwareIO\QrCode\QrCodeServiceProvider::class,
+        Barryvdh\Snappy\ServiceProvider::class
     ],
 
     /*
@@ -208,6 +209,8 @@ return [
         'AppHelper' => App\Helpers\AppHelper::class,
         'QrCode' => SimpleSoftwareIO\QrCode\Facades\QrCode::class,
         'Clockwork' => Clockwork\Support\Laravel\Facade::class,
+        'SPDF' => Barryvdh\Snappy\Facades\SnappyPdf::class,
+        'Image' => Barryvdh\Snappy\Facades\SnappyImage::class,
     ],
 
 ];

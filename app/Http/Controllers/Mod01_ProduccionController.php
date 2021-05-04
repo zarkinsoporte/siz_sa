@@ -49,43 +49,7 @@ class Mod01_ProduccionController extends Controller
         // dd(OP::getStatus("81143"));
         // dd(OP::getRuta("81143"));
     }
-
-    public function ReporteOpPDF($op)
-    {
-        //$pdf = App::make('dompdf.wrapper');
-        $GraficaOrden = DB::select(DB::raw("SELECT [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,OHEM.firstName + ' ' + OHEM.lastName AS Empleado,
-        DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)) AS FechaF ,
-       [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
-        SUM([@CP_LOGOF].U_Cantidad) AS U_CANTIDAD,
-        sum(oitm.U_VS ) AS VS,
-        (SELECT CompnyName FROM OADM ) AS CompanyName
-        FROM [@CP_LOGOF] inner join [@PL_RUTAS] ON [@CP_LOGOF].U_CT = [@PL_RUTAS].Code
-        left join OHEM ON [@CP_LOGOF].U_idEmpleado = OHEM.empID
-        inner join OWOR ON [@CP_LOGOF].U_DocEntry = OWOR.DocNum
-        inner join OITM ON OWOR.ItemCode = OITM.ItemCode
-        WHERE U_DocEntry = $op
-        GROUP BY [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,
-        OHEM.firstName + ' ' + OHEM.lastName ,
-         DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)),[@CP_LOGOF].U_DocEntry
-        ,OWOR.ItemCode , OITM.ItemName
-        ORDER BY [@CP_LOGOF].U_CT, FechaF, Empleado"));
-        //dd($GraficaOrden);
-
-        $data = array(
-            'data' => $GraficaOrden,
-            'op' => $op,
-        );
-
-        // dd($sociedad);
-        //$data = $GraficaOrden;
-
-        $pdf = \PDF::loadView('Mod01_Produccion.ReporteOpPDF', $data);
-        //dd($pdf);
-
-        return $pdf->setOptions(['isPhpEnabled' => true, 'isRemoteEnabled' => true])->stream('Siz_Producción_Reporte_OP.Pdf');
-        // return $pdf->download('ReporteOP.pdf');
-    }
-
+    
     public function ReporteMaterialesPDF($op)
     {
         //$pdf = App::make('dompdf.wrapper');
@@ -161,7 +125,81 @@ class Mod01_ProduccionController extends Controller
         //return $pdf->stream();
         return $pdf->setOptions(['isPhpEnabled' => true, 'isRemoteEnabled' => true])->stream('ReporteMateriales.pdf');
     }
+    public function OPPDF($op)
+    {
+        //$pdf = App::make('dompdf.wrapper');
+        $Materiales = DB::select(DB::raw("SELECT b.DocNum AS DocNumOf, 
+	       '*' + CAST(b.DocNum as varchar (50)) + '*' as CodBarras,
+	       b.ItemCode, 
+	       c.ItemName, 
+	       c.U_VS AS VS, 
+	       d.CardCode, 
+	       d.CardName, 
+	       d.DocNum AS NumPedido, 
+	       b.DueDate AS FechaEntrega, 
+	       b.plannedqty, 
+	       d.Comments as Comentario, 
+	       b.Comments, 
+	       c.UserText, 
+	       f.InvntryUom,
+	        '*' + cast(f.u_estacion as varchar (3)) + '*' as BarrEstacion, 
+	       ISNULL((SELECT Name FROM [@PL_RUTAS] WHERE Code=f.U_Estacion),'Sin Estacion') AS Estacion,
+	       a.Code AS Codigo, 
+	       f.ItemName as Descripcion, 
+	       a.Quantity AS Cantidad, 
+	       0 AS [Cant. Entregada], 
+	       0 AS [Cant. Devolución],
+	       b.U_NoSerie,
+	       f.U_Metodo,
+	       b.U_OF as origen,
+	       (SELECT TOP 1 ItemName FROM OITM INNER JOIN OWOR ON OITM.ITEMCODE = OWOR.ItemCode  WHERE OWOR.DocNum = b.U_OF ) as Funda            
+       FROM (ITT1 a
+			INNER JOIN OWOR b ON a.Father=b.ItemCode
+			INNER JOIN OITM c ON b.ItemCode=c.ItemCode
+			INNER JOIN ORDR d ON b.OriginAbs=d.DocEntry
+			INNER JOIN OITM f ON a.Code=f.ItemCode)
+	   WHERE b.DocEntry=CONVERT(Int,$op) 
+	      AND NOT (f.InvntItem='N' AND f.SellItem='N' AND f.PrchseItem='N' AND f.AssetItem='N')
+		  AND f.ItemName  not like  '%Gast%'
+	   ORDER BY CONVERT(INT, a.U_Estacion)"));
+        // dd($Materiales);
+        $total_vs = 0;
+        //$total_vs = array_sum( array_pluck($Materiales, 'VS'));
+        /* $composicion = DB::select("SELECT ItemCode AS codigo, Dscription AS descripcion 
+                        FROM RDR1 WHERE docentry = '2113'
+                        AND TreeType = 'S'
+                        AND ItemCode LIKE '%3491%'");*/
+        $composicion = DB::table('RDR1')
+        ->select(DB::raw('ItemCode AS codigo, Dscription AS descripcion'))
+        ->where('TreeType', 'S')
+            ->where('ItemCode', 'like', '%' . substr($Materiales[0]->ItemCode, 0, 4) . '%')
+            ->where('DocEntry', $Materiales[0]->NumPedido) //No. Pedido
+            ->first();
+        $ordenesSerie = DB::select("SELECT o.Docentry AS op, 
+                        o.ItemCode AS codigo, 
+                        a.ItemName AS descripcion,
+                        a.U_VS AS VS,
+                        o.plannedqty AS cantidad
+                        FROM OWOR o
+                        INNER JOIN OITM a ON a.ItemCode=o.ItemCode
+                        WHERE o.U_NoSerie = ? ", [$Materiales[0]->U_NoSerie]);
+        $data = array(
+            'ordenes_serie' => $ordenesSerie,
+            'composicion' => $composicion,
+            'total_vs' => $total_vs,
+            'data' => $Materiales,
+            'op' => $op,
+            'db' => DB::table('OADM')->value('CompnyName'),
+        );
+        //dd($data);
+        //$data = $GraficaOrden;
 
+        return view('Mod01_Produccion.impresionOPPDF', $data);
+        //$pdf = \PDF::loadView('Mod01_Produccion.ReporteMateriales', $data);
+        //dd($pdf);
+        //return $pdf->stream();
+       // return $pdf->setOptions(['isPhpEnabled' => true, 'isRemoteEnabled' => true])->stream('ReporteMateriales.pdf');
+    }
     public function allUsers(Request $request)
     {
         $users = DB::select('select * from view_Plantilla_SIZ');

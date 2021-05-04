@@ -418,7 +418,7 @@
                     if (data.mensajeErrr.includes('Error')) {
                         bootbox.dialog({
                             title: "Mensaje",
-                            message: "<div class='alert alert-danger m-b-0'>"+data.orders+"</div>",
+                            message: "<div class='alert alert-danger m-b-0'>Error al generar el PDF</div>",
                             buttons: {
                             success: {
                             label: "Ok",
@@ -426,6 +426,8 @@
                             }
                             }
                             }).find('.modal-content').css({'font-size': '14px'} );
+                    }else{
+                        window.open(data.file,"_blank");
                     }
                 }
                 }); 

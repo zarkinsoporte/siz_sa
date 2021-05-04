@@ -436,7 +436,7 @@ class Reportes_ProduccionController extends Controller
 
             $op = $request->input('fieldOtroNumber');
             $info = OP::getInfoOwor($op);
-            if(count($info)==0){
+            if(is_null($info)){
                 return redirect()->back()->withErrors(array('message' => 'OP inválida'));
             }
             $consulta = DB::select(DB::raw("SELECT b.DocNum AS DocNumOf, 

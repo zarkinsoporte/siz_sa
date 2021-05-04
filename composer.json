@@ -14,7 +14,10 @@
         "simplesoftwareio/simple-qrcode": "^2.0",
         "barryvdh/laravel-dompdf": "^0.8.2", 
         "maatwebsite/excel": "~2.0",
-        "itsgoingd/clockwork": "4.1.*"
+        "itsgoingd/clockwork": "4.1.*",
+        "barryvdh/laravel-snappy": "0.4.1",
+        "clegginabox/pdf-merger": "dev-master"
+       
    },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

@@ -168,16 +168,113 @@ public function impresion_op(Request $request){
     ini_set('memory_limit', '-1');
     set_time_limit(0);
     if(strlen($request->input('ordenes')) > 0 ){
-        $preOrdenes = explode(',', $request->input('ordenes'));
-        $index = 0;
-        $numSerieGrupal = null;
-        $mensajeErrr= '';
-        foreach ($preOrdenes as $key => $orden) {
-            
+        try {
+
+                $preOrdenes = explode(',', $request->input('ordenes'));            
+                $mensajeErrr = '';
+
+                $pdf_final = new \Clegginabox\PDFMerger\PDFMerger;
+                $user_path = storage_path('pdf_ordenes/user_' . Auth::user()->U_EmpGiro);
+                if (!File::exists($user_path)) {
+                    File::makeDirectory($user_path);
+                }
+                array_map("unlink", glob($user_path . '/*.pdf'));
+
+                foreach ($preOrdenes as $op) {
+                    //dd(base_path('vendor/h4cc/wkhtmltopdf-amd64/bin/wkhtmltopdf-amd64'));
+
+                    $Materiales = DB::select(DB::raw("SELECT b.DocNum AS DocNumOf, 
+	       '*' + CAST(b.DocNum as varchar (50)) + '*' as CodBarras,
+	       b.ItemCode, 
+	       c.ItemName, 
+	       c.U_VS AS VS, 
+	       d.CardCode, 
+	       d.CardName, 
+	       d.DocNum AS NumPedido, 
+	       b.DueDate AS FechaEntrega, 
+	       b.plannedqty, 
+	       d.Comments as Comentario, 
+	       b.Comments, 
+	       c.UserText, 
+	       f.InvntryUom,
+	        '*' + cast(f.u_estacion as varchar (3)) + '*' as BarrEstacion, 
+	       ISNULL((SELECT Name FROM [@PL_RUTAS] WHERE Code=f.U_Estacion),'Sin Estacion') AS Estacion,
+	       a.Code AS Codigo, 
+	       f.ItemName as Descripcion, 
+	       a.Quantity AS Cantidad, 
+	       0 AS [Cant. Entregada], 
+	       0 AS [Cant. Devolución],
+	       b.U_NoSerie,
+	       f.U_Metodo,
+	       b.U_OF as origen,
+	       (SELECT TOP 1 ItemName FROM OITM INNER JOIN OWOR ON OITM.ITEMCODE = OWOR.ItemCode  WHERE OWOR.DocNum = b.U_OF ) as Funda            
+       FROM (ITT1 a
+			INNER JOIN OWOR b ON a.Father=b.ItemCode
+			INNER JOIN OITM c ON b.ItemCode=c.ItemCode
+			INNER JOIN ORDR d ON b.OriginAbs=d.DocEntry
+			INNER JOIN OITM f ON a.Code=f.ItemCode)
+	   WHERE b.DocEntry=CONVERT(Int,$op) 
+	      AND NOT (f.InvntItem='N' AND f.SellItem='N' AND f.PrchseItem='N' AND f.AssetItem='N')
+		  AND f.ItemName  not like  '%Gast%'
+	   ORDER BY CONVERT(INT, a.U_Estacion)"));
+                    // dd($Materiales);
+                    $total_vs = 0;
+                    //$total_vs = array_sum( array_pluck($Materiales, 'VS'));
+                    /* $composicion = DB::select("SELECT ItemCode AS codigo, Dscription AS descripcion 
+                        FROM RDR1 WHERE docentry = '2113'
+                        AND TreeType = 'S'
+                        AND ItemCode LIKE '%3491%'");*/
+                    $composicion = DB::table('RDR1')
+                        ->select(DB::raw('ItemCode AS codigo, Dscription AS descripcion'))
+                        ->where('TreeType', 'S')
+                        ->where('ItemCode', 'like', '%' . substr($Materiales[0]->ItemCode, 0, 4) . '%')
+                        ->where('DocEntry', $Materiales[0]->NumPedido) //No. Pedido
+                        ->first();
+                    $ordenesSerie = DB::select("SELECT o.Docentry AS op, 
+                        o.ItemCode AS codigo, 
+                        a.ItemName AS descripcion,
+                        a.U_VS AS VS,
+                        o.plannedqty AS cantidad
+                        FROM OWOR o
+                        INNER JOIN OITM a ON a.ItemCode=o.ItemCode
+                        WHERE o.U_NoSerie = ? ", [$Materiales[0]->U_NoSerie]);
+                    $data = array(
+                        'ordenes_serie' => $ordenesSerie,
+                        'composicion' => $composicion,
+                        'total_vs' => $total_vs,
+                        'data' => $Materiales,
+                        'op' => $op,
+                        'db' => DB::table('OADM')->value('CompnyName'),
+                    );
+
+                    $headerHtml = view()->make('header', $data)->render();
+                    $pdf = SPDF::loadView('Mod01_Produccion.impresionOPPDF2', $data);
+                    $pdf->setOption('header-html', $headerHtml);
+                    $pdf->setOption('footer-center', 'Pagina [page] de [toPage]');
+                    $pdf->setOption('footer-left', 'SIZ');
+
+                    $pdf->setOption('margin-top', '55mm');
+                    $pdf->setOption('margin-left', '5mm');
+                    $pdf->setOption('margin-right', '5mm');
+                    $pdf->save($user_path . '/' . $op . '.pdf');
+                    //return $pdf->inline();
+                    //$pdf = PDF::loadView('pdf.invoice', $data);
+                    //header('Content-Type: application/pdf');
+                    //header('Content-Disposition: attachment; filename="file.pdf"');
+                    //return SPDF::getOutput();
+
+                    $pdf_final->addPDF($user_path . '/' . $op . '.pdf');
+                } //end Foreach
+                $pdf_final->merge('file', $user_path . '/ordenes.pdf', 'P');
+                $file = $user_path . '/ordenes.pdf';
+                return compact('mensajeErrr', 'file');
+    
+        } catch (\Throwable $th) {
+                $mensajeErrr = 'Error';
+                return compact('mensajeErrr');
         }
-        return compact('mensajeErrr');
     }else{
-        return 'No se ha seleccionado ninguna Orden';
+        return 'Error , No se ha seleccionado ninguna Orden';
     }
 }
 public function asignar_series(Request $request){
@@ -467,7 +564,7 @@ public function registros_tabla_liberacion(Request $request){
                                 dbo.OWOR ON dbo.ORDR.DocNum = dbo.OWOR.OriginNum INNER JOIN
                                 dbo.OITM ON dbo.OWOR.ItemCode = dbo.OITM.ItemCode
                 WHERE   (Status = '" . $estado . "') AND (" . $tipo . ")
-                AND U_NoSerie > 1 
+                AND U_NoSerie > 1 AND (U_Impreso = 0 OR U_Impreso IS NULL)
                 ORDER BY Pedido";
             $sel =  preg_replace('/[ ]{2,}|[\t]|[\n]|[\r]/', ' ', ($sel));
             $consulta = DB::select($sel);
