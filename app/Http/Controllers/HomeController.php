@@ -93,8 +93,8 @@ class HomeController extends Controller
                 and tm.name is not null and m.name is not null
                 group by tm.name, m.name, l.route
                 order by tm.name, m.name', [Auth::user()->U_EmpGiro]);
-                $db = DB::connection()->getDatabaseName();
-        return view('homeIndex',   ['traslados' => count($trasladosRecepcion), 'links' => $links, 'actividades' => $actividades, 'ultimo' => count($actividades), 'isAdmin'=> User::isAdmin(), 'db'=> $db]);
+              
+        return view('homeIndex',   ['traslados' => count($trasladosRecepcion), 'links' => $links, 'actividades' => $actividades, 'ultimo' => count($actividades), 'isAdmin'=> User::isAdmin()]);
     }
 
     public function UPT_Noticias($id){     
