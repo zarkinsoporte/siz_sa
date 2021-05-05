@@ -37,16 +37,17 @@ route::get('admin-password', function (){
         No debe dejarse abierta a los demas usuarios
     */
     //return  'no-autorizado';
+    //return  \DB::connection()->getDatabaseName();
     try {
         $password = Hash::make('1234');
         DB::table('dbo.OHEM')
-            ->where('U_EmpGiro', 777 )
+            ->where('U_EmpGiro', 790 )
             ->update(['U_CP_Password' => $password]);
     } catch(\Exception $e) {
         echo  $e->getMessage();
     }
 
-    echo 'password inicial Administrador establecida';
+    echo 'password inicial Administrador establecida en '.DB::connection()->getDatabaseName();
 });
 /*
 |--------------------------------------------------------------------------
