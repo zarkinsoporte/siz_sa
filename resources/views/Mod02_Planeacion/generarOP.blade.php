@@ -427,7 +427,7 @@
                             }
                             }).find('.modal-content').css({'font-size': '14px'} );
                     }else{
-                        window.open(data.file,"_blank");
+                        window.open('{{url()}}'+data.file,"_blank");
                     }
                 }
                 }); 

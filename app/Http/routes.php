@@ -18,9 +18,7 @@ use App\OP;
 use Illuminate\Support\Facades\DB;
 use App\User;
 use Illuminate\Support\Facades\Mail;
-//use Barryvdh\DomPDF\PDF;
-
-//use Barryvdh\Snappy;
+use App\SAP;
 use Illuminate\Http\Request;
 
 Route::get('/', 'HomeController@index');
@@ -409,9 +407,13 @@ Route::get('home/PRODUCCION POR AREAS', 'Reportes_ProduccionController@showModal
 Route::post('home/reporte/PRODUCCION POR AREAS', 'Reportes_ProduccionController@reporteProdxAreas');
 Route::get('home/reporte/PRODUCCION POR AREAS', 'Reportes_ProduccionController@reporteProdxAreasPDF');
 Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@produccionxareasXLS');
-Route::get('/pruebassap', 'Mod02_PlaneacionController@updateOV');
+//Route::get('/pruebassap', 'Mod02_PlaneacionController@updateOV');
 
 Route::get('/pruebas', function (Request $request) {
+
+   $rs =  SAP::updateImpresoOrden(7, '1');
+
+dd($rs);
     $ops=['7', '12' ];
     $pdf_final = new \Clegginabox\PDFMerger\PDFMerger;
     $user_path = storage_path('pdf_ordenes/user_' . Auth::user()->U_EmpGiro);

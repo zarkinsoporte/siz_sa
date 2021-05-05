@@ -34,7 +34,21 @@ class SAPi extends Model
         }  
    }
 
-   
+   public static function updateImpresoOrden($orden, $impreso)
+    {
+        (self::$vCmp == false) ? self::Connect() : '';
+        $vItem = self::$vCmp->GetBusinessObject("202");
+        $RetVal = $vItem->GetByKey($orden.'');
+        clock($RetVal);
+        $vItem->UserFields->Fields->Item('U_Impreso')->Value = ''.$impreso;
+        $retCode = $vItem->Update;
+        clock($retCode);
+        if ($retCode != 0) {
+            return 'Error, '.self::$vCmp->GetLastErrorDescription();
+        } else {
+            return $impreso;
+        }
+    }
 public static function ReciboProduccion($docEntry, $whs, $Cant, $comentario, $memo){
    if (self::$vCmp == false) {
        $cnn = self::Connect();

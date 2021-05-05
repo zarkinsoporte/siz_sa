@@ -169,20 +169,23 @@ public function impresion_op(Request $request){
     set_time_limit(0);
     if(strlen($request->input('ordenes')) > 0 ){
         try {
-
+            DB::beginTransaction();
                 $preOrdenes = explode(',', $request->input('ordenes'));            
                 $mensajeErrr = '';
-
+                //clock($preOrdenes);
                 $pdf_final = new \Clegginabox\PDFMerger\PDFMerger;
-                $user_path = storage_path('pdf_ordenes/user_' . Auth::user()->U_EmpGiro);
-                if (!File::exists($user_path)) {
-                    File::makeDirectory($user_path);
+                //clock($pdf_final);
+                $user_path = public_path('pdf_ordenes/user_' . Auth::user()->U_EmpGiro);
+                //clock($user_path);
+                if (!\File::exists($user_path)) {
+                    \File::makeDirectory($user_path);
+                    //clock('creado dir');
                 }
                 array_map("unlink", glob($user_path . '/*.pdf'));
 
                 foreach ($preOrdenes as $op) {
                     //dd(base_path('vendor/h4cc/wkhtmltopdf-amd64/bin/wkhtmltopdf-amd64'));
-
+                    
                     $Materiales = DB::select(DB::raw("SELECT b.DocNum AS DocNumOf, 
 	       '*' + CAST(b.DocNum as varchar (50)) + '*' as CodBarras,
 	       b.ItemCode, 
@@ -246,30 +249,38 @@ public function impresion_op(Request $request){
                         'op' => $op,
                         'db' => DB::table('OADM')->value('CompnyName'),
                     );
-
                     $headerHtml = view()->make('header', $data)->render();
-                    $pdf = SPDF::loadView('Mod01_Produccion.impresionOPPDF2', $data);
+                    ////clock($headerHtml);
+                    $pdf = \SPDF::loadView('Mod01_Produccion.impresionOPPDF2', $data);
                     $pdf->setOption('header-html', $headerHtml);
                     $pdf->setOption('footer-center', 'Pagina [page] de [toPage]');
                     $pdf->setOption('footer-left', 'SIZ');
-
+                    //clock($pdf);
                     $pdf->setOption('margin-top', '55mm');
                     $pdf->setOption('margin-left', '5mm');
                     $pdf->setOption('margin-right', '5mm');
                     $pdf->save($user_path . '/' . $op . '.pdf');
+                    //clock($user_path);
                     //return $pdf->inline();
                     //$pdf = PDF::loadView('pdf.invoice', $data);
                     //header('Content-Type: application/pdf');
                     //header('Content-Disposition: attachment; filename="file.pdf"');
                     //return SPDF::getOutput();
-
+                    
                     $pdf_final->addPDF($user_path . '/' . $op . '.pdf');
+                    $rs = SAP::updateImpresoOrden($op, '1'); 
+                 /*  DB::table('OWOR')
+                    ->where('DocEntry', '=', $op)
+                    ->update(['U_Impreso' =>  1]);*/
+                    //clock($rs);
                 } //end Foreach
                 $pdf_final->merge('file', $user_path . '/ordenes.pdf', 'P');
-                $file = $user_path . '/ordenes.pdf';
+                $file = '/pdf_ordenes/user_' . Auth::user()->U_EmpGiro.'/ordenes.pdf';
+                DB::commit();
                 return compact('mensajeErrr', 'file');
-    
+                
         } catch (\Throwable $th) {
+            DB::rollBack();
                 $mensajeErrr = 'Error';
                 return compact('mensajeErrr');
         }
