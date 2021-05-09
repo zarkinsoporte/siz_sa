@@ -16,7 +16,7 @@ return [
 	|
 	*/
 
-	'enable' => env('CLOCKWORK_ENABLE', null),
+	'enable' => env('CLOCKWORK_ENABLE', false),
 
 	/*
 	|--------------------------------------------------------------------------
@@ -46,7 +46,7 @@ return [
 			'collect_queries' => env('CLOCKWORK_DATABASE_COLLECT_QUERIES', true),
 
 			// Query execution time threshold in miliseconds after which the query will be marked as slow
-			'slow_threshold' => env('CLOCKWORK_DATABASE_SLOW_THRESHOLD'),
+			'slow_threshold' => env('CLOCKWORK_DATABASE_SLOW_THRESHOLD', false),
 
 			// Collect only slow database queries
 			'slow_only' => env('CLOCKWORK_DATABASE_SLOW_ONLY', false),
@@ -57,7 +57,7 @@ return [
 
 		// Sent emails
 		'emails' => [
-			'enabled' => env('CLOCKWORK_EMAILS_ENABLED', true),
+			'enabled' => env('CLOCKWORK_EMAILS_ENABLED', false),
 		],
 
 		// Dispatched events
@@ -83,7 +83,7 @@ return [
 
 		// Redis commands
 		'redis' => [
-			'enabled' => env('CLOCKWORK_REDIS_ENABLED', true)
+			'enabled' => env('CLOCKWORK_REDIS_ENABLED', false)
 		],
 
 		// Routes list

@@ -600,20 +600,18 @@ public function registros_tabla_series(){
             $sel = "SELECT 
                     '0' [Grupal],
                     OW.DocEntry as Orden,
-                    T0.DocNum AS Pedido, 
-                    T1.ItemCode AS Codigo,
-                    T1.Dscription AS Descripcion,
-                    (SELECT CardName  FROM OCRD WHERE	OCRD.CardCode = T1.BaseCard) Cliente,
+                    OW.OriginNum AS Pedido, 
+					OW.ProdName AS Descripcion,
+					OW.ItemCode AS Codigo,
+                   (SELECT CardName  FROM OCRD WHERE	OCRD.CardCode = OW.CardCode) Cliente,
                     OW.U_NoSerie AS NumSerie,
                     OW.Status AS Estatus,
-                    (SELECT U_TipoMat  FROM OITM WHERE	OITM.ItemCode = T1.ItemCode) TipoMaterial
-                    FROM dbo.ORDR T0
-                    INNER JOIN dbo.RDR1 T1 ON T0.DocEntry = T1.DocEntry
-                    INNER JOIN OWOR OW on OW.OriginNum = T0.DocEntry 
+                   (SELECT U_TipoMat  FROM OITM WHERE	OITM.ItemCode = OW.ItemCode) TipoMaterial
+                    FROM OWOR OW					
                     WHERE  
-                    U_NoSerie = 1
-                    AND Status = 'P' AND T0.DocStatus = 'O'
-                    ORDER BY T0.DocEntry";
+                    OW.U_NoSerie = 1
+                    AND OW.Status = 'P' 
+                    ORDER BY OW.DocEntry";
             $sel =  preg_replace('/[ ]{2,}|[\t]|[\n]|[\r]/', ' ', ($sel));
             $consulta = DB::select($sel);
             $sel = "select O.u_tipoMat, OW.DocEntry from OWOR OW
@@ -705,7 +703,8 @@ public function actualizaMRP(){
             );
         //dd(array_has($consulta[0], 'ant'));
         //Si existe Cant Anterior agregamos la columna
-        if ( array_key_exists('ant', $consulta[0]) ) {
+        //dd($consulta[0]);
+        if ( isset( $consulta[0]->ant ) ) {
             array_push($columns,["data" => "ant", "name" => "Anterior"]);
             array_push($columns_xls,["data" => "ant", "name" => "Anterior"]);
         } 

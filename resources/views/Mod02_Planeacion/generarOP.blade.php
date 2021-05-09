@@ -337,7 +337,7 @@
                 },
                 complete: function() {
                     reloadOrdenesLiberacion();
-                    reloadOrdenesImpresion();
+                   // reloadOrdenesImpresion();
                     setTimeout($.unblockUI, 1500);
                 },
                 success: function(data){   
@@ -488,7 +488,7 @@
                 },
                 complete: function() {
                     reloadOrdenesPedidos();
-                    reloadOrdenesSeries();
+                   // reloadOrdenesSeries();
                     setTimeout($.unblockUI, 1500);
                 },
                 success: function(data){   
@@ -974,12 +974,38 @@ $($.fn.dataTable.tables(true)).DataTable()
 });
 */
 $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
+
 $($.fn.dataTable.tables(true)).DataTable()
 .columns.adjust();
 });
+
+$('#lista-tab1').on('click', function(e) {
+    e.preventDefault();
+    reloadOrdenesPedidos();
+});
+$('#lista-tab2').on('click', function(e) {
+    e.preventDefault();
+    reloadOrdenesSeries();
+});
+$('#lista-tab3').on('click', function(e) {
+    e.preventDefault();
+   
+});
+$('#lista-tab4').on('click', function(e) {
+    e.preventDefault();
+    reloadOrdenesLiberacion();
+});
+$('#lista-tab5').on('click', function(e) {
+    e.preventDefault();
+    reloadOrdenesImpresion();
+});
+
       });//fin on load
+
+      
 }  //fin js_iniciador               
-                   function val_btn(val) {                     
+                   function val_btn(val) { 
+                   
                           $('#btn_enviar').attr('data-operacion', val);                                                     
                     } 
                 </script>
