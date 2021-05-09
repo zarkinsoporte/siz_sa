@@ -19,7 +19,7 @@ class SAPi extends Model
         self::$vCmp->DbServerType = "10";
         self::$vCmp->server = "ZARKIN-088";
         self::$vCmp->LicenseServer = "ZARKIN-088:30000";
-        self::$vCmp->CompanyDB = "SBO_PRUEBAS";
+        self::$vCmp->CompanyDB = "SBO_Salotto";
         self::$vCmp->username = "SIZ_PROD";
         self::$vCmp->password = "Zark&n20";
         self::$vCmp->DbUserName = "sa";
@@ -34,7 +34,21 @@ class SAPi extends Model
         }  
    }
 
-   
+   public static function updateImpresoOrden($orden, $impreso)
+    {
+        (self::$vCmp == false) ? self::Connect() : '';
+        $vItem = self::$vCmp->GetBusinessObject("202");
+        $RetVal = $vItem->GetByKey($orden.'');
+        clock($RetVal);
+        $vItem->UserFields->Fields->Item('U_Impreso')->Value = ''.$impreso;
+        $retCode = $vItem->Update;
+        clock($retCode);
+        if ($retCode != 0) {
+            return 'Error, '.self::$vCmp->GetLastErrorDescription();
+        } else {
+            return $impreso;
+        }
+    }
 public static function ReciboProduccion($docEntry, $whs, $Cant, $comentario, $memo){
    if (self::$vCmp == false) {
        $cnn = self::Connect();
@@ -45,7 +59,7 @@ public static function ReciboProduccion($docEntry, $whs, $Cant, $comentario, $me
         self::$vCmp->DbServerType = "10";
         self::$vCmp->server = "ZARKIN-088";
         self::$vCmp->LicenseServer = "ZARKIN-088:30000";
-        self::$vCmp->CompanyDB = "SBO_PRUEBAS";
+        self::$vCmp->CompanyDB = "SBO_Salotto";
         self::$vCmp->username = "SIZ_PROD";
         self::$vCmp->password = "Zark&n20";
         self::$vCmp->DbUserName = "sa";

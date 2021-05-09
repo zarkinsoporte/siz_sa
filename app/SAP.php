@@ -20,7 +20,7 @@ class SAP extends Model
         self::$vCmp->DbServerType = "10";
         self::$vCmp->server = "ZARKIN-088";
         self::$vCmp->LicenseServer = "ZARKIN-088:30000";
-        self::$vCmp->CompanyDB = "SBO_PRUEBAS";
+        self::$vCmp->CompanyDB = "SBO_Salotto";
         self::$vCmp->username = "SIZ_PROD";
         self::$vCmp->password = "Zark&n20";
         self::$vCmp->DbUserName = "sa";
@@ -54,13 +54,28 @@ class SAP extends Model
             return $numSerie;
         }
     }
+    public static function updateImpresoOrden($orden, $impreso)
+    {
+        (self::$vCmp == false) ? self::Connect() : '';
+        $vItem = self::$vCmp->GetBusinessObject("202");
+        $RetVal = $vItem->GetByKey($orden.'');
+        clock($RetVal);
+        $vItem->UserFields->Fields->Item('U_Impreso')->Value = ''.$impreso;
+        $retCode = $vItem->Update;
+        clock($retCode);
+        if ($retCode != 0) {
+            return 'Error, '.self::$vCmp->GetLastErrorDescription();
+        } else {
+            return $impreso;
+        }
+    }
     public static function ProductionOrderStatus($orden, $status)
     {
         self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
         self::$vCmp->DbServerType = "10";
         self::$vCmp->server = "ZARKIN-088";
         self::$vCmp->LicenseServer = "ZARKIN-088:30000";
-        self::$vCmp->CompanyDB = "SBO_PRUEBAS";
+        self::$vCmp->CompanyDB = "SBO_Salotto";
         self::$vCmp->username = "SIZ_PROD";
         self::$vCmp->password = "Zark&n20";
         self::$vCmp->DbUserName = "sa";
@@ -129,7 +144,7 @@ class SAP extends Model
         self::$vCmp->DbServerType = "10";
         self::$vCmp->server = "ZARKIN-088";
         self::$vCmp->LicenseServer = "ZARKIN-088:30000";
-        self::$vCmp->CompanyDB = "SBO_PRUEBAS";
+        self::$vCmp->CompanyDB = "SBO_Salotto";
         self::$vCmp->username = "SIZ_PROD";
         self::$vCmp->password = "Zark&n20";
         self::$vCmp->DbUserName = "sa";
@@ -404,7 +419,7 @@ class SAP extends Model
                 self::$vCmp->DbServerType = "10";
                 self::$vCmp->server = "ZARKIN-088";
                 self::$vCmp->LicenseServer = "ZARKIN-088:30000";
-                self::$vCmp->CompanyDB = "SBO_PRUEBAS";
+                self::$vCmp->CompanyDB = "SBO_Salotto";
                 self::$vCmp->username = "SIZ_PROD";
                 self::$vCmp->password = "Zark&n20";
                 self::$vCmp->DbUserName = "sa";
@@ -500,9 +515,11 @@ class SAP extends Model
             $vItem->UserFields->Fields->Item('U_C_Orden')->Value = $item_uc_orden; //S,C o P
             $vItem->UserFields->Fields->Item('U_AteEspecial')->Value = $atencion_especial; //S o N
             if (is_null( $OV->U_comp )) {
-                $resultadoEjecucion = $resultadoEjecucion .' Error Complejo NO capturado,  (OV:'.$ov.') ';
+               $complejo = 'N/A';
+            } else {
+                $complejo = $OV->U_comp;    
             }
-            $vItem->UserFields->Fields->Item('U_cc')->Value = $OV->U_comp; //
+            $vItem->UserFields->Fields->Item('U_cc')->Value = $complejo; //
 
             //Fecha de Producción = Fecha Entrega – 7 días (Entrega producción)
             $fechaProduccion = Carbon::now(); //vamos a guardar
@@ -610,7 +627,7 @@ class SAP extends Model
                             self::$vCmp->DbServerType = "10";
                             self::$vCmp->server = "ZARKIN-088";
                             self::$vCmp->LicenseServer = "ZARKIN-088:30000";
-                            self::$vCmp->CompanyDB = "SBO_PRUEBAS";
+                            self::$vCmp->CompanyDB = "SBO_Salotto";
                             self::$vCmp->username = "SIZ_PROD";
                             self::$vCmp->password = "Zark&n20";
                             self::$vCmp->DbUserName = "sa";

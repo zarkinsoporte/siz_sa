@@ -5,7 +5,6 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ 'Orden de Producción' }}</title>
@@ -33,8 +32,7 @@
     }
 tr:nth-child(even) {
 background-color: #f2f2f2;
-}
-       
+}      
         h3{
             font-family: 'Helvetica';
         }
@@ -43,70 +41,13 @@ background-color: #f2f2f2;
         }
   
     #content {position: relative; top:20%}
- 
 </style>
-<script>
-    function setPageNumbers() {
-        /*
-          vars will have the following structure
-
-          vars: {
-            page,
-            frompage,
-            topage,
-            webpage,
-            section,
-            subsection,
-            date,
-            isodate,
-            time,
-            title,
-            doctitle,
-            sitepage,
-            sitepages
-          }
-        */
-        var vars = {};
-        var queryStringsFromUrl = document.location.search.substring(1).split('&');
-        for (var queryString in queryStringsFromUrl) {
-            if (queryStringsFromUrl.hasOwnProperty(queryString)) {
-                var temp = queryStringsFromUrl[queryString].split('=', 2);
-                vars[temp[0]] = decodeURI(temp[1]);
-            }
-        }
-
-        var element = document.getElementById('pageNumber');
-
-        if (document.cookie.split(';').length === 2) {
-          var section = document.cookie.split(';')[0].split('=')[1];
-
-          if (vars.section !== section) {
-            document.cookie = 'currentSection=' + vars.section;
-            document.cookie = 'startedAt=' + vars.page;
-          }
-
-          // startedAt is the page on which a section started
-          var startedAt = parseInt(document.cookie.split(';')[1].split('=')[1]);
-          element.textContent = vars.page - startedAt + 1;
-        } else {
-          document.cookie = 'currentSection=' + vars.section;
-          document.cookie = 'startedAt=' + vars.page;
-          element.textContent = 1;
-        }
-      }
-</script>
 </head>
-
-<body onload="setPageNumbers()">
-   
-
-
-        
+<body>       
 <div id="content">
              <table>
                     <thead class="thead-dark">
-                    <tr>
-                        
+                    <tr>                        
                         <th align="center" bgcolor="#474747" style="color:white";scope="col">Código</th>
                         <th align="center" bgcolor="#474747" style="color:white";scope="col">Descripción</th>
                         <th align="center" bgcolor="#474747" style="color:white";scope="col">UM</th>
@@ -126,15 +67,12 @@ background-color: #f2f2f2;
                               <tr><td colspan="4" align="center" bgcolor="#ccc"> <?php echo $EstacionO ?> </td></tr>
 
                               <?php
-                          }
-                          
+                          }        
                            $temporal=$rep->Estacion;
                           //dd($EstacionO);
                            if($EstacionO==$temporal){ 
                             ?>
                             <tr>
-                          
-                            
                             <td align="center" scope="row">
                                 {{ $rep->Codigo }}
                             </td>
@@ -180,8 +118,7 @@ background-color: #f2f2f2;
                     <tr>
                         <th colspan="5" align="center" bgcolor="#474747" style="color:white">Ordenes que componen la Serie</th>
                     </tr>
-                    <tr>
-                        
+                    <tr>                        
                         <td align="center" bgcolor="#ccc">OP</td>
                         <td align="center" bgcolor="#ccc">Código</td>
                         <td align="center" bgcolor="#ccc">Descripción</td>
@@ -234,12 +171,5 @@ background-color: #f2f2f2;
                     </table>        
                     @endif
                 </div>
-
-       
-        
-
-
-<p style="font-size: 12px"> <span id="pageNumber"></span> </p>
 </body>
-
 </html>

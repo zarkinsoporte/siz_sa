@@ -169,20 +169,23 @@ public function impresion_op(Request $request){
     set_time_limit(0);
     if(strlen($request->input('ordenes')) > 0 ){
         try {
-
+            DB::beginTransaction();
                 $preOrdenes = explode(',', $request->input('ordenes'));            
                 $mensajeErrr = '';
-
+                //clock($preOrdenes);
                 $pdf_final = new \Clegginabox\PDFMerger\PDFMerger;
-                $user_path = storage_path('pdf_ordenes/user_' . Auth::user()->U_EmpGiro);
-                if (!File::exists($user_path)) {
-                    File::makeDirectory($user_path);
+                //clock($pdf_final);
+                $user_path = public_path('pdf_ordenes/user_' . Auth::user()->U_EmpGiro);
+                //clock($user_path);
+                if (!\File::exists($user_path)) {
+                    \File::makeDirectory($user_path);
+                    //clock('creado dir');
                 }
                 array_map("unlink", glob($user_path . '/*.pdf'));
 
                 foreach ($preOrdenes as $op) {
                     //dd(base_path('vendor/h4cc/wkhtmltopdf-amd64/bin/wkhtmltopdf-amd64'));
-
+                    
                     $Materiales = DB::select(DB::raw("SELECT b.DocNum AS DocNumOf, 
 	       '*' + CAST(b.DocNum as varchar (50)) + '*' as CodBarras,
 	       b.ItemCode, 
@@ -246,30 +249,38 @@ public function impresion_op(Request $request){
                         'op' => $op,
                         'db' => DB::table('OADM')->value('CompnyName'),
                     );
-
                     $headerHtml = view()->make('header', $data)->render();
-                    $pdf = SPDF::loadView('Mod01_Produccion.impresionOPPDF2', $data);
+                    ////clock($headerHtml);
+                    $pdf = \SPDF::loadView('Mod01_Produccion.impresionOPPDF2', $data);
                     $pdf->setOption('header-html', $headerHtml);
                     $pdf->setOption('footer-center', 'Pagina [page] de [toPage]');
                     $pdf->setOption('footer-left', 'SIZ');
-
+                    //clock($pdf);
                     $pdf->setOption('margin-top', '55mm');
                     $pdf->setOption('margin-left', '5mm');
                     $pdf->setOption('margin-right', '5mm');
                     $pdf->save($user_path . '/' . $op . '.pdf');
+                    //clock($user_path);
                     //return $pdf->inline();
                     //$pdf = PDF::loadView('pdf.invoice', $data);
                     //header('Content-Type: application/pdf');
                     //header('Content-Disposition: attachment; filename="file.pdf"');
                     //return SPDF::getOutput();
-
+                    
                     $pdf_final->addPDF($user_path . '/' . $op . '.pdf');
+                    $rs = SAP::updateImpresoOrden($op, '1'); 
+                 /*  DB::table('OWOR')
+                    ->where('DocEntry', '=', $op)
+                    ->update(['U_Impreso' =>  1]);*/
+                    //clock($rs);
                 } //end Foreach
                 $pdf_final->merge('file', $user_path . '/ordenes.pdf', 'P');
-                $file = $user_path . '/ordenes.pdf';
+                $file = '/pdf_ordenes/user_' . Auth::user()->U_EmpGiro.'/ordenes.pdf';
+                DB::commit();
                 return compact('mensajeErrr', 'file');
-    
+                
         } catch (\Throwable $th) {
+            DB::rollBack();
                 $mensajeErrr = 'Error';
                 return compact('mensajeErrr');
         }
@@ -589,20 +600,18 @@ public function registros_tabla_series(){
             $sel = "SELECT 
                     '0' [Grupal],
                     OW.DocEntry as Orden,
-                    T0.DocNum AS Pedido, 
-                    T1.ItemCode AS Codigo,
-                    T1.Dscription AS Descripcion,
-                    (SELECT CardName  FROM OCRD WHERE	OCRD.CardCode = T1.BaseCard) Cliente,
+                    OW.OriginNum AS Pedido, 
+					OW.ProdName AS Descripcion,
+					OW.ItemCode AS Codigo,
+                   (SELECT CardName  FROM OCRD WHERE	OCRD.CardCode = OW.CardCode) Cliente,
                     OW.U_NoSerie AS NumSerie,
                     OW.Status AS Estatus,
-                    (SELECT U_TipoMat  FROM OITM WHERE	OITM.ItemCode = T1.ItemCode) TipoMaterial
-                    FROM dbo.ORDR T0
-                    INNER JOIN dbo.RDR1 T1 ON T0.DocEntry = T1.DocEntry
-                    INNER JOIN OWOR OW on OW.OriginNum = T0.DocEntry 
+                   (SELECT U_TipoMat  FROM OITM WHERE	OITM.ItemCode = OW.ItemCode) TipoMaterial
+                    FROM OWOR OW					
                     WHERE  
-                    U_NoSerie = 1
-                    AND Status = 'P' AND T0.DocStatus = 'O'
-                    ORDER BY T0.DocEntry";
+                    OW.U_NoSerie = 1
+                    AND OW.Status = 'P' 
+                    ORDER BY OW.DocEntry";
             $sel =  preg_replace('/[ ]{2,}|[\t]|[\n]|[\r]/', ' ', ($sel));
             $consulta = DB::select($sel);
             $sel = "select O.u_tipoMat, OW.DocEntry from OWOR OW
@@ -694,7 +703,8 @@ public function actualizaMRP(){
             );
         //dd(array_has($consulta[0], 'ant'));
         //Si existe Cant Anterior agregamos la columna
-        if ( array_key_exists('ant', $consulta[0]) ) {
+        //dd($consulta[0]);
+        if ( isset( $consulta[0]->ant ) ) {
             array_push($columns,["data" => "ant", "name" => "Anterior"]);
             array_push($columns_xls,["data" => "ant", "name" => "Anterior"]);
         } 

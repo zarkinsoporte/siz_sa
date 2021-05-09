@@ -235,7 +235,7 @@ li.dt-button.active a::before{
 
                         <ul class="dropdown-menu">
                             <li>
-                                <a href="#"><i class="fa fa-fw fa-gear"></i> Configuración</a>
+                                <a href="#"><i class="fa fa-fw fa-gear"></i> {{DB::connection()->getDatabaseName()}}</a>
                             </li>
                             <li class="divider"></li>
                             <li>
