@@ -23,7 +23,7 @@
                             <div class="col-md-12">   
                                     <p align="right">                                                                                                      
                             <a href="../ReporteMaterialesPDF/{{$op}}" target="_blank" class="btn btn-danger"><i class="fa fa-file-pdf-o"></i> Reporte PDF</a>
-                            <a class="btn btn-success" href="materialesXLS"><i class="fa fa-file-excel-o"></i> Reporte XLS</a>                                    
+                                                               
                         </p>
                         </div>                         
                     </div>   
