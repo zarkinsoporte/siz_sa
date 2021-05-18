@@ -56,17 +56,57 @@ class SAP extends Model
     }
     public static function updateImpresoOrden($orden, $impreso)
     {
+        self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
+        self::$vCmp->DbServerType = "10";
+        self::$vCmp->server = "ZARKIN-088";
+        self::$vCmp->LicenseServer = "ZARKIN-088:30000";
+        self::$vCmp->CompanyDB = "SBO_Salotto";
+        self::$vCmp->username = "SIZ_PROD";
+        self::$vCmp->password = "Zark&n20";
+        self::$vCmp->DbUserName = "sa";
+        self::$vCmp->DbPassword = "B1Admin";
+        self::$vCmp->UseTrusted = false;
+        //self::$vCmp->language = "6";
+        $lRetCode = self::$vCmp->Connect;
         (self::$vCmp == false) ? self::Connect() : '';
         $vItem = self::$vCmp->GetBusinessObject("202");
         $RetVal = $vItem->GetByKey($orden.'');
-        clock($RetVal);
+       // clock($RetVal);
         $vItem->UserFields->Fields->Item('U_Impreso')->Value = ''.$impreso;
         $retCode = $vItem->Update;
-        clock($retCode);
+       // clock($retCode);
         if ($retCode != 0) {
-            return 'Error, '.self::$vCmp->GetLastErrorDescription();
+            return 'SAP , '.self::$vCmp->GetLastErrorDescription();
         } else {
             return $impreso;
+        }
+    }
+    public static function updateStatusEntregaPiel($orden, $status, $FentregaPiel)
+    {
+        self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
+        self::$vCmp->DbServerType = "10";
+        self::$vCmp->server = "ZARKIN-088";
+        self::$vCmp->LicenseServer = "ZARKIN-088:30000";
+        self::$vCmp->CompanyDB = "SBO_Salotto";
+        self::$vCmp->username = "SIZ_PROD";
+        self::$vCmp->password = "Zark&n20";
+        self::$vCmp->DbUserName = "sa";
+        self::$vCmp->DbPassword = "B1Admin";
+        self::$vCmp->UseTrusted = false;
+        //self::$vCmp->language = "6";
+        $lRetCode = self::$vCmp->Connect;
+        (self::$vCmp == false) ? self::Connect() : '';
+        $vItem = self::$vCmp->GetBusinessObject("202");
+        $RetVal = $vItem->GetByKey($orden);
+       // clock($RetVal);U_Starus' =>  '01', 'U_Entrega_Piel'
+        $vItem->UserFields->Fields->Item('U_Starus')->Value = $status;
+        $vItem->UserFields->Fields->Item('U_Entrega_Piel')->Value = $FentregaPiel;
+        $retCode = $vItem->Update;
+       // clock($retCode);
+        if ($retCode != 0) {
+            return 0;
+        } else {
+            return 1;
         }
     }
     public static function ProductionOrderStatus($orden, $status)

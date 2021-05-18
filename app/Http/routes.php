@@ -526,13 +526,14 @@ dd($rs);
 Route::get('/crear-orden', 'Mod02_PlaneacionController@crearOrden');
 
 Route::get('/sap-test/{var?}', function (Request $request) {
-    
-    
+    //SAP::ProductionOrderStatus('176', 1);
+    //SAP::updateStatusEntregaPiel('176');
+    dd('ok');
     $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
     $vCmp->DbServerType="10"; 
     $vCmp->server = "ZARKIN-088";
     $vCmp->LicenseServer = "ZARKIN-088:30000";
-    $vCmp->CompanyDB = "SBO_PRUEBAS";
+    $vCmp->CompanyDB = "SBO_Salotto";
     $vCmp->username = "SIZ_PROD";
     $vCmp->password = "Zark&n20";
     $vCmp->DbUserName = "sa";
@@ -540,6 +541,14 @@ Route::get('/sap-test/{var?}', function (Request $request) {
     $vCmp->UseTrusted = false;
     //$vCmp->language = "6";
     $lRetCode = $vCmp->Connect;
+    $vItem = $vCmp->GetBusinessObject("202");
+    $RetVal = $vItem->GetByKey('176');
+       // clock($RetVal);U_Starus' =>  '01', 'U_Entrega_Piel'
+        $vItem->UserFields->Fields->Item('U_Starus')->Value = '03';
+        $vItem->UserFields->Fields->Item('U_Entrega_Piel')->Value = '';
+        $retCode = $vItem->Update;
+    return 'Error, ' . $vCmp->GetLastErrorDescription();
+    
     if ($lRetCode <> 0) {
        Session::flash('error', $vCmp->GetLastErrorDescription());
     } else {
@@ -556,7 +565,7 @@ Route::get('/sap-test/{var?}', function (Request $request) {
     $retCode = 0;
     Session::flash('info', $vItem->Printed);
     if ($retCode != 0) {
-        return 'Error, ' . self::$vCmp->GetLastErrorDescription();
+        return 'Error, ' . $vCmp->GetLastErrorDescription();
     } else {
        // return $numSerie;
     }

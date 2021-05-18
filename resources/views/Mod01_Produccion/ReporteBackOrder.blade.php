@@ -271,7 +271,7 @@ var table = $('#tbackorder').DataTable({
         { data: 'Secue', name:  'Secue'},
         { data: 'SecOT', name:  'SecOT' },
         { data: 'METAL', name:  'METAL' },
-        { data: 'SEMANA2', name:  'SEMANA2'},
+        { data: 'SEMANA4', name:  'SEMANA4'},
 
         { data: 'fentrega', name:  'fentrega'},//fCompras
         { data: 'fechaentregapedido', name:  'fechaentregapedido'},//fVentas

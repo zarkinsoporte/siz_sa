@@ -574,9 +574,13 @@ $dt = date('Ymd h:i');
 //en caso de que no lleve piel, entonces le cambiamos en status y le colocamos la fecha de inicio.
 //casco: 400 armado - 300 habilitado ()
 if($Code_actual->U_CT == '100' && OP::ContieneRuta($Code_actual->U_DocEntry, '106') == false){
-    DB::table('OWOR')
-        ->where('DocEntry', '=', $Code_actual->U_DocEntry)
-        ->update(['U_Status' =>  '06', 'U_Entrega_Piel' => $dt]);
+    $res = SAP::updateStatusEntregaPiel($orden, '06', ''.$dt);
+            if ($res == 0){
+                DB::table('OWOR')
+                ->where('DocEntry', '=', $Code_actual->U_DocEntry)
+                ->update(['U_Starus' =>  '06', 'U_Entrega_Piel' => $dt]);
+            }
+    
         //cambiar a liberado SAP
       // $r = SAP::ProductionOrderStatus($Code_actual->U_DocEntry, 1);
       // if(!$r){
@@ -597,9 +601,14 @@ if($Code_actual->U_CT == '106'){
 if($consumido < 1 &&  !is_null($consumido)){
 return redirect()->back()->withErrors(array('message' => 'Esta orden necesita primero que le cargues Piel en SAP'));
 }else{
-    DB::table('OWOR')
+
+    $res = SAP::updateStatusEntregaPiel($orden, '06', ''.$dt);
+    if ($res == 0){
+        DB::table('OWOR')
         ->where('DocEntry', '=', $Code_actual->U_DocEntry)
-        ->update(['U_Status' =>  '06', 'U_Entrega_Piel' => $dt]);
+        ->update(['U_Starus' =>  '06', 'U_Entrega_Piel' => $dt]);
+    }
+    
     //cambiar a liberado SAP
    // $r = SAP::ProductionOrderStatus($Code_actual->U_DocEntry, 1);
   //  if(!$r){
@@ -814,9 +823,14 @@ if ($U_CT_siguiente == $Code_actual->U_CT) {
         Session::put('op', $orden);          
         return redirect()->action('Mod01_ProduccionController@getOP', $request->input('Nomina'));
         }else{
-            DB::table('OWOR')
+            
+            $res = SAP::updateStatusEntregaPiel($orden, '03', '');
+            if ($res == 0){
+                DB::table('OWOR')
                 ->where('DocEntry', '=', $orden)
-                ->update(['U_Status' =>  null, 'U_Entrega_Piel' => null]); 
+                ->update(['U_Starus' =>  '03', 'U_Entrega_Piel' => '']);
+            }
+           
         }
         }
 
@@ -1016,7 +1030,7 @@ return redirect()->route('home');
                 CASE WHEN email like '%@%' THEN email ELSE email + cast('@zarkin.com' as varchar) END AS correo
                 FROM OHEM
                 INNER JOIN Siz_Email AS se ON se.No_Nomina = OHEM.U_EmpGiro
-                WHERE se.Reprocesos = 1
+                WHERE se.Reprocesos = 1 AND OHEM.status = 1 AND email IS NOT NULL
                 GROUP BY email
             ");
             $correos = array_pluck($correos_db, 'correo');

@@ -422,13 +422,12 @@
                                 $("#page-wrapper").toggleClass("content"); 
                                 $(this).toggleClass("active"); 
                             }); 
-CalcularTotal();
-@endsection
 
-<script>
-    function CalcularTotal()
-    {
-        var totals = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        var totals = [  0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 
+                        0, 0, 0, 0, 0, 
+                        0, 0, 0, 0, 0, 
+                        0, 0, 0, 0];
         var $filas= $("#t1 tr:not('.total1, .encabezado')");
         $filas.each(function() {
             $(this).find('td').each(function(i) {       
@@ -436,10 +435,14 @@ CalcularTotal();
             });
         });
         $(".total1 td").each(function(i) {
-            $(this).html(totals[i].toFixed(2));
+            $(this).html(totals[i].toFixed(2    ));
         });
 
-        totals = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        totals = [  0, 0, 0, 0, 0, 
+                    0, 0, 0, 0, 0, 
+                    0, 0, 0, 0, 0, 
+                    0, 0, 0, 0, 0, 
+                    0, 0];
         $filas= $("#t2 tr:not('.total2, .encabezado')");
         $filas.each(function() {
             $(this).find('td').each(function(i) {       
@@ -450,7 +453,11 @@ CalcularTotal();
             $(this).html(totals[i].toFixed(2));
         });
 
-        totals = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        totals = [  0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 
+                    0, 0, 0, 0, 0, 
+                    0, 0, 0, 0, 0, 
+                    0, 0];
         $filas= $("#t3 tr:not('.total3, .encabezado')");
         $filas.each(function() {
             $(this).find('td').each(function(i) {                                 
@@ -460,17 +467,15 @@ CalcularTotal();
         $(".total3 td").each(function(i) {               
                 $(this).html(totals[i].toFixed(2));        
         });
-    }
+    
     function mostrar()
     {
         $("#hiddendiv").show();
     };
-</script>
-<script>
     document.onkeyup = function(e) {
    if (e.shiftKey && e.which == 112) {
     window.open("ayudas_pdf/AyM01_25.pdf","_blank");
   }
   }
-
+                        }
 </script>

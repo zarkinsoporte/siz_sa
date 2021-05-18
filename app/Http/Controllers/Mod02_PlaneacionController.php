@@ -181,6 +181,7 @@ public function impresion_op(Request $request){
                     \File::makeDirectory($user_path);
                     //clock('creado dir');
                 }
+                //dd();
                 array_map("unlink", glob($user_path . '/*.pdf'));
 
                 foreach ($preOrdenes as $op) {
@@ -249,6 +250,7 @@ public function impresion_op(Request $request){
                         'op' => $op,
                         'db' => DB::table('OADM')->value('CompnyName'),
                     );
+                    //clock($data);
                     $headerHtml = view()->make('header', $data)->render();
                     ////clock($headerHtml);
                     $pdf = \SPDF::loadView('Mod01_Produccion.impresionOPPDF2', $data);
@@ -347,6 +349,7 @@ public function registros_gop(Request $request){
             set_time_limit(0);            
             $sel = "SELECT
                 '0' [Grupal],
+                OITT.Code AS Code,
                 CONVERT (VARCHAR, [Fecha inicio], 103) AS FechaInicio,
                 Prioridad,
                 [Número de cliente] + ' - ' + [Razón social] AS Cliente,
@@ -432,7 +435,9 @@ public function registros_gop(Request $request){
 	INNER JOIN dbo.RDR1 T1 ON T0.DocEntry = T1.DocEntry
 	WHERE  T1.Quantity > ISNULL(T1.U_Procesado,0)
 						) as Item on Item.Pedido = TMP.Pedido
-						
+    inner join OITM on OITM.ItemCode = Item.[Codigo]
+	AND OITM.InvntItem = 'Y'
+    left join OITT on OITT.Code = 	Item.[Codigo]						
 	ORDER BY
                 ValorPrioridad, [Fecha inicio], DocTime";
             $sel =  preg_replace('/[ ]{2,}|[\t]|[\n]|[\r]/', ' ', ($sel));

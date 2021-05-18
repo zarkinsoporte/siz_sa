@@ -49,6 +49,9 @@
                 text-align: right;
                 visibility: visible;
                 }
+                .ignoreme{
+                    background-color: hsla(0, 100%, 46%, 0.10) !important;       
+                }
             </style>
 
                 <div class="container" >
@@ -239,6 +242,16 @@
                         
                     },
                     ],
+                    "rowCallback": function( row, data, index ) {
+                        
+                    if ( data['Code'] == null)
+                    {
+                   
+                        $('td',row).addClass("ignoreme");
+                        //$('td',row).addClass("ignoreme");
+                    
+                    }
+                    },
                     });
                
                 $.ajax({
@@ -263,8 +276,18 @@
                 }        
         }
     });
-    $('#tabla_pedidos tbody').on( 'click', 'tr', function () {
-        $(this).toggleClass('selected');
+
+    
+
+    $('#tabla_pedidos tbody').on( 'click', 'tr', function (e) {
+        if ($(e.target).hasClass("ignoreme")) {
+            
+        }else{
+            $(this).toggleClass('selected');
+        }
+        var ordvta = table.rows('.selected').data();
+        var registros = ordvta == null ? 0 : ordvta.length;
+        console.log(registros);
     } );
    
      $('#btn_enviar').on('click', function(e) {
@@ -418,7 +441,7 @@
                     if (data.mensajeErrr.includes('Error')) {
                         bootbox.dialog({
                             title: "Mensaje",
-                            message: "<div class='alert alert-danger m-b-0'>Error al generar el PDF</div>",
+                            message: "<div class='alert alert-danger m-b-0'>Error al generar el PDF"+data.mensajeErrr+"</div>",
                             buttons: {
                             success: {
                             label: "Ok",
@@ -427,6 +450,18 @@
                             }
                             }).find('.modal-content').css({'font-size': '14px'} );
                     }else{
+                        if (data.mensajeErrr.includes('SAP')) {
+                            bootbox.dialog({
+                            title: "Mensaje",
+                            message: "<div class='alert alert-danger m-b-0'>Error, "+data.mensajeErrr+"</div>",
+                            buttons: {
+                            success: {
+                            label: "Ok",
+                            className: "btn-success m-r-5 m-b-5"
+                            }
+                            }
+                            }).find('.modal-content').css({'font-size': '14px'} );
+                        }
                         window.open('{{url()}}'+data.file,"_blank");
                     }
                 }
@@ -541,7 +576,7 @@
     } else {
         datos['Grupal'] = 0;
     }
-    console.log(datos) 
+   // console.log(datos) 
 });
 function reloadOrdenesPedidos(){
     $("#tabla_pedidos").DataTable().clear().draw();
@@ -881,7 +916,13 @@ var tabla_impresion = $("#tabla_impresion").DataTable({
                 }).deselect();
                 }
                 },
-                    
+                {
+                text: '<button class="fa fa-file-pdf-o btn-danger"  target="_blank"></button>',
+                
+                action: function() {
+                    window.open('{{url()}}'+'/pdf_ordenes/user_'+ '{{Auth::user()->U_EmpGiro}}'+'/ordenes.pdf',"_blank");
+                }
+                }    
                     ],
                 scrollX: true,
                 scrollY: "240px",
@@ -899,6 +940,7 @@ var tabla_impresion = $("#tabla_impresion").DataTable({
                     'columnDefs': [
                         
                     ],
+                   
                     });
                
                 $.ajax({
