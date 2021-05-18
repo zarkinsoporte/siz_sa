@@ -574,7 +574,7 @@ $dt = date('Ymd h:i');
 //en caso de que no lleve piel, entonces le cambiamos en status y le colocamos la fecha de inicio.
 //casco: 400 armado - 300 habilitado ()
 if($Code_actual->U_CT == '100' && OP::ContieneRuta($Code_actual->U_DocEntry, '106') == false){
-    $res = SAP::updateStatusEntregaPiel($orden, '06', ''.$dt);
+    $res = SAP::updateStatusEntregaPiel($Code_actual->U_DocEntry, '06', ''.$dt);
             if ($res == 0){
                 DB::table('OWOR')
                 ->where('DocEntry', '=', $Code_actual->U_DocEntry)
@@ -602,7 +602,7 @@ if($consumido < 1 &&  !is_null($consumido)){
 return redirect()->back()->withErrors(array('message' => 'Esta orden necesita primero que le cargues Piel en SAP'));
 }else{
 
-    $res = SAP::updateStatusEntregaPiel($orden, '06', ''.$dt);
+    $res = SAP::updateStatusEntregaPiel($Code_actual->U_DocEntry, '06', ''.$dt);
     if ($res == 0){
         DB::table('OWOR')
         ->where('DocEntry', '=', $Code_actual->U_DocEntry)

@@ -526,6 +526,7 @@ dd($rs);
 Route::get('/crear-orden', 'Mod02_PlaneacionController@crearOrden');
 
 Route::get('/sap-test/{var?}', function (Request $request) {
+    dd(url());
     //SAP::ProductionOrderStatus('176', 1);
     //SAP::updateStatusEntregaPiel('176');
     dd('ok');

@@ -920,7 +920,7 @@ var tabla_impresion = $("#tabla_impresion").DataTable({
                 text: '<button class="fa fa-file-pdf-o btn-danger"  target="_blank"></button>',
                 
                 action: function() {
-                    window.open('{{url()}}'+'/pdf_ordenes/user_'+ '{{Auth::user()->U_EmpGiro}}'+'/ordenes.pdf',"_blank");
+                    window.open('{{url()}}'+'{{$file_anterior}}',"_blank");
                 }
                 }    
                     ],

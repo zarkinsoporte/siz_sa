@@ -18,6 +18,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Datatables;
 use Illuminate\Database\Eloquent\Collection;
 use App\SAP;
+use App\LOG;
 use App\OP;
 use App\Modelos\MOD01\LOGOF;
 use App\Modelos\MOD01\LOGOT;
@@ -61,10 +62,13 @@ public function indexGenerarOP(){
         if (Auth::check()) {
             $user = Auth::user();
             $actividades = $user->getTareas();
-
+            $file_anterior = DB::table('SIZ_Log')
+            ->where('LOG_cod_error', 'PRINT_PLANEACION')
+            ->orderBy('LOG_fecha', 'desc')->first();
             $data = array(
                 'actividades' => $actividades,
                 'ultimo' => count($actividades),
+                'file_anterior' => $file_anterior->LOG_descripcion,
                 'tipo' => ['PT', 'CA', 'OTRO'],
                 'estado' => ['Planificadas', 'Liberadas']
             );
@@ -278,6 +282,13 @@ public function impresion_op(Request $request){
                 } //end Foreach
                 $pdf_final->merge('file', $user_path . '/ordenes.pdf', 'P');
                 $file = '/pdf_ordenes/user_' . Auth::user()->U_EmpGiro.'/ordenes.pdf';
+                $lot = new LOG();
+                $lot->LOG_cod_error = 'PRINT_PLANEACION';
+                $lot->LOG_user = Auth::user()->empID;
+                $lot->LOG_tipo = 'INFO';
+                $lot->LOG_descripcion = $file;
+                $lot->LOG_fecha = date('Ymd h:i');
+                $lot->save();
                 DB::commit();
                 return compact('mensajeErrr', 'file');
                 
