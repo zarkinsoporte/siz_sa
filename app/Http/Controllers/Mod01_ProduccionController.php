@@ -116,14 +116,28 @@ class Mod01_ProduccionController extends Controller
             'op' => $op,
             'db' => DB::table('OADM')->value('CompnyName'),
         );
-        //dd($data);
-        //$data = $GraficaOrden;
+          $headerHtml = view()->make('header', $data)->render();
+                    ////clock($headerHtml);
+                    $pdf = \SPDF::loadView('Mod01_Produccion.impresionOPPDF2', $data);
+                    $pdf->setOption('header-html', $headerHtml);
+                    $pdf->setOption('footer-center', 'Pagina [page] de [toPage]');
+                    $pdf->setOption('footer-left', 'SIZ');
+                    //clock($pdf);
+                    $pdf->setOption('margin-top', '55mm');
+                    $pdf->setOption('margin-left', '5mm');
+                    $pdf->setOption('margin-right', '5mm');
+                    //$pdf->save($user_path . '/' . $op . '.pdf');
+                    //clock($user_path);
+                    return $pdf->inline();
+                    //$pdf = PDF::loadView('pdf.invoice', $data);
+                    //header('Content-Type: application/pdf');
+                    //header('Content-Disposition: attachment; filename="file.pdf"');
+                    //return SPDF::getOutput();
+                    //if($user->planeador){
+                    if(false){
+                        $rs = SAP::updateImpresoOrden($op, '2'); 
+                    }    
 
-        $pdf = \PDF::loadView('Mod01_Produccion.impresionOPPDF', $data);
-        //$pdf = \PDF::loadView('Mod01_Produccion.ReporteMateriales', $data);
-        //dd($pdf);
-        //return $pdf->stream();
-        return $pdf->setOptions(['isPhpEnabled' => true, 'isRemoteEnabled' => true])->stream('ReporteMateriales.pdf');
     }
     public function OPPDF($op)
     {
