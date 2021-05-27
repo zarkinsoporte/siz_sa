@@ -32,7 +32,9 @@
         <tr style="background-color: white">
             <td colspan="2" align="center" bgcolor="#fff">
                 <b><?php echo  $db?></b><br>
-                <h3>Orden de Producción ({{strtoupper ($marcaagua)}})</h3>
+                <h3>Orden de Producción @if (isset($marcaagua))
+                    ({{strtoupper ($marcaagua)}})
+                @endif </h3>
             </td>
         </tr>
         <tr style="background-color: white">

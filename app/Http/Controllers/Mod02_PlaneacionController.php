@@ -172,8 +172,8 @@ public function impresion_op(Request $request){
     ini_set('memory_limit', '-1');
     set_time_limit(0);
     if(strlen($request->input('ordenes')) > 0 ){
-        try {
-            DB::beginTransaction();
+
+           // DB::beginTransaction();
                 $preOrdenes = explode(',', $request->input('ordenes'));            
                 $mensajeErrr = '';
                 //clock($preOrdenes);
@@ -254,19 +254,19 @@ public function impresion_op(Request $request){
                         'op' => $op,
                         'db' => DB::table('OADM')->value('CompnyName'),
                     );
-                    //clock($data);
+                //clock($data);
                     $headerHtml = view()->make('header', $data)->render();
-                    ////clock($headerHtml);
+                   // clock($headerHtml);
                     $pdf = \SPDF::loadView('Mod01_Produccion.impresionOPPDF2', $data);
                     $pdf->setOption('header-html', $headerHtml);
                     $pdf->setOption('footer-center', 'Pagina [page] de [toPage]');
                     $pdf->setOption('footer-left', 'SIZ');
-                    //clock($pdf);
+                   // clock($pdf);
                     $pdf->setOption('margin-top', '55mm');
                     $pdf->setOption('margin-left', '5mm');
                     $pdf->setOption('margin-right', '5mm');
                     $pdf->save($user_path . '/' . $op . '.pdf');
-                    //clock($user_path);
+                  //  clock($user_path);
                     //return $pdf->inline();
                     //$pdf = PDF::loadView('pdf.invoice', $data);
                     //header('Content-Type: application/pdf');
@@ -278,25 +278,21 @@ public function impresion_op(Request $request){
                  /*  DB::table('OWOR')
                     ->where('DocEntry', '=', $op)
                     ->update(['U_Impreso' =>  1]);*/
-                    //clock($rs);
+                   // clock($rs);
                 } //end Foreach
                 $pdf_final->merge('file', $user_path . '/ordenes.pdf', 'P');
                 $file = '/pdf_ordenes/user_' . Auth::user()->U_EmpGiro.'/ordenes.pdf';
                 $lot = new LOG();
                 $lot->LOG_cod_error = 'PRINT_PLANEACION';
-                $lot->LOG_user = Auth::user()->empID;
+                $lot->LOG_user = Auth::user()->U_EmpGiro;
                 $lot->LOG_tipo = 'INFO';
                 $lot->LOG_descripcion = $file;
                 $lot->LOG_fecha = date('Ymd h:i');
                 $lot->save();
-                DB::commit();
+              //  DB::commit();
                 return compact('mensajeErrr', 'file');
                 
-        } catch (\Throwable $th) {
-            DB::rollBack();
-                $mensajeErrr = 'Error';
-                return compact('mensajeErrr');
-        }
+      
     }else{
         return 'Error , No se ha seleccionado ninguna Orden';
     }
@@ -653,7 +649,7 @@ public function registros_tabla_liberacion(Request $request){
                ON OWOR.OriginNum = ORDR.DocNum 
          WHERE
             OWOR.PlannedQty <> OWOR.CmpltQty AND  OWOR.PlannedQty = 0
-            OWOR.U_FPRODUCCION, OWOR.DOCNUM";
+            ORDER BY  OWOR.U_FPRODUCCION, OWOR.DOCNUM";
             $sel =  preg_replace('/[ ]{2,}|[\t]|[\n]|[\r]/', ' ', ($sel));
             $consulta = DB::select($sel);
             //dd($sel);
