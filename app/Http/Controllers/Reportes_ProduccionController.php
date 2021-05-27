@@ -48,7 +48,7 @@ class Reportes_ProduccionController extends Controller
             if ($enviado == 'send') {
                 $departamento = $request->input('dep');
                 //  $fecha = explode(" - ",$request->input('date_range'));
-                //$dt = date('d-m-Y H:i:s');
+                //$dt = date('Y-m-d H:i:s');
                 $fechaI = Date('Y-m-d', strtotime(str_replace('-', '/', $request->input('FechIn'))));
                 $fechaF = Date('Y-m-d', strtotime(str_replace('-', '/', $request->input('FechaFa'))));
                 $fecha_desde = strtotime($request->input('FechIn'));
@@ -705,9 +705,15 @@ class Reportes_ProduccionController extends Controller
 
     }
     public function reporteProdxAreas(){
+        /*
+            Si se agrega una nueva ruta en $consulta tambien se debe agregar en el array
+        */
         if (Auth::check()) {
             $user = Auth::user();
-            $actividades = $user->getTareas();           
+            $actividades = $user->getTareas();
+            $rutas_consulta = [100,106,109,112,115,118,121,124,127,130,133,136,139,140,142,145,148,151,154,157,160,172,175];
+            $criterio_consulta2 = implode("','",$rutas_consulta);
+            //dd($criterio_consulta2);
             $consulta = DB::select(DB::raw("           
             SELECT BIHR.Fecha,
             SUM(BIHR.VS100) AS VST100,
@@ -737,7 +743,7 @@ class Reportes_ProduccionController extends Controller
             FROM ( SELECT [@CP_LOGOF].U_DocEntry AS OP, [@CP_LOGOF].U_CT AS AREA, RUT.Name AS RUTA, CAST([@CP_LOGOF].U_FechaHora AS DATE) AS Fecha, CAST([@CP_LOGOF].U_FechaHora AS TIME) AS Hora, OP.ItemCode AS CODIGO, A3.ItemName AS ARTICULO, [@CP_LOGOF].U_Cantidad AS CANT, A3.U_VS * [@CP_LOGOF].U_Cantidad AS VS, CASE WHEN [@CP_LOGOF].U_CT=100 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS100, CASE WHEN [@CP_LOGOF].U_CT=106 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS106, CASE WHEN [@CP_LOGOF].U_CT=109 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS109, CASE WHEN [@CP_LOGOF].U_CT=112 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS112, CASE WHEN [@CP_LOGOF].U_CT=115 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS115, CASE WHEN [@CP_LOGOF].U_CT=118 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS118, CASE WHEN [@CP_LOGOF].U_CT=121 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS121, CASE WHEN [@CP_LOGOF].U_CT=124 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS124, CASE WHEN [@CP_LOGOF].U_CT=127 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS127, CASE WHEN [@CP_LOGOF].U_CT=130 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS130, CASE WHEN [@CP_LOGOF].U_CT=133 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS133, CASE WHEN [@CP_LOGOF].U_CT=136 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS136, CASE WHEN [@CP_LOGOF].U_CT=139 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS139, CASE WHEN [@CP_LOGOF].U_CT=140 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS140, CASE WHEN [@CP_LOGOF].U_CT=142 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS142, CASE WHEN [@CP_LOGOF].U_CT=145 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS145, CASE WHEN [@CP_LOGOF].U_CT=148 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS148, CASE WHEN [@CP_LOGOF].U_CT=151 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS151, CASE WHEN [@CP_LOGOF].U_CT=154 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS154, CASE WHEN [@CP_LOGOF].U_CT=157 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS157, CASE WHEN [@CP_LOGOF].U_CT=160 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS160, CASE WHEN [@CP_LOGOF].U_CT=172 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS172, CASE WHEN [@CP_LOGOF].U_CT=175 THEN A3.U_VS * [@CP_LOGOF].U_Cantidad ELSE 0 END AS VS175 FROM [@CP_LOGOF] INNER JOIN OWOR OP ON [@CP_LOGOF].U_DocEntry = OP.DocEntry inner join OITM A3 on OP.ItemCode=A3.ItemCode inner join [@PL_RUTAS] RUT on RUT.Code=[@CP_LOGOF].U_CT where  [@CP_LOGOF].U_FechaHora 
             BETWEEN '".date('Y-m-d', strtotime(Input::get('FechIn'))).' 00:00'."' and '".date('Y-m-d', strtotime(Input::get('FechaFa'))).' 23:59:59'."' ) BIHR Group by BIHR.Fecha order by BIHR.Fecha
             "));
-           
+            $rutas_consulta3 = '400,403,406,409,415,418';
             $consulta3 =  DB::select(DB::raw("
             Select BIHR.Fecha,
             SUM(BIHR.VS400) as VST400, 
@@ -774,10 +780,7 @@ class Reportes_ProduccionController extends Controller
             group by TRA_CAS.FECHA, c.FECHA_CONSUMO, c.Consumo Order by FECHA
             "));
             if (strtotime(Input::get('FechaFa')) == strtotime(date("Y-m-d"))){
-                $consulta2 = DB::select(DB::raw("           
-                SELECT T2.SVS FROM ( SELECT Code FROM [@PL_RUTAS] WHERE U_Estatus = 'A' AND Code <= '175' ) T1 LEFT JOIN ( SELECT CodFunda, SUM( VS) as SVS FROM SIZ_View_ReporteBO WHERE U_Starus= '06' and CodFunda is not null Group By CodFunda ) T2 ON T1.Code = T2.CodFunda Order By Code 
-                "));
-                
+                $consulta2 = DB::select(DB::raw("SELECT T2.SVS FROM ( SELECT Code FROM [@PL_RUTAS] WHERE U_Estatus = 'A' AND Code <= '175'  AND Code in ('$criterio_consulta2') ) T1 LEFT JOIN ( SELECT CodFunda, SUM( VS) as SVS FROM SIZ_View_ReporteBO WHERE U_Starus= '06' and CodFunda is not null Group By CodFunda ) T2 ON T1.Code = T2.CodFunda Order By Code"));
                 $consulta5 =  DB::select(DB::raw("
                 Select SUM(AL_CAS.EX_CARP) AS T_CARP, 
                 SUM(AL_CAS.EX_ALMA) AS T_ALMA, 

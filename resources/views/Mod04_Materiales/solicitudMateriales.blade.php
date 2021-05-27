@@ -400,7 +400,7 @@ var data,
     $('#tabla thead tr').clone(true).appendTo( '#tabla thead' );
 
 $('#confirma').modal('show');
-});
+
 
 $("#submitBtn").click(function(){
     //console.log(($( "#destino option:selected" ).val()).length);
@@ -428,7 +428,8 @@ $(document).on('click', '.regresacant', function(event) {
         table.cell(rowIdx, 3).data(parseFloat(table.cell(rowIdx, 3).data()) + parseFloat(cantidad));
     })
     .draw();
-})
+});
+});
 } //js_iniciador
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.7.2/angular.min.js"></script>

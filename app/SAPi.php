@@ -100,7 +100,7 @@ public static function ReciboProduccion($docEntry, $whs, $Cant, $comentario, $me
                 $descripcionError = self::$vCmp->GetLastErrorDescription();    
                 if (strpos($descripcionError, 'IGN1.WhsCode][line: 1') !== false) {
                 $descripcionError = $descripcionError.
-                ' Uno o más materiales tienen stock negativo. Actualiza Reporte "POSIBLE ROMPIMIENTOS"';
+                ' Uno o más materiales tienen stock negativo. Actualiza ';
                 }
                 return 'Error SAP: '.$descripcionError;
         }  

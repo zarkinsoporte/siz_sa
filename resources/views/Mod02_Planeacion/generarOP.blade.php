@@ -302,7 +302,7 @@
                 click_series();
                 break;
             case '3':
-                //click_series();
+                click_programar();
                 break;
             case '4':
                 console.log(' click liberar');
@@ -995,7 +995,121 @@ var tabla_impresion = $("#tabla_impresion").DataTable({
         }
     });
 }
+//FIN IMPRESION
+// INICIO LIBERACION
+var tabla_programar = $("#tabla_programar").DataTable({
+                language:{
+                    "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                }, 
+                dom: 'Bfrtip',
+                buttons: [
+                    {
+text: '<i class="fa fa-check-square"></i>',
+titleAttr: 'seleccionar',
+action: function() {
+    tabla_programar.rows({
+page: 'current'
+}).select();
+}
+},
+{
+text: '<i class="fa fa-square"></i>',
+titleAttr: 'deseleccionar',
+action: function() {
+    tabla_programar.rows({
+page: 'current'
+}).deselect();
+}
+},
+       
+    ],
+                scrollX: true,
+                scrollY: "240px",
+                scrollCollapse: true,
+                deferRender: true,        
+                   pageLength:-1,
+                    columns: [                   
+                    {data: "PEDIDO"},
+                    {data: "CARDNAME"},
+                    {data: "DOCNUM"},
+                    {data: "PRIORIDAD"},
+                    {data: "ITEMCODE"},
+                    {data: "ITEMNAME"},
+                    {data: "DUEDATE"}, //fecha de finalizacion
+                    {data: "DOCDUEDATE"},  //fecha de venta
+                    {data: "U_FPRODUCCION"},
+                    {data: "U_STARUS"},
+                    {data: "U_OT"}
+                   
+                    ],
+                    'columnDefs': [
+                        
+                    ],
+                    });
+               
+                $.ajax({
+        type: 'GET',
+        async: true,       
+        url: '{!! route('datatables.tabla_programar') !!}',
+        data: {
+           
+        },
+        beforeSend: function() {
+            
+        },
+        complete: function() {
+           // setTimeout($.unblockUI, 1500);
+        },
+        success: function(data){            
+                   
+                if(data.tabla_programar.length > 0){
+                $("#tabla_programar").dataTable().fnAddData(data.tabla_programar);
+                }else{
+                
+                } 
+                tabla_programar.columns.adjust().draw();       
+        }
+    });
+    $('#tabla_programar tbody').on( 'click', 'tr', function () {
+        $(this).toggleClass('selected');
+    } );
 
+   function reloadOrdenesProgramar(){
+    var estado = $('#cbo_estadoOP').val();
+    var tipo = $('#cbo_tipoOP').val();
+    console.log(estado);
+    console.log(tipo);
+    $("#tabla_programar").DataTable().clear().draw();
+    $.ajax({
+        type: 'GET',
+        async: true,       
+        url: '{!! route('datatables.tabla_programar') !!}',
+        data: {
+            "_token": "{{ csrf_token() }}",
+            estado: estado,
+            tipo: tipo,
+        },
+        beforeSend: function() {
+            
+        },
+        complete: function() {
+           // setTimeout($.unblockUI, 1500);
+        },
+        success: function(data){   
+            if(data.tabla_programar.length > 0){
+                $("#tabla_programar").dataTable().fnAddData(data.tabla_programar);           
+            }else{ 
+
+            }        
+        }
+    });
+}
+$('#boton-mostrar').on('click', function(e) {
+    e.preventDefault();
+    reloadOrdenesProgramar();
+});
+
+// FIN LIBERACION
 
 /* NOTA: cuando la tabla esta dentro de elementos ocultos por ejemplo en tab
 o en un collapsable hay que ajustar las cabeceras cuando la tabla va 
@@ -1031,6 +1145,7 @@ $('#lista-tab2').on('click', function(e) {
 });
 $('#lista-tab3').on('click', function(e) {
     e.preventDefault();
+    reloadOrdenesProgramar();
    
 });
 $('#lista-tab4').on('click', function(e) {

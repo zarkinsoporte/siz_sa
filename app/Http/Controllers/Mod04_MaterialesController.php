@@ -764,7 +764,7 @@ public function saveArt(Request $request){
                     $correos[] = $N_Emp;
                 }    
                 if (count($correos) > 0) {                                        
-                    Mail::send('Emails.SolicitudMP', [
+                    Mail::send('Emails.SolicitudMP', [ 'almacen_destino' => $almacen_destino,
                         'arts' => $arts, 'id' => $id, 'comentario' => $usercomment
                     ], function ($msj) use ($correos, $id) {
                         $msj->subject('SIZ Solicitud de Material #'.$id); //ASUNTO DEL CORREO

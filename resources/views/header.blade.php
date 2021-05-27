@@ -11,7 +11,7 @@
     img {
         display: block;
     margin-left: 70px;
-    width:800px;
+    width:90%;
     height: 50px;
         position: absolute;
 }
@@ -20,8 +20,6 @@
 		border-collapse: collapse; 
         font-family:arial;
 	}
-       
-
  
 </style>
 
@@ -34,7 +32,7 @@
         <tr style="background-color: white">
             <td colspan="2" align="center" bgcolor="#fff">
                 <b><?php echo  $db?></b><br>
-                <h3>Orden de Producción</h3>
+                <h3>Orden de Producción ({{strtoupper ($marcaagua)}})</h3>
             </td>
         </tr>
         <tr style="background-color: white">
@@ -46,7 +44,7 @@
                         <tr style="background-color: white">
                             <th align="center">Código: </th>
                             <td align='left' style="white-space:nowrap;"><?php echo $data[0]->ItemCode ?> -
-                                <?php echo $data[0]->ItemName ?></td>
+                                <?php echo substr($data[0]->ItemName,0,60) ?></td>
 
                         </tr>
                         <tr style="background-color: white">
@@ -112,6 +110,6 @@
 
 
 </div>
-</body>
 
+</body>
 </html>

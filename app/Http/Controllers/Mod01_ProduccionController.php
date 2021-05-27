@@ -107,8 +107,14 @@ class Mod01_ProduccionController extends Controller
                         o.plannedqty AS cantidad
                         FROM OWOR o
                         INNER JOIN OITM a ON a.ItemCode=o.ItemCode
-                        WHERE o.U_NoSerie = ? ", [$Materiales[0]->U_NoSerie]);                                           
+                        WHERE o.U_NoSerie = ? ", [$Materiales[0]->U_NoSerie]);    
+                        $marcaagua = 'muestra';
+                        if (Auth::user()->position == 6){
+                            $rs = SAP::updateImpresoOrden($op, '2'); 
+                            $marcaagua = 'reimpresion';                            
+                        }                                     
         $data = array(
+            'marcaagua' => $marcaagua,
             'ordenes_serie' => $ordenesSerie,
             'composicion' => $composicion,
             'total_vs' => $total_vs,
@@ -118,7 +124,7 @@ class Mod01_ProduccionController extends Controller
         );
           $headerHtml = view()->make('header', $data)->render();
                     ////clock($headerHtml);
-                    $pdf = \SPDF::loadView('Mod01_Produccion.impresionOPPDF2', $data);
+                    $pdf = \SPDF::loadView('Mod01_Produccion.impresionOPPDF', $data);
                     $pdf->setOption('header-html', $headerHtml);
                     $pdf->setOption('footer-center', 'Pagina [page] de [toPage]');
                     $pdf->setOption('footer-left', 'SIZ');
@@ -128,16 +134,14 @@ class Mod01_ProduccionController extends Controller
                     $pdf->setOption('margin-right', '5mm');
                     //$pdf->save($user_path . '/' . $op . '.pdf');
                     //clock($user_path);
-                    return $pdf->inline();
                     //$pdf = PDF::loadView('pdf.invoice', $data);
                     //header('Content-Type: application/pdf');
                     //header('Content-Disposition: attachment; filename="file.pdf"');
                     //return SPDF::getOutput();
                     //if($user->planeador){
-                    if(false){
-                        $rs = SAP::updateImpresoOrden($op, '2'); 
-                    }    
-
+                      
+                        
+                    return $pdf->inline();
     }
     public function OPPDF($op)
     {
@@ -1082,8 +1086,9 @@ if (Auth::check()) {
             $actividades = $user->getTareas();
             $data = 0;
  if (Input::has('enviado')){
-           $fechaI = Date('d-m-y', strtotime(str_replace('-', '/', Input::get('FechIn'))));
-           $fechaF = Date('d-m-y', strtotime(str_replace('-', '/', input::get('FechaFa'))));
+     
+           $fechaI = Date('Y-m-d', strtotime(str_replace('-', '/', Input::get('FechIn'))));
+           $fechaF = Date('Y-m-d', strtotime(str_replace('-', '/', input::get('FechaFa'))));
     $detInsPiel= DB::select(DB::raw("select  OWOR.DocNum, sum(WOR1.IssuedQty) as Usado ,OWOR.ItemCode , OHEM.firstName 
                 AS LOGISTICA,OHEM.middleName AS APELLIDO  , (a.u_vs * OWOR.PlannedQty ) as u_vs ,OITM.ItmsGrpCod, OWOR.closedate  , a.itemname ,  sum(WOR1.IssuedQty*OITM.AvgPrice) 
                 as mUsado  , (vwsof_pieles1.cantidad * OWOR.PlannedQty) as Teorico , (vwsof_pieles1.monto * OWOR.PlannedQty) as mTeorico,
@@ -1279,7 +1284,7 @@ public function terminarOP(Request $request){
                 Session::put('return', 1);    
                 
 
-   $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
+   $rates = DB::table('ORTT')->where('RateDate', date('Y-m-d'))->get();
         if (count($rates) >= 3) {
             $Code_actual = OP::find($request->input('code'));
             $orden_owor = DB::table('OWOR')->where('DocNum', $request->input('orden'))->first();          

@@ -37,6 +37,7 @@
   <div class="row">
     <div class="col-md-12">
         <h3>Solicitud de Material #{{$id}}</h3>
+        <h3>Almacén Destino: {{$almacen_destino}} </h3>
         <h4>Requerido por: {{ Auth::user()->firstName.' '.Auth::user()->lastName }}</h4>
       <table class="paleBlueRows">
         <thead>
@@ -46,8 +47,7 @@
             <th>Descripción</th>
             <th>UM</th>
             <th>Cantidad</th>
-            <th>Destino</th>
-          
+ 
           </tr>
         </thead>
         <tbody>
@@ -60,7 +60,6 @@
             <td>{{$art['descr']}}</td>
             <td>{{$art['um']}}</td>
             <td>{{$art['cant']}}</td>
-            <td>{{$art['labelDestino']}}</td>
           </tr>
           @endforeach
          

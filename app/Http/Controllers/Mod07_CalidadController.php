@@ -541,11 +541,11 @@ public function DataShowDefectivosCaptura(Request $request){
 
      public function exportarReporteDefectivos(Request $request){        
         $fecha = Carbon::createFromFormat('d/m/Y', $request->get('date')); 
-        $fecha_desde = $fecha->format('d-m-Y');                             
+        $fecha_desde = $fecha->format('Y-m-d');                             
         for ($i=0; $i < 4 ; $i++) { 
 
-            $fechaIni = $fecha->format('d-m-Y');
-            $fechaEnd = $fecha->endOfWeek()->format('d-m-Y H:i');                      
+            $fechaIni = $fecha->format('Y-m-d');
+            $fechaEnd = $fecha->endOfWeek()->format('Y-m-d H:i');                      
             $fecha = $fecha->addSeconds(61);                       
 
             $rs = DB::select("select 
@@ -742,11 +742,11 @@ public function DataShowDefectivosCaptura(Request $request){
 
      public function ddx(){   
         $fecha = Carbon::createFromFormat('d/m/Y', $request->get('date')); 
-        $fecha_desde = $fecha->format('d-m-Y');                             
+        $fecha_desde = $fecha->format('Y-m-d');                             
         for ($i=0; $i < 4 ; $i++) { 
 
-            $fechaIni = $fecha->format('d-m-Y');
-            $fechaEnd = $fecha->endOfWeek()->format('d-m-Y H:i');                      
+            $fechaIni = $fecha->format('Y-m-d');
+            $fechaEnd = $fecha->endOfWeek()->format('Y-m-d H:i');                      
             $fecha = $fecha->addSeconds(61);                       
 
             $rs = DB::select("select 

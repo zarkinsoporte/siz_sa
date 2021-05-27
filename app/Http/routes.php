@@ -395,6 +395,7 @@ Route::any('generarOP', 'Mod02_PlaneacionController@generarOP')->name('generarOP
 Route::any('datatables.tabla_series', 'Mod02_PlaneacionController@registros_tabla_series')->name('datatables.tabla_series');
 Route::any('datatables.tabla_liberacion', 'Mod02_PlaneacionController@registros_tabla_liberacion')->name('datatables.tabla_liberacion');
 Route::any('datatables.tabla_impresion', 'Mod02_PlaneacionController@registros_tabla_impresion')->name('datatables.tabla_impresion');
+Route::any('datatables.tabla_programar', 'Mod02_PlaneacionController@registros_tabla_programar')->name('datatables.tabla_programar');
 Route::any('asignar_series', 'Mod02_PlaneacionController@asignar_series')->name('asignar_series');
 Route::any('liberacionOP', 'Mod02_PlaneacionController@liberacion_op')->name('liberacionOP');
 Route::any('impresionOP', 'Mod02_PlaneacionController@impresion_op')->name('impresionOP');
@@ -411,9 +412,9 @@ Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@pr
 
 Route::get('/pruebas', function (Request $request) {
 
-   $rs =  SAP::updateImpresoOrden(7, '1');
+    $rates = DB::table('ORTT')->where('RateDate', date('Y-m-d'))->get();
 
-dd($rs);
+dd($rates);
     $ops=['7', '12' ];
     $pdf_final = new \Clegginabox\PDFMerger\PDFMerger;
     $user_path = storage_path('pdf_ordenes/user_' . Auth::user()->U_EmpGiro);

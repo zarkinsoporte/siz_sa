@@ -119,6 +119,7 @@
                             <td id="f5" scope="row">
                                 {{number_format($rep->VST115,2)}}
                             </td>
+
                             <td id="f6" scope="row">
                                 {{number_format($rep->VST118,2)}}
                             </td>
@@ -134,6 +135,7 @@
                             <td id="f10" scope="row">
                                 {{number_format($rep->VST130,2)}}
                             </td>
+
                             <td id="f11" scope="row">
                                 {{number_format($rep->VST133,2)}}
                             </td>
@@ -149,6 +151,7 @@
                             <td id="f13" scope="row">
                                 {{number_format($rep->VST142,2)}}
                             </td>
+
                             <td id="f14" scope="row">
                                 {{number_format($rep->VST145,2)}}
                             </td>
@@ -164,6 +167,7 @@
                             <td id="f18" scope="row">
                                 {{number_format($rep->VST157,2)}}
                             </td>
+
                             <td id="f19" scope="row">
                                 {{number_format($rep->VST160,2)}}
                             </td>
@@ -203,7 +207,7 @@
                             <td>0</td>
                             <td>0</td>
                         </tr>
-                        @if (strtotime($ff) == strtotime(date("Y-m-d"))) 
+                        @if (strtotime($ff) == strtotime(date('d-m-Y'))) 
                             <tr  class="encabezado">
                                 <th scope="row" class="table-condensed zrk-dimgray">INVENTARIO:</th>
                                 @foreach ($data2 as $item)                          
@@ -280,7 +284,7 @@
                                 <td>0</td>
                                 <td>0</td>                                
                             </tr>
-                             @if (strtotime($ff) == strtotime(date("Y-m-d"))) 
+                             @if (strtotime($ff) == strtotime(date("d-m-Y"))) 
                                         <tr  class="encabezado">
                                                 <th scope="row" class="table-condensed zrk-dimgray">INVENTARIO:</th>
                                                 @foreach ($data7 as $item)                          
@@ -371,7 +375,7 @@
                                     <td>0</td>
                                    
                                 </tr>
-                                @if (strtotime($ff) == strtotime(date("Y-m-d"))) 
+                                @if (strtotime($ff) == strtotime(date("d-m-Y"))) 
                                         <tr  class="encabezado">
                                                 <th scope="row" class="table-condensed zrk-dimgray">INVENTARIO CASCO:</th>
                                                 @foreach ($data5 as $item)                          

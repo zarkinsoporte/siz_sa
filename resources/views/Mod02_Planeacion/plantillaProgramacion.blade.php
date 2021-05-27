@@ -14,17 +14,29 @@
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            
+                            <table id="tabla_programar" class="table table-striped table-bordered hover" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>Pedido</th>
+                                        <th>Cliente</th>
+                                        <th>OP</th>
+                                        <th>Prioridad</th>
+                                        <th>Código</th>
+                                        <th>Descripción</th>
+                                        <th>F. Finalización</th>
+                                        <th>F. Venta</th>
+                                        <th>F. Producción</th>
+                                        <th>Estatus</th>
+                                        <th>OT</th>
+
+                                    </tr>
+                                </thead>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
-            <div id="hiddendiv" class="progress" style="display: none">
-                <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="100"
-                    aria-valuemin="0" aria-valuemax="100" style="width: 50%">
-                    <span>Espere un momento...<span class="dotdotdot"></span></span>
-                </div>
-            </div>
+          
         </div>
     </div>                                                                                                 
 </div> 
