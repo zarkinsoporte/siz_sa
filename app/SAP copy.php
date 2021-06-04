@@ -15,13 +15,13 @@ class SAPcopy extends Model
     public static function Connect(){
         self::$vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
         self::$vCmp->DbServerType="6"; 
-        self::$vCmp->server = "SERVER-SAPBO";
-        self::$vCmp->LicenseServer = "SERVER-SAPBO:30000";
-        self::$vCmp->CompanyDB = "SALOTTO";
-        self::$vCmp->username = "controlp";
-        self::$vCmp->password = "190109";
-        self::$vCmp->DbUserName = "sa";
-        self::$vCmp->DbPassword = "B1Admin";
+        self::$vCmp->server = env('SAP_server');;
+        self::$vCmp->LicenseServer = env('SAP_LicenseServer');
+        self::$vCmp->CompanyDB = env('SAP_CompanyDB');
+        self::$vCmp->username = env('SAP_username');
+        self::$vCmp->password = env('SAP_password');
+        self::$vCmp->DbUserName = env('SAP_DbUserName');
+        self::$vCmp->DbPassword = env('SAP_DbPassword');
         self::$vCmp->UseTrusted = false;
         self::$vCmp->language = "6";
         $lRetCode = self::$vCmp->Connect;
@@ -89,13 +89,13 @@ class SAPcopy extends Model
     public static function Connect2(){
         self::$vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
         self::$vCmp->DbServerType="6"; 
-        self::$vCmp->server = "SERVER-SAPBO";
-        self::$vCmp->LicenseServer = "SERVER-SAPBO:30000";
-        self::$vCmp->CompanyDB = "SALOTTO";
-        self::$vCmp->username = "sistema3";
-        self::$vCmp->password = "beto";
-        self::$vCmp->DbUserName = "sa";
-        self::$vCmp->DbPassword = "B1Admin";
+        self::$vCmp->server = env('SAP_server');;
+        self::$vCmp->LicenseServer = env('SAP_LicenseServer');
+        self::$vCmp->CompanyDB = env('SAP_CompanyDB');
+        self::$vCmp->username = env('SAP_username');
+        self::$vCmp->password = env('SAP_password');
+        self::$vCmp->DbUserName = env('SAP_DbUserName');
+        self::$vCmp->DbPassword = env('SAP_DbPassword');
         self::$vCmp->UseTrusted = false;
         self::$vCmp->language = "6";
         $lRetCode = self::$vCmp->Connect;

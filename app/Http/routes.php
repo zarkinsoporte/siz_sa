@@ -527,51 +527,28 @@ dd($rates);
 
 Route::get('/crear-orden', 'Mod02_PlaneacionController@crearOrden');
 
-Route::get('/sap-test/{var?}', function (Request $request) {
-    dd(url());
-    //SAP::ProductionOrderStatus('176', 1);
-    //SAP::updateStatusEntregaPiel('176');
-    dd('ok');
+Route::get('/sap', function (Request $request) {
+   
     $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
     $vCmp->DbServerType="10"; 
-    $vCmp->server = "ZARKIN-088";
-    $vCmp->LicenseServer = "ZARKIN-088:30000";
-    $vCmp->CompanyDB = "SBO_Salotto";
-    $vCmp->username = "SIZ_PROD";
-    $vCmp->password = "Zark&n20";
-    $vCmp->DbUserName = "sa";
-    $vCmp->DbPassword = "B1Admin";
+    $vCmp->server = env('SAP_server');;
+    $vCmp->LicenseServer = env('SAP_LicenseServer');
+    $vCmp->CompanyDB = env('SAP_CompanyDB');
+    $vCmp->username = env('SAP_username');
+    $vCmp->password = env('SAP_password');
+    $vCmp->DbUserName = env('SAP_DbUserName');
+    $vCmp->DbPassword = env('SAP_DbPassword');
     $vCmp->UseTrusted = false;
     //$vCmp->language = "6";
     $lRetCode = $vCmp->Connect;
-    $vItem = $vCmp->GetBusinessObject("202");
-    $RetVal = $vItem->GetByKey('176');
-       // clock($RetVal);U_Starus' =>  '01', 'U_Entrega_Piel'
-        $vItem->UserFields->Fields->Item('U_Starus')->Value = '03';
-        $vItem->UserFields->Fields->Item('U_Entrega_Piel')->Value = '';
-        $retCode = $vItem->Update;
-    return 'Error, ' . $vCmp->GetLastErrorDescription();
+    
     
     if ($lRetCode <> 0) {
        Session::flash('error', $vCmp->GetLastErrorDescription());
     } else {
         Session::flash('info',' - conexión con SAP DI API exitosa!!');
     } 
-    Session::flash('error', $vCmp->GetLastErrorDescription());
-    //return view('welcome');
-    
-    $vItem = $vCmp->GetBusinessObject("202");
-    $RetVal = $vItem->GetByKey('12');
-    //dd($vItem->Printed);
-    $vItem->Printed = '';
-    $retCode = $vItem->Update;
-    $retCode = 0;
-    Session::flash('info', $vItem->Printed);
-    if ($retCode != 0) {
-        return 'Error, ' . $vCmp->GetLastErrorDescription();
-    } else {
-       // return $numSerie;
-    }
+   
     return redirect('home');
     
 });
