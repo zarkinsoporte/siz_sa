@@ -25,12 +25,13 @@
 	},
 	"buttons": {
 		"copyTitle": "Copiar al portapapeles",
-  		selectAll: "Select all items",
-            	selectNone: "Select none",
+  		"selectAll": "Select all items",
+            	"selectNone": "Select none",
 		"copyKeys": "Presiona <i>ctrl</i> + <i>C</i> para copiar o la tecla <i>Esc</i> para continuar.",
 		"copySuccess": {
 			"_": "%d filas copiadas",
 		"1": "1 fila copiada"
 		}
-	}
+	}	
+	
 }

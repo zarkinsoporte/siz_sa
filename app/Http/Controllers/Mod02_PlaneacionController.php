@@ -69,8 +69,10 @@ public function indexGenerarOP(){
                 'actividades' => $actividades,
                 'ultimo' => count($actividades),
                 'file_anterior' => $file_anterior->LOG_descripcion,
-                'tipo' => ['PT', 'CA', 'OTRO'],
-                'estado' => ['Planificadas', 'Liberadas']
+                'tipo' => ['PT', 'CASCO', 'OTRO'],
+                'tipocompleto' => ['FUNDAS', 'CASCO', 'PATAS Y BASTIDORES', 'SUB-ENSAMBLES', 'HABILITADO'],
+                'estado' => ['Planificadas', 'Liberadas'],
+                'estatus' => ['-', '01-DETENIDO VENTAS', '02-FALTA INFORMACION', '03-FALTA PIEL', '04-REVISION DE PIEL', '05-POR ORDENAR']
             );
             return view('Mod02_Planeacion.generarOP', $data);
         } else {
@@ -88,13 +90,36 @@ public function generarOP(Request $request){
         }
         return compact('orders');
 }
+public function programar_op(Request $request){
+       // dd($request->all());
+        ini_set('memory_limit', '-1');
+        set_time_limit(0);
+        if(strlen($request->input('ordenes')) > 0 ){
+            $preOrdenes = explode(',', $request->input('ordenes'));
+            $mensajeErrr= '';
+
+            $prog_corte = $request->input('prog_corte');
+            $sec_compra = $request->input('sec_compra');
+            $sec_ot = $request->input('sec_ot');
+            $estatus = $request->input('estatus');
+            $fCompra = $request->input('fCompra');
+            $fProduccion = $request->input('fProduccion');
+
+            foreach ($preOrdenes as $key => $orden) {
+                    
+                       SAP::ProductionOrderProgramar($orden, $prog_corte, $sec_compra, $sec_ot, $estatus, $fCompra, $fProduccion); 
+                                  
+            }
+            return compact('mensajeErrr');
+        }else{
+            return 'No se ha seleccionado ninguna Orden';
+        }
+}
 public function liberacion_op(Request $request){
         ini_set('memory_limit', '-1');
         set_time_limit(0);
         if(strlen($request->input('ordenes')) > 0 ){
             $preOrdenes = explode(',', $request->input('ordenes'));
-            $index = 0;
-            $numSerieGrupal = null;
             $mensajeErrr= '';
             foreach ($preOrdenes as $key => $preorden) {
                 $orden = explode('&',$preorden);
@@ -545,7 +570,7 @@ public function registros_tabla_liberacion(Request $request){
             'tipo' => ['PT', 'CA', 'OTRO'],
             'estado' => ['Planificadas', 'Liberadas']
             */
-            /*
+           
             switch ($estado) {
                 case 0:
                     $estado = 'P'; //PLANIFICADAS
@@ -557,100 +582,112 @@ public function registros_tabla_liberacion(Request $request){
                     $estado = 'P';
                     break;
             }
-            switch ($tipo) {
+             
+             switch ($tipo) {
                 case 0:
-                    $tipo = "dbo.OITM.U_TipoMat = 'PT'"; //PRODUCTO TERMINADO
+                    $tipo = "dbo.OITM.QryGroup31 = 'N' AND dbo.OITM.QryGroup32 = 'N' AND dbo.OITM.QryGroup30 = 'N' AND dbo.OITM.QryGroup29 = 'N'"; //FUNDAS
                     break;
                 case 1:
-                    $tipo = "dbo.OITM.U_TipoMat = 'CA'"; //CASCO
-                    break;
+                    $tipo = "dbo.OITM.QryGroup29 = 'Y'"; //CASCO 29
+                    break; 
                 case 2:
-                    $tipo = "dbo.OITM.U_TipoMat <> 'PT' AND dbo.OITM.U_TipoMat <> 'CA'"; //DIFENTES A LAS ANTERIORES (SUBENSAMBLES)
+                    $tipo = "dbo.OITM.QryGroup31 = 'Y'"; //PATAS Y BAST 31
                     break;
-                default:
-                    $tipo = "dbo.OITM.U_TipoMat = 'PT'"; //PRODUCTO TERMINADO
+                case 3:
+                    $tipo = "dbo.OITM.QryGroup32 = 'Y'"; //SUBENSAMBLES 32
                     break;
+                case 4:
+                    $tipo = "dbo.OITM.QryGroup30 = 'Y'"; //HABILITADO 30
+                    break;   
             }
             //dd([$estado, $tipo]);
-            */
-            $estado = 'R';
-            $tipo = "dbo.OITM.U_TipoMat = 'PT'";
+            
+           // $estado = 'R';
+           // $tipo = "dbo.OITM.U_TipoMat = 'PT'";
             $sel = "SELECT
-            OWOR.OriginNum AS PEDIDO,
-            OWOR.CardCode,
-            OCRD.CardName,
-            OWOR.DOCNUM,
-            OWOR.U_C_Orden AS PRIORIDAD,
-            OWOR.ITEMCODE,
-            OITM.ITEMNAME,
-            OWOR.DUEDATE,
-            OWOR.U_FPRODUCCION,
-            CASE
-               WHEN
-                  U_Starus IS NULL 
-               THEN
-                  'POR PROGRAMAR' 
-               ELSE
-                  CASE
-                     WHEN
-                        U_Starus = '01' 
-                     THEN
-                        'DET VENTAS' 
-                     ELSE
+            OWOR.Status,
+            OITM.QryGroup29,
+            OITM.QryGroup30,
+            OITM.QryGroup31,
+            OITM.QryGroup32,
+                        OWOR.OriginNum AS PEDIDO,
+                        OWOR.CARDCODE,
+                        SUBSTRING(OCRD.CARDNAME, 0, 35) CARDNAME,
+                        OWOR.DOCNUM,
+                        OWOR.U_C_Orden AS PRIORIDAD,
+                        OWOR.ITEMCODE,
+                        SUBSTRING(OITM.ITEMNAME,0, 35) ITEMNAME,
+                        OWOR.U_FCOMPRAS,
+                        OWOR.U_FPRODUCCION,
+						OWOR.U_GRUPO AS PROG_CORTE,
+						OWOR.U_OF AS SEC_COMPRA,
+						OWOR.U_OT AS SEC_OT,
                         CASE
                            WHEN
-                              U_Starus = '02' 
+                              U_Starus IS NULL 
                            THEN
-                              'FALTA INF.' 
+                              'POR PROGRAMAR' 
                            ELSE
                               CASE
                                  WHEN
-                                    U_Starus = '03' 
+                                    U_Starus = '01' 
                                  THEN
-                                    'FALTA MAT.' 
+                                    'DET VENTAS' 
                                  ELSE
                                     CASE
                                        WHEN
-                                          U_Starus = '04' 
+                                          U_Starus = '02' 
                                        THEN
-                                          'REV. PIEL' 
+                                          'FALTA INF.' 
                                        ELSE
                                           CASE
                                              WHEN
-                                                U_Starus = '05' 
+                                                U_Starus = '03' 
                                              THEN
-                                                'POR ORDENAR MAT.' 
+                                                'FALTA PIEL' 
                                              ELSE
                                                 CASE
                                                    WHEN
-                                                      U_Starus = '06' 
+                                                      U_Starus = '04' 
                                                    THEN
-                                                      'EN PROCESO' 
+                                                      'REV. PIEL' 
+                                                   ELSE
+                                                      CASE
+                                                         WHEN
+                                                            U_Starus = '05' 
+                                                         THEN
+                                                            'POR ORDENAR' 
+                                                         ELSE
+                                                            CASE
+                                                               WHEN
+                                                                  U_Starus = '06' 
+                                                               THEN
+                                                                  'EN PROCESO' 
+                                                            END
+                                                      END
                                                 END
                                           END
                                     END
                               END
                         END
-                  END
-            END
-            AS U_Starus, ORDR.DocDueDate, OWOR.U_OT, CP.U_CT 
-         FROM
-            OWOR 
-            INNER JOIN
-               OITM 
-               ON OWOR.ITEMCODE = OITM.ITEMCODE 
-            INNER JOIN
-               OCRD 
-               ON OWOR.CardCode = OCRD.CardCode 
-            LEFT JOIN
-               [@CP_OF] CP 
-               ON OWOR.DocNum = CP.U_DocEntry 
-            LEFT JOIN
-               ORDR 
-               ON OWOR.OriginNum = ORDR.DocNum 
-         WHERE
-            OWOR.PlannedQty <> OWOR.CmpltQty AND  OWOR.PlannedQty = 0
-            ORDER BY  OWOR.U_FPRODUCCION, OWOR.DOCNUM";
+                        AS U_STARUS, ORDR.DOCDUEDATE, CP.U_CT 
+                     FROM
+                        OWOR 
+                        INNER JOIN
+                           OITM 
+                           ON OWOR.ITEMCODE = OITM.ITEMCODE 
+                        INNER JOIN
+                           OCRD 
+                           ON OWOR.CardCode = OCRD.CardCode 
+                        LEFT JOIN
+                           [@CP_OF] CP 
+                           ON OWOR.DocNum = CP.U_DocEntry 
+                        LEFT JOIN
+                           ORDR 
+                           ON OWOR.OriginNum = ORDR.DocNum 
+                     WHERE
+                     (Status = '" . $estado . "') AND (" . $tipo . ") AND  OWOR.PlannedQty <> OWOR.CmpltQty
+                        ORDER BY  OWOR.U_FPRODUCCION, OWOR.DOCNUM";
             $sel =  preg_replace('/[ ]{2,}|[\t]|[\n]|[\r]/', ' ', ($sel));
             $consulta = DB::select($sel);
             //dd($sel);

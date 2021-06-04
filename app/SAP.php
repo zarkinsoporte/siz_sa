@@ -18,13 +18,13 @@ class SAP extends Model
     {
         self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
         self::$vCmp->DbServerType = "10";
-        self::$vCmp->server = "ZARKIN-088";
-        self::$vCmp->LicenseServer = "ZARKIN-088:30000";
-        self::$vCmp->CompanyDB = "SBO_Salotto";
-        self::$vCmp->username = "SIZ_PROD";
-        self::$vCmp->password = "Zark&n20";
-        self::$vCmp->DbUserName = "sa";
-        self::$vCmp->DbPassword = "B1Admin";
+        self::$vCmp->server = env('SAP_server');;
+        self::$vCmp->LicenseServer = env('SAP_LicenseServer');
+        self::$vCmp->CompanyDB = env('SAP_CompanyDB');
+        self::$vCmp->username = env('SAP_username');
+        self::$vCmp->password = env('SAP_password');
+        self::$vCmp->DbUserName = env('SAP_DbUserName');
+        self::$vCmp->DbPassword = env('SAP_DbPassword');
         self::$vCmp->UseTrusted = false;
         //self::$vCmp->language = "6";
         $lRetCode = self::$vCmp->Connect;
@@ -58,13 +58,13 @@ class SAP extends Model
     {
         self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
         self::$vCmp->DbServerType = "10";
-        self::$vCmp->server = "ZARKIN-088";
-        self::$vCmp->LicenseServer = "ZARKIN-088:30000";
-        self::$vCmp->CompanyDB = "SBO_Salotto";
-        self::$vCmp->username = "SIZ_PROD";
-        self::$vCmp->password = "Zark&n20";
-        self::$vCmp->DbUserName = "sa";
-        self::$vCmp->DbPassword = "B1Admin";
+        self::$vCmp->server = env('SAP_server');;
+        self::$vCmp->LicenseServer = env('SAP_LicenseServer');
+        self::$vCmp->CompanyDB = env('SAP_CompanyDB');
+        self::$vCmp->username = env('SAP_username');
+        self::$vCmp->password = env('SAP_password');
+        self::$vCmp->DbUserName = env('SAP_DbUserName');
+        self::$vCmp->DbPassword = env('SAP_DbPassword');
         self::$vCmp->UseTrusted = false;
         //self::$vCmp->language = "6";
         $lRetCode = self::$vCmp->Connect;
@@ -81,17 +81,62 @@ class SAP extends Model
             return $impreso;
         }
     }
+    public static function ProductionOrderProgramar($orden, $prog_corte, $sec_compra, $sec_ot, $estatus, $fCompra, $fProduccion)
+    {
+        self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
+        self::$vCmp->DbServerType = "10";
+        self::$vCmp->server = env('SAP_server');;
+        self::$vCmp->LicenseServer = env('SAP_LicenseServer');
+        self::$vCmp->CompanyDB = env('SAP_CompanyDB');
+        self::$vCmp->username = env('SAP_username');
+        self::$vCmp->password = env('SAP_password');
+        self::$vCmp->DbUserName = env('SAP_DbUserName');
+        self::$vCmp->DbPassword = env('SAP_DbPassword');
+        self::$vCmp->UseTrusted = false;
+        //self::$vCmp->language = "6";
+        $lRetCode = self::$vCmp->Connect;
+        (self::$vCmp == false) ? self::Connect() : '';
+        $vItem = self::$vCmp->GetBusinessObject("202");
+        $RetVal = $vItem->GetByKey($orden.'');
+       // clock($RetVal);
+        if($prog_corte !== ''){
+            $vItem->UserFields->Fields->Item('U_Grupo')->Value = ''.$prog_corte;
+        }
+        if($sec_compra !== ''){
+            $vItem->UserFields->Fields->Item('U_OF')->Value = ''.$sec_compra;
+        }
+        if($sec_ot !== ''){
+            $vItem->UserFields->Fields->Item('U_OT')->Value = ''.$sec_ot;
+        }
+        if($estatus !== ''){
+            
+            $vItem->UserFields->Fields->Item('U_Starus')->Value = '0'.$estatus;
+        }
+        if($fCompra !== ''){
+            $vItem->UserFields->Fields->Item('U_FCompras')->Value = ''.$fCompra;
+        }
+        if($fProduccion !== ''){
+            $vItem->UserFields->Fields->Item('U_FProduccion')->Value = ''.$fProduccion;
+        }
+        $retCode = $vItem->Update;
+       // clock($retCode);
+        if ($retCode != 0) {
+            return 'SAP , '.self::$vCmp->GetLastErrorDescription();
+        } else {
+            return $orden;
+        }
+    }
     public static function updateStatusEntregaPiel($orden, $status, $FentregaPiel)
     {
         self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
         self::$vCmp->DbServerType = "10";
-        self::$vCmp->server = "ZARKIN-088";
-        self::$vCmp->LicenseServer = "ZARKIN-088:30000";
-        self::$vCmp->CompanyDB = "SBO_Salotto";
-        self::$vCmp->username = "SIZ_PROD";
-        self::$vCmp->password = "Zark&n20";
-        self::$vCmp->DbUserName = "sa";
-        self::$vCmp->DbPassword = "B1Admin";
+        self::$vCmp->server = env('SAP_server');;
+        self::$vCmp->LicenseServer = env('SAP_LicenseServer');
+        self::$vCmp->CompanyDB = env('SAP_CompanyDB');
+        self::$vCmp->username = env('SAP_username');
+        self::$vCmp->password = env('SAP_password');
+        self::$vCmp->DbUserName = env('SAP_DbUserName');
+        self::$vCmp->DbPassword = env('SAP_DbPassword');
         self::$vCmp->UseTrusted = false;
         //self::$vCmp->language = "6";
         $lRetCode = self::$vCmp->Connect;
@@ -113,13 +158,13 @@ class SAP extends Model
     {
         self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
         self::$vCmp->DbServerType = "10";
-        self::$vCmp->server = "ZARKIN-088";
-        self::$vCmp->LicenseServer = "ZARKIN-088:30000";
-        self::$vCmp->CompanyDB = "SBO_Salotto";
-        self::$vCmp->username = "SIZ_PROD";
-        self::$vCmp->password = "Zark&n20";
-        self::$vCmp->DbUserName = "sa";
-        self::$vCmp->DbPassword = "B1Admin";
+        self::$vCmp->server = env('SAP_server');;
+        self::$vCmp->LicenseServer = env('SAP_LicenseServer');
+        self::$vCmp->CompanyDB = env('SAP_CompanyDB');
+        self::$vCmp->username = env('SAP_username');
+        self::$vCmp->password = env('SAP_password');
+        self::$vCmp->DbUserName = env('SAP_DbUserName');
+        self::$vCmp->DbPassword = env('SAP_DbPassword');
         self::$vCmp->UseTrusted = false;
         //self::$vCmp->language = "6";
         $lRetCode = self::$vCmp->Connect;
@@ -182,13 +227,13 @@ class SAP extends Model
     {
         self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
         self::$vCmp->DbServerType = "10";
-        self::$vCmp->server = "ZARKIN-088";
-        self::$vCmp->LicenseServer = "ZARKIN-088:30000";
-        self::$vCmp->CompanyDB = "SBO_Salotto";
-        self::$vCmp->username = "SIZ_PROD";
-        self::$vCmp->password = "Zark&n20";
-        self::$vCmp->DbUserName = "sa";
-        self::$vCmp->DbPassword = "B1Admin";
+        self::$vCmp->server = env('SAP_server');;
+        self::$vCmp->LicenseServer = env('SAP_LicenseServer');
+        self::$vCmp->CompanyDB = env('SAP_CompanyDB');
+        self::$vCmp->username = env('SAP_username');
+        self::$vCmp->password = env('SAP_password');
+        self::$vCmp->DbUserName = env('SAP_DbUserName');
+        self::$vCmp->DbPassword = env('SAP_DbPassword');
         self::$vCmp->UseTrusted = false;
         //self::$vCmp->language = "6";
         $lRetCode = self::$vCmp->Connect;
@@ -457,13 +502,13 @@ class SAP extends Model
             } else {
                 self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
                 self::$vCmp->DbServerType = "10";
-                self::$vCmp->server = "ZARKIN-088";
-                self::$vCmp->LicenseServer = "ZARKIN-088:30000";
-                self::$vCmp->CompanyDB = "SBO_Salotto";
-                self::$vCmp->username = "SIZ_PROD";
-                self::$vCmp->password = "Zark&n20";
-                self::$vCmp->DbUserName = "sa";
-                self::$vCmp->DbPassword = "B1Admin";
+                self::$vCmp->server = env('SAP_server');;
+                self::$vCmp->LicenseServer = env('SAP_LicenseServer');
+                self::$vCmp->CompanyDB = env('SAP_CompanyDB');
+                self::$vCmp->username = env('SAP_username');
+                self::$vCmp->password = env('SAP_password');
+                self::$vCmp->DbUserName = env('SAP_DbUserName');
+                self::$vCmp->DbPassword = env('SAP_DbPassword');
                 self::$vCmp->UseTrusted = false;
                 //self::$vCmp->language = "6";
                 $lRetCode = self::$vCmp->Connect;
@@ -665,13 +710,13 @@ class SAP extends Model
                         if ($order[0]->sum_cant == $order[0]->sum_procesado) { //si la cantidad de la OV es mayor a la procesada
                             self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
                             self::$vCmp->DbServerType = "10";
-                            self::$vCmp->server = "ZARKIN-088";
-                            self::$vCmp->LicenseServer = "ZARKIN-088:30000";
-                            self::$vCmp->CompanyDB = "SBO_Salotto";
-                            self::$vCmp->username = "SIZ_PROD";
-                            self::$vCmp->password = "Zark&n20";
-                            self::$vCmp->DbUserName = "sa";
-                            self::$vCmp->DbPassword = "B1Admin";
+                            self::$vCmp->server = env('SAP_server');;
+                            self::$vCmp->LicenseServer = env('SAP_LicenseServer');
+                            self::$vCmp->CompanyDB = env('SAP_CompanyDB');
+                            self::$vCmp->username = env('SAP_username');
+                            self::$vCmp->password = env('SAP_password');
+                            self::$vCmp->DbUserName = env('SAP_DbUserName');
+                            self::$vCmp->DbPassword = env('SAP_DbPassword');
                             self::$vCmp->UseTrusted = false;
                             //self::$vCmp->language = "6";
                             $lRetCode = self::$vCmp->Connect;

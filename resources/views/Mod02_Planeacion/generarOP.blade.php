@@ -85,7 +85,7 @@
                                 <li id="lista-tab5" class=""><a onclick = "val_btn(5)" href="#default-tab-5" data-toggle="tab" 
                                     aria-expanded="false">Impresión</a></li>
                                 <div class="pull-right">
-                                    <a style="margin-right: 30px;" id="btn_enviar" class="btn btn-success btn-sm" data-operacion='1'><i class="fa fa-send"></i> Enviar</a>
+                                    <a style="margin-right: 30px;" id="btn_enviar" class="btn btn-success btn-sm" data-operacion='1'><i class="fa fa-send"></i> Enviar <span class="badge"></span></a>
                                 </div>
                                 
                             </ul>
@@ -158,7 +158,74 @@
                             </div>  <!-- /.tab-content -->                     
                         </div>  <!-- /.row -->                     
                     </div>   <!-- /.container -->
-
+                    <div class="modal fade" id="updateprogramar" tabindex="-1" role="dialog">
+                        <div class="modal-dialog modal-sm" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                            aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title" >Datos a Actualizar</h4>
+                                </div>
+                    
+                                <div class="modal-body" style='padding:16px'>
+                                    
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="fecha_provision">Prog. Corte</label>
+                                                        <input maxlength="10" type="text" id="programar_progCorte" name="programar_progCorte" class='form-control' autocomplete="off">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="cant">Sec. Compra</label>
+                                                        <input maxlength="10" type="text" class="form-control" id="programar_secCompra" autocomplete="off">
+                                                       
+                                                    </div>
+                                                </div>
+                                            </div><!-- /.row -->
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="fecha_provision">Sec. OT</label>
+                                                        <input maxlength="49" type="text" id="programar_secOt" name="programar_secOt" class='form-control' autocomplete="off">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="cant">Estatus</label>
+                                                        
+                                                        {!! Form::select("cboestadoprogramar", $estatus, null, ["class" => "form-control selectpicker","id"
+                                                            =>"programar_estatus", "data-size" => "8", "data-style"=>"btn-success"])
+                                                            !!}
+                                                    </div>
+                                                </div>
+                                            </div><!-- /.row -->
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="programar_fCompra">F. Compra</label>
+                                                        <input type="text" id="programar_fCompra"  class='form-control' autocomplete="off">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="programar_fProduccion">F. Producción</label>
+                                                        <input type="text" class="form-control" id="programar_fProduccion" autocomplete="off">
+                                                       
+                                                    </div>
+                                                </div>
+                                            </div><!-- /.row -->
+                                                                                       
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                                    <button id='btn-guarda-programar'class="btn btn-primary"> Actualizar</button>
+                                </div>
+                    
+                            </div>
+                        </div>
+                    </div>
                     @endsection
 
                      <script>
@@ -175,11 +242,27 @@
                                 $("#page-wrapper").toggleClass("content"); 
                                 $(this).toggleClass("active"); 
                             });
-                    
+                            const today = new Date();
+                            $("#programar_fCompra").datepicker( {
+                                    language: "es",    
+                                    autoclose: true,
+                                    format: "dd-mm-yyyy",  
+                                }).val('');
+
+                                $("#programar_fProduccion").datepicker( {
+                                    language: "es",    
+                                    autoclose: true,
+                                    format: "dd-mm-yyyy",
+                                }).val('');
+
+                                $('#programar_fCompra').datepicker('setStartDate', today);
+                                //$('#programar_fCompra').datepicker('setDate', today);
+                                $('#programar_fProduccion').datepicker('setStartDate', today);
+                               // $('#programar_fProduccion').datepicker('setDate', today);
                     document.onkeyup = function(e) {
                         if (e.shiftKey && e.which == 112) {
                             var namefile= 'RG_'+$('#btn_pdf').attr('ayudapdf')+'.pdf';
-                            console.log(namefile)
+                            //console.log(namefile)
                             $.ajax({
                             url:"{{ URL::asset('ayudas_pdf') }}"+"/"+namefile,
                             type:'HEAD',
@@ -199,14 +282,15 @@
                            
                         }
                     }
-      $(window).on('load',function(){            
+$(window).on('load',function(){      
+         
                 /*GENERAR OP*/
-                var table = $("#tabla_pedidos").DataTable({
+var table = $("#tabla_pedidos").DataTable({
                 language:{
-                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                 "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
                 }, 
                 scrollX: true,
-                scrollY: "240px",
+                scrollY: "430px",
                 dom: 'lfrtip',
                 scrollCollapse: true,
                 deferRender: true,        
@@ -252,9 +336,9 @@
                     
                     }
                     },
-                    });
+});
                
-                $.ajax({
+$.ajax({
         type: 'GET',
         async: true,       
         url: '{!! route('datatables.gop') !!}',
@@ -275,11 +359,9 @@
                 
                 }        
         }
-    });
+}); 
 
-    
-
-    $('#tabla_pedidos tbody').on( 'click', 'tr', function (e) {
+$('#tabla_pedidos tbody').on( 'click', 'tr', function (e) {
         if ($(e.target).hasClass("ignoreme")) {
             
         }else{
@@ -287,13 +369,18 @@
         }
         var ordvta = table.rows('.selected').data();
         var registros = ordvta == null ? 0 : ordvta.length;
-        console.log(registros);
-    } );
+        
+        var count = table.rows( '.selected' ).count();
+        var $badge = $('#btn_enviar').find('.badge'); 
+        $badge.text(count);
+
+        //console.log(registros);
+} );
    
      $('#btn_enviar').on('click', function(e) {
         e.preventDefault();
         var oper = $('#btn_enviar').attr('data-operacion');
-        console.log(oper);
+        //console.log(oper);
         switch (oper) {
             case '1':
                 click_pedidos();
@@ -301,11 +388,10 @@
             case '2':
                 click_series();
                 break;
-            case '3':
-                click_programar();
+            case '3':            
+                click_programar_cambios();
                 break;
-            case '4':
-                console.log(' click liberar');
+            case '4':               
                 click_liberacion();
                 break;
             case '5':
@@ -316,6 +402,126 @@
                 break;
         }
      });
+     function click_programar_cambios(){
+        var countOP = tabla_programar.rows('.selected').count();
+        if (countOP == 0){
+            bootbox.dialog({
+                title: "Mensaje",
+                message: "<div class='alert alert-danger m-b-0'>No hay registros seleccionados.</div>",
+                buttons: {
+                success: {
+                label: "Ok",
+                className: "btn-success m-r-5 m-b-5"
+                }
+                }
+            }).find('.modal-content').css({'font-size': '14px'} );
+        }else{
+            $('#updateprogramar').modal('show');
+        }
+     }
+     $('#btn-guarda-programar').on('click', function(e) {
+        click_programar();
+     });
+     function click_programar() {
+        var ordvta = tabla_programar.rows('.selected').data();
+        //var ordvtac = table.rows('.selected').node();
+        //console.log(ordvtac[0])
+        var ops = '';
+        var registros = ordvta == null ? 0 : ordvta.length;
+        for(var i=0; i < registros; i++){
+            if (i == registros - 1) {
+                ops += ordvta[i].DOCNUM;
+            } else {
+                ops += ordvta[i].DOCNUM + ",";
+            }
+            //console.log(ordvta[i]);         
+        }
+        
+        if(registros > 0){
+            var estatus_filtro = '';
+            if ($('#cbo_estadoprogramar').val() == 0 && $('#programar_estatus').val() != 0) {//filtro estado = Planificadas
+              estatus_filtro = $('#programar_estatus').val(); 
+            }   
+
+                $.ajax({
+                type: 'GET',
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                data: {
+                    "_token": "{{ csrf_token() }}",
+                    ordenes: ops,
+                    prog_corte: $('#programar_progCorte').val(),
+                    sec_compra: $('#programar_secCompra').val(),
+                    sec_ot: $('#programar_secOt').val(),
+                    estatus: estatus_filtro,
+                    fCompra: $('#programar_fCompra').val(),
+                    fProduccion: $('#programar_fProduccion').val()
+                },
+                url: '{!! route('programarOP') !!}',
+                beforeSend: function() {
+                    $.blockUI({
+                    baseZ: 2000,
+                    message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                    css: {
+                    border: 'none',
+                    padding: '16px',
+                    width: '50%',
+                    top: '40%',
+                    left: '30%',
+                    backgroundColor: '#fefefe',
+                    '-webkit-border-radius': '10px',
+                    '-moz-border-radius': '10px',
+                    opacity: .7,
+                    color: '#000000'
+                    }
+                    });
+                },
+                complete: function() {
+                    reloadOrdenesProgramar();
+                    var $badge = $('#btn_enviar').find('.badge'); 
+                    $badge.text('');
+                    setTimeout($.unblockUI, 1500);
+                   // reloadOrdenesImpresion();
+                   $('#updateprogramar').modal('hide');
+                    $('#programar_progCorte').val('');
+                    $('#programar_secCompra').val('');
+                    $('#programar_secOt').val('');
+                    $('#programar_estatus').val(0);
+                    $("#programar_estatus").selectpicker("refresh");
+                    $('#programar_fCompra').datepicker('setStartDate', today);
+                    $('#programar_fCompra').datepicker().val('');
+                    $('#programar_fProduccion').datepicker('setStartDate', today);
+                    $('#programar_fProduccion').datepicker().val(''); 
+                    
+                    
+                },
+                success: function(data){   
+                    if (data.mensajeErrr.includes('Error')) {
+                        bootbox.dialog({
+                            title: "Mensaje",
+                            message: "<div class='alert alert-danger m-b-0'>"+data.orders+"</div>",
+                            buttons: {
+                            success: {
+                            label: "Ok",
+                            className: "btn-success m-r-5 m-b-5"
+                            }
+                            }
+                            }).find('.modal-content').css({'font-size': '14px'} );
+                    }
+                }
+                }); 
+        }else{
+              bootbox.dialog({
+                title: "Mensaje",
+                message: "<div class='alert alert-danger m-b-0'>No hay registros seleccionados.</div>",
+                buttons: {
+                success: {
+                label: "Ok",
+                className: "btn-success m-r-5 m-b-5"
+                }
+                }
+                }).find('.modal-content').css({'font-size': '14px'} );
+        }           
+    }
      function click_liberacion() {
         var ordvta = tabla_liberacion.rows('.selected').data();
         //var ordvtac = table.rows('.selected').node();
@@ -554,21 +760,18 @@
                 }).find('.modal-content').css({'font-size': '14px'} );
         }           
     }
-    function enviaOrdenes(item, index) {
-        console.log(item);
-    }
 
-    $('#tabla_pedidos tbody').on( 'change', 'td input', function (e) {
+$('#tabla_pedidos tbody').on( 'change', 'td input', function (e) {
 
     e.preventDefault();
 
     //var tbl = $('#tableFacturas').DataTable();
     var fila = $(this).closest('tr');
-    console.log(fila)
+    
     var datos = table.row(fila).data();
-    console.log(datos)
+   
     var check = datos['Grupal'];
-    console.log(check)
+   
     
 
     if(check == 0){
@@ -578,6 +781,7 @@
     }
    // console.log(datos) 
 });
+
 function reloadOrdenesPedidos(){
     $("#tabla_pedidos").DataTable().clear().draw();
     $.ajax({
@@ -592,6 +796,8 @@ function reloadOrdenesPedidos(){
         },
         complete: function() {
            // setTimeout($.unblockUI, 1500);
+           var $badge = $('#btn_enviar').find('.badge'); 
+                $badge.text('');
         },
         success: function(data){   
             if(data.pedidos_gop.length > 0){
@@ -604,13 +810,13 @@ function reloadOrdenesPedidos(){
 }
 // FIN GENERAR OP
 // INICIO GENERAR SERIES
- var tabla_series = $("#tabla_series").DataTable({
+var tabla_series = $("#tabla_series").DataTable({
                 language:{
-                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                 "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
                 }, 
                 dom: 'lfrtip',
                 scrollX: true,
-                scrollY: "240px",
+                scrollY: "430px",
                 scrollCollapse: true,
                 deferRender: true,        
                    pageLength:-1,
@@ -633,36 +839,16 @@ function reloadOrdenesPedidos(){
                         
                     },
                     ],
-                    });
+});
                
-                $.ajax({
-        type: 'GET',
-        async: true,       
-        url: '{!! route('datatables.tabla_series') !!}',
-        data: {
-           
-        },
-        beforeSend: function() {
-            
-        },
-        complete: function() {
-           // setTimeout($.unblockUI, 1500);
-        },
-        success: function(data){            
-                   
-                if(data.tabla_series.length > 0){
-                $("#tabla_series").dataTable().fnAddData(data.tabla_series);
-                }else{
-                
-                } 
-                tabla_series.columns.adjust().draw();       
-        }
-    });
-    $('#tabla_series tbody').on( 'click', 'tr', function () {
+$('#tabla_series tbody').on( 'click', 'tr', function () {
         $(this).toggleClass('selected');
-    } );
+        var count = tabla_series.rows( '.selected' ).count();
+        var $badge = $('#btn_enviar').find('.badge'); 
+        $badge.text(count);
+} );
    
-    function click_series() {
+function click_series() {
         
         var ordvta = tabla_series.rows('.selected').data();
         
@@ -676,7 +862,7 @@ function reloadOrdenesPedidos(){
             }
             //console.log(ordvta[i]);         
         }
-        console.log(ovs)
+       
         if(registros > 0){
         
                 $.ajax({
@@ -736,19 +922,19 @@ function reloadOrdenesPedidos(){
                 }
                 }).find('.modal-content').css({'font-size': '14px'} );
         }           
-    }
+}
 
-    $('#tabla_series tbody').on( 'change', 'td input', function (e) {
+$('#tabla_series tbody').on( 'change', 'td input', function (e) {
 
     e.preventDefault();
 
     //var tbl = $('#tableFacturas').DataTable();
     var fila = $(this).closest('tr');
-    console.log(fila)
+  
     var datos = tabla_series.row(fila).data();
-    console.log(datos)
+    
     var check = datos['Grupal'];
-    console.log(check)
+  
     
 
     if(check == 0){
@@ -756,8 +942,9 @@ function reloadOrdenesPedidos(){
     } else {
         datos['Grupal'] = 0;
     }
-    console.log(datos) 
+    //console.log(datos) 
 });
+
 function reloadOrdenesSeries(){
     $("#tabla_series").DataTable().clear().draw();
     $.ajax({
@@ -772,6 +959,8 @@ function reloadOrdenesSeries(){
         },
         complete: function() {
            // setTimeout($.unblockUI, 1500);
+           var $badge = $('#btn_enviar').find('.badge'); 
+            $badge.text('');
         },
         success: function(data){   
             if(data.tabla_series.length > 0){
@@ -786,32 +975,38 @@ function reloadOrdenesSeries(){
 // INICIO LIBERACION
 var tabla_liberacion = $("#tabla_liberacion").DataTable({
                 language:{
-                    "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                     "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
                 }, 
                 dom: 'Bfrtip',
                 buttons: [
                     {
-text: '<i class="fa fa-check-square"></i>',
-titleAttr: 'seleccionar',
-action: function() {
-    tabla_liberacion.rows({
-page: 'current'
-}).select();
-}
-},
-{
-text: '<i class="fa fa-square"></i>',
-titleAttr: 'deseleccionar',
-action: function() {
-    tabla_liberacion.rows({
-page: 'current'
-}).deselect();
-}
-},
-       
-    ],
+    text: '<i class="fa fa-check-square"></i>',
+    titleAttr: 'seleccionar',
+    action: function() {
+        tabla_liberacion.rows({
+            page: 'current'
+        }).select();
+        var count = tabla_liberacion.rows( '.selected' ).count();
+        var $badge = $('#btn_enviar').find('.badge'); 
+        $badge.text(count);
+    }
+    },
+    {
+    text: '<i class="fa fa-square"></i>',
+    titleAttr: 'deseleccionar',
+    action: function() {
+        tabla_liberacion.rows({
+            page: 'current'
+        }).deselect();
+        var count = tabla_liberacion.rows( '.selected' ).count();
+        var $badge = $('#btn_enviar').find('.badge'); 
+        $badge.text(count);
+    }
+    },
+        
+        ],
                 scrollX: true,
-                scrollY: "240px",
+                scrollY: "370px",
                 scrollCollapse: true,
                 deferRender: true,        
                    pageLength:-1,
@@ -826,40 +1021,19 @@ page: 'current'
                     'columnDefs': [
                         
                     ],
-                    });
-               
-                $.ajax({
-        type: 'GET',
-        async: true,       
-        url: '{!! route('datatables.tabla_liberacion') !!}',
-        data: {
-           
-        },
-        beforeSend: function() {
-            
-        },
-        complete: function() {
-           // setTimeout($.unblockUI, 1500);
-        },
-        success: function(data){            
-                   
-                if(data.tabla_liberacion.length > 0){
-                $("#tabla_liberacion").dataTable().fnAddData(data.tabla_liberacion);
-                }else{
-                
-                } 
-                tabla_liberacion.columns.adjust().draw();       
-        }
-    });
-    $('#tabla_liberacion tbody').on( 'click', 'tr', function () {
-        $(this).toggleClass('selected');
-    } );
+});
 
-   function reloadOrdenesLiberacion(){
+$('#tabla_liberacion tbody').on( 'click', 'tr', function () {
+    $(this).toggleClass('selected');
+    var count = tabla_liberacion.rows( '.selected' ).count();
+    var $badge = $('#btn_enviar').find('.badge'); 
+    $badge.text(count);
+} );
+
+function reloadOrdenesLiberacion(){
     var estado = $('#cbo_estadoOP').val();
     var tipo = $('#cbo_tipoOP').val();
-    console.log(estado);
-    console.log(tipo);
+   
     $("#tabla_liberacion").DataTable().clear().draw();
     $.ajax({
         type: 'GET',
@@ -875,6 +1049,8 @@ page: 'current'
         },
         complete: function() {
            // setTimeout($.unblockUI, 1500);
+            var $badge = $('#btn_enviar').find('.badge'); 
+            $badge.text('');
         },
         success: function(data){   
             if(data.tabla_liberacion.length > 0){
@@ -885,6 +1061,7 @@ page: 'current'
         }
     });
 }
+
 $('#boton-mostrar').on('click', function(e) {
     e.preventDefault();
     reloadOrdenesLiberacion();
@@ -894,7 +1071,7 @@ $('#boton-mostrar').on('click', function(e) {
 // INICIO IMPRESION
 var tabla_impresion = $("#tabla_impresion").DataTable({
                 language:{
-                    "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                     "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
                 }, 
                 dom: 'Bfrtip',
                 buttons: [
@@ -903,8 +1080,11 @@ var tabla_impresion = $("#tabla_impresion").DataTable({
                 titleAttr: 'seleccionar',
                 action: function() {
                     tabla_impresion.rows({
-                page: 'current'
-                }).select();
+                        page: 'current'
+                    }).select();
+                    var count = tabla_impresion.rows( '.selected' ).count();
+                    var $badge = $('#btn_enviar').find('.badge'); 
+                    $badge.text(count);
                 }
                 },
                 {
@@ -912,8 +1092,11 @@ var tabla_impresion = $("#tabla_impresion").DataTable({
                 titleAttr: 'deseleccionar',
                 action: function() {
                     tabla_impresion.rows({
-                page: 'current'
-                }).deselect();
+                        page: 'current'
+                    }).deselect();
+                    var count = tabla_impresion.rows( '.selected' ).count();
+                    var $badge = $('#btn_enviar').find('.badge'); 
+                    $badge.text(count);
                 }
                 },
                 {
@@ -925,7 +1108,7 @@ var tabla_impresion = $("#tabla_impresion").DataTable({
                 }    
                     ],
                 scrollX: true,
-                scrollY: "240px",
+                scrollY: "430px",
                 scrollCollapse: true,
                 deferRender: true,        
                    pageLength:-1,
@@ -941,36 +1124,16 @@ var tabla_impresion = $("#tabla_impresion").DataTable({
                         
                     ],
                    
-                    });
-               
-                $.ajax({
-        type: 'GET',
-        async: true,       
-        url: '{!! route('datatables.tabla_impresion') !!}',
-        data: {
-           
-        },
-        beforeSend: function() {
-            
-        },
-        complete: function() {
-           // setTimeout($.unblockUI, 1500);
-        },
-        success: function(data){            
-                   
-                if(data.tabla_impresion.length > 0){
-                $("#tabla_impresion").dataTable().fnAddData(data.tabla_impresion);
-                }else{
-                
-                } 
-                tabla_impresion.columns.adjust().draw();       
-        }
-    });
-    $('#tabla_impresion tbody').on( 'click', 'tr', function () {
-        $(this).toggleClass('selected');
-    } );
+});
+             
+$('#tabla_impresion tbody').on( 'click', 'tr', function () {
+    $(this).toggleClass('selected');
+    var count = tabla_impresion.rows( '.selected' ).count();
+    var $badge = $('#btn_enviar').find('.badge'); 
+    $badge.text(count);
+} );
 
-   function reloadOrdenesImpresion(){
+function reloadOrdenesImpresion(){
     
     $("#tabla_impresion").DataTable().clear().draw();
     $.ajax({
@@ -985,6 +1148,8 @@ var tabla_impresion = $("#tabla_impresion").DataTable({
         },
         complete: function() {
            // setTimeout($.unblockUI, 1500);
+           var $badge = $('#btn_enviar').find('.badge'); 
+                $badge.text('');
         },
         success: function(data){   
             if(data.tabla_impresion.length > 0){
@@ -996,35 +1161,42 @@ var tabla_impresion = $("#tabla_impresion").DataTable({
     });
 }
 //FIN IMPRESION
-// INICIO LIBERACION
+// INICIO PROGRAMAR
+
 var tabla_programar = $("#tabla_programar").DataTable({
                 language:{
-                    "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                     "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
                 }, 
                 dom: 'Bfrtip',
                 buttons: [
                     {
-text: '<i class="fa fa-check-square"></i>',
-titleAttr: 'seleccionar',
-action: function() {
-    tabla_programar.rows({
-page: 'current'
-}).select();
-}
-},
-{
-text: '<i class="fa fa-square"></i>',
-titleAttr: 'deseleccionar',
-action: function() {
-    tabla_programar.rows({
-page: 'current'
-}).deselect();
-}
-},
+    text: '<i class="fa fa-check-square"></i>',
+    titleAttr: 'seleccionar',
+    action: function() {
+        tabla_programar.rows({
+            page: 'current'
+        }).select();
+        var count = tabla_programar.rows( '.selected' ).count();
+        var $badge = $('#btn_enviar').find('.badge'); 
+        $badge.text(count);
+    }
+    },
+    {
+    text: '<i class="fa fa-square"></i>',
+    titleAttr: 'deseleccionar',
+    action: function() {
+        tabla_programar.rows({
+            page: 'current'
+        }).deselect();
+        var count = tabla_programar.rows( '.selected' ).count();
+        var $badge = $('#btn_enviar').find('.badge'); 
+        $badge.text(count);
+    }
+    },
        
     ],
                 scrollX: true,
-                scrollY: "240px",
+                scrollY: "370px",
                 scrollCollapse: true,
                 deferRender: true,        
                    pageLength:-1,
@@ -1035,50 +1207,61 @@ page: 'current'
                     {data: "PRIORIDAD"},
                     {data: "ITEMCODE"},
                     {data: "ITEMNAME"},
-                    {data: "DUEDATE"}, //fecha de finalizacion
-                    {data: "DOCDUEDATE"},  //fecha de venta
-                    {data: "U_FPRODUCCION"},
+                    {data: "DOCDUEDATE",
+                        render: function(data){   
+                            var d = new Date(data);             
+                            return moment(d).format("DD-MM-YYYY");
+                        }},  //fecha de venta
+                    {data: "U_FCOMPRAS",
+                        render: function(data){   
+                          
+                            var d = new Date(data);             
+                            return moment(d).format("DD-MM-YYYY");
+                        }}, //fecha de finalizacion
+                    
+                    {data: "U_FPRODUCCION",
+                        render: function(data){   
+                            var d = new Date(data);             
+                            return moment(d).format("DD-MM-YYYY");
+                        }},
                     {data: "U_STARUS"},
-                    {data: "U_OT"}
-                   
+                    {data: "SEC_OT"},
+                    {data: "SEC_COMPRA"},
+                    {data: "PROG_CORTE"}
                     ],
                     'columnDefs': [
                         
                     ],
-                    });
-               
-                $.ajax({
-        type: 'GET',
-        async: true,       
-        url: '{!! route('datatables.tabla_programar') !!}',
-        data: {
-           
-        },
-        beforeSend: function() {
-            
-        },
-        complete: function() {
-           // setTimeout($.unblockUI, 1500);
-        },
-        success: function(data){            
-                   
-                if(data.tabla_programar.length > 0){
-                $("#tabla_programar").dataTable().fnAddData(data.tabla_programar);
-                }else{
-                
-                } 
-                tabla_programar.columns.adjust().draw();       
-        }
-    });
-    $('#tabla_programar tbody').on( 'click', 'tr', function () {
-        $(this).toggleClass('selected');
-    } );
+});
+$('#tabla_programar thead tr').clone(true).appendTo( '#tabla_programar thead' );
+$('#tabla_programar thead tr:eq(1) th').each( function (i) {
+    var title = $(this).text();
+    $(this).html( '<input style="color: black;"  type="text" placeholder="Filtro '+title+'" />' );
 
-   function reloadOrdenesProgramar(){
-    var estado = $('#cbo_estadoOP').val();
-    var tipo = $('#cbo_tipoOP').val();
-    console.log(estado);
-    console.log(tipo);
+    $( 'input', this ).on( 'keyup change', function () {       
+            
+            if ( tabla_programar.column(i).search() !== this.value ) {
+                tabla_programar
+                    .column(i)
+                    .search(this.value, true, false)
+                    
+                    .draw();
+            } 
+                
+    } );    
+} );
+$('#tabla_programar tbody').on( 'click', 'tr', function () {
+    $(this).toggleClass('selected');
+    var count = tabla_programar.rows( '.selected' ).count();
+    var $badge = $('#btn_enviar').find('.badge'); 
+    $badge.text(count);
+    
+} );
+
+function reloadOrdenesProgramar(){
+    var estado = $('#cbo_estadoprogramar').val();
+    var tipo = $('#cbo_tipoOPcompleto').val();
+   
     $("#tabla_programar").DataTable().clear().draw();
     $.ajax({
         type: 'GET',
@@ -1094,19 +1277,32 @@ page: 'current'
         },
         complete: function() {
            // setTimeout($.unblockUI, 1500);
+           var $badge = $('#btn_enviar').find('.badge'); 
+            $badge.text('');
         },
         success: function(data){   
             if(data.tabla_programar.length > 0){
                 $("#tabla_programar").dataTable().fnAddData(data.tabla_programar);           
             }else{ 
 
-            }        
+            }
+            
+            if ($('#cbo_estadoprogramar').val() == 0) {//filtro estado = Planificadas
+               $('#programar_estatus').removeAttr("disabled");
+               
+            } else {
+               $('#programar_estatus').attr('disabled', 'disabled');
+            }   
+            $('#programar_estatus').selectpicker('refresh');     
         }
     });
 }
-$('#boton-mostrar').on('click', function(e) {
+
+$('#boton-mostrar_programar').on('click', function(e) {
     e.preventDefault();
     reloadOrdenesProgramar();
+    var $badge = $('#btn_enviar').find('.badge'); 
+    $badge.text('');
 });
 
 // FIN LIBERACION
@@ -1138,23 +1334,32 @@ $($.fn.dataTable.tables(true)).DataTable()
 $('#lista-tab1').on('click', function(e) {
     e.preventDefault();
     reloadOrdenesPedidos();
+    var $badge = $('#btn_enviar').find('.badge'); 
+    $badge.text('');
 });
 $('#lista-tab2').on('click', function(e) {
     e.preventDefault();
     reloadOrdenesSeries();
+    var $badge = $('#btn_enviar').find('.badge'); 
+    $badge.text('');
 });
 $('#lista-tab3').on('click', function(e) {
     e.preventDefault();
     reloadOrdenesProgramar();
-   
+    var $badge = $('#btn_enviar').find('.badge'); 
+    $badge.text('');
 });
 $('#lista-tab4').on('click', function(e) {
     e.preventDefault();
     reloadOrdenesLiberacion();
+    var $badge = $('#btn_enviar').find('.badge'); 
+    $badge.text('');
 });
 $('#lista-tab5').on('click', function(e) {
     e.preventDefault();
     reloadOrdenesImpresion();
+    var $badge = $('#btn_enviar').find('.badge'); 
+    $badge.text('');
 });
 
       });//fin on load

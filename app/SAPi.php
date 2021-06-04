@@ -17,13 +17,13 @@ class SAPi extends Model
     public static function Connect(){
         self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
         self::$vCmp->DbServerType = "10";
-        self::$vCmp->server = "ZARKIN-088";
-        self::$vCmp->LicenseServer = "ZARKIN-088:30000";
-        self::$vCmp->CompanyDB = "SBO_Salotto";
-        self::$vCmp->username = "SIZ_PROD";
-        self::$vCmp->password = "Zark&n20";
-        self::$vCmp->DbUserName = "sa";
-        self::$vCmp->DbPassword = "B1Admin";
+        self::$vCmp->server = env('SAP_server');;
+        self::$vCmp->LicenseServer = env('SAP_LicenseServer');
+        self::$vCmp->CompanyDB = env('SAP_CompanyDB');
+        self::$vCmp->username = env('SAP_username');
+        self::$vCmp->password = env('SAP_password');
+        self::$vCmp->DbUserName = env('SAP_DbUserName');
+        self::$vCmp->DbPassword = env('SAP_DbPassword');
         self::$vCmp->UseTrusted = false;
         //self::$vCmp->language = "6";
         $lRetCode = self::$vCmp->Connect;
@@ -57,13 +57,13 @@ public static function ReciboProduccion($docEntry, $whs, $Cant, $comentario, $me
       }else{
         self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
         self::$vCmp->DbServerType = "10";
-        self::$vCmp->server = "ZARKIN-088";
-        self::$vCmp->LicenseServer = "ZARKIN-088:30000";
-        self::$vCmp->CompanyDB = "SBO_Salotto";
-        self::$vCmp->username = "SIZ_PROD";
-        self::$vCmp->password = "Zark&n20";
-        self::$vCmp->DbUserName = "sa";
-        self::$vCmp->DbPassword = "B1Admin";
+        self::$vCmp->server = env('SAP_server');;
+        self::$vCmp->LicenseServer = env('SAP_LicenseServer');
+        self::$vCmp->CompanyDB = env('SAP_CompanyDB');
+        self::$vCmp->username = env('SAP_username');
+        self::$vCmp->password = env('SAP_password');
+        self::$vCmp->DbUserName = env('SAP_DbUserName');
+        self::$vCmp->DbPassword = env('SAP_DbPassword');
         self::$vCmp->UseTrusted = false;
         //self::$vCmp->language = "6";
         $lRetCode = self::$vCmp->Connect;
