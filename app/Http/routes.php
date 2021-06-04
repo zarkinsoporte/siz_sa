@@ -397,6 +397,7 @@ Route::any('datatables.tabla_liberacion', 'Mod02_PlaneacionController@registros_
 Route::any('datatables.tabla_impresion', 'Mod02_PlaneacionController@registros_tabla_impresion')->name('datatables.tabla_impresion');
 Route::any('datatables.tabla_programar', 'Mod02_PlaneacionController@registros_tabla_programar')->name('datatables.tabla_programar');
 Route::any('asignar_series', 'Mod02_PlaneacionController@asignar_series')->name('asignar_series');
+Route::any('programarOP', 'Mod02_PlaneacionController@programar_op')->name('programarOP');
 Route::any('liberacionOP', 'Mod02_PlaneacionController@liberacion_op')->name('liberacionOP');
 Route::any('impresionOP', 'Mod02_PlaneacionController@impresion_op')->name('impresionOP');
 //
