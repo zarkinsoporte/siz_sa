@@ -23,7 +23,7 @@
     <div id="page-wrapper2">
         <div class="container-fluid" >
             <!-- Page Heading -->
-            <div class="container">
+           
                 <div  class="row">
                     <h3 class="page-header">
                         Menu del Módulo {{$modulo->name}}:
@@ -40,9 +40,9 @@
                         </li>
                     </ol>
                 </div>
-            </div>
+            
             <!-- /.row -->
-            <div class="container">
+            <div class="" >
                 <div class="row">
                     @include('partials.alertas')
                 </div>
@@ -173,7 +173,22 @@
 
 @endsection
 
-@section('script')
+<script>
+  function js_iniciador() {
+                            $('.toggle').bootstrapSwitch();
+                            $('[data-toggle="tooltip"]').tooltip();
+                            $('.boot-select').selectpicker();
+                            $('.dropdown-toggle').dropdown();
+                            setTimeout(function() {
+                            $('#infoMessage').fadeOut('fast');
+                            }, 5000); // <-- time in milliseconds
+                            $("#sidebarCollapse").on("click", function() {
+                                $("#sidebar").toggleClass("active"); 
+                                $("#page-wrapper").toggleClass("content"); 
+                                $(this).toggleClass("active"); 
+                            });
+
+
 
 
     $('#sel1').change(function(){
@@ -245,13 +260,8 @@
 
     }
     );
-
-
-
-
-
     });
 
+  }
 
-
-@endsection
+</script>

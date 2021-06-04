@@ -265,6 +265,7 @@ public function impresion_op(Request $request){
                     $pdf->setOption('margin-top', '55mm');
                     $pdf->setOption('margin-left', '5mm');
                     $pdf->setOption('margin-right', '5mm');
+                    $pdf->setOption('page-size', 'Letter');
                     $pdf->save($user_path . '/' . $op . '.pdf');
                   //  clock($user_path);
                     //return $pdf->inline();

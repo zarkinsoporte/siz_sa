@@ -75,5 +75,12 @@
                         function mostrar(){
                             $("#hiddendiv").show();
                         };
-
+                        function js_iniciador() {
+                            
+                            $("#sidebarCollapse").on("click", function() {
+                                $("#sidebar").toggleClass("active"); 
+                                $("#page-wrapper").toggleClass("content"); 
+                                $(this).toggleClass("active"); 
+                            });
+                        }
                     </script>
