@@ -193,8 +193,14 @@ Route::get('home/BACK ORDER CASCO', 'Reportes_ProduccionController@backorderCasc
 Route::get('datatables.showbackordercasco', 'Reportes_ProduccionController@DataShowbackorderCasco')->name('datatables.showbackordercasco');
 
 Route::get('home/reporte/backorderCascoPDF', 'Reportes_ProduccionController@ReporteBackOrderCascoPDF');
+
 //Ruta generica para guardar ajaxtoSession
 Route::post('home/reporte/ajaxtosession/{id}', 'Reportes_ProduccionController@AjaxToSession');
+
+Route::get('home/BACK ORDER PATAS', 'Reportes_ProduccionController@backorderPatas')->middleware('routelog');
+Route::get('datatables.showbackorderpatas', 'Reportes_ProduccionController@DataShowbackorderPatas')->name('datatables.showbackorderpatas');
+
+Route::get('home/reporte/backorderPatasPDF', 'Reportes_ProduccionController@ReporteBackOrderPatasPDF');
 /*
     |--------------------------------------------------------------------------
     | MOD07-CALIDAD Routes

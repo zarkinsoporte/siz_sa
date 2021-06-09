@@ -1063,10 +1063,49 @@ class Reportes_ProduccionController extends Controller
             return redirect()->route('auth/login');
         }
     }
+    public function backorderPatas()
+    {                               
+        if (Auth::check()) {            
+                $user = Auth::user();
+                $actividades = $user->getTareas(); 
+                $ultimo = count($actividades);
+            return view('Mod01_Produccion.ReporteBackOrderPatas', compact('user', 'actividades', 'ultimo'));
+        } else {
+            return redirect()->route('auth/login');
+        }
+    }
     public function DataShowbackorderCasco()
     {             
         if (Auth::check()) {
         $rowsBo = DB::table('SIZ_View_ReporteBOCasco')->where('proceso', '>', 0)->orWhere('poriniciar', '>', 0);
+         
+        return Datatables::of($rowsBo)
+        ->addColumn('diasproc', function ($rowbo) {
+             $cDate = Carbon::parse($rowbo->U_Entrega_Piel);
+             return $cDate->diffInDays();
+        })
+        ->addColumn('totalproc', function ($rowbo) {            
+            return ($rowbo->PorIniciar + $rowbo->Habilitado + $rowbo->Armado + $rowbo->Preparado + $rowbo->Inspeccion);
+        })
+        ->addColumn('totalvs', function ($rowbo) {            
+            return number_format(($rowbo->U_VS * 
+            ($rowbo->PorIniciar + $rowbo->Habilitado + $rowbo->Armado + $rowbo->Preparado + $rowbo->Inspeccion)),2);
+        })
+        ->addColumn('uvs', function ($rowbo) {            
+            return number_format($rowbo->U_VS,2);
+        })
+        ->addColumn('xiniciar', function ($rowbo) {            
+            return  number_format($rowbo->PorIniciar,0);         
+        })
+        ->make(true);
+        }else {
+            return redirect()->route('auth/login');
+        }
+    }
+    public function DataShowbackorderPatas()
+    {             
+        if (Auth::check()) {
+        $rowsBo = DB::table('SIZ_View_ReporteBOPatas')->where('proceso', '>', 0)->orWhere('poriniciar', '>', 0);
          
         return Datatables::of($rowsBo)
         ->addColumn('diasproc', function ($rowbo) {
@@ -1128,7 +1167,38 @@ class Reportes_ProduccionController extends Controller
             return redirect()->route('auth/login');
         }
     }
-
+    public function ReporteBackOrderPatasPDF()
+    {    
+        if (Auth::check()) {       
+        $data = json_decode(stripslashes(Session::get('bocasco')));      
+        
+        $totales_pzas = array('Proceso'=>0, 'PorIniciar'=>0, 'Habilitado'=>0, 'Armado'=>0, 'Tapado'=>0, 'Preparado'=>0, 'Inspeccion'=>0, 'totalvs'=>0);   
+        $totales_vs = array('Proceso'=>0, 'PorIniciar'=>0, 'Habilitado'=>0, 'Armado'=>0, 'Tapado'=>0, 'Preparado'=>0, 'Inspeccion'=>0, 'totalvs'=>0);   
+        foreach($data as $item){            
+                $totales_vs['Proceso'] += $item->Proceso * $item->uvs;
+                $totales_vs['PorIniciar'] += $item->PorIniciar * $item->uvs; 
+                $totales_vs['Habilitado'] += $item->Habilitado * $item->uvs;
+                $totales_vs['Armado'] += $item->Armado * $item->uvs;
+                $totales_vs['Tapado'] += $item->Tapado * $item->uvs;
+                $totales_vs['Preparado'] += $item->Preparado * $item->uvs;
+                $totales_vs['Inspeccion'] += $item->Inspeccion * $item->uvs;
+                               
+                $totales_pzas['Proceso'] += $item->Proceso; 
+                $totales_pzas['PorIniciar'] += $item->PorIniciar; 
+                $totales_pzas['Habilitado'] += $item->Habilitado; 
+                $totales_pzas['Armado'] += $item->Armado; 
+                $totales_pzas['Tapado'] += $item->Tapado; 
+                $totales_pzas['Preparado'] += $item->Preparado; 
+                $totales_pzas['Inspeccion'] += $item->Inspeccion; 
+                $totales_pzas['totalvs'] += $item->totalvs;           
+        }         
+        $pdf = \PDF::loadView('Mod01_Produccion.ReporteBackOrderPatasPDF', compact('data', 'totales_pzas', 'totales_vs'));
+        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);             
+        return $pdf->stream('Siz_Reporte_BackOrderPatas ' . ' - ' .date("d/m/Y") . '.Pdf');
+        }else {
+            return redirect()->route('auth/login');
+        }
+    }
     public function opcionesCatalogo(Request $request)
     {
         if (Auth::check()) {
