@@ -64,7 +64,7 @@
 
                         <th>Tapado (409)</th>
                         <th>Pegado Hule (415)</th>
-                        <th>Entrega Casco (418)</th>
+                        <th>Entrega (418)</th>
                         <th>VS</th>
                         <th>Total Valor Sala</th>                       
                     </tr>
@@ -214,7 +214,7 @@ var table = $('#tbackorder').DataTable({
     processing:true,     
     deferRender:    true,
     ajax: {
-        url: '{!! route('datatables.showbackordercasco') !!}',
+        url: '{!! route('datatables.showbackorderpatas') !!}',
         data: function () {
                          
                         }              
