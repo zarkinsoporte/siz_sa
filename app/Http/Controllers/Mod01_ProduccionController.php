@@ -49,7 +49,41 @@ class Mod01_ProduccionController extends Controller
         // dd(OP::getStatus("81143"));
         // dd(OP::getRuta("81143"));
     }
-    
+    public function ReporteOpPDF($op)
+    {
+        //$pdf = App::make('dompdf.wrapper');
+        $GraficaOrden = DB::select(DB::raw("SELECT [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,OHEM.firstName + ' ' + OHEM.lastName AS Empleado,
+        DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)) AS FechaF ,
+       [@CP_LOGOF].U_DocEntry  ,OWOR.ItemCode , OITM.ItemName ,
+        SUM([@CP_LOGOF].U_Cantidad) AS U_CANTIDAD,
+        sum(oitm.U_VS ) AS VS,
+        (SELECT CompnyName FROM OADM ) AS CompanyName
+        FROM [@CP_LOGOF] inner join [@PL_RUTAS] ON [@CP_LOGOF].U_CT = [@PL_RUTAS].Code
+        left join OHEM ON [@CP_LOGOF].U_idEmpleado = OHEM.empID
+        inner join OWOR ON [@CP_LOGOF].U_DocEntry = OWOR.DocNum
+        inner join OITM ON OWOR.ItemCode = OITM.ItemCode
+        WHERE U_DocEntry = $op
+        GROUP BY [@CP_LOGOF].U_idEmpleado, [@CP_LOGOF].U_CT ,[@PL_RUTAS].NAME,
+        OHEM.firstName + ' ' + OHEM.lastName ,
+         DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)),[@CP_LOGOF].U_DocEntry
+        ,OWOR.ItemCode , OITM.ItemName
+        ORDER BY [@CP_LOGOF].U_CT, FechaF, Empleado"));
+        //dd($GraficaOrden);
+
+        $data = array(
+            'data' => $GraficaOrden,
+            'op' => $op,
+        );
+
+        // dd($sociedad);
+        //$data = $GraficaOrden;
+
+        $pdf = \PDF::loadView('Mod01_Produccion.ReporteOpPDF', $data);
+        //dd($pdf);
+        $pdf->setOptions(['isPhpEnabled' => true, 'isRemoteEnabled' => true]);
+        return $pdf->stream('Siz_Producción_Reporte_OP.Pdf');
+        // return $pdf->download('ReporteOP.pdf');
+    }
     public function ReporteMaterialesPDF($op)
     {
         //$pdf = App::make('dompdf.wrapper');

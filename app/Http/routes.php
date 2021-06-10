@@ -548,11 +548,11 @@ Route::get('/sap', function (Request $request) {
     //$vCmp->language = "6";
     $lRetCode = $vCmp->Connect;
     
-    
+    Session::flash('error', $vCmp->GetLastErrorDescription());
     if ($lRetCode <> 0) {
        Session::flash('error', $vCmp->GetLastErrorDescription());
     } else {
-        Session::flash('info',' - conexión con SAP DI API exitosa!!');
+        Session::flash('info',' - conexión con SAP DI API exitosa!!'. ' ultimo err:'. $vCmp->GetLastErrorDescription());
     } 
    
     return redirect('home');
