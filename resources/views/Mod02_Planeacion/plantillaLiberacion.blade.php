@@ -48,6 +48,7 @@
                                             <th>Estado</th>
                                             <th>Pedido</th>
                                             <th>OP</th>
+                                            <th>Estatus</th>
                                             <th>Codigo</th>
                                             <th>Descripción</th>
                                             <th>Cliente</th>

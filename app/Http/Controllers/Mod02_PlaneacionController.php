@@ -534,8 +534,9 @@ public function registros_tabla_liberacion(Request $request){
 				dbo.ORDR.DocNum AS Pedido,
 				dbo.OWOR.DocNum AS OP, 
                 dbo.OWOR.ItemCode AS Codigo, 
-                dbo.OITM.ItemName AS Descripcion,
-				dbo.ORDR.CardCode +' - '+ dbo.ORDR.CardName AS Cliente
+                SUBSTRING(dbo.OITM.ItemName, 0, 50) AS Descripcion,
+				dbo.ORDR.CardCode +' - '+ dbo.ORDR.CardName AS Cliente, 
+                OWOR.U_Starus 
                 FROM      dbo.ORDR INNER JOIN
                                 dbo.OWOR ON dbo.ORDR.DocNum = dbo.OWOR.OriginNum INNER JOIN
                                 dbo.OITM ON dbo.OWOR.ItemCode = dbo.OITM.ItemCode
@@ -754,7 +755,10 @@ public function registros_tabla_liberacion(Request $request){
 				dbo.OWOR.DocNum AS OP, 
                 dbo.OWOR.ItemCode AS Codigo, 
                 dbo.OITM.ItemName AS Descripcion,
-				dbo.ORDR.CardCode +' - '+ dbo.ORDR.CardName AS Cliente
+				dbo.ORDR.CardCode +' - '+ dbo.ORDR.CardName AS Cliente,
+                OWOR.U_GRUPO AS PROG_CORTE,
+                OWOR.U_OF AS SEC_COMPRA,
+                OWOR.U_OT AS SEC_OT
                 FROM      dbo.ORDR INNER JOIN
                                 dbo.OWOR ON dbo.ORDR.DocNum = dbo.OWOR.OriginNum INNER JOIN
                                 dbo.OITM ON dbo.OWOR.ItemCode = dbo.OITM.ItemCode

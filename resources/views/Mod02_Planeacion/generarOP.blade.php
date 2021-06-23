@@ -1014,6 +1014,7 @@ var tabla_liberacion = $("#tabla_liberacion").DataTable({
                     {data: "Estado"},
                     {data: "Pedido"},
                     {data: "OP"},
+                    {data: "U_Starus"},
                     {data: "Codigo"},
                     {data: "Descripcion"},
                     {data: "Cliente"}
@@ -1022,7 +1023,23 @@ var tabla_liberacion = $("#tabla_liberacion").DataTable({
                         
                     ],
 });
+$('#tabla_liberacion thead tr').clone(true).appendTo( '#tabla_liberacion thead' );
+$('#tabla_liberacion thead tr:eq(1) th').each( function (i) {
+    var title = $(this).text();
+    $(this).html( '<input style="color: black;"  type="text" placeholder="Filtro '+title+'" />' );
 
+    $( 'input', this ).on( 'keyup change', function () {       
+            
+            if ( tabla_liberacion.column(i).search() !== this.value ) {
+                tabla_liberacion
+                    .column(i)
+                    .search(this.value, true, false)
+                    
+                    .draw();
+            } 
+                
+    } );    
+} );
 $('#tabla_liberacion tbody').on( 'click', 'tr', function () {
     $(this).toggleClass('selected');
     var count = tabla_liberacion.rows( '.selected' ).count();
@@ -1118,7 +1135,10 @@ var tabla_impresion = $("#tabla_impresion").DataTable({
                     {data: "OP"},
                     {data: "Codigo"},
                     {data: "Descripcion"},
-                    {data: "Cliente"}
+                    {data: "Cliente"},
+                    {data: "SEC_OT"},
+                    {data: "SEC_COMPRA"},
+                    {data: "PROG_CORTE"}
                     ],
                     'columnDefs': [
                         

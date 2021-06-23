@@ -24,7 +24,9 @@
                                         <th>Codigo</th>
                                         <th>Descripción</th>
                                         <th>Cliente</th>
-                        
+                                        <th>Sec. OT</th>
+                                        <th>Sec. Compra</th>
+                                        <th>Prog. Corte</th>
                                     </tr>
                                 </thead>
                             </table>
