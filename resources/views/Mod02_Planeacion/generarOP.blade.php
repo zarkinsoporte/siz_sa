@@ -332,6 +332,25 @@ var table = $("#tabla_pedidos").DataTable({
                     {
                    
                         $('td',row).addClass("ignoreme");
+                        $(row).attr({
+                            'data-toggle': 'tooltip',
+                            'data-placement': 'right',
+                            'title': 'Falta LDM para este artículo.',
+                            'container': 'body'
+                        });
+                        //$('td',row).addClass("ignoreme");
+                    
+                    }
+                    if ( data['DfltWH'] == null)
+                    {
+                   
+                        $('td',row).addClass("ignoreme");
+                        $(row).attr({
+                            'data-toggle': 'tooltip',
+                            'data-placement': 'right',
+                            'title': 'Debe cargar almacén por omisión al artículo.',
+                            'container': 'body'
+                        });
                         //$('td',row).addClass("ignoreme");
                     
                     }
@@ -1145,7 +1164,25 @@ var tabla_impresion = $("#tabla_impresion").DataTable({
                     ],
                    
 });
-             
+
+$('#tabla_impresion thead tr').clone(true).appendTo( '#tabla_impresion thead' );
+$('#tabla_impresion thead tr:eq(1) th').each( function (i) {
+    var title = $(this).text();
+    $(this).html( '<input style="color: black;"  type="text" placeholder="Filtro '+title+'" />' );
+
+    $( 'input', this ).on( 'keyup change', function () {       
+            
+            if ( tabla_impresion.column(i).search() !== this.value ) {
+                tabla_impresion
+                    .column(i)
+                    .search(this.value, true, false)
+                    
+                    .draw();
+            } 
+                
+    } );    
+} );    
+
 $('#tabla_impresion tbody').on( 'click', 'tr', function () {
     $(this).toggleClass('selected');
     var count = tabla_impresion.rows( '.selected' ).count();

@@ -534,8 +534,8 @@ class SAP extends Model
             $vItem->ProductionOrderStatus = 0; //Orden planeada
             $vItem->ItemNo = $itemOV->ItemCode; // codigo del Articulo
             $vItem->PlannedQuantity = $cantidadOP; //cant con la que se hace la orden
-            $vItem->Warehouse = 'APT-ST';
-
+            //$vItem->Warehouse = 'APT-ST';
+            $vItem->Warehouse = ''.$itemOV->DfltWH; //'APT-ST';
             //CABECERA DER (2)
             //fecha de finalizacion Fecha Entrega – 21 días (Compra de Materiales)
             $fecha = Carbon::parse($OV->DocDueDate);
@@ -662,7 +662,12 @@ class SAP extends Model
                 $ov = $orden[0];
                 $itemCode = $orden[2];
                 //$Items_OV = DB::select('select * from RDR1 where RDR1.DocEntry = ?', [$ov]);
-                $Item = DB::table('RDR1')->where('DocEntry', $ov)->where('ItemCode', $itemCode)->first();
+                $Item = DB::table('RDR1')
+                ->leftJoin('OITM', 'RDR1.ItemCode', '=', 'OITM.ItemCode')
+                ->where('RDR1.DocEntry', $ov)
+                ->where('RDR1.ItemCode', $itemCode)
+                ->select('RDR1.*', 'OITM.DfltWH')
+                ->first();
                 $OV = DB::table('ORDR')->where('DocEntry', $ov)->first();
                 if ($grupal == 1) {
                     //(T1.Quantity-ISNULL(T1.U_Procesado
