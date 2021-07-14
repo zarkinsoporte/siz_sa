@@ -395,6 +395,7 @@ public function registros_gop(Request $request){
                 Item.[CantidadSolicitada],
                 Item.[Procesado],
                 Item.[Pendiente]
+                ,Item.[LineNum]
                 ,OITM.DfltWH
                 FROM
                 (

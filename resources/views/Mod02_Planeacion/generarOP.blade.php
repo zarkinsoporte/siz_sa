@@ -712,11 +712,11 @@ $('#tabla_pedidos tbody').on( 'click', 'tr', function (e) {
         var registros = ordvta == null ? 0 : ordvta.length;
         for(var i=0; i < registros; i++){
             if (i == registros - 1) {
-                ovs += ordvta[i].Pedido + "&" + ordvta[i].Grupal + "&" + ordvta[i].Codigo;
+                ovs += ordvta[i].Pedido + "&" + ordvta[i].Grupal + "&" + ordvta[i].Codigo + "&" + ordvta[i].LineNum;
             } else {
-                ovs += ordvta[i].Pedido + "&"+ ordvta[i].Grupal + "&" + ordvta[i].Codigo + ",";
+                ovs += ordvta[i].Pedido + "&"+ ordvta[i].Grupal + "&" + ordvta[i].Codigo + "&" + ordvta[i].LineNum + ",";
             }
-            //console.log(ordvta[i]);         
+            console.log(ordvta[i]);         
         }
         
         if(registros > 0){

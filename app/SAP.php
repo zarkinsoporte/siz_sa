@@ -657,15 +657,17 @@ class SAP extends Model
         $mensajeErrr= '';
         foreach ($preOrdenes as $key => $preorden) {
             $orden = explode('&', $preorden);
-            if (count($orden) == 3) {
-                $grupal = $orden[1];
+            if (count($orden) == 4) {
                 $ov = $orden[0];
+                $grupal = $orden[1];
                 $itemCode = $orden[2];
+                $lineNum = $orden[3];
                 //$Items_OV = DB::select('select * from RDR1 where RDR1.DocEntry = ?', [$ov]);
                 $Item = DB::table('RDR1')
                 ->leftJoin('OITM', 'RDR1.ItemCode', '=', 'OITM.ItemCode')
                 ->where('RDR1.DocEntry', $ov)
                 ->where('RDR1.ItemCode', $itemCode)
+                ->where('RDR1.LineNum', $lineNum)
                 ->select('RDR1.*', 'OITM.DfltWH')
                 ->first();
                 $OV = DB::table('ORDR')->where('DocEntry', $ov)->first();
@@ -699,20 +701,20 @@ class SAP extends Model
     public static function updateOV($ov, $Item, $cantProcesada)
     {
         $order = DB::select('select sum (COALESCE(Quantity, 0)) as sum_cant, SUM(COALESCE(U_Procesado, 0)) as sum_procesado from RDR1 
-        where  Docentry =  ? ', [$ov]);
+        where  Docentry =  ? AND TreeType <> ?', [$ov, 'S']);
 
         if (count($order) > 0) { //verificar la existencia de la OV
-            if ($order[0]->sum_cant > $order[0]->sum_procesado) { //si la cantidad de la OV es mayor a la procesada
+            if ((int)$order[0]->sum_cant > (int)$order[0]->sum_procesado) { //si la cantidad de la OV es mayor a la procesada
                 $orderLine = DB::select('select sum (COALESCE(Quantity, 0)) as sum_cant, SUM(COALESCE(U_Procesado, 0)) as sum_procesado from RDR1 
                 where  Docentry =  ? AND ItemCode = ? AND LineNum = ?', [$ov, $Item->ItemCode, $Item->LineNum]);
-                if ($orderLine[0]->sum_cant > $orderLine[0]->sum_procesado) {
+                if ((int)$orderLine[0]->sum_cant > (int)$orderLine[0]->sum_procesado) {
                     $cantActual = (is_null($Item->U_Procesado)) ? 0 : ($Item->U_Procesado) * 1;
                     $cantActualProcesado = $cantActual + $cantProcesada;
                     DB::update('UPDATE RDR1 SET U_Procesado = ? WHERE DocEntry = ? AND ItemCode = ? AND LineNum = ?', [$cantActualProcesado, $ov, $Item->ItemCode, $Item->LineNum]);
                     $order = DB::select('select sum (COALESCE(Quantity, 0)) as sum_cant, SUM(COALESCE(U_Procesado, 0)) as sum_procesado from RDR1 
-                        where  Docentry =  ? ', [$ov]);
+                        where  Docentry =  ? AND TreeType <> ?', [$ov, 'S']);
                     if (count($order) > 0) {
-                        if ($order[0]->sum_cant == $order[0]->sum_procesado) { //si la cantidad de la OV es mayor a la procesada
+                        if ((int)$order[0]->sum_cant == (int)$order[0]->sum_procesado) { //si la cantidad de la OV es mayor a la procesada
                             self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
                             self::$vCmp->DbServerType = "10";
                             self::$vCmp->server = env('SAP_server');;

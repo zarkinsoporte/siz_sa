@@ -159,9 +159,21 @@
     </div>
 @endsection
  
-@section('script')
-
-$('#tinventario thead tr').clone(true).appendTo( '#tinventario thead' );
+<script>
+     function js_iniciador() {
+                            $('.toggle').bootstrapSwitch();
+                            $('[data-toggle="tooltip"]').tooltip();
+                            $('.boot-select').selectpicker();
+                            $('.dropdown-toggle').dropdown();
+                            setTimeout(function() {
+                            $('#infoMessage').fadeOut('fast');
+                            }, 5000); // <-- time in milliseconds
+                            $("#sidebarCollapse").on("click", function() {
+                                $("#sidebar").toggleClass("active"); 
+                                $("#page-wrapper").toggleClass("content"); 
+                                $(this).toggleClass("active"); 
+                            });
+                            $('#tinventario thead tr').clone(true).appendTo( '#tinventario thead' );
 
 $('#tinventario thead tr:eq(1) th').each( function (i) {
     var title = $(this).text();
@@ -372,8 +384,11 @@ var table = $('#tinventario').DataTable({
     ],
     //revision
   
-});
-@endsection
+});                    
+    }
+</script>
+
+
 
 <script>
 document.onkeyup = function(e) {

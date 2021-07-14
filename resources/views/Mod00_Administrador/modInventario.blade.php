@@ -356,14 +356,14 @@
                                 <div class="form-group">
                                     <label for="mantenimiento_programado">Próximo Mantenimiento</label>
                                     <input type="Date" name="mantenimiento_programado" class="form-control" placeholder=""
-                                        value="{{ old('mantenimiento_programado',$i->Fecha_mttoProgramado)}}">
+                                        value="{{ old('mantenimiento_programado', is_null($i->Fecha_mttoProgramado) ? null : date('Y-m-d', strtotime($i->Fecha_mttoProgramado)))}}">
                                 </div>
                             </div>
                             <div class="col-md-6 col-sm-6">
                                 <div class="form-group">
-                                    <label for="mantenimiento_realizado">Último Mantenimiento Realizado</label>
+                                    <label for="mantenimiento_realizado">Último Mantenimiento Realizado </label>
                                     <input type="Date" name="mantenimiento_realizado" class="form-control" placeholder=""
-                                        value="{{ old('mantenimiento_realizado',$i->Fecha_mantenimiento)}}">
+                                        value="{{ old('mantenimiento_realizado', is_null($i->Fecha_mantenimiento) ? null :  date('Y-m-d', strtotime($i->Fecha_mantenimiento)))}}">
                                 </div>
                             </div>
                         </div><!-- /.row -->
@@ -389,7 +389,7 @@
                                 <div class="form-group">
                                     <label for="fecha_garantia">Vencimiento Garantía</label>
                                     <input type="Date" name="fecha_garantia" class="form-control" placeholder=""
-                                        value="{{ old('fecha_garantia',$i->Fecha_garantia)}}">
+                                        value="{{ old('fecha_garantia', is_null($i->Fecha_garantia) ? null : date('Y-m-d', strtotime($i->Fecha_garantia)))}}">
                                 </div>
                             </div>
                         </div><!-- /.row -->

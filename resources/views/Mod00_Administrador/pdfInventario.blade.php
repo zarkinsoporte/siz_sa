@@ -59,7 +59,8 @@
         <div id="wrapper">
 
 <div class="container" >
-<img src="images/ZARKIN_0.png" >
+
+<img src="{{ url('images/ZARKIN_0.png') }}" >
      <div class="row">
         <div class="col-6">
         <BR>

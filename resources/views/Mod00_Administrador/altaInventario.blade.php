@@ -330,14 +330,14 @@
                                     <div class="form-group">
                                         <label for="mantenimiento_programado">Próximo Mantenimiento</label>
                                         <input type="Date" name="mantenimiento_programado" class="form-control" placeholder=""
-                                            value="{{ old('mantenimiento_programado') }}">
+                                           >
                                     </div>
                                 </div>
                                 <div class="col-md-6 col-sm-6">
                                     <div class="form-group">
                                         <label for="mantenimiento_realizado">Último Mantenimiento Realizado</label>
                                         <input type="Date" name="mantenimiento_realizado" class="form-control" placeholder=""
-                                            value="{{ old('mantenimiento_realizado') }}">
+                                            >
                                     </div>
                                 </div>
                             </div><!-- /.row -->
@@ -363,7 +363,7 @@
                                     <div class="form-group">
                                         <label for="fecha_garantia">Vencimiento Garantía</label>
                                         <input type="Date" name="fecha_garantia" class="form-control" placeholder=""
-                                            value="{{ old('fecha_garantia') }}">
+                                            >
                                     </div>
                                 </div>
                             </div><!-- /.row -->

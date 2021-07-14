@@ -522,7 +522,7 @@ dd($user);
     {
         //Actualizamos el valor en la DB
         DB::table('Siz_Inventario')
-            ->where("id", "=", "$id")
+            ->where("numero_equipo", "=", "$id")
             ->update([
                 'obsoleto' => '0'
             ]);
@@ -624,7 +624,12 @@ dd($user);
     {         
         //Insertamos en la DB
         try{
-             DB::table('Siz_Inventario')->insert(
+            $f1 = ($request->input('mantenimiento_programado') == '')? null : date("Y-m-d",(strtotime( $request->input('mantenimiento_programado')) ));
+            $f2 = ($request->input('mantenimiento_realizado') == '')? null : date("Y-m-d",(strtotime( $request->input('mantenimiento_realizado')) ));
+            $f3 = ($request->input('fecha_garantia') == '')? null : date("Y-m-d",(strtotime($request->input('fecha_garantia')) ));
+            $f4 = ($request->input('fecha_actualizacion') == '')? null : date("Y-m-d",(strtotime($request->input('fecha_actualizacion')) ));
+        
+            DB::table('Siz_Inventario')->insert(
                 [
                  //registro
                 // 'numero_equipo' => $request->input('numero_equipo'),
@@ -633,7 +638,7 @@ dd($user);
                  'area' => $request->input('area'),             
                  'nombre_equipo' => $request->input('nombre_equipo'), //descripcion
                  'usuario_actualizacion' => $request->input('usuario_actualizacion'),//*
-                 'fecha_actualizacion' => $request->input('fecha_actualizacion'),//*
+                'fecha_actualizacion' => $f4,//*
                 //Usuario
                  'nombre_usuario' => $request->input('nombre_usuario'),
                  'correo' => $request->input('correo'), 
@@ -661,11 +666,12 @@ dd($user);
                  'otros' => $request->input('otro'),                     
                  'l_otros' => $request->input('l_otro'),//*
                  //Mto             
-                 'Fecha_mttoProgramado' => $request->input('mantenimiento_programado'),
-                 'Fecha_mantenimiento' => $request->input('mantenimiento_realizado'),
+                 
+                 'Fecha_mttoProgramado' => $f1, 
+                 'Fecha_mantenimiento' => $f2,
                  'Observaciones' => $request->input('ObservacionesTec'), //*
                  'garantia' => $request->input('garantia'), //*
-                 'Fecha_garantia' => $request->input('fecha_garantia'), //*
+                 'Fecha_garantia' => $f3, //*
                  //acceso
                  'local_user' => $request->input('local_user'), //*
                  'dominio_user' => $request->input('dominio_user'), //*
