@@ -626,7 +626,8 @@ $dt = date('Ymd h:i');
 //Cuando una orden se libera en planeación revisamos si se le cargara piel 106 (revisando su ruta), 
 //en caso de que no lleve piel, entonces le cambiamos en status y le colocamos la fecha de inicio.
 //casco: 400 armado - 300 habilitado ()
-if($Code_actual->U_CT == '100' && OP::ContieneRuta($Code_actual->U_DocEntry, '106') == false){
+if($Code_actual->U_CT == '100' && OP::ContieneRuta($Code_actual->U_DocEntry, '106') == false)
+{
     $res = SAP::updateStatusEntregaPiel($Code_actual->U_DocEntry, '06', ''.$dt);
             if ($res == 0){
                 DB::table('OWOR')
@@ -644,30 +645,31 @@ if($Code_actual->U_CT == '100' && OP::ContieneRuta($Code_actual->U_DocEntry, '10
 //AVANCE DE OP (PIEL)
 //Se modifica status y fecha, necesitamosrevisar que tenga piel.
 
-if($Code_actual->U_CT == '106'){
+if($Code_actual->U_CT == '106')
+{
     $consumido = DB::table('WOR1')
     ->leftJoin('OITM','WOR1.ItemCode', '=', 'OITM.ItemCode')
     ->where('OITM.ItmsGrpCod', '=', 113)
     ->where('WOR1.DocEntry', '=', $Code_actual->U_DocEntry)
     ->value('WOR1.IssuedQty');
 
-if($consumido < 1 &&  !is_null($consumido)){
-return redirect()->back()->withErrors(array('message' => 'Esta orden necesita primero que le cargues Piel en SAP'));
-}else{
+    if($consumido < 1 &&  !is_null($consumido)){
+    return redirect()->back()->withErrors(array('message' => 'Esta orden necesita primero que le cargues Piel en SAP'));
+    }else{
 
-    $res = SAP::updateStatusEntregaPiel($Code_actual->U_DocEntry, '06', ''.$dt);
-    if ($res == 0){
-        DB::table('OWOR')
-        ->where('DocEntry', '=', $Code_actual->U_DocEntry)
-        ->update(['U_Starus' =>  '06', 'U_Entrega_Piel' => $dt]);
+        $res = SAP::updateStatusEntregaPiel($Code_actual->U_DocEntry, '06', ''.$dt);
+        if ($res == 0){
+            DB::table('OWOR')
+            ->where('DocEntry', '=', $Code_actual->U_DocEntry)
+            ->update(['U_Starus' =>  '06', 'U_Entrega_Piel' => $dt]);
+        }
+        
+        //cambiar a liberado SAP
+    // $r = SAP::ProductionOrderStatus($Code_actual->U_DocEntry, 1);
+    //  if(!$r){
+    //      Session::flash('info', 'La orden no pudo liberarse en Sap');
+    //  }
     }
-    
-    //cambiar a liberado SAP
-   // $r = SAP::ProductionOrderStatus($Code_actual->U_DocEntry, 1);
-  //  if(!$r){
-  //      Session::flash('info', 'La orden no pudo liberarse en Sap');
-  //  }
-}
 }
 
 //TERMINA AVANCE DE OP (PIEL)

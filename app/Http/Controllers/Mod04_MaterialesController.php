@@ -1784,7 +1784,11 @@ public function getPdfSolicitud(){
             ["data" => "ItemCode", "name" => "Código"],
             ["data" => "ItemName", "name" => "Descripción"],
             ["data" => "UM", "name" => "UM"],
-            ["data" => "Existencia", "name" => "Existencia", "defaultContent" => "0.00"],
+            ["data" => "Existencia", "name" => "Existencia",
+            "render"=> "function(data){                     
+                return data.toFixed(4);;
+            }",
+             "defaultContent" => "0.0000"],
         );
 
         return response()->json(array('data' => $consulta, 'columns' => $columns));

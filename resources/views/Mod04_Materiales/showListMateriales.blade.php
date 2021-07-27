@@ -309,7 +309,7 @@
                                         <div class="form-group">
                                             <label for="cant">Cantidad:</label>
 
-                                            <input type="number" step="0.001" min="0.1" class="form-control" name="cant"
+                                            <input type="number" step="0.0001" min="0.0001" class="form-control" name="cant"
                                                 id="cant" ng-model="insert.cant" required>
                                         </div>
                                     </div>
@@ -452,13 +452,21 @@ success: function(data, textStatus, jqXHR) {
     deferRender: true,
     scrollCollapse: true,
     data:data.data,
-    columns: data.columns,
+    columns: [
+        {"data" : "ItemCode", "name" : "Código"},
+            {"data" : "ItemName", "name" : "Descripción"},
+            {"data" : "UM", "name" : "UM"},
+            {"data" : "Existencia", "name" : "Existencia",
+            "render": function(data){                     
+                return data;
+            },
+             "defaultContent" : "0.0000"}],
     "language": {
     "url": "{{ asset('assets/lang/Spanish.json') }}",
     },
     columnDefs: [
     { width: "7%", targets: 0},
-
+    
     ],
     "rowCallback": function( row, data, index ) {
     //console.log(data['Existencia']);
@@ -530,7 +538,7 @@ success: function(data, textStatus, jqXHR) {
 
     $('input[name=cant]').focus();
     $('input[name=cant]').attr('max', fila[0]['Existencia']);
-    $('input[name=cant]').attr('min',1);
+    $('input[name=cant]').attr('min','0.0001');
     $('#submitBtn').attr("disabled", false);
     }
     }

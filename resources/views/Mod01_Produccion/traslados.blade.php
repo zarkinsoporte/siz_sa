@@ -233,7 +233,7 @@ data-target="#Retroceder" class="btn btn-info btn-lg" data-codem="{{$of->U_Orden
         <i class="fa fa-send-o" aria-hidden="true"> 
           Avanzar
           </i>
-        </a> </td>
+        </a> <br> </td>
     <?php   
     break;        
     case '5'; //Almacén de 
