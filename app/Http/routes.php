@@ -593,3 +593,11 @@ Route::get('home/CALIDAD REPORTE DEFECTIVOS', 'Mod07_CalidadController@showRepor
 Route::post('home/reporte/CALIDAD REPORTE DEFECTIVOS', 'Mod07_CalidadController@exportarReporteDefectivos');
 Route::post('home/reporte/009 CATALOGO DE EMPLEADOS', 'Reportes_ProduccionController@R009');
 Route::get('datatables.R009', 'Reportes_ProduccionController@DataShow009')->name('datatables.R009');
+
+
+//LISTA DE PRECIOS
+
+Route::get('home/LISTA DE PRECIOS', 'Mod04_MaterialesController@listaPrecios')->middleware('routelog');
+Route::any('datatables.arts', 'Mod04_MaterialesController@registros_listaPrecios')->name('datatables.arts');
+Route::any('generarOP', 'Mod02_PlaneacionController@generarOP')->name('generarOP');
+Route::any('asignar_series', 'Mod02_PlaneacionController@asignar_series')->name('asignar_series');
