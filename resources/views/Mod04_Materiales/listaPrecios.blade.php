@@ -58,40 +58,42 @@
 
                     <!-- Page Heading -->
                     <div class="row">
-                        <div class="col-md-11">
-                            <h3 class="page-header">
+                        <div class="col-md-12">
+                            <h3 class="">
                                Lista de Precios
                                 <small><b>{{$deplist.' - '.$deplistname}}</b></small>
                             
-                            </h3>                                        
+                            </h3> 
+                            <div class="pull-right">
+                                <a style="margin-right: 5px;" id="btn_enviar" class="btn btn-success btn-sm" data-operacion='1'><i
+                                        class="fa fa-send"></i> Actualizar <span class="badge"></span></a>
+                            </div>                                       
                         </div>
                           <input type="text" style="display: none" class="form-control input-sm" id="input-lista" value="{{$deplist}}">
                         <div class="col-md-12 ">
                             @include('partials.alertas')
                         </div>
                             
-                            <div class="tab-content">
-                                <div class="tab-pane fade active in" id="default-tab-1">
-                                    <div class="container">                                                                                                                  
-                                      <div class="row">
-                                            <div class="col-md-12">
-                                                <div class="panel panel-default">
-                                                    <div class="panel-body">
+                            <div class="">
+                                <div class="">
+                                    <div class="">                                                                                                                  
+                                      <div >
+                                            <div >
+                                                <div >
+                                                    <div >
                                                         <div class="row">
                                                             <div class="col-md-12">
                                                                 <div class="table-scroll" id="registros-ordenes-venta">
                                                                     <table id="tabla_arts" class="table table-striped table-bordered hover" width="100%">
                                                                         <thead>
-                                                                            <tr>                                                                              
-                                                                                <th></th>
+                                                                            <tr>              
                                                                                 <th>Código</th>
                                                                                 <th>Descripción</th>
                                                                                 <th>UM</th>                                        
                                                                                 <th>UM Compras</th>
-                                                                                <th>Factor Conversion</th>
+                                                                                <th>F. Conversión</th>
                                                                                 <th>Precio Lista</th>                                                                
-                                                                                <th>Moneda</th>                                                                
-                                                                                                                       
+                                                                                <th>Moneda</th>                         
                                                                             </tr>
                                                                         </thead>
                                                                     </table>
@@ -224,13 +226,39 @@
                 "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
             },
             scrollX: true,
-            scrollY: "430px",
-            dom: 'lfrtip',
+            scrollY: "410px",
+            dom: 'Brtip',
+            buttons: [
+                {
+                    text: '<i class="fa fa-check-square"></i>',
+                    titleAttr: 'seleccionar',
+                    action: function() {
+                        table.rows({
+                            page: 'current'
+                        }).select();
+                        var count = table.rows( '.selected' ).count();
+                        var $badge = $('#btn_enviar').find('.badge'); 
+                        $badge.text(count);
+                    }
+                },
+                {
+                    text: '<i class="fa fa-square"></i>',
+                    titleAttr: 'deseleccionar',
+                    action: function() {
+                        table.rows({
+                            page: 'current'
+                        }).deselect();
+                        var count = table.rows( '.selected' ).count();
+                        var $badge = $('#btn_enviar').find('.badge'); 
+                        $badge.text(count);
+                    }
+                }
+                
+                ],
             scrollCollapse: true,
             deferRender: true,
             pageLength: -1,
             columns: [
-                { data: "checkbox" },
                 { data: "codigo" },
                 { data: "descripcion" },
                 { data: "um" },
@@ -240,24 +268,33 @@
                 { data: "moneda" }
 
             ],
-            'columnDefs': [{
-                'targets': 0,
-                'searchable': false,
-                'orderable': false,
-                'className': 'dt-body-center',
-                'render': function (data, type, full, meta) {
-                    return '<input type="checkbox" name="selectCheck" value="' + $('<div/>').text(data).html() + '">';
-                }
-
-            },
+            'columnDefs': [
             ],
             "rowCallback": function (row, data, index) {
 
-                if (data['precio_lista'] == null || data['precio_lista'] == 0) {
+                if (data['precio'] == null || data['precio'] == 0) {
                     $('td', row).addClass("ignoreme");
                 }
             },
         });
+
+        $('#tabla_arts thead tr').clone(true).appendTo( '#tabla_arts thead' );
+$('#tabla_arts thead tr:eq(1) th').each( function (i) {
+    var title = $(this).text();
+    $(this).html( '<input style="color: black;"  type="text" placeholder="Filtro '+title+'" />' );
+
+    $( 'input', this ).on( 'keyup change', function () {       
+            
+            if ( table.column(i).search() !== this.value ) {
+                table
+                    .column(i)
+                    .search(this.value, true, false)
+                    
+                    .draw();
+            } 
+                
+    } );    
+} );
 
         $.ajax({
             type: 'GET',
@@ -297,7 +334,7 @@
             }
         });
 
-        $('#tabla_pedidos tbody').on('click', 'tr', function (e) {
+        $('#tabla_arts tbody').on('click', 'tr', function (e) {
             if ($(e.target).hasClass("ignoreme")) {
 
             } else {
@@ -315,31 +352,12 @@
 
         $('#btn_enviar').on('click', function (e) {
             e.preventDefault();
-            var oper = $('#btn_enviar').attr('data-operacion');
-            //console.log(oper);
-            switch (oper) {
-                case '1':
-                    click_pedidos();
-                    break;
-                case '2':
-                    click_series();
-                    break;
-                case '3':
-                    click_programar_cambios();
-                    break;
-                case '4':
-                    click_liberacion();
-                    break;
-                case '5':
-                    click_impresion();
-                    break;
-
-                default:
-                    break;
-            }
+            //var oper = $('#btn_enviar').attr('data-operacion');
+            click_programar_cambios();
+             
         });
         function click_programar_cambios() {
-            var countOP = tabla_programar.rows('.selected').count();
+            var countOP = table.rows('.selected').count();
             if (countOP == 0) {
                 bootbox.dialog({
                     title: "Mensaje",

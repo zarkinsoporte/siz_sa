@@ -29,9 +29,9 @@ class Mod04_MaterialesController extends Controller
         try {
             ini_set('memory_limit', '-1');
             set_time_limit(0);
-            $depList = $request->input('');
-            $consulta = DB::select('SELECT 0 AS checkbox, OITM.ItemCode as codigo, 
-            ItemName AS descripcion, InvntryUom AS um, BuyUnitMsr AS umc, 
+            $depList = $request->input('deplist');
+            $consulta = DB::select('SELECT OITM.ItemCode as codigo, 
+            SUBSTRING( ItemName, 1, 50) AS descripcion, InvntryUom AS um, BuyUnitMsr AS umc, 
             NumInBuy AS factor_conversion, L01.Price AS precio, L01.Currency AS moneda 
             FROM OITM 
             INNER JOIN ITM1 L01 on OITM.ItemCode=L01.ItemCode 
