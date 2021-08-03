@@ -293,12 +293,7 @@
 
             }
         ],
-        "rowCallback": function (row, data, index) {
-
-            if (data['precio'] == null || data['precio'] == 0) {
-                $('td', row).addClass("ignoreme");
-            }
-        },
+       
     });
 
     $('#tabla_arts thead tr').clone(true).appendTo( '#tabla_arts thead' );
