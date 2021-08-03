@@ -60,8 +60,8 @@
                     <div class="row">
                         <div class="col-md-12">
                             <h3 class="">
-                               Lista de Precios
-                                <small><b>{{$deplist.' - '.$deplistname}}</b></small>
+                              Actualizar Precios
+                                <small><b>{{' LISTA DE PRECIOS #'.$deplist.' - '.$deplistname}}</b></small>
                             
                             </h3> 
                             <div class="pull-right">
@@ -118,63 +118,36 @@
                                 <div class="modal-header">
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                                             aria-hidden="true">&times;</span></button>
-                                    <h4 class="modal-title" >Datos a Actualizar</h4>
+                                    <h4 class="modal-title" > Actualizar Precios</h4>
                                 </div>
-                    
+    
                                 <div class="modal-body" style='padding:16px'>
                                     
                                             <div class="row">
-                                                <div class="col-md-6">
+                                                <div class="col-md-12">
                                                     <div class="form-group">
-                                                        <label for="fecha_provision">Prog. Corte</label>
-                                                        <input maxlength="10" type="text" id="programar_progCorte" name="programar_progCorte" class='form-control' autocomplete="off">
+                                                        <input class="form-check-input" type="radio" name="r1" id="ch1" value="1" checked>
+                                                        <label for="fecha_provision">Nuevo Precio</label>
+                                                        <input  type="number" id="precio_nuevo" name="precio_nuevo" min=".0001" step=".0001" class='form-control' autocomplete="off">
                                                     </div>
                                                 </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label for="cant">Sec. Compra</label>
-                                                        <input maxlength="10" type="text" class="form-control" id="programar_secCompra" autocomplete="off">
-                                                       
-                                                    </div>
-                                                </div>
+                                                
                                             </div><!-- /.row -->
                                             <div class="row">
-                                                <div class="col-md-6">
+                                                <div class="col-md-12">
                                                     <div class="form-group">
-                                                        <label for="fecha_provision">Sec. OT</label>
-                                                        <input maxlength="49" type="text" id="programar_secOt" name="programar_secOt" class='form-control' autocomplete="off">
+                                                        <input class="form-check-input" type="radio" name="r1" id="ch2" value="2" >
+                                                        <label for="fecha_provision">Incrementar /decrementar %</label>
+                                                        <input  type="number" id="precio_porcentaje" name="precio_porcentaje" min="-99" max="100" class='form-control' autocomplete="off">
                                                     </div>
                                                 </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label for="cant">Estatus</label>
-                                                        
-                                                        {!! Form::select("cboestadoprogramar", [], null, ["class" => "form-control selectpicker","id"
-                                                            =>"programar_estatus", "data-size" => "8", "data-style"=>"btn-success"])
-                                                            !!}
-                                                    </div>
-                                                </div>
-                                            </div><!-- /.row -->
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label for="programar_fCompra">F. Compra</label>
-                                                        <input type="text" id="programar_fCompra"  class='form-control' autocomplete="off">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label for="programar_fProduccion">F. Producción</label>
-                                                        <input type="text" class="form-control" id="programar_fProduccion" autocomplete="off">
-                                                       
-                                                    </div>
-                                                </div>
+                                               
                                             </div><!-- /.row -->
                                                                                        
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-                                    <button id='btn-guarda-programar'class="btn btn-primary"> Actualizar</button>
+                                    <button id='btn-actualiza-precio'class="btn btn-primary"> Actualizar</button>
                                 </div>
                     
                             </div>
@@ -189,7 +162,7 @@
     $('.boot-select').selectpicker();
     $('.dropdown-toggle').dropdown();
     setTimeout(function () {
-        $('#infoMessage').fadeOut('fast');
+    $('#infoMessage').fadeOut('fast');
     }, 5000); // <-- time in milliseconds
     $("#sidebarCollapse").on("click", function () {
         $("#sidebar").toggleClass("active");
@@ -218,417 +191,400 @@
 
         }
     }
+    $("#precio_nuevo").click(function(){
+     $("#ch1").prop("checked", true);
+     $("#ch2").prop("checked", false);
+    });
+    $("#precio_porcentaje").click(function(){
+     $("#ch2").prop("checked", true);
+     $("#ch1").prop("checked", false);
+    });
     $(window).on('load', function () {
 
         /*GENERAR OP*/
-        var table = $("#tabla_arts").DataTable({
-            language: {
-                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
-            },
-            scrollX: true,
-            scrollY: "410px",
-            dom: 'Brtip',
-            buttons: [
-                {
-                    text: '<i class="fa fa-check-square"></i>',
-                    titleAttr: 'seleccionar',
-                    action: function() {
-                        table.rows({
-                            page: 'current'
-                        }).select();
-                        var count = table.rows( '.selected' ).count();
-                        var $badge = $('#btn_enviar').find('.badge'); 
-                        $badge.text(count);
-                    }
-                },
-                {
-                    text: '<i class="fa fa-square"></i>',
-                    titleAttr: 'deseleccionar',
-                    action: function() {
-                        table.rows({
-                            page: 'current'
-                        }).deselect();
-                        var count = table.rows( '.selected' ).count();
-                        var $badge = $('#btn_enviar').find('.badge'); 
-                        $badge.text(count);
-                    }
-                }
-                
-                ],
-            scrollCollapse: true,
-            deferRender: true,
-            pageLength: -1,
-            columns: [
-                { data: "codigo" },
-                { data: "descripcion" },
-                { data: "um" },
-                { data: "umc" },
-                { data: "factor_conversion" },
-                { data: "precio" },
-                { data: "moneda" }
-
-            ],
-            'columnDefs': [
-            ],
-            "rowCallback": function (row, data, index) {
-
-                if (data['precio'] == null || data['precio'] == 0) {
-                    $('td', row).addClass("ignoreme");
+    var table = $("#tabla_arts").DataTable({
+        language: {
+            "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+        },
+        scrollX: true,
+        scrollY: "410px",
+        dom: 'Brtip',
+        buttons: [
+            {
+                text: '<i class="fa fa-check-square"></i>',
+                titleAttr: 'seleccionar',
+                action: function() {
+                    table.rows({
+                        page: 'current'
+                    }).select();
+                    var count = table.rows( '.selected' ).count();
+                    var $badge = $('#btn_enviar').find('.badge'); 
+                    $badge.text(count);
                 }
             },
-        });
-
-        $('#tabla_arts thead tr').clone(true).appendTo( '#tabla_arts thead' );
-$('#tabla_arts thead tr:eq(1) th').each( function (i) {
-    var title = $(this).text();
-    $(this).html( '<input style="color: black;"  type="text" placeholder="Filtro '+title+'" />' );
-
-    $( 'input', this ).on( 'keyup change', function () {       
+            {
+                text: '<i class="fa fa-square"></i>',
+                titleAttr: 'deseleccionar',
+                action: function() {
+                    table.rows({
+                        page: 'current'
+                    }).deselect();
+                    var count = table.rows( '.selected' ).count();
+                    var $badge = $('#btn_enviar').find('.badge'); 
+                    $badge.text(count);
+                }
+            }
             
-            if ( table.column(i).search() !== this.value ) {
-                table
-                    .column(i)
-                    .search(this.value, true, false)
-                    
-                    .draw();
-            } 
+            ],
+        scrollCollapse: true,
+        deferRender: true,
+        pageLength: -1,
+        columns: [
+            { data: "codigo" },
+            { data: "descripcion" },
+            { data: "um" },
+            { data: "umc" },
+            { data: "factor_conversion" },
+            { data: "precio" },
+            { data: "moneda" }
+
+        ],
+        'columnDefs': [
+                {
+
+                "targets": [ 4 ],
+                "searchable": false,
+                "orderable": false,
+                "render": function ( data, type, row ) {
+
+                    if(row['factor_conversion'] != ''){
+
+                        return number_format(row['factor_conversion'],4,'.',',');
+
+                    }
+                    else{
+
+                        return '';
+
+                    }
+
+                }
+
+            },
+            {
+
+                "targets": [ 5 ],
+                "searchable": false,
+                "orderable": false,
+                "render": function ( data, type, row ) {
+
+                    if(row['precio'] != ''){
+
+                        return number_format(row['precio'],4,'.',',');
+
+                    }
+                    else{
+
+                        return '0.0000';
+
+                    }
+
+                }
+
+            }
+        ],
+        "rowCallback": function (row, data, index) {
+
+            if (data['precio'] == null || data['precio'] == 0) {
+                $('td', row).addClass("ignoreme");
+            }
+        },
+    });
+
+    $('#tabla_arts thead tr').clone(true).appendTo( '#tabla_arts thead' );
+
+    $('#tabla_arts thead tr:eq(1) th').each( function (i) {
+        var title = $(this).text();
+        $(this).html( '<input style="color: black;"  type="text" placeholder="Filtro '+title+'" />' );
+
+        $( 'input', this ).on( 'keyup change', function () {       
                 
-    } );    
-} );
+                if ( table.column(i).search() !== this.value ) {
+                    table
+                        .column(i)
+                        .search(this.value, true, false)
+                        
+                        .draw();
+                } 
+                    
+        } );    
+    } );
 
-        $.ajax({
-            type: 'GET',
-            async: true,
-            url: '{!! route('datatables.arts') !!}',
-            data: {
-                deplist: $('#input-lista').val()
-            },
-            beforeSend: function () {
-                $.blockUI({
-                    baseZ: 2000,
-                    message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
-                    css: {
-                        border: 'none',
-                        padding: '16px',
-                        width: '50%',
-                        top: '40%',
-                        left: '30%',
-                        backgroundColor: '#fefefe',
-                        '-webkit-border-radius': '10px',
-                        '-moz-border-radius': '10px',
-                        opacity: .7,
-                        color: '#000000'
+    reload_tabla_arts();
+
+    $('#tabla_arts tbody').on('click', 'tr', function (e) {
+        if ($(e.target).hasClass("ignoreme")) {
+
+        } else {
+            $(this).toggleClass('selected');
+        }
+        var ordvta = table.rows('.selected').data();
+        var registros = ordvta == null ? 0 : ordvta.length;
+
+        var count = table.rows('.selected').count();
+        var $badge = $('#btn_enviar').find('.badge');
+        $badge.text(count);
+
+        //console.log(registros);
+    });
+
+    $('#btn_enviar').on('click', function (e) {
+        e.preventDefault();
+        //var oper = $('#btn_enviar').attr('data-operacion');
+        click_programar_cambios();
+            
+    });
+    $('#tabla_arts tbody').on('dblclick','tr',function(e){
+        $(this).toggleClass('selected');
+        var fila = table.rows(this).data()
+        var num = parseFloat(fila[0]['precio']).toFixed(4)
+        $('#precio_nuevo').val(num)
+        $("#ch1").prop("checked", true);
+        $("#ch2").prop("checked", false);
+        $('#updateprogramar').modal('show');
+    })
+
+    function click_programar_cambios() {
+        var countOP = table.rows('.selected').count();
+        if (countOP == 0) {
+            bootbox.dialog({
+                title: "Mensaje",
+                message: "<div class='alert alert-danger m-b-0'>No hay registros seleccionados.</div>",
+                buttons: {
+                    success: {
+                        label: "Ok",
+                        className: "btn-success m-r-5 m-b-5"
                     }
-                });
-            },
-            complete: function () {
-                setTimeout($.unblockUI, 1500);
-            },
-            success: function (data) {
-
-                if (data.arts.length > 0) {
-                    $("#tabla_arts").dataTable().fnAddData(data.arts);
-                } else {
-
                 }
-            }
-        });
-
-        $('#tabla_arts tbody').on('click', 'tr', function (e) {
-            if ($(e.target).hasClass("ignoreme")) {
-
+            }).find('.modal-content').css({ 'font-size': '14px' });
+        } else {
+            if (countOP > 1) {
+                $('#precio_nuevo').val('')
             } else {
-                $(this).toggleClass('selected');
+                var fila = table.rows('.selected').data()
+                var num = parseFloat(fila[0]['precio']).toFixed(4)
+                $('#precio_nuevo').val(num)
             }
-            var ordvta = table.rows('.selected').data();
-            var registros = ordvta == null ? 0 : ordvta.length;
+            $("#ch1").prop("checked", true);
+            $("#ch2").prop("checked", false);
+            $('#updateprogramar').modal('show');
+        }
+    }
 
-            var count = table.rows('.selected').count();
-            var $badge = $('#btn_enviar').find('.badge');
-            $badge.text(count);
-
-            //console.log(registros);
-        });
-
-        $('#btn_enviar').on('click', function (e) {
-            e.preventDefault();
-            //var oper = $('#btn_enviar').attr('data-operacion');
-            click_programar_cambios();
-             
-        });
-        function click_programar_cambios() {
-            var countOP = table.rows('.selected').count();
-            if (countOP == 0) {
+    $('#btn-actualiza-precio').on('click', function (e) {
+        if ($("#ch1").is(":checked")) {
+            if ($('#precio_nuevo').val() <= 0 || $('#precio_nuevo').val() == '' ) {
                 bootbox.dialog({
-                    title: "Mensaje",
-                    message: "<div class='alert alert-danger m-b-0'>No hay registros seleccionados.</div>",
-                    buttons: {
-                        success: {
-                            label: "Ok",
-                            className: "btn-success m-r-5 m-b-5"
-                        }
+                title: "Mensaje",
+                message: "<div class='alert alert-danger m-b-0'>Introduzca Precio válido.</div>",
+                buttons: {
+                    success: {
+                        label: "Ok",
+                        className: "btn-success m-r-5 m-b-5"
                     }
+                }
                 }).find('.modal-content').css({ 'font-size': '14px' });
-            } else {
-                $('#updateprogramar').modal('show');
+            }else{
+                click_programar(1);
+            }
+        } else {
+            if ($('#precio_porcentaje').val() <= 0 || $('#precio_porcentaje').val() == '' ) {
+                bootbox.dialog({
+                title: "Mensaje",
+                message: "<div class='alert alert-danger m-b-0'>Introduzca Porcentaje válido.</div>",
+                buttons: {
+                    success: {
+                        label: "Ok",
+                        className: "btn-success m-r-5 m-b-5"
+                    }
+                }
+                }).find('.modal-content').css({ 'font-size': '14px' });
+            }else{
+                click_programar(2);
             }
         }
-        $('#btn-guarda-programar').on('click', function (e) {
-            click_programar();
-        });
-        function click_programar() {
-            var ordvta = tabla_programar.rows('.selected').data();
-            //var ordvtac = table.rows('.selected').node();
-            //console.log(ordvtac[0])
-            var ops = '';
-            var registros = ordvta == null ? 0 : ordvta.length;
-            for (var i = 0; i < registros; i++) {
-                if (i == registros - 1) {
-                    ops += ordvta[i].DOCNUM;
-                } else {
-                    ops += ordvta[i].DOCNUM + ",";
-                }
-                //console.log(ordvta[i]);         
-            }
-
-            if (registros > 0) {
-                var estatus_filtro = '';
-                if ($('#cbo_estadoprogramar').val() == 0 && $('#programar_estatus').val() != 0) {//filtro estado = Planificadas
-                    estatus_filtro = $('#programar_estatus').val();
-                }
-
-                $.ajax({
-                    type: 'GET',
-                    headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-                    data: {
-                        "_token": "{{ csrf_token() }}",
-                        ordenes: ops,
-                        prog_corte: $('#programar_progCorte').val(),
-                        sec_compra: $('#programar_secCompra').val(),
-                        sec_ot: $('#programar_secOt').val(),
-                        estatus: estatus_filtro,
-                        fCompra: $('#programar_fCompra').val(),
-                        fProduccion: $('#programar_fProduccion').val()
-                    },
-                    url: '{!! route('programarOP') !!}',
-                    beforeSend: function () {
-                        $.blockUI({
-                            baseZ: 2000,
-                            message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
-                            css: {
-                                border: 'none',
-                                padding: '16px',
-                                width: '50%',
-                                top: '40%',
-                                left: '30%',
-                                backgroundColor: '#fefefe',
-                                '-webkit-border-radius': '10px',
-                                '-moz-border-radius': '10px',
-                                opacity: .7,
-                                color: '#000000'
-                            }
-                        });
-                    },
-                    complete: function () {
-                        reloadOrdenesProgramar();
-                        var $badge = $('#btn_enviar').find('.badge');
-                        $badge.text('');
-                        setTimeout($.unblockUI, 1500);
-                        // reloadOrdenesImpresion();
-                        $('#updateprogramar').modal('hide');
-                        $('#programar_progCorte').val('');
-                        $('#programar_secCompra').val('');
-                        $('#programar_secOt').val('');
-                        $('#programar_estatus').val(0);
-                        $("#programar_estatus").selectpicker("refresh");
-                        $('#programar_fCompra').datepicker('setStartDate', today);
-                        $('#programar_fCompra').datepicker().val('');
-                        $('#programar_fProduccion').datepicker('setStartDate', today);
-                        $('#programar_fProduccion').datepicker().val('');
-
-
-                    },
-                    success: function (data) {
-                        if (data.mensajeErrr.includes('Error')) {
-                            bootbox.dialog({
-                                title: "Mensaje",
-                                message: "<div class='alert alert-danger m-b-0'>" + data.orders + "</div>",
-                                buttons: {
-                                    success: {
-                                        label: "Ok",
-                                        className: "btn-success m-r-5 m-b-5"
-                                    }
-                                }
-                            }).find('.modal-content').css({ 'font-size': '14px' });
-                        }
-                    }
-                });
+    });
+    
+    function click_programar(option) {
+        var ordvta = table.rows('.selected').data();
+        //var ordvtac = table.rows('.selected').node();
+        //console.log(ordvtac[0])
+        var ops = '';
+        var registros = ordvta == null ? 0 : ordvta.length;
+        for (var i = 0; i < registros; i++) {
+            if (i == registros - 1) {
+                ops += ordvta[i].codigo + "&" + parseFloat(ordvta[i].precio).toFixed(4);
             } else {
-                bootbox.dialog({
-                    title: "Mensaje",
-                    message: "<div class='alert alert-danger m-b-0'>No hay registros seleccionados.</div>",
-                    buttons: {
-                        success: {
-                            label: "Ok",
-                            className: "btn-success m-r-5 m-b-5"
-                        }
-                    }
-                }).find('.modal-content').css({ 'font-size': '14px' });
+                ops += ordvta[i].codigo + "&" + parseFloat(ordvta[i].precio).toFixed(4) + ",";
             }
+            //console.log(ordvta[i]);         
         }
 
-        function click_pedidos() {
-            var ordvta = table.rows('.selected').data();
-            //var ordvtac = table.rows('.selected').node();
-            //console.log(ordvtac[0])
-            var ovs = '';
-            var registros = ordvta == null ? 0 : ordvta.length;
-            for (var i = 0; i < registros; i++) {
-                if (i == registros - 1) {
-                    ovs += ordvta[i].Pedido + "&" + ordvta[i].Grupal + "&" + ordvta[i].Codigo + "&" + ordvta[i].LineNum;
-                } else {
-                    ovs += ordvta[i].Pedido + "&" + ordvta[i].Grupal + "&" + ordvta[i].Codigo + "&" + ordvta[i].LineNum + ",";
-                }
-                console.log(ordvta[i]);
-            }
-
-            if (registros > 0) {
-                $.ajax({
-                    type: 'GET',
-                    headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-                    data: {
-                        "_token": "{{ csrf_token() }}",
-                        ordenesvta: ovs,
-
-                    },
-                    url: '{!! route('generarOP') !!}',
-                    beforeSend: function () {
-                        $.blockUI({
-                            message: '<h2>Procesando</h2><h3>espere...<i class="fa fa-spin fa-spinner"></i></h3>',
-                            css: {
-                                border: 'none',
-                                padding: '16px',
-                                width: '50%',
-                                top: '40%',
-                                left: '30%',
-                                backgroundColor: '#fefefe',
-                                '-webkit-border-radius': '10px',
-                                '-moz-border-radius': '10px',
-                                opacity: .7,
-                                color: '#000000'
-                            }
-                        });
-                    },
-                    complete: function () {
-                        reloadOrdenesPedidos();
-                        // reloadOrdenesSeries();
-                        setTimeout($.unblockUI, 1500);
-                    },
-                    success: function (data) {
-                        if (data.orders.includes('Error')) {
-                            bootbox.dialog({
-                                title: "Mensaje",
-                                message: "<div class='alert alert-danger m-b-0'>" + data.orders + "</div>",
-                                buttons: {
-                                    success: {
-                                        label: "Ok",
-                                        className: "btn-success m-r-5 m-b-5"
-                                    }
-                                }
-                            }).find('.modal-content').css({ 'font-size': '14px' });
-                        }
-                    }
-                });
-            } else {
-                bootbox.dialog({
-                    title: "Mensaje",
-                    message: "<div class='alert alert-danger m-b-0'>No hay registros seleccionados.</div>",
-                    buttons: {
-                        success: {
-                            label: "Ok",
-                            className: "btn-success m-r-5 m-b-5"
-                        }
-                    }
-                }).find('.modal-content').css({ 'font-size': '14px' });
-            }
-        }
-
-        $('#tabla_pedidos tbody').on('change', 'td input', function (e) {
-
-            e.preventDefault();
-
-            //var tbl = $('#tableFacturas').DataTable();
-            var fila = $(this).closest('tr');
-
-            var datos = table.row(fila).data();
-
-            var check = datos['Grupal'];
-
-
-
-            if (check == 0) {
-                datos['Grupal'] = 1;
-            } else {
-                datos['Grupal'] = 0;
-            }
-            // console.log(datos) 
-        });
-
-        function reloadOrdenesPedidos() {
-            $("#tabla_pedidos").DataTable().clear().draw();
+        if (registros > 0) {
+            
             $.ajax({
                 type: 'GET',
-                async: true,
-                url: '{!! route('datatables.gop') !!}',
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
                 data: {
-
+                    "_token": "{{ csrf_token() }}",
+                    articulos: ops,
+                    precio_nuevo: $('#precio_nuevo').val(),
+                    precio_porcentaje: $('#precio_porcentaje').val(),
+                    option: option,
+                    priceList: $('#input-lista').val()
                 },
+                url: '{!! route('actualizarPrecios') !!}',
                 beforeSend: function () {
-
+                    $.blockUI({
+                        baseZ: 2000,
+                        message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                        css: {
+                            border: 'none',
+                            padding: '16px',
+                            width: '50%',
+                            top: '40%',
+                            left: '30%',
+                            backgroundColor: '#fefefe',
+                            '-webkit-border-radius': '10px',
+                            '-moz-border-radius': '10px',
+                            opacity: .7,
+                            color: '#000000'
+                        }
+                    });
                 },
                 complete: function () {
-                    // setTimeout($.unblockUI, 1500);
+                    reload_tabla_arts();
                     var $badge = $('#btn_enviar').find('.badge');
                     $badge.text('');
+                    setTimeout($.unblockUI, 1500);
+                    $('#updateprogramar').modal('hide');
+                    $('#precio_nuevo').val('');
+                    $('#precio_porcentaje').val('');
+                    
                 },
                 success: function (data) {
-                    if (data.pedidos_gop.length > 0) {
-                        $("#tabla_pedidos").dataTable().fnAddData(data.pedidos_gop);
-                    } else {
+                    setTimeout(function () {
+                                var respuesta = JSON.parse(JSON.stringify(data));
+                                console.log(respuesta)
+                                if(respuesta.codigo == 302){
+                                    window.location = '{{ url("auth/login") }}';
 
+                                }
+                            }, 2000);
+                            console.log(data.mensajeErr)
+                    if (data.mensajeErr.includes('Error')) {
+                        bootbox.dialog({
+                            title: "Mensaje",
+                            message: "<div class='alert alert-danger m-b-0'>" + data.mensajeErr + "</div>",
+                            buttons: {
+                                success: {
+                                    label: "Ok",
+                                    className: "btn-success m-r-5 m-b-5"
+                                }
+                            }
+                        }).find('.modal-content').css({ 'font-size': '14px' });
+                    }else{
+                        bootbox.dialog({
+                            title: "Mensaje",
+                            message: "<div class='alert alert-success m-b-0'>Proceso Terminado</div>",
+                            buttons: {
+                                success: {
+                                    label: "Ok",
+                                    className: "btn-success m-r-5 m-b-5"
+                                }
+                            }
+                        }).find('.modal-content').css({ 'font-size': '14px' });
                     }
                 }
             });
+
+        } else {
+            bootbox.dialog({
+                title: "Mensaje",
+                message: "<div class='alert alert-danger m-b-0'>No hay registros seleccionados.</div>",
+                buttons: {
+                    success: {
+                        label: "Ok",
+                        className: "btn-success m-r-5 m-b-5"
+                    }
+                }
+            }).find('.modal-content').css({ 'font-size': '14px' });
         }
-        // FIN GENERAR OP
+    }
 
-        /* NOTA: cuando la tabla esta dentro de elementos ocultos por ejemplo en tab
-        o en un collapsable hay que ajustar las cabeceras cuando la tabla va 
-        a ser visible:
-        
-        If table is in the collapsible element, you need to adjust headers when collapsible element becomes visible.
-        For example, for Bootstrap Collapse plugin:
-        $('#myCollapsible').on('shown.bs.collapse', function () {
-        $($.fn.dataTable.tables(true)).DataTable()
-        .columns.adjust();
-        });
-        
-        If table is in the tab, you need to adjust headers when tab becomes visible.
-        For example, for Bootstrap Tab plugin:
-        $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
-        $($.fn.dataTable.tables(true)).DataTable()
-        .columns.adjust();
-        });
-        */
-        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+    function reload_tabla_arts() {
+        $("#tabla_arts").DataTable().clear().draw();
+        $.ajax({
+        type: 'GET',
+        async: true,
+        url: '{!! route('datatables.arts') !!}',
+        data: {
+            deplist: $('#input-lista').val()
+        },
+        beforeSend: function () {
+            $.blockUI({
+                baseZ: 2000,
+                message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                css: {
+                    border: 'none',
+                    padding: '16px',
+                    width: '50%',
+                    top: '40%',
+                    left: '30%',
+                    backgroundColor: '#fefefe',
+                    '-webkit-border-radius': '10px',
+                    '-moz-border-radius': '10px',
+                    opacity: .7,
+                    color: '#000000'
+                }
+            });
+        },
+        complete: function () {
+            setTimeout($.unblockUI, 1500);
+        },
+        success: function (data) {
 
-            $($.fn.dataTable.tables(true)).DataTable()
-                .columns.adjust();
-        });
+            if (data.arts.length > 0) {
+                $("#tabla_arts").dataTable().fnAddData(data.arts);
+            } else {
 
+            }
+        }
+    });
+    }
 
-    });//fin on load
-
+    function number_format(number, decimals, dec_point, thousands_sep) 
+    {
+        var n = !isFinite(+number) ? 0 : +number,
+            prec = !isFinite(+decimals) ? 0 : Math.abs(decimals),
+            sep = (typeof thousands_sep === 'undefined') ? ',' : thousands_sep,
+            dec = (typeof dec_point === 'undefined') ? '.' : dec_point,
+            toFixedFix = function (n, prec) {
+                // Fix for IE parseFloat(0.55).toFixed(0) = 0;
+                var k = Math.pow(10, prec);
+                return Math.round(n * k) / k;
+            },
+            s = (prec ? toFixedFix(n, prec) : Math.round(n)).toString().split('.');
+        if (s[0].length > 3) {
+            s[0] = s[0].replace(/\B(?=(?:\d{3})+(?!\d))/g, sep);
+        }
+        if ((s[1] || '').length < prec) {
+            s[1] = s[1] || '';
+            s[1] += new Array(prec - s[1].length + 1).join('0');
+        }
+        return s.join(dec);
+    }
+});//fin on load
 
 }  //fin js_iniciador               
 function val_btn(val) {
