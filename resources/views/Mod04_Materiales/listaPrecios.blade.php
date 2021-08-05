@@ -323,8 +323,8 @@
         } else {
             $(this).toggleClass('selected');
         }
-        var ordvta = table.rows('.selected').data();
-        var registros = ordvta == null ? 0 : ordvta.length;
+        //var ordvta = table.rows('.selected').data();
+        //var registros = ordvta == null ? 0 : ordvta.length;
 
         var count = table.rows('.selected').count();
         var $badge = $('#btn_enviar').find('.badge');
@@ -340,13 +340,31 @@
             
     });
     $('#tabla_arts tbody').on('dblclick','tr',function(e){
-        $(this).toggleClass('selected');
         var fila = table.rows(this).data()
-        var num = parseFloat(fila[0]['precio']).toFixed(4)
+        var num = parseFloat(fila[0]['precio']).toFixed(4);
+        var code = fila[0]['codigo'];
         $('#precio_nuevo').val(num)
         $("#ch1").prop("checked", true);
         $("#ch2").prop("checked", false);
         $('#updateprogramar').modal('show');
+         
+     
+        table.rows().every( function ( rowIdx, tableLoop, rowLoop ) {
+            if(this.data().codigo === code){
+                var node=this.node();
+               // console.log($(node).hasClass("selected"))
+                if ( $(node).hasClass("selected")) {
+
+                } else {
+                    $(node).toggleClass('selected');
+                }
+                var count = table.rows('.selected').count();
+                var $badge = $('#btn_enviar').find('.badge');
+                $badge.text(count);
+            }
+        } );
+
+        
     })
 
     function click_programar_cambios() {
