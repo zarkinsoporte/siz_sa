@@ -411,7 +411,7 @@
                 click_programar(1);
             }
         } else {
-            if ($('#precio_porcentaje').val() <= 0 || $('#precio_porcentaje').val() == '' ) {
+            if ($('#precio_porcentaje').val() < -100 || $('#precio_porcentaje').val() == '' ) {
                 bootbox.dialog({
                 title: "Mensaje",
                 message: "<div class='alert alert-danger m-b-0'>Introduzca Porcentaje válido.</div>",
