@@ -436,11 +436,50 @@ class Reportes_ProduccionController extends Controller
 
             $op = $request->input('fieldOtroNumber');
             $info = OP::getInfoOwor($op);
-            dd($info);
             if(is_null($info)){
                 return redirect()->back()->withErrors(array('message' => 'OP inválida'));
             }
-            $consulta = DB::select(DB::raw("SELECT b.DocNum AS DocNumOf, 
+            $lista_precio = 1;
+            $xCodeSub[0] = $info->ItemCode;
+            //dd($xCodeSub);
+            foreach ($xCodeSub as $codeSub) {
+
+                $subs = DB::select("Select OITM.ItemCode AS CODIGO 
+                   -- ,OITM.ItemName AS MATERIAL, 
+                   -- OITM.InvntryUom AS UDM, 
+                   -- RUTE.Name AS ESTACION, 
+                   -- ITT1.Quantity AS CANTIDAD, 
+                   -- ITM1.Price AS L_10,  
+                   -- (ITT1.Quantity * ITM1.Price) AS IMPORTE, 
+                   -- ITM1.Currency AS MONEDA 
+                    from ITT1 
+                    inner join OITM on OITM.ItemCode = ITT1.Code 
+                    inner join [@PL_RUTAS] RUTE on RUTE.Code = OITM.U_estacion 
+                    inner join ITM1 on ITM1.ItemCode = OITM.ItemCode 
+                    and ITM1.PriceList=? 
+                    where  ITT1.Father = ? and 
+                    (OITM.QryGroup29 = 'Y' or OITM.QryGroup30 = 'Y' or OITM.QryGroup31 = 'Y' or OITM.QryGroup32 = 'Y') 
+                    --Order by MATERIAL",
+                    [$lista_precio, $codeSub]);
+                 $subs = array_pluck($subs,'CODIGO');
+
+                $xCodeSub = array_merge($xCodeSub, $subs);
+                
+            }
+            $sub_cadena = "";
+            for ($x = 0; $x < count($xCodeSub); $x++) {
+                if ($x == count($xCodeSub) - 1) {
+                    $sub_cadena = $sub_cadena . $xCodeSub[$x];
+                } else {
+                    $sub_cadena = $sub_cadena . $xCodeSub[$x] . ", ";
+                }
+            }
+            //dd($sub_cadena);
+
+            //dd($sub_cadena);
+            $consulta = DB::select('exec SIZ_MATERIALES_LDM_CODIGO ?, ?', [$sub_cadena, $lista_precio]);
+        /*    
+        $consulta = DB::select(DB::raw("SELECT b.DocNum AS DocNumOf, 
 	       '*' + CAST(b.DocNum as varchar (50)) + '*' as CodBarras,
 	       b.ItemCode, 
 	       c.ItemName, 
@@ -465,16 +504,17 @@ class Reportes_ProduccionController extends Controller
 	       f.U_Metodo,
 	       b.U_OF as origen,
 	       (SELECT TOP 1 ItemName FROM OITM INNER JOIN OWOR ON OITM.ITEMCODE = OWOR.ItemCode  WHERE OWOR.DocNum = b.U_OF ) as Funda            
-       FROM (ITT1 a
+            FROM (ITT1 a
 			INNER JOIN OWOR b ON a.Father=b.ItemCode
 			INNER JOIN OITM c ON b.ItemCode=c.ItemCode
 			INNER JOIN ORDR d ON b.OriginAbs=d.DocEntry
 			INNER JOIN OITM f ON a.Code=f.ItemCode)
-	   WHERE b.DocEntry=CONVERT(Int, $op) 
+	        WHERE b.DocEntry=CONVERT(Int, $op) 
 	      AND NOT (f.InvntItem='N' AND f.SellItem='N' AND f.PrchseItem='N' AND f.AssetItem='N')
 		  AND f.ItemName  not like  '%Gast%'
-	   ORDER BY CONVERT(INT, a.U_Estacion)"));
-            //dd($consulta);
+	        ORDER BY CONVERT(INT, a.U_Estacion)"));
+       */
+            dd($consulta);
             Session::put('repmateriales', $consulta);           
             Session::put('repinfo', $info);
             switch ($info->Status) {
