@@ -601,3 +601,6 @@ Route::get('home/ACTUALIZAR PRECIOS', 'Mod09_FinanzasListaPreciosController@list
 Route::any('datatables.arts', 'Mod09_FinanzasListaPreciosController@registros_listaPrecios')->name('datatables.arts');
 Route::any('actualizarPrecios', 'Mod09_FinanzasListaPreciosController@actualizarPrecios')->name('actualizarPrecios');
 //Route::any('asignar_series', 'Mod02_PlaneacionController@asignar_series')->name('asignar_series');
+
+
+Route::any('update-table', 'Mod02_PlaneacionController@rollUpdateTable')->name('asignar_series');
