@@ -308,13 +308,7 @@ public function impresion_op(Request $request){
                 } //end Foreach
                 $pdf_final->merge('file', $user_path . '/ordenes.pdf', 'P');
                 $file = '/pdf_ordenes/user_' . Auth::user()->U_EmpGiro.'/ordenes.pdf';
-                $lot = new LOG();
-                $lot->LOG_cod_error = 'PRINT_PLANEACION';
-                $lot->LOG_user = Auth::user()->U_EmpGiro;
-                $lot->LOG_tipo = 'INFO';
-                $lot->LOG_descripcion = $file;
-                $lot->LOG_fecha = date('Ymd h:i');
-                $lot->save();
+               
               //  DB::commit();
                 return compact('mensajeErrr', 'file');
                 

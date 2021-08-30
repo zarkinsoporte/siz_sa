@@ -8,6 +8,7 @@ use \COM;
 use Session;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use App\ROLLITEM;
 
 class SAP extends Model
 {
@@ -201,6 +202,13 @@ class SAP extends Model
         if ($retCode != 0) {
             return self::$vCmp->GetLastErrorDescription();
         } else {
+          //  $lot = ROLLITEM::firstOrNew(['RO_Codigo' => $codigo]);
+           
+           // $lot->RO_Usuario = Auth::user()->U_EmpGiro;
+           // $lot->RO_Activo = 1;
+           // $lot->RO_PrecioAnterior = $precio_ant;
+           // $lot->RO_fecha = date('Ymd h:i');
+          //  $lot->save();
             return 'ok';
         }
     }
