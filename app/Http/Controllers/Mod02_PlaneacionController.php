@@ -22,7 +22,7 @@ use App\LOG;
 use App\OP;
 use App\Modelos\MOD01\LOGOF;
 use App\Modelos\MOD01\LOGOT;
-
+use Cache;
 ini_set("memory_limit", '512M');
 ini_set('max_execution_time', 0);
 class Mod02_PlaneacionController extends Controller
@@ -478,6 +478,29 @@ public function registros_gop(Request $request){
             $sel =  preg_replace('/[ ]{2,}|[\t]|[\n]|[\r]/', ' ', ($sel));
             $consulta = DB::select($sel);
 //U_LineNum = T1.LineNum AND
+            $pedidos_gop = collect($consulta);
+            return compact('pedidos_gop');
+        } catch (\Exception $e) {
+            header('HTTP/1.1 500 Internal Server Error');
+            header('Content-Type: application/json; charset=UTF-8');
+            die(json_encode(array(
+                "mensaje" => $e->getMessage(),
+                "codigo" => $e->getCode(),
+                "clase" => $e->getFile(),
+                "linea" => $e->getLine()
+            )));
+        }
+}
+public function rollUpdateTable(Request $request){
+        try {
+            ini_set('memory_limit', '-1');
+            set_time_limit(0);            
+            $sel = "";
+            Cache::forever('roll', true);
+            $consulta = 'DB::select($sel)';
+            if (Cache::has('roll')) {
+                $consulta = Cache::get('roll');
+            }
             $pedidos_gop = collect($consulta);
             return compact('pedidos_gop');
         } catch (\Exception $e) {
