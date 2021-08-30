@@ -597,7 +597,7 @@ Route::get('datatables.R009', 'Reportes_ProduccionController@DataShow009')->name
 
 //LISTA DE PRECIOS
 
-Route::get('home/LISTA DE PRECIOS', 'Mod04_MaterialesController@listaPrecios')->middleware('routelog');
-Route::any('datatables.arts', 'Mod04_MaterialesController@registros_listaPrecios')->name('datatables.arts');
-Route::any('generarOP', 'Mod02_PlaneacionController@generarOP')->name('generarOP');
-Route::any('asignar_series', 'Mod02_PlaneacionController@asignar_series')->name('asignar_series');
+Route::get('home/ACTUALIZAR PRECIOS', 'Mod09_FinanzasListaPreciosController@listaPrecios')->middleware('routelog');
+Route::any('datatables.arts', 'Mod09_FinanzasListaPreciosController@registros_listaPrecios')->name('datatables.arts');
+Route::any('actualizarPrecios', 'Mod09_FinanzasListaPreciosController@actualizarPrecios')->name('actualizarPrecios');
+//Route::any('asignar_series', 'Mod02_PlaneacionController@asignar_series')->name('asignar_series');

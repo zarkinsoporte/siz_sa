@@ -8,6 +8,7 @@ use \COM;
 use Session;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use App\ROLLITEM;
 
 class SAP extends Model
 {
@@ -182,6 +183,33 @@ class SAP extends Model
             return false;
         } else {
             return true;
+        }
+    }
+    public static function updateItemPriceList($codigo, $priceList, $precio){
+        (self::$vCmp == false) ? self::Connect() : '';
+        //self::$vCmp->XmlExportType("xet_ExportImportMode");
+        //OITM ARTICULOS ES EL OBJETO 4
+        $vItem = self::$vCmp->GetBusinessObject("4"); 
+        //ENTRE PARENTESIS VA EL CODIGO DEL ARTICULO A ACTUALIZAR
+        $RetVal = $vItem->GetByKey($codigo); 
+        
+        //Seleccionar lista de Precios/CAMBIAR PRECIO Y MONEDA
+        $vItem->PriceList->SetCurrentLine($priceList);
+        $vItem->PriceList->Price = $precio;
+       // $vItem->PriceList->Currency = $array['monedacompras'];
+
+        $retCode = $vItem->Update;
+        if ($retCode != 0) {
+            return self::$vCmp->GetLastErrorDescription();
+        } else {
+          //  $lot = ROLLITEM::firstOrNew(['RO_Codigo' => $codigo]);
+           
+           // $lot->RO_Usuario = Auth::user()->U_EmpGiro;
+           // $lot->RO_Activo = 1;
+           // $lot->RO_PrecioAnterior = $precio_ant;
+           // $lot->RO_fecha = date('Ymd h:i');
+          //  $lot->save();
+            return 'ok';
         }
     }
     public static function SaveArticulo($array)

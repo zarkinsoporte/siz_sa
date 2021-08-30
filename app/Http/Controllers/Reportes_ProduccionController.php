@@ -436,6 +436,7 @@ class Reportes_ProduccionController extends Controller
 
             $op = $request->input('fieldOtroNumber');
             $info = OP::getInfoOwor($op);
+            dd($info);
             if(is_null($info)){
                 return redirect()->back()->withErrors(array('message' => 'OP inválida'));
             }
