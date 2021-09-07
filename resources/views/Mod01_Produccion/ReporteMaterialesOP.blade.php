@@ -34,11 +34,12 @@
                         <table  border="1px" class="table table-striped">
                     <thead class="table-bordered table-condensed">
                     <tr>
-                        <th align="center" bgcolor="#474747" style="color:white";scope="col">Fecha</th>
+                        
                         <th align="center" bgcolor="#474747" style="color:white";scope="col">Código</th>
                         <th align="center" bgcolor="#474747" style="color:white";scope="col">Descripción</th>
                         <th align="center" bgcolor="#474747" style="color:white";scope="col">UM</th>
                         <th align="center" bgcolor="#474747" style="color:white";scope="col">Solicitada</th>
+                        <th align="center" bgcolor="#474747" style="color:white";scope="col">Origen</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -49,33 +50,34 @@
                           <?php 
                           if($bandera==false){
                               $bandera=true;
-                              $EstacionO=$rep->Estacion;
+                              $EstacionO=$rep->ESTACION;
                               ?>
                               <tr><td colspan="5"align="center" bgcolor="#ccc"> <?php echo $EstacionO ?> </td></tr>
 
                               <?php
                           }
                           
-                           $temporal=$rep->Estacion;
+                           $temporal=$rep->ESTACION;
                           //dd($EstacionO);
                            if($EstacionO==$temporal){ 
                             ?>
                             <tr>
-                            <td scope="row" width="10%">
-                               <?php echo date('d-m-Y', strtotime($rep->FechaEntrega));  ?>
-                            </td>
+                           
                             
                             <td scope="row">
-                                {{ $rep->Codigo }}
+                                {{ $rep->CODIGO }}
                             </td>
                             <td scope="row">
-                                {{$rep->Descripcion}}
+                                {{$rep->MATERIAL}}
                             </td>
                             <td align="center"scope="row">
-                                {{ $rep->InvntryUom }}
+                                {{ $rep->UDM }}
                             </td>
                             <td align="center"scope="row">
-                            <?php echo number_format($rep->Cantidad,2); ?>
+                            <?php echo number_format($rep->CANTIDAD,2); ?>
+                            </td>
+                            <td align="center" scope="row">
+                                {{ $rep->ORIGEN }}
                             </td>
                         </tr>
                            <?php
@@ -84,22 +86,23 @@
                             ?>  
                            <tr><td colspan="5"align="center" bgcolor="#ccc"> <?php echo $EstacionO ?> </td></tr>
                            <tr>
-                            <td scope="row">
-                               <?php echo date('d-m-Y', strtotime($rep->FechaEntrega));  ?>
-                            </td>
+                           
                             
                             <td scope="row">
-                                {{ $rep->Codigo }}
+                                {{ $rep->CODIGO }}
                             </td>
                             <td scope="row">
-                                {{$rep->Descripcion}}
+                                {{$rep->MATERIAL}}
                             </td>
                             <td align="center"scope="row">
-                                {{ $rep->InvntryUom }}
+                                {{ $rep->UDM }}
                             </td>
                             <td align="center"scope="row">
-                                <?php echo number_format($rep->Cantidad,2); ?>
+                                <?php echo number_format($rep->CANTIDAD,2); ?>
 
+                            </td>
+                            <td align="center" scope="row">
+                                {{ $rep->ORIGEN }}
                             </td>
                         </tr>
                             <?php

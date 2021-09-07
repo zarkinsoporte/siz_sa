@@ -174,7 +174,7 @@ return $data1;
     ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
     ->leftJoin('OCRD', 'OCRD.CardCode','=', 'OWOR.CardCode')
     ->select('OWOR.ItemCode', 'OWOR.Status', 'OWOR.CardCode', 'OWOR.OriginNum as pedido',
-    'OITM.ItemName', 'OCRD.CardName')
+    'OITM.ItemName', 'OCRD.CardName', 'OWOR.U_NoSerie', 'OWOR.DueDate AS FechaEntrega', 'OWOR.plannedqty', 'OITM.U_VS AS VS')
     ->where('OWOR.DocEntry', $op)->first();
    
     return $rs;

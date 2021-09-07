@@ -215,54 +215,53 @@ public function impresion_op(Request $request){
 
                 foreach ($preOrdenes as $op) {
                     //dd(base_path('vendor/h4cc/wkhtmltopdf-amd64/bin/wkhtmltopdf-amd64'));
-                    
-                    $Materiales = DB::select(DB::raw("SELECT b.DocNum AS DocNumOf, 
-	       '*' + CAST(b.DocNum as varchar (50)) + '*' as CodBarras,
-	       b.ItemCode, 
-	       c.ItemName, 
-	       c.U_VS AS VS, 
-	       d.CardCode, 
-	       d.CardName, 
-	       d.DocNum AS NumPedido, 
-	       b.DueDate AS FechaEntrega, 
-	       b.plannedqty, 
-	       d.Comments as Comentario, 
-	       b.Comments, 
-	       c.UserText, 
-	       f.InvntryUom,
-	        '*' + cast(f.u_estacion as varchar (3)) + '*' as BarrEstacion, 
-	       ISNULL((SELECT Name FROM [@PL_RUTAS] WHERE Code=f.U_Estacion),'Sin Estacion') AS Estacion,
-	       a.Code AS Codigo, 
-	       f.ItemName as Descripcion, 
-	       a.Quantity AS Cantidad, 
-	       0 AS [Cant. Entregada], 
-	       0 AS [Cant. Devolución],
-	       b.U_NoSerie,
-	       f.U_Metodo,
-	       b.U_OF as origen,
-	       (SELECT TOP 1 ItemName FROM OITM INNER JOIN OWOR ON OITM.ITEMCODE = OWOR.ItemCode  WHERE OWOR.DocNum = b.U_OF ) as Funda            
-       FROM (ITT1 a
-			INNER JOIN OWOR b ON a.Father=b.ItemCode
-			INNER JOIN OITM c ON b.ItemCode=c.ItemCode
-			INNER JOIN ORDR d ON b.OriginAbs=d.DocEntry
-			INNER JOIN OITM f ON a.Code=f.ItemCode)
-	   WHERE b.DocEntry=CONVERT(Int,$op) 
-	      AND NOT (f.InvntItem='N' AND f.SellItem='N' AND f.PrchseItem='N' AND f.AssetItem='N')
-		  AND f.ItemName  not like  '%Gast%'
-	   ORDER BY CONVERT(INT, a.U_Estacion)"));
-                    // dd($Materiales);
+                    $info = OP::getInfoOwor($op);
+                    $lista_precio = 1;
+                    $xCodeSub[0] = $info->ItemCode;
+                    //dd($xCodeSub);
+                    foreach ($xCodeSub as $codeSub) {
+            
+                        $subs = DB::select("Select OITM.ItemCode AS CODIGO 
+                           -- ,OITM.ItemName AS MATERIAL, 
+                           -- OITM.InvntryUom AS UDM, 
+                           -- RUTE.Name AS ESTACION, 
+                           -- ITT1.Quantity AS CANTIDAD, 
+                           -- ITM1.Price AS L_10,  
+                           -- (ITT1.Quantity * ITM1.Price) AS IMPORTE, 
+                           -- ITM1.Currency AS MONEDA 
+                            from ITT1 
+                            inner join OITM on OITM.ItemCode = ITT1.Code 
+                            inner join [@PL_RUTAS] RUTE on RUTE.Code = OITM.U_estacion 
+                            inner join ITM1 on ITM1.ItemCode = OITM.ItemCode 
+                            and ITM1.PriceList=? 
+                            where  ITT1.Father = ? and 
+                            (OITM.QryGroup29 = 'Y' or OITM.QryGroup30 = 'Y' or OITM.QryGroup31 = 'Y' or OITM.QryGroup32 = 'Y') 
+                            --Order by MATERIAL",
+                            [$lista_precio, $codeSub]);
+                         $subs = array_pluck($subs,'CODIGO');
+            
+                        $xCodeSub = array_merge($xCodeSub, $subs);
+                        
+                    }
+                    $sub_cadena = "";
+                    for ($x = 0; $x < count($xCodeSub); $x++) {
+                        if ($x == count($xCodeSub) - 1) {
+                            $sub_cadena = $sub_cadena . $xCodeSub[$x];
+                        } else {
+                            $sub_cadena = $sub_cadena . $xCodeSub[$x] . ",";
+                        }
+                    }
+                    //dd($sub_cadena);
                     $total_vs = 0;
-                    //$total_vs = array_sum( array_pluck($Materiales, 'VS'));
-                    /* $composicion = DB::select("SELECT ItemCode AS codigo, Dscription AS descripcion 
-                        FROM RDR1 WHERE docentry = '2113'
-                        AND TreeType = 'S'
-                        AND ItemCode LIKE '%3491%'");*/
+                   // dd($sub_cadena);
+                    $Materiales = DB::select('exec SIZ_MATERIALES_LDM_CODIGO ?, ?', [$sub_cadena, $lista_precio]);
+
                     $composicion = DB::table('RDR1')
                         ->select(DB::raw('ItemCode AS codigo, Dscription AS descripcion'))
                         ->where('TreeType', 'S')
-                        ->where('ItemCode', 'like', '%' . substr($Materiales[0]->ItemCode, 0, 4) . '%')
-                        ->where('DocEntry', $Materiales[0]->NumPedido) //No. Pedido
-                        ->first();
+                        ->where('ItemCode', 'like', '%'. substr($info->ItemCode, 0, 4) .'%')
+                        ->where('DocEntry', $info->pedido) //No. Pedido
+                        ->first(); 
                     $ordenesSerie = DB::select("SELECT o.Docentry AS op, 
                         o.ItemCode AS codigo, 
                         a.ItemName AS descripcion,
@@ -270,12 +269,13 @@ public function impresion_op(Request $request){
                         o.plannedqty AS cantidad
                         FROM OWOR o
                         INNER JOIN OITM a ON a.ItemCode=o.ItemCode
-                        WHERE o.U_NoSerie = ? ", [$Materiales[0]->U_NoSerie]);
+                        WHERE o.U_NoSerie = ? ", [$info->U_NoSerie]);  
                     $data = array(
                         'ordenes_serie' => $ordenesSerie,
                         'composicion' => $composicion,
                         'total_vs' => $total_vs,
                         'data' => $Materiales,
+                        'info' => $info,
                         'op' => $op,
                         'db' => DB::table('OADM')->value('CompnyName'),
                     );

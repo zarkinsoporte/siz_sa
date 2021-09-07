@@ -471,12 +471,12 @@ class Reportes_ProduccionController extends Controller
                 if ($x == count($xCodeSub) - 1) {
                     $sub_cadena = $sub_cadena . $xCodeSub[$x];
                 } else {
-                    $sub_cadena = $sub_cadena . $xCodeSub[$x] . ", ";
+                    $sub_cadena = $sub_cadena . $xCodeSub[$x] . ",";
                 }
             }
             //dd($sub_cadena);
 
-            //dd($sub_cadena);
+           // dd($sub_cadena);
             $consulta = DB::select('exec SIZ_MATERIALES_LDM_CODIGO ?, ?', [$sub_cadena, $lista_precio]);
         /*    
         $consulta = DB::select(DB::raw("SELECT b.DocNum AS DocNumOf, 
@@ -514,7 +514,7 @@ class Reportes_ProduccionController extends Controller
 		  AND f.ItemName  not like  '%Gast%'
 	        ORDER BY CONVERT(INT, a.U_Estacion)"));
        */
-            dd($consulta);
+           // dd($consulta);
             Session::put('repmateriales', $consulta);           
             Session::put('repinfo', $info);
             switch ($info->Status) {

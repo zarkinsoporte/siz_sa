@@ -45,19 +45,19 @@
 
                         <tr style="background-color: white">
                             <th align="center">Código: </th>
-                            <td align='left' style="white-space:nowrap;"><?php echo $data[0]->ItemCode ?> -
-                                <?php echo substr($data[0]->ItemName,0,60) ?></td>
+                            <td align='left' style="white-space:nowrap;"><?php echo $info->ItemCode ?> -
+                                <?php echo substr($info->ItemName,0,60) ?></td>
 
                         </tr>
                         <tr style="background-color: white">
                             <th align="center">Cliente:</th>
-                            <td align="left" style="white-space:nowrap;"><?php echo $data[0]->CardCode ?> -
-                                <?php echo $data[0]->CardName ?></td>
+                            <td align="left" style="white-space:nowrap;"><?php echo $info->CardCode ?> -
+                                <?php echo $info->CardName ?></td>
 
                         </tr>
                         <tr style="background-color: white">
                             <th align="center" style="white-space:nowrap;">F. Entrega: </th>
-                            <td align='left'><?php echo date_create($data[0]->FechaEntrega)->format('d-m-Y'); ?></td>
+                            <td align='left'><?php echo date_create($info->FechaEntrega)->format('d-m-Y'); ?></td>
 
                         </tr>
 
@@ -79,22 +79,22 @@
                         <tr style="background-color: white">
 
                             <th align="center">No. Serie:</th>
-                            <td align="left"><?php echo ($data[0]->U_NoSerie); ?></td>
+                            <td align="left"><?php echo ($info->U_NoSerie); ?></td>
                         </tr>
                         <tr style="background-color: white">
 
                             <th align='center'>No. Pedido:</th>
-                            <td align='left'><?php echo number_format($data[0]->NumPedido,0); ?></td>
+                            <td align='left'><?php echo number_format($info->pedido,0); ?></td>
                         </tr>
                         <tr style="background-color: white">
 
                             <th align='center' style="white-space:nowrap;">Cantidad Planeada:</th>
-                            <td align='left'><?php echo number_format($data[0]->plannedqty,0); ?></td>
+                            <td align='left'><?php echo number_format($info->plannedqty,0); ?></td>
                         </tr>
                         <tr style="background-color: white">
 
                             <th align="center">V.S:</th>
-                            <td align="left"><?php echo number_format($data[0]->VS, 2); ?></td>
+                            <td align="left"><?php echo number_format($info->VS, 2); ?></td>
                         </tr>
                         <tr style="background-color: white">
 

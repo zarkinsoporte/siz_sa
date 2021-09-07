@@ -52,6 +52,7 @@ background-color: #f2f2f2;
                         <th align="center" bgcolor="#474747" style="color:white";scope="col">Descripción</th>
                         <th align="center" bgcolor="#474747" style="color:white";scope="col">UM</th>
                         <th align="center" bgcolor="#474747" style="color:white";scope="col">Solicitada</th>
+                        <th align="center" bgcolor="#474747" style="color:white";scope="col">Origen</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -62,49 +63,55 @@ background-color: #f2f2f2;
                           <?php 
                           if($bandera==false){
                               $bandera=true;
-                              $EstacionO=$rep->Estacion;
+                              $EstacionO=$rep->ESTACION;
                               ?>
-                              <tr><td colspan="4" align="center" bgcolor="#ccc"> <?php echo $EstacionO ?> </td></tr>
+                              <tr><td colspan="5" align="center" bgcolor="#ccc"> <?php echo $EstacionO ?> </td></tr>
 
                               <?php
                           }        
-                           $temporal=$rep->Estacion;
+                           $temporal=$rep->ESTACION;
                           //dd($EstacionO);
                            if($EstacionO==$temporal){ 
                             ?>
                             <tr>
                             <td align="center" scope="row">
-                                {{ $rep->Codigo }}
+                                {{ $rep->CODIGO }}
                             </td>
                             <td style="white-space:nowrap;" scope="row">
-                                {{$rep->Descripcion}}
+                                {{$rep->MATERIAL}}
                             </td>
                             <td align="center" scope="row">
-                                {{ $rep->InvntryUom }}
+                                {{ $rep->UDM }}
                             </td>
                             <td align="center" scope="row">
-                            <?php echo number_format($rep->Cantidad,2); ?>
+                            <?php echo number_format($rep->CANTIDAD,2); ?>
+                            </td>
+                            <td align="center" scope="row">
+                                {{ $rep->ORIGEN }}
                             </td>
                         </tr>
                            <?php
                            }else{
                             $EstacionO=$temporal;
                             ?>  
-                           <tr><td colspan="4"align="center" bgcolor="#ccc"> <?php echo $EstacionO ?> </td></tr>
+                           <tr><td colspan="5"align="center" bgcolor="#ccc"> <?php echo $EstacionO ?> </td></tr>
                            <tr>
                            
                             <td align="center" scope="row">
-                                {{ $rep->Codigo }}
+                                {{ $rep->CODIGO }}
                             </td>
                             <td style="white-space:nowrap;" scope="row">
-                                {{$rep->Descripcion}}
+                                {{$rep->MATERIAL}}
                             </td>
                             <td align="center"scope="row">
-                                {{ $rep->InvntryUom }}
+                                {{ $rep->UDM }}
                             </td>
                             <td align="center"scope="row">
-                                <?php echo number_format($rep->Cantidad,2); ?>
+                                <?php echo number_format($rep->CANTIDAD,2); ?>
 
+                            </td>
+                            <td align="center" scope="row">
+                                {{ $rep->ORIGEN }}
                             </td>
                         </tr>
                             <?php

@@ -86,8 +86,48 @@ class Mod01_ProduccionController extends Controller
     }
     public function ReporteMaterialesPDF($op)
     {
-        //$pdf = App::make('dompdf.wrapper');
-        $Materiales = DB::select(DB::raw("SELECT b.DocNum AS DocNumOf, 
+       
+        $info = OP::getInfoOwor($op);
+        $lista_precio = 1;
+        $xCodeSub[0] = $info->ItemCode;
+        //dd($xCodeSub);
+        foreach ($xCodeSub as $codeSub) {
+
+            $subs = DB::select("Select OITM.ItemCode AS CODIGO 
+               -- ,OITM.ItemName AS MATERIAL, 
+               -- OITM.InvntryUom AS UDM, 
+               -- RUTE.Name AS ESTACION, 
+               -- ITT1.Quantity AS CANTIDAD, 
+               -- ITM1.Price AS L_10,  
+               -- (ITT1.Quantity * ITM1.Price) AS IMPORTE, 
+               -- ITM1.Currency AS MONEDA 
+                from ITT1 
+                inner join OITM on OITM.ItemCode = ITT1.Code 
+                inner join [@PL_RUTAS] RUTE on RUTE.Code = OITM.U_estacion 
+                inner join ITM1 on ITM1.ItemCode = OITM.ItemCode 
+                and ITM1.PriceList=? 
+                where  ITT1.Father = ? and 
+                (OITM.QryGroup29 = 'Y' or OITM.QryGroup30 = 'Y' or OITM.QryGroup31 = 'Y' or OITM.QryGroup32 = 'Y') 
+                --Order by MATERIAL",
+                [$lista_precio, $codeSub]);
+             $subs = array_pluck($subs,'CODIGO');
+
+            $xCodeSub = array_merge($xCodeSub, $subs);
+            
+        }
+        $sub_cadena = "";
+        for ($x = 0; $x < count($xCodeSub); $x++) {
+            if ($x == count($xCodeSub) - 1) {
+                $sub_cadena = $sub_cadena . $xCodeSub[$x];
+            } else {
+                $sub_cadena = $sub_cadena . $xCodeSub[$x] . ",";
+            }
+        }
+        //dd($sub_cadena);
+
+       // dd($sub_cadena);
+        $Materiales = DB::select('exec SIZ_MATERIALES_LDM_CODIGO ?, ?', [$sub_cadena, $lista_precio]);
+       /* $Materiales = DB::select(DB::raw("SELECT b.DocNum AS DocNumOf, 
 	       '*' + CAST(b.DocNum as varchar (50)) + '*' as CodBarras,
 	       b.ItemCode, 
 	       c.ItemName, 
@@ -121,18 +161,19 @@ class Mod01_ProduccionController extends Controller
 	      AND NOT (f.InvntItem='N' AND f.SellItem='N' AND f.PrchseItem='N' AND f.AssetItem='N')
 		  AND f.ItemName  not like  '%Gast%'
 	   ORDER BY CONVERT(INT, a.U_Estacion)"));
-       // dd($Materiales);
+       */
         $total_vs = 0;
         //$total_vs = array_sum( array_pluck($Materiales, 'VS'));
        /* $composicion = DB::select("SELECT ItemCode AS codigo, Dscription AS descripcion 
                         FROM RDR1 WHERE docentry = '2113'
                         AND TreeType = 'S'
                         AND ItemCode LIKE '%3491%'");*/
+                       // dd($info->ItemCode);
         $composicion = DB::table('RDR1')
                         ->select(DB::raw('ItemCode AS codigo, Dscription AS descripcion'))
                         ->where('TreeType', 'S')
-                        ->where('ItemCode', 'like', '%'. substr($Materiales[0]->ItemCode, 0, 4) .'%')
-                        ->where('DocEntry', $Materiales[0]->NumPedido) //No. Pedido
+                        ->where('ItemCode', 'like', '%'. substr($info->ItemCode, 0, 4) .'%')
+                        ->where('DocEntry', $info->pedido) //No. Pedido
                         ->first(); 
         $ordenesSerie = DB::select("SELECT o.Docentry AS op, 
                         o.ItemCode AS codigo, 
@@ -141,7 +182,7 @@ class Mod01_ProduccionController extends Controller
                         o.plannedqty AS cantidad
                         FROM OWOR o
                         INNER JOIN OITM a ON a.ItemCode=o.ItemCode
-                        WHERE o.U_NoSerie = ? ", [$Materiales[0]->U_NoSerie]);    
+                        WHERE o.U_NoSerie = ? ", [$info->U_NoSerie]);    
                         $marcaagua = 'muestra';
                         if (Auth::user()->position == 6){
                             $rs = SAP::updateImpresoOrden($op, '2'); 
@@ -153,6 +194,7 @@ class Mod01_ProduccionController extends Controller
             'composicion' => $composicion,
             'total_vs' => $total_vs,
             'data' => $Materiales,
+            'info' => $info,
             'op' => $op,
             'db' => DB::table('OADM')->value('CompnyName'),
         );
