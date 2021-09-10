@@ -320,11 +320,12 @@ public function impresion_op(Request $request){
 public function asignar_series(Request $request){
         ini_set('memory_limit', '-1');
         set_time_limit(0);
+        $mensajeErrr= '';
         if(strlen($request->input('ordenes')) > 0 ){
+            //dd($request->input('ordenes'));
             $preOrdenes = explode(',', $request->input('ordenes'));
             $index = 0;
             $numSerieGrupal = null;
-            $mensajeErrr= '';
             foreach ($preOrdenes as $key => $preorden) {
                 $orden = explode('&',$preorden);
                 if (count($orden) == 2) {
@@ -352,6 +353,7 @@ public function asignar_series(Request $request){
                     }
                 }
             }
+           // dd($mensajeErrr);
             return compact('mensajeErrr');
         }else{
             return 'No se ha seleccionado ninguna Orden';
@@ -485,28 +487,56 @@ public function registros_gop(Request $request){
             )));
         }
 }
-public function rollUpdateTable(Request $request){
-        try {
-            ini_set('memory_limit', '-1');
-            set_time_limit(0);            
-            $sel = "";
+public function processRollout(Request $request){
+    try {
+        ini_set('memory_limit', '-1');
+        set_time_limit(0);            
+        $sel = "";
+        
+        $mensaje= '';            
+        if (!Cache::has('roll')) {
             Cache::forever('roll', true);
-            $consulta = 'DB::select($sel)';
-            if (Cache::has('roll')) {
-                $consulta = Cache::get('roll');
-            }
-            $pedidos_gop = collect($consulta);
-            return compact('pedidos_gop');
-        } catch (\Exception $e) {
-            header('HTTP/1.1 500 Internal Server Error');
-            header('Content-Type: application/json; charset=UTF-8');
-            die(json_encode(array(
-                "mensaje" => $e->getMessage(),
-                "codigo" => $e->getCode(),
-                "clase" => $e->getFile(),
-                "linea" => $e->getLine()
-            )));
+                $index = 1;
+                $priceList = $request->input('priceList');   
+                while ($index == 1) {
+                    $articulos = DB::select('exec SIZ_SP_ROLLOUT_SIMULADOR_COSTOS ?', [$priceList]);
+                    
+                    clock([$index => $articulos]);
+                    if (count($articulos) > 0) {
+                        
+                        $mensajeErr= '';
+                        foreach ($articulos as $key => $articulo) {
+                            $codigo = $articulo->ItemCode;
+                            $precio = $articulo->PRICE_SAVE;
+                            $rs = SAP::updateItemPriceList($codigo, $priceList, $precio); 
+                            if($rs !== 'ok'){
+                                $mensajeErr = 'Error : Art#'.$codigo.', SAP:'.$rs;
+                                $mensaje = $mensaje.$mensajeErr;
+                            }
+                        }
+                        clock($mensajeErr);
+                    } else {
+                        $index = 0;
+                        Cache::forget('roll');
+                    }
+                    
+                }
+            
+        } else {
+            $mensaje = 'Aviso: existe otro ROLLOUT en proceso.';
         }
+        
+        return compact('mensaje');
+    } catch (\Exception $e) {
+        header('HTTP/1.1 500 Internal Server Error');
+        header('Content-Type: application/json; charset=UTF-8');
+        die(json_encode(array(
+            "mensaje" => $e->getMessage(),
+            "codigo" => $e->getCode(),
+            "clase" => $e->getFile(),
+            "linea" => $e->getLine()
+        )));
+    }
 }
 public function registros_tabla_liberacion(Request $request){
              //dd($request->all());

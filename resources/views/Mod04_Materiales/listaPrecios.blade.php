@@ -65,9 +65,16 @@
                             
                             </h3> 
                             <div class="pull-right">
-                                <a style="margin-right: 5px;" id="btn_enviar" class="btn btn-success btn-sm" data-operacion='1'><i
+                                
+                            </div>
+                            
+                            <div class="row pull-right">
+                                    <a style="margin-right: 5px;" id="btn_enviar" class="btn btn-success btn-sm" data-operacion='1'><i
                                         class="fa fa-send"></i> Actualizar <span class="badge"></span></a>
-                            </div>                                       
+                                    <a disabled style="margin-right: 5px;" id="btn_roll" class="btn btn-success btn-sm" ><i class="fa fa-cogs"></i>
+                                        Roll Out</a>
+                            </div>
+                                                                   
                         </div>
                           <input type="text" style="display: none" class="form-control input-sm" id="input-lista" value="{{$deplist}}">
                         <div class="col-md-12 ">
@@ -337,6 +344,84 @@
         e.preventDefault();
         //var oper = $('#btn_enviar').attr('data-operacion');
         click_programar_cambios();
+            
+    });
+    $('#btn_roll').on('click', function (e) {
+        e.preventDefault();
+        
+        $.ajax({
+                type: 'GET',
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                data: {
+                    "_token": "{{ csrf_token() }}",
+                    priceList: $('#input-lista').val()
+                },
+                url: '{!! route('process-rollout') !!}',
+                beforeSend: function () {
+                    $.blockUI({
+                        baseZ: 2000,
+                        message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                        css: {
+                            border: 'none',
+                            padding: '16px',
+                            width: '50%',
+                            top: '40%',
+                            left: '30%',
+                            backgroundColor: '#fefefe',
+                            '-webkit-border-radius': '10px',
+                            '-moz-border-radius': '10px',
+                            opacity: .7,
+                            color: '#000000'
+                        }
+                    });
+                },
+                complete: function () {
+                    //rollout
+                    reload_tabla_arts();
+                    var $badge = $('#btn_enviar').find('.badge');
+                    $badge.text('');
+                    setTimeout($.unblockUI, 1500);
+                    $('#updateprogramar').modal('hide');
+                    $('#precio_nuevo').val('');
+                    $('#precio_porcentaje').val('');
+                    
+                },
+                success: function (data) {
+                    setTimeout(function () {
+                                var respuesta = JSON.parse(JSON.stringify(data));
+                                console.log(respuesta)
+                                if(respuesta.codigo == 302){
+                                    window.location = '{{ url("auth/login") }}';
+
+                                }
+                            }, 2000);
+                            console.log(data.mensajeErr)
+                    if (data.mensajeErr.includes('Error')) {
+                        bootbox.dialog({
+                            title: "Mensaje",
+                            message: "<div class='alert alert-danger m-b-0'>" + data.mensajeErr + "</div>",
+                            buttons: {
+                                success: {
+                                    label: "Ok",
+                                    className: "btn-success m-r-5 m-b-5"
+                                }
+                            }
+                        }).find('.modal-content').css({ 'font-size': '14px' });
+                    }else{
+                        bootbox.dialog({
+                            title: "Mensaje",
+                            message: "<div class='alert alert-success m-b-0'>Proceso Terminado</div>",
+                            buttons: {
+                                success: {
+                                    label: "Ok",
+                                    className: "btn-success m-r-5 m-b-5"
+                                }
+                            }
+                        }).find('.modal-content').css({ 'font-size': '14px' });
+                    }
+                }
+            });
+        
             
     });
     $('#tabla_arts tbody').on('dblclick','tr',function(e){

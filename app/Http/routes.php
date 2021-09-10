@@ -603,4 +603,4 @@ Route::any('actualizarPrecios', 'Mod09_FinanzasListaPreciosController@actualizar
 //Route::any('asignar_series', 'Mod02_PlaneacionController@asignar_series')->name('asignar_series');
 
 
-Route::any('update-table', 'Mod02_PlaneacionController@rollUpdateTable')->name('asignar_series');
+Route::any('process-rollout', 'Mod02_PlaneacionController@processRollout')->name('process-rollout');
