@@ -71,8 +71,9 @@
                             <div class="row pull-right">
                                     <a style="margin-right: 5px;" id="btn_enviar" class="btn btn-success btn-sm" data-operacion='1'><i
                                         class="fa fa-send"></i> Actualizar <span class="badge"></span></a>
-                                    <a disabled style="margin-right: 5px;" id="btn_roll" class="btn btn-success btn-sm" ><i class="fa fa-cogs"></i>
-                                        Roll Out</a>
+                                    <button  style="margin-right: 5px;" type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#confirma">
+                                        <i class="fa fa-cogs" aria-hidden="true"></i> Roll Out
+                                    </button>
                             </div>
                                                                    
                         </div>
@@ -157,6 +158,32 @@
                                     <button id='btn-actualiza-precio'class="btn btn-primary"> Actualizar</button>
                                 </div>
                     
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="confirma" tabindex="-1" role="dialog" >
+                        <div class="modal-dialog modal-sm" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title" id="pwModalLabel">Ejecución RollOut</h4>
+                                </div>
+                             
+                                <div class="modal-body">
+
+                                    <div class="form-group">
+                                        <div>
+                                           <h4>¿Desea continuar?</h4>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                                    <button type="button" id="btn_roll" class="btn btn-primary">Guardar</button>
+                                </div>
+                                
                             </div>
                         </div>
                     </div>
@@ -384,7 +411,7 @@
                     $('#updateprogramar').modal('hide');
                     $('#precio_nuevo').val('');
                     $('#precio_porcentaje').val('');
-                    
+                    $('#confirma').modal('hide');
                 },
                 success: function (data) {
                     setTimeout(function () {
@@ -395,11 +422,11 @@
 
                                 }
                             }, 2000);
-                            console.log(data.mensajeErr)
-                    if (data.mensajeErr.includes('Error')) {
+                            //console.log(data)
+                    if (data.mensaje.includes('Error')) {
                         bootbox.dialog({
                             title: "Mensaje",
-                            message: "<div class='alert alert-danger m-b-0'>" + data.mensajeErr + "</div>",
+                            message: "<div class='alert alert-danger m-b-0'>" + data.mensaje + "</div>",
                             buttons: {
                                 success: {
                                     label: "Ok",
@@ -407,7 +434,18 @@
                                 }
                             }
                         }).find('.modal-content').css({ 'font-size': '14px' });
-                    }else{
+                    }else if (data.mensaje.includes('Aviso')) {
+                        bootbox.dialog({
+                            title: "Mensaje",
+                            message: "<div class='alert alert-info m-b-0'>" + data.mensaje + "</div>",
+                            buttons: {
+                                success: {
+                                    label: "Ok",
+                                    className: "btn-success m-r-5 m-b-5"
+                                }
+                            }
+                        }).find('.modal-content').css({ 'font-size': '14px' });
+                    } else{
                         bootbox.dialog({
                             title: "Mensaje",
                             message: "<div class='alert alert-success m-b-0'>Proceso Terminado</div>",

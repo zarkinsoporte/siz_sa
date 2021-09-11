@@ -492,42 +492,49 @@ public function processRollout(Request $request){
         ini_set('memory_limit', '-1');
         set_time_limit(0);            
         $sel = "";
-        
+        //Cache::forget('roll');
         $mensaje= '';            
-        if (!Cache::has('roll')) {
-            Cache::forever('roll', true);
+        //if (!Cache::has('roll')) {
+        //    Cache::forever('roll', true);
                 $index = 1;
-                $priceList = $request->input('priceList');   
-                while ($index == 1) {
+                $priceList = (int) $request->input('priceList'); 
+                while ($index >= 1) {
                     $articulos = DB::select('exec SIZ_SP_ROLLOUT_SIMULADOR_COSTOS ?', [$priceList]);
                     
-                    clock([$index => $articulos]);
+                    clock($index.'-'.$priceList);
+                    clock($articulos);
+                    clock(count($articulos));
                     if (count($articulos) > 0) {
                         
                         $mensajeErr= '';
                         foreach ($articulos as $key => $articulo) {
                             $codigo = $articulo->ItemCode;
                             $precio = $articulo->PRICE_SAVE;
-                            $rs = SAP::updateItemPriceList($codigo, $priceList, $precio); 
+                            $rs = SAP::updateItemPriceList($codigo, $priceList - 1, $precio); 
+                            clock($codigo, $rs);
                             if($rs !== 'ok'){
                                 $mensajeErr = 'Error : Art#'.$codigo.', SAP:'.$rs;
                                 $mensaje = $mensaje.$mensajeErr;
                             }
+                            //break;
                         }
-                        clock($mensajeErr);
+                        $index++;
+                        //clock($mensajeErr);
                     } else {
                         $index = 0;
-                        Cache::forget('roll');
+                 //       Cache::forget('roll');
                     }
                     
                 }
             
-        } else {
-            $mensaje = 'Aviso: existe otro ROLLOUT en proceso.';
-        }
+        //} else {
+       //     $mensaje = 'Aviso: existe otro ROLLOUT en proceso.';
+       // }
+        //Cache::forget('roll');
         
         return compact('mensaje');
     } catch (\Exception $e) {
+        Cache::forget('roll');
         header('HTTP/1.1 500 Internal Server Error');
         header('Content-Type: application/json; charset=UTF-8');
         die(json_encode(array(
