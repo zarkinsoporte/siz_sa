@@ -81,7 +81,7 @@ class Mod09_FinanzasListaPreciosController extends Controller
             $user = Auth::user();
             $actividades = $user->getTareas();
             $depList = 0;
-
+            $hide_rollout = false;
             //segun el departamento del usuario (table:OUDP)
             //se asignara la lista de precios correspondiente (table:OPLN)
             switch ($user->dept) {
@@ -96,9 +96,13 @@ class Mod09_FinanzasListaPreciosController extends Controller
                     break;
                 case '10': //Finanzas
                     $depList = 10;
+                    $hide_rollout = true;
                     break;
                 case '15': //Sistemas
                     $depList = 7;
+                    break;
+                default:
+                    return redirect()->route('home')->withErrors(array('message' => 'El departamento al que pertenece no esta considerado para actualizar precios.'));
                     break;
             } 
             $depListName = DB::table('OPLN')->where('ListNum', $depList)
@@ -107,7 +111,8 @@ class Mod09_FinanzasListaPreciosController extends Controller
                 'actividades' => $actividades,
                 'ultimo' => count($actividades),
                 'deplist' => $depList,
-                'deplistname' => $depListName
+                'deplistname' => $depListName,
+                'hide_rollout' => $hide_rollout
             );
             return view('Mod04_Materiales.listaPrecios', $data);
         } else {

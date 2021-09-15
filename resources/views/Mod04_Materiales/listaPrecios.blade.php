@@ -71,9 +71,13 @@
                             <div class="row pull-right">
                                     <a style="margin-right: 5px;" id="btn_enviar" class="btn btn-success btn-sm" data-operacion='1'><i
                                         class="fa fa-send"></i> Actualizar <span class="badge"></span></a>
-                                    <button  style="margin-right: 5px;" type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#confirma">
-                                        <i class="fa fa-cogs" aria-hidden="true"></i> Roll Out
-                                    </button>
+                                    @if (!$hide_rollout)
+                                        <button  style="margin-right: 5px;" type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#confirma">
+                                            <i class="fa fa-cogs" aria-hidden="true"></i> Roll Out
+                                        </button>
+                                    @endif
+                                        
+                                   
                             </div>
                                                                    
                         </div>
@@ -203,7 +207,7 @@
         $("#page-wrapper").toggleClass("content");
         $(this).toggleClass("active");
     });
-
+    
     document.onkeyup = function (e) {
         if (e.shiftKey && e.which == 112) {
             var namefile = 'RG_' + $('#btn_pdf').attr('ayudapdf') + '.pdf';
