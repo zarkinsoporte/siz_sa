@@ -353,7 +353,7 @@
         } );    
     } );
 
-    reload_tabla_arts();
+    reload_tabla_arts(true);
 
     $('#tabla_arts tbody').on('click', 'tr', function (e) {
         if ($(e.target).hasClass("ignoreme")) {
@@ -408,14 +408,19 @@
                 },
                 complete: function () {
                     //rollout
-                    reload_tabla_arts();
-                    var $badge = $('#btn_enviar').find('.badge');
-                    $badge.text('');
+                    
                     setTimeout($.unblockUI, 1500);
-                    $('#updateprogramar').modal('hide');
-                    $('#precio_nuevo').val('');
-                    $('#precio_porcentaje').val('');
-                    $('#confirma').modal('hide');
+                   setTimeout( function () { bootbox.dialog({
+                            title: "Mensaje",
+                            message: "<div class='alert alert-success m-b-0'>Proceso Terminado</div>",
+                            buttons: {
+                                success: {
+                                    label: "Ok",
+                                    className: "btn-success m-r-5 m-b-5"
+                                }
+                            }
+                        }).find('.modal-content').css({ 'font-size': '14px' });
+                    } ,2000)
                 },
                 success: function (data) {
                     setTimeout(function () {
@@ -426,6 +431,14 @@
 
                                 }
                             }, 2000);
+
+                    reload_tabla_arts(false);
+                    var $badge = $('#btn_enviar').find('.badge');
+                    $badge.text('');
+                    $('#updateprogramar').modal('hide');
+                    $('#precio_nuevo').val('');
+                    $('#precio_porcentaje').val('');
+                    $('#confirma').modal('hide');
                             //console.log(data)
                     if (data.mensaje.includes('Error')) {
                         bootbox.dialog({
@@ -450,17 +463,9 @@
                             }
                         }).find('.modal-content').css({ 'font-size': '14px' });
                     } else{
-                        bootbox.dialog({
-                            title: "Mensaje",
-                            message: "<div class='alert alert-success m-b-0'>Proceso Terminado</div>",
-                            buttons: {
-                                success: {
-                                    label: "Ok",
-                                    className: "btn-success m-r-5 m-b-5"
-                                }
-                            }
-                        }).find('.modal-content').css({ 'font-size': '14px' });
+
                     }
+                   
                 }
             });
         
@@ -603,13 +608,8 @@
                     });
                 },
                 complete: function () {
-                    reload_tabla_arts();
-                    var $badge = $('#btn_enviar').find('.badge');
-                    $badge.text('');
                     setTimeout($.unblockUI, 1500);
-                    $('#updateprogramar').modal('hide');
-                    $('#precio_nuevo').val('');
-                    $('#precio_porcentaje').val('');
+                   
                     
                 },
                 success: function (data) {
@@ -621,6 +621,12 @@
 
                                 }
                             }, 2000);
+                    reload_tabla_arts(false);
+                    var $badge = $('#btn_enviar').find('.badge');
+                    $badge.text('');
+                    $('#updateprogramar').modal('hide');
+                    $('#precio_nuevo').val('');
+                    $('#precio_porcentaje').val('');
                             console.log(data.mensajeErr)
                     if (data.mensajeErr.includes('Error')) {
                         bootbox.dialog({
@@ -634,16 +640,7 @@
                             }
                         }).find('.modal-content').css({ 'font-size': '14px' });
                     }else{
-                        bootbox.dialog({
-                            title: "Mensaje",
-                            message: "<div class='alert alert-success m-b-0'>Proceso Terminado</div>",
-                            buttons: {
-                                success: {
-                                    label: "Ok",
-                                    className: "btn-success m-r-5 m-b-5"
-                                }
-                            }
-                        }).find('.modal-content').css({ 'font-size': '14px' });
+                       
                     }
                 }
             });
@@ -662,35 +659,41 @@
         }
     }
 
-    function reload_tabla_arts() {
+    function reload_tabla_arts(asyncc) {
         $("#tabla_arts").DataTable().clear().draw();
         $.ajax({
         type: 'GET',
-        async: true,
+        async: asyncc,
         url: '{!! route('datatables.arts') !!}',
         data: {
             deplist: $('#input-lista').val()
         },
         beforeSend: function () {
-            $.blockUI({
-                baseZ: 2000,
-                message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
-                css: {
-                    border: 'none',
-                    padding: '16px',
-                    width: '50%',
-                    top: '40%',
-                    left: '30%',
-                    backgroundColor: '#fefefe',
-                    '-webkit-border-radius': '10px',
-                    '-moz-border-radius': '10px',
-                    opacity: .7,
-                    color: '#000000'
-                }
-            });
+            if (asyncc) {
+               $.blockUI({
+                    baseZ: 2000,
+                    message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                    css: {
+                        border: 'none',
+                        padding: '16px',
+                        width: '50%',
+                        top: '40%',
+                        left: '30%',
+                        backgroundColor: '#fefefe',
+                        '-webkit-border-radius': '10px',
+                        '-moz-border-radius': '10px',
+                        opacity: .7,
+                        color: '#000000'
+                    }
+                }); 
+            }
+            
         },
         complete: function () {
-            setTimeout($.unblockUI, 1500);
+            if (asyncc) {
+                setTimeout($.unblockUI, 1500);
+            }
+            
         },
         success: function (data) {
 

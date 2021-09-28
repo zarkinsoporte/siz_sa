@@ -41,7 +41,7 @@ class Mod09_FinanzasListaPreciosController extends Controller
             } else if ($option == '2') { 
                 $precio += $precio * ( $precio_porcentaje / 100 );
             }
-            $rs = SAP::updateItemPriceList($codigo, $priceList, $precio); 
+            $rs = SAP::updateItemPriceList($codigo, $priceList, $precio, 'NOMONEDA'); 
             if($rs !== 'ok'){
                 $mensajeErr = 'Error : articulo #'.$codigo.', SAP:'.$rs;
              }

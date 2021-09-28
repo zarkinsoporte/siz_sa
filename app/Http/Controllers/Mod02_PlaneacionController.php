@@ -501,17 +501,18 @@ public function processRollout(Request $request){
                 while ($index >= 1) {
                     $articulos = DB::select('exec SIZ_SP_ROLLOUT_SIMULADOR_COSTOS ?', [$priceList]);
                     
-                    clock($index.'-'.$priceList);
-                    clock($articulos);
-                    clock(count($articulos));
+                    //clock($index.'-'.$priceList);
+                    //clock($articulos);
+                   // clock(count($articulos));
                     if (count($articulos) > 0) {
                         
                         $mensajeErr= '';
                         foreach ($articulos as $key => $articulo) {
                             $codigo = $articulo->ItemCode;
                             $precio = $articulo->PRICE_SAVE;
-                            $rs = SAP::updateItemPriceList($codigo, $priceList - 1, $precio); 
-                            clock($codigo, $rs);
+                            $moneda = $articulo->MONEDA;
+                            $rs = SAP::updateItemPriceList($codigo, $priceList - 1, $precio, $moneda); 
+                            //clock($codigo, $rs);
                             if($rs !== 'ok'){
                                 $mensajeErr = 'Error : Art#'.$codigo.', SAP:'.$rs;
                                 $mensaje = $mensaje.$mensajeErr;

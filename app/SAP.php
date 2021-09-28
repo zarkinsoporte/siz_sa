@@ -185,7 +185,7 @@ class SAP extends Model
             return true;
         }
     }
-    public static function updateItemPriceList($codigo, $priceList, $precio){
+    public static function updateItemPriceList($codigo, $priceList, $precio, $moneda){
         (self::$vCmp == false) ? self::Connect() : '';
         //self::$vCmp->XmlExportType("xet_ExportImportMode");
         //OITM ARTICULOS ES EL OBJETO 4
@@ -196,6 +196,9 @@ class SAP extends Model
         //Seleccionar lista de Precios/CAMBIAR PRECIO Y MONEDA
         $vItem->PriceList->SetCurrentLine($priceList);
         $vItem->PriceList->Price = $precio;
+        if ($moneda !== 'NOMONEDA') {
+            $vItem->PriceList->Currency = $moneda;
+        }
        // $vItem->PriceList->Currency = $array['monedacompras'];
 
         $retCode = $vItem->Update;
