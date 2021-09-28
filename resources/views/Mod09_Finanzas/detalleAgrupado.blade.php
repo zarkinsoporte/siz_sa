@@ -100,11 +100,7 @@
             @include('partials.alertas')
         </div>
         </div> <!-- /.row -->
-        <?php 
-        $saldo = $total_bancos[0]->SaldoDisponibleMN;
-        $semanas = 5;
-        $saldos_bancos = [];
-        ?>
+        
         <div class="col-md-12">
             <div class="row">
                     <a class="btn btn-success" href="{{url('home/FINANZAS/flujoefectivo-programas')}}"><i class="fa fa-cogs"></i>
@@ -120,15 +116,12 @@
                 <div class="table-responsive">
                     <table id="table_detalle_agrupado" class="table table-striped table-bordered nowrap" width="100%">
                         <thead>
-                            <tr>
-                                <th>MXN</th>
-                            </tr>
+                        
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>BANCOS</td>
-                            </tr>
+                         
                         </tbody>
+                        <tfoot></tfoot>
                     </table>
                 </div>
             </div>
@@ -247,8 +240,8 @@ jqxhr =  $.ajax({
                     strfoot = '<th></th>';
                 }
                 contth ++;
-                $(str).appendTo(tableName_cxp+'>thead>tr');
-                $(strfoot).appendTo(tableName_cxp+'>tfoot>tr');
+                $(str).appendTo(tableName+'>thead>tr');
+                $(strfoot).appendTo(tableName+'>tfoot>tr');
                 console.log("adding col "+ colObj.name);
             });
             
@@ -259,7 +252,7 @@ jqxhr =  $.ajax({
                 }
             }  
             
-         table_cxp = $(tableName_cxp).DataTable({
+         table_cxp = $(tableName).DataTable({
                 
                 deferRender: true,
                "paging":   false,

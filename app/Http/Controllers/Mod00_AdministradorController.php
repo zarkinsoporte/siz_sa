@@ -449,7 +449,7 @@ dd($user);
             }else{               
                 $modulo = new MENU_ITEM();                
                 $modulo->name = strtoupper(Input::get('menu2'));
-                $modulo->route = strtoupper(Input::get('route'));
+                //$modulo->route = strtoupper(Input::get('route'));
                 $modulo->id_modulo = Input::get('modulo');                
                 $modulo->save();
                 $id_menu_i = $modulo->id;                
