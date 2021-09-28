@@ -23,6 +23,113 @@ ini_set('max_execution_time', 0);
 
 class Mod09_FinanzasListaPreciosController extends Controller
 {
+    public function DetalleAgrupado()
+    {
+        if (Auth::check()) {
+            $user = Auth::user();
+            $actividades = $user->getTareas();
+
+            $data = array(
+                'actividades' => $actividades,
+                'ultimo' => count($actividades),
+
+            );
+            return view('Mod09_Finanzas.detalleAgrupado', $data);
+        } else {
+            return redirect()->route('auth/login');
+        }
+    }
+    public function datatables_simulador_modelos()
+    {
+
+
+        $consulta = DB::select('SELECT OITM.ItemCode 
+                , OITM.ItemName AS MODELO
+                FROM OITM 
+                WHERE OITM.U_IsModel = \'S\' AND OITM.frozenFor= \'N\' AND U_Linea = \'01\'
+                ORDER BY OITM.ItemName	
+            ');
+
+        //Definimos las columnas
+        $columns = array(
+            ["data" => "ItemCode", "name" => "Código"],
+            ["data" => "MODELO", "name" => "Modelo"],
+        );
+
+        return response()->json(array('data' => $consulta, 'columns' => $columns, 'pkey' => 'ItemCode'));
+    }
+    public function datatables_simulador_detalle_agrupado()
+    {
+
+        $consulta = DB::select('
+            Declare @CodeMode nvarchar(10)
+            Declare @NumeList integer 
+            Declare @TiCa_CAN decimal(10,4)
+            Declare @TiCa_USD decimal(10,4)
+            Declare @TiCa_EUR decimal(10,4)
+
+            SELECT TOP 1 @CodeMode = TC_code_mode, @TiCa_CAN = TC_can, @TiCa_USD = TC_usd, @TiCa_EUR = TC_eur
+            FROM SIZ_TipoCambio 
+            WHERE YEAR(TC_date) = YEAR(GETDATE())
+
+                SELECT SC.COMPONENTE AS CODIGO, SC.DESCRIPCION, MAX(SC.PC03) AS PC03, MAX(SC.PC04) AS PC04
+                , MAX(SC.PC05) AS PC05, MAX(SC.PC06) AS PC06, MAX(SC.PC07) AS PC07, MAX(SC.PC08) AS PC08, MAX(SC.OTROS) AS OTRO, SC.MONEDA, 
+                COUNT(SC.CATEGORIA) AS AGRUPADOS
+                FROM (
+                SELECT  Left(ITT1.Father, 7) AS COMPONENTE
+                        , Case When Left(Right(ITT1.Father, 5),2) = \'P0\' then Left(Right(ITT1.Father, 5),2) else \'B0\' END AS CATEGORIA
+                        , ITT1.Father AS CODIGO
+                        , A3.FrgnName AS DESCRIPCION
+                        , Case When Left(Right(ITT1.Father, 5),3) = \'P03\' then SUM(ITT1.Quantity * L1.Price * 
+                            (Case When ITT1.Currency = \'USD\' then @TiCa_USD When ITT1.Currency = \'CAN\' then @TiCa_CAN When ITT1.Currency = \'EUR\' 
+                            then @TiCa_EUR When ITT1.Currency = \'MXP\' then  1 end)) ELSE 0 END AS PC03
+                        , Case When Left(Right(ITT1.Father, 5),3) = \'P04\' then SUM(ITT1.Quantity * L1.Price * 
+                            (Case When ITT1.Currency = \'USD\' then @TiCa_USD When ITT1.Currency = \'CAN\' then @TiCa_CAN When ITT1.Currency = \'EUR\' 
+                            then @TiCa_EUR When ITT1.Currency = \'MXP\' then  1 end)) ELSE 0 END AS PC04
+                        , Case When Left(Right(ITT1.Father, 5),3) = \'P05\' then SUM(ITT1.Quantity * L1.Price * 
+                            (Case When ITT1.Currency = \'USD\' then @TiCa_USD When ITT1.Currency = \'CAN\' then @TiCa_CAN When ITT1.Currency = \'EUR\' 
+                            then @TiCa_EUR When ITT1.Currency = \'MXP\' then  1 end)) ELSE 0 END AS PC05
+                        , Case When Left(Right(ITT1.Father, 5),3) = \'P06\' then SUM(ITT1.Quantity * L1.Price * 
+                            (Case When ITT1.Currency = \'USD\' then @TiCa_USD When ITT1.Currency = \'CAN\' then @TiCa_CAN When ITT1.Currency = \'EUR\' 
+                            then @TiCa_EUR When ITT1.Currency = \'MXP\' then  1 end)) ELSE 0 END AS PC06
+                        , Case When Left(Right(ITT1.Father, 5),3) = \'P07\' then SUM(ITT1.Quantity * L1.Price * 
+                            (Case When ITT1.Currency = \'USD\' then @TiCa_USD When ITT1.Currency = \'CAN\' then @TiCa_CAN When ITT1.Currency = \'EUR\' 
+                            then @TiCa_EUR When ITT1.Currency = \'MXP\' then  1 end)) ELSE 0 END AS PC07
+                        , Case When Left(Right(ITT1.Father, 5),3) = \'P08\' then SUM(ITT1.Quantity * L1.Price * 
+                            (Case When ITT1.Currency = \'USD\' then @TiCa_USD When ITT1.Currency = \'CAN\' then @TiCa_CAN When ITT1.Currency = \'EUR\' 
+                            then @TiCa_EUR When ITT1.Currency = \'MXP\' then  1 end)) ELSE 0 END AS PC08
+                        , Case When Left(Right(ITT1.Father, 5),2) <> \'P0\' then SUM(ITT1.Quantity * L1.Price * 
+                            (Case When ITT1.Currency = \'USD\' then @TiCa_USD When ITT1.Currency = \'CAN\' then @TiCa_CAN When ITT1.Currency = \'EUR\' 
+                            then @TiCa_EUR When ITT1.Currency = \'MXP\' then  1 end)) ELSE 0 END AS OTROS
+                        , \'MXP\' AS MONEDA	
+                FROM ITT1 
+                INNER JOIN OITM A3 on ITT1.Father = A3.ItemCode
+                INNER JOIN ITM1 L1 on ITT1.Code= L1.ItemCode and L1.PriceList=1 
+                WHERE A3.InvntItem = \'Y\' and A3.frozenFor=\'N\' and A3.U_TipoMat = \'PT\' 
+                and A3.U_IsModel = \'N\'
+                and left(ITT1.Father,4) = @CodeMode
+                GROUP BY ITT1.Father, A3.FrgnName, ITT1.Currency
+                ) SC
+                GROUP BY SC.COMPONENTE, SC.DESCRIPCION, SC.MONEDA
+                ORDER BY SC.DESCRIPCION		
+            ');
+
+        //Definimos las columnas 
+        $columns = array(
+            ["data" => "CODIGO", "name" => "Código"],
+            ["data" => "DESCRIPCION", "name" => "Descripción"],
+            ["data" => "PC03"],
+            ["data" => "PC04"],
+            ["data" => "PC05"],
+            ["data" => "PC06"],
+            ["data" => "PC07"],
+            ["data" => "PC08"],
+            ["data" => "MONEDA"]
+
+        );
+
+        return response()->json(array('data' => $consulta, 'columns' => $columns));
+    }
     public function actualizarPrecios(Request $request){
         $articulos = $request->input('articulos');
         $precio_nuevo = $request->input('precio_nuevo');

@@ -18,7 +18,7 @@
                         </div>
                        <style>
      div.dataTables_wrapper div.dataTables_processing {
-        width: 500px;
+        
         height: 250px;
         margin-left: 0%;
         background: linear-gradient(to right, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.95) 25%, rgba(255,255,255,0.95) 75%, rgba(255,255,255,0.2) 100%);
@@ -36,6 +36,7 @@
     }
      table { //me ayudo a que no se desfazaran las columnas en Chrome
         table-layout: fixed;
+        width: 100% !important;
     }
 </style>
 

@@ -298,7 +298,12 @@ class Reportes_ProduccionController extends Controller
                 $text_selSeis = 'Almacén Destino';
                 $data_selSeis = $almacenesDestino;  
             break;
-
+            case 'SIMULADOR COSTOS':
+                $Text = 'Para continuar, primero seleccione un modelo.';
+                //$fieldText = 'Código';
+                $sizeModal = 'modal-md';
+                $data_table = 'datatables_simulador_modelos';
+                break;
         }
 
         if (Auth::check()) {

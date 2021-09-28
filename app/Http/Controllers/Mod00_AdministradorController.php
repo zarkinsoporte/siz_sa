@@ -253,6 +253,12 @@ dd($user);
 
         $modulo = new TAREA_MENU();
         $modulo->name = strtoupper (Input::get('name'));
+        
+        if(Input::get('route') !== ''){
+            $modulo->route = strtoupper (Input::get('route'));
+        }else{
+            $modulo->route = strtoupper(Input::get('name'));
+        }
         $modulo->id_menu_item  = $id_modulo;
         $modulo->save();
         return redirect()->back();
@@ -443,6 +449,7 @@ dd($user);
             }else{               
                 $modulo = new MENU_ITEM();                
                 $modulo->name = strtoupper(Input::get('menu2'));
+                $modulo->route = strtoupper(Input::get('route'));
                 $modulo->id_modulo = Input::get('modulo');                
                 $modulo->save();
                 $id_menu_i = $modulo->id;                
@@ -458,6 +465,11 @@ dd($user);
         }else{
             $modulo = new TAREA_MENU();
             $modulo->name = $nombretarea;
+            if (Input::get('route') !== '') {
+                $modulo->route = strtoupper(Input::get('route'));
+            } else {
+                $modulo->route = strtoupper(Input::get('name'));
+            }
             $modulo->id_menu_item = $id_menu_i;
             $modulo->save();
             Session::flash('mensaje', 'La tarea '.$nombretarea.' se creo, pero no ha sido agregada a este grupo.');

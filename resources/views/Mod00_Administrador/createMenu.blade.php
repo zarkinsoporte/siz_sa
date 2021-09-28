@@ -148,6 +148,12 @@
                                            <input id="name" type="text" class="form-control" name="name" required minlength="3" maxlength="30">
                                        </div>
                                    </div>
+                                   <div class="row">
+                                    <div class="col-md-6">
+                                        <label for="name" class="control-label">Ruta (si la ruta en sistema será diferente especifiquela):</label>
+                                        <input id="route" type="text" class="form-control" name="route" required minlength="3" maxlength="30">
+                                    </div>
+                                </div>
 
                                 </div>
                                 <div class="modal-footer">

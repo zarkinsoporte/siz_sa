@@ -419,111 +419,11 @@ Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@pr
 
 Route::get('/pruebas', function (Request $request) {
 
-    $rates = DB::table('ORTT')->where('RateDate', date('Y-m-d'))->get();
-
-dd($rates);
-    $ops=['7', '12' ];
-    $pdf_final = new \Clegginabox\PDFMerger\PDFMerger;
-    $user_path = storage_path('pdf_ordenes/user_' . Auth::user()->U_EmpGiro);
-    if (!File::exists($user_path)) {
-        File::makeDirectory($user_path);
-    }
-    array_map( "unlink", glob($user_path.'/*.pdf' ) );
-
-    foreach ($ops as $op) {
-    //dd(base_path('vendor/h4cc/wkhtmltopdf-amd64/bin/wkhtmltopdf-amd64'));
-    
-    $Materiales = DB::select(DB::raw("SELECT b.DocNum AS DocNumOf, 
-	       '*' + CAST(b.DocNum as varchar (50)) + '*' as CodBarras,
-	       b.ItemCode, 
-	       c.ItemName, 
-	       c.U_VS AS VS, 
-	       d.CardCode, 
-	       d.CardName, 
-	       d.DocNum AS NumPedido, 
-	       b.DueDate AS FechaEntrega, 
-	       b.plannedqty, 
-	       d.Comments as Comentario, 
-	       b.Comments, 
-	       c.UserText, 
-	       f.InvntryUom,
-	        '*' + cast(f.u_estacion as varchar (3)) + '*' as BarrEstacion, 
-	       ISNULL((SELECT Name FROM [@PL_RUTAS] WHERE Code=f.U_Estacion),'Sin Estacion') AS Estacion,
-	       a.Code AS Codigo, 
-	       f.ItemName as Descripcion, 
-	       a.Quantity AS Cantidad, 
-	       0 AS [Cant. Entregada], 
-	       0 AS [Cant. Devolución],
-	       b.U_NoSerie,
-	       f.U_Metodo,
-	       b.U_OF as origen,
-	       (SELECT TOP 1 ItemName FROM OITM INNER JOIN OWOR ON OITM.ITEMCODE = OWOR.ItemCode  WHERE OWOR.DocNum = b.U_OF ) as Funda            
-       FROM (ITT1 a
-			INNER JOIN OWOR b ON a.Father=b.ItemCode
-			INNER JOIN OITM c ON b.ItemCode=c.ItemCode
-			INNER JOIN ORDR d ON b.OriginAbs=d.DocEntry
-			INNER JOIN OITM f ON a.Code=f.ItemCode)
-	   WHERE b.DocEntry=CONVERT(Int,$op) 
-	      AND NOT (f.InvntItem='N' AND f.SellItem='N' AND f.PrchseItem='N' AND f.AssetItem='N')
-		  AND f.ItemName  not like  '%Gast%'
-	   ORDER BY CONVERT(INT, a.U_Estacion)"));
-    // dd($Materiales);
-    $total_vs = 0;
-    //$total_vs = array_sum( array_pluck($Materiales, 'VS'));
-    /* $composicion = DB::select("SELECT ItemCode AS codigo, Dscription AS descripcion 
-                        FROM RDR1 WHERE docentry = '2113'
-                        AND TreeType = 'S'
-                        AND ItemCode LIKE '%3491%'");*/
-    $composicion = DB::table('RDR1')
-        ->select(DB::raw('ItemCode AS codigo, Dscription AS descripcion'))
-        ->where('TreeType', 'S')
-        ->where('ItemCode', 'like', '%' . substr($Materiales[0]->ItemCode, 0, 4) . '%')
-        ->where('DocEntry', $Materiales[0]->NumPedido) //No. Pedido
-        ->first();
-    $ordenesSerie = DB::select("SELECT o.Docentry AS op, 
-                        o.ItemCode AS codigo, 
-                        a.ItemName AS descripcion,
-                        a.U_VS AS VS,
-                        o.plannedqty AS cantidad
-                        FROM OWOR o
-                        INNER JOIN OITM a ON a.ItemCode=o.ItemCode
-                        WHERE o.U_NoSerie = ? ", [$Materiales[0]->U_NoSerie]);
-    $data = array(
-        'ordenes_serie' => $ordenesSerie,
-        'composicion' => $composicion,
-        'total_vs' => $total_vs,
-        'data' => $Materiales,
-        'op' => $op,
-        'db' => DB::table('OADM')->value('CompnyName'),
-    );
-   
-    $headerHtml = view()->make('header', $data)->render();
-    $pdf = SPDF::loadView('Mod01_Produccion.impresionOPPDF2', $data);
-    $pdf->setOption('header-html', $headerHtml);
-    $pdf->setOption('footer-center', 'Pagina [page] de [toPage]');
-    $pdf->setOption('footer-left', 'SIZ');
-    
-    $pdf->setOption('margin-top', '55mm');
-    $pdf->setOption('margin-left', '5mm');
-    $pdf->setOption('margin-right', '5mm');
-    $pdf->save($user_path.'/'.$op.'.pdf');
-        //return $pdf->inline();
-        //$pdf = PDF::loadView('pdf.invoice', $data);
-        //header('Content-Type: application/pdf');
-        //header('Content-Disposition: attachment; filename="file.pdf"');
-        //return SPDF::getOutput();
-        
-    $pdf_final->addPDF($user_path.'/' . $op . '.pdf');
-    }//end Foreach
-    return $pdf_final->merge('browser', 'ordenes.pdf', 'P');
-
-    $rates = DB::table('ORTT')->where('RateDate', date('d-m-Y'))->get();
-    dd($rates);
-   $var1= Artisan::call('cache:clear');
-   $var= Artisan::call('config:cache');
-   
-    dd($var1);
-    $tareas = DB::table('Siz_Tarea_Menu')->get();
+    $var1= Artisan::call('cache:clear');
+    $var= Artisan::call('config:cache');
+    $tareas = DB::table('Siz_Tarea_Menu')
+    ->where('name','')
+    ->get();
 
     foreach ($tareas as $k) {
         DB::update('update Siz_Tarea_Menu set route = ? where name = ?', [$k->name, $k->name]);
@@ -564,7 +464,7 @@ Route::post('home/traslados/terminar', 'Mod01_ProduccionController@terminarOP');
 Route::get('home/GENERACION ETIQUETAS', 'Reportes_ProduccionController@showModal')->middleware('routelog');
 Route::post('home/reporte/GENERACION ETIQUETAS/{redirek?}', 'Mod04_MaterialesController@QR_Articulos');
 Route::post('etiquetaQR', 'Mod04_MaterialesController@generaEtiquetaQR');
-Route::get('OITM.show', 'HomeController@ShowArticulos')->name('OITM.show');
+
 //Visualizacion de Articulos para INVITADOS
 Route::get('qr/{itemCode}/{proveedor}/{cantXbulto}', 'GuestController@getArticulo')->name('qr')->middleware('guest');
 Route::get('qr/{itemCode}/{proveedor}/{cantXbulto}', 'Mod04_MaterialesController@getArticulo')->name('qr2');
@@ -588,19 +488,20 @@ Route::post('home/calidad/tabladefectivos/addorupdate', 'Mod07_CalidadController
 Route::post('home/tabladefectivos/quitar', 'Mod07_CalidadController@CDA_quitar');
 
 //REPORTE DEFECTIVOS
-
 Route::get('home/CALIDAD REPORTE DEFECTIVOS', 'Mod07_CalidadController@showReporteDefectivos')->middleware('routelog');
 Route::post('home/reporte/CALIDAD REPORTE DEFECTIVOS', 'Mod07_CalidadController@exportarReporteDefectivos');
 Route::post('home/reporte/009 CATALOGO DE EMPLEADOS', 'Reportes_ProduccionController@R009');
 Route::get('datatables.R009', 'Reportes_ProduccionController@DataShow009')->name('datatables.R009');
 
-
 //LISTA DE PRECIOS
-
 Route::get('home/ACTUALIZAR PRECIOS', 'Mod09_FinanzasListaPreciosController@listaPrecios')->middleware('routelog');
 Route::any('datatables.arts', 'Mod09_FinanzasListaPreciosController@registros_listaPrecios')->name('datatables.arts');
 Route::any('actualizarPrecios', 'Mod09_FinanzasListaPreciosController@actualizarPrecios')->name('actualizarPrecios');
-//Route::any('asignar_series', 'Mod02_PlaneacionController@asignar_series')->name('asignar_series');
-
-
 Route::any('process-rollout', 'Mod02_PlaneacionController@processRollout')->name('process-rollout');
+
+//SIMULADOR COSTOS
+Route::get('home/SIMULADOR COSTOS', 'Reportes_ProduccionController@showModal')->middleware('routelog');
+Route::get('datatables_simulador_modelos', 'Mod09_FinanzasListaPreciosController@datatables_simulador_modelos')->name('datatables_simulador_modelos');
+Route::get('datatables_simulador_detalle_agrupado', 'Mod09_FinanzasListaPreciosController@datatables_simulador_modelos')->name('datatables_simulador_detalle_agrupado');
+Route::post('home/reporte/SIMULADOR COSTOS', 'Mod09_FinanzasListaPreciosController@DetalleAgrupado');
+
