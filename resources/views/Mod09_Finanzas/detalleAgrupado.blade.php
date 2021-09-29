@@ -71,7 +71,7 @@
     }
     
     .DTFC_LeftBodyWrapper {
-    margin-top: 80px;
+    
     }
     
     .DTFC_LeftHeadWrapper {
@@ -85,7 +85,7 @@
 </style>
 
 <div class="container" >
-
+<hr>
     <!-- Page Heading -->
     <div class="row">
         <div class="col-md-11" style="margin-top: -20px">
@@ -103,9 +103,9 @@
         
         <div class="col-md-12">
             <div class="row">
-                    <a class="btn btn-success" href="{{url('home/FINANZAS/flujoefectivo-programas')}}"><i class="fa fa-cogs"></i>
+                    <a class="btn btn-primary" href="{{url('home/FINANZAS/flujoefectivo-programas')}}"><i class="fa fa-table"></i>
                         Detalle Modelos</a>
-                    <a class="btn btn-success" href="{{url('home/FINANZAS/flujoefectivo-resumen-cliente-proveedor')}}"><i class="fa fa-eye"></i>
+                    <a class="btn btn-primary" href="{{url('home/FINANZAS/flujoefectivo-resumen-cliente-proveedor')}}"><i class="fa fa-cogs"></i>
                         Simulador</a>
                    
             </div>
@@ -115,13 +115,12 @@
             <div class="col-md-12">
                 <div class="table-responsive">
                     <table id="table_detalle_agrupado" class="table table-striped table-bordered nowrap" width="100%">
-                        <thead>
-                        
+                       <thead>
+                            <tr></tr>
                         </thead>
-                        <tbody>
-                         
-                        </tbody>
-                        <tfoot></tfoot>
+                        <tfoot>
+                            <tr></tr>
+                        </tfoot>
                     </table>
                 </div>
             </div>

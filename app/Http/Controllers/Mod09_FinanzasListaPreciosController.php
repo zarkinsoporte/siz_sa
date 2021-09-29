@@ -118,13 +118,13 @@ class Mod09_FinanzasListaPreciosController extends Controller
         $columns = array(
             ["data" => "CODIGO", "name" => "Código"],
             ["data" => "DESCRIPCION", "name" => "Descripción"],
-            ["data" => "PC03"],
-            ["data" => "PC04"],
-            ["data" => "PC05"],
-            ["data" => "PC06"],
-            ["data" => "PC07"],
-            ["data" => "PC08"],
-            ["data" => "MONEDA"]
+            ["data" => "PC03", "name" => "PC03"],
+            ["data" => "PC04", "name" => "PC04"],
+            ["data" => "PC05", "name" => "PC05"],
+            ["data" => "PC06", "name" => "PC06"],
+            ["data" => "PC07", "name" => "PC07"],
+            ["data" => "PC08", "name" => "PC08"],
+            ["data" => "MONEDA", "name" => "Moneda"]
 
         );
 
