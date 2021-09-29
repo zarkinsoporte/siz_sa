@@ -90,12 +90,11 @@
     <div class="row">
         <div class="col-md-11" style="margin-top: -20px">
             <h3 class="page-header">
-                AGRUPADO POR COMPOSICION DEL MODELO
+                DETALLE DE LOS MUEBLES DEL MODELO
                 <small><b>SIMULADOR COSTOS PT</b></small>
-                <br>
-                
-            </h3>    
-            <h4><b>MODELO {{$modelo. ' ' . $modelo_descr}}</b></h4>                                    
+            
+            </h3>  
+            <h4><b>MODELO {{$modelo. ' ' . $modelo_descr}}</b></h4>                                      
         </div>
             
         <div class="col-md-12 ">
@@ -105,20 +104,16 @@
         
         <div class="col-md-12">
             <div class="row">
-                    <a  class="btn btn-primary" href="{{url('home/SIMULADOR COSTOS/detalle_modelos/'.$modelo.'/'.$modelo_descr)}}"><i class="fa fa-table"></i>
-                        Detalle Modelos</a>
-                    <a  class="btn btn-primary" href="{{url('#')}}"><i class="fa fa-cogs"></i>
-                        Simulador</a>
-                        <a  class="btn btn-primary" href="{{url('home/SIMULADOR COSTOS/')}}"><i class="fa fa-cog"></i>
-                        Revisar otro</a>
+                <a href="{{ URL::previous() }}" class="btn btn-primary">Atras</a>
+                   
                    
             </div>
         </div>
-       
+        <hr>
         <div class="row">
             <div class="col-md-12">
-                <div class="">
-                    <table id="table_detalle_agrupado" class="table table-striped table-bordered nowrap" width="100%">
+                <div class="table-responsive">
+                    <table id="table_detalle_modelos" class="table table-striped table-bordered nowrap" width="100%">
                        <thead>
                             <tr></tr>
                         </thead>
@@ -178,7 +173,7 @@ $(window).on('load',function(){
 var xhrBuscador = null;
 
 var data,
-tableName= '#table_detalle_agrupado',
+tableName= '#table_detalle_modelos',
 tableproy,
 str, strfoot, contth,
 jqxhr =  $.ajax({
@@ -187,9 +182,9 @@ jqxhr =  $.ajax({
         dataType:'json',
         type: 'GET',
         data:  {
-             'modelo' : '{{$modelo}}'
+            'modelo' : '{{$modelo}}' 
             },
-        url: '{!! route('datatables_simulador_detalle_agrupado') !!}',
+        url: '{!! route('datatables_simulador_detalle_modelos') !!}',
         beforeSend: function () {
            $.blockUI({
             message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
@@ -260,7 +255,6 @@ jqxhr =  $.ajax({
                 deferRender: true,
                "paging":   false,
                 dom: 'frti',
-                caption : 'Hello',
                 scrollX: true,
                 scrollCollapse: true,
                 scrollY: "200px",

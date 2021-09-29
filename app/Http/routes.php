@@ -502,6 +502,9 @@ Route::any('process-rollout', 'Mod02_PlaneacionController@processRollout')->name
 //SIMULADOR COSTOS
 Route::get('home/SIMULADOR COSTOS', 'Reportes_ProduccionController@showModal')->middleware('routelog');
 Route::get('datatables_simulador_modelos', 'Mod09_FinanzasListaPreciosController@datatables_simulador_modelos')->name('datatables_simulador_modelos');
+
 Route::get('datatables_simulador_detalle_agrupado', 'Mod09_FinanzasListaPreciosController@datatables_simulador_detalle_agrupado')->name('datatables_simulador_detalle_agrupado');
 Route::post('home/reporte/SIMULADOR COSTOS', 'Mod09_FinanzasListaPreciosController@DetalleAgrupado');
 
+Route::get('datatables_simulador_detalle_modelos', 'Mod09_FinanzasListaPreciosController@datatables_simulador_detalle_modelos')->name('datatables_simulador_detalle_modelos');
+Route::get('home/SIMULADOR COSTOS/detalle_modelos/{modelo}/{modelo_descr}', 'Mod09_FinanzasListaPreciosController@DetalleModelos');
