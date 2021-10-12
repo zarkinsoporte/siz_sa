@@ -104,7 +104,7 @@
         
         <div class="col-md-12">
             <div class="row">
-                <a href="{{ URL::previous() }}" class="btn btn-primary">Atras</a>
+                <a onclick="window.history.back();"  class="btn btn-primary">Atras</a>
                    
                    
             </div>

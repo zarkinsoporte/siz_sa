@@ -103,12 +103,30 @@ class Mod09_FinanzasListaPreciosController extends Controller
 
         return response()->json(array('data' => $consulta, 'columns' => $columns));
     }
-    public function DetalleAgrupado()
+    public function DetalleAgrupado(Request $request)
     {
         if (Auth::check()) {
             $user = Auth::user();
             $actividades = $user->getTareas();
             $modelo = Input::get('pKey');
+            $rules = [
+                // 'fieldText' => 'required|exists:OITM,ItemCode',
+                'pKey' => 'required',
+             
+
+            ];
+            $customMessages = [
+                'pKey.required' => 'Ningun modelo seleccionado',
+                
+                //'fieldText.exists' => 'El Código no existe.'
+            ];
+            $valid = Validator::make( $request->all(), $rules, $customMessages);
+            
+            if ($valid->fails()) {
+                return redirect()->back()
+                    ->withErrors($valid)
+                    ->withInput();
+            }
             $model_descr = DB::table('OITM')
                         ->select(DB::raw('left(OITM.FrgnName , charindex(\',\', OITM.FrgnName ) - 1) descr'))
                         ->where('OITM.ItemCode', 'like', $modelo.'-%')
