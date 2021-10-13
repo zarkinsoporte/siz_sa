@@ -23,6 +23,89 @@ ini_set('max_execution_time', 0);
 
 class Mod09_FinanzasListaPreciosController extends Controller
 {
+    public function Simulador($modelo, $modelo_descr)
+    {
+        if (Auth::check()) {
+            $user = Auth::user();
+            $actividades = $user->getTareas();
+            $tc = DB::select('SELECT TOP 1 TC_can, TC_usd, TC_eur
+                        FROM SIZ_TipoCambio 
+                        WHERE YEAR(TC_date) = YEAR(GETDATE())');
+            
+            $data = array(
+                'actividades' => $actividades,
+                'ultimo' => count($actividades),
+                'modelo' => $modelo,
+                'modelo_descr' => $modelo_descr,
+                'tc' => $tc
+            );
+            return view('Mod09_Finanzas.simulador', $data);
+        } else {
+            return redirect()->route('auth/login');
+        }
+    }
+    public function datatables_simulador(Request $request)
+    {
+        $consulta = DB::select('
+            Declare @TiCa_CAN decimal(10,4)
+            Declare @TiCa_USD decimal(10,4)
+            Declare @TiCa_EUR decimal(10,4)
+
+                        SELECT TOP 1 @TiCa_CAN = TC_can, @TiCa_USD = TC_usd, @TiCa_EUR = TC_eur
+                        FROM SIZ_TipoCambio 
+                        WHERE YEAR(TC_date) = YEAR(GETDATE())
+
+                        SELECT  ITT1.Father AS CODIGO
+                        , A3.ItemName AS DESCRIPCION		 
+                        , Case When Left(Right(ITT1.Father, 5),3) = \'P03\' then SUM(ITT1.Quantity * L1.Price * 
+                            (Case When ITT1.Currency = \'USD\' then @TiCa_USD When ITT1.Currency = \'CAN\' then @TiCa_CAN When ITT1.Currency = \'EUR\' 
+                            then @TiCa_EUR When ITT1.Currency = \'MXP\' then  1 end)) ELSE 0 END AS PC03
+                        , Case When Left(Right(ITT1.Father, 5),3) = \'P04\' then SUM(ITT1.Quantity * L1.Price * 
+                            (Case When ITT1.Currency = \'USD\' then @TiCa_USD When ITT1.Currency = \'CAN\' then @TiCa_CAN When ITT1.Currency = \'EUR\' 
+                            then @TiCa_EUR When ITT1.Currency = \'MXP\' then  1 end)) ELSE 0 END AS PC04
+                        , Case When Left(Right(ITT1.Father, 5),3) = \'P05\' then SUM(ITT1.Quantity * L1.Price * 
+                            (Case When ITT1.Currency = \'USD\' then @TiCa_USD When ITT1.Currency = \'CAN\' then @TiCa_CAN When ITT1.Currency = \'EUR\' 
+                            then @TiCa_EUR When ITT1.Currency = \'MXP\' then  1 end)) ELSE 0 END AS PC05
+                        , Case When Left(Right(ITT1.Father, 5),3) = \'P06\' then SUM(ITT1.Quantity * L1.Price * 
+                            (Case When ITT1.Currency = \'USD\' then @TiCa_USD When ITT1.Currency = \'CAN\' then @TiCa_CAN When ITT1.Currency = \'EUR\' 
+                            then @TiCa_EUR When ITT1.Currency = \'MXP\' then  1 end)) ELSE 0 END AS PC06
+                        , Case When Left(Right(ITT1.Father, 5),3) = \'P07\' then SUM(ITT1.Quantity * L1.Price * 
+                            (Case When ITT1.Currency = \'USD\' then @TiCa_USD When ITT1.Currency = \'CAN\' then @TiCa_CAN When ITT1.Currency = \'EUR\' 
+                            then @TiCa_EUR When ITT1.Currency = \'MXP\' then  1 end)) ELSE 0 END AS PC07
+                        , Case When Left(Right(ITT1.Father, 5),3) = \'P08\' then SUM(ITT1.Quantity * L1.Price * 
+                            (Case When ITT1.Currency = \'USD\' then @TiCa_USD When ITT1.Currency = \'CAN\' then @TiCa_CAN When ITT1.Currency = \'EUR\' 
+                            then @TiCa_EUR When ITT1.Currency = \'MXP\' then  1 end)) ELSE 0 END AS PC08
+                        , Case When Left(Right(ITT1.Father, 5),2) <> \'P0\' then SUM(ITT1.Quantity * L1.Price * 
+                            (Case When ITT1.Currency = \'USD\' then @TiCa_USD When ITT1.Currency = \'CAN\' then @TiCa_CAN When ITT1.Currency = \'EUR\' 
+                            then @TiCa_EUR When ITT1.Currency = \'MXP\' then  1 end)) ELSE 0 END AS OTROS
+                        , \'MXP\' AS MONEDA
+                FROM ITT1 
+                INNER JOIN OITM A3 on ITT1.Father = A3.ItemCode
+                INNER JOIN ITM1 L1 on ITT1.Code= L1.ItemCode and L1.PriceList=1 
+                WHERE A3.InvntItem = \'Y\' and A3.frozenFor=\'N\' and A3.U_TipoMat = \'PT\' 
+                and A3.U_IsModel = \'N\'
+                and left(ITT1.Father,4) = ?
+                GROUP BY ITT1.Father, A3.ItemName, ITT1.Currency
+                ORDER BY Left(A3.ItemName, 14), Left(Right(ITT1.Father, 5),3) 
+            ', [$request->get('modelo')]);
+
+        //Definimos las columnas 
+        $columns = array(
+            ["data" => "CODIGO", "name" => "Código"],
+            ["data" => "DESCRIPCION", "name" => "Descripción"],
+            ["data" => "PC03", "name" => "PC03"],
+            ["data" => "PC04", "name" => "PC04"],
+            ["data" => "PC05", "name" => "PC05"],
+            ["data" => "PC06", "name" => "PC06"],
+            ["data" => "PC07", "name" => "PC07"],
+            ["data" => "PC08", "name" => "PC08"],
+            ["data" => "OTROS", "name" => "OTROS"],
+            ["data" => "MONEDA", "name" => "Moneda"]
+
+        );
+
+        return response()->json(array('data' => $consulta, 'columns' => $columns));
+    }
     public function DetalleModelos($modelo, $modelo_descr)
     {
         if (Auth::check()) {

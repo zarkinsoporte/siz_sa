@@ -508,3 +508,6 @@ Route::post('home/reporte/SIMULADOR COSTOS', 'Mod09_FinanzasListaPreciosControll
 
 Route::get('datatables_simulador_detalle_modelos', 'Mod09_FinanzasListaPreciosController@datatables_simulador_detalle_modelos')->name('datatables_simulador_detalle_modelos');
 Route::get('home/SIMULADOR COSTOS/detalle_modelos/{modelo}/{modelo_descr}', 'Mod09_FinanzasListaPreciosController@DetalleModelos');
+
+Route::get('datatables_simulador', 'Mod09_FinanzasListaPreciosController@datatables_simulador')->name('datatables_simulador');
+Route::get('home/SIMULADOR COSTOS/simulador/{modelo}/{modelo_descr}', 'Mod09_FinanzasListaPreciosController@Simulador');

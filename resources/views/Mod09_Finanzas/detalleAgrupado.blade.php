@@ -107,7 +107,7 @@
             <div class="row">
                     <a  class="btn btn-primary" href="{{url('home/SIMULADOR COSTOS/detalle_modelos/'.$modelo.'/'.$modelo_descr)}}"><i class="fa fa-table"></i>
                         Detalle Modelos</a>
-                    <a  class="btn btn-primary" href="{{url('#')}}"><i class="fa fa-cogs"></i>
+                    <a  class="btn btn-primary" href="{{url('home/SIMULADOR COSTOS/simulador/'.$modelo.'/'.$modelo_descr)}}"><i class="fa fa-cogs"></i>
                         Simulador</a>
                         <a  class="btn btn-primary" href="{{url('home/SIMULADOR COSTOS/')}}"><i class="fa fa-cog"></i>
                         Revisar otro</a>
