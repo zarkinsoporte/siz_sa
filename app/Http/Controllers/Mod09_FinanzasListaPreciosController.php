@@ -23,12 +23,106 @@ ini_set('max_execution_time', 0);
 
 class Mod09_FinanzasListaPreciosController extends Controller
 {
+    public function simulador_actualizarPrecios(Request $request){
+        $articulos = $request->input('articulos');
+        $precio_nuevo = $request->input('precio_nuevo');
+        $precio_porcentaje = $request->input('precio_porcentaje');
+        $option = $request->input('option');
+        $moneda = $request->input('moneda');
+        $tc_usd = $request->input('tc_usd');
+        $tc_can = $request->input('tc_can');
+        $tc_eur = $request->input('tc_eur');
+        $code_composicion = $request->input('code_composicion');
+        $articulos = explode(',', $articulos);
+       
+        foreach ($articulos as $key => $articulo) {
+            $pos = explode('&',$articulo);
+            
+            $codigo = $pos[0];
+            $precio = $pos[1];
+            
+            if ($option == '1') { 
+                $precio = $precio_nuevo;
+            } else if ($option == '2') { 
+                $precio += $precio * ( $precio_porcentaje / 100 );
+            }
+            switch ($moneda) {
+                case 'USD':
+                    $precioMXP = $precio * $tc_usd;
+                    break;
+                case 'CAN':
+                    $precioMXP = $precio * $tc_can;
+                    break;
+                case 'EUR':
+                    $precioMXP = $precio * $tc_eur;
+                    break;                
+                default:
+                    $precioMXP = $precio;
+                    break;
+            }
+            DB::update('update Siz_simulador_temp set precio = ?, precioMXP = ?
+            where composicionCodigo = ?
+            and codigo = ?', 
+            [$precio, $precioMXP, $code_composicion, $codigo]);
+        }
+        return 'ok';
+    }
+    public function datatables_simulador_precios(Request $request)
+    {
+        $cat = $request->get('categoria');   
+        switch ($cat) {
+            case 'precios_piel':
+                $cat = '9';
+                break;
+            case 'precios_tela':
+                $cat = '11';
+                break;
+            
+            default:
+                # code...
+                break;
+        }
+        $id = $request->get('id');        
+      //Siz_simulador_temp
+            
+        $material = DB::select('select *, cantidad*precioMXP as precio_pesos from Siz_simulador_temp
+        where composicionCodigo = ?
+        and grupoPlaneacion = ? and subModelo <> ? 
+        ', [$id, $cat,'C']);
+               
+        return response()->json(array('material' => $material));
+        
+        $consulta = DB::select('exec SIZ_SIMULADOR_COSTO_LDM  ?', [$tc_usd]);
+        //Definimos las columnas 
+        $consulta= collect($consulta);
+        return Datatables::of($consulta)
+            
+            ->addColumn(
+                'pieles',
+                function ($item) {
+                    return  number_format($item->g_piel_cant, 2, '.', ',') . ' / ' . number_format($item->g_tela_cant, 2, '.', ',');
+                }
+            )
+            ->addColumn(
+                'pieles_precio',
+                function ($item) {
+                    //return   . ;
+                    return '<a href="#" id="precios_piel">
+                            <i class="fa fa-hand-o-right"></i> '.number_format($item->g_piel, 2, '.', ',').'</a> / 
+                            <a href="#" id="precios_tela">
+                            <i class="fa fa-hand-o-right"></i> '.number_format($item->g_tela, 2, '.', ',').'</a>';
+                    
+                }
+            )
+            ->make(true);
+      
+    }
     public function Simulador($modelo, $modelo_descr)
     {
         if (Auth::check()) {
             $user = Auth::user();
             $actividades = $user->getTareas();
-            $tc = DB::select('SELECT TOP 1 TC_can, TC_usd, TC_eur
+            $tc = DB::select('SELECT TOP 1 TC_can can, TC_usd usd, TC_eur eur
                         FROM SIZ_TipoCambio 
                         WHERE YEAR(TC_date) = YEAR(GETDATE())');
             
@@ -46,65 +140,110 @@ class Mod09_FinanzasListaPreciosController extends Controller
     }
     public function datatables_simulador(Request $request)
     {
-        $consulta = DB::select('
-            Declare @TiCa_CAN decimal(10,4)
-            Declare @TiCa_USD decimal(10,4)
-            Declare @TiCa_EUR decimal(10,4)
+        $modelo = $request->get('modelo');        
+        $tc_usd = $request->get('tc_usd');        
+        $tc_can = $request->get('tc_can');        
+        $tc_eur = $request->get('tc_eur');        
+        $insert = $request->get('insert');
 
-                        SELECT TOP 1 @TiCa_CAN = TC_can, @TiCa_USD = TC_usd, @TiCa_EUR = TC_eur
-                        FROM SIZ_TipoCambio 
-                        WHERE YEAR(TC_date) = YEAR(GETDATE())
+        if ($insert == 1 ) {
+            
+        $composiciones = DB::select('Select OITM.ItemCode,
+        OITM.FrgnName composicion
+        From OITM
+        inner join ITT1 on OITM.ItemCode = ITT1.Father  
+        inner join OITM A1 on ITT1.Code = A1.ItemCode and A1.ItemCode =\'12826\'
+        Where OITM.ItemCode like \''.$modelo.'%\' and oitm.ItemCode like \'%0301\' 
+        ');
+        //dd($composiciones);              
+        DB::table('Siz_simulador_temp')->truncate();
+        foreach ($composiciones as $value) {
+            $xCodeSub[0] = $value->ItemCode;
+            //dd($xCodeSub);
+            foreach ($xCodeSub as $codeSub) {
 
-                        SELECT  ITT1.Father AS CODIGO
-                        , A3.ItemName AS DESCRIPCION		 
-                        , Case When Left(Right(ITT1.Father, 5),3) = \'P03\' then SUM(ITT1.Quantity * L1.Price * 
-                            (Case When ITT1.Currency = \'USD\' then @TiCa_USD When ITT1.Currency = \'CAN\' then @TiCa_CAN When ITT1.Currency = \'EUR\' 
-                            then @TiCa_EUR When ITT1.Currency = \'MXP\' then  1 end)) ELSE 0 END AS PC03
-                        , Case When Left(Right(ITT1.Father, 5),3) = \'P04\' then SUM(ITT1.Quantity * L1.Price * 
-                            (Case When ITT1.Currency = \'USD\' then @TiCa_USD When ITT1.Currency = \'CAN\' then @TiCa_CAN When ITT1.Currency = \'EUR\' 
-                            then @TiCa_EUR When ITT1.Currency = \'MXP\' then  1 end)) ELSE 0 END AS PC04
-                        , Case When Left(Right(ITT1.Father, 5),3) = \'P05\' then SUM(ITT1.Quantity * L1.Price * 
-                            (Case When ITT1.Currency = \'USD\' then @TiCa_USD When ITT1.Currency = \'CAN\' then @TiCa_CAN When ITT1.Currency = \'EUR\' 
-                            then @TiCa_EUR When ITT1.Currency = \'MXP\' then  1 end)) ELSE 0 END AS PC05
-                        , Case When Left(Right(ITT1.Father, 5),3) = \'P06\' then SUM(ITT1.Quantity * L1.Price * 
-                            (Case When ITT1.Currency = \'USD\' then @TiCa_USD When ITT1.Currency = \'CAN\' then @TiCa_CAN When ITT1.Currency = \'EUR\' 
-                            then @TiCa_EUR When ITT1.Currency = \'MXP\' then  1 end)) ELSE 0 END AS PC06
-                        , Case When Left(Right(ITT1.Father, 5),3) = \'P07\' then SUM(ITT1.Quantity * L1.Price * 
-                            (Case When ITT1.Currency = \'USD\' then @TiCa_USD When ITT1.Currency = \'CAN\' then @TiCa_CAN When ITT1.Currency = \'EUR\' 
-                            then @TiCa_EUR When ITT1.Currency = \'MXP\' then  1 end)) ELSE 0 END AS PC07
-                        , Case When Left(Right(ITT1.Father, 5),3) = \'P08\' then SUM(ITT1.Quantity * L1.Price * 
-                            (Case When ITT1.Currency = \'USD\' then @TiCa_USD When ITT1.Currency = \'CAN\' then @TiCa_CAN When ITT1.Currency = \'EUR\' 
-                            then @TiCa_EUR When ITT1.Currency = \'MXP\' then  1 end)) ELSE 0 END AS PC08
-                        , Case When Left(Right(ITT1.Father, 5),2) <> \'P0\' then SUM(ITT1.Quantity * L1.Price * 
-                            (Case When ITT1.Currency = \'USD\' then @TiCa_USD When ITT1.Currency = \'CAN\' then @TiCa_CAN When ITT1.Currency = \'EUR\' 
-                            then @TiCa_EUR When ITT1.Currency = \'MXP\' then  1 end)) ELSE 0 END AS OTROS
-                        , \'MXP\' AS MONEDA
-                FROM ITT1 
-                INNER JOIN OITM A3 on ITT1.Father = A3.ItemCode
-                INNER JOIN ITM1 L1 on ITT1.Code= L1.ItemCode and L1.PriceList=1 
-                WHERE A3.InvntItem = \'Y\' and A3.frozenFor=\'N\' and A3.U_TipoMat = \'PT\' 
-                and A3.U_IsModel = \'N\'
-                and left(ITT1.Father,4) = ?
-                GROUP BY ITT1.Father, A3.ItemName, ITT1.Currency
-                ORDER BY Left(A3.ItemName, 14), Left(Right(ITT1.Father, 5),3) 
-            ', [$request->get('modelo')]);
+                $subs = DB::select("Select OITM.ItemCode AS CODIGO 
+                    from ITT1 
+                    inner join OITM on OITM.ItemCode = ITT1.Code 
+                    inner join [@PL_RUTAS] RUTE on RUTE.Code = OITM.U_estacion 
+                    inner join ITM1 on ITM1.ItemCode = OITM.ItemCode 
+                    and ITM1.PriceList=? 
+                    where  ITT1.Father = ? and 
+                    (OITM.QryGroup29 = 'Y' or OITM.QryGroup30 = 'Y' or OITM.QryGroup31 = 'Y' or OITM.QryGroup32 = 'Y') 
+                    --Order by MATERIAL",
+                    [1, $codeSub]);
+                 $subs = array_pluck($subs,'CODIGO');
 
+                $xCodeSub = array_merge($xCodeSub, $subs);
+                
+            }
+            $sub_cadena = "";
+            for ($x = 0; $x < count($xCodeSub); $x++) {
+                if ($x == count($xCodeSub) - 1) {
+                    $sub_cadena = $sub_cadena . $xCodeSub[$x];
+                } else {
+                    $sub_cadena = $sub_cadena . $xCodeSub[$x] . ",";
+                }
+            }
+            DB::select('exec SIZ_SIMULADOR_COSTO_LDM_INSERT  ?, ?, ?, ?, ?, ?', 
+            [$sub_cadena, $value->ItemCode, $value->composicion, $tc_usd, $tc_can, $tc_eur]);
+        }
+
+        } //end insert
+        
+        $consulta = DB::select('exec SIZ_SIMULADOR_COSTO_LDM  ?, ?, ?', [$tc_usd, $tc_can, $tc_eur]);
         //Definimos las columnas 
+        $consulta= collect($consulta);
+        return Datatables::of($consulta)
+            
+            ->addColumn(
+                'pieles',
+                function ($item) {
+                    return  number_format($item->g_piel_cant, 2, '.', ',') . ' / ' . number_format($item->g_tela_cant, 2, '.', ',');
+                }
+            )
+            ->addColumn(
+                'pieles_precio',
+                function ($item) {
+                    //return   . ;
+                    return '<a href="#" id="precios_piel">
+                            <i class="fa fa-hand-o-right"></i> '.number_format($item->g_piel, 2, '.', ',').'</a> / 
+                            <a href="#" id="precios_tela">
+                            <i class="fa fa-hand-o-right"></i> '.number_format($item->g_tela, 2, '.', ',').'</a>';
+                    
+                }
+            )
+            ->make(true);
         $columns = array(
-            ["data" => "CODIGO", "name" => "Código"],
-            ["data" => "DESCRIPCION", "name" => "Descripción"],
-            ["data" => "PC03", "name" => "PC03"],
-            ["data" => "PC04", "name" => "PC04"],
-            ["data" => "PC05", "name" => "PC05"],
-            ["data" => "PC06", "name" => "PC06"],
-            ["data" => "PC07", "name" => "PC07"],
-            ["data" => "PC08", "name" => "PC08"],
-            ["data" => "OTROS", "name" => "OTROS"],
-            ["data" => "MONEDA", "name" => "Moneda"]
+            ["data" => "composicionCodigoCorto", "name" => "Código"],
+            ["data" => "composicion", "name" => "Composición"],
+            ["data" => "pielcant", "name" => "DCM/MT"],
+            ["data" => "gpiel", "name" => "1 Piel/Tela T"],
+            ["data" => "pg_piel_tela", "name" => "% Piel"],
+            ["data" => "g_huleUSD", "name" => "Dólares Hule"],
+            ["data" => "g_hule", "name" => "2 Hule"],
+            ["data" => "pg_hule", "name" => "% Hule"],
+            ["data" => "g_cojineria", "name" => "3 Pluma/Acojin"],
+            ["data" => "pg_cojineria", "name" => "% Cojín"],
+            ["data" => "g_casco", "name" => "4 Casco"],
+            ["data" => "pg_casco", "name" => "% Casco"],
+            ["data" => "g_herrajesUSD", "name" => "Dólares Herrajes"],
+            ["data" => "g_herrajes", "name" => "5 Herrajes y Mecanismos"],
+            ["data" => "pg_herrajes", "name" => "% Herrajes"],
+            ["data" => "g_metalesUSD", "name" => "Dólares Patas"],
+            ["data" => "g_metales", "name" => "6 Patas"],
+            ["data" => "pg_metales", "name" => "% Patas"],
+            ["data" => "g_empaques", "name" => "7 Empaque"],
+            ["data" => "pg_empaques", "name" => "% Empaque"],
+            ["data" => "g_otros", "name" => "8 Otros"],
+            ["data" => "pg_metales", "name" => "% Otros"],
+            ["data" => "g_cuotas", "name" => "9 Cuotas"],
+            ["data" => "pg_cuotas", "name" => "% Cuotas"],
+            ["data" => "total", "name" => "Total"]
 
         );
 
-        return response()->json(array('data' => $consulta, 'columns' => $columns));
+       // return response()->json(array('data' => $consulta, 'columns' => $columns));
     }
     public function DetalleModelos($modelo, $modelo_descr)
     {
@@ -233,7 +372,7 @@ class Mod09_FinanzasListaPreciosController extends Controller
                 , OITM.ItemName AS MODELO
                 FROM OITM 
                 WHERE OITM.U_IsModel = \'S\' AND OITM.frozenFor= \'N\' AND U_Linea = \'01\'
-                ORDER BY OITM.ItemName	
+                ORDER BY OITM.ItemName asc	
             ');
 
         //Definimos las columnas

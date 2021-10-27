@@ -254,7 +254,8 @@
                                 
                                         var table = $(tableName).DataTable({               
                                         dom: 'irtp',
-                                        orderCellsTop: true,    
+                                        orderCellsTop: true, 
+                                        order: [],   
                                         scrollY:        "250px",
                                         "pageLength": 50,
                                         scrollX:        true,
@@ -266,7 +267,10 @@
                                         columns: data.columns,            
                                         "language": {
                                             "url": "{{ asset('assets/lang/Spanish.json') }}",                    
-                                        },                          
+                                        }, 
+                                        "initComplete": function(settings, json) {
+                                            $('#tabla tbody tr:eq(0)').click();
+                                        }                         
                                     });
 
                                     $('#tabla thead tr:eq(1) th').each( function (i) {
@@ -300,6 +304,7 @@
                                     $('input[name=pKey]').val(fila[0][data.pkey]);                                                                                                   
                                 }
                                    } );
+                                   
                                 },
                                 error: function(jqXHR, textStatus, errorThrown) {
                                     var msg = '';

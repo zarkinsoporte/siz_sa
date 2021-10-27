@@ -47,35 +47,36 @@ class Mod04_MaterialesController extends Controller
         if (Auth::check()) {
             $consulta = DB::select(DB::raw( "
           SELECT * FROM(
-            SELECT 'ENTRADA G' as TIPO, PDN1.ItemCode, OPDN.DocNum, OPDN.DocDate, OPDN.CardCode, OPDN.CardName, PDN1.Price, PDN1.LineTotal, PDN1.VatSum, OPDN.DocCur, PDN1.Dscription, OPDN.DocRate, PDN1.WhsCode, PDN1.Quantity, PDN1.NumPerMsr, OPDN.NumAtCard
+            SELECT 'ENTRADA G' as TIPO, PDN1.ItemCode, OPDN.DocNum, FORMAT (Cast (OPDN.DocDate AS DATE), 'dd-MM-yyyy') DocDate, OPDN.CardCode, OPDN.CardName, PDN1.Price, PDN1.LineTotal, PDN1.VatSum, OPDN.DocCur, PDN1.Dscription, OPDN.DocRate, PDN1.WhsCode, PDN1.Quantity, PDN1.NumPerMsr, OPDN.NumAtCard
             ,PDN1.TotalFrgn, PDN1.VatSumFrgn 
             FROM   OPDN OPDN INNER JOIN dbo.PDN1 PDN1 ON OPDN.DocEntry=PDN1.DocEntry
-            WHERE  (FORMAT (Cast (OPDN.DocDate as DATE), 'dd-MM-yyyy hh:mm:ss') 
-                        BETWEEN '" . date('d-m-Y', strtotime($request->get('fi'))) . ' 00:00' . "' and '" . date('d-m-Y', strtotime($request->get('ff'))) . ' 23:59:59' . "'
-            )AND (PDN1.WhsCode=N'AMG-CC' OR PDN1.WhsCode=N'AMG-ST' OR PDN1.WhsCode=N'AMG-FE' OR PDN1.WhsCode=N'AGG-RE' OR PDN1.WhsCode=N'AMG-KU' OR PDN1.WhsCode=N'AMP-BL' OR PDN1.WhsCode=N'APG-ST' OR PDN1.WhsCode=N'APG-PA' OR PDN1.WhsCode=N'ATG-ST' OR PDN1.WhsCode=N'ATG-FX' OR PDN1.WhsCode=N'AMP-TR' OR PDN1.WhsCode=N'ARG-ST')
+            WHERE  OPDN.DocDate 
+            BETWEEN '" . date('Y-m-d', strtotime($request->get('fi'))) . ' 00:00:00' . "' and '" . date('Y-m-d', strtotime($request->get('ff'))) . ' 23:59:59' . "'
+            
+            AND (PDN1.WhsCode=N'AMG-CC' OR PDN1.WhsCode=N'AMG-ST' OR PDN1.WhsCode=N'AMG-FE' OR PDN1.WhsCode=N'AGG-RE' OR PDN1.WhsCode=N'AMG-KU' OR PDN1.WhsCode=N'AMP-BL' OR PDN1.WhsCode=N'APG-ST' OR PDN1.WhsCode=N'APG-PA' OR PDN1.WhsCode=N'ATG-ST' OR PDN1.WhsCode=N'ATG-FX' OR PDN1.WhsCode=N'AMP-TR' OR PDN1.WhsCode=N'ARG-ST')
 UNION ALL
-            SELECT 'ENTRADA L' as TIPO, PDN1.ItemCode, OPDN.DocNum, OPDN.DocDate, OPDN.CardCode, OPDN.CardName, PDN1.Price, PDN1.LineTotal, PDN1.VatSum, OPDN.DocCur, PDN1.Dscription, OPDN.DocRate, PDN1.WhsCode, PDN1.Quantity, PDN1.NumPerMsr, OPDN.NumAtCard
+            SELECT 'ENTRADA L' as TIPO, PDN1.ItemCode, OPDN.DocNum, FORMAT (Cast (OPDN.DocDate AS DATE), 'dd-MM-yyyy') DocDate, OPDN.CardCode, OPDN.CardName, PDN1.Price, PDN1.LineTotal, PDN1.VatSum, OPDN.DocCur, PDN1.Dscription, OPDN.DocRate, PDN1.WhsCode, PDN1.Quantity, PDN1.NumPerMsr, OPDN.NumAtCard
             ,PDN1.TotalFrgn, PDN1.VatSumFrgn 
             FROM   OPDN OPDN INNER JOIN PDN1 PDN1 ON OPDN.DocEntry=PDN1.DocEntry
-            WHERE  (FORMAT (Cast (OPDN.DocDate as DATE), 'dd-MM-yyyy hh:mm:ss') 
-            BETWEEN '" . date('d-m-Y', strtotime($request->get('fi'))) . ' 00:00' . "' and '" . date('d-m-Y', strtotime($request->get('ff'))) . ' 23:59:59' . "'
-            ) 
+            WHERE  OPDN.DocDate 
+            BETWEEN '" . date('Y-m-d', strtotime($request->get('fi'))) . ' 00:00:00' . "' and '" . date('Y-m-d', strtotime($request->get('ff'))) . ' 23:59:59' . "'
+            
             AND (PDN1.WhsCode IS  NULL  OR  NOT (PDN1.WhsCode=N'AGG-RE' OR PDN1.WhsCode=N'AMG-CC' OR PDN1.WhsCode=N'AMG-FE' OR PDN1.WhsCode=N'AMG-KU' OR PDN1.WhsCode=N'AMG-ST' OR PDN1.WhsCode=N'AMP-BL' OR PDN1.WhsCode=N'AMP-TR' OR PDN1.WhsCode=N'APG-PA' OR PDN1.WhsCode=N'APG-ST' OR PDN1.WhsCode=N'ARG-ST' OR PDN1.WhsCode=N'ATG-FX' OR PDN1.WhsCode=N'ATG-ST'))
 UNION ALL
-            SELECT 'NOTA CREDITO' as TIPO, RPC1.ItemCode, ORPC.DocNum, ORPC.DocDate, ORPC.CardCode, ORPC.CardName, RPC1.Price, RPC1.LineTotal, RPC1.VatSum, ORPC.DocCur, RPC1.Dscription, ORPC.DocRate, RPC1.WhsCode, RPC1.Quantity, RPC1.NumPerMsr, ORPC.NumAtCard
+            SELECT 'NOTA CREDITO' as TIPO, RPC1.ItemCode, ORPC.DocNum, FORMAT (Cast (ORPC.DocDate AS DATE), 'dd-MM-yyyy') DocDate, ORPC.CardCode, ORPC.CardName, RPC1.Price, RPC1.LineTotal, RPC1.VatSum, ORPC.DocCur, RPC1.Dscription, ORPC.DocRate, RPC1.WhsCode, RPC1.Quantity, RPC1.NumPerMsr, ORPC.NumAtCard
             ,RPC1.TotalFrgn, RPC1.VatSumFrgn 
             FROM   ORPC ORPC INNER JOIN RPC1 RPC1 ON ORPC.DocEntry=RPC1.DocEntry
-            WHERE  (FORMAT (Cast (ORPC.DocDate as DATE), 'dd-MM-yyyy hh:mm:ss') 
-            BETWEEN '" . date('d-m-Y', strtotime($request->get('fi'))) . ' 00:00' . "' and '" . date('d-m-Y', strtotime($request->get('ff'))) . ' 23:59:59' . "'
-            ) 
+            WHERE  ORPC.DocDate 
+            BETWEEN '" . date('Y-m-d', strtotime($request->get('fi'))) . ' 00:00:00' . "' and '" . date('Y-m-d', strtotime($request->get('ff'))) . ' 23:59:59' . "'
+             
             AND (RPC1.WhsCode IS  NULL  OR  NOT (RPC1.WhsCode=N'AGG-RE' OR RPC1.WhsCode=N'AMG-CC' OR RPC1.WhsCode=N'AMG-FE' OR RPC1.WhsCode=N'AMG-KU' OR RPC1.WhsCode=N'AMG-ST' OR RPC1.WhsCode=N'AMP-BL' OR RPC1.WhsCode=N'AMP-TR' OR RPC1.WhsCode=N'APG-PA' OR RPC1.WhsCode=N'APG-ST' OR RPC1.WhsCode=N'ARG-ST' OR RPC1.WhsCode=N'ATG-FX' OR RPC1.WhsCode=N'ATG-ST'))
 UNION ALL
-            SELECT 'DEVOLUCION' AS TIPO, RPD1.ItemCode, ORPD.DocNum, ORPD.DocDate, ORPD.CardCode, ORPD.CardName, RPD1.Price, RPD1.LineTotal, RPD1.VatSum, ORPD.DocCur, RPD1.Dscription, ORPD.DocRate, RPD1.WhsCode, RPD1.Quantity, RPD1.NumPerMsr, ORPD.NumAtCard
+            SELECT 'DEVOLUCION' AS TIPO, RPD1.ItemCode, ORPD.DocNum, FORMAT (Cast (ORPD.DocDate AS DATE), 'dd-MM-yyyy') DocDate, ORPD.CardCode, ORPD.CardName, RPD1.Price, RPD1.LineTotal, RPD1.VatSum, ORPD.DocCur, RPD1.Dscription, ORPD.DocRate, RPD1.WhsCode, RPD1.Quantity, RPD1.NumPerMsr, ORPD.NumAtCard
             ,RPD1.TotalFrgn, RPD1.VatSumFrgn 
             FROM   ORPD ORPD INNER JOIN RPD1 RPD1 ON ORPD.DocEntry=RPD1.DocEntry
-            WHERE  (FORMAT (Cast (ORPD.DocDate as DATE), 'dd-MM-yyyy hh:mm:ss')
-            BETWEEN '" . date('d-m-Y', strtotime($request->get('fi'))) . ' 00:00' . "' and '" . date('d-m-Y', strtotime($request->get('ff'))) . ' 23:59:59' . "'
-            ) 
+            WHERE  ORPD.DocDate
+            BETWEEN '" . date('Y-m-d', strtotime($request->get('fi'))) . ' 00:00:00' . "' and '" . date('Y-m-d', strtotime($request->get('ff'))) . ' 23:59:59' . "'
+             
             AND (RPD1.WhsCode IS  NULL  OR  NOT (RPD1.WhsCode=N'AGG-RE' OR RPD1.WhsCode=N'AMG-CC' OR RPD1.WhsCode=N'AMG-FE' OR RPD1.WhsCode=N'AMG-KU' OR RPD1.WhsCode=N'AMG-ST' OR RPD1.WhsCode=N'AMP-BL' OR RPD1.WhsCode=N'AMP-TR' OR RPD1.WhsCode=N'APG-PA' OR RPD1.WhsCode=N'APG-ST' OR RPD1.WhsCode=N'ARG-ST' OR RPD1.WhsCode=N'ATG-FX' OR RPD1.WhsCode=N'ATG-ST'))
             
             ) T
@@ -2732,7 +2733,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
     public function DataShowEntradasSalidas(Request $request)
     {
         if (Auth::check()) {
-            $fi = $request->get('fi').' 00:00';
+            $fi = $request->get('fi').' 00:00:00';
             $ff = $request->get('ff').' 23:59:59';
             $tipomat = $request->get('tipomat');
             $almacenes = $request->get('almacenes');

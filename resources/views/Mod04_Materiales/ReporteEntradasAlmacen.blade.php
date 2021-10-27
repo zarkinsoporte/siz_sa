@@ -154,10 +154,14 @@ var f = fecha.toUpperCase();
 
 var table = $('#tentradas').DataTable({
     "order": [[ 1, "desc" ],[0, "asc"],[2, "asc"]],
+    lengthMenu: [
+        [ 10, 25, 50, -1 ],
+        [ '10', '25', '50', 'Todo' ]
+    ],
     dom: 'Bfrtip',
     orderCellsTop: true,    
     scrollY:        "300px",
-    "pageLength": 50,
+    
     scrollX:        true,
     scrollCollapse: true,
     paging:         true,
@@ -175,11 +179,7 @@ var table = $('#tentradas').DataTable({
         // { data: 'action', name: 'action', orderable: false, searchable: false}
         { data: 'DocNum', name:  'DocNum', orderable: true, searchable: true},
         { data: 'TIPO'},
-        { data: 'DocDate', name: 'DocDate',
-        render: function(data){   
-            var d = new Date(data.split(' ')[0]);             
-            return moment(d).format("DD-MM-YYYY");
-        }},
+        { data: 'DocDate', name: 'DocDate'},
         { data: 'CardCode', name:  'CardCode'},
         { data: 'CardName', name: 'CardName'},
         { data: 'NumAtCard', name: 'NumAtCard'},
@@ -278,6 +278,7 @@ var table = $('#tentradas').DataTable({
                 columns: ':visible',                
             }
         },
+        'pageLength'
        
     ],
     "language": {
@@ -288,6 +289,10 @@ var table = $('#tentradas').DataTable({
             copySuccess: {
                 _: '%d filas copiadas',
                 1: '1 fila copiada'
+            },
+            pageLength: {
+                _: "Mostrar %d filas",
+                '-1': "Mostrar todo"
             }
         }
     },

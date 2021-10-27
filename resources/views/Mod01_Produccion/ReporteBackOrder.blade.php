@@ -35,7 +35,7 @@
 
     <!-- Page Heading -->
     <div class="row">
-        <div class="col-md-11">
+        <div class="col-md-11" style="margin-bottom: -12px">
             <h3 class="page-header">
                 Reporte BackOrder
                 <small>Producción</small>
@@ -148,6 +148,10 @@ var f = fecha.toUpperCase();
 
 var table = $('#tbackorder').DataTable({
     dom: 'Bfrtip',
+    lengthMenu: [
+        [ 10, 25, 50, -1 ],
+        [ '10', '25', '50', 'Todo' ]
+    ],
     buttons: [ 
         {
             extend: 'collection',
@@ -233,11 +237,11 @@ var table = $('#tbackorder').DataTable({
                 columns: ':visible',                
             }             
         },
+        'pageLength'
     ],
    
     orderCellsTop: true,    
-    scrollY:        "300px",
-    "pageLength": 50,
+    scrollY:        "270px",
     scrollX:        true,
     scrollCollapse: true,
     paging:         true,
@@ -314,7 +318,11 @@ var table = $('#tbackorder').DataTable({
         "oAria": {
             "sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
             "sSortDescending": ": Activar para ordenar la columna de manera descendente"
-        }
+        },
+        "pageLength": {
+                _: "Mostrar %d filas",
+                '-1': "Mostrar todo"
+            }
     },
     columnDefs: [
         { width: 80, targets: 2 },
