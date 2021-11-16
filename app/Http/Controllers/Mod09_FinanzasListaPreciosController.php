@@ -157,6 +157,7 @@ class Mod09_FinanzasListaPreciosController extends Controller
         ');
         //dd($composiciones);              
         DB::table('Siz_simulador_temp')->truncate();
+        
         foreach ($composiciones as $value) {
             $xCodeSub[0] = $value->ItemCode;
             //dd($xCodeSub);
@@ -185,13 +186,16 @@ class Mod09_FinanzasListaPreciosController extends Controller
                     $sub_cadena = $sub_cadena . $xCodeSub[$x] . ",";
                 }
             }
-            DB::select('exec SIZ_SIMULADOR_COSTO_LDM_INSERT  ?, ?, ?, ?, ?, ?', 
-            [$sub_cadena, $value->ItemCode, $value->composicion, $tc_usd, $tc_can, $tc_eur]);
+            $xCodeSub = [];
+            //dd([$sub_cadena, $value->ItemCode, $value->composicion, $tc_usd, $tc_can, $tc_eur]);
+            clock([$sub_cadena, $value->ItemCode]);
+            DB::select('exec SIZ_SIMULADOR_COSTO_LDM_INSERT  ?, ?, ?, ?', 
+            [$sub_cadena, $value->ItemCode, $value->composicion, $tc_usd]);
         }
 
         } //end insert
         
-        $consulta = DB::select('exec SIZ_SIMULADOR_COSTO_LDM  ?, ?, ?', [$tc_usd, $tc_can, $tc_eur]);
+        $consulta = DB::select('exec SIZ_SIMULADOR_COSTO_LDM  ?', [$tc_usd]);
         //Definimos las columnas 
         $consulta= collect($consulta);
         return Datatables::of($consulta)

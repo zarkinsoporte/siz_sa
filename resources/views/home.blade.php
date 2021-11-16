@@ -157,7 +157,7 @@ $index = 0;
             .navbar-collapse.in {
                 background-color: rgb(16, 13, 13);
             }
-          .content {
+            .content {
                 padding: 10px;
                 margin-left: -230px;
                 transition: all 0.3s;

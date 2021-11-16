@@ -15,7 +15,13 @@
         font-size: 12px;
         border: 0px;
     }
-    
+    #resize_wrapper {
+				position: absolute;
+				top: 5em;
+				left: 1em;
+				right: 1em;
+				bottom: 1em;
+			}
     td {
     font-family: 'Helvetica';
     font-size: 11px;
@@ -104,7 +110,7 @@
         </div> <!-- /.row -->
         
         <div class="col-md-12">
-            <div class="row">
+            <div class="row" style="margin-bottom: 15px">
                     <a  class="btn btn-primary" href="{{url('home/SIMULADOR COSTOS/detalle_modelos/'.$modelo.'/'.$modelo_descr)}}"><i class="fa fa-table"></i>
                         Detalle Modelos</a>
                     <a  class="btn btn-primary" href="{{url('home/SIMULADOR COSTOS/simulador/'.$modelo.'/'.$modelo_descr)}}"><i class="fa fa-cogs"></i>
@@ -116,6 +122,7 @@
         </div>
        
         <div class="row">
+            
             <div class="col-md-12">
                 <div class="">
                     <table id="table_detalle_agrupado" class="table table-striped table-bordered nowrap" width="100%">
@@ -258,12 +265,12 @@ jqxhr =  $.ajax({
          table_cxp = $(tableName).DataTable({
                 
                 deferRender: true,
-               "paging":   false,
-                dom: 'frti',
-                caption : 'Hello',
-                scrollX: true,
+                "lengthMenu": [ [-1, 10, 25, 50], ["Todo", 10, 25, 50] ],
+                dom: 'flrti',
+               
+			    scrollX: true,
+                paging: true,
                 scrollCollapse: true,
-                scrollY: "200px",
                 fixedColumns: false,
                 processing: true,
                 columns: data.columns,
@@ -280,6 +287,7 @@ jqxhr =  $.ajax({
                 ],
                 
             });
+           
           
 }
 

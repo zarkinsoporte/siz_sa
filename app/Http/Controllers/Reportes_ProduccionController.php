@@ -481,7 +481,7 @@ class Reportes_ProduccionController extends Controller
             }
             //dd($sub_cadena);
 
-           // dd($sub_cadena);
+            //clock($sub_cadena);
             $consulta = DB::select('exec SIZ_MATERIALES_LDM_CODIGO ?, ?', [$sub_cadena, $lista_precio]);
         /*    
         $consulta = DB::select(DB::raw("SELECT b.DocNum AS DocNumOf, 

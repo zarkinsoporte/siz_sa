@@ -125,7 +125,7 @@ class Mod01_ProduccionController extends Controller
         }
         //dd($sub_cadena);
 
-       // dd($sub_cadena);
+        
         $Materiales = DB::select('exec SIZ_MATERIALES_LDM_CODIGO ?, ?', [$sub_cadena, $lista_precio]);
        /* $Materiales = DB::select(DB::raw("SELECT b.DocNum AS DocNumOf, 
 	       '*' + CAST(b.DocNum as varchar (50)) + '*' as CodBarras,

@@ -418,7 +418,10 @@ Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@pr
 //Route::get('/pruebassap', 'Mod02_PlaneacionController@updateOV');
 
 Route::get('/pruebas', function (Request $request) {
-
+    Mail::send('welcome', [], function ($msj)  {
+        $msj->subject('SIZ Test'); //ASUNTO DEL CORREO
+        $msj->to(['alberto.medina@zarkin.com']); //Correo del destinatario
+    });      
     $var1= Artisan::call('cache:clear');
     $var= Artisan::call('config:cache');
     $tareas = DB::table('Siz_Tarea_Menu')
@@ -426,7 +429,7 @@ Route::get('/pruebas', function (Request $request) {
     ->get();
 
     foreach ($tareas as $k) {
-        DB::update('update Siz_Tarea_Menu set route = ? where name = ?', [$k->name, $k->name]);
+       // DB::update('update Siz_Tarea_Menu set route = ? where name = ?', [$k->name, $k->name]);
     }
    
 });

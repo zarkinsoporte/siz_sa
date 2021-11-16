@@ -149,7 +149,7 @@
                            <th class="blue">5 Herrajes</th>
                            <th class="blue">% Herrajes</th>
                            <th>USD Patas</th>
-                           <th>6 Patas"</th>
+                           <th>6 Patas</th>
                            <th>% Patas</th>
                            <th class="blue">7 Empaque</th>
                            <th class="blue">% Empaque</th>
@@ -426,6 +426,7 @@
 
             }
             $('#btn_mostrar').on('click', function(e) {
+                // boton calcular
                 e.preventDefault();
                 reloadTable();
             });

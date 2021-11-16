@@ -253,11 +253,12 @@ jqxhr =  $.ajax({
          table_cxp = $(tableName).DataTable({
                 
                 deferRender: true,
-               "paging":   false,
-                dom: 'frti',
-                scrollX: true,
+                "lengthMenu": [ [-1, 10, 25, 50], ["Todo", 10, 25, 50] ],
+                dom: 'flrti',
+               
+			    scrollX: true,
+                paging: true,
                 scrollCollapse: true,
-                scrollY: "200px",
                 fixedColumns: false,
                 processing: true,
                 columns: data.columns,

@@ -149,8 +149,8 @@ var f = fecha.toUpperCase();
 var table = $('#tbackorder').DataTable({
     dom: 'Bfrtip',
     lengthMenu: [
-        [ 10, 25, 50, -1 ],
-        [ '10', '25', '50', 'Todo' ]
+        [ -1, 10, 25, 50],
+        [ 'Todo' , '10', '25', '50']
     ],
     buttons: [ 
         {
@@ -244,7 +244,7 @@ var table = $('#tbackorder').DataTable({
     scrollY:        "270px",
     scrollX:        true,
     scrollCollapse: true,
-    paging:         true,
+    paging:         false,
    fixedColumns: true,
     processing: true,
     
@@ -295,6 +295,10 @@ var table = $('#tbackorder').DataTable({
             copySuccess: {
                 _: '%d filas copiadas',
                 1: '1 fila copiada'
+            },
+        "pageLength": {
+                _: "Mostrar %d filas",
+                '-1': "Mostrar todo"
             }
         },
         "sProcessing":     '<i class="fa fa-spinner fa-pulse fa-3x fa-fw" style="font-size:25px; "></i><span class="" style="font-size:25px; "><b>Procesando...</b></span> ',
@@ -319,10 +323,7 @@ var table = $('#tbackorder').DataTable({
             "sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
             "sSortDescending": ": Activar para ordenar la columna de manera descendente"
         },
-        "pageLength": {
-                _: "Mostrar %d filas",
-                '-1': "Mostrar todo"
-            }
+        
     },
     columnDefs: [
         { width: 80, targets: 2 },
