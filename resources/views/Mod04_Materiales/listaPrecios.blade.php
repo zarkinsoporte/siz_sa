@@ -145,6 +145,17 @@
                                                 </div>
                                                 
                                             </div><!-- /.row -->
+                                            
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <input class="form-check-input" type="radio" name="r1" id="ch2" value="2" >
+                                                        <label for="fecha_provision">Incrementar /decrementar %</label>
+                                                        <input  type="number" id="precio_porcentaje" name="precio_porcentaje" min="-99" max="100" class='form-control' autocomplete="off">
+                                                    </div>
+                                                </div>
+                                               
+                                            </div><!-- /.row -->
                                             <div class="row">
                                                 <div class="col-md-12">
                                                     <label for="fecha_provision">Moneda</label>
@@ -163,16 +174,6 @@
                                                 </select>
                                                 </div>
                                             </div>
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <div class="form-group">
-                                                        <input class="form-check-input" type="radio" name="r1" id="ch2" value="2" >
-                                                        <label for="fecha_provision">Incrementar /decrementar %</label>
-                                                        <input  type="number" id="precio_porcentaje" name="precio_porcentaje" min="-99" max="100" class='form-control' autocomplete="off">
-                                                    </div>
-                                                </div>
-                                               
-                                            </div><!-- /.row -->
                                                                                        
                                 </div>
                                 <div class="modal-footer">

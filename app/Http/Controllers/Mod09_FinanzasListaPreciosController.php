@@ -460,6 +460,7 @@ class Mod09_FinanzasListaPreciosController extends Controller
     public function actualizarPrecios(Request $request){
         $articulos = $request->input('articulos');
         $precio_nuevo = $request->input('precio_nuevo');
+        $moneda_nueva = ($request->input('moneda_nueva') == '') ? 'NOMONEDA' : $request->input('moneda_nueva');
         $precio_porcentaje = $request->input('precio_porcentaje');
         $option = $request->input('option');
         $articulos = explode(',', $articulos);
@@ -475,7 +476,7 @@ class Mod09_FinanzasListaPreciosController extends Controller
             } else if ($option == '2') { 
                 $precio += $precio * ( $precio_porcentaje / 100 );
             }
-            $rs = SAP::updateItemPriceList($codigo, $priceList, $precio, 'NOMONEDA'); 
+            $rs = SAP::updateItemPriceList($codigo, $priceList, $precio, $moneda_nueva); 
             if($rs !== 'ok'){
                 $mensajeErr = 'Error : articulo #'.$codigo.', SAP:'.$rs;
              }
