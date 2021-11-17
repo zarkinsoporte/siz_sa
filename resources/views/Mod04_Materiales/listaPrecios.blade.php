@@ -147,6 +147,24 @@
                                             </div><!-- /.row -->
                                             <div class="row">
                                                 <div class="col-md-12">
+                                                    <label for="fecha_provision">Moneda</label>
+                                                <select class="form-control" id="moneda_nueva" 
+                                                name="moneda_nueva" style="margin-bottom: 10px;" 
+                                                class="form-control selectpicker"
+                                                @if ($hide_rollout)
+                                                    {{'disabled'}}
+                                                @endif
+                                                >
+                                                    <option value=""> Selecciona una moneda </option>
+                                                    <option value="MXP">MXP</option>
+                                                    <option value="USD">USD</option>
+                                                    <option value="CAN">CAN</option>
+                                                        
+                                                </select>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12">
                                                     <div class="form-group">
                                                         <input class="form-check-input" type="radio" name="r1" id="ch2" value="2" >
                                                         <label for="fecha_provision">Incrementar /decrementar %</label>
@@ -437,6 +455,7 @@
                     $badge.text('');
                     $('#updateprogramar').modal('hide');
                     $('#precio_nuevo').val('');
+                    $('#moneda_nueva').val('').selectpicker('refresh');
                     $('#precio_porcentaje').val('');
                     $('#confirma').modal('hide');
                             //console.log(data)
@@ -475,7 +494,9 @@
         var fila = table.rows(this).data()
         var num = parseFloat(fila[0]['precio']).toFixed(4);
         var code = fila[0]['codigo'];
+        var moneda = fila[0]['moneda'];
         $('#precio_nuevo').val(num)
+        $('#moneda_nueva').val(moneda).selectpicker('refresh');
         $("#ch1").prop("checked", true);
         $("#ch2").prop("checked", false);
         $('#updateprogramar').modal('show');
@@ -515,10 +536,13 @@
         } else {
             if (countOP > 1) {
                 $('#precio_nuevo').val('')
+                $('#moneda_nueva').val('').selectpicker('refresh');
             } else {
                 var fila = table.rows('.selected').data()
                 var num = parseFloat(fila[0]['precio']).toFixed(4)
+                var moneda = fila[0]['moneda']
                 $('#precio_nuevo').val(num)
+                $('#moneda_nueva').val(moneda).selectpicker('refresh');
             }
             $("#ch1").prop("checked", true);
             $("#ch2").prop("checked", false);
@@ -584,6 +608,7 @@
                     "_token": "{{ csrf_token() }}",
                     articulos: ops,
                     precio_nuevo: $('#precio_nuevo').val(),
+                    moneda_nueva: $( "#moneda_nueva option:selected" ).val(),
                     precio_porcentaje: $('#precio_porcentaje').val(),
                     option: option,
                     priceList: $('#input-lista').val()
@@ -626,6 +651,7 @@
                     $badge.text('');
                     $('#updateprogramar').modal('hide');
                     $('#precio_nuevo').val('');
+                    $('#moneda_nueva').val('').selectpicker('refresh');
                     $('#precio_porcentaje').val('');
                             console.log(data.mensajeErr)
                     if (data.mensajeErr.includes('Error')) {
