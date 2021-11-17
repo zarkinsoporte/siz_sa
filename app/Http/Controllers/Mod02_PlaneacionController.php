@@ -487,6 +487,26 @@ public function registros_gop(Request $request){
             )));
         }
 }
+public function countRollout(Request $request){
+    try {
+        ini_set('memory_limit', '-1');
+        set_time_limit(0);       
+        $priceList = (int) $request->input('priceList');         
+        $articulos = DB::select('exec SIZ_SP_ROLLOUT_SIMULADOR_COSTOS ?', [$priceList]);
+        $count = count($articulos) * 2;
+        return compact('count');
+    } catch (\Exception $e) {
+        Cache::forget('roll');
+        header('HTTP/1.1 500 Internal Server Error');
+        header('Content-Type: application/json; charset=UTF-8');
+        die(json_encode(array(
+            "mensaje" => $e->getMessage(),
+            "codigo" => $e->getCode(),
+            "clase" => $e->getFile(),
+            "linea" => $e->getLine()
+        )));
+    }
+}
 public function processRollout(Request $request){
     try {
         ini_set('memory_limit', '-1');

@@ -72,8 +72,8 @@
                                     <a style="margin-right: 5px;" id="btn_enviar" class="btn btn-success btn-sm" data-operacion='1'><i
                                         class="fa fa-send"></i> Actualizar <span class="badge"></span></a>
                                     @if (!$hide_rollout)
-                                        <button  style="margin-right: 5px;" type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#confirma">
-                                            <i class="fa fa-cogs" aria-hidden="true"></i> Roll Out
+                                        <button id="btn_rollout" style="margin-right: 5px;" type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#confirma">
+                                            <i class="fa fa-cogs" aria-hidden="true"></i> Roll Out <span class="badge"></span>
                                         </button>
                                     @endif
                                         
@@ -204,7 +204,7 @@
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-                                    <button type="button" id="btn_roll" class="btn btn-primary">Guardar</button>
+                                    <button type="button" id="btn_roll" class="btn btn-primary">Ejecutar</button>
                                 </div>
                                 
                             </div>
@@ -373,7 +373,7 @@
     } );
 
     reload_tabla_arts(true);
-
+    count_rollout();
     $('#tabla_arts tbody').on('click', 'tr', function (e) {
         if ($(e.target).hasClass("ignoreme")) {
 
@@ -454,6 +454,8 @@
                     reload_tabla_arts(false);
                     var $badge = $('#btn_enviar').find('.badge');
                     $badge.text('');
+                    var $badgeroll = $('#btn_rollout').find('.badge');
+                    $badgeroll.text('');
                     $('#updateprogramar').modal('hide');
                     $('#precio_nuevo').val('');
                     $('#moneda_nueva').val('').selectpicker('refresh');
@@ -570,21 +572,55 @@
         } else {
             if ($('#precio_porcentaje').val() < -100 || $('#precio_porcentaje').val() == '' ) {
                 bootbox.dialog({
-                title: "Mensaje",
-                message: "<div class='alert alert-danger m-b-0'>Introduzca Porcentaje válido.</div>",
-                buttons: {
-                    success: {
-                        label: "Ok",
-                        className: "btn-success m-r-5 m-b-5"
+                    title: "Mensaje",
+                    message: "<div class='alert alert-danger m-b-0'>Introduzca Porcentaje válido.</div>",
+                    buttons: {
+                        success: {
+                            label: "Ok",
+                            className: "btn-success m-r-5 m-b-5"
+                        }
                     }
-                }
                 }).find('.modal-content').css({ 'font-size': '14px' });
             }else{
                 click_programar(2);
             }
         }
+        count_rollout();
     });
-    
+    function count_rollout()
+    {
+        $.ajax({
+                type: 'GET',
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                data: {
+                    "_token": "{{ csrf_token() }}",
+                    priceList: $('#input-lista').val()
+                },
+                url: '{!! route('count-rollout') !!}',
+                beforeSend: function () {
+                   
+                },
+                complete: function () {
+                   
+                    
+                },
+                success: function (data) {
+                    setTimeout(function () {
+                                var respuesta = JSON.parse(JSON.stringify(data));
+                                console.log(respuesta)
+                                if(respuesta.codigo == 302){
+                                    window.location = '{{ url("auth/login") }}';
+
+                                }
+                            }, 2000);
+                   
+                    var $badgeroll = $('#btn_rollout').find('.badge');
+                    $badgeroll.text(data.count);
+                  
+                  
+                }
+            });
+    }
     function click_programar(option) {
         var ordvta = table.rows('.selected').data();
         //var ordvtac = table.rows('.selected').node();
