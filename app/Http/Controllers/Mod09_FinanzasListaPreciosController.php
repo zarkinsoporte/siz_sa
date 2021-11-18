@@ -356,6 +356,7 @@ class Mod09_FinanzasListaPreciosController extends Controller
             $model_descr = DB::table('OITM')
                         ->select(DB::raw('left(OITM.FrgnName , charindex(\',\', OITM.FrgnName ) - 1) descr'))
                         ->where('OITM.ItemCode', 'like', $modelo.'-%')
+                        ->where('OITM.FrgnName', '<>', '')
                         ->first();
                       //  dd($model_descr);
             $data = array(
