@@ -32,7 +32,7 @@ class Mod09_FinanzasListaPreciosController extends Controller
         $tc_usd = $request->input('tc_usd');
         $tc_can = $request->input('tc_can');
         $tc_eur = $request->input('tc_eur');
-        $code_composicion = $request->input('code_composicion');
+       // $code_composicion = $request->input('code_composicion');
         $articulos = explode(',', $articulos);
        
         foreach ($articulos as $key => $articulo) {
@@ -60,10 +60,14 @@ class Mod09_FinanzasListaPreciosController extends Controller
                     $precioMXP = $precio;
                     break;
             }
-            DB::update('update Siz_simulador_temp set precio = ?, precioMXP = ?
+           /* DB::update('update Siz_simulador_temp set precio = ?, precioMXP = ?
             where composicionCodigo = ?
             and codigo = ?', 
             [$precio, $precioMXP, $code_composicion, $codigo]);
+            */
+            DB::update('update Siz_simulador_temp set precio = ?, precioMXP = ?
+            where codigo = ?', 
+            [$precio, $precioMXP, $codigo]);
         }
         return 'ok';
     }
@@ -107,14 +111,46 @@ class Mod09_FinanzasListaPreciosController extends Controller
                 'pieles_precio',
                 function ($item) {
                     //return   . ;
-                    return '<a href="#" id="precios_piel">
+                   /* return '<a href="#" id="precios_piel">
                             <i class="fa fa-hand-o-right"></i> '.number_format($item->g_piel, 2, '.', ',').'</a> / 
                             <a href="#" id="precios_tela">
                             <i class="fa fa-hand-o-right"></i> '.number_format($item->g_tela, 2, '.', ',').'</a>';
-                    
+                    */
+                    return number_format($item->g_piel, 2, '.', ',').' /  '.
+                    number_format($item->g_tela, 2, '.', ',');
                 }
             )
             ->make(true);
+      
+    }
+    public function datatables_tparametros(Request $request)
+    {
+           
+        $tparametros = DB::select('SELECT \'0\' AS err, codigo, descripcion, um, convert (decimal(18,2), precio) precio, moneda 
+            , \'0\' AS activar, precioMXP
+            from SIZ_simulador_temp
+            where 
+            codigo in (\'12826\', \'11000\', \'11001\', \'99999\') 
+            group  by 
+            codigo, descripcion, um, precio, moneda, precioMXP
+            UNION ALL 
+            select (select SUM (CASE WHEN SWeight1 = 0 OR SWeight1 IS NULL THEN 1
+                            ELSE 0 END ) AS err from SIZ_simulador_temp
+                        LEFT JOIN OITM o on o.itemCode = codigo
+                        where grupoPlaneacion = 6 AND subModelo <> \'C\') 
+            AS err, 
+            codigo, descripcion, um, convert (decimal(18,2), precio) precio, moneda 
+            , \'0\' AS activar, precioMXP
+            from SIZ_simulador_temp
+            where 
+            codigo =\'10007\'
+        ');
+               
+        //return response()->json(array('tparametros' => $tparametros));
+        $data = collect($tparametros);
+        
+        return Datatables::of($data)
+        ->make(true);
       
     }
     public function Simulador($modelo, $modelo_descr)
@@ -141,65 +177,134 @@ class Mod09_FinanzasListaPreciosController extends Controller
     public function datatables_simulador(Request $request)
     {
         $modelo = $request->get('modelo');        
-        $tc_usd = $request->get('tc_usd');        
-        $tc_can = $request->get('tc_can');        
-        $tc_eur = $request->get('tc_eur');        
+        $tc_usd = floatval($request->get('tc_usd'));        
+        $tc_can = floatval($request->get('tc_can'));        
+        $tc_eur = floatval($request->get('tc_eur'));        
         $insert = $request->get('insert');
+        $tparametros = json_decode($request->input('tparametros'), true);
 
-        if ($insert == 1 ) {
+       // if ($insert == 1 ) {
             
-        $composiciones = DB::select('Select OITM.ItemCode,
-        OITM.FrgnName composicion
-        From OITM
-        inner join ITT1 on OITM.ItemCode = ITT1.Father  
-        inner join OITM A1 on ITT1.Code = A1.ItemCode and A1.ItemCode =\'12826\'
-        Where OITM.ItemCode like \''.$modelo.'%\' and oitm.ItemCode like \'%0301\' 
-        ');
-        //dd($composiciones);              
-        DB::table('Siz_simulador_temp')->truncate();
+            $composiciones = DB::select('Select OITM.ItemCode,
+            OITM.FrgnName composicion
+            From OITM
+            inner join ITT1 on OITM.ItemCode = ITT1.Father  
+            inner join OITM A1 on ITT1.Code = A1.ItemCode and A1.ItemCode =\'12826\'
+            Where OITM.ItemCode like \''.$modelo.'%\' and oitm.ItemCode like \'%0301\' 
+            ');
+            //dd($composiciones);              
+            DB::table('Siz_simulador_temp')->truncate();
         
-        foreach ($composiciones as $value) {
-            $xCodeSub[0] = $value->ItemCode;
-            //dd($xCodeSub);
-            foreach ($xCodeSub as $codeSub) {
+            foreach ($composiciones as $value) {
+                $xCodeSub[0] = $value->ItemCode;
+                //dd($xCodeSub);
+                foreach ($xCodeSub as $codeSub) {
 
-                $subs = DB::select("Select OITM.ItemCode AS CODIGO 
-                    from ITT1 
-                    inner join OITM on OITM.ItemCode = ITT1.Code 
-                    inner join [@PL_RUTAS] RUTE on RUTE.Code = OITM.U_estacion 
-                    inner join ITM1 on ITM1.ItemCode = OITM.ItemCode 
-                    and ITM1.PriceList=? 
-                    where  ITT1.Father = ? and 
-                    (OITM.QryGroup29 = 'Y' or OITM.QryGroup30 = 'Y' or OITM.QryGroup31 = 'Y' or OITM.QryGroup32 = 'Y') 
-                    --Order by MATERIAL",
-                    [1, $codeSub]);
-                 $subs = array_pluck($subs,'CODIGO');
+                    $subs = DB::select("Select OITM.ItemCode AS CODIGO 
+                        from ITT1 
+                        inner join OITM on OITM.ItemCode = ITT1.Code 
+                        inner join [@PL_RUTAS] RUTE on RUTE.Code = OITM.U_estacion 
+                        inner join ITM1 on ITM1.ItemCode = OITM.ItemCode 
+                        and ITM1.PriceList=? 
+                        where  ITT1.Father = ? and 
+                        (OITM.QryGroup29 = 'Y' or OITM.QryGroup30 = 'Y' or OITM.QryGroup31 = 'Y' or OITM.QryGroup32 = 'Y') 
+                        --Order by MATERIAL",
+                        [1, $codeSub]);
+                    $subs = array_pluck($subs,'CODIGO');
 
-                $xCodeSub = array_merge($xCodeSub, $subs);
-                
+                    $xCodeSub = array_merge($xCodeSub, $subs);
+                    
+                }
+                $sub_cadena = "";
+                for ($x = 0; $x < count($xCodeSub); $x++) {
+                    if ($x == count($xCodeSub) - 1) {
+                        $sub_cadena = $sub_cadena . $xCodeSub[$x];
+                    } else {
+                        $sub_cadena = $sub_cadena . $xCodeSub[$x] . ",";
+                    }
+                }
+                $xCodeSub = [];
+                //dd([$sub_cadena, $value->ItemCode, $value->composicion, $tc_usd, $tc_can, $tc_eur]);
+                //clock([$sub_cadena, $value->ItemCode]);
+                DB::select('exec SIZ_SIMULADOR_COSTO_LDM_INSERT  ?, ?, ?, ?', 
+                [$sub_cadena, $value->ItemCode, $value->composicion, $tc_usd]);
             }
-            $sub_cadena = "";
-            for ($x = 0; $x < count($xCodeSub); $x++) {
-                if ($x == count($xCodeSub) - 1) {
-                    $sub_cadena = $sub_cadena . $xCodeSub[$x];
-                } else {
-                    $sub_cadena = $sub_cadena . $xCodeSub[$x] . ",";
+
+            //vamos a insertar los codigos de la tabla de parametro
+           $parametros = DB::select('SELECT Itemcode AS codigo
+            , ItemName AS descripcion
+            , OITM.InvntryUom AS um
+            , convert (decimal(18,2), OITM.AvgPrice/?) AS precio
+            , 1 AS cantidad
+            , \'USD\' AS moneda
+            , convert (decimal(18,2), OITM.AvgPrice) AS precioMXP
+            , convert (decimal(18,2), OITM.AvgPrice/?) AS precioUSD
+            from OITM where ItemCode = \'10007\'
+            UNION ALL
+            select 
+            \'99999\' AS codigo
+            , \'MARGEN DE VENTA\' AS descripcion
+            , \'%\' AS um
+            , 50 AS precio
+            , 1 AS cantidad
+            , \'%\' AS moneda
+            , convert (decimal(18,2), 50) AS precioMXP
+            , convert (decimal(18,2), 50) AS precioUSD',
+            [$tc_usd, $tc_usd]);
+            foreach ($parametros as $parametro) {
+                DB::insert('insert into Siz_simulador_temp (codigo, descripcion, um, precio, cantidad, moneda, precioMXP, precioUSD) 
+                values (?, ?, ?, ?, ?, ?, ?, ?)', 
+                [$parametro->codigo, $parametro->descripcion, $parametro->um, $parametro->precio, $parametro->cantidad, $parametro->moneda, $parametro->precioMXP, $parametro->precioUSD]);
+            }
+        //} //end insert
+        $margenVtas = 0;
+        $cuenta_tparametros = count($tparametros);
+            for ($x = 0; $x < $cuenta_tparametros; $x++) {
+                
+                DB::update('update Siz_simulador_temp set precio = ?, precioMXP = ?
+                where codigo = ?', 
+                [$tparametros[$x]['precio'], $tparametros[$x]['precioMXP'], $tparametros[$x]['codigo']]);
+                
+                if ($tparametros[$x]['codigo'] == '10007') {
+                   $hules = DB::select('SELECT CASE WHEN SWeight1 = 0 OR SWeight1 IS NULL THEN 1
+                   ELSE 0 END AS err, codigo, descripcion, um, convert (decimal(18,2), precio) precio, moneda 
+                   , SWeight1 pesoKG
+                   , SWeight1 * (select precioUSD from SIZ_simulador_temp where codigo=\'10007\') precioTotalUSDKG
+                   ,(select precioUSD from SIZ_simulador_temp where codigo=\'10007\') precioUSDKG
+                   from SIZ_simulador_temp
+                   LEFT JOIN OITM o on o.itemCode = codigo
+                   where 
+                   grupoPlaneacion = 6 AND subModelo <> \'C\'');
+
+                   foreach ($hules as $hule) {
+                        DB::update('update Siz_simulador_temp set  precioUSD = ?, precio = ?, precioMXP = ?, moneda = ?
+                        where codigo = ?', 
+                        [$hule->precioTotalUSDKG, $hule->precioTotalUSDKG, $hule->precioTotalUSDKG * $tc_usd ,
+                         'USD', $hule->codigo]);
+                   }
+                }
+
+                if ($tparametros[$x]['codigo'] == '99999') {
+                    $margenVtas = $tparametros[$x]['precio'];
                 }
             }
-            $xCodeSub = [];
-            //dd([$sub_cadena, $value->ItemCode, $value->composicion, $tc_usd, $tc_can, $tc_eur]);
-            clock([$sub_cadena, $value->ItemCode]);
-            DB::select('exec SIZ_SIMULADOR_COSTO_LDM_INSERT  ?, ?, ?, ?', 
-            [$sub_cadena, $value->ItemCode, $value->composicion, $tc_usd]);
-        }
-
-        } //end insert
-        
+           
         $consulta = DB::select('exec SIZ_SIMULADOR_COSTO_LDM  ?', [$tc_usd]);
         //Definimos las columnas 
         $consulta= collect($consulta);
         return Datatables::of($consulta)
-            
+            ->addColumn(
+                'margen',
+                function ($item) use ($margenVtas) {
+                    return  number_format( $margenVtas, 2, '.', ',');
+                }
+            )
+            ->addColumn(
+                'venta',
+                function ($item) use ($margenVtas) {
+                    return  $item->total + ($item->total * $margenVtas * .01);
+                }
+            )
             ->addColumn(
                 'pieles',
                 function ($item) {
@@ -210,11 +315,13 @@ class Mod09_FinanzasListaPreciosController extends Controller
                 'pieles_precio',
                 function ($item) {
                     //return   . ;
-                    return '<a href="#" id="precios_piel">
+                    /*return '<a href="#" id="precios_piel">
                             <i class="fa fa-hand-o-right"></i> '.number_format($item->g_piel, 2, '.', ',').'</a> / 
                             <a href="#" id="precios_tela">
                             <i class="fa fa-hand-o-right"></i> '.number_format($item->g_tela, 2, '.', ',').'</a>';
-                    
+                    */
+                    return number_format($item->g_piel, 2, '.', ',').' /  '.
+                    number_format($item->g_tela, 2, '.', ',');
                 }
             )
             ->make(true);
@@ -338,12 +445,9 @@ class Mod09_FinanzasListaPreciosController extends Controller
             $rules = [
                 // 'fieldText' => 'required|exists:OITM,ItemCode',
                 'pKey' => 'required',
-             
-
             ];
             $customMessages = [
                 'pKey.required' => 'Ningun modelo seleccionado',
-                
                 //'fieldText.exists' => 'El Código no existe.'
             ];
             $valid = Validator::make( $request->all(), $rules, $customMessages);

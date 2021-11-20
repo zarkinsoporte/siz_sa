@@ -514,6 +514,7 @@ Route::get('datatables_simulador_detalle_modelos', 'Mod09_FinanzasListaPreciosCo
 Route::get('home/SIMULADOR COSTOS/detalle_modelos/{modelo}/{modelo_descr}', 'Mod09_FinanzasListaPreciosController@DetalleModelos');
 
 Route::get('datatables_simulador', 'Mod09_FinanzasListaPreciosController@datatables_simulador')->name('datatables_simulador');
+Route::get('datatables_tparametros', 'Mod09_FinanzasListaPreciosController@datatables_tparametros')->name('datatables_tparametros');
 Route::get('home/SIMULADOR COSTOS/simulador/{modelo}/{modelo_descr}', 'Mod09_FinanzasListaPreciosController@Simulador');
 Route::get('datatables_simulador_precios', 'Mod09_FinanzasListaPreciosController@datatables_simulador_precios')->name('datatables_simulador_precios');
 Route::any('simulador_actualizarPrecios', 'Mod09_FinanzasListaPreciosController@simulador_actualizarPrecios')->name('simulador_actualizarPrecios');
