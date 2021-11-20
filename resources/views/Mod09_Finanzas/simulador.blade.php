@@ -331,7 +331,7 @@
                     scrollCollapse: true,
                     scrollY: "230px",
                     fixedColumns:   {
-                        leftColumns: 3,
+                        leftColumns: 5,
                     },
                     ajax: {
                         url: '{!! route('datatables_simulador') !!}',
