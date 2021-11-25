@@ -262,7 +262,7 @@
                                         <input  type="number" id="precio_nuevo" name="precio_nuevo" min=".0001" step=".0001" class='form-control' autocomplete="off">
                                     </div>
                                 </div>
-                                
+                                <input type="button" id="check" hidden>
                             </div><!-- /.row -->
                             <div class="row">
                                 <div class="col-md-12">
@@ -307,6 +307,7 @@
                 tableName = '#table_detalle_modelos',
                 table_modelos, tparametros, createparametros = 0,
                 datosTParametros = new Array(); 
+                var keepenablecheckbox = [''];
         $(window).on('load', function() {
             var xhrBuscador = null;
 
@@ -315,15 +316,17 @@
                
             
             function createTable(){
-               
+                
                 if (createparametros > 0) {
                     datosTParametros = getTParametros();
+                    keepenablecheckbox = datosTParametros.filter(function (item) { return item.codigo == "99999" });                   
                 } 
+
                 datosTParametros = JSON.stringify(datosTParametros);
                    
+                console.log('**** LEYENDO PARAMETROS ******************')
                 console.log(datosTParametros)
-                console.log(createparametros)
-               table_modelos = $(tableName).DataTable({
+                table_modelos = $(tableName).DataTable({
                     deferRender: true,
                     "paging": false,
                     dom: 'frti',
@@ -350,7 +353,8 @@
                         {"data" : "composicion", "name" : "Composición"},
                         {"data" : "total", "name" : "Total",
                         render: function(data){
-                            var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            var val = Math.round(data);
                             return val;
                         }},
                         {"data" : "margen"},
@@ -359,102 +363,122 @@
                         {"data" : "pieles_precio", "name" : "1 Piel/Tela"},
                         {"data" : "pg_piel_tela", "name" : "% Piel",
                         render: function(data){
-                            var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);                            
+                            var val = Math.round(data);
                             return val;
                         }},
                         {"data" : "g_huleUSD", "name" : "USD Hule",
                         render: function(data){
-                            var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            var val = Math.round(data);
                             return val;
                         }},
                         {"data" : "g_hule", "name" : "2 Hule",
                         render: function(data){
-                            var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            var val = Math.round(data);
                             return val;
                         }},
                         {"data" : "pg_hule", "name" : "% Hule",
                         render: function(data){
-                            var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            var val = Math.round(data);
                             return val;
                         }},
                         {"data" : "g_cojineria", "name" : "3 Pluma/Acojin",
                         render: function(data){
-                            var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            var val = Math.round(data);
                             return val;
                         }},
                         {"data" : "pg_cojineria", "name" : "% Cojín",
                         render: function(data){
-                            var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            var val = Math.round(data);
                             return val;
                         }},
                         {"data" : "g_casco", "name" : "4 Casco",
                         render: function(data){
-                            var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            var val = Math.round(data);
                             return val;
                         }},
                         {"data" : "pg_casco", "name" : "% Casco",
                         render: function(data){
-                            var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            var val = Math.round(data);
                             return val;
                         }},
                         {"data" : "g_herrajesUSD", "name" : "Dólares Herrajes",
                         render: function(data){
-                            var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            var val = Math.round(data);
                             return val;
                         }},
                         {"data" : "g_herrajes", "name" : "5 Herrajes y Mecanismos",
                         render: function(data){
-                            var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            var val = Math.round(data);
                             return val;
                         }},
                         {"data" : "pg_herrajes", "name" : "% Herrajes",
                         render: function(data){
-                            var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            var val = Math.round(data);
                             return val;
                         }},
                         {"data" : "g_metalesUSD", "name" : "Dólares Patas",
                         render: function(data){
-                            var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            var val = Math.round(data);
                             return val;
                         }},
                         {"data" : "g_metales", "name" : "6 Patas",
                         render: function(data){
-                            var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            var val = Math.round(data);
                             return val;
                         }},
                         {"data" : "pg_metales", "name" : "% Patas",
                         render: function(data){
-                            var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            var val = Math.round(data);
                             return val;
                         }},
                         {"data" : "g_empaques", "name" : "7 Empaque",
                         render: function(data){
-                            var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            var val = Math.round(data);
                             return val;
                         }},
                         {"data" : "pg_empaques", "name" : "% Empaque",
                         render: function(data){
-                            var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            var val = Math.round(data);
                             return val;
                         }},
                         {"data" : "g_otros", "name" : "8 Otros",
                         render: function(data){
-                            var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            var val = Math.round(data);
                             return val;
                         }},
-                        {"data" : "pg_metales", "name" : "% Otros",
+                        {"data" : "pg_otros", "name" : "% Otros",
                         render: function(data){
-                            var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            var val = Math.round(data);
                             return val;
                         }},
                         {"data" : "g_cuotas", "name" : "9 Cuotas",
                         render: function(data){
-                            var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            var val = Math.round(data);
                             return val;
                         }},
                         {"data" : "pg_cuotas", "name" : "% Cuotas",
                         render: function(data){
-                            var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                            var val = Math.round(data);
                             return val;
                         }}
                         
@@ -469,7 +493,7 @@
                             "orderable": false,
                             'className': "dt-body-center",
                             "render": function ( data, type, row ) {
-                                    return '<input id= "inputventa" style="width: 100px" class="form-control input-sm" value="' + number_format(row['venta'],2,'.','') + '" type="number" min="'+number_format(row['total'],2,'.','')+'" >'
+                                    return '<input  readonly id= "inputventa" style="width: 100px" class="form-control input-sm inputvta" value="' + number_format(row['venta'],0,'.','') + '" type="number" min="0.1" >'
 
                             }
 
@@ -480,18 +504,23 @@
                             createparametros = 1;
                             createTableParametros();
                         }
+                        if (keepenablecheckbox.length == 0) {
+                            $('.inputvta').prop('readonly', false);
+                        }
                     }
                 });
                 
             
             }
             $('#table_detalle_modelos').on( 'change', 'input', function (e) {
-                //var tbl = $('#tableFTPDCXPPesos').DataTable();
+                e.preventDefault();
+                var table_modelos = $('#table_detalle_modelos').DataTable();
 
                 var fila = $(this).closest('tr');
                 var datos = table_modelos.row(fila).data();
+               
                 var total = datos['total'];
-                var  cantInput = parseFloat($('input#inputventa',table_modelos.row(fila).node()).val());
+                var  cantInput = $(this).val();
                 if (cantInput < total) {
                     bootbox.dialog({
                         title: "Mensaje",
@@ -504,10 +533,26 @@
                         }
                     }).find('.modal-content').css({ 'font-size': '14px' });
                 } else {
-                    var margen = cantInput - total;
-                    datos['venta'] = cantInput;
-                    datos['margen'] = number_format((margen * 100) / total,2,'.','');
-                    table_modelos.row(fila).data(datos);
+                  
+                    //var margen = total / (cantInput * .01);
+                    var margen = ((cantInput - total) / (cantInput)) * 100;
+                    
+                    /*
+                        precioVta = total/(margen*.01)
+                        percioVta * 
+
+                    */
+                    datos['venta'] = cantInput+'';
+                    datos['margen'] = number_format(margen ,1,'.','');
+                    
+                    console.log('total ' + total)
+                    console.log('cantcantInput vta ' +cantInput)
+                    console.log('margen ' + margen)
+
+                    table_modelos.row(fila).data(datos); 
+                    $('.inputvta').prop('readonly', false);
+                    table_modelos.fixedColumns().update();
+                    
                 }
             });
             function number_format(number, decimals, dec_point, thousands_sep) 
@@ -589,7 +634,7 @@
                             'orderable': false,
                             'className': 'dt-body-center',
                             'render': function (data, type, full, meta){
-                            return '<input type="checkbox" id="selectCheck" name="selectCheck" value="' + $('<div/>').text(data).html() + '">';
+                            return '<input  type="checkbox" id="selectCheck" name="selectCheck" class="checkboxes" value="' + $('<div/>').text(data).html() + '">';
                             }
                         },
                         {
@@ -597,23 +642,42 @@
                             "visible": false
                         }  
                     ],
-
+                    "initComplete": function(settings, json) {
+                            $('.checkboxes').prop('checked', true);
+                    }
+                   
                 });
 
             }
 
             $('#tparametros').on( 'change', 'input#selectCheck', function (e) {
                 e.preventDefault();
-               // var tblBancos = $('#tableBancos').DataTable();
+                // var tblBancos = $('#tableBancos').DataTable();
                 var fila = $(this).closest('tr');
                 var datos = tparametros.row(fila).data();
                 var check = datos['activar'];
-                if (check == 0) {
-                    datos['activar'] = 1;
-                } else {
-                    datos['activar'] = 0;
+                console.log('check A val- ' + datos['activar'])
+               
+                if($(this).is(':checked')){
+                    datos['activar'] = 1; 
+                    if (datos['codigo'] == '99999') {
+                        $('.inputvta').prop('readonly', true);
+                    }
+                }else{
+                    datos['activar'] = 0; 
+                    if (datos['codigo'] == '99999') {
+                        $('.inputvta').prop('readonly', false);
+                    }
                 }
-                console.log('check - ' + datos['activar'])
+
+                if (check == 0) {
+                    
+                   
+                } else {
+                    
+                   
+                }
+                console.log('check val- ' + datos['activar'])
                 
             });
 
@@ -622,6 +686,7 @@
                 //var tabla = $('#tparametros').DataTable();
                 var fila = $('#tparametros tbody tr').length;
                 var datos_Tabla = tparametros.rows().data();
+                
                 var tblParametros = new Array();
                 console.log('filas - '+ fila)
                 console.log('filasTabla - '+ datos_Tabla.length)
@@ -630,7 +695,8 @@
                     var siguiente = 0;
                     for (var i = 0; i < fila; i++) {
                         console.log('row - '+ datos_Tabla[i])
-                        if(datos_Tabla[i]["activar"] == 1){//CHECK_BOX
+                        console.log('row activar - '+ datos_Tabla[i]["activar"])
+                        
 
                             tblParametros[siguiente]={
 
@@ -638,12 +704,13 @@
                                 ,"precio" : datos_Tabla[i]["precio"]
                                 ,"moneda" : datos_Tabla[i]["moneda"]
                                 ,"precioMXP" : datos_Tabla[i]["precioMXP"]
+                                ,"checkbox" : datos_Tabla[i]["activar"] == 1 ? true : false
 
                             }
                            
                             siguiente++;
 
-                        }
+                        
 
                     }
                     console.log(tblParametros)
@@ -698,12 +765,15 @@
                 //var code_composicion = fila[0]['composicionCodigo'];
                 //var code = fila[0]['codigo'];
                 var num = parseFloat(fila[0]['precio']).toFixed(4);
+                var activar = (fila[0]['activar']);
+                $('#check').val(activar)
                 $('#precio_nuevo').val(num)
                 $("#ch1").prop("checked", true);
                 $("#ch2").prop("checked", false);
                 $('#modal_update').modal('show');
                 
             });
+
             $('#tparametros').on('dblclick', 'tr', function () {
                 //modal que muestra el modal de actualizar precio
                 tparametros.rows().every( function ( rowIdx, tableLoop, rowLoop ) {                   
@@ -715,6 +785,8 @@
                 var fila = tparametros.rows(this).data()
                 var num = parseFloat(fila[0]['precio']).toFixed(4);
                 var code = fila[0]['codigo'];
+                var activar = (fila[0]['activar']);
+                $('#check').val(activar)
                 $('#precio_nuevo').val(num)
                 $("#ch1").prop("checked", true);
                 $("#ch2").prop("checked", false);
@@ -824,6 +896,80 @@
             });
 
             function click_programar(option) {
+                var row = tparametros.row('.selected');
+                var mifila = row.data();
+
+                console.log(mifila['codigo'])
+                var
+                codigo = mifila.codigo,
+                precio = mifila.precio,
+                precio_nuevo = $('#precio_nuevo').val(),
+                precio_porcentaje = $('#precio_porcentaje').val(),
+                option = option,
+                moneda = mifila.moneda, 
+                tc_usd = $('#tc_usd').val(),
+                tc_can = $('#tc_can').val(),
+                tc_eur = $('#tc_eur').val(),
+                check = $('#check').val(),
+                precioMXP = mifila.precioMXP
+                console.log('estoy actualizando precio articulo ' + codigo + ' - '+ precio)
+                if (option == '1') { 
+                    precio = precio_nuevo;
+                } else if (option == '2') { 
+                    precio += precio * ( precio_porcentaje / 100 );
+                }
+                mifila.precio = precio
+                
+                switch (moneda) {
+                    case 'USD':
+                        precioMXP = precio * tc_usd;
+                        break;
+                    case 'CAN':
+                        precioMXP = precio * tc_can;
+                        break;
+                    case 'EUR':
+                        precioMXP = precio * tc_eur;
+                        break;                
+                    default:
+                        precioMXP = precio;
+                        break;
+                }
+                
+                mifila.precioMXP = precioMXP
+                var tr = $(row.node());
+                var checkbox = tr.find('td:first-child input[type="checkbox"]')
+                if(checkbox.is(':checked')){
+                    mifila.validar = 1;
+                   
+                } else {
+                    mifila.validar = 0;
+                   
+                }
+                console.log('checkbox ' + checkbox.is(':checked') )
+                console.log('validar ' + mifila.validar )
+                console.log('precio nuevo ' + precio + ' - '+ precioMXP)
+                console.log(mifila )
+
+                tparametros.row('.selected').data(mifila);
+                console.log('ok' )
+
+                var tr = $(row.node());
+                var checkbox = tr.find('td:first-child input[type="checkbox"]')
+                if(checkbox.is(':checked')){
+                  
+                    checkbox.prop('checked', true);
+                } else {
+                   
+                    checkbox.prop('checked', false);
+                }
+
+                    $('#modal_update').modal('hide');
+                    $('#precio_nuevo').val('');
+                    $('#check').val('')
+                    $('#precio_porcentaje').val('');
+                
+            }
+            function click_programar_old(option) {
                 var mifila = tparametros.rows('.selected').data();
                 //var mifilac = table.rows('.selected').node();
                 //console.log(mifilac[0])
@@ -858,7 +1004,8 @@
                             moneda: moneda, 
                             tc_usd :$('#tc_usd').val(),
                             tc_can : $('#tc_can').val(),
-                            tc_eur : $('#tc_eur').val()
+                            tc_eur : $('#tc_eur').val(),
+                            check : $('#check').val()
                         },
                         url: '{!! route('simulador_actualizarPrecios') !!}',
                         beforeSend: function () {
@@ -895,6 +1042,7 @@
                            
                             $('#modal_update').modal('hide');
                             $('#precio_nuevo').val('');
+                            $('#check').val('')
                             $('#precio_porcentaje').val('');
                             
                         }

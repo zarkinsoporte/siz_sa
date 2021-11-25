@@ -23,7 +23,8 @@ ini_set('max_execution_time', 0);
 
 class Mod09_FinanzasListaPreciosController extends Controller
 {
-    public function simulador_actualizarPrecios(Request $request){
+    public function simulador_actualizarPrecios_old(Request $request){
+        $check = $request->input('check');
         $articulos = $request->input('articulos');
         $precio_nuevo = $request->input('precio_nuevo');
         $precio_porcentaje = $request->input('precio_porcentaje');
@@ -65,13 +66,14 @@ class Mod09_FinanzasListaPreciosController extends Controller
             and codigo = ?', 
             [$precio, $precioMXP, $code_composicion, $codigo]);
             */
-            DB::update('update Siz_simulador_temp set precio = ?, precioMXP = ?
+            DB::update('update Siz_simulador_temp set precio = ?, precioMXP = ?,
+            checkbox = ?
             where codigo = ?', 
-            [$precio, $precioMXP, $codigo]);
+            [$precio, $precioMXP, $codigo, $check]);
         }
         return 'ok';
     }
-    public function datatables_simulador_precios(Request $request)
+    public function datatables_simulador_precios_old(Request $request)
     {
         $cat = $request->get('categoria');   
         switch ($cat) {
@@ -127,7 +129,7 @@ class Mod09_FinanzasListaPreciosController extends Controller
     {
            
         $tparametros = DB::select('SELECT \'0\' AS err, codigo, descripcion, um, convert (decimal(18,2), precio) precio, moneda 
-            , \'0\' AS activar, precioMXP
+            , 1 AS activar, precioMXP
             from SIZ_simulador_temp
             where 
             codigo in (\'12826\', \'11000\', \'11001\', \'99999\') 
@@ -140,7 +142,7 @@ class Mod09_FinanzasListaPreciosController extends Controller
                         where grupoPlaneacion = 6 AND subModelo <> \'C\') 
             AS err, 
             codigo, descripcion, um, convert (decimal(18,2), precio) precio, moneda 
-            , \'0\' AS activar, precioMXP
+            , 1 AS activar, precioMXP
             from SIZ_simulador_temp
             where 
             codigo =\'10007\'
@@ -183,7 +185,7 @@ class Mod09_FinanzasListaPreciosController extends Controller
         $insert = $request->get('insert');
         $tparametros = json_decode($request->input('tparametros'), true);
 
-       // if ($insert == 1 ) {
+        if ($insert == 1 ) {
             
             $composiciones = DB::select('Select OITM.ItemCode,
             OITM.FrgnName composicion
@@ -229,7 +231,8 @@ class Mod09_FinanzasListaPreciosController extends Controller
                 DB::select('exec SIZ_SIMULADOR_COSTO_LDM_INSERT  ?, ?, ?, ?', 
                 [$sub_cadena, $value->ItemCode, $value->composicion, $tc_usd]);
             }
-
+            //$review = DB::select('SELECT * from Siz_simulador_temp where codigo in( ?)', ["'11000', '11001', '12826','10007'"]);
+            //clock(['before' => $review]);
             //vamos a insertar los codigos de la tabla de parametro
            $parametros = DB::select('SELECT Itemcode AS codigo
             , ItemName AS descripcion
@@ -251,44 +254,93 @@ class Mod09_FinanzasListaPreciosController extends Controller
             , convert (decimal(18,2), 50) AS precioMXP
             , convert (decimal(18,2), 50) AS precioUSD',
             [$tc_usd, $tc_usd]);
+
             foreach ($parametros as $parametro) {
                 DB::insert('insert into Siz_simulador_temp (codigo, descripcion, um, precio, cantidad, moneda, precioMXP, precioUSD) 
                 values (?, ?, ?, ?, ?, ?, ?, ?)', 
                 [$parametro->codigo, $parametro->descripcion, $parametro->um, $parametro->precio, $parametro->cantidad, $parametro->moneda, $parametro->precioMXP, $parametro->precioUSD]);
             }
-        //} //end insert
-        $margenVtas = 0;
+
+
+            //al arranque vamos a calcular los hules x kilo
+                //primero vamos a guardar los valores originales
+            $original_hules = DB::select('SELECT codigo, precio, precioUSD, precioMXP, moneda from SIZ_simulador_temp
+                where grupoPlaneacion = 6 AND subModelo <> \'C\'');
+            Session::put('simulador_original_hules', $original_hules);
+
+            $hules = DB::select('SELECT CASE WHEN SWeight1 = 0 OR SWeight1 IS NULL THEN 1
+            ELSE 0 END AS err, codigo, descripcion, um, convert (decimal(18,2), precio) precio, moneda 
+            , SWeight1 pesoKG
+            , SWeight1 * (select precioUSD from SIZ_simulador_temp where codigo=\'10007\') precioTotalUSDKG
+            ,(select precioUSD from SIZ_simulador_temp where codigo=\'10007\') precioUSDKG
+            from SIZ_simulador_temp
+            LEFT JOIN OITM o on o.itemCode = codigo
+            where 
+            grupoPlaneacion = 6 AND subModelo <> \'C\'');
+
+            foreach ($hules as $hule) {
+                 DB::update('update Siz_simulador_temp set  precioUSD = ?, precio = ?, precioMXP = ?, moneda = ?
+                 where codigo = ?', 
+                 [$hule->precioTotalUSDKG, $hule->precioTotalUSDKG, $hule->precioTotalUSDKG * $tc_usd ,
+                  'USD', $hule->codigo]);
+            }
+            //fin calculo hules x kilo
+        } //end insert
+        $margenVtas = 50;
         $cuenta_tparametros = count($tparametros);
+        
             for ($x = 0; $x < $cuenta_tparametros; $x++) {
-                
-                DB::update('update Siz_simulador_temp set precio = ?, precioMXP = ?
-                where codigo = ?', 
-                [$tparametros[$x]['precio'], $tparametros[$x]['precioMXP'], $tparametros[$x]['codigo']]);
-                
+
                 if ($tparametros[$x]['codigo'] == '10007') {
-                   $hules = DB::select('SELECT CASE WHEN SWeight1 = 0 OR SWeight1 IS NULL THEN 1
-                   ELSE 0 END AS err, codigo, descripcion, um, convert (decimal(18,2), precio) precio, moneda 
-                   , SWeight1 pesoKG
-                   , SWeight1 * (select precioUSD from SIZ_simulador_temp where codigo=\'10007\') precioTotalUSDKG
-                   ,(select precioUSD from SIZ_simulador_temp where codigo=\'10007\') precioUSDKG
-                   from SIZ_simulador_temp
-                   LEFT JOIN OITM o on o.itemCode = codigo
-                   where 
-                   grupoPlaneacion = 6 AND subModelo <> \'C\'');
+                    //clock('codeHule 10007');
+                    if ($tparametros[$x]['checkbox']) {
+                        $hules = DB::select('SELECT CASE WHEN SWeight1 = 0 OR SWeight1 IS NULL THEN 1
+                        ELSE 0 END AS err, codigo, descripcion, um, convert (decimal(18,2), precio) precio, moneda 
+                        , SWeight1 pesoKG
+                        , SWeight1 * (select precioUSD from SIZ_simulador_temp where codigo=\'10007\') precioTotalUSDKG
+                        ,(select precioUSD from SIZ_simulador_temp where codigo=\'10007\') precioUSDKG
+                        from SIZ_simulador_temp
+                        LEFT JOIN OITM o on o.itemCode = codigo
+                        where 
+                        grupoPlaneacion = 6 AND subModelo <> \'C\'');
 
-                   foreach ($hules as $hule) {
-                        DB::update('update Siz_simulador_temp set  precioUSD = ?, precio = ?, precioMXP = ?, moneda = ?
-                        where codigo = ?', 
-                        [$hule->precioTotalUSDKG, $hule->precioTotalUSDKG, $hule->precioTotalUSDKG * $tc_usd ,
-                         'USD', $hule->codigo]);
-                   }
-                }
-
-                if ($tparametros[$x]['codigo'] == '99999') {
+                        foreach ($hules as $hule) {
+                                DB::update('update Siz_simulador_temp set  precioUSD = ?, precio = ?, precioMXP = ?, moneda = ?
+                                where codigo = ?', 
+                                [$hule->precioTotalUSDKG, $hule->precioTotalUSDKG, $hule->precioTotalUSDKG * $tc_usd ,
+                                'USD', $hule->codigo]);
+                        }
+                    } else {
+                        if (Session::has('simulador_original_hules')) {
+                            $hules = Session::get('simulador_original_hules');
+                            foreach ($hules as $hule) {
+                                 DB::update('update Siz_simulador_temp set  precioUSD = ?, precio = ?, precioMXP = ?, moneda = ?
+                                 where codigo = ?', 
+                                 [$hule->precioUSD, $hule->precio, $hule->precioMXP, 'USD', $hule->codigo]);
+                             }
+                         }
+                    }
+                } // end if 10007
+                else
+                if ($tparametros[$x]['codigo'] == '99999' && $tparametros[$x]['checkbox'] == true) {
+                    //clock('codeMargen 99999');
                     $margenVtas = $tparametros[$x]['precio'];
                 }
+                else
+                if (( $tparametros[$x]['codigo'] == '12826' || $tparametros[$x]['codigo'] == '11000' || $tparametros[$x]['codigo'] == '11001') && $tparametros[$x]['checkbox'] == false) {
+                    //colocamos a cero
+                    DB::update('update Siz_simulador_temp set precio = ?, precioMXP = ?, precioUSD = ?
+                    where codigo = ?', 
+                    [0, 0, 0, $tparametros[$x]['codigo']]);
+                } else {
+                    DB::update('update Siz_simulador_temp set precio = ?, precioMXP = ?, precioUSD = ?
+                    where codigo = ?', 
+                    [$tparametros[$x]['precio'], $tparametros[$x]['precioMXP'], ($tparametros[$x]['precioMXP']/$tc_usd), $tparametros[$x]['codigo']]);
+                }
+                
             }
-           
+            //$review = DB::select('SELECT * from Siz_simulador_temp where codigo in( ?)', ["'11000', '11001', '12826','10007'"]);
+            //clock(['after' => $review]);   
         $consulta = DB::select('exec SIZ_SIMULADOR_COSTO_LDM  ?', [$tc_usd]);
         //Definimos las columnas 
         $consulta= collect($consulta);
@@ -296,19 +348,20 @@ class Mod09_FinanzasListaPreciosController extends Controller
             ->addColumn(
                 'margen',
                 function ($item) use ($margenVtas) {
-                    return  number_format( $margenVtas, 2, '.', ',');
+                    return  number_format( $margenVtas, 1, '.', ',');
                 }
             )
             ->addColumn(
                 'venta',
                 function ($item) use ($margenVtas) {
-                    return  $item->total + ($item->total * $margenVtas * .01);
+                    //return  $item->total + ($item->total * $margenVtas * .01);
+                    return  $item->total / (1 - ($margenVtas * .01));
                 }
             )
             ->addColumn(
                 'pieles',
                 function ($item) {
-                    return  number_format($item->g_piel_cant, 2, '.', ',') . ' / ' . number_format($item->g_tela_cant, 2, '.', ',');
+                    return  number_format($item->g_piel_cant, 0, '.', ',') . ' / ' . number_format($item->g_tela_cant, 0, '.', ',');
                 }
             )
             ->addColumn(
@@ -320,8 +373,8 @@ class Mod09_FinanzasListaPreciosController extends Controller
                             <a href="#" id="precios_tela">
                             <i class="fa fa-hand-o-right"></i> '.number_format($item->g_tela, 2, '.', ',').'</a>';
                     */
-                    return number_format($item->g_piel, 2, '.', ',').' /  '.
-                    number_format($item->g_tela, 2, '.', ',');
+                    return number_format($item->g_piel, 0, '.', ',').' /  '.
+                    number_format($item->g_tela, 0, '.', ',');
                 }
             )
             ->make(true);
@@ -581,7 +634,7 @@ class Mod09_FinanzasListaPreciosController extends Controller
             } else if ($option == '2') { 
                 $precio += $precio * ( $precio_porcentaje / 100 );
             }
-            clock('$codigo, $priceList, $precio, $moneda_nueva', $codigo, $priceList, $precio, $moneda_nueva);
+            //clock('$codigo, $priceList, $precio, $moneda_nueva', $codigo, $priceList, $precio, $moneda_nueva);
             $rs = SAP::updateItemPriceList($codigo, $priceList, $precio, $moneda_nueva); 
             if($rs !== 'ok'){
                 $mensajeErr = 'Error : articulo #'.$codigo.', SAP:'.$rs;
