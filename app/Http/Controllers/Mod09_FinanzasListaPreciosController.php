@@ -23,7 +23,7 @@ ini_set('max_execution_time', 0);
 
 class Mod09_FinanzasListaPreciosController extends Controller
 {
-    public function simulador_actualizarPrecios_old(Request $request){
+    public function simulador_actualizarPrecios(Request $request){
         $check = $request->input('check');
         $articulos = $request->input('articulos');
         $precio_nuevo = $request->input('precio_nuevo');
@@ -33,7 +33,7 @@ class Mod09_FinanzasListaPreciosController extends Controller
         $tc_usd = $request->input('tc_usd');
         $tc_can = $request->input('tc_can');
         $tc_eur = $request->input('tc_eur');
-       // $code_composicion = $request->input('code_composicion');
+        $code_composicion = $request->input('code_composicion');
         $articulos = explode(',', $articulos);
        
         foreach ($articulos as $key => $articulo) {
@@ -50,15 +50,19 @@ class Mod09_FinanzasListaPreciosController extends Controller
             switch ($moneda) {
                 case 'USD':
                     $precioMXP = $precio * $tc_usd;
+                    $precioUSD = $precio;
                     break;
                 case 'CAN':
                     $precioMXP = $precio * $tc_can;
+                    $precioUSD = $precioMXP / $tc_usd;
                     break;
                 case 'EUR':
                     $precioMXP = $precio * $tc_eur;
+                    $precioUSD = $precioMXP / $tc_usd;
                     break;                
                 default:
                     $precioMXP = $precio;
+                    $precioUSD = $precio / $tc_usd;
                     break;
             }
            /* DB::update('update Siz_simulador_temp set precio = ?, precioMXP = ?
@@ -66,64 +70,71 @@ class Mod09_FinanzasListaPreciosController extends Controller
             and codigo = ?', 
             [$precio, $precioMXP, $code_composicion, $codigo]);
             */
-            DB::update('update Siz_simulador_temp set precio = ?, precioMXP = ?,
-            checkbox = ?
-            where codigo = ?', 
-            [$precio, $precioMXP, $codigo, $check]);
+            DB::update('UPDATE Siz_simulador_temp set precio = ?, precioMXP = ?, precioUSD = ?
+            where composicionCodigo = ? AND codigo = ?', 
+            [$precio, $precioMXP, $precioUSD, $code_composicion, $codigo]);
         }
         return 'ok';
     }
-    public function datatables_simulador_precios_old(Request $request)
+    public function datatables_simulador_precios(Request $request)
     {
-        $cat = $request->get('categoria');   
+        $cat = $request->get('categoria'); 
+        $precio = ' precioMXP as precio_moneda, cantidad * precioMXP as importe_moneda';
         switch ($cat) {
-            case 'precios_piel':
-                $cat = '9';
+            case 'piel':
+                $cat = ' grupoPlaneacion = 9 AND subModelo <> \'C\'';
                 break;
-            case 'precios_tela':
-                $cat = '11';
+            case 'tela':
+                $cat = ' grupoPlaneacion = 11 AND subModelo <> \'C\'';
                 break;
-            
+            case 'hule':
+                $cat = ' grupoPlaneacion = 6 AND subModelo <> \'C\'';
+                $precio = ' precioUSD as precio_moneda, cantidad * precioUSD as importe_moneda';
+                break;
+            case 'cojineria':
+                $cat = ' grupoPlaneacion = 21 AND subModelo <> \'C\'';
+                break;
+            case 'casco':
+                $cat = ' subModelo = \'C\'';
+                break;
+            case 'herrajes':
+                $cat = ' grupoPlaneacion = 5 AND subModelo <> \'C\'';
+                $precio = ' precioUSD as precio_moneda, cantidad * precioUSD as importe_moneda';
+                break;
+            case 'metales':
+                $cat = ' grupoPlaneacion = 7 AND subModelo <> \'C\'';
+                $precio = ' precioUSD as precio_moneda, cantidad * precioUSD as importe_moneda';
+                break;
+                case 'empaques':
+                $cat = ' (grupoPlaneacion = 3 OR grupoPlaneacion = 28) AND subModelo <> \'C\'';
+                break;
+            case 'otros':
+                $cat = ' (grupoPlaneacion <> 11
+                AND  grupoPlaneacion <> 9
+                AND grupoPlaneacion <> 6
+                AND grupoPlaneacion <> 21
+                AND grupoPlaneacion <> 5
+                AND grupoPlaneacion <> 7
+                AND grupoPlaneacion <> 3
+                AND grupoPlaneacion <> 6
+                AND grupoPlaneacion <> 13
+                AND grupoPlaneacion <> 28 ) AND subModelo <> \'C\'';
+                break;
+            case 'cuotas':
+                $cat = ' grupoPlaneacion = 13 AND subModelo <> \'C\'';
+                break;
             default:
                 # code...
                 break;
         }
         $id = $request->get('id');        
-      //Siz_simulador_temp
-            
-        $material = DB::select('select *, cantidad*precioMXP as precio_pesos from Siz_simulador_temp
-        where composicionCodigo = ?
-        and grupoPlaneacion = ? and subModelo <> ? 
-        ', [$id, $cat,'C']);
+         //Siz_simulador_temp
+        $material = DB::select('select *, '.$precio.' from Siz_simulador_temp
+        where composicionCodigo = ? AND '.$cat 
+        , [$id]);
+        
                
         return response()->json(array('material' => $material));
-        
-        $consulta = DB::select('exec SIZ_SIMULADOR_COSTO_LDM  ?', [$tc_usd]);
-        //Definimos las columnas 
-        $consulta= collect($consulta);
-        return Datatables::of($consulta)
-            
-            ->addColumn(
-                'pieles',
-                function ($item) {
-                    return  number_format($item->g_piel_cant, 2, '.', ',') . ' / ' . number_format($item->g_tela_cant, 2, '.', ',');
-                }
-            )
-            ->addColumn(
-                'pieles_precio',
-                function ($item) {
-                    //return   . ;
-                   /* return '<a href="#" id="precios_piel">
-                            <i class="fa fa-hand-o-right"></i> '.number_format($item->g_piel, 2, '.', ',').'</a> / 
-                            <a href="#" id="precios_tela">
-                            <i class="fa fa-hand-o-right"></i> '.number_format($item->g_tela, 2, '.', ',').'</a>';
-                    */
-                    return number_format($item->g_piel, 2, '.', ',').' /  '.
-                    number_format($item->g_tela, 2, '.', ',');
-                }
-            )
-            ->make(true);
-      
     }
     public function datatables_tparametros(Request $request)
     {
@@ -285,6 +296,13 @@ class Mod09_FinanzasListaPreciosController extends Controller
                   'USD', $hule->codigo]);
             }
             //fin calculo hules x kilo
+
+            //tambien vamos a cambiar la moneda para los articulos que estamos presentando en Dolar
+            //son hules (ya no seria necesario, el proceso de xKILO hixo el cambio)
+            //herrajes y metales que son grupo 5 y 7 
+            DB::update('update Siz_simulador_temp set moneda = \'USD\' 
+            where (grupoPlaneacion = 7 OR grupoPlaneacion = 5) AND subModelo <> \'C\'');
+         
         } //end insert
         $margenVtas = 50;
         $cuenta_tparametros = count($tparametros);
@@ -358,23 +376,52 @@ class Mod09_FinanzasListaPreciosController extends Controller
                     return  $item->total / (1 - ($margenVtas * .01));
                 }
             )
-            ->addColumn(
-                'pieles',
-                function ($item) {
+            ->addColumn('pieles', function ($item) {
                     return  number_format($item->g_piel_cant, 0, '.', ',') . ' / ' . number_format($item->g_tela_cant, 0, '.', ',');
                 }
             )
             ->addColumn(
-                'pieles_precio',
+                'pieles_precio_detalle',
                 function ($item) {
-                    //return   . ;
-                    /*return '<a href="#" id="precios_piel">
-                            <i class="fa fa-hand-o-right"></i> '.number_format($item->g_piel, 2, '.', ',').'</a> / 
+                  return '<a href="#" id="precios_piel">
+                            '.round($item->g_piel).'</a> / 
                             <a href="#" id="precios_tela">
-                            <i class="fa fa-hand-o-right"></i> '.number_format($item->g_tela, 2, '.', ',').'</a>';
-                    */
-                    return number_format($item->g_piel, 0, '.', ',').' /  '.
-                    number_format($item->g_tela, 0, '.', ',');
+                            '.round($item->g_tela).'</a>';
+                   
+                   /* return number_format($item->g_piel, 2, '.', ',').' /  '.
+                    number_format($item->g_tela, 2, '.', ',');*/
+                }
+            )
+            ->addColumn('g_hule_detalle', function ($item) {
+                  return '<a href="#" id="precios_hule">'.round($item->g_huleUSD).'</a>';
+                }
+            )
+            ->addColumn('g_cojineria_detalle', function ($item) {
+                  return '<a href="#" id="precios_cojineria">'.round($item->g_cojineria).'</a>';
+                }
+            )
+            ->addColumn('g_casco_detalle', function ($item) {
+                  return '<a href="#" id="precios_casco">'.round($item->g_casco).'</a>';
+                }
+            )
+            ->addColumn('g_herrajes_detalle', function ($item) {
+                  return '<a href="#" id="precios_herrajes">'.round($item->g_herrajesUSD).'</a>';
+                }
+            )
+            ->addColumn('g_metales_detalle', function ($item) {
+                  return '<a href="#" id="precios_metales">'.round($item->g_metalesUSD).'</a>';
+                }
+            )
+            ->addColumn('g_empaques_detalle', function ($item) {
+                  return '<a href="#" id="precios_empaques">'.round($item->g_empaques).'</a>';
+                }
+            )
+            ->addColumn('g_otros_detalle', function ($item) {
+                  return '<a href="#" id="precios_otros">'.round($item->g_otros).'</a>';
+                }
+            )
+            ->addColumn('g_cuotas_detalle', function ($item) {
+                  return '<a href="#" id="precios_cuotas">'.round($item->g_cuotas).'</a>';
                 }
             )
             ->make(true);

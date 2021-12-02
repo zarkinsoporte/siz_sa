@@ -207,7 +207,7 @@
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                             aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Cambio de precio</h4>
+                    <h4 class="modal-title">Detalle de Costo <codigo id='text_categoria'></codigo></h4>
                 </div>
                 <input id="modal_composicion" type="hidden">
                 <input id="modal_categoria" type="hidden">
@@ -219,14 +219,14 @@
                                 <table id="table_precios" class="table table-striped table-bordered hover" width="100%">
                                     <thead>
                                         <tr>
-                                            <th>CódigoComposicion</th>
+                                            <th>HIDE CódigoComposicion</th>
                                             <th>Código</th>
                                             <th>Descripción</th>
                                             <th>UM</th>
                                             <th>Cantidad</th>
                                             <th>Precio</th>
+                                            <th>Importe</th>
                                             <th>Moneda</th>
-                                            <th>Total MXP</th>
                                             
                                         </tr>
                                     </thead>
@@ -253,27 +253,27 @@
                 </div>
 
                 <div class="modal-body" style='padding:16px'>
-                    
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <input class="form-check-input" type="radio" name="r1" id="ch1" value="1" checked>
-                                        <label for="fecha_provision">Nuevo Precio</label>
-                                        <input  type="number" id="precio_nuevo" name="precio_nuevo" min=".0001" step=".0001" class='form-control' autocomplete="off">
-                                    </div>
-                                </div>
-                                <input type="button" id="check" hidden>
-                            </div><!-- /.row -->
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <input class="form-check-input" type="radio" name="r1" id="ch2" value="2" >
-                                        <label for="fecha_provision">Incrementar /decrementar %</label>
-                                        <input  type="number" id="precio_porcentaje" name="precio_porcentaje" min="-99" max="100" class='form-control' autocomplete="off">
-                                    </div>
-                                </div>
-                               
-                            </div><!-- /.row -->                                         
+                    <input id="origindb" type="hidden">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <input class="form-check-input" type="radio" name="r1" id="ch1" value="1" checked>
+                                <label for="fecha_provision">Nuevo Precio</label>
+                                <input  type="number" id="precio_nuevo" name="precio_nuevo" min=".0001" step=".0001" class='form-control' autocomplete="off">
+                            </div>
+                        </div>
+                        <input type="button" id="check" hidden>
+                    </div><!-- /.row -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <input class="form-check-input" type="radio" name="r1" id="ch2" value="2" >
+                                <label for="fecha_provision">Incrementar /decrementar %</label>
+                                <input  type="number" id="precio_porcentaje" name="precio_porcentaje" min="-99" max="100" class='form-control' autocomplete="off">
+                            </div>
+                        </div>
+                        
+                    </div><!-- /.row -->                                         
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
@@ -360,19 +360,14 @@
                         {"data" : "margen"},
                         {"data" : "venta"},
                         {"data" : "pieles",  "name" : "DCM/MT"},
-                        {"data" : "pieles_precio", "name" : "1 Piel/Tela"},
+                        {"data" : "pieles_precio_detalle", "name" : "1 Piel/Tela"},
                         {"data" : "pg_piel_tela", "name" : "% Piel",
                         render: function(data){
                             //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);                            
                             var val = Math.round(data);
                             return val;
                         }},
-                        {"data" : "g_huleUSD", "name" : "USD Hule",
-                        render: function(data){
-                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
-                            var val = Math.round(data);
-                            return val;
-                        }},
+                        {"data" : "g_hule_detalle", "name" : "USD Hule"},
                         {"data" : "g_hule", "name" : "2 Hule",
                         render: function(data){
                             //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
@@ -385,24 +380,14 @@
                             var val = Math.round(data);
                             return val;
                         }},
-                        {"data" : "g_cojineria", "name" : "3 Pluma/Acojin",
-                        render: function(data){
-                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
-                            var val = Math.round(data);
-                            return val;
-                        }},
+                        {"data" : "g_cojineria_detalle", "name" : "3 Pluma/Acojin"},
                         {"data" : "pg_cojineria", "name" : "% Cojín",
                         render: function(data){
                             //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
                             var val = Math.round(data);
                             return val;
                         }},
-                        {"data" : "g_casco", "name" : "4 Casco",
-                        render: function(data){
-                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
-                            var val = Math.round(data);
-                            return val;
-                        }},
+                        {"data" : "g_casco_detalle", "name" : "4 Casco"},
                         {"data" : "pg_casco", "name" : "% Casco",
                         render: function(data){
                             //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
@@ -415,12 +400,7 @@
                             var val = Math.round(data);
                             return val;
                         }},
-                        {"data" : "g_herrajes", "name" : "5 Herrajes y Mecanismos",
-                        render: function(data){
-                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
-                            var val = Math.round(data);
-                            return val;
-                        }},
+                        {"data" : "g_herrajes_detalle", "name" : "5 Herrajes y Mecanismos"},
                         {"data" : "pg_herrajes", "name" : "% Herrajes",
                         render: function(data){
                             //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
@@ -433,48 +413,28 @@
                             var val = Math.round(data);
                             return val;
                         }},
-                        {"data" : "g_metales", "name" : "6 Patas",
-                        render: function(data){
-                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
-                            var val = Math.round(data);
-                            return val;
-                        }},
+                        {"data" : "g_metales_detalle", "name" : "6 Patas"},
                         {"data" : "pg_metales", "name" : "% Patas",
                         render: function(data){
                             //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
                             var val = Math.round(data);
                             return val;
                         }},
-                        {"data" : "g_empaques", "name" : "7 Empaque",
-                        render: function(data){
-                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
-                            var val = Math.round(data);
-                            return val;
-                        }},
+                        {"data" : "g_empaques_detalle", "name" : "7 Empaque"},
                         {"data" : "pg_empaques", "name" : "% Empaque",
                         render: function(data){
                             //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
                             var val = Math.round(data);
                             return val;
                         }},
-                        {"data" : "g_otros", "name" : "8 Otros",
-                        render: function(data){
-                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
-                            var val = Math.round(data);
-                            return val;
-                        }},
+                        {"data" : "g_otros_detalle", "name" : "8 Otros"},
                         {"data" : "pg_otros", "name" : "% Otros",
                         render: function(data){
                             //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
                             var val = Math.round(data);
                             return val;
                         }},
-                        {"data" : "g_cuotas", "name" : "9 Cuotas",
-                        render: function(data){
-                            //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
-                            var val = Math.round(data);
-                            return val;
-                        }},
+                        {"data" : "g_cuotas_detalle", "name" : "9 Cuotas"},
                         {"data" : "pg_cuotas", "name" : "% Cuotas",
                         render: function(data){
                             //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
@@ -519,23 +479,27 @@
                 var fila = $(this).closest('tr');
                 var datos = table_modelos.row(fila).data();
                
-                var total = datos['total'];
-                var  cantInput = $(this).val();
-                if (cantInput < total) {
+                var total = parseFloat(datos['total']);
+                var  cantInput = parseFloat($(this).val());
+                var margen = 50;
+                if (cantInput < total || $(this).val() == '') {
                     bootbox.dialog({
                         title: "Mensaje",
                         message: "<div class='alert alert-danger m-b-0'>El valor de Venta no puede ser menor al Total.</div>",
                         buttons: {
                             success: {
                                 label: "Ok",
-                                className: "btn-success m-r-5 m-b-5"
+                                className: "btn-primary m-r-5 m-b-5"
                             }
                         }
                     }).find('.modal-content').css({ 'font-size': '14px' });
+                   
+                    
+                    datos['venta']  =  total / (1 - (margen * .01));
                 } else {
                   
                     //var margen = total / (cantInput * .01);
-                    var margen = ((cantInput - total) / (cantInput)) * 100;
+                    margen = ((cantInput - total) / (cantInput)) * 100;
                     
                     /*
                         precioVta = total/(margen*.01)
@@ -548,12 +512,12 @@
                     console.log('total ' + total)
                     console.log('cantcantInput vta ' +cantInput)
                     console.log('margen ' + margen)
-
+                }
                     table_modelos.row(fila).data(datos); 
                     $('.inputvta').prop('readonly', false);
                     table_modelos.fixedColumns().update();
                     
-                }
+               
             });
             function number_format(number, decimals, dec_point, thousands_sep) 
                 {
@@ -757,7 +721,39 @@
             function reloadTparametros(){
                 tparametros.ajax.reload();
             }
-          
+
+            $('#table_detalle_modelos tbody').on( 'click', 'a', function (event) {
+                var rowdata = table_modelos.row( $(this).parents('tr') ).data();
+                
+                console.log(rowdata['composicionCodigo'])
+                console.log(event.currentTarget.id);
+                var categoria = event.currentTarget.id;
+                var textCategoria = categoria.split("_")[1];
+                var grupo_costo = rowdata['g_'+textCategoria]
+                console.log(grupo_costo)
+                if ( parseFloat(grupo_costo) == 0 ) {
+                        bootbox.dialog({
+                        title: "Mensaje",
+                        message: "<div class='alert alert-danger m-b-0'>No hay detalle para mostrar.</div>",
+                        buttons: {
+                            success: {
+                                label: "Ok",
+                                className: "btn-success m-r-5 m-b-5"
+                            }
+                        }
+                        }).find('.modal-content').css({ 'font-size': '14px' });
+                    }else{
+                       $('#modal_composicion').val( rowdata['composicionCodigo'])
+                        $('#text_categoria').text(capitalizeFirstLetter(textCategoria))
+                        $('#modal_categoria').val(textCategoria)
+                        reloadTablePrecios();
+                        $('#modal_price').modal('show'); 
+                    }
+                
+            });
+            function capitalizeFirstLetter(string) {
+                return string.charAt(0).toUpperCase() + string.slice(1);
+            }
             $('#tparametros tbody').on( 'click', 'a', function (event) {
                
                 var fila = tparametros.row( $(this).parents('tr') ).data();
@@ -768,6 +764,7 @@
                 var activar = (fila[0]['activar']);
                 $('#check').val(activar)
                 $('#precio_nuevo').val(num)
+                $('#origindb').val(0)
                 $("#ch1").prop("checked", true);
                 $("#ch2").prop("checked", false);
                 $('#modal_update').modal('show');
@@ -790,6 +787,7 @@
                 $('#precio_nuevo').val(num)
                 $("#ch1").prop("checked", true);
                 $("#ch2").prop("checked", false);
+                $('#origindb').val(0)
                 $('#modal_update').modal("show");
 
                 tparametros.rows().every( function ( rowIdx, tableLoop, rowLoop ) {
@@ -822,17 +820,17 @@
                         var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
                         return val;
                     }},
-                    {data: "precio",
+                    {data: "precio_moneda",
                         render: function(data){
                         var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
                         return val;
                     }},
-                    {data: "moneda"},
-                    {data: "precio_pesos",
+                    {data: "importe_moneda",
                         render: function(data){
                         var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
                         return val;
-                    }}
+                    }},
+                    {data: "moneda"}
                 ],
                 "columnDefs": [
                     {
@@ -853,10 +851,22 @@
                 console.log(fila)
                 //var code_composicion = fila[0]['composicionCodigo'];
                 //var code = fila[0]['codigo'];
-                var num = parseFloat(fila[0]['precio']).toFixed(4);
+                var moneda = fila[0]['moneda'], precio_moneda = 0;
+                switch (moneda) {
+                    case 'USD':                        
+                        precio_moneda = fila[0]['precioUSD'];
+                        break;
+                                  
+                    default:
+                        precio_moneda = fila[0]['precioMXP'];
+                      
+                        break;
+                }
+                var num = parseFloat(precio_moneda).toFixed(4);
                 $('#precio_nuevo').val(num)
                 $("#ch1").prop("checked", true);
                 $("#ch2").prop("checked", false);
+                $('#origindb').val(1)
                 $('#modal_update').modal('show');
                
             });
@@ -875,7 +885,11 @@
                         }
                         }).find('.modal-content').css({ 'font-size': '14px' });
                     }else{
-                        click_programar(1);
+                        if ($('#origindb').val() == 0) {                            
+                            click_programar(1);
+                        } else {
+                            click_programardb(1);                            
+                        }
                     }
                 } else {
                     if ($('#precio_porcentaje').val() < -100 || $('#precio_porcentaje').val() == '' ) {
@@ -890,7 +904,11 @@
                         }
                         }).find('.modal-content').css({ 'font-size': '14px' });
                     }else{
-                        click_programar(2);
+                        if ($('#origindb').val() == 0) {                            
+                            click_programar(2);
+                        } else {
+                            click_programardb(2);                            
+                        }
                     }
                 }
             });
@@ -969,26 +987,23 @@
                     $('#precio_porcentaje').val('');
                 
             }
-            function click_programar_old(option) {
-                var mifila = tparametros.rows('.selected').data();
-                //var mifilac = table.rows('.selected').node();
-                //console.log(mifilac[0])
-                //var code_composicion = '';
+            function click_programardb(option) {
+                var ordvta = table_precios.rows('.selected').data();
+                //var ordvtac = table.rows('.selected').node();
+                //console.log(ordvtac[0])
+                var code_composicion = '';
                 var ops = '';
-                var registros = mifila == null ? 0 : mifila.length;
+                var registros = ordvta == null ? 0 : ordvta.length;
                 for (var i = 0; i < registros; i++) {
                     if (i == registros - 1) {
-                        //linea comentada, ayudaba para elegir un codigo de la lista de precios, para actualizar el codigo 
-                        //solo para un mueble, una composicion. pero ahorita vamos actualizar todos los codigod
-                        //code_composicion = mifila[i].composicionCodigo;    
-                        moneda = mifila[i].moneda;    
-                        ops += mifila[i].codigo + "&" + parseFloat(mifila[i].precio).toFixed(4);
+                        code_composicion = ordvta[i].composicionCodigo;    
+                        moneda = ordvta[i].moneda;    
+                        ops += ordvta[i].codigo + "&" + parseFloat(ordvta[i].precio).toFixed(4);
                     } else {
-                        ops += mifila[i].codigo + "&" + parseFloat(mifila[i].precio).toFixed(4) + ",";
+                        ops += ordvta[i].codigo + "&" + parseFloat(ordvta[i].precio).toFixed(4) + ",";
                     }
-                    //console.log(mifila[i]);         
+                    //console.log(ordvta[i]);         
                 }
-
                 if (registros > 0) {
                     
                     $.ajax({
@@ -1000,12 +1015,11 @@
                             precio_nuevo: $('#precio_nuevo').val(),
                             precio_porcentaje: $('#precio_porcentaje').val(),
                             option: option,
-                            //code_composicion: code_composicion,
+                            code_composicion: code_composicion,
                             moneda: moneda, 
                             tc_usd :$('#tc_usd').val(),
                             tc_can : $('#tc_can').val(),
-                            tc_eur : $('#tc_eur').val(),
-                            check : $('#check').val()
+                            tc_eur : $('#tc_eur').val()
                         },
                         url: '{!! route('simulador_actualizarPrecios') !!}',
                         beforeSend: function () {
@@ -1035,19 +1049,16 @@
                                         console.log(respuesta)
                                         if(respuesta.codigo == 302){
                                             window.location = '{{ url("auth/login") }}';
-
                                         }
                                     }, 2000);
-                            reloadTparametros();
+                            reloadTablePrecios();
                            
                             $('#modal_update').modal('hide');
                             $('#precio_nuevo').val('');
-                            $('#check').val('')
                             $('#precio_porcentaje').val('');
                             
                         }
                     });
-
                 } else {
                     bootbox.dialog({
                         title: "Mensaje",
