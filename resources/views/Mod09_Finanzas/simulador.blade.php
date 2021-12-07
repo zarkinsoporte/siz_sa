@@ -76,6 +76,9 @@
     .ignoreme{
                     background-color: rgba(235, 0, 0, 0.288) !important;       
     }
+    .hidden {
+        display: none;
+    }
 </style>
 
 <div class="container">
@@ -225,7 +228,7 @@
                                             <th>UM</th>
                                             <th>Cantidad</th>
                                             <th>Precio</th>
-                                            <th>Importe</th>
+                                            <th>Importe</th>                                        
                                             <th>Moneda</th>
                                             
                                         </tr>
@@ -273,7 +276,23 @@
                             </div>
                         </div>
                         
-                    </div><!-- /.row -->                                         
+                    </div><!-- /.row -->   
+                    <div class="row" id="div_moneda">
+                        <div class="col-md-12">
+                            <label for="fecha_provision">Moneda</label>
+                        <select class="form-control" id="moneda_nueva" 
+                        name="moneda_nueva" style="margin-bottom: 10px;" 
+                        class="form-control selectpicker"
+                       
+                        >
+                            <option value=""> Selecciona una moneda </option>
+                            <option value="MXP">MXP</option>
+                            <option value="USD">USD</option>
+                            <option value="CAN">CAN</option>
+                                
+                        </select>
+                        </div>
+                    </div>                                      
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
@@ -303,6 +322,7 @@
             $("#page-wrapper").toggleClass("content");
             $(this).toggleClass("active");
         });
+        $('#moneda_nueva').val('').selectpicker('refresh');
    var data,
                 tableName = '#table_detalle_modelos',
                 table_modelos, tparametros, createparametros = 0,
@@ -394,26 +414,26 @@
                             var val = Math.round(data);
                             return val;
                         }},
-                        {"data" : "g_herrajesUSD", "name" : "Dólares Herrajes",
+                        {"data" : "g_herrajes_detalle", "name" : "Dólares Herrajes"},
+                        {"data" : "g_herrajes", "name" : "5 Herrajes y Mecanismos",
                         render: function(data){
                             //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
                             var val = Math.round(data);
                             return val;
                         }},
-                        {"data" : "g_herrajes_detalle", "name" : "5 Herrajes y Mecanismos"},
                         {"data" : "pg_herrajes", "name" : "% Herrajes",
                         render: function(data){
                             //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
                             var val = Math.round(data);
                             return val;
                         }},
-                        {"data" : "g_metalesUSD", "name" : "Dólares Patas",
+                        {"data" : "g_metales_detalle", "name" : "Dólares Patas"},
+                        {"data" : "g_metales", "name" : "6 Patas",
                         render: function(data){
                             //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
                             var val = Math.round(data);
                             return val;
                         }},
-                        {"data" : "g_metales_detalle", "name" : "6 Patas"},
                         {"data" : "pg_metales", "name" : "% Patas",
                         render: function(data){
                             //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
@@ -707,6 +727,8 @@
                         data: {
                             "_token": "{{ csrf_token() }}",
                             categoria: $('#modal_categoria').val(),
+                            tc_can : $('#tc_can').val(),
+                            tc_eur : $('#tc_eur').val(),   
                             id : $('#modal_composicion').val()
                         },
                         url: '{!! route('datatables_simulador_precios') !!}',
@@ -785,6 +807,8 @@
                 var activar = (fila[0]['activar']);
                 $('#check').val(activar)
                 $('#precio_nuevo').val(num)
+                $('#div_moneda').addClass('hidden')
+                
                 $("#ch1").prop("checked", true);
                 $("#ch2").prop("checked", false);
                 $('#origindb').val(0)
@@ -830,6 +854,7 @@
                         var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
                         return val;
                     }},
+                   
                     {data: "moneda"}
                 ],
                 "columnDefs": [
@@ -862,8 +887,11 @@
                       
                         break;
                 }
+                $('#div_moneda').removeClass('hidden');
                 var num = parseFloat(precio_moneda).toFixed(4);
                 $('#precio_nuevo').val(num)
+                var moneda = fila[0]['moneda'];
+                $('#moneda_nueva').val(moneda).selectpicker('refresh');
                 $("#ch1").prop("checked", true);
                 $("#ch2").prop("checked", false);
                 $('#origindb').val(1)
@@ -955,8 +983,9 @@
                 
                 mifila.precioMXP = precioMXP
                 var tr = $(row.node());
-                var checkbox = tr.find('td:first-child input[type="checkbox"]')
-                if(checkbox.is(':checked')){
+                var checkbox = tr.find('td input[type="checkbox"]')
+                var razon = checkbox.is(':checked')
+                if(razon){
                     mifila.validar = 1;
                    
                 } else {
@@ -969,11 +998,10 @@
                 console.log(mifila )
 
                 tparametros.row('.selected').data(mifila);
-                console.log('ok' )
-
-                var tr = $(row.node());
-                var checkbox = tr.find('td:first-child input[type="checkbox"]')
-                if(checkbox.is(':checked')){
+                 row = tparametros.row('.selected');
+                 tr = $(row.node());
+                 checkbox = tr.find('td input[type="checkbox"]')
+                if(razon){
                   
                     checkbox.prop('checked', true);
                 } else {
@@ -983,6 +1011,7 @@
 
                     $('#modal_update').modal('hide');
                     $('#precio_nuevo').val('');
+                    $('#moneda_nueva').val('').selectpicker('refresh');
                     $('#check').val('')
                     $('#precio_porcentaje').val('');
                 
@@ -997,7 +1026,7 @@
                 for (var i = 0; i < registros; i++) {
                     if (i == registros - 1) {
                         code_composicion = ordvta[i].composicionCodigo;    
-                        moneda = ordvta[i].moneda;    
+                           
                         ops += ordvta[i].codigo + "&" + parseFloat(ordvta[i].precio).toFixed(4);
                     } else {
                         ops += ordvta[i].codigo + "&" + parseFloat(ordvta[i].precio).toFixed(4) + ",";
@@ -1016,8 +1045,8 @@
                             precio_porcentaje: $('#precio_porcentaje').val(),
                             option: option,
                             code_composicion: code_composicion,
-                            moneda: moneda, 
-                            tc_usd :$('#tc_usd').val(),
+                            moneda: $('#moneda_nueva').val(),
+                            tc_usd : $('#tc_usd').val(),
                             tc_can : $('#tc_can').val(),
                             tc_eur : $('#tc_eur').val()
                         },
@@ -1055,6 +1084,7 @@
                            
                             $('#modal_update').modal('hide');
                             $('#precio_nuevo').val('');
+                            $('#moneda_nueva').val('').selectpicker('refresh');
                             $('#precio_porcentaje').val('');
                             
                         }

@@ -70,16 +70,27 @@ class Mod09_FinanzasListaPreciosController extends Controller
             and codigo = ?', 
             [$precio, $precioMXP, $code_composicion, $codigo]);
             */
-            DB::update('UPDATE Siz_simulador_temp set precio = ?, precioMXP = ?, precioUSD = ?
+            DB::update('UPDATE Siz_simulador_temp set precio = ?, moneda = ?, precioMXP = ?, precioUSD = ?
             where composicionCodigo = ? AND codigo = ?', 
-            [$precio, $precioMXP, $precioUSD, $code_composicion, $codigo]);
+            [$precio, $moneda, $precioMXP, $precioUSD, $code_composicion, $codigo]);
         }
         return 'ok';
     }
     public function datatables_simulador_precios(Request $request)
     {
         $cat = $request->get('categoria'); 
-        $precio = ' precioMXP as precio_moneda, cantidad * precioMXP as importe_moneda';
+        $tc_eur = $request->get('tc_eur'); 
+        $tc_can = $request->get('tc_can'); 
+        $precio = ' CASE WHEN moneda = \'USD\' THEN precioUSD
+                     WHEN moneda = \'MXP\' THEN precioMXP
+                     WHEN moneda = \'CAN\' THEN precioMXP * '. $tc_can .'
+                     WHEN moneda = \'EUR\' THEN precioMXP * '. $tc_eur .' END
+                    
+        as precio_moneda, cantidad * CASE WHEN moneda = \'USD\' THEN precioUSD
+         WHEN moneda = \'MXP\' THEN precioMXP
+         WHEN moneda = \'CAN\' THEN precioMXP * '. $tc_can .'
+         WHEN moneda = \'EUR\' THEN precioMXP * '. $tc_eur .' END as importe_moneda';
+        
         switch ($cat) {
             case 'piel':
                 $cat = ' grupoPlaneacion = 9 AND subModelo <> \'C\'';
@@ -129,7 +140,7 @@ class Mod09_FinanzasListaPreciosController extends Controller
         }
         $id = $request->get('id');        
          //Siz_simulador_temp
-        $material = DB::select('select *, '.$precio.' from Siz_simulador_temp
+        $material = DB::select('select *, SUBSTRING(descripcion, 0, 45) descripcion, '.$precio.' from Siz_simulador_temp
         where composicionCodigo = ? AND '.$cat 
         , [$id]);
         
