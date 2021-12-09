@@ -327,7 +327,7 @@
                 tableName = '#table_detalle_modelos',
                 table_modelos, tparametros, createparametros = 0,
                 datosTParametros = new Array(); 
-                var keepenablecheckbox = [''];
+                var keepenablecheckbox = 1;
         $(window).on('load', function() {
             var xhrBuscador = null;
 
@@ -338,8 +338,14 @@
             function createTable(){
                 
                 if (createparametros > 0) {
+                    //obtenemos array de parametros
                     datosTParametros = getTParametros();
-                    keepenablecheckbox = datosTParametros.filter(function (item) { return item.codigo == "99999" });                   
+                    //vamos a obtener la fila del hule, para corregir comportamiento de los inputs de la columna VENTA              
+                    filap = datosTParametros.filter(function (item) { return item.codigo == "99999" });   
+                    //en caso de checkbox=0 se tienen que habilitar los inputs de la columna VENTA
+                    //se habilitaran al terminar de cargar la tabla de modelos, LINEA #494 en function INITCOMPLETE              
+                    keepenablecheckbox = (filap[0].checkbox)? filap.length : 0;
+                    console.log('checkHule_habilitado: '+keepenablecheckbox + '-'+ filap[0].checkbox)                  
                 } 
 
                 datosTParametros = JSON.stringify(datosTParametros);
@@ -484,7 +490,7 @@
                             createparametros = 1;
                             createTableParametros();
                         }
-                        if (keepenablecheckbox.length == 0) {
+                        if (keepenablecheckbox == 0) {
                             $('.inputvta').prop('readonly', false);
                         }
                     }
@@ -678,7 +684,7 @@
 
                     var siguiente = 0;
                     for (var i = 0; i < fila; i++) {
-                        console.log('row - '+ datos_Tabla[i])
+                       
                         console.log('row activar - '+ datos_Tabla[i]["activar"])
                         
 

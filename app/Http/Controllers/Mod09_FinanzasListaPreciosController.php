@@ -286,14 +286,16 @@ class Mod09_FinanzasListaPreciosController extends Controller
 
             //al arranque vamos a calcular los hules x kilo
                 //primero vamos a guardar los valores originales
-            $original_hules = DB::select('SELECT codigo, precio, precioUSD, precioMXP, moneda from SIZ_simulador_temp
+            $original_hules = DB::select('SELECT um, codigo, cantidad, precio, precioUSD, precioMXP, moneda from SIZ_simulador_temp
                 where grupoPlaneacion = 6 AND subModelo <> \'C\'');
             Session::put('simulador_original_hules', $original_hules);
 
             $hules = DB::select('SELECT CASE WHEN SWeight1 = 0 OR SWeight1 IS NULL THEN 1
             ELSE 0 END AS err, codigo, descripcion, um, convert (decimal(18,2), precio) precio, moneda 
             , SWeight1 pesoKG
-            , SWeight1 * (select precioUSD from SIZ_simulador_temp where codigo=\'10007\') precioTotalUSDKG
+            , cantidad
+			, cantidad * SWeight1 cantidadKG
+            , cantidad * SWeight1 * (select precioUSD from SIZ_simulador_temp where codigo=\'10007\') precioTotalUSDKG
             ,(select precioUSD from SIZ_simulador_temp where codigo=\'10007\') precioUSDKG
             from SIZ_simulador_temp
             LEFT JOIN OITM o on o.itemCode = codigo
@@ -301,9 +303,9 @@ class Mod09_FinanzasListaPreciosController extends Controller
             grupoPlaneacion = 6 AND subModelo <> \'C\'');
 
             foreach ($hules as $hule) {
-                 DB::update('update Siz_simulador_temp set  precioUSD = ?, precio = ?, precioMXP = ?, moneda = ?
+                 DB::update('update Siz_simulador_temp set um = ?, cantidad = ?, precioUSD = ?, precio = ?, precioMXP = ?, moneda = ?
                  where codigo = ?', 
-                 [$hule->precioTotalUSDKG, $hule->precioTotalUSDKG, $hule->precioTotalUSDKG * $tc_usd ,
+                 ['KGS', $hule->cantidadKG, $hule->precioTotalUSDKG, $hule->precioUSDKG, $hule->precioTotalUSDKG * $tc_usd ,
                   'USD', $hule->codigo]);
             }
             //fin calculo hules x kilo
@@ -322,11 +324,24 @@ class Mod09_FinanzasListaPreciosController extends Controller
 
                 if ($tparametros[$x]['codigo'] == '10007') {
                     //clock('codeHule 10007');
+                    //ANTES DE CHECAR SI LOS HULES VAN A SER POR KILOS RETOMAMOS LOS DATOS ORIGINALES
+                    //SOBREESCRIBIENDO INCLUSO ALGUN CAMBIO DE PRECIO EN ALGUN ARTICULO HULE
+                    //PUESTO QUE LOS CALCULOS DE CANTIDAD E IMPORTE GUIANDONOS POR KILOS INCLUYE EL PESO.
+                    if (Session::has('simulador_original_hules')) {
+                        $hules = Session::get('simulador_original_hules');
+                        foreach ($hules as $hule) {
+                             DB::update('update Siz_simulador_temp set um = ?, cantidad = ?, precioUSD = ?, precio = ?, precioMXP = ?, moneda = ?
+                             where codigo = ?', 
+                             [$hule->um, $hule->cantidad, $hule->precioUSD, $hule->precio, $hule->precioMXP, 'USD', $hule->codigo]);
+                         }
+                     }
                     if ($tparametros[$x]['checkbox']) {
                         $hules = DB::select('SELECT CASE WHEN SWeight1 = 0 OR SWeight1 IS NULL THEN 1
                         ELSE 0 END AS err, codigo, descripcion, um, convert (decimal(18,2), precio) precio, moneda 
                         , SWeight1 pesoKG
-                        , SWeight1 * (select precioUSD from SIZ_simulador_temp where codigo=\'10007\') precioTotalUSDKG
+                        , cantidad
+                        , cantidad * SWeight1 cantidadKG
+                        , cantidad * SWeight1 * (select precioUSD from SIZ_simulador_temp where codigo=\'10007\') precioTotalUSDKG
                         ,(select precioUSD from SIZ_simulador_temp where codigo=\'10007\') precioUSDKG
                         from SIZ_simulador_temp
                         LEFT JOIN OITM o on o.itemCode = codigo
@@ -334,20 +349,13 @@ class Mod09_FinanzasListaPreciosController extends Controller
                         grupoPlaneacion = 6 AND subModelo <> \'C\'');
 
                         foreach ($hules as $hule) {
-                                DB::update('update Siz_simulador_temp set  precioUSD = ?, precio = ?, precioMXP = ?, moneda = ?
-                                where codigo = ?', 
-                                [$hule->precioTotalUSDKG, $hule->precioTotalUSDKG, $hule->precioTotalUSDKG * $tc_usd ,
-                                'USD', $hule->codigo]);
+                            DB::update('update Siz_simulador_temp set um = ?, cantidad = ?, precioUSD = ?, precio = ?, precioMXP = ?, moneda = ?
+                            where codigo = ?', 
+                            ['KGS', $hule->cantidadKG, $hule->precioTotalUSDKG, $hule->precioUSDKG, $hule->precioTotalUSDKG * $tc_usd ,
+                             'USD', $hule->codigo]);
                         }
                     } else {
-                        if (Session::has('simulador_original_hules')) {
-                            $hules = Session::get('simulador_original_hules');
-                            foreach ($hules as $hule) {
-                                 DB::update('update Siz_simulador_temp set  precioUSD = ?, precio = ?, precioMXP = ?, moneda = ?
-                                 where codigo = ?', 
-                                 [$hule->precioUSD, $hule->precio, $hule->precioMXP, 'USD', $hule->codigo]);
-                             }
-                         }
+                        
                     }
                 } // end if 10007
                 else
