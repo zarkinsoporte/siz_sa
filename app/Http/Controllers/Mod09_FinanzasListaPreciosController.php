@@ -222,7 +222,8 @@ class Mod09_FinanzasListaPreciosController extends Controller
             foreach ($composiciones as $value) {
                 $xCodeSub[0] = $value->ItemCode;
                 //dd($xCodeSub);
-                foreach ($xCodeSub as $codeSub) {
+                $index = 0;
+                while ($index < count($xCodeSub)) {
 
                     $subs = DB::select("Select OITM.ItemCode AS CODIGO 
                         from ITT1 
@@ -233,12 +234,14 @@ class Mod09_FinanzasListaPreciosController extends Controller
                         where  ITT1.Father = ? and 
                         (OITM.QryGroup29 = 'Y' or OITM.QryGroup30 = 'Y' or OITM.QryGroup31 = 'Y' or OITM.QryGroup32 = 'Y') 
                         --Order by MATERIAL",
-                        [1, $codeSub]);
+                        [1, $xCodeSub[$index]]);
                     $subs = array_pluck($subs,'CODIGO');
-
-                    $xCodeSub = array_merge($xCodeSub, $subs);
-                    
+                    if (count($subs) > 0) {
+                        $xCodeSub = array_merge($xCodeSub, $subs);
+                    }
+                    $index++;
                 }
+
                 $sub_cadena = "";
                 for ($x = 0; $x < count($xCodeSub); $x++) {
                     if ($x == count($xCodeSub) - 1) {
@@ -247,8 +250,8 @@ class Mod09_FinanzasListaPreciosController extends Controller
                         $sub_cadena = $sub_cadena . $xCodeSub[$x] . ",";
                     }
                 }
+                //dd([$xCodeSub, $sub_cadena, $value->ItemCode, $value->composicion, $tc_usd, $tc_can, $tc_eur]);
                 $xCodeSub = [];
-                //dd([$sub_cadena, $value->ItemCode, $value->composicion, $tc_usd, $tc_can, $tc_eur]);
                 //clock([$sub_cadena, $value->ItemCode]);
                 DB::select('exec SIZ_SIMULADOR_COSTO_LDM_INSERT  ?, ?, ?, ?', 
                 [$sub_cadena, $value->ItemCode, $value->composicion, $tc_usd]);

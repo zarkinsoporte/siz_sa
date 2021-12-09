@@ -447,7 +447,8 @@ class Reportes_ProduccionController extends Controller
             $lista_precio = 1;
             $xCodeSub[0] = $info->ItemCode;
             //dd($xCodeSub);
-            foreach ($xCodeSub as $codeSub) {
+            $index = 0;
+            while ($index < count($xCodeSub)) {
 
                 $subs = DB::select("Select OITM.ItemCode AS CODIGO 
                    -- ,OITM.ItemName AS MATERIAL, 
@@ -465,10 +466,12 @@ class Reportes_ProduccionController extends Controller
                     where  ITT1.Father = ? and 
                     (OITM.QryGroup29 = 'Y' or OITM.QryGroup30 = 'Y' or OITM.QryGroup31 = 'Y' or OITM.QryGroup32 = 'Y') 
                     --Order by MATERIAL",
-                    [$lista_precio, $codeSub]);
-                 $subs = array_pluck($subs,'CODIGO');
-
-                $xCodeSub = array_merge($xCodeSub, $subs);
+                    [$lista_precio, $xCodeSub[$index]]);
+                    $subs = array_pluck($subs,'CODIGO');
+                    if (count($subs) > 0) {
+                        $xCodeSub = array_merge($xCodeSub, $subs);
+                    }
+                    $index++;
                 
             }
             $sub_cadena = "";
