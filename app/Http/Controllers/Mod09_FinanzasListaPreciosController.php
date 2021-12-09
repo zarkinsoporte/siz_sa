@@ -106,7 +106,7 @@ class Mod09_FinanzasListaPreciosController extends Controller
                 $cat = ' grupoPlaneacion = 21 AND subModelo <> \'C\'';
                 break;
             case 'casco':
-                $cat = ' subModelo = \'C\'';
+                $cat = ' (grupoPlaneacion = 12 OR grupoPlaneacion = 14 OR grupoPlaneacion = 23) OR subModelo = \'C\'';
                 break;
             case 'herrajes':
                 $cat = ' grupoPlaneacion = 5 AND subModelo <> \'C\'';
@@ -129,6 +129,9 @@ class Mod09_FinanzasListaPreciosController extends Controller
                 AND grupoPlaneacion <> 3
                 AND grupoPlaneacion <> 6
                 AND grupoPlaneacion <> 13
+                AND grupoPlaneacion <> 12
+                AND grupoPlaneacion <> 14
+                AND grupoPlaneacion <> 23
                 AND grupoPlaneacion <> 28 ) AND subModelo <> \'C\'';
                 break;
             case 'cuotas':
