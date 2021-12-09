@@ -230,7 +230,7 @@
                                             <th>Precio</th>
                                             <th>Importe</th>                                        
                                             <th>Moneda</th>
-                                            
+                                            <th>Origen</th>                                            
                                         </tr>
                                     </thead>
                                 </table>
@@ -322,6 +322,9 @@
             $("#page-wrapper").toggleClass("content");
             $(this).toggleClass("active");
         });
+        $("#sidebar").toggleClass("active");
+            $("#page-wrapper").toggleClass("content");
+            $(this).toggleClass("active");
         $('#moneda_nueva').val('').selectpicker('refresh');
    var data,
                 tableName = '#table_detalle_modelos',
@@ -837,9 +840,12 @@
                 language:{
                 "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
                 },
-                "aaSorting": [],
-                dom: 'T<"clear">lfrtip',
                 processing: true,
+                "paging": false,
+                dom: 'frti',
+                scrollX: true,
+                scrollCollapse: true,
+                "order": [[2, "asc"],[ 4, "desc" ]],
                 columns: [
                     {data: "composicionCodigo"},
                     {data: "codigo"},
@@ -859,9 +865,9 @@
                         render: function(data){
                         var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
                         return val;
-                    }},
-                   
-                    {data: "moneda"}
+                    }},                   
+                    {data: "moneda"},
+                    {data: "codigoPadre"}
                 ],
                 "columnDefs": [
                     {
