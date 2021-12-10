@@ -126,7 +126,7 @@ class Mod01_ProduccionController extends Controller
                 $sub_cadena = $sub_cadena . $xCodeSub[$x] . ",";
             }
         }
-        dd($sub_cadena);
+        //dd($sub_cadena);
 
         
         $Materiales = DB::select('exec SIZ_MATERIALES_LDM_CODIGO ?, ?', [$sub_cadena, $lista_precio]);
