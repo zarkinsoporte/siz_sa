@@ -22,7 +22,172 @@ ini_set("memory_limit", '512M');
 ini_set('max_execution_time', 0);
 
 class Mod09_FinanzasListaPreciosController extends Controller
-{
+{   
+    public function simuladorAjaxToSession(){
+        //ajax nos envia los registros del datatable y los alamcenamos en la session
+        //formato JSON
+        $tParametros = Input::get('tParametros');
+        $tComposiciones = Input::get('tComposiciones');
+        $tc = [Input::get('tc_usd'), Input::get('tc_can'), Input::get('tc_eur'), Input::get('modelo')];
+        Session::put('tParametros',Input::get('tParametros'));   
+        Session::put('tComposiciones',Input::get('tComposiciones'));   
+        Session::put('tc',$tc);   
+    }
+    public function ReporteSimuladorXLS()
+    {
+        $path = public_path() . '/assets/plantillas_excel/Mod_09/SIZ_simulador.xlsx';
+        $tParametros = json_decode((Session::get('tParametros')));
+        $tComposiciones = json_decode((Session::get('tComposiciones')));
+        $tc = Session::get('tc');
+        //dd($tParametros, $tComposiciones);
+        $tc_usd = Input::get('tc_usd');
+        $excel =  Excel::load($path, function ($excel) use ($tc, $tParametros, $tComposiciones) {
+            $excel->sheet('RESUMEN', function ($sheet) use ($tc, $tParametros, $tComposiciones) {
+
+                $sheet->cell('A4', function ($cell) {
+                    $cell->setValue((date("Y-m-d H:i:s")));
+                });
+                $sheet->cell('K4', function ($cell) use ($tc) {
+                    $cell->setValue($tc[3]); //modelo
+                });
+                $sheet->cell('E6', function ($cell) use ($tc) {
+                    $cell->setValue($tc[0]); //tc_usd
+                });
+                $sheet->cell('G6', function ($cell) use ($tc) {
+                    $cell->setValue($tc[1]);
+                });
+                $sheet->cell('I6', function ($cell) use ($tc) {
+                    $cell->setValue($tc[2]);
+                });
+                $sheet->cell('D4', function ($cell) {
+                    $cell->setValue(date("H:i:s"));
+                });
+                $index = 10;
+                foreach ($tParametros as $row) {
+                    $sheet->row($index, [
+                        $row->codigo, $row->descripcion, $row->um, $row->precio, $row->moneda, $row->checkbox
+                    ]);
+                    $index++;
+                }
+                $index = 22;
+               //dd($tComposiciones);
+                foreach ($tComposiciones as $r) {
+                    $sheet->row($index, [
+                        $r->composicionCodigoCorto,
+                        $r->composicion,
+                        $r->total,
+                        $r->margen,
+                        $r->venta,
+                        $r->pieles,
+                        $r->pieles_precio_detalle,
+                        $r->pg_piel_tela,
+                        $r->g_hule_detalle,
+                        $r->g_hule,
+                        $r->pg_hule,
+                        $r->g_cojineria,
+                        $r->pg_cojineria,
+                        $r->g_casco,
+                        $r->pg_casco,
+                        $r->g_herrajes_detalle,
+                        $r->g_herrajes,
+                        $r->pg_herrajes,
+                        $r->g_metales_detalle,
+                        $r->g_metales,
+                        $r->pg_metales,
+                        $r->g_empaques,
+                        $r->pg_empaques,
+                        $r->g_otros,
+                        $r->pg_otros,
+                        $r->g_cuotas,
+                        $r->pg_cuotas
+                    ]);
+                    $index++;
+                }
+            });
+            $excel->sheet('DETALLE', function ($sheet2) {
+                $index = 6;
+                $sim = DB::select('SELECT [composicionCodigo] MODELO
+                    ,[composicion] COMPOSICION
+                    ,[codigoPadre] as ORIGEN
+                    ,[descripcionPadre] DESCRIPCION_ORIGEN
+                    ,[codigo] CODIGO
+                    ,[descripcion] DESCRIPCION
+                    ,[um] UM
+                    ,[cantidad] CANTIDAD
+                    ,[precio] PRECIO
+                    ,[moneda] MONEDA
+                    ,[precioMXP] PRECIO_MXP
+                    ,[precioUSD] PRECIO_USD
+                    ,[grupo] GRUPO
+                    ,[grupoPlaneacion] GRUPO_PLANEACION
+                    ,CASE WHEN grupoPlaneacion = 9 AND subModelo <> \'C\' THEN \'PIEL\'
+                    WHEN grupoPlaneacion = 11 AND subModelo <> \'C\' THEN \'TELA\'
+                    WHEN grupoPlaneacion = 6 AND subModelo <> \'C\' THEN \'HULE\'
+                    WHEN grupoPlaneacion = 21 AND subModelo <> \'C\' THEN \'COJINERIA\'
+                    WHEN (grupoPlaneacion = 12 OR grupoPlaneacion = 14 OR grupoPlaneacion = 23) OR subModelo = \'C\' THEN \'CASCO\'
+                    WHEN grupoPlaneacion = 5 AND subModelo <> \'C\' THEN \'HERRAJES\'   
+                    WHEN grupoPlaneacion = 7 AND subModelo <> \'C\' THEN \'METALES\'
+                    WHEN (grupoPlaneacion = 3 OR grupoPlaneacion = 28) AND subModelo <> \'C\' THEN \'EMPAQUES\'    
+                    WHEN (grupoPlaneacion <> 11
+                            AND  grupoPlaneacion <> 9
+                            AND grupoPlaneacion <> 6
+                            AND grupoPlaneacion <> 21
+                            AND grupoPlaneacion <> 5
+                            AND grupoPlaneacion <> 7
+                            AND grupoPlaneacion <> 3
+                            AND grupoPlaneacion <> 6
+                            AND grupoPlaneacion <> 13
+                            AND grupoPlaneacion <> 12
+                            AND grupoPlaneacion <> 14
+                            AND grupoPlaneacion <> 23
+                            AND grupoPlaneacion <> 28 ) AND subModelo <> \'C\' THEN \'OTROS\'   
+                        WHEN grupoPlaneacion = 13 AND subModelo <> \'C\' THEN \'COUTAS\'
+                        END AS GRUPO_SIMULADOR 
+                    ,[subModelo] SUBMODELO
+                    
+                    FROM [dbo].[SIZ_simulador_temp]
+                    where composicionCodigo IS NOT NULL'
+                );
+
+              $cant = count($sim) + 6;
+              $range = 'A5:P5';
+                
+                $sheet2->setAutoFilter($range);
+
+                foreach ($sim as $row) {
+                    $sheet2->row($index, 
+                    [
+                        $row->MODELO
+                        ,$row->COMPOSICION
+                        ,$row->ORIGEN
+                        ,$row->DESCRIPCION_ORIGEN
+                        ,$row->CODIGO
+                        ,$row->DESCRIPCION
+                        ,$row->UM
+                        ,$row->CANTIDAD
+                        ,$row->PRECIO
+                        ,$row->MONEDA
+                        ,$row->PRECIO_MXP
+                        ,$row->PRECIO_USD
+                        ,$row->GRUPO
+                        ,$row->GRUPO_PLANEACION
+                        ,$row->GRUPO_SIMULADOR
+                        ,$row->SUBMODELO
+                    ]
+                    );
+                    $index++;
+                }
+                $sheet2->getStyle('A6:P'.$cant)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+                $sheet2->getColumnDimension('A')->setAutoSize(true);
+                $sheet2->getColumnDimension('B')->setAutoSize(true);               
+                $sheet2->getColumnDimension('D')->setAutoSize(true);              
+                $sheet2->getColumnDimension('F')->setAutoSize(true);
+                
+            });
+        })
+            ->setFilename('SIZ Simulador Costo')
+            ->export('xlsx');
+    }
     public function simulador_actualizarPrecios(Request $request){
         $check = $request->input('check');
         $articulos = $request->input('articulos');
