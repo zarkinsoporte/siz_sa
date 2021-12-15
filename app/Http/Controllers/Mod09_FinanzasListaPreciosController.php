@@ -318,6 +318,7 @@ class Mod09_FinanzasListaPreciosController extends Controller
     public function datatables_tparametros(Request $request)
     {
            
+            //OR (grupoPlaneacion = 11 AND subModelo <> \'C\')
         $tparametros = DB::select('SELECT \'0\' AS err, codigo, descripcion, um, convert (decimal(18,2), precio) precio, moneda 
             , 1 AS activar, precioMXP
             from SIZ_simulador_temp
@@ -467,7 +468,7 @@ class Mod09_FinanzasListaPreciosController extends Controller
             , cantidad
 			, cantidad * SWeight1 cantidadKG
             , cantidad * SWeight1 * (select precioUSD from SIZ_simulador_temp where codigo=\'10007\') precioTotalUSDKG
-            ,(select precioUSD from SIZ_simulador_temp where codigo=\'10007\') precioUSDKG
+            , SWeight1 * (select precioUSD from SIZ_simulador_temp where codigo=\'10007\') precioUSDKG
             from SIZ_simulador_temp
             LEFT JOIN OITM o on o.itemCode = codigo
             where 
@@ -513,7 +514,7 @@ class Mod09_FinanzasListaPreciosController extends Controller
                         , cantidad
                         , cantidad * SWeight1 cantidadKG
                         , cantidad * SWeight1 * (select precioUSD from SIZ_simulador_temp where codigo=\'10007\') precioTotalUSDKG
-                        ,(select precioUSD from SIZ_simulador_temp where codigo=\'10007\') precioUSDKG
+                        , SWeight1 * (select precioUSD from SIZ_simulador_temp where codigo=\'10007\') precioUSDKG
                         from SIZ_simulador_temp
                         LEFT JOIN OITM o on o.itemCode = codigo
                         where 
