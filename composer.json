@@ -11,9 +11,9 @@
         "illuminate/html": "5.*",
         "laravelcollective/html": "5.1.*",
         "khill/lavacharts" : "3.*", 
-        "yajra/laravel-datatables-oracle": "^6.6.0",
         "simplesoftwareio/simple-qrcode": "^2.0",
         "barryvdh/laravel-dompdf": "^0.8.2", 
+        "yajra/laravel-datatables-oracle": "^6.6.0",
         "maatwebsite/excel": "~2.0",
         "itsgoingd/clockwork": "4.1.*",
         "barryvdh/laravel-snappy": "0.4.1",
@@ -58,7 +58,7 @@
     "config": {
         "preferred-install": "dist",
         "platform": {
-            "php": "7.1.33"
+            "php": "7.0.27"
         }
     }
 }

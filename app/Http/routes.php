@@ -418,19 +418,13 @@ Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@pr
 //Route::get('/pruebassap', 'Mod02_PlaneacionController@updateOV');
 
 Route::get('/pruebas', function (Request $request) {
-    Mail::send('welcome', [], function ($msj)  {
-        $msj->subject('SIZ Test'); //ASUNTO DEL CORREO
-        $msj->to(['alberto.medina@zarkin.com']); //Correo del destinatario
-    });      
-    $var1= Artisan::call('cache:clear');
-    $var= Artisan::call('config:cache');
-    $tareas = DB::table('Siz_Tarea_Menu')
-    ->where('name','')
-    ->get();
+    $dt = date('d/m/Y h:i');
+//AVANCE DE OP (NO PIEL)
+//Cuando una orden se libera en planeación revisamos si se le cargara piel 106 (revisando su ruta), 
+//en caso de que no lleve piel, entonces le cambiamos en status y le colocamos la fecha de inicio.
+//casco: 400 armado - 300 habilitado ()
 
-    foreach ($tareas as $k) {
-       // DB::update('update Siz_Tarea_Menu set route = ? where name = ?', [$k->name, $k->name]);
-    }
+    $res = SAP::updateStatusEntregaPiel('6098', '06', ''.$dt);
    
 });
 
@@ -518,3 +512,5 @@ Route::get('datatables_tparametros', 'Mod09_FinanzasListaPreciosController@datat
 Route::get('home/SIMULADOR COSTOS/simulador/{modelo}/{modelo_descr}', 'Mod09_FinanzasListaPreciosController@Simulador');
 Route::get('datatables_simulador_precios', 'Mod09_FinanzasListaPreciosController@datatables_simulador_precios')->name('datatables_simulador_precios');
 Route::any('simulador_actualizarPrecios', 'Mod09_FinanzasListaPreciosController@simulador_actualizarPrecios')->name('simulador_actualizarPrecios');
+Route::get('simuladorXLS/{tc_usd}/{tc_can}/{tc_eur}', 'Mod09_FinanzasListaPreciosController@ReporteSimuladorXLS')->name('simuladorXLS');
+Route::post('simulador_session_json', 'Mod09_FinanzasListaPreciosController@simuladorAjaxToSession')->name('simulador_session_json');

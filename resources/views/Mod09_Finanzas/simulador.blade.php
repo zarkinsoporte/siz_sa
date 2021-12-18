@@ -149,16 +149,33 @@
                 </table>
             </div>
         </div>
-        <div class="col-md-2">
-            <p style="margin-bottom: 23px"></p>
-            <button type="button" class="form-control btn btn-primary " id="btn_mostrar"> Calcular</button>
-            
+        <div class="col-md-3">
+           <div class="row">
+               <div class="col-md-4">
+                <p style="margin-bottom: 23px"></p>
+                <a onclick="window.history.back();" class=" btn btn-primary btn-block" ">Atras</a>
+                
+                </div>
+           </div>
+           <div class="row">
+               <div class="col-md-12">
+                <p style="margin-bottom: 23px"></p>
+                <button type="button" class=" btn btn-primary btn-block" id="btn_mostrar"><i class="fa fa-cogs"></i> Calcular</button>
+                
+                </div>
+           </div>
+           <div class="row">
+            <div class="col-md-12">
+             <p style="margin-bottom: 23px"></p>
+             <button type="button" class=" btn btn-success btn-block" id="btn_xls"><i class="fa fa-file-excel-o"></i> Excel</button>
+             
+             </div>
         </div>
-        <div class="col-md-1">
-            <p style="margin-bottom: 23px"></p>
-            <a onclick="window.history.back();" class=" btn btn-primary " style="margin-left: -10px">Atras</a>
             
+            
+           
         </div>
+        
     </div>
     <hr>
     <div class="row">
@@ -376,7 +393,7 @@
                             d.tparametros = datosTParametros           
                         }              
                     },
-                    processing: true,
+                    processing: false,
                     columns: [   
                         {"data" : "composicionCodigoCorto", "name" : "Código"},
                         {"data" : "composicion", "name" : "Composición"},
@@ -423,7 +440,7 @@
                             var val = Math.round(data);
                             return val;
                         }},
-                        {"data" : "g_herrajes_detalle", "name" : "Dólares Herrajes"},
+                        {"data" : "g_herrajes_detalle", "name" : "USD Herrajes"},
                         {"data" : "g_herrajes", "name" : "5 Herrajes y Mecanismos",
                         render: function(data){
                             //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
@@ -436,7 +453,7 @@
                             var val = Math.round(data);
                             return val;
                         }},
-                        {"data" : "g_metales_detalle", "name" : "Dólares Patas"},
+                        {"data" : "g_metales_detalle", "name" : "USD Patas"},
                         {"data" : "g_metales", "name" : "6 Patas",
                         render: function(data){
                             //var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
@@ -698,7 +715,8 @@
                                 ,"moneda" : datos_Tabla[i]["moneda"]
                                 ,"precioMXP" : datos_Tabla[i]["precioMXP"]
                                 ,"checkbox" : datos_Tabla[i]["activar"] == 1 ? true : false
-
+                                ,"descripcion" : datos_Tabla[i]["descripcion"]
+                                ,"um" : datos_Tabla[i]["um"]
                             }
                            
                             siguiente++;
@@ -1120,7 +1138,94 @@
                 $('#modal_price').modal('hide');
             });
 
+            $('#btn_xls').on('click', function (e) {
+                $(this).html('<i class="fa fa-spinner fa-pulse fa-lg fa-fw"></i> Excel');
+                var datosTParametros = getTParametros();
+                var datosTComposiciones = getTComposiciones();
+                
+                datosTParametros = JSON.stringify(datosTParametros);
+                datosTComposiciones = JSON.stringify(datosTComposiciones);
+                $.ajax({ 
+                    type:'POST',  
+                    url: '{!! route('simulador_session_json') !!}',
+                    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                    data: { 
+                        "_token": "{{ csrf_token() }}", 
+                        "tParametros": datosTParametros ,
+                        "tComposiciones": datosTComposiciones ,
+                        tc_usd : $('#tc_usd').val(),
+                        tc_can : $('#tc_can').val(),
+                        tc_eur : $('#tc_eur').val(),                        
+                        modelo : '{{$modelo. ' ' . $modelo_descr}}'
+                    }, 
+                    success: function(data, status, xhr)
+                    { 
+                        window.location.href = '{!! route('simuladorXLS') !!}'; 
+                    },
+                    complete: function () {
+                        $( "button:contains('Excel')").html('<span><i class="fa fa-file-excel-o"></i> Excel</span>');
+                    }
+                }); 
+            });
             
+            function getTComposiciones(){
+
+                //var tabla = $('#tparametros').DataTable();
+                var fila = $('#table_detalle_modelos tbody tr').length;
+                var datos_Tabla = table_modelos.rows().data();
+                
+                var tblComposiciones = new Array();
+                
+                if (datos_Tabla.length != 0){
+
+                    var siguiente = 0;
+                    for (var i = 0; i < fila; i++) {
+                       
+                        console.log('row activar - '+ datos_Tabla[i]["activar"])
+                        
+                            tblComposiciones[siguiente]={
+                                "composicionCodigoCorto" : datos_Tabla[i]["composicionCodigoCorto"]
+                                ,"composicion" : datos_Tabla[i]["composicion"]
+                                ,"total" : Math.round (datos_Tabla[i]["total"])
+                                ,"margen" : datos_Tabla[i]["margen"]
+                                ,"venta" : datos_Tabla[i]["venta"] 
+                                ,"pieles" : datos_Tabla[i]["pieles"]
+                                ,"pieles_precio_detalle" : Math.round(datos_Tabla[i]["g_piel"]) +'/'+ Math.round(datos_Tabla[i]["g_tela"])
+                                ,"pg_piel_tela" : Math.round(datos_Tabla[i]["pg_piel_tela"])
+                                ,"g_hule_detalle" : Math.round(datos_Tabla[i]["g_huleUSD"])
+                                ,"g_hule" : Math.round(datos_Tabla[i]["g_hule"])
+                                ,"pg_hule" : Math.round(datos_Tabla[i]["pg_hule"])
+                                ,"g_cojineria" : Math.round(datos_Tabla[i]["g_cojineria"])
+                                ,"pg_cojineria" : Math.round(datos_Tabla[i]["pg_cojineria"])
+                                ,"g_casco" : Math.round(datos_Tabla[i]["g_casco"])
+                                ,"pg_casco" : Math.round(datos_Tabla[i]["pg_casco"])
+                                ,"g_herrajes_detalle" : Math.round(datos_Tabla[i]["g_herrajesUSD"])
+                                ,"g_herrajes" : Math.round(datos_Tabla[i]["g_herrajes"])
+                                ,"pg_herrajes" : Math.round(datos_Tabla[i]["pg_herrajes"])
+                                ,"g_metales_detalle" : Math.round(datos_Tabla[i]["g_metalesUSD"])
+                                ,"g_metales" : Math.round(datos_Tabla[i]["g_metales"])
+                                ,"pg_metales" : Math.round(datos_Tabla[i]["pg_metales"])
+                                ,"g_empaques" : Math.round(datos_Tabla[i]["g_empaques"])
+                                ,"pg_empaques" : Math.round(datos_Tabla[i]["pg_empaques"])
+                                ,"g_otros" : Math.round(datos_Tabla[i]["g_otros"])
+                                ,"pg_otros" : Math.round(datos_Tabla[i]["pg_otros"])
+                                ,"g_cuotas" : Math.round(datos_Tabla[i]["g_cuotas"])
+                                ,"pg_cuotas" : Math.round(datos_Tabla[i]["pg_cuotas"])
+                            }
+                            siguiente++;
+
+                    }
+                    console.log(tblComposiciones)
+                    return tblComposiciones;
+
+                }
+                else{
+
+                    return tblComposiciones;
+
+                }
+
+            }
         }); //fin on load
     } //fin js_iniciador               
 </script>

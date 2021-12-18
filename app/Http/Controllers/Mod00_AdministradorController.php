@@ -760,7 +760,8 @@ dd($user);
                 'area' => $request->input('area'),
                 'nombre_equipo' => $request->input('nombre_equipo'), //descripcion
                 'usuario_actualizacion' => $request->input('usuario_actualizacion'), //*
-                'fecha_actualizacion' => $request->input('fecha_actualizacion'), //*
+                'fecha_actualizacion' => date("Y-m-d",(strtotime( $request->input('fecha_actualizacion')) )), //*
+                
                 //Usuario
                 'nombre_usuario' => $request->input('nombre_usuario'),
                 'correo' => $request->input('correo'),
@@ -788,11 +789,11 @@ dd($user);
                 'otros' => $request->input('otro'),
                 'l_otros' => $request->input('l_otro'), //*
                 //Mto             
-                'Fecha_mttoProgramado' => $request->input('mantenimiento_programado'),
-                'Fecha_mantenimiento' => $request->input('mantenimiento_realizado'),
+                'Fecha_mttoProgramado' => date("Y-m-d",(strtotime( $request->input('mantenimiento_programado')) )),                
+                'Fecha_mantenimiento' => date("Y-m-d",(strtotime( $request->input('mantenimiento_realizado')) )),
                 'Observaciones' => $request->input('ObservacionesTec'), //*
                 'garantia' => $request->input('garantia'), //*
-                'Fecha_garantia' => $request->input('fecha_garantia'), //*
+                'Fecha_garantia' => date("Y-m-d",(strtotime( $request->input('fecha_garantia')) )), //*
                 //acceso
                 'local_user' => $request->input('local_user'), //*
                 'dominio_user' => $request->input('dominio_user'), //*
