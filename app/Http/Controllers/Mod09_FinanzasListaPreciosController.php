@@ -468,7 +468,7 @@ class Mod09_FinanzasListaPreciosController extends Controller
             , cantidad
 			, cantidad * SWeight1 cantidadKG
             , cantidad * SWeight1 * (select precioUSD from SIZ_simulador_temp where codigo=\'10007\') precioTotalUSDKG
-            , SWeight1 * (select precioUSD from SIZ_simulador_temp where codigo=\'10007\') precioUSDKG
+            , (select precioUSD from SIZ_simulador_temp where codigo=\'10007\') precioUSDKG
             from SIZ_simulador_temp
             LEFT JOIN OITM o on o.itemCode = codigo
             where 
@@ -514,7 +514,7 @@ class Mod09_FinanzasListaPreciosController extends Controller
                         , cantidad
                         , cantidad * SWeight1 cantidadKG
                         , cantidad * SWeight1 * (select precioUSD from SIZ_simulador_temp where codigo=\'10007\') precioTotalUSDKG
-                        , SWeight1 * (select precioUSD from SIZ_simulador_temp where codigo=\'10007\') precioUSDKG
+                        , (select precioUSD from SIZ_simulador_temp where codigo=\'10007\') precioUSDKG
                         from SIZ_simulador_temp
                         LEFT JOIN OITM o on o.itemCode = codigo
                         where 
