@@ -312,7 +312,7 @@ class Mod09_FinanzasListaPreciosController extends Controller
         where composicionCodigo = ? AND '.$cat 
         , [$id]);
         
-               
+        clock($material);       
         return response()->json(array('material' => $material));
     }
     public function datatables_tparametros(Request $request)
@@ -475,10 +475,11 @@ class Mod09_FinanzasListaPreciosController extends Controller
             grupoPlaneacion = 6 AND subModelo <> \'C\'');
 
             foreach ($hules as $hule) {
-                 DB::update('update Siz_simulador_temp set um = ?, cantidad = ?, precioUSD = ?, precio = ?, precioMXP = ?, moneda = ?
+                 DB::update('update Siz_simulador_temp set um = ?, cantidad = ?, precioUSD = ?, precio = ?, 
+                 precioMXP = ?, moneda = ?
                  where codigo = ?', 
-                 ['KGS', $hule->cantidadKG, $hule->precioTotalUSDKG, $hule->precioUSDKG, $hule->precioTotalUSDKG * $tc_usd ,
-                  'USD', $hule->codigo]);
+                 ['KGS', $hule->cantidadKG, $hule->precioUSDKG, $hule->precioUSDKG, 
+                 $hule->precioUSDKG * $tc_usd , 'USD', $hule->codigo]);
             }
             //fin calculo hules x kilo
 
@@ -523,8 +524,8 @@ class Mod09_FinanzasListaPreciosController extends Controller
                         foreach ($hules as $hule) {
                             DB::update('update Siz_simulador_temp set um = ?, cantidad = ?, precioUSD = ?, precio = ?, precioMXP = ?, moneda = ?
                             where codigo = ?', 
-                            ['KGS', $hule->cantidadKG, $hule->precioTotalUSDKG, $hule->precioUSDKG, $hule->precioTotalUSDKG * $tc_usd ,
-                             'USD', $hule->codigo]);
+                            ['KGS', $hule->cantidadKG, $hule->precioUSDKG, $hule->precioUSDKG, 
+                            $hule->precioUSDKG * $tc_usd , 'USD', $hule->codigo]);
                         }
                     } else {
                         
