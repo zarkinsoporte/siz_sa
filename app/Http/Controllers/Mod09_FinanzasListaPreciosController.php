@@ -258,34 +258,34 @@ class Mod09_FinanzasListaPreciosController extends Controller
         
         switch ($cat) {
             case 'piel':
-                $cat = ' grupoPlaneacion = 9 AND subModelo <> \'C\'';
+                $cat = '( grupoPlaneacion = 9 AND subModelo <> \'C\')';
                 break;
             case 'tela':
-                $cat = ' grupoPlaneacion = 11 AND subModelo <> \'C\'';
+                $cat = '( grupoPlaneacion = 11 AND subModelo <> \'C\')';
                 break;
             case 'hule':
-                $cat = ' grupoPlaneacion = 6 AND subModelo <> \'C\'';
+                $cat = ' (grupoPlaneacion = 6 AND subModelo <> \'C\')';
                 $precio = ' precioUSD as precio_moneda, cantidad * precioUSD as importe_moneda';
                 break;
             case 'cojineria':
-                $cat = ' grupoPlaneacion = 21 AND subModelo <> \'C\'';
+                $cat = '( grupoPlaneacion = 21 AND subModelo <> \'C\')';
                 break;
             case 'casco':
-                $cat = ' (grupoPlaneacion = 12 OR grupoPlaneacion = 14 OR grupoPlaneacion = 23) OR subModelo = \'C\'';
+                $cat = '( (grupoPlaneacion = 12 OR grupoPlaneacion = 14 OR grupoPlaneacion = 23) OR subModelo = \'C\')';
                 break;
             case 'herrajes':
-                $cat = ' grupoPlaneacion = 5 AND subModelo <> \'C\'';
+                $cat = '( grupoPlaneacion = 5 AND subModelo <> \'C\')';
                 $precio = ' precioUSD as precio_moneda, cantidad * precioUSD as importe_moneda';
                 break;
             case 'metales':
-                $cat = ' grupoPlaneacion = 7 AND subModelo <> \'C\'';
+                $cat = ' (grupoPlaneacion = 7 AND subModelo <> \'C\')';
                 $precio = ' precioUSD as precio_moneda, cantidad * precioUSD as importe_moneda';
                 break;
                 case 'empaques':
-                $cat = ' (grupoPlaneacion = 3 OR grupoPlaneacion = 28) AND subModelo <> \'C\'';
+                $cat = ' ((grupoPlaneacion = 3 OR grupoPlaneacion = 28) AND subModelo <> \'C\')';
                 break;
             case 'otros':
-                $cat = ' (grupoPlaneacion <> 11
+                $cat = ' ((grupoPlaneacion <> 11
                 AND  grupoPlaneacion <> 9
                 AND grupoPlaneacion <> 6
                 AND grupoPlaneacion <> 21
@@ -297,10 +297,10 @@ class Mod09_FinanzasListaPreciosController extends Controller
                 AND grupoPlaneacion <> 12
                 AND grupoPlaneacion <> 14
                 AND grupoPlaneacion <> 23
-                AND grupoPlaneacion <> 28 ) AND subModelo <> \'C\'';
+                AND grupoPlaneacion <> 28 ) AND subModelo <> \'C\')';
                 break;
             case 'cuotas':
-                $cat = ' grupoPlaneacion = 13 AND subModelo <> \'C\'';
+                $cat = '( grupoPlaneacion = 13 AND subModelo <> \'C\')';
                 break;
             default:
                 # code...
