@@ -312,7 +312,7 @@ class Mod09_FinanzasListaPreciosController extends Controller
         where composicionCodigo = ? AND '.$cat 
         , [$id]);
         
-        clock($material);       
+        //clock($material);       
         return response()->json(array('material' => $material));
     }
     public function datatables_tparametros(Request $request)
@@ -394,19 +394,36 @@ class Mod09_FinanzasListaPreciosController extends Controller
                 $index = 0;
                 while ($index < count($xCodeSub)) {
 
-                    $subs = DB::select("Select OITM.ItemCode AS CODIGO 
-                        from ITT1 
-                        inner join OITM on OITM.ItemCode = ITT1.Code 
-                        inner join [@PL_RUTAS] RUTE on RUTE.Code = OITM.U_estacion 
-                        inner join ITM1 on ITM1.ItemCode = OITM.ItemCode 
+                    $subsensambles = DB::select("SELECT OITM.ItemCode AS CODIGO, OITM.ItemName DESCRIPCION, ITT1.Father ORIGEN, 
+                        (select itemName from OITM where itemcode = ITT1.Father) ORIGEN_DESCR, 
+                        ITT1.Quantity CANTIDAD_ART
+                        ,COALESCE( (select cantidad from SIZ_simulador_temp where 
+                        SIZ_simulador_temp.codigo = ITT1.Father AND 
+                        SIZ_simulador_temp.composicionCodigo = ? AND
+                        SIZ_simulador_temp.composicionCodigoCorto IS NULL), 1) CANTIDAD_ORIGEN
+                        ,ITT1.Quantity * COALESCE( (select cantidad from SIZ_simulador_temp where 
+                        SIZ_simulador_temp.codigo = ITT1.Father AND 
+                        SIZ_simulador_temp.composicionCodigo = ? AND
+                        SIZ_simulador_temp.composicionCodigoCorto IS NULL), 1) CANTIDAD,   OITM.InvntryUom UM, ITM1.Price PRECIO_UNITARIO, 
+                        ITT1.Quantity * ITM1.Price PRECIO_TOTAL, ITM1.Currency MONEDA
+                        FROM ITT1
+                        INNER JOIN OITM ON OITM.ItemCode = ITT1.Code
+                        INNER JOIN [@PL_RUTAS] RUTE ON RUTE.Code = OITM.U_estacion 
+                        INNER JOIN ITM1 ON ITM1.ItemCode = OITM.ItemCode 
                         and ITM1.PriceList=? 
-                        where  ITT1.Father = ? and 
-                        (OITM.QryGroup29 = 'Y' or OITM.QryGroup30 = 'Y' or OITM.QryGroup31 = 'Y' or OITM.QryGroup32 = 'Y') 
-                        --Order by MATERIAL",
-                        [1, $xCodeSub[$index]]);
-                    $subs = array_pluck($subs,'CODIGO');
+                        WHERE  ITT1.Father = ? and 
+                        (OITM.QryGroup29 = 'Y' or OITM.QryGroup30 = 'Y' or OITM.QryGroup31 = 'Y' or OITM.QryGroup32 = 'Y')",
+                        [$xCodeSub[0], $xCodeSub[0], 1, $xCodeSub[$index]]);
+                    $subs = array_pluck($subsensambles,'CODIGO');
                     if (count($subs) > 0) {
                         $xCodeSub = array_merge($xCodeSub, $subs);
+                        foreach ($subsensambles as $sub) {
+                            DB::insert('insert into Siz_simulador_temp (composicionCodigo, codigo, descripcion, 
+                            um, precio, cantidad, moneda, codigoPadre, descripcionPadre, cantidadPadre, cantidadArticulo) 
+                                    values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
+                            [$xCodeSub[0], $sub->CODIGO, $sub->DESCRIPCION, $sub->UM, $sub->PRECIO_UNITARIO, 
+                            $sub->CANTIDAD, $sub->MONEDA, $sub->ORIGEN, $sub->ORIGEN_DESCR, $sub->CANTIDAD_ORIGEN, $sub->CANTIDAD_ART]);
+                        }
                     }
                     $index++;
                 }
