@@ -23,6 +23,14 @@ ini_set('max_execution_time', 0);
 
 class Mod09_FinanzasListaPreciosController extends Controller
 {   
+    public function __construct()
+    {
+        // check if session expired for ajax request
+        $this->middleware('ajax-session-expired');
+
+        // check if user is autenticated for non-ajax request
+        $this->middleware('auth');
+    }
     public function simuladorAjaxToSession(){
         //ajax nos envia los registros del datatable y los alamcenamos en la session
         //formato JSON
@@ -32,6 +40,7 @@ class Mod09_FinanzasListaPreciosController extends Controller
         Session::put('tParametros',Input::get('tParametros'));   
         Session::put('tComposiciones',Input::get('tComposiciones'));   
         Session::put('tc',$tc);   
+        return response()->json(array('respuesta' => true));
     }
     public function ReporteSimuladorXLS()
     {

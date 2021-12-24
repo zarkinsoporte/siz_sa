@@ -1160,7 +1160,9 @@
                     }, 
                     success: function(data, status, xhr)
                     { 
-                        window.location.href = '{!! route('simuladorXLS') !!}'; 
+                        if (data.respuesta) {                            
+                            window.location.href = '{!! route('simuladorXLS') !!}'; 
+                        }
                     },
                     complete: function () {
                         $( "button:contains('Excel')").html('<span><i class="fa fa-file-excel-o"></i> Excel</span>');
