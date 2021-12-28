@@ -177,6 +177,7 @@ class Mod09_FinanzasListaPreciosController extends Controller
                         ,$row->PRECIO
                         ,$row->MONEDA
                         ,$row->PRECIO_MXP
+                        ,($row->PRECIO_MXP * $row->CANTIDAD)
                         ,$row->PRECIO_USD
                         ,$row->GRUPO
                         ,$row->GRUPO_PLANEACION
