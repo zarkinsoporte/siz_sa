@@ -514,3 +514,5 @@ Route::get('datatables_simulador_precios', 'Mod09_FinanzasListaPreciosController
 Route::any('simulador_actualizarPrecios', 'Mod09_FinanzasListaPreciosController@simulador_actualizarPrecios')->name('simulador_actualizarPrecios');
 Route::get('simuladorXLS/{tc_usd}/{tc_can}/{tc_eur}', 'Mod09_FinanzasListaPreciosController@ReporteSimuladorXLS')->name('simuladorXLS');
 Route::post('simulador_session_json', 'Mod09_FinanzasListaPreciosController@simuladorAjaxToSession')->name('simulador_session_json');
+
+Route::get('home/MTTO_ACABADOS', 'Mod08_DisenioController@mtto_acabados_index')->middleware('routelog');
