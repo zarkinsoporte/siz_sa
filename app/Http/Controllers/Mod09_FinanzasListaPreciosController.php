@@ -22,16 +22,6 @@ ini_set("memory_limit", '512M');
 ini_set('max_execution_time', 0);
 
 class Mod09_FinanzasListaPreciosController extends Controller
-<<<<<<< HEAD
-{
-    public function ReporteSimuladorXLS()
-    {
-        $path = public_path() . '/assets/plantillas_excel/Mod_01/SIZ_bo.xlsx';
-        $data = json_decode((Session::get('miarr')));
-
-        $excel =  Excel::load($path, function ($excel) use ($data) {
-            $excel->sheet('B.O.', function ($sheet) use ($data) {
-=======
 {   
     public function __construct()
     {
@@ -62,27 +52,10 @@ class Mod09_FinanzasListaPreciosController extends Controller
         $tc_usd = Input::get('tc_usd');
         $excel =  Excel::load($path, function ($excel) use ($tc, $tParametros, $tComposiciones) {
             $excel->sheet('RESUMEN', function ($sheet) use ($tc, $tParametros, $tComposiciones) {
->>>>>>> f237f2e5f989178d22ed3e9a03c23767ef20606a
 
                 $sheet->cell('A4', function ($cell) {
                     $cell->setValue((date("Y-m-d H:i:s")));
                 });
-<<<<<<< HEAD
-                $sheet->cell('N4', function ($cell) {
-                    $cell->setValue(date("H:i:s"));
-                });
-                $index = 6;
-                foreach ($data as $row) {
-                    $sheet->row($index, [
-                        $row->OP, $row->Pedido, $row->FechaPedido, $row->OC, $row->D_PROC, $row->NO_SERIE, $row->CLIENTE, $row->codigo1, $row->codigo3, $row->Descripcion, $row->Cant, $row->VSind, $row->VS, $row->Funda, $row->DEstacion, $row->U_Grupo, $row->Secue, $row->SecOT, $row->METAL, $row->SEMANA4, $row->fentrega, $row->fechaentregapedido, $row->SEMANA3, $row->u_fproduccion, $row->Prioridad, $row->Desv, $row->Comments, $row->U_Especial, $row->Modelo
-                    ]);
-                    $index++;
-                }
-            });
-        })
-            ->setFilename('SIZ Back Order Programado SALOTTO')
-            ->export('xlsx', ['Set-Cookie' => 'xlscook=done; path=/']);
-=======
                 $sheet->cell('K4', function ($cell) use ($tc) {
                     $cell->setValue($tc[3]); //modelo
                 });
@@ -224,7 +197,6 @@ class Mod09_FinanzasListaPreciosController extends Controller
         })
             ->setFilename('SIZ Simulador Costo')
             ->export('xlsx');
->>>>>>> f237f2e5f989178d22ed3e9a03c23767ef20606a
     }
     public function simulador_actualizarPrecios(Request $request){
         $check = $request->input('check');
