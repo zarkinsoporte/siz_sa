@@ -516,3 +516,6 @@ Route::get('simuladorXLS/{tc_usd}/{tc_can}/{tc_eur}', 'Mod09_FinanzasListaPrecio
 Route::post('simulador_session_json', 'Mod09_FinanzasListaPreciosController@simuladorAjaxToSession')->name('simulador_session_json');
 
 Route::get('home/MTTO_ACABADOS', 'Mod08_DisenioController@mtto_acabados_index')->middleware('routelog');
+Route::get('datatables_acabados', 'Mod08_DisenioController@datatables_acabados')->name('datatables_acabados');
+Route::post('eliminar_material_acabado', 'Mod08_DisenioController@eliminar_material_acabado')->name('eliminar_material_acabado');
+Route::post('guarda_material_acabado', 'Mod08_DisenioController@guarda_material_acabado')->name('guarda_material_acabado');
