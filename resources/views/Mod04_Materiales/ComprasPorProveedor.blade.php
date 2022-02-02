@@ -25,25 +25,28 @@
                     left: 0;
                     z-index: 5;
                 }
-                .segundoth {
-                    position: -webkit-sticky;
-                    position: sticky;
-                    left: 155px;
-                    z-index: 5;
-                }
-                table.dataTable thead .sorting {                
-                    position: sticky;
-                }
-                .DTFC_LeftBodyWrapper{
-                    margin-top: 81px;
-                }
-                .DTFC_LeftHeadWrapper {
-                    display:none;
-                }
-                .DTFC_LeftBodyLiner {
-                overflow: hidden;
-                overflow-y: hidden;
-                }
+                
+
+    .segundoth {
+        position: -webkit-sticky;
+        position: sticky;
+        left: 155px;
+        z-index: 5;
+    }
+    .primerth {
+        position: -webkit-sticky;
+        position: sticky;
+        left: 0px;
+        z-index: 5;
+    }
+
+
+   
+    .DTFC_LeftBodyLiner {
+        overflow-x: hidden;
+        left: -2px !important;
+    }
+
                
                 div.dt-buttons {
                     float: right;
@@ -239,13 +242,13 @@ function js_iniciador() {
     $('#fend').datepicker('setStartDate', start);
     $('#fend').datepicker('setDate', end);    
    
-    var wrapper = $('#page-wrapper2');
+    var wrapper = $('#wrapper');
     var resizeStartHeight = wrapper.height();
-    var height = (resizeStartHeight *75)/100;
+    var height = (resizeStartHeight *80)/100;
     if ( height < 200 ) {
         height = 200;
     }
-    console.log('height_datatable' + height)
+    console.log(wrapper.height()+' height_datatable ' + height)
 
     var options = [];         
         $.ajax({
@@ -298,6 +301,11 @@ function js_iniciador() {
     var table = $("#tcompras").DataTable({
         language:{
         "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+        },
+        "order": [[2, "desc"]],
+        fixedHeader : true,
+        fixedColumns: {
+        leftColumns: 3
         },
         deferRender: true,
         scrollX: true,

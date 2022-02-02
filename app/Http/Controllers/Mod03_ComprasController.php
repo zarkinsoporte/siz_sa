@@ -40,9 +40,11 @@ class Mod03_ComprasController extends Controller
             $articulos = str_replace("'',", "", $articulos);
             $proveedores = "'" . $request->input('proveedores') . "'";
             $proveedores = str_replace("'',", "", $proveedores);
-
-            $fstart = $request->input('fstart');
-            $fend = $request->input('fend');
+            //dd(Input::get('fstart'), Input::get('fend'));
+            $f1 = explode("/", Input::get('fstart'));
+            $fstart = $f1[2].$f1[1].$f1[0];
+            $f2 = explode("/", Input::get('fend'));
+            $fend = $f2[2].$f2[1].$f2[0];
             $criterio = " ";
             if (strlen($articulos) > 3 && $articulos != '') {
                 $criterio = $criterio . " AND (PDN1.ItemCode in(" . $articulos . ") ) ";
@@ -67,13 +69,13 @@ class Mod03_ComprasController extends Controller
                 inner join OPDN on OPDN.DocEntry = PDN1.DocEntry left join OITM on PDN1.ItemCode = OITM.ItemCode
                 left join ITM1 on PDN1.ItemCode = ITM1.ItemCode and ITM1.PriceList= 9 
                 left join UFD1 T1 on OITM.U_GrupoPlanea=T1.FldValue and T1.TableID='OITM' and T1.FieldID=9 
-                Where OITM.ItemCode is not null AND Cast(OPDN.DocDate as DATE) Between ? and ? 
+                Where OITM.ItemCode is not null AND Cast(OPDN.DocDate as DATE) Between '".$fstart."' and '".$fend."' 
                 ".$criterio."
                 Order by PDN1.DocEntry";
 
             $sel =  preg_replace('/[ ]{2,}|[\t]|[\n]|[\r]/', ' ', ($sel));
             //dd($sel);
-            $consulta = DB::select($sel, [$fstart, $fend]);
+            $consulta = DB::select($sel);
             $registros = collect($consulta);
             return compact('registros');
         } catch (\Exception $e) {
