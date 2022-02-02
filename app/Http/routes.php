@@ -418,13 +418,15 @@ Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@pr
 //Route::get('/pruebassap', 'Mod02_PlaneacionController@updateOV');
 
 Route::get('/pruebas', function (Request $request) {
-    $dt = date('d/m/Y h:i');
-//AVANCE DE OP (NO PIEL)
-//Cuando una orden se libera en planeación revisamos si se le cargara piel 106 (revisando su ruta), 
-//en caso de que no lleve piel, entonces le cambiamos en status y le colocamos la fecha de inicio.
-//casco: 400 armado - 300 habilitado ()
+    $start = \Carbon\Carbon::now()->startOfMonth()->toDateString();
+    $end = \Carbon\Carbon::now()->endOfMonth()->toDateString();
+    dd($start, $end);   
+    //AVANCE DE OP (NO PIEL)
+    //Cuando una orden se libera en planeación revisamos si se le cargara piel 106 (revisando su ruta), 
+    //en caso de que no lleve piel, entonces le cambiamos en status y le colocamos la fecha de inicio.
+    //casco: 400 armado - 300 habilitado ()
 
-    $res = SAP::updateStatusEntregaPiel('6098', '06', ''.$dt);
+            //$res = SAP::updateStatusEntregaPiel('6098', '06', ''.$dt);
    
 });
 
@@ -519,3 +521,8 @@ Route::get('home/MTTO_ACABADOS', 'Mod08_DisenioController@mtto_acabados_index')-
 Route::get('datatables_acabados', 'Mod08_DisenioController@datatables_acabados')->name('datatables_acabados');
 Route::post('eliminar_material_acabado', 'Mod08_DisenioController@eliminar_material_acabado')->name('eliminar_material_acabado');
 Route::post('guarda_material_acabado', 'Mod08_DisenioController@guarda_material_acabado')->name('guarda_material_acabado');
+
+Route::get('home/COMPRAS X PROVEEDOR', 'Mod03_ComprasController@index_compras_proveedor')->middleware('routelog');
+Route::any('datatables_compras_proveedor', 'Mod03_ComprasController@datatables_compras_proveedor')->name('datatables_compras_proveedor');
+
+Route::post('home/cpp_combobox', 'Mod03_ComprasController@cpp_combobox');
