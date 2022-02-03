@@ -58,6 +58,11 @@ class Mod08_DisenioController extends Controller
         ->get();
         return Datatables::of($data)->make(true);
     }
+    public function eliminar_acabado(Request $request)
+    {
+        ACABADO::where('CODIDATO', $request->get('acabado_code'))
+        ->update(array('ACA_Eliminado' => 1, 'FechaMov'=> date('Ymd'), 'idUser' =>  Auth::user()->U_EmpGiro));        
+    }
     public function eliminar_material_acabado(Request $request)
     {
         $material = ACABADO::find($request->get('id_mat'));

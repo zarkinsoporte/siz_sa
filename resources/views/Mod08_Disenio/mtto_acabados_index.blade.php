@@ -118,8 +118,9 @@
                                 @endforeach
                             </select>
                             <span class="input-group-btn">
-                                <button id="btn_add_acabado" class="btn btn-primary" type="button"><i class="fa fa-plus"></i> Acabado</button>
                                 <button id="btn_add_code" class="btn btn-primary" type="button"><i class="fa fa-plus"></i> Código</button>
+                                <button id="btn_add_acabado" class="btn btn-primary" type="button"><i class="fa fa-plus"></i> Acabado</button>
+                                <button id="btn_del_acabado" class="btn btn-danger" type="button"><i class="fa fa-trash"></i> Acabado</button>
                             </span>
                         </div><!-- /input-group -->
                   
@@ -259,6 +260,7 @@
             $("#page-wrapper").toggleClass("content");
             $(this).toggleClass("active");
             $('#btn_add_code').prop('disabled', true);
+            $('#btn_del_acabado').prop('disabled', true);
          
        
             var data,
@@ -299,7 +301,7 @@
                         {"data" : "ID"},
                         {data: "ACA_Eliminado", "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
                             if ( oData.PCXC_Activo != 0 ) {
-                                $(nTd).html("<a id='btneliminar' role='button' class='btn btn-danger' style='margin-right: 5px;'><i class='fa fa-trash'></i></a><a id='btnedit role='button' class='btn btn-primary'><i class='fa fa-edit'></i></a>");
+                                $(nTd).html("<a id='btneliminar' role='button' class='btn btn-sm btn-danger' style='margin-right: 5px;'><i class='fa fa-trash'></i></a><a id='btnedit role='button' class='btn btn-sm btn-primary'><i class='fa fa-edit'></i></a>");
                             }
                         }},
                         {"data" : "Arti"},
@@ -328,8 +330,10 @@
                 console.log(this.value)
                 if (this.value == "") {
                     $('#btn_add_code').prop('disabled', true);
+                    $('#btn_del_acabado').prop('disabled', true);
                 } else {
                     $('#btn_add_code').prop('disabled', false);
+                    $('#btn_del_acabado').prop('disabled', false);
 
                 }
                 table_acabados.ajax.reload();
@@ -405,6 +409,52 @@
             $('#btn_add_acabado').on('click', function (e) {
                 e.preventDefault();
                 $('#modal_add_acabado').modal('show');
+            });
+            $('#btn_del_acabado').on('click', function (e) {
+                e.preventDefault();
+                bootbox.confirm({
+                    size: "small",
+                    centerVertical: true,
+                    message: "Confirma para eliminar Acabado...",
+                    callback: function(result){ 
+                    
+                        if (result) {
+                            $.ajax({
+                            type: 'POST',       
+                            url: '{!! route('eliminar_acabado') !!}',
+                            data: {
+                                "_token": "{{ csrf_token() }}",                       
+                                acabado_code : $('#sel_acabado').val()                
+                            },
+                            beforeSend: function() {
+                                $.blockUI({
+                                    baseZ: 2000,
+                                    message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                                    css: {
+                                        border: 'none',
+                                        padding: '16px',
+                                        width: '50%',
+                                        top: '40%',
+                                        left: '30%',
+                                        backgroundColor: '#fefefe',
+                                        '-webkit-border-radius': '10px',
+                                        '-moz-border-radius': '10px',
+                                        opacity: .7,
+                                        color: '#000000'
+                                    }
+                                });
+                            },
+                            complete: function() {
+                                setTimeout($.unblockUI, 1500);
+                                
+                            }, 
+                            success: function(data){
+                                table_acabados.ajax.reload();
+                            }
+                            });
+                        }
+                    }
+                    });
             });
 
             $('#btn_guarda_material').on('click', function (e) {
