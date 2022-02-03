@@ -32,7 +32,12 @@ class Mod08_DisenioController extends Controller
         // check if user is autenticated for non-ajax request
         $this->middleware('auth');
     }
-
+    public function mtto_acabados_PDF(){
+        
+        $pdf = \PDF::loadView('Mod01_Produccion.ReporteBackOrderPDF_Planea', compact('data'));
+        $pdf->setPaper('Letter', 'landscape')->setOptions(['isPhpEnabled' => true, 'isRemoteEnabled' => true]);
+        return $pdf->stream('Siz_Reporte_BackOrderP ' . ' - ' . date("d/m/Y") . '.Pdf');
+    }
     public function mtto_acabados_index(){
         $user = Auth::user();
         $actividades = $user->getTareas();

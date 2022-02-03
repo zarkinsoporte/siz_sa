@@ -121,6 +121,7 @@
                                 <button id="btn_add_code" class="btn btn-primary" type="button"><i class="fa fa-plus"></i> Código</button>
                                 <button id="btn_add_acabado" class="btn btn-primary" type="button"><i class="fa fa-plus"></i> Acabado</button>
                                 <button id="btn_del_acabado" class="btn btn-danger" type="button"><i class="fa fa-trash"></i> Acabado</button>
+                                <button disabled id="btn_download_pdf" href="mtto_acabados_PDF" target="_blank" class="btn btn-danger" type="button"><i class="fa fa-file-pdf-o"></i> PDF</button>
                             </span>
                         </div><!-- /input-group -->
                   
@@ -137,9 +138,7 @@
                         <th>HIDE ID</th>
                         <th>Acción</th>
                         <th>Código</th>
-                        <th>Descripción</th>
-                        <th>Código a Surtir</th>
-                        <th>Descripción</th>
+                        <th>Código Sustituto</th>
                         </tr>
                     </thead>
                     <tfoot>
@@ -256,9 +255,7 @@
             $("#page-wrapper").toggleClass("content");
             $(this).toggleClass("active");
         });
-            $("#sidebar").toggleClass("active");
-            $("#page-wrapper").toggleClass("content");
-            $(this).toggleClass("active");
+            
             $('#btn_add_code').prop('disabled', true);
             $('#btn_del_acabado').prop('disabled', true);
          
@@ -304,10 +301,14 @@
                                 $(nTd).html("<a id='btneliminar' role='button' class='btn btn-sm btn-danger' style='margin-right: 5px;'><i class='fa fa-trash'></i></a><a id='btnedit role='button' class='btn btn-sm btn-primary'><i class='fa fa-edit'></i></a>");
                             }
                         }},
-                        {"data" : "Arti"},
-                        {"data" : "inval01_al0102"},
-                        {"data" : "Surtir"},
-                        {"data" : "inval01_descripcion2"},
+                        {"data" : "Arti", 
+                        render: function ( data, type, row ) {
+                        return '<b>'+ row['Arti'] + '</b> - '+ row['inval01_al0102'] ;
+                        }},
+                        {"data" : "Surtir",
+                        render: function ( data, type, row ) {
+                        return '<b>'+ row['Surtir'] + '</b> - '+ row['inval01_descripcion2'] ;
+                        }},
                         
                     ],
                     "language": {

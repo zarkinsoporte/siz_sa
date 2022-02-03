@@ -131,7 +131,7 @@ Route::post('admin/delete_Noti/', 'Mod00_AdministradorController@delete_Noti');
 Route::get('updateprivilegio', 'Mod00_AdministradorController@updateprivilegio');
 Route::get('dropdown', function () {
     return TAREA_MENU::where('id_menu_item', Input::get('option'))
-        ->lists('name', 'id');
+    ->lists('name', 'id');
 });
 Route::get('switch', function () {
     $vava = MODULOS_GRUPO_SIZ::find(2);
@@ -202,10 +202,10 @@ Route::get('datatables.showbackorderpatas', 'Reportes_ProduccionController@DataS
 
 Route::get('home/reporte/backorderPatasPDF', 'Reportes_ProduccionController@ReporteBackOrderPatasPDF');
 /*
-    |--------------------------------------------------------------------------
-    | MOD07-CALIDAD Routes
-    |--------------------------------------------------------------------------
-    */
+|--------------------------------------------------------------------------
+| MOD07-CALIDAD Routes
+|--------------------------------------------------------------------------
+*/
 Route::get('home/NUEVO RECHAZO', 'Mod07_CalidadController@Rechazo')->middleware('routelog');
 Route::post('RechazosNuevo', 'Mod07_CalidadController@RechazoIn');
 Route::get('Mod07_Calidad/Mod_Rechazo/{id}/{mensaje}', 'Mod07_CalidadController@Mod_Rechazo');
@@ -303,7 +303,7 @@ Route::get('home/lotes/{tabla}/{alm}/{item}', 'Mod04_MaterialesController@vistaL
 Route::post('home/lotes/insert', 'Mod04_MaterialesController@insertLotes');
 Route::get('home/lotes/remove/{id}/{lote}/{alm}', 'Mod04_MaterialesController@removeLote');
 Route::get('disponibilidadAlmacenMP', function(){
-     
+    
     $data = DB::select("SELECT 
 		 COALESCE (SUM(CASE WHEN WhsCode = 'APG-PA'  
          THEN OnHand ELSE 0 END) - (COALESCE (t1.A, 0) + COALESCE (tr.A, 0)), 0) 
@@ -425,15 +425,15 @@ Route::get('/pruebas', function (Request $request) {
     //Cuando una orden se libera en planeación revisamos si se le cargara piel 106 (revisando su ruta), 
     //en caso de que no lleve piel, entonces le cambiamos en status y le colocamos la fecha de inicio.
     //casco: 400 armado - 300 habilitado ()
-
-            //$res = SAP::updateStatusEntregaPiel('6098', '06', ''.$dt);
+    
+    //$res = SAP::updateStatusEntregaPiel('6098', '06', ''.$dt);
    
 });
 
 Route::get('/crear-orden', 'Mod02_PlaneacionController@crearOrden');
 
 Route::get('/sap', function (Request $request) {
-   
+    
     $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
     $vCmp->DbServerType="10"; 
     $vCmp->server = env('SAP_server');;
@@ -449,11 +449,11 @@ Route::get('/sap', function (Request $request) {
     
     Session::flash('error', $vCmp->GetLastErrorDescription());
     if ($lRetCode <> 0) {
-       Session::flash('error', $vCmp->GetLastErrorDescription());
+        Session::flash('error', $vCmp->GetLastErrorDescription());
     } else {
         Session::flash('info',' - conexión con SAP DI API exitosa!!'. ' ultimo err:'. $vCmp->GetLastErrorDescription());
     } 
-   
+    
     return redirect('home');
     
 });
@@ -517,13 +517,15 @@ Route::any('simulador_actualizarPrecios', 'Mod09_FinanzasListaPreciosController@
 Route::get('simuladorXLS/{tc_usd}/{tc_can}/{tc_eur}', 'Mod09_FinanzasListaPreciosController@ReporteSimuladorXLS')->name('simuladorXLS');
 Route::post('simulador_session_json', 'Mod09_FinanzasListaPreciosController@simuladorAjaxToSession')->name('simulador_session_json');
 
+//MTTO DE ACABADOS
 Route::get('home/MTTO_ACABADOS', 'Mod08_DisenioController@mtto_acabados_index')->middleware('routelog');
 Route::get('datatables_acabados', 'Mod08_DisenioController@datatables_acabados')->name('datatables_acabados');
 Route::post('eliminar_material_acabado', 'Mod08_DisenioController@eliminar_material_acabado')->name('eliminar_material_acabado');
 Route::post('eliminar_acabado', 'Mod08_DisenioController@eliminar_acabado')->name('eliminar_acabado');
 Route::post('guarda_material_acabado', 'Mod08_DisenioController@guarda_material_acabado')->name('guarda_material_acabado');
+Route::get('mtto_acabados_PDF', 'Mod08_DisenioController@mtto_acabados_PDF');
 
+//REPORTE DE COMPRAS X PROVEEDOR
 Route::get('home/COMPRAS X PROVEEDOR', 'Mod03_ComprasController@index_compras_proveedor')->middleware('routelog');
 Route::any('datatables_compras_proveedor', 'Mod03_ComprasController@datatables_compras_proveedor')->name('datatables_compras_proveedor');
-
 Route::post('home/cpp_combobox', 'Mod03_ComprasController@cpp_combobox');
