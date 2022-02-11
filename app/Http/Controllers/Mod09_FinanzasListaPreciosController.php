@@ -403,8 +403,21 @@ class Mod09_FinanzasListaPreciosController extends Controller
                 //dd($xCodeSub);
                 $index = 0;
                 while ($index < count($xCodeSub)) {
-
-                    $subsensambles = DB::select("SELECT OITM.ItemCode AS CODIGO, OITM.ItemName DESCRIPCION, ITT1.Father ORIGEN, 
+                    //DB::enableQueryLog();
+                    $subsensambles = DB::select("SELECT 
+                    CODIGO
+                    ,DESCRIPCION
+                    ,ORIGEN
+                    ,ORIGEN_DESCR
+                    ,CANTIDAD_ORIGEN
+                    ,UM
+                    ,PRECIO_UNITARIO
+                    , MONEDA
+                    ,SUM(CANTIDAD_ART) CANTIDAD_ART
+                    ,SUM(CANTIDAD) CANTIDAD
+                    ,SUM(PRECIO_TOTAL) PRECIO_TOTAL
+                    FROM(
+                        SELECT OITM.ItemCode AS CODIGO, OITM.ItemName DESCRIPCION, ITT1.Father ORIGEN, 
                         (select itemName from OITM where itemcode = ITT1.Father) ORIGEN_DESCR, 
                         ITT1.Quantity CANTIDAD_ART
                         ,COALESCE( (select cantidad from SIZ_simulador_temp where 
@@ -422,8 +435,18 @@ class Mod09_FinanzasListaPreciosController extends Controller
                         INNER JOIN ITM1 ON ITM1.ItemCode = OITM.ItemCode 
                         and ITM1.PriceList=? 
                         WHERE  ITT1.Father = ? and 
-                        (OITM.QryGroup29 = 'Y' or OITM.QryGroup30 = 'Y' or OITM.QryGroup31 = 'Y' or OITM.QryGroup32 = 'Y')",
+                        (OITM.QryGroup29 = 'Y' or OITM.QryGroup30 = 'Y' or OITM.QryGroup31 = 'Y' or OITM.QryGroup32 = 'Y')
+                        ) tab
+                        group by CODIGO
+                        ,DESCRIPCION
+                        ,ORIGEN
+                        ,ORIGEN_DESCR
+                        ,CANTIDAD_ORIGEN
+                        ,UM, PRECIO_UNITARIO
+                        , MONEDA",
                         [$xCodeSub[0], $xCodeSub[0], 1, $xCodeSub[$index]]);
+                        //dd(DB::getQueryLog());
+                       // dd($subsensambles);
                     $subs = array_pluck($subsensambles,'CODIGO');
                     if (count($subs) > 0) {
                         $xCodeSub = array_merge($xCodeSub, $subs);
