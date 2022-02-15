@@ -471,7 +471,7 @@ class Mod09_FinanzasListaPreciosController extends Controller
                 }
                 //dd([$xCodeSub, $sub_cadena, $value->ItemCode, $value->composicion, $tc_usd, $tc_can, $tc_eur]);
                 $xCodeSub = [];
-                //clock([$sub_cadena, $value->ItemCode]);
+                //dd([$sub_cadena, $value->ItemCode]);
                 DB::select('exec SIZ_SIMULADOR_COSTO_LDM_INSERT  ?, ?, ?, ?', 
                 [$sub_cadena, $value->ItemCode, $value->composicion, $tc_usd]);
             }

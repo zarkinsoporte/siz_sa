@@ -86,11 +86,11 @@
                 }
                 .dataTables_wrapper .dataTables_filter {float: right;text-align: right;visibility: visible;}
                 /* remove bs select all btn */
-select[data-max-options="10"] ~ .dropdown-menu .bs-actionsbox .bs-select-all {
+select[data-max-options="20"] ~ .dropdown-menu .bs-actionsbox .bs-select-all {
   display: none;
 }
 
-select[data-max-options="10"] ~ .dropdown-menu .bs-actionsbox .bs-deselect-all {
+select[data-max-options="20"] ~ .dropdown-menu .bs-actionsbox .bs-deselect-all {
   width: 100%;
 }
 
@@ -136,7 +136,7 @@ select[data-max-options="10"] ~ .dropdown-menu .bs-actionsbox .bs-deselect-all {
                                                         {!! Form::select("sel_articulos[]", $articulos, null, [
                                                         "data-selected-text-format"=>"count", "class" => "form-control selectpicker","id"
                                                         =>"sel_articulos", "data-size" => "8", "data-style" => "btn-success btn-sm",
-                                                        "data-actions-box"=>"true",  "data-deselect-all-text"=>"Limpiar", "data-max-options"=>"10",
+                                                        "data-actions-box"=>"true",  "data-deselect-all-text"=>"Limpiar", "data-max-options"=>"20",
                                                         'data-live-search' => 'true', 'multiple'=>'multiple'])
                                                         !!}
                                                     </div>
@@ -147,7 +147,7 @@ select[data-max-options="10"] ~ .dropdown-menu .bs-actionsbox .bs-deselect-all {
                                                         {!! Form::select("sel_proveedores[]", $proveedores, null, [
                                                         "data-selected-text-format"=>"count", "class" => "form-control selectpicker","id"
                                                         =>"sel_proveedores", "data-size" => "8", "data-style" => "btn-success btn-sm", 
-                                                        "data-actions-box"=>"true", "data-deselect-all-text"=>"Limpiar", "data-max-options"=>"10",
+                                                        "data-actions-box"=>"true", "data-deselect-all-text"=>"Limpiar", "data-max-options"=>"20",
                                                         'data-live-search' => 'true', 'multiple'=>'multiple'])
                                                         !!}
                                                     </div>
@@ -240,7 +240,7 @@ function js_iniciador() {
         
         console.log(selected, d_end);                
         $('#fend').datepicker('setStartDate', selected);
-        if (d_start > d_end) {
+        if (d_start > d_end && !ignore) {
             $('#fend').datepicker('setDate', selected);
         }        
     });
@@ -267,6 +267,10 @@ function js_iniciador() {
         height = 200;
     }
     console.log(wrapper.height()+' height_datatable ' + height)
+
+    $("#sel_articulos").on("changed.bs.select", function(e, clickedIndex, newValue, oldValue) {
+        comboboxProveedores_reload();
+    });
 
     function comboboxArticulos_reload() {
         var options = [];         
@@ -322,19 +326,7 @@ function js_iniciador() {
                     cadena += $($('#sel_articulos option:selected')[x]).val() + "','";
                 }
             }
-        var articulos = cadena;
-        if (registros == 0) {
-           bootbox.dialog({
-                    title: "Mensaje",
-                    message: "<div class='alert alert-danger m-b-0'>Selecciona primero algún artículo</div>",
-                    buttons: {
-                    success: {
-                    label: "Ok",
-                    className: "btn-success m-r-5 m-b-5"
-                    }
-                    }
-                    }).find('.modal-content').css({'font-size': '14px'} );
-        }else{
+        var articulos = cadena;    
             var options = [];         
             $.ajax({
                 type: 'POST',
@@ -361,10 +353,12 @@ function js_iniciador() {
                         options.push('<option value="' + data.proveedores[i]['codigo'] + '">' +
                         data.proveedores[i]['descripcion'] + '</option>');
                         }
-                    $('#sel_proveedores').append(options).selectpicker('refresh');                            
+                    if (data.proveedores.length > 0) {                        
+                        $('#sel_proveedores').append(options).selectpicker('refresh');                            
+                    }
                 }
             });  
-        }
+        
         
     }
     var table = $("#tcompras").DataTable({
