@@ -207,10 +207,10 @@ li.dt-button.active a::before{
                 </div>
                 <!-- Top Menu Items -->
                 <ul class="nav navbar-left top-nav hidden-xs">
-                    <li style="left:350%"><a href="#" style="padding-bottom: 0;
+                    <li style="left:200%"><a href="#" style="padding-bottom: 0;
                 padding-top: 3px;">
                            <a id="sidebarCollapse">
-                            <i class="glyphicon glyphicon-align-left"></i>
+                            <i class="glyphicon glyphicon-align-left"> <b>Menú</b></i>
                            </a>
                         </a></li>
                 </ul>

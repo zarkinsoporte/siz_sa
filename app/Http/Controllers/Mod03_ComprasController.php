@@ -24,11 +24,45 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class Mod03_ComprasController extends Controller
 {
-    public function cpp_combobox(){
-        $oitms = DB::select('SELECT ItemCode codigo, ItemCode +\' - \'+ ItemName AS descripcion FROM OITM WHERE PrchseItem = \'Y\' AND InvntItem = \'Y\' 
-        AND OITM.frozenFor = \'N\' ORDER BY ItemName asc');
-        $proveedores = DB::select('SELECT CardCode codigo, CardCode +\' - \'+ CardName as descripcion FROM OCRD WHERE CardType = ? ORDER BY CardName', ['S']);
-        return compact('proveedores', 'oitms');
+    public function cpp_combobox_articulos(Request $request){
+        $f1 = explode("/", Input::get('fstart'));
+        $fstart = $f1[2].$f1[1].$f1[0];
+        $f2 = explode("/", Input::get('fend'));
+        $fend = $f2[2].$f2[1].$f2[0];
+
+        $oitms = DB::select("SELECT 
+        PDN1.ItemCode codigo, PDN1.ItemCode +' - '+ OITM.ItemName AS descripcion   
+        From PDN1 
+        inner join OPDN on OPDN.DocEntry = PDN1.DocEntry left join OITM on PDN1.ItemCode = OITM.ItemCode
+        left join ITM1 on PDN1.ItemCode = ITM1.ItemCode and ITM1.PriceList= 9 
+        left join UFD1 T1 on OITM.U_GrupoPlanea=T1.FldValue and T1.TableID='OITM' and T1.FieldID=9 
+        Where OITM.ItemCode is not null AND Cast(OPDN.DocDate as DATE) Between '" . $fstart . "' and '" . $fend . "' 
+        GROUP BY PDN1.ItemCode, OITM.ItemName");
+      return compact('oitms');
+    }
+    public function cpp_combobox_proveedores(Request $request){
+        $f1 = explode("/", Input::get('fstart'));
+        $fstart = $f1[2].$f1[1].$f1[0];
+        $f2 = explode("/", Input::get('fend'));
+        $fend = $f2[2].$f2[1].$f2[0];
+
+        $articulos = "'" . $request->input('articulos') . "'";
+        $articulos = str_replace("'',", "", $articulos);
+        $criterio = " ";
+        if (strlen($articulos) > 3 && $articulos != '') {
+            $criterio = $criterio . " AND (PDN1.ItemCode in(" . $articulos . ") ) ";
+        }
+        $proveedores = DB::select("SELECT 
+        OPDN.CardCode codigo, OPDN.CardCode +' - '+ OPDN.CardName AS descripcion   
+        From PDN1 
+        inner join OPDN on OPDN.DocEntry = PDN1.DocEntry left join OITM on PDN1.ItemCode = OITM.ItemCode
+        left join ITM1 on PDN1.ItemCode = ITM1.ItemCode and ITM1.PriceList= 9 
+        left join UFD1 T1 on OITM.U_GrupoPlanea=T1.FldValue and T1.TableID='OITM' and T1.FieldID=9 
+        Where OITM.ItemCode is not null AND Cast(OPDN.DocDate as DATE) Between '" . $fstart . "' and '" . $fend ."'  
+        " . $criterio . "
+        group by OPDN.CardCode, OPDN.CardName
+        Order by OPDN.CardName");
+        return compact('proveedores');
     }
     public function datatables_compras_proveedor(Request $request)
     {

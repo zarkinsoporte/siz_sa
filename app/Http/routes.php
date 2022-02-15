@@ -528,4 +528,5 @@ Route::get('mtto_acabados_PDF', 'Mod08_DisenioController@mtto_acabados_PDF');
 //REPORTE DE COMPRAS X PROVEEDOR
 Route::get('home/COMPRAS X PROVEEDOR', 'Mod03_ComprasController@index_compras_proveedor')->middleware('routelog');
 Route::any('datatables_compras_proveedor', 'Mod03_ComprasController@datatables_compras_proveedor')->name('datatables_compras_proveedor');
-Route::post('home/cpp_combobox', 'Mod03_ComprasController@cpp_combobox');
+Route::post('home/cpp_combobox_articulos', 'Mod03_ComprasController@cpp_combobox_articulos');
+Route::post('home/cpp_combobox_proveedores', 'Mod03_ComprasController@cpp_combobox_proveedores');
