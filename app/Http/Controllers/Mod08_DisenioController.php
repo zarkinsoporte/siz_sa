@@ -45,12 +45,54 @@ class Mod08_DisenioController extends Controller
         ->where('ACA_Eliminado', 0)
         ->groupBy('CODIDATO', 'DESCDATO')
         ->orderBy('DESCDATO', 'desc')->get();
-        $oitms = DB::select('SELECT ItemCode, ItemName FROM OITM WHERE PrchseItem = \'Y\' AND InvntItem = \'Y\' AND U_TipoMat <> \'PT\' AND U_TipoMat IS NOT NULL
-        AND OITM.frozenFor = \'N\' ORDER BY ItemName asc');
+        $oitms = DB::select("SELECT ItemCode, ItemName,
+            CASE WHEN ItemName like '%NEGRO%' THEN 1 ELSE 0 END AS negro
+            FROM OITM 
+                WHERE PrchseItem = 'Y' AND InvntItem = 'Y' 
+                AND U_TipoMat <> 'PT' AND U_TipoMat IS NOT NULL
+                AND OITM.frozenFor = 'N'
+                AND U_GrupoPlanea in (
+                '18', --hilos
+                '19', --cierres
+                '9', --piel
+                '10', --tela complemento
+                '11' --tela y viniles
+                )
+                ORDER BY negro, ItemName asc
+        ");
+        $oitms_negro = array_where($oitms, function ($key, $value) {
+            return $value->negro == 1;
+        });
+        $oitms_otros = array_where($oitms, function ($key, $value) {
+            return $value->negro == 0;
+        });
+        $codigos_acabados = DB::select(
+            "SELECT SUBSTRING(ItemCode , charindex('-', ItemCode, 6) + 1, LEN(ItemCode) - charindex('-', ItemCode, 6) + 1) as Acabado
+            FROM OITM 
+            LEFT JOIN (
+                SELECT CODIDATO from SIZ_Acabados
+                where ACA_Eliminado = 0
+                group by CODIDATO
+            ) AS ACABADOS on ACABADOS.CODIDATO = LTRIM(RTRIM(SUBSTRING(ItemCode , charindex('-', ItemCode, 6) + 1, LEN(ItemCode) - charindex('-', ItemCode, 6) + 1)))
+            WHERE 
+                CODIDATO IS NULL
+                AND InvntItem = 'Y' 
+                AND U_TipoMat = 'PT' AND U_TipoMat IS NOT NULL
+                AND OITM.frozenFor = 'N'
+                AND ItemName not like '%NEGRO%'
+                AND U_IsModel = 'N'
+                AND ItemCode like '%-%'
+                GROUP BY SUBSTRING(ItemCode , charindex('-', ItemCode, 6) + 1, LEN(ItemCode) - charindex('-', ItemCode, 6) + 1)
+                ORDER BY SUBSTRING(ItemCode , charindex('-', ItemCode, 6) + 1, LEN(ItemCode) - charindex('-', ItemCode, 6) + 1) asc"
+        );
+
+        //dd($oitms_negro, $oitms_otros);
         $data = array(
             'actividades' => $actividades,
             'acabados' => $acabados,
-            'oitms' => $oitms,
+            'oitms_negro' => $oitms_negro,
+            'oitms_otros' => $oitms_otros,
+            'codigos_acabados' => $codigos_acabados,
             'ultimo' => count($actividades)
         );
         return view('Mod08_Disenio.mtto_acabados_index', $data);

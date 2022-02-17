@@ -160,8 +160,18 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
-                                <label for="text_acabado_codigo">Código del acabado</label>
-                                <input type="text" id="text_acabado_codigo" class="form-control">
+                                <label for="sel_codigo_acabado">Código del acabado</label>
+                                
+                                <select data-live-search="true" class="boot-select form-control" id="sel_codigo_acabado" 
+                                    name="sel_codigo_acabado" title="Selecciona...">
+                                    
+                                    @foreach ($codigos_acabados as $item)
+                                    <option value="{{$item->Acabado}}">
+                                        <span>{{$item->Acabado}}</span>
+                                    </option>
+                                    @endforeach
+                                </select>
+                                
                                 <br>
                                 <label for="text_acabado_descripcion">Descripción del acabado</label>
                                 <input type="text" id="text_acabado_descripcion" class="form-control">
@@ -193,11 +203,9 @@
                             <div class="form-group">
                                 <label for="sel_codigo">Código</label>
                                 <select data-live-search="true" class="boot-select form-control" id="sel_codigo" 
-                                name="sel_codigo">
-                                    <option value="">
-                                        <span>Selecciona material</span>
-                                    </option>
-                                    @foreach ($oitms as $item)
+                                name="sel_codigo" title="Selecciona...">
+                                    
+                                    @foreach ($oitms_negro as $item)
                                     <option value="{{$item->ItemCode}}">
                                         <span>{{$item->ItemCode."  -  ".$item->ItemName}}</span>
                                     </option>
@@ -212,11 +220,9 @@
                             <div class="form-group">
                                 <label for="sel_surtir">Código a Surtir</label>
                                 <select data-live-search="true" class="boot-select form-control" id="sel_surtir" 
-                                name="sel_surtir">
-                                    <option value="">
-                                        <span>Selecciona material</span>
-                                    </option>
-                                    @foreach ($oitms as $item)
+                                name="sel_surtir" title="Selecciona...">
+                                   
+                                    @foreach ($oitms_otros as $item)
                                     <option value="{{$item->ItemCode}}">
                                         <span>{{$item->ItemCode."  -  ".$item->ItemName}}</span>
                                     </option>
@@ -229,7 +235,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-                    <button id='btn_guarda_material'class="btn btn-primary"> Actualizar</button>
+                    <button id='btn_guarda_material'class="btn btn-primary"> Guardar</button>
                 </div>
     
             </div>
@@ -451,6 +457,12 @@
                             }, 
                             success: function(data){
                                 table_acabados.ajax.reload();
+                                var itemSelectorOption = $('#sel_acabado option:selected');
+                                
+                                $("#sel_codigo_acabado").append('<option value="'+itemSelectorOption.val()+'">'+itemSelectorOption.val()+'</option>');
+                                $('#sel_codigo_acabado').selectpicker('refresh');
+                                itemSelectorOption.remove(); 
+                                $('#sel_acabado').selectpicker('refresh');
                             }
                             });
                         }
@@ -523,6 +535,7 @@
                             }, 
                             success: function(data){
                                 table_acabados.ajax.reload();
+                                
                             }
                         });
                     }
@@ -531,8 +544,9 @@
             
             $('#btn_guarda_acabado').on('click', function (e) {
                 e.preventDefault();
-                var codigo_nuevo = $('#text_acabado_codigo').val();
+                var codigo_nuevo = $('#sel_codigo_acabado').val();
                 var existe = $('#sel_acabado').find('[value='+codigo_nuevo.toUpperCase()+']').length;                
+                console.log('acabado nuevo: '+ codigo_nuevo)
                 console.log('acabado existe?: '+ existe)
                 if (existe == 1) {
                     bootbox.dialog({
@@ -553,6 +567,10 @@
                         $("#sel_acabado").selectpicker("refresh");
                         $('#btn_add_code').prop('disabled', false);
                         $('#modal_add_acabado').modal('hide');
+                        $('#btn_del_acabado').prop('disabled', false);
+                        var itemSelectorOption = $('#sel_codigo_acabado option:selected');
+                        itemSelectorOption.remove();
+                        $('#sel_codigo_acabado').selectpicker('refresh');
                         table_acabados.ajax.reload();
                     } else {
                         bootbox.dialog({
