@@ -121,7 +121,9 @@
                                 <button id="btn_add_code" class="btn btn-primary" type="button"><i class="fa fa-plus"></i> Código</button>
                                 <button id="btn_add_acabado" class="btn btn-primary" type="button"><i class="fa fa-plus"></i> Acabado</button>
                                 <button id="btn_del_acabado" class="btn btn-danger" type="button"><i class="fa fa-trash"></i> Acabado</button>
-                                <button disabled id="btn_download_pdf" href="mtto_acabados_PDF" target="_blank" class="btn btn-danger" type="button"><i class="fa fa-file-pdf-o"></i> PDF</button>
+                                <a  id="btn_download_pdf" href="{!!url('mtto_acabados_PDF')!!}"
+                                target="_blank"
+                                class="btn btn-danger" type="button"><i class="fa fa-file-pdf-o"></i> PDF</a>
                             </span>
                         </div><!-- /input-group -->
                   

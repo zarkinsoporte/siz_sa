@@ -3,25 +3,20 @@ namespace App\Http\Controllers;
 
 use App\User;
 use App\Http\Controllers\Controller;
-use Hash;
 use DB;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Input;
-use Session;
+//use Session;
 use Auth;
-use Lava;
 use Carbon\Carbon;
 //excel
-use Maatwebsite\Excel\Facades\Excel;
-//DOMPDF
-use Dompdf\Dompdf;
+//use Maatwebsite\Excel\Facades\Excel;
+
 use App;
-//use Pdf;
-//Fin DOMPDF
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Validator;
+//use Illuminate\Support\Facades\Validator;
 use Datatables;
 use App\ACABADO;
+ini_set("memory_limit", '512M');
+ini_set('max_execution_time', 0);
 class Mod08_DisenioController extends Controller
 {
     public function __construct()
@@ -33,10 +28,39 @@ class Mod08_DisenioController extends Controller
         $this->middleware('auth');
     }
     public function mtto_acabados_PDF(){
+
+        ini_set('memory_limit', '-1');
+        set_time_limit(0);
+        $acabados = ACABADO::where('ACA_Eliminado', 0)
+            ->whereNotNull('CODIDATO')           
+            ->orderBy('DESCDATO', 'asc')
+            ->orderBy('inval01_descripcion2', 'asc')
+            ->get();
+        //dd($acabados[0]);
+        //$codigo_acabado = array_column($acabados, 'CODIDATO');
+        //array_multisort($codigo_acabado, SORT_ASC, $acabados);
+        $fechaActualizacion = ACABADO::where('ACA_Eliminado', 0)->max('FechaMov');
+        $fechaImpresion = date("d-m-Y H:i:s"); 
+        $headerHtml = view()->make('Mod08_Disenio.mtto_acabados_pdfheader', 
+        [
+            'titulo' => 'Relación de Complementos según Acabado.',
+            'fechaImpresion' => 'Fecha de Impresión: ' . $fechaImpresion,
+            'fechaActualizado' => 'Fecha Actualización: ' . $fechaActualizacion
+        ])->render();
         
-        $pdf = \PDF::loadView('Mod01_Produccion.ReporteBackOrderPDF_Planea', compact('data'));
-        $pdf->setPaper('Letter', 'landscape')->setOptions(['isPhpEnabled' => true, 'isRemoteEnabled' => true]);
-        return $pdf->stream('Siz_Reporte_BackOrderP ' . ' - ' . date("d/m/Y") . '.Pdf');
+        $pdf = \SPDF::loadView('Mod08_Disenio.mtto_acabados_pdf', compact('acabados'));
+        //$pdf->setOption('header-left', 'Fecha Actualización: '. $fechaActualizacion);
+        //$pdf->setOption('header-right', 'Fecha de Impresión: '. $fechaImpresion);
+        $pdf->setOption('header-html', $headerHtml);
+        $pdf->setOption('footer-center', 'Pagina [page] de [toPage]');
+        $pdf->setOption('footer-left', 'SIZ');
+        $pdf->setOption('margin-top', '33mm');
+        $pdf->setOption('margin-left', '5mm');
+        $pdf->setOption('margin-right', '5mm');
+        $pdf->setOption('page-size', 'Letter');
+        
+        return $pdf->inline('SIZ_MantenimientoAcabados.pdf');
+        
     }
     public function mtto_acabados_index(){
         $user = Auth::user();
