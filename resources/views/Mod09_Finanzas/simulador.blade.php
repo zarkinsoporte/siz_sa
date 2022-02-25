@@ -356,7 +356,22 @@
                
             
             function createTable(){
-                
+                $.blockUI({
+                                baseZ: 2000,
+                                message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                                css: {
+                                    border: 'none',
+                                    padding: '16px',
+                                    width: '50%',
+                                    top: '40%',
+                                    left: '30%',
+                                    backgroundColor: '#fefefe',
+                                    '-webkit-border-radius': '10px',
+                                    '-moz-border-radius': '10px',
+                                    opacity: .7,
+                                    color: '#000000'
+                                }
+                            });
                 if (createparametros > 0) {
                     //obtenemos array de parametros
                     datosTParametros = getTParametros();
@@ -506,6 +521,7 @@
                         }
                     ],
                     "initComplete": function(settings, json) {
+                        setTimeout($.unblockUI, 1500);
                         if (createparametros == 0) {
                             createparametros = 1;
                             createTableParametros();
@@ -518,6 +534,9 @@
                 
             
             }
+          
+
+
             $('#table_detalle_modelos').on( 'change', 'input', function (e) {
                 e.preventDefault();
                 var table_modelos = $('#table_detalle_modelos').DataTable();
