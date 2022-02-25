@@ -136,7 +136,7 @@ select[data-max-options="20"] ~ .dropdown-menu .bs-actionsbox .bs-deselect-all {
                                                         {!! Form::select("sel_articulos[]", $articulos, null, [
                                                         "data-selected-text-format"=>"count", "class" => "form-control selectpicker","id"
                                                         =>"sel_articulos", "data-size" => "8", "data-style" => "btn-success btn-sm",
-                                                        "data-actions-box"=>"true",  "data-deselect-all-text"=>"deseleccionar", "data-select-all-text"=>"seleccionar",  "data-max-options"=>"20",
+                                                        "data-actions-box"=>"true",  "data-deselect-all-text"=>"deseleccionar", "data-select-all-text"=>"seleccionar",  "data-max-options"=>"200",
                                                         'data-live-search' => 'true', 'multiple'=>'multiple', 'title'=>"Selecciona..."])
                                                         !!}
                                                     </div>
@@ -147,7 +147,7 @@ select[data-max-options="20"] ~ .dropdown-menu .bs-actionsbox .bs-deselect-all {
                                                         {!! Form::select("sel_proveedores[]", $proveedores, null, [
                                                         "data-selected-text-format"=>"count", "class" => "form-control selectpicker","id"
                                                         =>"sel_proveedores", "data-size" => "8", "data-style" => "btn-success btn-sm", 
-                                                        "data-actions-box"=>"true", "data-deselect-all-text"=>"deseleccionar", "data-select-all-text"=>"seleccionar", "data-max-options"=>"20",
+                                                        "data-actions-box"=>"true", "data-deselect-all-text"=>"deseleccionar", "data-select-all-text"=>"seleccionar", "data-max-options"=>"200",
                                                         'data-live-search' => 'true', 'multiple'=>'multiple', 'title'=>"Selecciona..."])
                                                         !!}
                                                     </div>
