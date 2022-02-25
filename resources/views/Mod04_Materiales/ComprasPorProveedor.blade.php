@@ -129,7 +129,7 @@ select[data-max-options="20"] ~ .dropdown-menu .bs-actionsbox .bs-deselect-all {
                                                             </strong></label>
                                                         <input type="text" id="fend" class='form-control' autocomplete="off">
                                                     </div>
-                                                    <div class="col-md-3">
+                                                    <div class="col-md-2">
                                                         <label><strong>
                                                                 <font size="2">Artículo</font>
                                                             </strong></label>
@@ -140,7 +140,7 @@ select[data-max-options="20"] ~ .dropdown-menu .bs-actionsbox .bs-deselect-all {
                                                         'data-live-search' => 'true', 'multiple'=>'multiple', 'title'=>"Selecciona..."])
                                                         !!}
                                                     </div>
-                                                    <div class="col-md-3">
+                                                    <div class="col-md-2">
                                                         <label><strong>
                                                                 <font size="2">Proveedor</font>
                                                             </strong></label>
@@ -151,14 +151,17 @@ select[data-max-options="20"] ~ .dropdown-menu .bs-actionsbox .bs-deselect-all {
                                                         'data-live-search' => 'true', 'multiple'=>'multiple', 'title'=>"Selecciona..."])
                                                         !!}
                                                     </div>
-                                                    
                                                    
                                                     <div class="col-md-2">
                                                         <p style="margin-bottom: 23px"></p>
                                                         <button type="button" class="form-control btn btn-primary m-r-5 m-b-5" id="boton-mostrar"><i
                                                                 class="fa fa-cogs"></i> Mostrar</button>
                                                     </div>
-                                                    
+                                                    <div class="col-md-2">
+                                                        <p style="margin-bottom: 23px"></p>
+                                                        <button type="button" class="btn btn-success btn-block" id="btn_xls"><i class="fa fa-file-excel-o"></i> Excel</button>
+                                                        
+                                                    </div>
                                                 </div>
                                             </div>
                                         <div class="row">
@@ -171,7 +174,8 @@ select[data-max-options="20"] ~ .dropdown-menu .bs-actionsbox .bs-deselect-all {
                                                                 <th>Proveedor</th>
                                                                 <th># Entrada</th>
                                                                 <th>Fecha</th>
-                                                                <th>Material</th>
+                                                                <th>Código</th>
+                                                                <th>Descripción</th>
                                                                 <th>UM</th>
                                                                 <th>Cantidad</th>
                                                 
@@ -221,7 +225,7 @@ function js_iniciador() {
         noneResultsText: 'Ningún resultado coincide',
         countSelectedText: '{0} de {1} seleccionados'
     });
-    
+    $('#btn_xls').prop('disabled', true);
 
     console.log("{{$fstart}}"+' -- '+ "{{$fend}}");
     var a_fstart = "{{$fstart}}".split('-');
@@ -250,9 +254,25 @@ function js_iniciador() {
         language: "es",
         autoclose: true,  
     }).on("change", function() {
-        if (!ignore) {            
+        if (!ignore) { 
+            $.blockUI({
+                message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                css: {
+                border: 'none',
+                padding: '16px',
+                width: '50%',
+                top: '40%',
+                left: '30%',
+                backgroundColor: '#fefefe',
+                '-webkit-border-radius': '10px',
+                '-moz-border-radius': '10px',
+                opacity: .7,
+                color: '#000000'
+                }  
+                });           
             comboboxArticulos_reload();    
             comboboxProveedores_reload(); 
+           setTimeout($.unblockUI, 2000);
         }
     });
     $('#fstart').datepicker('setDate', start);
@@ -290,7 +310,7 @@ function js_iniciador() {
             },
             complete: function() {
                
-                $("#tcompras").DataTable().clear().draw();
+               //$("#tcompras").DataTable().clear().draw();
             },
             success: function(data){
                 options = [];
@@ -350,7 +370,7 @@ function js_iniciador() {
                 },
                 complete: function() {
                 
-                    $("#tcompras").DataTable().clear().draw();
+                   // $("#tcompras").DataTable().clear().draw();
                 },
                 success: function(data){
                     options = [];
@@ -392,7 +412,8 @@ function js_iniciador() {
             {data: "PROVEEDOR"},
             {data: "N_ENTRADA"},
             {data: "F_COMPRA"},
-            {data: "ARTICULO"},
+            {data: "ARTICULO_CODIGO"},
+            {data: "ARTICULO_DESCR"},
             {data: "UM"},
             {data: "CANTIDAD",
             render: function(data){
@@ -435,7 +456,15 @@ function js_iniciador() {
             recargarTabla();
         }
     });
-
+    $('#btn_xls').on('click', function (e) {
+        $(this).html('<i class="fa fa-spinner fa-pulse fa-lg fa-fw"></i> Excel');
+        window.location.href = '{!! route('cppXLS') !!}'; 
+        setTimeout(function () {
+            $( "button:contains('Excel')").html('<span><i class="fa fa-file-excel-o"></i> Excel</span>');            
+        }, 2500);
+           
+    });
+            
     function recargarTabla(){
         var registros = $('#sel_articulos').val() == null ? 0 : $('#sel_articulos').val().length;
             var cadena = "";
@@ -497,7 +526,8 @@ function js_iniciador() {
             },
             success: function(data){            
                 if(data.registros.length > 0){
-                    $("#tcompras").dataTable().fnAddData(data.registros);           
+                    $("#tcompras").dataTable().fnAddData(data.registros);
+                     $('#btn_xls').prop('disabled', false);        
                 }else{
                     bootbox.dialog({
                     title: "Mensaje",
@@ -509,6 +539,7 @@ function js_iniciador() {
                     }
                     }
                     }).find('.modal-content').css({'font-size': '14px'} );
+                    $('#btn_xls').prop('disabled', true);
                 }            
             }
         });

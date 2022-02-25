@@ -531,3 +531,4 @@ Route::get('home/COMPRAS X PROVEEDOR', 'Mod03_ComprasController@index_compras_pr
 Route::any('datatables_compras_proveedor', 'Mod03_ComprasController@datatables_compras_proveedor')->name('datatables_compras_proveedor');
 Route::post('home/cpp_combobox_articulos', 'Mod03_ComprasController@cpp_combobox_articulos');
 Route::post('home/cpp_combobox_proveedores', 'Mod03_ComprasController@cpp_combobox_proveedores');
+Route::get('cppXLS', 'Mod03_ComprasController@cppXLS')->name('cppXLS');

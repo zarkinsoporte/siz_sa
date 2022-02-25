@@ -95,7 +95,8 @@ class Mod03_ComprasController extends Controller
             $sel = "SELECT OPDN.CardCode +'-'+ OPDN.CardName as PROVEEDOR,
                 OPDN.DocNum as N_ENTRADA, 
                 Cast(OPDN.DocDate as DATE) as F_COMPRA, 
-                PDN1.ItemCode +'-'+ OITM.ItemName as ARTICULO, 
+                PDN1.ItemCode as ARTICULO_CODIGO, 
+                OITM.ItemName as ARTICULO_DESCR, 
                 OITM.InvntryUom as UM, 
                 PDN1.Quantity as CANTIDAD, 
                 PDN1.NumPerMsr as X_PAQ, 
@@ -116,6 +117,8 @@ class Mod03_ComprasController extends Controller
             //dd($sel);
             $consulta = DB::select($sel);
             $registros = collect($consulta);
+            Session::put('datatables_compras_proveedor', $registros);
+            Session::put('fechas_compras_proveedor', 'del '. Input::get('fstart') .' al '. Input::get('fend'));
             return compact('registros');
         } catch (\Exception $e) {
             header('HTTP/1.1 500 Internal Server Error');
@@ -236,5 +239,57 @@ class Mod03_ComprasController extends Controller
         $pdf = \PDF::loadView('Mod03_Compras.PedidosPDF', Session::get('OrdenCompra'));
         $pdf->setOptions(['isPhpEnabled' => true, 'isRemoteEnabled' => true]);
         return $pdf->stream('Siz_Orden_Compra' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
+    }
+    public function cppXLS(){
+        $path = public_path() . '/assets/plantillas_excel/Mod_03/SIZ_compras_proveedor.xlsx';
+       
+          
+        $datatables_compras_proveedor = Session::get('datatables_compras_proveedor');
+       
+        $excel =  Excel::load($path, function ($excel) use ($datatables_compras_proveedor) {
+            $excel->sheet('COMPRAS', function ($sheet2) use ($datatables_compras_proveedor){
+                $index = 6;
+
+                $cant = count($datatables_compras_proveedor) + 6;
+                $range = 'A5:M5';
+                
+               
+                    $sheet2->cell('A4', function ($cell) {
+                        $cell->setValue('ACTUALIZADO: '.(date("Y-m-d H:i:s")));
+                    });
+                    $sheet2->cell('D4', function ($cell) {
+                        $cell->setValue(Session::get('fechas_compras_proveedor'));
+                    });
+                foreach ($datatables_compras_proveedor as $row) {
+                    $sheet2->row($index, 
+                    [
+                        $row->PROVEEDOR
+                        ,$row->N_ENTRADA
+                        ,$row->F_COMPRA
+                        ,$row->ARTICULO_CODIGO
+                        ,$row->ARTICULO_DESCR
+                        ,$row->UM
+                        , number_format( $row->CANTIDAD , 2)
+                        , number_format( $row->X_PAQ , 2)
+                        , number_format( $row->Q_INV , 2)
+                        , number_format( $row->PREC_UNIT , 2)
+                        , number_format( $row->TIPO_CAMBIO , 2)
+                        ,$row->M_C
+                        , $row->IMPORTE
+                    ]
+                    );
+                    $index++;
+                }
+                $sheet2->getStyle('A6:M'.$cant)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+                $sheet2->getColumnDimension('A')->setAutoSize(true);
+                $sheet2->getColumnDimension('E')->setAutoSize(true);               
+               // $sheet2->getColumnDimension('D')->setAutoSize(true);              
+                //$sheet2->getColumnDimension('F')->setAutoSize(true);
+                 $sheet2->setAutoFilter($range);
+            });
+        })
+            ->setFilename('SIZ Compras por Proveedor')
+            ->export('xlsx');    
+    
     }
 }
