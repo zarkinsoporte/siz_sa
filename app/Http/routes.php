@@ -522,6 +522,7 @@ Route::get('home/MTTO_ACABADOS', 'Mod08_DisenioController@mtto_acabados_index')-
 Route::get('datatables_acabados', 'Mod08_DisenioController@datatables_acabados')->name('datatables_acabados');
 Route::post('eliminar_material_acabado', 'Mod08_DisenioController@eliminar_material_acabado')->name('eliminar_material_acabado');
 Route::post('eliminar_acabado', 'Mod08_DisenioController@eliminar_acabado')->name('eliminar_acabado');
+Route::post('dbrecuperar_acabado', 'Mod08_DisenioController@dbrecuperar_acabado')->name('dbrecuperar_acabado');
 Route::post('guarda_material_acabado', 'Mod08_DisenioController@guarda_material_acabado')->name('guarda_material_acabado');
 Route::any('mtto_acabados_PDF', 'Mod08_DisenioController@mtto_acabados_PDF');
 

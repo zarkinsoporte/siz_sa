@@ -69,6 +69,10 @@ class Mod08_DisenioController extends Controller
         ->where('ACA_Eliminado', 0)
         ->groupBy('CODIDATO', 'DESCDATO')
         ->orderBy('DESCDATO', 'desc')->get();
+        $recuperar_acabados = ACABADO::select('CODIDATO', 'DESCDATO')
+        ->where('ACA_Eliminado', 1)
+        ->groupBy('CODIDATO', 'DESCDATO')
+        ->orderBy('DESCDATO', 'desc')->get();
         $oitms = DB::select("SELECT ItemCode, ItemName,
             CASE WHEN ItemName like '%NEGRO%' THEN 1 ELSE 0 END AS negro
             FROM OITM 
@@ -114,6 +118,7 @@ class Mod08_DisenioController extends Controller
         $data = array(
             'actividades' => $actividades,
             'acabados' => $acabados,
+            'recuperar_acabados' => $recuperar_acabados,
             'oitms_negro' => $oitms_negro,
             'oitms_otros' => $oitms_otros,
             'codigos_acabados' => $codigos_acabados,
@@ -133,6 +138,11 @@ class Mod08_DisenioController extends Controller
     {
         ACABADO::where('CODIDATO', $request->get('acabado_code'))
         ->update(array('ACA_Eliminado' => 1, 'FechaMov'=> date('Ymd'), 'idUser' =>  Auth::user()->U_EmpGiro));        
+    }
+    public function dbrecuperar_acabado(Request $request)
+    {
+        ACABADO::where('CODIDATO', $request->get('acabado_code'))
+        ->update(array('DESCDATO' => strtoupper( trim($request->get('acabado_descr')) ), 'ACA_Eliminado' => 0, 'FechaMov'=> date('Ymd'), 'idUser' =>  Auth::user()->U_EmpGiro));        
     }
     public function eliminar_material_acabado(Request $request)
     {

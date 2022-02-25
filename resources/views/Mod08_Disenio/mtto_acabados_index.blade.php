@@ -120,6 +120,7 @@
                             <span class="input-group-btn">
                                 <button id="btn_add_code" class="btn btn-primary" type="button"><i class="fa fa-plus"></i> Código</button>
                                 <button id="btn_add_acabado" class="btn btn-primary" type="button"><i class="fa fa-plus"></i> Acabado</button>
+                                <button id="btn_recuperar_acabado" class="btn btn-primary" type="button"><i class="fa fa-trash"></i> Recuperar</button>
                                 <button id="btn_del_acabado" class="btn btn-danger" type="button"><i class="fa fa-trash"></i> Acabado</button>
                                 <a  id="btn_download_pdf" href="{!!url('mtto_acabados_PDF')!!}"
                                 target="_blank"
@@ -184,6 +185,45 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
                     <a id='btn_guarda_acabado' class="btn btn-success">Agregar</a>
+                </div>
+    
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="modal_recuperar_acabado" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Recuperar Acabado Eliminado<codigo id='text_categoria'></codigo></h4>
+                </div>
+                <div class="modal-body" style='padding:16px'>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="sel_recuperar_acabado">Código del acabado</label>
+                                
+                                <select data-live-search="true" class="boot-select form-control" id="sel_recuperar_acabado" 
+                                    name="sel_recuperar_acabado" title="Selecciona...">
+                                    
+                                    @foreach ($recuperar_acabados as $item)
+                                    <option value="{{$item->DESCDATO}}">
+                                        <span>{{$item->CODIDATO}}</span>
+                                    </option>
+                                    @endforeach
+                                </select>
+                                
+                                <br>
+                                <label for="text_recuperar_acabado_descripcion">Descripción del acabado</label>
+                                <input type="text" id="text_recuperar_acabado_descripcion" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    <a id='btn_guarda_recuperar' class="btn btn-success">Recuperar</a>
                 </div>
     
             </div>
@@ -348,6 +388,13 @@
                 table_acabados.ajax.reload();
 
             });
+            let recuperar_acabado = '';
+            $("#sel_recuperar_acabado").on("changed.bs.select", 
+                function(e, clickedIndex, newValue, oldValue) {
+                recuperar_acabado = $(this).siblings('.btn.dropdown-toggle').attr('title');
+                $('#text_recuperar_acabado_descripcion').val(this.value)
+              
+            });
 
             $('#table_acabados tbody').on( 'click', 'a', function (event) {
                 event.preventDefault();
@@ -419,6 +466,11 @@
                 e.preventDefault();
                 $('#modal_add_acabado').modal('show');
             });
+            $('#btn_recuperar_acabado').on('click', function (e) {
+                e.preventDefault();
+                $('#text_recuperar_acabado_descripcion').val('')
+                $('#modal_recuperar_acabado').modal('show');
+            });
             $('#btn_del_acabado').on('click', function (e) {
                 e.preventDefault();
                 bootbox.confirm({
@@ -461,8 +513,9 @@
                                 table_acabados.ajax.reload();
                                 var itemSelectorOption = $('#sel_acabado option:selected');
                                 
-                                $("#sel_codigo_acabado").append('<option value="'+itemSelectorOption.val()+'">'+itemSelectorOption.val()+'</option>');
-                                $('#sel_codigo_acabado').selectpicker('refresh');
+                                $("#sel_recuperar_acabado").append('<option value="'+itemSelectorOption.text()+'">'+itemSelectorOption.val()+'</option>');
+                                $('#sel_recuperar_acabado').selectpicker('refresh');
+                                
                                 itemSelectorOption.remove(); 
                                 $('#sel_acabado').selectpicker('refresh');
                             }
@@ -587,6 +640,69 @@
                         }).find('.modal-content').css({ 'font-size': '14px' });
                     }
                 } 
+            });
+            $('#btn_guarda_recuperar').on('click', function (e) {
+                e.preventDefault();
+                    if (recuperar_acabado !== '' && $('#text_recuperar_acabado_descripcion').val() !== '') {  
+                        $.ajax({
+                            type: 'POST',       
+                            url: '{!! route('dbrecuperar_acabado') !!}',
+                            data: {
+                                "_token": "{{ csrf_token() }}",                       
+                                acabado_code : recuperar_acabado ,
+                                acabado_descr: $('#text_recuperar_acabado_descripcion').val()
+                            },
+                            beforeSend: function() {
+                                $.blockUI({
+                                    baseZ: 2000,
+                                    message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                                    css: {
+                                        border: 'none',
+                                        padding: '16px',
+                                        width: '50%',
+                                        top: '40%',
+                                        left: '30%',
+                                        backgroundColor: '#fefefe',
+                                        '-webkit-border-radius': '10px',
+                                        '-moz-border-radius': '10px',
+                                        opacity: .7,
+                                        color: '#000000'
+                                    }
+                                });
+                            },
+                            complete: function() {
+                                setTimeout($.unblockUI, 1500);
+                                
+                            }, 
+                            success: function(data){
+                                $("#sel_acabado").append('<option value="'+recuperar_acabado+'">'+recuperar_acabado+' - '+$('#text_recuperar_acabado_descripcion').val()+'</option>');
+                                $("#sel_acabado").val(recuperar_acabado);
+                                $("#sel_acabado").selectpicker("refresh");
+                                
+                                $('#btn_add_code').prop('disabled', false);
+                                $('#modal_recuperar_acabado').modal('hide');
+                                $('#btn_del_acabado').prop('disabled', false);
+                                
+                                var itemSelectorOption = $('#sel_recuperar_acabado option:selected');
+                                itemSelectorOption.remove();
+                                $('#sel_recuperar_acabado').selectpicker('refresh');
+                                table_acabados.ajax.reload();
+                            }
+                        });                 
+                       
+                    } else {
+                        bootbox.dialog({
+                            title: "Mensaje",
+                            message: "<div class='alert alert-danger m-b-0'>No se admiten campos vacíos.</div>",
+                            buttons: {
+                                success: {
+                                    label: "Ok",
+                                    className: "btn-primary m-r-5 m-b-5"
+                                }
+                            }
+                        }).find('.modal-content').css({ 'font-size': '14px' });
+                    }
+                
             });
 
             $('#btn_add_code').on('click', function (e) {
