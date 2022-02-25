@@ -38,19 +38,20 @@ class Mod03_ComprasController extends Controller
         left join UFD1 T1 on OITM.U_GrupoPlanea=T1.FldValue and T1.TableID='OITM' and T1.FieldID=9 
         Where OITM.ItemCode is not null AND Cast(OPDN.DocDate as DATE) Between '" . $fstart . "' and '" . $fend . "' 
         GROUP BY PDN1.ItemCode, OITM.ItemName");
-      return compact('oitms');
+        return compact('oitms');
     }
     public function cpp_combobox_proveedores(Request $request){
         $f1 = explode("/", Input::get('fstart'));
         $fstart = $f1[2].$f1[1].$f1[0];
         $f2 = explode("/", Input::get('fend'));
         $fend = $f2[2].$f2[1].$f2[0];
-
+        $todos_articulos = Input::get('todos_articulos');
+       // dd($todos_articulos);
         $articulos = "'" . $request->input('articulos') . "'";
         $articulos = str_replace("'',", "", $articulos);
         $criterio = " ";
-        if (strlen($articulos) > 3 && $articulos != '') {
-            $criterio = $criterio . " AND (PDN1.ItemCode in(" . $articulos . ") ) ";
+        if (strlen($articulos) > 3 && $articulos != '' && $todos_articulos == 'false') {
+            $criterio = " AND (PDN1.ItemCode in(" . $articulos . ") ) ";
         }
         $proveedores = DB::select("SELECT 
         OPDN.CardCode codigo, OPDN.CardCode +' - '+ OPDN.CardName AS descripcion   
@@ -79,11 +80,15 @@ class Mod03_ComprasController extends Controller
             $fstart = $f1[2].$f1[1].$f1[0];
             $f2 = explode("/", Input::get('fend'));
             $fend = $f2[2].$f2[1].$f2[0];
+
+            $todos_articulos = Input::get('todos_articulos');
+            $todos_proveedores = Input::get('todos_proveedores');
+
             $criterio = " ";
-            if (strlen($articulos) > 3 && $articulos != '') {
-                $criterio = $criterio . " AND (PDN1.ItemCode in(" . $articulos . ") ) ";
+            if (strlen($articulos) > 3 && $articulos != '' && $todos_articulos == 'false') {
+                $criterio = " AND (PDN1.ItemCode in(" . $articulos . ") ) ";
             }
-            if (strlen($proveedores) > 3 && $proveedores != '') {
+            if (strlen($proveedores) > 3 && $proveedores != '' && $todos_proveedores == 'false') {
                 $criterio = $criterio . " AND (OPDN.CardCode in(" . $proveedores . ") ) ";
             }
 

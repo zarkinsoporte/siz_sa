@@ -85,7 +85,7 @@
                     border: 0px;
                 }
                 .dataTables_wrapper .dataTables_filter {float: right;text-align: right;visibility: visible;}
-                /* remove bs select all btn */
+                /* remove bs select all btn 
 select[data-max-options="20"] ~ .dropdown-menu .bs-actionsbox .bs-select-all {
   display: none;
 }
@@ -93,7 +93,7 @@ select[data-max-options="20"] ~ .dropdown-menu .bs-actionsbox .bs-select-all {
 select[data-max-options="20"] ~ .dropdown-menu .bs-actionsbox .bs-deselect-all {
   width: 100%;
 }
-
+*/
             </style>
 
                 <div class="container" >
@@ -136,8 +136,8 @@ select[data-max-options="20"] ~ .dropdown-menu .bs-actionsbox .bs-deselect-all {
                                                         {!! Form::select("sel_articulos[]", $articulos, null, [
                                                         "data-selected-text-format"=>"count", "class" => "form-control selectpicker","id"
                                                         =>"sel_articulos", "data-size" => "8", "data-style" => "btn-success btn-sm",
-                                                        "data-actions-box"=>"true",  "data-deselect-all-text"=>"Limpiar", "data-max-options"=>"20",
-                                                        'data-live-search' => 'true', 'multiple'=>'multiple'])
+                                                        "data-actions-box"=>"true",  "data-deselect-all-text"=>"deseleccionar", "data-select-all-text"=>"seleccionar",  "data-max-options"=>"20",
+                                                        'data-live-search' => 'true', 'multiple'=>'multiple', 'title'=>"Selecciona..."])
                                                         !!}
                                                     </div>
                                                     <div class="col-md-3">
@@ -147,8 +147,8 @@ select[data-max-options="20"] ~ .dropdown-menu .bs-actionsbox .bs-deselect-all {
                                                         {!! Form::select("sel_proveedores[]", $proveedores, null, [
                                                         "data-selected-text-format"=>"count", "class" => "form-control selectpicker","id"
                                                         =>"sel_proveedores", "data-size" => "8", "data-style" => "btn-success btn-sm", 
-                                                        "data-actions-box"=>"true", "data-deselect-all-text"=>"Limpiar", "data-max-options"=>"20",
-                                                        'data-live-search' => 'true', 'multiple'=>'multiple'])
+                                                        "data-actions-box"=>"true", "data-deselect-all-text"=>"deseleccionar", "data-select-all-text"=>"seleccionar", "data-max-options"=>"20",
+                                                        'data-live-search' => 'true', 'multiple'=>'multiple', 'title'=>"Selecciona..."])
                                                         !!}
                                                     </div>
                                                     
@@ -221,7 +221,7 @@ function js_iniciador() {
         noneResultsText: 'Ningún resultado coincide',
         countSelectedText: '{0} de {1} seleccionados'
     });
-   
+    
 
     console.log("{{$fstart}}"+' -- '+ "{{$fend}}");
     var a_fstart = "{{$fstart}}".split('-');
@@ -252,6 +252,7 @@ function js_iniciador() {
     }).on("change", function() {
         if (!ignore) {            
             comboboxArticulos_reload();    
+            comboboxProveedores_reload(); 
         }
     });
     $('#fstart').datepicker('setDate', start);
@@ -259,6 +260,8 @@ function js_iniciador() {
     ignore = false;
     
     //$('#fend').datepicker('setDate', end);    
+    let todos_articulos = 0;
+    let todos_proveedores = 0;
    
     var wrapper = $('#wrapper');
     var resizeStartHeight = wrapper.height();
@@ -271,7 +274,6 @@ function js_iniciador() {
     $("#sel_articulos").on("changed.bs.select", function(e, clickedIndex, newValue, oldValue) {
         comboboxProveedores_reload();
     });
-
     function comboboxArticulos_reload() {
         var options = [];         
         $.ajax({
@@ -292,7 +294,7 @@ function js_iniciador() {
             },
             success: function(data){
                 options = [];
-                options.push('<option value="">Seleccionar</option>');
+                
                 $("#sel_articulos").empty();
                 for (var i = 0; i < data.oitms.length; i++) { 
                     options.push('<option value="' + data.oitms[i]['codigo'] + '">' +
@@ -310,13 +312,17 @@ function js_iniciador() {
                     }
                     }).find('.modal-content').css({'font-size': '14px'} );
                 } else {
-                    $('#sel_articulos').append(options).selectpicker('refresh');
+                    todos_articulos = data.oitms.length;
+                    $('#sel_articulos').append(options);
+                    $('#sel_articulos option').attr("selected","selected");
+                    $('#sel_articulos').selectpicker('refresh');
                 }                             
                                           
             }
         });
     }    
     function comboboxProveedores_reload() {
+       
         var registros = $('#sel_articulos').val() == null ? 0 : $('#sel_articulos').val().length;
             var cadena = "";
             for (var x = 0; x < registros; x++) {
@@ -335,7 +341,8 @@ function js_iniciador() {
                     "_token": "{{ csrf_token() }}",
                     fstart: $('#fstart').val(),
                     fend: $('#fend').val(),
-                    articulos: articulos
+                    articulos: articulos,
+                    todos_articulos: (todos_articulos === registros) ? true : false
                 },
                 url: "cpp_combobox_proveedores",
                 beforeSend: function() {
@@ -347,14 +354,17 @@ function js_iniciador() {
                 },
                 success: function(data){
                     options = [];
-                    options.push('<option value="">Seleccionar</option>');
+                   
                     $("#sel_proveedores").empty();
                     for (var i = 0; i < data.proveedores.length; i++) { 
                         options.push('<option value="' + data.proveedores[i]['codigo'] + '">' +
                         data.proveedores[i]['descripcion'] + '</option>');
                         }
-                    if (data.proveedores.length > 0) {                        
-                        $('#sel_proveedores').append(options).selectpicker('refresh');                            
+                    if (data.proveedores.length > 0) {     
+                        todos_proveedores = data.proveedores.length;                   
+                        $('#sel_proveedores').append(options);
+                        $('#sel_proveedores option').attr("selected","selected");
+                        $('#sel_proveedores').selectpicker('refresh');
                     }
                 }
             });  
@@ -437,9 +447,9 @@ function js_iniciador() {
                 }
             }
             var articulos = cadena;
-
-            var registros = $('#sel_proveedores').val() == null ? 0 : $('#sel_proveedores').val().length;
-            var cadena = "";
+            var t_articulos = (todos_articulos === registros) ? true : false;
+            registros = $('#sel_proveedores').val() == null ? 0 : $('#sel_proveedores').val().length;
+            cadena = "";
             for (var x = 0; x < registros; x++) {
                 if (x == registros - 1) {
                     cadena += $($('#sel_proveedores option:selected')[x]).val();
@@ -448,6 +458,7 @@ function js_iniciador() {
                 }
             }
             var proveedores = cadena;
+            var t_proveedores = (todos_proveedores === registros) ? true : false;
 
         $("#tcompras").DataTable().clear().draw();
 
@@ -460,7 +471,9 @@ function js_iniciador() {
                 articulos: articulos,
                 proveedores: proveedores,
                 fstart: $('#fstart').val(),
-                fend: $('#fend').val()
+                fend: $('#fend').val(),
+                todos_articulos : t_articulos,
+                todos_proveedores : t_proveedores
             },
             beforeSend: function() {
                 $.blockUI({
