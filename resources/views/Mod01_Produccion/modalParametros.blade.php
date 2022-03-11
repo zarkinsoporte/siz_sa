@@ -125,9 +125,9 @@
                                                 </select>
                                             </div>
                                         @endif
-                                        @if($text_selSiete <> '')
+                                        @if($text_selCinco <> '')
                                             <div class="form-group">
-                                                <label for="text_selSiete">{{$text_selSiete}}:</label>
+                                                <label for="text_selCinco">{{$text_selCinco}}:</label>
                                                 <select class="form-control" id="data_selCinco" name="data_selCinco" autofocus required>
                                                     @foreach ($data_selCinco as $k => $v)
                                                         <option value="{{$k}}">{{$v}}</option> 
@@ -181,7 +181,7 @@
                                                 name="text_selSiete[]" 
                                                 autofocus required>
 
-                                                    @foreach ($text_selSiete as $item)
+                                                    @foreach ($data_selSiete as $item)
                                                         <option value="{{$item->llave}}" selected>{{$item->valor}}</option> 
                                                     @endforeach
                                                 </select>
@@ -207,7 +207,7 @@
                                                 name="text_selOcho[]" 
                                                 autofocus required>
 
-                                                    @foreach ($text_selOcho as $item)
+                                                    @foreach ($data_selOcho as $item)
                                                         <option value="{{$item->llave}}" selected>{{$item->valor}}</option> 
                                                     @endforeach
                                                 </select>
