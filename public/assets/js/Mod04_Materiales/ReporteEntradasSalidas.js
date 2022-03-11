@@ -38,14 +38,14 @@ function js_iniciador() {
         autoclose: true
     }).on("change", function () {
         var selected = $(this).val();
-        var d_start = $('#fstart').datepicker('getDate');
-        var d_end = $('#fend').datepicker('getDate');
+        //var d_start = $('#fstart').datepicker('getDate');
+        //var d_end = $('#fend').datepicker('getDate');
 
-        console.log(selected, d_end);
+        //console.log(selected, d_end);
         $('#fend').datepicker('setStartDate', selected);
-        if (d_start > d_end && !ignore) {
-            $('#fend').datepicker('setDate', selected);
-        }
+        //if (d_start > d_end && !ignore) {
+            //$('#fend').datepicker('setDate', selected);
+        //}
     });
 
     $("#fend").datepicker({
@@ -217,7 +217,7 @@ function js_iniciador() {
     
     var wrapper = $('#wrapper');
     var resizeStartHeight = wrapper.height();
-    var height = (resizeStartHeight * 80) / 100;
+    var height = (resizeStartHeight * 130) / 100;
     if (height < 200) {
         height = 200;
     }
