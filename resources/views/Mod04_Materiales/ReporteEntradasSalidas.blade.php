@@ -18,8 +18,7 @@
         <div class="col-md-11">
             <h3 class="page-header">
                 Reporte de Entradas y Salidas
-                <small><b>Del:</b> {{\AppHelper::instance()->getHumanDate($fstart)}} <b>al:</b>
-                {{\AppHelper::instance()->getHumanDate($fend)}} (Fecha Sistema)</small>
+                <small></small>
             </h3>
             <!--
             <h5>Actualizado: {{date('d-m-Y h:i a', strtotime("now"))}}</h5>
@@ -31,7 +30,7 @@
         <div class="form-group">
             <div class="col-md-2">
                 <label><strong>
-                        <font size="2">Fecha Inicial</font>
+                        <font size="2">Fecha Inicial (Sistema)</font>
                     </strong></label>
                 <input type="text" id="fstart" name="fstart" class='form-control' autocomplete="off">
             </div>
