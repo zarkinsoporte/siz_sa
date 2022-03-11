@@ -1,5 +1,9 @@
 @extends('home')
-
+<style>
+    svg {
+        padding-top: 0px !important;
+    }
+</style>
 @section('homecontent')
 
         <div class="container" >
@@ -492,10 +496,19 @@ break;
             </div><!-- /modal -->
 
             <!-- /cantidadModal-->
-
+<?php
+//$GraficaOrden=1;
+if (isset($HisOrden) && !is_null($HisOrden)) {
+    ?>
+<?=
+    Lava::render('AreaChart', 'HisOrden', 'chart');
+    ?>
+<?php
+}
+?>
+<div id="chart"></div>
         </div>
  <!-- /.container -->
-
 
         <!-- .Model retroceso -->
 
@@ -582,55 +595,45 @@ break;
                             <h4 class="modal-title" id="pwModalLabel">Recibo Producción</h4>
                         </div>
 
-            <div class="modal-body">
+                    <div class="modal-body">
 
-               <div class="row">
-                   <div class="col-md-12">
-                       <input id="code" name="code" type="text" hidden>
-                       @if(Session::has('usertraslados') && Session::get('usertraslados')>0)
-                          <input id="userId" name="userId" type="text" hidden value="{{$t_user->U_EmpGiro}}">
-                       @endif
-                       
-                       <input type="hidden" id="orden" name="orden"
-                       @if(isset($op)) value="{{$op}}" @endif
-         >
-                       <label for="cant" class="control-label">Cantidad a Procesar:</label>
-                       <input id="cant" type="number" class="form-control" name="cant"  step="1" min="1">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <input id="code" name="code" type="text" hidden>
+                            @if(Session::has('usertraslados') && Session::get('usertraslados')>0)
+                                <input id="userId" name="userId" type="text" hidden value="{{$t_user->U_EmpGiro}}">
+                            @endif
+                            
+                            <input type="hidden" id="orden" name="orden"
+                            @if(isset($op)) value="{{$op}}" @endif
+                >
+                            <label for="cant" class="control-label">Cantidad a Procesar:</label>
+                            <input id="cant" type="number" class="form-control" name="cant"  step="1" min="1">
 
-                   </div>
-                 
-               </div>
-
-            </div>
-                        <div class="modal-footer">
-
-                            <div id="espera" class="progress" style="display: none">
-                                <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
-                                    <span>Espere un momento...<span class="dotdotdot"></span></span>
-                                </div>
-                            </div>
-                                        &nbsp;&nbsp;&nbsp;
-                           <input id="submit" name="submit" type="submit" value="Liberar" onclick="mostrarespera();"  class="btn btn-primary"/>
-                            <button type="button" class="btn btn-default" data-dismiss="modal" aria-label="Close">Cancelar</button>
                         </div>
+                        
+                    </div>
 
                     </div>
-                    {!! Form::close() !!}
-                </div>
+                                <div class="modal-footer">
+
+                                    <div id="espera" class="progress" style="display: none">
+                                        <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                                            <span>Espere un momento...<span class="dotdotdot"></span></span>
+                                        </div>
+                                    </div>
+                                                &nbsp;&nbsp;&nbsp;
+                                <input id="submit" name="submit" type="submit" value="Liberar" onclick="mostrarespera();"  class="btn btn-primary"/>
+                                    <button type="button" class="btn btn-default" data-dismiss="modal" aria-label="Close">Cancelar</button>
+                                </div>
+
+                            </div>
+                            {!! Form::close() !!}
+                        </div>
             </div><!-- /modal -->
 
         <!-- /.container -->
-<?php
-//$GraficaOrden=1;
-if (isset($HisOrden) && !is_null($HisOrden)) {
-    ?>
-<?=
-    Lava::render('AreaChart', 'HisOrden', 'chart');
-    ?>
-<?php
-}
-?>
-<div id="chart"></div>
+
 @endsection
  <script>
                         function js_iniciador() {

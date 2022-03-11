@@ -277,6 +277,7 @@ li.dt-button.active a::before{
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/js/bootstrap-select.min.js"></script>
 
 <script>
+    let routeapp = "{{url().'/'}}";
     $(document).ready(js_iniciador);
     $( document ).ajaxError(function( event, jqxhr, settings, thrownError ) {
         if (jqxhr.status === 403) {

@@ -125,9 +125,9 @@
                                                 </select>
                                             </div>
                                         @endif
-                                        @if($text_selCinco <> '')
+                                        @if($text_selSiete <> '')
                                             <div class="form-group">
-                                                <label for="text_selCinco">{{$text_selCinco}}:</label>
+                                                <label for="text_selSiete">{{$text_selSiete}}:</label>
                                                 <select class="form-control" id="data_selCinco" name="data_selCinco" autofocus required>
                                                     @foreach ($data_selCinco as $k => $v)
                                                         <option value="{{$k}}">{{$v}}</option> 
@@ -156,7 +156,59 @@
                                                 autofocus required>
 
                                                     @foreach ($data_selCuatro as $item)
-                                                        <option value="{{$item->llave}}" checked>{{$item->valor}}</option> 
+                                                        <option value="{{$item->llave}}" selected>{{$item->valor}}</option> 
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        @endif
+                                        @if($text_selSiete <> '')
+                                            <div class="form-group">
+                                                <label for="text_selSiete">{{$text_selSiete}}:</label>
+                                                
+                                                <select 
+                                                data-live-search="true" 
+                                                class="boot-select form-control" 
+                                                title="No has seleccionado nada" 
+                                                data-size="5"
+                                                data-dropup-auto="false" 
+                                                multiple data-actions-box="true" 
+                                                data-select-all-text="Marcar Todos"
+                                                data-deselect-all-text="Desmarcar Todos"
+                                                data-selected-text-format="count"
+                                                data-count-selected-text="{0} Seleccionados"   
+                                                data-live-search-placeholder="Busqueda" 
+                                                id="text_selSiete" multiple="multiple" 
+                                                name="text_selSiete[]" 
+                                                autofocus required>
+
+                                                    @foreach ($text_selSiete as $item)
+                                                        <option value="{{$item->llave}}" selected>{{$item->valor}}</option> 
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        @endif
+                                        @if($text_selOcho <> '')
+                                            <div class="form-group">
+                                                <label for="text_selOcho">{{$text_selOcho}}:</label>
+                                                
+                                                <select 
+                                                data-live-search="true" 
+                                                class="boot-select form-control" 
+                                                title="No has seleccionado nada" 
+                                                data-size="5"
+                                                data-dropup-auto="false" 
+                                                multiple data-actions-box="true" 
+                                                data-select-all-text="Marcar Todos"
+                                                data-deselect-all-text="Desmarcar Todos"
+                                                data-selected-text-format="count"
+                                                data-count-selected-text="{0} Seleccionados"   
+                                                data-live-search-placeholder="Busqueda" 
+                                                id="text_selOcho" multiple="multiple" 
+                                                name="text_selOcho[]" 
+                                                autofocus required>
+
+                                                    @foreach ($text_selOcho as $item)
+                                                        <option value="{{$item->llave}}" selected>{{$item->valor}}</option> 
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -231,6 +283,11 @@
                             keyboard: false
                         }
                         );
+                        //selectPickers
+                        $('#data_selCuatro option').attr("selected","selected");
+                        $('#data_selCuatro').selectpicker('refresh');
+                        $('#text_selSiete option').attr("selected","selected");
+                        $('#text_selSiete').selectpicker('refresh');
 
                         var data,
                         tableName= '#tabla',

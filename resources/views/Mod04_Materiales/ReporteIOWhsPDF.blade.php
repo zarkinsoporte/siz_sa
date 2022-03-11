@@ -42,11 +42,14 @@
             right: 2%;
         }
 
-        h5 {
+        h3 {
             font-family: 'Helvetica';
-            margin-bottom: 15;
+            margin-bottom: 2px;
+            margin-top:3px
         }
-
+        h5{
+            margin-top:2px
+        }
         .fz {
             font-size: 100%;
             margin-top: 7px;
@@ -55,12 +58,12 @@
         #header {
             position: fixed;
             margin-top: 2px;
-
+            
         }
 
         #content {
             position: relative;
-            top: 20%
+            top: 15%
         }
 
         table,
@@ -107,16 +110,17 @@
 
 <body>
     <div id="header">
-        <img src="{{ url('/images/Mod01_Produccion/siz1.png') }}">
+        <img src="{{ public_path('images/Mod01_Produccion/siz1.png') }}">
         <!--empieza encabezado, continua cuerpo-->
         <table border="1px" class="table">
             <thead class="thead-dark">
                 <tr>
                     <td colspan="6" align="center" bgcolor="#fff">
                         <div class="fz"><b>{{env('EMPRESA_NAME')}}</b><br>
-                            <b>Mod04 - Materiales</b></div>
-                        <h2>Reporte de Movimientos de Entradas y Salidas de Articulos </h2>
-                        <h3><b>Del:</b> {{\AppHelper::instance()->getHumanDate(array_get($fechas_entradas,'fi'))}} <b>al:</b> {{\AppHelper::instance()->getHumanDate(array_get($fechas_entradas,'ff'))}}</h3>
+                           
+                        <h3>Reporte de Movimientos</h3>
+                        <h3>de Entradas y Salidas de Articulos</h3>
+                        <h5><b>Del:</b> {{\AppHelper::instance()->getHumanDate(array_get($fechas_entradas,'fi'))}} <b>al:</b> {{\AppHelper::instance()->getHumanDate(array_get($fechas_entradas,'ff'))}}</h5>
                     </td>
                 </tr>
             </thead>

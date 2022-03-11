@@ -362,14 +362,6 @@ Route::get('home/TRASLADO RECEPCION/solicitud/update/{id}', 'Mod04_MaterialesCon
 Route::post('home/TRASLADO RECEPCION/solicitud/articulos/edit', 'Mod04_MaterialesController@editArticuloTrasladosDepto');
 Route::get('home/TRASLADO RECEPCION/solicitud/PDF/traslado/{transfer}', 'Mod04_MaterialesController@getPdfTraslado');
 
-//REPORTE DE ENTRADAS Y SALIDAS
-Route::get('home/ENTRADAS SALIDAS', 'Reportes_ProduccionController@showModal')->middleware('routelog');
-Route::post('home/reporte/ENTRADAS SALIDAS', 'Mod04_MaterialesController@EntradasSalidas');
-Route::get('datatables.ioWhs', 'Mod04_MaterialesController@DataShowEntradasSalidas')->name('datatables.ioWhs');
-Route::get('home/reporte/ENTRADAS SALIDAS', 'Mod04_MaterialesController@reporteiowhsPDF');
-Route::get('home/reporte/entradasysalidasXLS', 'Mod04_MaterialesController@iowhsXLS');
-Route::get('home/reporte/entradasysalidasPDF', 'Mod04_MaterialesController@iowhsPDF');
-
 //REPORTE TRANSFERENCIAS PENDIENTES
 Route::get('home/TRANSFERENCIAS PENDIENTES', 'Mod04_MaterialesController@TransferenciasPendientes')->middleware('routelog');
 Route::get('datatables.transferencias_pendientes', 'Mod04_MaterialesController@DataShowTransferenciasPendientes')->name('datatables.transferencias_pendientes');
@@ -532,3 +524,21 @@ Route::any('datatables_compras_proveedor', 'Mod03_ComprasController@datatables_c
 Route::post('home/cpp_combobox_articulos', 'Mod03_ComprasController@cpp_combobox_articulos');
 Route::post('home/cpp_combobox_proveedores', 'Mod03_ComprasController@cpp_combobox_proveedores');
 Route::get('cppXLS', 'Mod03_ComprasController@cppXLS')->name('cppXLS');
+
+//REPORTE DE ENTRADAS Y SALIDAS
+//Route::get('home/ENTRADAS SALIDAS', 'Mod04_MaterialesController@showModal')->middleware('routelog');
+Route::get('home/ENTRADAS SALIDAS', 'Mod04_MaterialesController@index_EntradasSalidas');
+Route::any('datatables_ioWhs', 'Mod04_MaterialesController@datatables_ioWhs')->name('datatables_ioWhs');
+Route::any('entradasSalidas_combobox_tipoMat', 'Mod04_MaterialesController@entradasSalidas_combobox_tipoMat')->name('entradasSalidas_combobox_tipoMat');
+Route::any('entradasSalidas_combobox_articulos', 'Mod04_MaterialesController@entradasSalidas_combobox_articulos')->name('entradasSalidas_combobox_articulos');
+//Route::get('home/reporte/ENTRADAS SALIDAS', 'Mod04_MaterialesController@reporteiowhsPDF');
+Route::get('entradasysalidasXLS', 'Mod04_MaterialesController@iowhsXLS')->name('entradasysalidasXLS');;
+Route::get('entradasysalidasPDF', 'Mod04_MaterialesController@iowhsPDF')->name('entradasysalidasPDF');;
+/*
+Route::get('home/ENTRADAS SALIDAS', 'Reportes_ProduccionController@showModal')->middleware('routelog');
+Route::post('home/reporte/ENTRADAS SALIDAS', 'Mod04_MaterialesController@EntradasSalidas');
+Route::any('datatables.ioWhs', 'Mod04_MaterialesController@DataShowEntradasSalidas')->name('datatables.ioWhs');
+//Route::get('home/reporte/ENTRADAS SALIDAS', 'Mod04_MaterialesController@reporteiowhsPDF');
+Route::get('home/reporte/entradasysalidasXLS', 'Mod04_MaterialesController@iowhsXLS');
+Route::get('home/reporte/entradasysalidasPDF', 'Mod04_MaterialesController@iowhsPDF');
+*/
