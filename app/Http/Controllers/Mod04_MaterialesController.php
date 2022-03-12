@@ -158,13 +158,37 @@ public function entradasPDF()
 }
 public function iowhsPDF()
 {
-    $a = json_decode(Session::get('entradasysalidas'));
+    $a = (json_decode(Session::get('entradasysalidas')));
+     
+    $fechaImpresion = date("d-m-Y H:i:s"); 
+    $headerHtml = view()->make('Mod04_Materiales.ReporteIOWhs_pdfheader', 
+    [
+        'titulo' => 'Reporte de Entradas y Salidas',
+        'fechaImpresion' => 'Fecha de Impresión: ' . $fechaImpresion,
+        'fechas_entradas' => Session::get('param_entradasysalidas')
+    ])->render();
+    //dd(compact('data'));
+    $pdf = \SPDF::loadView('Mod04_Materiales.ReporteIOWhsPDF', compact('a'));
+    
+    //$pdf->setOption('header-left', 'Fecha Actualización: '. $fechaActualizacion);
+    //$pdf->setOption('header-right', 'Fecha de Impresión: '. $fechaImpresion);
+    $pdf->setOption('header-html', $headerHtml);
+    $pdf->setOption('footer-center', 'Pagina [page] de [toPage]');
+    $pdf->setOption('footer-left', 'SIZ');
+    $pdf->setOption('orientation', 'Landscape');
+    $pdf->setOption('margin-top', '40mm');
+    $pdf->setOption('margin-left', '5mm');
+    $pdf->setOption('margin-right', '5mm');
+    $pdf->setOption('page-size', 'Letter');
+        
+    return $pdf->inline('SIZ EntradasSalidas' . ' ' . date("d/m/Y") . '.Pdf');
+    
          
     // dd(\AppHelper::instance()->getHumanDate(array_get( Session::get('fechas_entradas'), 'ff')));
-    $data = array('data' => $a, 'fechas_entradas' => Session::get('param_entradasysalidas'));
-    $pdf = \PDF::loadView('Mod04_Materiales.ReporteIOWhsPDF', $data);
-        $pdf->setPaper('Letter', 'landscape')->setOptions(['isPhpEnabled' => true]);  
-    return $pdf->stream('SIZ Entradas - Salidas' . ' ' . date("d/m/Y") . '.Pdf');
+    
+    //$pdf = \PDF::loadView('Mod04_Materiales.ReporteIOWhsPDF', $data);
+        //$pdf->setPaper('Letter', 'landscape')->setOptions(['isPhpEnabled' => true]);  
+    //return $pdf->stream('SIZ Entradas - Salidas' . ' ' . date("d/m/Y") . '.Pdf');
 }
     public function entradasXLS()
     {
