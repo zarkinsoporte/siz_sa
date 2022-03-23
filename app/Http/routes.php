@@ -425,7 +425,7 @@ Route::get('/pruebas', function (Request $request) {
 Route::get('/crear-orden', 'Mod02_PlaneacionController@crearOrden');
 
 Route::get('/sap', function (Request $request) {
-    
+   
     $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
     $vCmp->DbServerType="10"; 
     $vCmp->server = env('SAP_server');;
@@ -439,13 +439,18 @@ Route::get('/sap', function (Request $request) {
     //$vCmp->language = "6";
     $lRetCode = $vCmp->Connect;
     
+    $vCmp->XmlExportType = '3';
+    $vItem = $vCmp->GetBusinessObject("66");
+    $RetVal = $vItem->GetByKey("20185");
+    $pathh = "C:\Users\Administrador\Documents\Invoice.xml";
+    $vItem->SaveXML($pathh);
     Session::flash('error', $vCmp->GetLastErrorDescription());
     if ($lRetCode <> 0) {
-        Session::flash('error', $vCmp->GetLastErrorDescription());
+       Session::flash('error', $vCmp->GetLastErrorDescription());
     } else {
         Session::flash('info',' - conexión con SAP DI API exitosa!!'. ' ultimo err:'. $vCmp->GetLastErrorDescription());
     } 
-    
+   
     return redirect('home');
     
 });
