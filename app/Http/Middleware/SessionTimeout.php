@@ -6,7 +6,7 @@ use DB;
 use Session;
 class SessionTimeout {
     protected $session;
-    protected $timeout=1460;
+    protected $timeout=1900;
     public function __construct(Store $session){
         $this->session=$session;
     }
@@ -20,7 +20,7 @@ class SessionTimeout {
     public function handle($request, Closure $next)
     {
       //dd(strpos($request->path(), 'qr') === 0 ); //todas las rutas que comiencen con qr
-    if ($request->path() == "auth/login" || $request->path() == "/" || strpos($request->path(), 'qr') === 0) {
+    if ($request->path() == "auth/login" || $request->path() == "/" || strpos($request->path(), 'qr') === 0 || !User::isProductionUser()) {
         
         }
         else{
