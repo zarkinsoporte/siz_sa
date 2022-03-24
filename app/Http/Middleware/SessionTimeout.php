@@ -3,6 +3,7 @@ use Closure;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Session\Store;
 use DB;
+use App\User;
 use Session;
 class SessionTimeout {
     protected $session;
