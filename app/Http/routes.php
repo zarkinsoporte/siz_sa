@@ -547,3 +547,4 @@ Route::any('datatables.ioWhs', 'Mod04_MaterialesController@DataShowEntradasSalid
 Route::get('home/reporte/entradasysalidasXLS', 'Mod04_MaterialesController@iowhsXLS');
 Route::get('home/reporte/entradasysalidasPDF', 'Mod04_MaterialesController@iowhsPDF');
 */
+Route::any('datatables_donde_usado', 'Mod04_MaterialesController@datatables_donde_usado')->name('datatables_donde_usado');

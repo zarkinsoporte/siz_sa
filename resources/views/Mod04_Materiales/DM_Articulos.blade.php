@@ -48,6 +48,11 @@ border: 1px solid #000000;
 .bootstrap-select>.dropdown-toggle {
 width: 100% !important;
 }
+ .dataTables_wrapper .dataTables_filter {
+        float: right;
+        text-align: right;
+        visibility: visible;
+    }
 </style>
 <div class="container">
  {!! Form::open(['url' => 'articuloToSap', 'method' => 'POST', 'id' => 'mainform']) !!}
@@ -62,6 +67,16 @@ width: 100% !important;
                     Datos Maestros de Artículos 
                     <div class="visible-xs visible-sm"><br></div>
                     <span class="pull-right">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                                aria-expanded="false"><i class="fa fa-search" aria-hidden="true"></i>
+                                ¿Dónde usado? <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a href="#" id="btn_op">OP</a></li>
+                                <li><a href="#" id="btn_ldm">LDM</a></li>
+                            </ul>
+                        </div>
                         @if(!isset($oculto))  
                             <a class="btn btn-primary" href="{{url('home/DATOS MAESTROS ARTICULOS')}}">Revisar Otro Artículo</a>                    
                             <button type="button" class="btn btn-success" data-toggle="modal" data-target="#confirma" {{$privilegioTarea}}>
@@ -465,6 +480,77 @@ width: 100% !important;
                             </div>
                         </div>
                     </div>
+    
+    <div class="modal fade" id="modal_donde_op" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Donde Usado OP <b>{{$data[0]->ItemCode.' '.$data[0]->ItemName}}</b>
+                    </h4>
+                </div>
+               
+                <div class="modal-body" style='padding:16px'>
+    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="table-scroll" id="registros-provisionar">
+                                <table id="table_op" class="table table-striped table-bordered hover" width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th>Estatus</th>
+                                            <th>OP</th>
+                                            <th>Cantidad</th>
+                                            <th>UM</th>
+                                            
+                                            <th>Material</th>
+                                            <th>Cant. Material</th>
+                                            <th>Almacén</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="modal_donde_ldm" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Donde Usado LDM <b> {{$data[0]->ItemCode.' '.$data[0]->ItemName}} </b>
+                    </h4>
+                </div>
+               
+                <div class="modal-body" style='padding:16px'>
+    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="table-scroll" id="registros-provisionar">
+                                <table id="table_ldm" class="table table-striped table-bordered hover" width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th>Código</th>
+                                            <th>Descripción</th>
+                                            <th>Cantidad</th>
+                                            <th>UM</th>
+                                            <th>Precio</th>
+                                            <th>Consumo</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
     <!-- /.container -->
 @endsection
@@ -482,6 +568,117 @@ width: 100% !important;
                                 $("#page-wrapper").toggleClass("content"); 
                                 $(this).toggleClass("active"); 
                             });
+                            var meses = new Array ("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
+var diasSemana = new Array("Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado");
+var f=new Date();
+var hours = f.getHours();
+var ampm = hours >= 12 ? 'pm' : 'am';
+var fecha = 'ACTUALIZADO: '+ diasSemana[f.getDay()] + ', ' + f.getDate() + ' de ' + meses[f.getMonth()] + ' del ' + f.getFullYear()+', A LAS '+hours+":"+f.getMinutes()+ ' ' + ampm; 
+var f = fecha.toUpperCase();
+                            var wrapper = $('#page-wrapper');
+            var resizeStartHeight = wrapper.height();
+            var height = (resizeStartHeight * 65)/100;
+            if ( height < 200 ) {   
+                height = 200;
+            }
+var table_ldm = $("#table_ldm").DataTable(
+            {
+                language:{
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                },
+                processing: true,
+                "paging": false,
+                dom: 'Bfrti',
+                scrollX: true,
+                scrollY: height,
+                scrollCollapse: true,
+                "order": [[1, "desc"]],
+                columns: [
+                    {data: "codigo_origen"},
+                    {data: "descripcion_origen"},
+                    {data: "cantidad",
+                        render: function(data){
+                        var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                        return val;
+                    }},
+                    {data: "um"},
+                    {data: "precio",
+                        render: function(data){
+                        var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                        return val;
+                    }},
+                    {data: "consumo",
+                        render: function(data){
+                        var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                        return val;
+                    }}
+                ],
+                buttons: [    
+                    {
+                        text: '<i class="fa fa-file-excel-o"></i> Excel',
+                        className: "btn-success",
+                        extend: 'excelHtml5',
+                        message: $('#EMPRESA_NAME').val()+"\n",
+                        messagetwo: "DONDE USADO LDM "+"{{$data[0]->ItemCode .' '.$data[0]->ItemName}}"+".\n",
+                        messagethree: f,
+                        exportOptions: {
+                            columns: ':visible',                
+                        }          
+                    }
+                
+                ],
+                "columnDefs": [
+                    
+                ],
+            });                            
+var table_op = $("#table_op").DataTable(
+            {
+                language:{
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                },
+                processing: true,
+                "paging": false,
+                dom: 'Bfrti',
+                scrollX: true,
+                scrollY: height,
+                scrollCollapse: true,
+                "order": [[1, "desc"]],
+                columns: [
+                    {data: "Estatus"},
+                    {data: "OP"},
+                    {data: "Cant",
+                        render: function(data){
+                        var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                        return val;
+                    }},
+                    {data: "Codigo"},
+                    
+                    {data: "Mueble"},//descripcion
+                    {data: "Cant_Mat",
+                        render: function(data){
+                        var val = new Intl.NumberFormat("es-MX", {minimumFractionDigits:2}).format(data);
+                        return val;
+                    }},
+                    {data: "Almacen"}
+                ],
+                buttons: [    
+                    {
+                        text: '<i class="fa fa-file-excel-o"></i> Excel',
+                        className: "btn-success",
+                        extend: 'excelHtml5',
+                        message: $('#EMPRESA_NAME').val()+"\n",
+                        messagetwo: "DONDE USADO OP "+"{{$data[0]->ItemCode .' '.$data[0]->ItemName}}"+".\n",
+                        messagethree: f,
+                        exportOptions: {
+                            columns: ':visible',                
+                        }          
+                    }
+                
+                ],
+                "columnDefs": [
+                    
+                ],
+            });                            
 $("#submitBtn").click(function(){        
 
 $("#mainform").submit(); // Submit the form
@@ -491,6 +688,63 @@ $("#mainform").submit(); // Submit the form
 $("#showImg").click(function(){        
 $('.imagepreview').attr('src', $("#showImg").attr('src'));
 $('#imagemodal').modal('show');
+});
+
+$('#btn_op').on('click', function (e) {
+    e.preventDefault();
+    reloadTable_donde('op');
+    $('#modal_donde_op').modal('show');
+});
+$('#btn_ldm').on('click', function (e) {
+    e.preventDefault();
+    reloadTable_donde('ldm');
+    $('#modal_donde_ldm').modal('show');
+});
+function reloadTable_donde(tipo){
+    $.ajax({
+            type: 'GET',
+            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+            data: {
+                codigo: "{{$data[0]->ItemCode}}",
+                tipo: tipo
+            },
+            url: '{!! route('datatables_donde_usado') !!}',
+            beforeSend: function () {
+                $.blockUI({
+                    baseZ: 2000,
+                    message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                    css: {
+                        border: 'none',
+                        padding: '16px',
+                        width: '50%',
+                        top: '40%',
+                        left: '30%',
+                        backgroundColor: '#fefefe',
+                        '-webkit-border-radius': '10px',
+                        '-moz-border-radius': '10px',
+                        opacity: .7,
+                        color: '#000000'
+                    }
+                });
+            },
+            complete: function () {
+                setTimeout($.unblockUI, 1500);
+            },
+            success: function(data){
+                let tabla = '#table_ldm';
+                if (tipo == 'op'){
+                    tabla = '#table_op'
+                }
+                $(tabla).DataTable().clear().draw();
+                if((data.codigos).length > 0){
+                    $(tabla).dataTable().fnAddData(data.codigos);
+                }   
+            }
+            });
+}
+$('.modal').on('shown.bs.modal', function () {
+  $($.fn.dataTable.tables(true)).DataTable()
+    .columns.adjust();
 });
 }  //js_iniciador
 </script>

@@ -2964,6 +2964,34 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
         ->make(true);
     
     }
+    public function datatables_donde_usado(Request $request)
+    {
+        
+        $codigo = $request->get('codigo');
+        $tipo = $request->get('tipo');
+        if($tipo === 'ldm'){
+            $consulta = DB::select("SELECT T0.[Father] codigo_origen ,T2.[ItemName] as descripcion_origen, 
+            T0.[Code] codigo, 
+            T1.[ItemName] descripcion, T0.[Quantity] cantidad,T1.[invntryuom] as um,T0.[Price] precio, T0.[Quantity]*T0.[Price] as consumo 
+            FROM ITT1 T0 
+            INNER JOIN OITM T1 ON T0.Code = T1.ItemCode
+            left join OITM T2 on  T0.father = T2.ItemCode 
+            WHERE T0.[Code] = ?", [$codigo]);
+        }else{
+            $consulta = DB::select("SELECT V3.Status as Estatus, V3.DocEntry as OP, V3.PlannedQty as Cant, V3.ItemCode as Codigo, V4.ItemName as Mueble, 
+            V1.ItemCode as Material, v2.ItemName as Nombre_Material, V1.BaseQty as Cant_Mat, V1.wareHouse as Almacen
+            from WOR1 V1
+            inner join OITM V2 on V1.ItemCode=V2.ItemCode
+            inner join OWOR V3 on V1.DocEntry=V3.DocEntry
+            inner join OITM V4 on V3.ItemCode=V4.ItemCode
+            where V1.ItemCode = ? and V1.IssuedQty =0 and V3.Status<>'C' and V3.Status<>'L'
+            order by V3.DocEntry", [$codigo]);  
+        }
+        
+        //dd(DB::getQueryLog());
+        return response()->json(array('codigos' => $consulta));
+    
+    }
 
     public function entradasSalidas_combobox_tipoMat(Request $request)
     {
