@@ -403,8 +403,21 @@ class Mod09_FinanzasListaPreciosController extends Controller
                 //dd($xCodeSub);
                 $index = 0;
                 while ($index < count($xCodeSub)) {
-
-                    $subsensambles = DB::select("SELECT OITM.ItemCode AS CODIGO, OITM.ItemName DESCRIPCION, ITT1.Father ORIGEN, 
+                    //DB::enableQueryLog();
+                    $subsensambles = DB::select("SELECT 
+                    CODIGO
+                    ,DESCRIPCION
+                    ,ORIGEN
+                    ,ORIGEN_DESCR
+                    ,CANTIDAD_ORIGEN
+                    ,UM
+                    ,PRECIO_UNITARIO
+                    , MONEDA
+                    ,SUM(CANTIDAD_ART) CANTIDAD_ART
+                    ,SUM(CANTIDAD) CANTIDAD
+                    ,SUM(PRECIO_TOTAL) PRECIO_TOTAL
+                    FROM(
+                        SELECT OITM.ItemCode AS CODIGO, OITM.ItemName DESCRIPCION, ITT1.Father ORIGEN, 
                         (select itemName from OITM where itemcode = ITT1.Father) ORIGEN_DESCR, 
                         ITT1.Quantity CANTIDAD_ART
                         ,COALESCE( (select cantidad from SIZ_simulador_temp where 
@@ -422,8 +435,18 @@ class Mod09_FinanzasListaPreciosController extends Controller
                         INNER JOIN ITM1 ON ITM1.ItemCode = OITM.ItemCode 
                         and ITM1.PriceList=? 
                         WHERE  ITT1.Father = ? and 
-                        (OITM.QryGroup29 = 'Y' or OITM.QryGroup30 = 'Y' or OITM.QryGroup31 = 'Y' or OITM.QryGroup32 = 'Y')",
+                        (OITM.QryGroup29 = 'Y' or OITM.QryGroup30 = 'Y' or OITM.QryGroup31 = 'Y' or OITM.QryGroup32 = 'Y')
+                        ) tab
+                        group by CODIGO
+                        ,DESCRIPCION
+                        ,ORIGEN
+                        ,ORIGEN_DESCR
+                        ,CANTIDAD_ORIGEN
+                        ,UM, PRECIO_UNITARIO
+                        , MONEDA",
                         [$xCodeSub[0], $xCodeSub[0], 1, $xCodeSub[$index]]);
+                        //dd(DB::getQueryLog());
+                       // dd($subsensambles);
                     $subs = array_pluck($subsensambles,'CODIGO');
                     if (count($subs) > 0) {
                         $xCodeSub = array_merge($xCodeSub, $subs);
@@ -448,7 +471,7 @@ class Mod09_FinanzasListaPreciosController extends Controller
                 }
                 //dd([$xCodeSub, $sub_cadena, $value->ItemCode, $value->composicion, $tc_usd, $tc_can, $tc_eur]);
                 $xCodeSub = [];
-                //clock([$sub_cadena, $value->ItemCode]);
+                //dd([$sub_cadena, $value->ItemCode]);
                 DB::select('exec SIZ_SIMULADOR_COSTO_LDM_INSERT  ?, ?, ?, ?', 
                 [$sub_cadena, $value->ItemCode, $value->composicion, $tc_usd]);
             }
@@ -485,12 +508,12 @@ class Mod09_FinanzasListaPreciosController extends Controller
 
             //al arranque vamos a calcular los hules x kilo
                 //primero vamos a guardar los valores originales
-            $original_hules = DB::select('SELECT um, codigo, cantidad, precio, precioUSD, precioMXP, moneda from SIZ_simulador_temp
+            $original_hules = DB::select('SELECT composicionCodigo, um, codigo, cantidad, precio, precioUSD, precioMXP, moneda from SIZ_simulador_temp
                 where grupoPlaneacion = 6 AND subModelo <> \'C\'');
             Session::put('simulador_original_hules', $original_hules);
-
+            clock($original_hules);
             $hules = DB::select('SELECT CASE WHEN SWeight1 = 0 OR SWeight1 IS NULL THEN 1
-            ELSE 0 END AS err, codigo, descripcion, um, convert (decimal(18,2), precio) precio, moneda 
+            ELSE 0 END AS err, composicionCodigo, codigo, descripcion, um, convert (decimal(18,2), precio) precio, moneda 
             , SWeight1 pesoKG
             , cantidad
 			, cantidad * SWeight1 cantidadKG
@@ -504,9 +527,9 @@ class Mod09_FinanzasListaPreciosController extends Controller
             foreach ($hules as $hule) {
                  DB::update('update Siz_simulador_temp set um = ?, cantidad = ?, precioUSD = ?, precio = ?, 
                  precioMXP = ?, moneda = ?
-                 where codigo = ?', 
+                 where codigo = ? AND composicionCodigo = ?', 
                  ['KGS', $hule->cantidadKG, $hule->precioUSDKG, $hule->precioUSDKG, 
-                 $hule->precioUSDKG * $tc_usd , 'USD', $hule->codigo]);
+                 $hule->precioUSDKG * $tc_usd , 'USD', $hule->codigo, $hule->composicionCodigo]);
             }
             //fin calculo hules x kilo
 
@@ -519,7 +542,8 @@ class Mod09_FinanzasListaPreciosController extends Controller
         } //end insert
         $margenVtas = 50;
         $cuenta_tparametros = count($tparametros);
-        
+        clock('parametros');
+        clock($tparametros);
             for ($x = 0; $x < $cuenta_tparametros; $x++) {
 
                 if ($tparametros[$x]['codigo'] == '10007') {
@@ -529,15 +553,18 @@ class Mod09_FinanzasListaPreciosController extends Controller
                     //PUESTO QUE LOS CALCULOS DE CANTIDAD E IMPORTE GUIANDONOS POR KILOS INCLUYE EL PESO.
                     if (Session::has('simulador_original_hules')) {
                         $hules = Session::get('simulador_original_hules');
+                        clock($hules);
                         foreach ($hules as $hule) {
                              DB::update('update Siz_simulador_temp set um = ?, cantidad = ?, precioUSD = ?, precio = ?, precioMXP = ?, moneda = ?
-                             where codigo = ?', 
-                             [$hule->um, $hule->cantidad, $hule->precioUSD, $hule->precio, $hule->precioMXP, 'USD', $hule->codigo]);
+                             where codigo = ? AND composicionCodigo = ?', 
+                             [$hule->um, $hule->cantidad, $hule->precioUSD, $hule->precio, $hule->precioMXP, 'USD', $hule->codigo, $hule->composicionCodigo]);
                          }
                      }
+                     clock('CHECK');
+                     clock($tparametros[$x]['checkbox']);
                     if ($tparametros[$x]['checkbox']) {
                         $hules = DB::select('SELECT CASE WHEN SWeight1 = 0 OR SWeight1 IS NULL THEN 1
-                        ELSE 0 END AS err, codigo, descripcion, um, convert (decimal(18,2), precio) precio, moneda 
+                        ELSE 0 END AS err, composicionCodigo, codigo, descripcion, um, convert (decimal(18,2), precio) precio, moneda 
                         , SWeight1 pesoKG
                         , cantidad
                         , cantidad * SWeight1 cantidadKG
@@ -550,9 +577,9 @@ class Mod09_FinanzasListaPreciosController extends Controller
 
                         foreach ($hules as $hule) {
                             DB::update('update Siz_simulador_temp set um = ?, cantidad = ?, precioUSD = ?, precio = ?, precioMXP = ?, moneda = ?
-                            where codigo = ?', 
+                            where codigo = ? AND composicionCodigo = ?', 
                             ['KGS', $hule->cantidadKG, $hule->precioUSDKG, $hule->precioUSDKG, 
-                            $hule->precioUSDKG * $tc_usd , 'USD', $hule->codigo]);
+                            $hule->precioUSDKG * $tc_usd , 'USD', $hule->codigo, $hule->composicionCodigo]);
                         }
                     } else {
                         

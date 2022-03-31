@@ -42,11 +42,14 @@
             right: 2%;
         }
 
-        h5 {
+        h3 {
             font-family: 'Helvetica';
-            margin-bottom: 15;
+            margin-bottom: 2px;
+            margin-top:3px
         }
-
+        h5{
+            margin-top:2px
+        }
         .fz {
             font-size: 100%;
             margin-top: 7px;
@@ -55,12 +58,12 @@
         #header {
             position: fixed;
             margin-top: 2px;
-
+            margin-bottom:40px;
         }
 
         #content {
             position: relative;
-            top: 20%
+            margin-top: 40%
         }
 
         table,
@@ -106,26 +109,10 @@
 </head>
 
 <body>
-    <div id="header">
-        <img src="{{ url('/images/Mod01_Produccion/siz1.png') }}">
-        <!--empieza encabezado, continua cuerpo-->
-        <table border="1px" class="table">
-            <thead class="thead-dark">
-                <tr>
-                    <td colspan="6" align="center" bgcolor="#fff">
-                        <div class="fz"><b>{{env('EMPRESA_NAME')}}</b><br>
-                            <b>Mod04 - Materiales</b></div>
-                        <h2>Reporte de Movimientos de Entradas y Salidas de Articulos </h2>
-                        <h3><b>Del:</b> {{\AppHelper::instance()->getHumanDate(array_get($fechas_entradas,'fi'))}} <b>al:</b> {{\AppHelper::instance()->getHumanDate(array_get($fechas_entradas,'ff'))}}</h3>
-                    </td>
-                </tr>
-            </thead>
-        </table>
-
-    </div>
+    
     <!--Cuerpo o datos de la tabla-->
     <div id="content">
-        @if(count($data)>0)
+        @if(count($a)>0)
             <div class="row">
            
             <div class="col-md-8">
@@ -135,7 +122,7 @@
                         $totalEntrada = 0;
                         $moneda = 'MXP';   
                     ?>
-                        @foreach ($data as $rep)
+                        @foreach ($a as $rep)
                         @if($index == 0)
                         <?php
                             $DocN = $rep->BASE_REF; 
@@ -360,7 +347,7 @@
                                        
                                     </tr>
                                         @endif 
-                                        @if($index == count($data)-1)
+                                        @if($index == count($a)-1)
                                        
 
                                         @endif
@@ -375,22 +362,6 @@
         </div>
        @endif
     </div>
-
-
-    <footer>
-        <script type="text/php">
-            $font = $fontMetrics->get_font("Arial, Helvetica, sans-serif","normal"); 
-            $empresa = 'Sociedad: <?php echo env('EMPRESA_NAME'); ?>'; 
-            $date = 'Fecha de impresion: <?php echo date("d-m-Y H:i:s"); ?>'; 
-            $text = 'Pagina: {PAGE_NUM} / {PAGE_COUNT}'; 
-            $tittle = 'Siz_Reporte_Entradas_Salidas.Pdf'; 
-            $pdf->page_text(40, 23,$empresa, $font, 9); 
-            $pdf->page_text(580, 23, $date, $font, 9); 
-            $pdf->page_text(35, 580, $text, $font, 9); 
-            $pdf->page_text(620, 580, $tittle, $font, 9);
-        </script>
-    </footer>
-    @yield('subcontent-01')
 
 </body>
 

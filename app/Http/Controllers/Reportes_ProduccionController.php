@@ -203,6 +203,10 @@ class Reportes_ProduccionController extends Controller
         $data_selCuatro = [];
         $text_selCinco = '';
         $data_selCinco = [];
+        $text_selSiete = '';
+        $data_selSiete = [];
+        $text_selOcho = '';
+        $data_selOcho = [];
         $sizeModal = 'modal-sm';
         $data_table = '';
         $btn3 = '';
@@ -272,15 +276,23 @@ class Reportes_ProduccionController extends Controller
                 break;
             case "ENTRADAS SALIDAS":
                 $fechas = true;
-                $text_selDos = 'Tipo de Material'; 
-                $data_selDos = ['Cualquiera', 'MP', 'PT'];
+                $tipo_m = DB::table('OITM')
+                    ->select('U_TipoMat as llave, U_TipoMat as valor')                    
+                    ->groupBy('U_TipoMat')
+                    ->orderBy('U_TipoMat')                    
+                    ->get();
+                $text_selCuatro = 'Tipo de Material'; 
+                $data_selCuatro = $tipo_m;
+                
+                $text_selSiete = 'Artículos';
+                $data_selSiete = $almacenes;
                 $almacenes = DB::table('OWHS')
                     ->select('WhsCode as llave', DB::raw('WhsCode + \' - \' + WhsName as valor'))
                     ->where('DataSource', 'I')
                     ->orderBy('WhsName')                    
                     ->get();                
-                $text_selCuatro = 'Almacenes a Considerar';
-                $data_selCuatro = $almacenes;
+                $text_selOcho = 'Almacenes';
+                $data_selOcho = $almacenes;
             break;
             
             case "CALIDAD CAPTURA DEFECTIVOS":
@@ -329,6 +341,10 @@ class Reportes_ProduccionController extends Controller
             'data_selCuatro' => $data_selCuatro,
             'text_selCinco' => $text_selCinco,
             'data_selCinco' => $data_selCinco,
+            'text_selSiete' => $text_selCinco,
+            'data_selSiete' => $data_selCinco,
+            'text_selOcho' => $text_selCinco,
+            'data_selOcho' => $data_selCinco,
             'sizeModal' => $sizeModal,
             'data_table' => $data_table,
             'btn3' => $btn3,
@@ -365,7 +381,7 @@ class Reportes_ProduccionController extends Controller
         OHEM.firstName + ' ' + OHEM.lastName ,
          DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)),[@CP_LOGOF].U_DocEntry
         ,OWOR.ItemCode , OITM.ItemName
-        ORDER BY [@CP_LOGOF].U_CT, FechaF, Empleado"));
+        ORDER BY FechaF, [@CP_LOGOF].U_CT, Empleado"));
             Session::put('rephistorial', $consulta);
 
             switch ($info->Status) {

@@ -67,7 +67,7 @@ class Mod01_ProduccionController extends Controller
         OHEM.firstName + ' ' + OHEM.lastName ,
          DATEADD(dd, 0, DATEDIFF(dd, 0, [@CP_LOGOF].U_FechaHora)),[@CP_LOGOF].U_DocEntry
         ,OWOR.ItemCode , OITM.ItemName
-        ORDER BY [@CP_LOGOF].U_CT, FechaF, Empleado"));
+        ORDER BY FechaF, [@CP_LOGOF].U_CT, Empleado"));
         //dd($GraficaOrden);
 
         $data = array(

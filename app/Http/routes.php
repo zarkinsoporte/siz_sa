@@ -131,7 +131,7 @@ Route::post('admin/delete_Noti/', 'Mod00_AdministradorController@delete_Noti');
 Route::get('updateprivilegio', 'Mod00_AdministradorController@updateprivilegio');
 Route::get('dropdown', function () {
     return TAREA_MENU::where('id_menu_item', Input::get('option'))
-        ->lists('name', 'id');
+    ->lists('name', 'id');
 });
 Route::get('switch', function () {
     $vava = MODULOS_GRUPO_SIZ::find(2);
@@ -202,10 +202,10 @@ Route::get('datatables.showbackorderpatas', 'Reportes_ProduccionController@DataS
 
 Route::get('home/reporte/backorderPatasPDF', 'Reportes_ProduccionController@ReporteBackOrderPatasPDF');
 /*
-    |--------------------------------------------------------------------------
-    | MOD07-CALIDAD Routes
-    |--------------------------------------------------------------------------
-    */
+|--------------------------------------------------------------------------
+| MOD07-CALIDAD Routes
+|--------------------------------------------------------------------------
+*/
 Route::get('home/NUEVO RECHAZO', 'Mod07_CalidadController@Rechazo')->middleware('routelog');
 Route::post('RechazosNuevo', 'Mod07_CalidadController@RechazoIn');
 Route::get('Mod07_Calidad/Mod_Rechazo/{id}/{mensaje}', 'Mod07_CalidadController@Mod_Rechazo');
@@ -303,7 +303,7 @@ Route::get('home/lotes/{tabla}/{alm}/{item}', 'Mod04_MaterialesController@vistaL
 Route::post('home/lotes/insert', 'Mod04_MaterialesController@insertLotes');
 Route::get('home/lotes/remove/{id}/{lote}/{alm}', 'Mod04_MaterialesController@removeLote');
 Route::get('disponibilidadAlmacenMP', function(){
-     
+    
     $data = DB::select("SELECT 
 		 COALESCE (SUM(CASE WHEN WhsCode = 'APG-PA'  
          THEN OnHand ELSE 0 END) - (COALESCE (t1.A, 0) + COALESCE (tr.A, 0)), 0) 
@@ -361,14 +361,6 @@ Route::get('home/TRASLADO RECEPCION/solicitud/articulos/return/{id}', 'Mod04_Mat
 Route::get('home/TRASLADO RECEPCION/solicitud/update/{id}', 'Mod04_MaterialesController@updateArticuloTrasladoDepto');
 Route::post('home/TRASLADO RECEPCION/solicitud/articulos/edit', 'Mod04_MaterialesController@editArticuloTrasladosDepto');
 Route::get('home/TRASLADO RECEPCION/solicitud/PDF/traslado/{transfer}', 'Mod04_MaterialesController@getPdfTraslado');
-
-//REPORTE DE ENTRADAS Y SALIDAS
-Route::get('home/ENTRADAS SALIDAS', 'Reportes_ProduccionController@showModal')->middleware('routelog');
-Route::post('home/reporte/ENTRADAS SALIDAS', 'Mod04_MaterialesController@EntradasSalidas');
-Route::get('datatables.ioWhs', 'Mod04_MaterialesController@DataShowEntradasSalidas')->name('datatables.ioWhs');
-Route::get('home/reporte/ENTRADAS SALIDAS', 'Mod04_MaterialesController@reporteiowhsPDF');
-Route::get('home/reporte/entradasysalidasXLS', 'Mod04_MaterialesController@iowhsXLS');
-Route::get('home/reporte/entradasysalidasPDF', 'Mod04_MaterialesController@iowhsPDF');
 
 //REPORTE TRANSFERENCIAS PENDIENTES
 Route::get('home/TRANSFERENCIAS PENDIENTES', 'Mod04_MaterialesController@TransferenciasPendientes')->middleware('routelog');
@@ -449,10 +441,9 @@ Route::get('/sap', function (Request $request) {
     
     $vCmp->XmlExportType = '3';
     $vItem = $vCmp->GetBusinessObject("66");
-        //Obtener Lineas de una Transferencia
-        $RetVal = $vItem->GetByKey("20185");
-        $pathh = "C:\Users\Administrador\Documents\Invoice.xml";
-        $vItem->SaveXML($pathh);
+    $RetVal = $vItem->GetByKey("20185");
+    $pathh = "C:\Users\Administrador\Documents\Invoice.xml";
+    $vItem->SaveXML($pathh);
     Session::flash('error', $vCmp->GetLastErrorDescription());
     if ($lRetCode <> 0) {
        Session::flash('error', $vCmp->GetLastErrorDescription());
@@ -522,3 +513,38 @@ Route::get('datatables_simulador_precios', 'Mod09_FinanzasListaPreciosController
 Route::any('simulador_actualizarPrecios', 'Mod09_FinanzasListaPreciosController@simulador_actualizarPrecios')->name('simulador_actualizarPrecios');
 Route::get('simuladorXLS/{tc_usd}/{tc_can}/{tc_eur}', 'Mod09_FinanzasListaPreciosController@ReporteSimuladorXLS')->name('simuladorXLS');
 Route::post('simulador_session_json', 'Mod09_FinanzasListaPreciosController@simuladorAjaxToSession')->name('simulador_session_json');
+
+//MTTO DE ACABADOS
+Route::get('home/MTTO_ACABADOS', 'Mod08_DisenioController@mtto_acabados_index')->middleware('routelog');
+Route::get('datatables_acabados', 'Mod08_DisenioController@datatables_acabados')->name('datatables_acabados');
+Route::post('eliminar_material_acabado', 'Mod08_DisenioController@eliminar_material_acabado')->name('eliminar_material_acabado');
+Route::post('eliminar_acabado', 'Mod08_DisenioController@eliminar_acabado')->name('eliminar_acabado');
+Route::post('dbrecuperar_acabado', 'Mod08_DisenioController@dbrecuperar_acabado')->name('dbrecuperar_acabado');
+Route::post('guarda_material_acabado', 'Mod08_DisenioController@guarda_material_acabado')->name('guarda_material_acabado');
+Route::any('mtto_acabados_PDF', 'Mod08_DisenioController@mtto_acabados_PDF');
+
+//REPORTE DE COMPRAS X PROVEEDOR
+Route::get('home/COMPRAS X PROVEEDOR', 'Mod03_ComprasController@index_compras_proveedor')->middleware('routelog');
+Route::any('datatables_compras_proveedor', 'Mod03_ComprasController@datatables_compras_proveedor')->name('datatables_compras_proveedor');
+Route::post('home/cpp_combobox_articulos', 'Mod03_ComprasController@cpp_combobox_articulos');
+Route::post('home/cpp_combobox_proveedores', 'Mod03_ComprasController@cpp_combobox_proveedores');
+Route::get('cppXLS', 'Mod03_ComprasController@cppXLS')->name('cppXLS');
+
+//REPORTE DE ENTRADAS Y SALIDAS
+//Route::get('home/ENTRADAS SALIDAS', 'Mod04_MaterialesController@showModal')->middleware('routelog');
+Route::get('home/ENTRADAS SALIDAS', 'Mod04_MaterialesController@index_EntradasSalidas');
+Route::any('datatables_ioWhs', 'Mod04_MaterialesController@datatables_ioWhs')->name('datatables_ioWhs');
+Route::any('entradasSalidas_combobox_tipoMat', 'Mod04_MaterialesController@entradasSalidas_combobox_tipoMat')->name('entradasSalidas_combobox_tipoMat');
+Route::any('entradasSalidas_combobox_articulos', 'Mod04_MaterialesController@entradasSalidas_combobox_articulos')->name('entradasSalidas_combobox_articulos');
+//Route::get('home/reporte/ENTRADAS SALIDAS', 'Mod04_MaterialesController@reporteiowhsPDF');
+Route::get('entradasysalidasXLS', 'Mod04_MaterialesController@iowhsXLS')->name('entradasysalidasXLS');;
+Route::get('entradasysalidasPDF', 'Mod04_MaterialesController@iowhsPDF')->name('entradasysalidasPDF');;
+/*
+Route::get('home/ENTRADAS SALIDAS', 'Reportes_ProduccionController@showModal')->middleware('routelog');
+Route::post('home/reporte/ENTRADAS SALIDAS', 'Mod04_MaterialesController@EntradasSalidas');
+Route::any('datatables.ioWhs', 'Mod04_MaterialesController@DataShowEntradasSalidas')->name('datatables.ioWhs');
+//Route::get('home/reporte/ENTRADAS SALIDAS', 'Mod04_MaterialesController@reporteiowhsPDF');
+Route::get('home/reporte/entradasysalidasXLS', 'Mod04_MaterialesController@iowhsXLS');
+Route::get('home/reporte/entradasysalidasPDF', 'Mod04_MaterialesController@iowhsPDF');
+*/
+Route::any('datatables_donde_usado', 'Mod04_MaterialesController@datatables_donde_usado')->name('datatables_donde_usado');

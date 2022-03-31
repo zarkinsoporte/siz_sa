@@ -207,10 +207,10 @@ li.dt-button.active a::before{
                 </div>
                 <!-- Top Menu Items -->
                 <ul class="nav navbar-left top-nav hidden-xs">
-                    <li style="left:350%"><a href="#" style="padding-bottom: 0;
+                    <li style="left:200%"><a href="#" style="padding-bottom: 0;
                 padding-top: 3px;">
                            <a id="sidebarCollapse">
-                            <i class="glyphicon glyphicon-align-left"></i>
+                            <i class="glyphicon glyphicon-align-left"> <b>Menú</b></i>
                            </a>
                         </a></li>
                 </ul>
@@ -277,15 +277,16 @@ li.dt-button.active a::before{
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/js/bootstrap-select.min.js"></script>
 
 <script>
+    let routeapp = "{{url().'/'}}";
     $(document).ready(js_iniciador);
     $( document ).ajaxError(function( event, jqxhr, settings, thrownError ) {
-        //alert("Session expired. You'll be take to the login page");
-           
-        bootbox.alert({
-            title: "Sesión terminada",
-            message: "<div class='alert alert-danger m-b-0'>Tiene que volver a iniciar Sesión.</div>",
-            callback: function(){ location.href = '{!! route('auth/login') !!}'; }
-        });
+        if (jqxhr.status === 403) {
+            bootbox.alert({
+                    title: "Sesión terminada",
+                    message: "<div class='alert alert-danger m-b-0'>Tiene que volver a iniciar Sesión.</div>",
+                    callback: function(){ location.href = '{!! route('auth/login') !!}'; }
+                });     
+        }
     });
 </script>
   

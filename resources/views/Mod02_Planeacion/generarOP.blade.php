@@ -1381,6 +1381,11 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
 $($.fn.dataTable.tables(true)).DataTable()
 .columns.adjust();
 });
+
+$('#myModal').on('shown.bs.modal', function () {
+  $($.fn.dataTable.tables(true)).DataTable()
+.columns.adjust();
+});
 */
 $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
 
