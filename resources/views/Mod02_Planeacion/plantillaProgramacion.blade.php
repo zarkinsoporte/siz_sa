@@ -56,8 +56,9 @@
                                         <th>F. Producción</th>
                                         <th>Estatus</th>
                                         <th>Sec. OT</th>
-                                        <th>Sec. Compra</th>
-                                        <th>Prog. Corte</th>
+                                        <th>Hule Espuma</th>
+                                        <th>Prog. Fundas</th>
+                                        <th>Metales</th>
 
                                     </tr>
                                 </thead>

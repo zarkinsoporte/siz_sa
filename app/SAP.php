@@ -82,7 +82,7 @@ class SAP extends Model
             return $impreso;
         }
     }
-    public static function ProductionOrderProgramar($orden, $prog_corte, $sec_compra, $sec_ot, $estatus, $fCompra, $fProduccion)
+    public static function ProductionOrderProgramar($orden, $prog_corte, $hule, $sec_ot, $estatus, $fCompra, $fProduccion, $prioridad, $num_pedido, $metales)
     {
         self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
         self::$vCmp->DbServerType = "10";
@@ -100,11 +100,17 @@ class SAP extends Model
         $vItem = self::$vCmp->GetBusinessObject("202");
         $RetVal = $vItem->GetByKey($orden.'');
        // clock($RetVal);
+        if($num_pedido !== ''){
+            $vItem->ProductionOrderOriginEntry = $num_pedido;
+        }
         if($prog_corte !== ''){
             $vItem->UserFields->Fields->Item('U_Grupo')->Value = ''.$prog_corte;
         }
-        if($sec_compra !== ''){
-            $vItem->UserFields->Fields->Item('U_OF')->Value = ''.$sec_compra;
+        if($hule !== ''){
+            $vItem->UserFields->Fields->Item('U_OF')->Value = ''.$hule;
+        }
+        if($metales !== ''){
+            $vItem->UserFields->Fields->Item('U_OF')->Value = ''.$metales;
         }
         if($sec_ot !== ''){
             $vItem->UserFields->Fields->Item('U_OT')->Value = ''.$sec_ot;
@@ -112,6 +118,10 @@ class SAP extends Model
         if($estatus !== ''){
             
             $vItem->UserFields->Fields->Item('U_Starus')->Value = '0'.$estatus;
+        }
+        if($prioridad !== ''){
+            
+            $vItem->UserFields->Fields->Item('U_C_Orden')->Value = ''.$prioridad;
         }
         if($fCompra !== ''){
             $vItem->UserFields->Fields->Item('U_FCompras')->Value = ''.$fCompra;
@@ -578,7 +588,7 @@ class SAP extends Model
             //--Usuario: El del Sistema //auto
             //--Origen: Manual
             $vItem->ProductionOrderOriginEntry = $OV->DocEntry; // Num pedido (DocEntry de ORDR)
-
+            //ProductionOrderOriginNumber
             $apellido = self::getApellidoPaternoUsuario(explode(' ', Auth::user()->lastName));
             $usuario_reporta = explode(' ', Auth::user()->firstName)[0] . ' ' . $apellido;
             //validacion de longitud 50

@@ -159,7 +159,7 @@
                         </div>  <!-- /.row -->                     
                     </div>   <!-- /.container -->
                     <div class="modal fade" id="updateprogramar" tabindex="-1" role="dialog">
-                        <div class="modal-dialog modal-sm" role="document">
+                        <div class="modal-dialog modal-md" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
@@ -172,17 +172,26 @@
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="fecha_provision">Prog. Corte</label>
+                                                        <label for="fecha_provision">Prog. Fundas</label>
                                                         <input maxlength="10" type="text" id="programar_progCorte" name="programar_progCorte" class='form-control' autocomplete="off">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="cant">Sec. Compra</label>
-                                                        <input maxlength="10" type="text" class="form-control" id="programar_secCompra" autocomplete="off">
+                                                        <label for="cant">Hule</label>
+                                                        <input maxlength="10" type="text" class="form-control" id="programar_hule" autocomplete="off">
                                                        
                                                     </div>
                                                 </div>
+                                            </div><!-- /.row -->
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="fecha_provision">Metales</label>
+                                                        <input maxlength="19" type="text" id="programar_metales" class='form-control' autocomplete="off">
+                                                    </div>
+                                                </div>
+                                               
                                             </div><!-- /.row -->
                                             <div class="row">
                                                 <div class="col-md-6">
@@ -193,7 +202,7 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="cant">Estatus</label>
+                                                        <label for="cant">Estatus (Solo Planificadas)</label>
                                                         
                                                         {!! Form::select("cboestadoprogramar", $estatus, null, ["class" => "form-control selectpicker","id"
                                                             =>"programar_estatus", "data-size" => "8", "data-style"=>"btn-success"])
@@ -216,6 +225,38 @@
                                                     </div>
                                                 </div>
                                             </div><!-- /.row -->
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="programar_pedido">Pedido</label>
+                                                        <input type="text" id="programar_pedido"  class='form-control' autocomplete="off">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="programar_prioridad">Prioridad</label>
+                                                        {!! Form::select("cbo_prioridad", $prioridades, null, ["class" => "form-control selectpicker","id"
+                                                            =>"cbo_prioridad", "data-size" => "8", "data-style"=>"btn-success"])
+                                                            !!}
+                                                       
+                                                    </div>
+                                                </div>
+                                            </div><!-- /.row -->
+                                            <!--<div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="programar_pedido">Estatus Metales</label>
+                                                        <input type="text" id="programar_pedido"  class='form-control' autocomplete="off">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="programar_prioridad">Estatus Hule</label>
+                                                        <input type="text" class="form-control" id="programar_prioridad" autocomplete="off">
+                                                       
+                                                    </div>
+                                                </div>
+                                            </div> /.row -->
                                                                                        
                                 </div>
                                 <div class="modal-footer">
@@ -223,6 +264,39 @@
                                     <button id='btn-guarda-programar'class="btn btn-primary"> Actualizar</button>
                                 </div>
                     
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal fade" id="modal_ordenes_pedido" tabindex="-1" role="dialog">
+                        <div class="modal-dialog modal-lg" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                            aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title">Órdenes de Pedido 
+                                    </h4>
+                                </div>
+                    
+                                <div class="modal-body" style='padding:16px'>
+                    
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="table-scroll" id="registros-provisionar">
+                                                <table id="table_op" class="table table-striped table-bordered hover" width="100%">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Selección</th>
+                                                            <th>OP</th>
+                                                            <th>Código</th>
+                                                            <th>Descripción</th>
+                    
+                                                        </tr>
+                                                    </thead>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -458,8 +532,14 @@ $('#tabla_pedidos tbody').on( 'click', 'tr', function (e) {
         
         if(registros > 0){
             var estatus_filtro = '';
-            if ($('#cbo_estadoprogramar').val() == 0 && $('#programar_estatus').val() != 0) {//filtro estado = Planificadas
+            var prioridad_filtro = '';
+            if ($('#cbo_estadoprogramar').val() == 0 && $('#programar_estatus').val() != 0) {
+                //SOLO SI: filtro estado = Planificadas
               estatus_filtro = $('#programar_estatus').val(); 
+            }   
+            if ( $('#cbo_prioridad').val() != 0) {
+                //SOLO CUANDO SEAN PLANIFICADAS
+              prioridad_filtro = $('#cbo_prioridad').val(); 
             }   
 
                 $.ajax({
@@ -469,9 +549,12 @@ $('#tabla_pedidos tbody').on( 'click', 'tr', function (e) {
                     "_token": "{{ csrf_token() }}",
                     ordenes: ops,
                     prog_corte: $('#programar_progCorte').val(),
-                    sec_compra: $('#programar_secCompra').val(),
+                    hule: $('#programar_hule').val(),
+                    metales: $('#programar_metales').val(),
                     sec_ot: $('#programar_secOt').val(),
+                    num_pedido: $('#programar_pedido').val(),
                     estatus: estatus_filtro,
+                    prioridad: prioridad_filtro,
                     fCompra: $('#programar_fCompra').val(),
                     fProduccion: $('#programar_fProduccion').val()
                 },
@@ -502,8 +585,12 @@ $('#tabla_pedidos tbody').on( 'click', 'tr', function (e) {
                    // reloadOrdenesImpresion();
                    $('#updateprogramar').modal('hide');
                     $('#programar_progCorte').val('');
-                    $('#programar_secCompra').val('');
+                    $('#programar_hule').val('');
+                    $('#programar_metales').val('');
                     $('#programar_secOt').val('');
+                    $('#programar_pedido').val('');
+                    $('#cbo_prioridad').val(0);
+                    $("#cbo_prioridad").selectpicker("refresh");
                     $('#programar_estatus').val(0);
                     $("#programar_estatus").selectpicker("refresh");
                     $('#programar_fCompra').datepicker('setStartDate', today);
@@ -514,10 +601,10 @@ $('#tabla_pedidos tbody').on( 'click', 'tr', function (e) {
                     
                 },
                 success: function(data){   
-                    if (data.mensajeErrr.includes('Error')) {
+                    if (data.mensajeErrr.length > 0) {
                         bootbox.dialog({
                             title: "Mensaje",
-                            message: "<div class='alert alert-danger m-b-0'>"+data.orders+"</div>",
+                            message: "<div class='alert alert-danger m-b-0'>"+data.mensajeErrr+"</div>",
                             buttons: {
                             success: {
                             label: "Ok",
@@ -1283,8 +1370,9 @@ var tabla_programar = $("#tabla_programar").DataTable({
                         }},
                     {data: "U_STARUS"},
                     {data: "SEC_OT"},
-                    {data: "SEC_COMPRA"},
-                    {data: "PROG_CORTE"}
+                    {data: "HULE"},
+                    {data: "PROG_CORTE"},
+                    {data: "METALES"}
                     ],
                     'columnDefs': [
                         
@@ -1330,10 +1418,24 @@ function reloadOrdenesProgramar(){
             tipo: tipo,
         },
         beforeSend: function() {
-            
-        },
+                $.blockUI({
+                message: '<h2>Procesando</h2><h3>espere...<i class="fa fa-spin fa-spinner"></i></h3>',
+                css: {
+                border: 'none',
+                padding: '16px',
+                width: '50%',
+                top: '40%',
+                left: '30%',
+                backgroundColor: '#fefefe',
+                '-webkit-border-radius': '10px',
+                '-moz-border-radius': '10px',
+                opacity: .7,
+                color: '#000000'
+                }
+                });
+                },
         complete: function() {
-           // setTimeout($.unblockUI, 1500);
+            setTimeout($.unblockUI, 1500);
            var $badge = $('#btn_enviar').find('.badge'); 
             $badge.text('');
         },

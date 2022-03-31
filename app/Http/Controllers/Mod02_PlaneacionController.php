@@ -72,7 +72,8 @@ public function indexGenerarOP(){
                 'tipo' => ['PT', 'CASCO', 'OTRO'],
                 'tipocompleto' => ['FUNDAS', 'CASCO', 'PATAS Y BASTIDORES', 'SUB-ENSAMBLES', 'HABILITADO'],
                 'estado' => ['Planificadas', 'Liberadas'],
-                'estatus' => ['-', '01-DETENIDO VENTAS', '02-FALTA INFORMACION', '03-FALTA PIEL', '04-REVISION DE PIEL', '05-POR ORDENAR']
+                'estatus' => ['-', '01-DETENIDO VENTAS', '02-FALTA INFORMACION', '03-FALTA PIEL', '04-REVISION DE PIEL', '05-POR ORDENAR'],
+                'prioridades' => ['-', 'S - 03 SIN ORDEN DE CLIENTE', 'C - 01 CON ORDEN DE CLIENTE', 'P - 06 PRONOSTICOS']
             );
             return view('Mod02_Planeacion.generarOP', $data);
         } else {
@@ -91,29 +92,75 @@ public function generarOP(Request $request){
         return compact('orders');
 }
 public function programar_op(Request $request){
-       // dd($request->all());
-        ini_set('memory_limit', '-1');
-        set_time_limit(0);
-        if(strlen($request->input('ordenes')) > 0 ){
-            $preOrdenes = explode(',', $request->input('ordenes'));
-            $mensajeErrr= '';
+    // dd($request->all());
+    ini_set('memory_limit', '-1');
+    set_time_limit(0);
+    if(strlen($request->input('ordenes')) > 0 ){
+        $preOrdenes = explode(',', $request->input('ordenes'));
+        $mensajeErrr= [];
 
-            $prog_corte = $request->input('prog_corte');
-            $sec_compra = $request->input('sec_compra');
-            $sec_ot = $request->input('sec_ot');
-            $estatus = $request->input('estatus');
-            $fCompra = $request->input('fCompra');
-            $fProduccion = $request->input('fProduccion');
-
-            foreach ($preOrdenes as $key => $orden) {
-                    
-                       SAP::ProductionOrderProgramar($orden, $prog_corte, $sec_compra, $sec_ot, $estatus, $fCompra, $fProduccion); 
-                                  
-            }
-            return compact('mensajeErrr');
-        }else{
-            return 'No se ha seleccionado ninguna Orden';
+        $prog_corte = $request->input('prog_corte');
+        $hule = $request->input('hule');
+        $metales = $request->input('metales');
+        $sec_ot = $request->input('sec_ot');
+        $estatus = $request->input('estatus');
+        $prioridad = $request->input('prioridad');
+        $num_pedido = $request->input('num_pedido');
+        $fCompra = $request->input('fCompra');
+        $fProduccion = $request->input('fProduccion');
+        switch ($prioridad) {
+            case '1':
+                $prioridad = 'S';
+                break;
+            case '2':
+                $prioridad = 'C';
+                break;
+            case '3':
+                $prioridad = 'P';
+                break;
+            
+            default:
+                # code...
+                break;
         }
+        
+        //guardar
+        foreach ($preOrdenes as $key => $orden) {                    
+            //logica verificacion de pedido
+            $op =DB::table('OWOR')
+            ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
+                ->select(
+                    'OWOR.ItemCode',
+                    'OWOR.OriginNum as pedido',
+                    'OWOR.plannedqty',
+                    'OITM:ItemName'
+                )
+                ->where('OWOR.DocEntry', $orden)->first();
+            $enpedido = DB::select("SELECT T0.[CardCode] AS CodCliente, 
+            T0.[CardName] AS NombreCliente,
+            T1.[Dscription] AS Descripcion, 
+            T1.ItemCode AS ItemCode, 
+            T1.Quantity AS Cantidad, 
+            T0.[DocNum] AS NumPedido
+            ,T1.LineStatus 
+            FROM ORDR T0 INNER JOIN RDR1 T1 ON T0.DocEntry = T1.DocEntry 
+            WHERE T0.[DocStatus] = 'O' AND T1.LineStatus = 'O'
+            and T0.[DocNum] = ? AND ItemCode = ?", [$num_pedido, $op->ItemCode]);
+            $n_pedido = '';
+            if (count($enpedido) > 0) {
+               $n_pedido = $num_pedido;
+            }else{
+                array_push($mensajeErrr, ['OP' => $orden, 'ItemCode'=> $op->ItemCode,
+                'ItemName'=> $op->ItemName
+            ]);
+            }
+
+            SAP::ProductionOrderProgramar($orden, $prog_corte, $hule, $sec_ot, $estatus, $fCompra, $fProduccion, $prioridad, $n_pedido, $metales);                                   
+        }
+        return compact('mensajeErrr');
+    }else{
+        return 'No se ha seleccionado ninguna Orden';
+    }
 }
 public function liberacion_op(Request $request){
         ini_set('memory_limit', '-1');
@@ -700,7 +747,8 @@ public function registros_tabla_liberacion(Request $request){
                         OWOR.U_FCOMPRAS,
                         OWOR.U_FPRODUCCION,
 						OWOR.U_GRUPO AS PROG_CORTE,
-						OWOR.U_OF AS SEC_COMPRA,
+                        OWOR.U_Ubicacion AS METALES,
+						OWOR.U_OF AS HULE,
 						OWOR.U_OT AS SEC_OT,
                         CASE
                            WHEN
