@@ -179,7 +179,7 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="cant">Hule</label>
-                                                        <input maxlength="10" type="text" class="form-control" id="programar_hule" autocomplete="off">
+                                                        <input maxlength="10" type="number" class="form-control" id="programar_hule" autocomplete="off">
                                                        
                                                     </div>
                                                 </div>
@@ -191,7 +191,15 @@
                                                         <input maxlength="19" type="text" id="programar_metales" class='form-control' autocomplete="off">
                                                     </div>
                                                 </div>
-                                               
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="programar_prioridad">Prioridad</label>
+                                                        {!! Form::select("cbo_prioridad", $prioridades, null, ["class" => "form-control selectpicker","id"
+                                                            =>"cbo_prioridad", "data-size" => "8", "data-style"=>"btn-success"])
+                                                            !!}
+                                                       
+                                                    </div>
+                                                </div>
                                             </div><!-- /.row -->
                                             <div class="row">
                                                 <div class="col-md-6">
@@ -232,15 +240,7 @@
                                                         <input type="text" id="programar_pedido"  class='form-control' autocomplete="off">
                                                     </div>
                                                 </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label for="programar_prioridad">Prioridad</label>
-                                                        {!! Form::select("cbo_prioridad", $prioridades, null, ["class" => "form-control selectpicker","id"
-                                                            =>"cbo_prioridad", "data-size" => "8", "data-style"=>"btn-success"])
-                                                            !!}
-                                                       
-                                                    </div>
-                                                </div>
+                                                
                                             </div><!-- /.row -->
                                             <!--<div class="row">
                                                 <div class="col-md-6">
@@ -316,6 +316,9 @@
                                 $("#page-wrapper").toggleClass("content"); 
                                 $(this).toggleClass("active"); 
                             });
+                            $("#sidebar").toggleClass("active"); 
+                            $("#page-wrapper").toggleClass("content"); 
+                            $(this).toggleClass("active"); 
                             const today = new Date();
                             $("#programar_fCompra").datepicker( {
                                     language: "es",    
@@ -604,7 +607,7 @@ $('#tabla_pedidos tbody').on( 'click', 'tr', function (e) {
                     if (data.mensajeErrr.length > 0) {
                         bootbox.dialog({
                             title: "Mensaje",
-                            message: "<div class='alert alert-danger m-b-0'>"+data.mensajeErrr+"</div>",
+                            message: "<div class='alert alert-danger m-b-0'>No se cambio pedido, validar que el pedido NO este cerrado y que exista el artículo.</div><div class='table-scroll' id='cxc_ots'> <table id='table_err' class='table table-striped table-bordered hover' width='100%'> <thead> <tr> <th>OP</th> <th>Código</th> <th>Descripcion</th> </tr> </thead> </table>",
                             buttons: {
                             success: {
                             label: "Ok",
@@ -612,6 +615,8 @@ $('#tabla_pedidos tbody').on( 'click', 'tr', function (e) {
                             }
                             }
                             }).find('.modal-content').css({'font-size': '14px'} );
+                            inicializatabla();
+                            $("#table_err").dataTable().fnAddData(data.mensajeErrr);
                     }
                 }
                 }); 
@@ -627,6 +632,23 @@ $('#tabla_pedidos tbody').on( 'click', 'tr', function (e) {
                 }
                 }).find('.modal-content').css({'font-size': '14px'} );
         }           
+    }
+    function inicializatabla(){
+     var table_ots = $("#table_err").DataTable(
+        {
+            language:{
+            "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            "aaSorting": [],
+            dom: 'T<"clear">lfrtip',
+                processing: true,
+            columns: [
+            {data: "OP"},
+            {data: "ItemCode"},
+            {data: "ItemName"}
+            ]
+        });
+
     }
      function click_liberacion() {
         var ordvta = tabla_liberacion.rows('.selected').data();

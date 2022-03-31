@@ -110,7 +110,7 @@ class SAP extends Model
             $vItem->UserFields->Fields->Item('U_OF')->Value = ''.$hule;
         }
         if($metales !== ''){
-            $vItem->UserFields->Fields->Item('U_OF')->Value = ''.$metales;
+            $vItem->UserFields->Fields->Item('U_Ubicacion')->Value = ''.$metales;
         }
         if($sec_ot !== ''){
             $vItem->UserFields->Fields->Item('U_OT')->Value = ''.$sec_ot;

@@ -127,34 +127,36 @@ public function programar_op(Request $request){
         //guardar
         foreach ($preOrdenes as $key => $orden) {                    
             //logica verificacion de pedido
-            $op =DB::table('OWOR')
-            ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
-                ->select(
-                    'OWOR.ItemCode',
-                    'OWOR.OriginNum as pedido',
-                    'OWOR.plannedqty',
-                    'OITM.ItemName'
-                )
-                ->where('OWOR.DocEntry', $orden)->first();
-            $enpedido = DB::select("SELECT T0.[CardCode] AS CodCliente, 
-            T0.[CardName] AS NombreCliente,
-            T1.[Dscription] AS Descripcion, 
-            T1.ItemCode AS ItemCode, 
-            T1.Quantity AS Cantidad, 
-            T0.[DocNum] AS NumPedido
-            ,T1.LineStatus 
-            FROM ORDR T0 INNER JOIN RDR1 T1 ON T0.DocEntry = T1.DocEntry 
-            WHERE T0.[DocStatus] = 'O' AND T1.LineStatus = 'O'
-            and T0.[DocNum] = ? AND ItemCode = ?", [$num_pedido, $op->ItemCode]);
             $n_pedido = '';
-            if (count($enpedido) > 0) {
-               $n_pedido = $num_pedido;
-            }else{
-                array_push($mensajeErrr, ['OP' => $orden, 'ItemCode'=> $op->ItemCode,
-                'ItemName'=> $op->ItemName
-            ]);
-            }
-
+            if ($num_pedido != '') {                          
+                $op =DB::table('OWOR')
+                ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
+                    ->select(
+                        'OWOR.ItemCode',
+                        'OWOR.OriginNum as pedido',
+                        'OWOR.plannedqty',
+                        'OITM.ItemName'
+                    )
+                    ->where('OWOR.DocEntry', $orden)->first();
+                $enpedido = DB::select("SELECT T0.[CardCode] AS CodCliente, 
+                T0.[CardName] AS NombreCliente,
+                T1.[Dscription] AS Descripcion, 
+                T1.ItemCode AS ItemCode, 
+                T1.Quantity AS Cantidad, 
+                T0.[DocNum] AS NumPedido
+                ,T1.LineStatus 
+                FROM ORDR T0 INNER JOIN RDR1 T1 ON T0.DocEntry = T1.DocEntry 
+                WHERE T0.[DocStatus] = 'O' AND T1.LineStatus = 'O'
+                and T0.[DocNum] = ? AND ItemCode = ?", [$num_pedido, $op->ItemCode]);
+                
+                if (count($enpedido) > 0) {
+                $n_pedido = $num_pedido;
+                }else{
+                    array_push($mensajeErrr, ['OP' => $orden, 'ItemCode'=> $op->ItemCode,
+                    'ItemName'=> $op->ItemName
+                ]);
+                }
+            }            
             SAP::ProductionOrderProgramar($orden, $prog_corte, $hule, $sec_ot, $estatus, $fCompra, $fProduccion, $prioridad, $n_pedido, $metales);                                   
         }
         return compact('mensajeErrr');
