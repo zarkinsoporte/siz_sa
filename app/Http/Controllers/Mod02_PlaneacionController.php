@@ -133,7 +133,7 @@ public function programar_op(Request $request){
                     'OWOR.ItemCode',
                     'OWOR.OriginNum as pedido',
                     'OWOR.plannedqty',
-                    'OITM:ItemName'
+                    'OITM.ItemName'
                 )
                 ->where('OWOR.DocEntry', $orden)->first();
             $enpedido = DB::select("SELECT T0.[CardCode] AS CodCliente, 
