@@ -410,15 +410,15 @@ Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@pr
 //Route::get('/pruebassap', 'Mod02_PlaneacionController@updateOV');
 
 Route::get('/pruebas', function (Request $request) {
-    $start = \Carbon\Carbon::now()->startOfMonth()->toDateString();
-    $end = \Carbon\Carbon::now()->endOfMonth()->toDateString();
-    dd($start, $end);   
-    //AVANCE DE OP (NO PIEL)
-    //Cuando una orden se libera en planeación revisamos si se le cargara piel 106 (revisando su ruta), 
-    //en caso de que no lleve piel, entonces le cambiamos en status y le colocamos la fecha de inicio.
-    //casco: 400 armado - 300 habilitado ()
     
-    //$res = SAP::updateStatusEntregaPiel('6098', '06', ''.$dt);
+    Session::flush();
+    DB::disconnect('sqlsrv');
+    Auth::logout();
+//AVANCE DE OP (NO PIEL)
+//Cuando una orden se libera en planeación revisamos si se le cargara piel 106 (revisando su ruta), 
+//en caso de que no lleve piel, entonces le cambiamos en status y le colocamos la fecha de inicio.
+//casco: 400 armado - 300 habilitado ()
+
    
 });
 
