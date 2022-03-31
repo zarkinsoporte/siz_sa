@@ -418,13 +418,15 @@ Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@pr
 //Route::get('/pruebassap', 'Mod02_PlaneacionController@updateOV');
 
 Route::get('/pruebas', function (Request $request) {
-    $dt = date('d/m/Y h:i');
+    
+    Session::flush();
+    DB::disconnect('sqlsrv');
+    Auth::logout();
 //AVANCE DE OP (NO PIEL)
 //Cuando una orden se libera en planeación revisamos si se le cargara piel 106 (revisando su ruta), 
 //en caso de que no lleve piel, entonces le cambiamos en status y le colocamos la fecha de inicio.
 //casco: 400 armado - 300 habilitado ()
 
-    $res = SAP::updateStatusEntregaPiel('6098', '06', ''.$dt);
    
 });
 
@@ -445,6 +447,12 @@ Route::get('/sap', function (Request $request) {
     //$vCmp->language = "6";
     $lRetCode = $vCmp->Connect;
     
+    $vCmp->XmlExportType = '3';
+    $vItem = $vCmp->GetBusinessObject("66");
+        //Obtener Lineas de una Transferencia
+        $RetVal = $vItem->GetByKey("20185");
+        $pathh = "C:\Users\Administrador\Documents\Invoice.xml";
+        $vItem->SaveXML($pathh);
     Session::flash('error', $vCmp->GetLastErrorDescription());
     if ($lRetCode <> 0) {
        Session::flash('error', $vCmp->GetLastErrorDescription());
