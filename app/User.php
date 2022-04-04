@@ -116,26 +116,30 @@ class User extends Model implements AuthenticatableContract,
        }
 
        public static function isProductionUser(){
-        $admin=DB::table('OHEM')
-        ->join('HEM6', 'OHEM.empID', '=', 'HEM6.empID')
-        ->leftJoin('OHTY', 'OHTY.typeID', '=', 'HEM6.roleID')
-        ->where('OHEM.empID',Auth::user()->empID)
-        ->select('OHTY.typeID','OHTY.name')
-        ->first();
-   
-        if(isset($admin)){
-            if($admin->typeID==8)
-            {
-                return true;
+        if (Auth::check()) {   
+            $admin=DB::table('OHEM')
+            ->join('HEM6', 'OHEM.empID', '=', 'HEM6.empID')
+            ->leftJoin('OHTY', 'OHTY.typeID', '=', 'HEM6.roleID')
+            ->where('OHEM.empID',Auth::user()->empID)
+            ->select('OHTY.typeID','OHTY.name')
+            ->first();
+    
+            if(isset($admin)){
+                if($admin->typeID==8)
+                {
+                    return true;
+                }
+                else
+                {           
+                    return false;
+                }            
             }
             else
             {           
                 return false;
-            }            
-        }
-        else
-        {           
-            return false;
+            }
+        }else{
+           return true;
         }
        }
        public static function getUserType($empId){
