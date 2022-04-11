@@ -87,7 +87,7 @@
 
             <div class="content">
                 <div class="title m-b-md">
-                    <a  href="{{ url('/home') }}">SALOTTO
+                    <a  href="{{ url('/home') }}">{{env('EMPRESA_ALIAS')}}
                     @if(Session::has('sap'))
                     {{Session::get('sap')}}               
 @endif

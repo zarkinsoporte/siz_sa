@@ -765,7 +765,7 @@ class Reportes_ProduccionController extends Controller
                 }         
             });
         })
-        ->setFilename('SIZ Back Order Programado SALOTTO')
+        ->setFilename('SIZ Back Order Programado'.env('EMPRESA_ALIAS'))
         ->export('xlsx', [ 'Set-Cookie' => 'xlscook=done; path=/' ]);
 
     }
