@@ -272,9 +272,9 @@
                             <tr class="encabezado">
                                 <th scope="col" style="min-width:150px;">Fecha</th>                                
                                 <th class="zrk-cafe" scope="col">Series Incompletas</th>
-                                <th class="zrk-teal" scope="col">Pegado Delcrón</th>
+                                {{-- <th class="zrk-teal" scope="col">Pegado Delcrón</th> --}}
 
-                                <th class="zrk-teal" scope="col">Llenado Cojin</th>
+                                {{-- <th class="zrk-teal" scope="col">Llenado Cojin</th> --}}
                                 <th class="zrk-teal" scope="col">Acojinado</th>
                                 <th class="zrk-tejelet" scope="col">Fundas Terminadas</th>
                                 <th class="zrk-tejelet" scope="col">Kitting</th>
@@ -306,8 +306,8 @@
                              <?php
                          
                               $sum_13 = $sum_13 + $rep->VST139;
-                              $sum_14 = $sum_14 + $rep->VST140;
-                              $sum_15 = $sum_15 + $rep->VST142;
+                             // $sum_14 = $sum_14 + $rep->VST140;
+                             // $sum_15 = $sum_15 + $rep->VST142;
                               $sum_16 = $sum_16 + $rep->VST145;
                               $sum_17 = $sum_17 + $rep->VST148;
                               $sum_18 = $sum_18 + $rep->VST151;
@@ -325,12 +325,12 @@
                                 <td id="f13" scope="row">
                                     {{number_format($rep->VST139,2)}}
                                 </td>
-                                <td id="f13" scope="row">
+                                {{-- <td id="f13" scope="row">
                                     {{number_format($rep->VST140,2)}}
                                 </td>
                                 <td id="f13" scope="row">
                                     {{number_format($rep->VST142,2)}}
-                                </td>
+                                </td> --}}
                                 <td id="f14" scope="row">
                                     {{number_format($rep->VST145,2)}}
                                 </td>
@@ -362,8 +362,8 @@
                             <tr class="total1">
                                 <th scope="row" class="table-condensed">SUMA DE FUNDAS:</th>                               
                                 <td class="zrk-gamal">{{number_format($sum_13, 2)}}</td>
-                                <td class="zrk-gamal">{{number_format($sum_14, 2)}}</td>
-                                <td class="zrk-gamal">{{number_format($sum_15, 2)}}</td>
+                                {{-- <td class="zrk-gamal">{{number_format($sum_14, 2)}}</td>
+                                <td class="zrk-gamal">{{number_format($sum_15, 2)}}</td> --}}
                                 <td class="zrk-gamal">{{number_format($sum_16, 2)}}</td>
                                 <td class="zrk-gamal">{{number_format($sum_17, 2)}}</td>
                                 <td class="zrk-gamal">{{number_format($sum_18, 2)}}</td>
@@ -498,116 +498,223 @@
                     </div>
                 </div>
                 <!-- /.col-md-8 -->
+        </div> <!-- / -->
+            <!--HIDE /.row -->
+        <!-- /.row -->
+        <div class="row">
+            <div class="col-md-11">
+                <h5>Reporte de Hule</h5>
             </div>
-            <!-- /.row -->
-            <div class="row">
-                    <div class="col-md-11">
-                        <h5>Movimientos de Cascos</h5>
-                    </div>
-                    <div id="t3" class="col-md-11 table-scroll">
-                        <div class="pane">
-                            <table id="main-table" class="table table-striped main-table" style="margin-bottom:0px">
-            
-                                <thead class="table-condensed">
-                                    <tr class="encabezado">
-                                        <th scope="col" style="min-width:150px;">Fecha</th>
-                                        <th scope="col">Aduana Carpintería</th>
-                                        <th scope="col">Almacén</th>
-                                        <th scope="col">Camión</th>
-                                        <th scope="col">Kitting</th>
-                                        <th scope="col">Tapiz</th>
-                                        <th scope="col">Ajuste</th>                                   
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @if(count($data4)>0)
-                                    <?php
-                                    $sum_1 = 0;
-                                    $sum_2 = 0;
-                                    $sum_3 = 0;
-                                    $sum_4 = 0;
-                                    $sum_5 = 0;
-                                    $sum_6 = 0;
-                                 
-                                ?>
-                                   
-                                @foreach ($data4 as $rep4)
-                                    <?php
-                                    $sum_1 = $sum_1  + $rep4->S_CARP;
-                                    $sum_2 = $sum_2  + $rep4->S_TRAS;
-                                    $sum_3 = $sum_3  + $rep4->S_KITT;
-                                    $sum_4 = $sum_4  + $rep4->S_TAPI;
-                                    $sum_6 = $sum_6  + $rep4->Consumo;
-                                    $sum_5 = $sum_5  + ((($rep4->S_TAPI + $rep4->S_KITT + $rep4->S_TRAS + $rep4->S_CARP)*-1) + $rep4->S_VST);
+            <div id="t5" class="col-md-11 table-scroll">
+                <div class="pane">
+                    <table id="main-table" class="table table-striped main-table" style="margin-bottom:0px">
+        
+                        <thead class="table-condensed">
+                            <tr class="encabezado">
+                                <th scope="col" style="min-width:150px;">Fecha</th>
+                                <th scope="col">Planeación</th>
+                                <th scope="col">Habilitado</th>
+                                <th scope="col">Armado</th>
+                                <th scope="col">Pegado</th>
+                                <th scope="col">Empaque</th>
+                                <th scope="col">Entrega Almacén</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if(count($data8)>0)
+                            <?php
+                                            $sum_1 = 0;
+                                            $sum_2 = 0;
+                                            $sum_3 = 0;
+                                            $sum_4 = 0;
+                                            $sum_5 = 0;
+                                            $sum_6 = 0;
+                                        ?>
+                            @foreach ($data8 as $rep3)
+                            <?php
+                                            $sum_1 = $sum_1  + $rep3->VST200;
+                                            $sum_2 = $sum_2  + $rep3->VST206;
+                                            $sum_3 = $sum_3  + $rep3->VST209;
+                                            $sum_4 = $sum_4  + $rep3->VST212;
+                                            $sum_5 = $sum_5  + $rep3->VST218;
+                                            $sum_6 = $sum_6  + $rep3->VST221;
+                                        ?>
+                            <tr>
+                                <th id="f0" scope="row" class="table-condensed">
+                                    {{\AppHelper::instance()->getHumanDate($rep3->Fecha)}}
+                                </th>
+                                <td id="f1" scope="row">
+                                    {{number_format($rep3->VST200,2)}}
+                                </td>
+                                <td id="f2" scope="row">
+                                    {{number_format($rep3->VST206,2)}}
+                                </td>
+                                <td id="f3" scope="row">
+                                    {{number_format($rep3->VST209,2)}}
+                                </td>
+                                <td id="f4" scope="row">
+                                    {{number_format($rep3->VST212,2)}}
+                                </td>
+                                <td id="f5" scope="row">
+                                    {{number_format($rep3->VST218,2)}}
+                                </td>
+                                <td id="f6" scope="row">
+                                    {{number_format($rep3->VST221,2)}}
+                                </td>
+                            </tr>
+                            @endforeach @endif
+                        </tbody>
+                        <tfoot>
+                            <tr class="total5">
+                                <th scope="row" class="table-condensed">SUMA DE CASCOS:</th>
+                                <td class="zrk-gamal">{{number_format($sum_1, 2) }}</td>
+                                <td class="zrk-gamal">{{number_format($sum_2, 2) }}</td>
+                                <td class="zrk-gamal">{{number_format($sum_3, 2) }}</td>
+                                <td class="zrk-gamal">{{number_format($sum_4, 2) }}</td>
+                                <td class="zrk-gamal">{{number_format($sum_5, 2) }}</td>
+                                <td class="zrk-gamal">{{number_format($sum_6, 2) }}</td>
+                            </tr>
+                            @if (strtotime($ff) == strtotime(date("Y-m-d")))
+                            <tr class="encabezado">
+                                <th scope="row" class="table-condensed">INVENTARIO:</th>
+                                @foreach ($data9 as $item)
+                                <td class="zrk-gamalobs" scope="row">
+                                    {{number_format($item->P200,2)}}
+                                </td>
+                                <td class="zrk-gamalobs" scope="row">
+                                    {{number_format($item->H206,2)}}
+                                </td>
+                                <td class="zrk-gamalobs" scope="row">
+                                    {{number_format($item->A209,2)}}
+                                </td>
+                                <td class="zrk-gamalobs" scope="row">
+                                    {{number_format($item->P212,2)}}
+                                </td>
+                                <td class="zrk-gamalobs" scope="row">
+                                    {{number_format($item->E218,2)}}
+                                </td>
+                                <td class="zrk-gamalobs" scope="row">
+                                    {{number_format($item->E221, 2)}}
+                                </td>
+                                @endforeach
+                            </tr>
+                            @endif
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <!-- /.col-md-8 -->
+        </div>  
+        @if(false) <!--//RETIRAMOS MOVIMIENTO DE CASCO/ -->
+        <div class="row hide">
+                <div class="col-md-11">
+                    <h5>Movimientos de Cascos</h5>
+                </div>
+                <div id="t3" class="col-md-11 table-scroll">
+                    <div class="pane">
+                        <table id="main-table" class="table table-striped main-table" style="margin-bottom:0px">
+        
+                            <thead class="table-condensed">
+                                <tr class="encabezado">
+                                    <th scope="col" style="min-width:150px;">Fecha</th>
+                                    <th scope="col">Aduana Carpintería</th>
+                                    <th scope="col">Almacén</th>
+                                    <th scope="col">Camión</th>
+                                    <th scope="col">Kitting</th>
+                                    <th scope="col">Tapiz</th>
+                                    <th scope="col">Ajuste</th>                                   
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if(count($data4)>0)
+                                <?php
+                                $sum_1 = 0;
+                                $sum_2 = 0;
+                                $sum_3 = 0;
+                                $sum_4 = 0;
+                                $sum_5 = 0;
+                                $sum_6 = 0;
+                                
+                            ?>
+                                
+                            @foreach ($data4 as $rep4)
+                                <?php
+                                $sum_1 = $sum_1  + $rep4->S_CARP;
+                                $sum_2 = $sum_2  + $rep4->S_TRAS;
+                                $sum_3 = $sum_3  + $rep4->S_KITT;
+                                $sum_4 = $sum_4  + $rep4->S_TAPI;
+                                $sum_6 = $sum_6  + $rep4->Consumo;
+                                $sum_5 = $sum_5  + ((($rep4->S_TAPI + $rep4->S_KITT + $rep4->S_TRAS + $rep4->S_CARP)*-1) + $rep4->S_VST);
+                                
+                                ?> <tr>
+                                    <th id="f0" scope="row" class="table-condensed">
+                                        {{\AppHelper::instance()->getHumanDate($rep4->Fecha)}}
+                                    </th>
+                                    <td id="f1" scope="row">
+                                        {{number_format($rep4->S_CARP,2)}}
+                                    </td>
+                                    <td id="f2" scope="row">
+                                        {{number_format($rep4->S_TRAS,2)}}
+                                    </td>
+                                    <td id="f3" scope="row">
+                                        {{number_format($rep4->S_KITT,2)}}
+                                    </td>
+                                    <td id="f4" scope="row">
+                                        {{number_format($rep4->S_TAPI,2)}}
+                                    </td>
+                                    <td id="f5" scope="row">
+                                        {{number_format($rep4->Consumo,2)}}
+                                    </td>
+                                    <td  scope="row">
+                                        {{number_format((($rep4->S_TAPI + $rep4->S_KITT + $rep4->S_TRAS + $rep4->S_CARP)*-1) + $rep4->S_VST  ,2)}}
+                                    </td>                                                                   
+                                </tr>                                 
+                                @endforeach @endif
+                            </tbody>
+                            <tfoot>
+                                <tr class="total3">
+                                    <th scope="row" class="table-condensed">SUMA DE CASCOS:</th>
+                                    <td class="zrk-gamal">{{number_format($sum_1, 2) }}</td>
+                                    <td class="zrk-gamal">{{number_format($sum_2, 2) }}</td>
+                                    <td class="zrk-gamal">{{number_format($sum_3, 2) }}</td>
+                                    <td class="zrk-gamal">{{number_format($sum_4, 2) }}</td>
+                                    <td class="zrk-gamal">{{number_format($sum_6, 2) }}</td>
+                                    <td class="zrk-gamal">{{number_format($sum_5, 2) }}</td>
                                     
-                                    ?> <tr>
-                                        <th id="f0" scope="row" class="table-condensed">
-                                            {{\AppHelper::instance()->getHumanDate($rep4->Fecha)}}
-                                        </th>
-                                        <td id="f1" scope="row">
-                                            {{number_format($rep4->S_CARP,2)}}
-                                        </td>
-                                        <td id="f2" scope="row">
-                                            {{number_format($rep4->S_TRAS,2)}}
-                                        </td>
-                                        <td id="f3" scope="row">
-                                            {{number_format($rep4->S_KITT,2)}}
-                                        </td>
-                                        <td id="f4" scope="row">
-                                            {{number_format($rep4->S_TAPI,2)}}
-                                        </td>
-                                        <td id="f5" scope="row">
-                                            {{number_format($rep4->Consumo,2)}}
-                                        </td>
-                                        <td  scope="row">
-                                            {{number_format((($rep4->S_TAPI + $rep4->S_KITT + $rep4->S_TRAS + $rep4->S_CARP)*-1) + $rep4->S_VST  ,2)}}
-                                        </td>                                                                   
-                                    </tr>                                 
-                                    @endforeach @endif
-                                </tbody>
-                                <tfoot>
-                                    <tr class="total3">
-                                        <th scope="row" class="table-condensed">SUMA DE CASCOS:</th>
-                                        <td class="zrk-gamal">{{number_format($sum_1, 2) }}</td>
-                                        <td class="zrk-gamal">{{number_format($sum_2, 2) }}</td>
-                                        <td class="zrk-gamal">{{number_format($sum_3, 2) }}</td>
-                                        <td class="zrk-gamal">{{number_format($sum_4, 2) }}</td>
-                                        <td class="zrk-gamal">{{number_format($sum_6, 2) }}</td>
-                                        <td class="zrk-gamal">{{number_format($sum_5, 2) }}</td>
-                                       
-                                    </tr>
-                                    @if (strtotime($ff) == strtotime(date("Y-m-d"))) 
-                                             <tr  class="encabezado">
-                                                <th scope="row" class="table-condensed">INVENTARIO CASCO:</th>
-                                                @foreach ($data5 as $item)                          
-                                                    <td class="zrk-gamalobs" scope="row">
-                                                        {{number_format($item->T_CARP,2)}}
-                                                    </td>                             
-                                                    <td class="zrk-gamalobs" scope="row">
-                                                        {{number_format($item->T_ALMA,2)}}
-                                                    </td>                             
-                                                    <td class="zrk-gamalobs" scope="row">
-                                                        {{number_format($item->T_CAMI,2)}}
-                                                    </td>                             
-                                                    <td class="zrk-gamalobs" scope="row">
-                                                        {{number_format($item->T_KITT,2)}}
-                                                    </td>                             
-                                                    <td class="zrk-gamalobs" scope="row">
-                                                        {{number_format($item->T_TAPIZ,2)}}
-                                                    </td>                             
-                                                    <td class="zrk-gamalobs" scope="row">
-                                                    {{''}}
-                                                    </td>                             
-                                                @endforeach                                          
-                                            </tr>
-                                    @endif
-                                </tfoot>
-                            </table>
-                        </div>
+                                </tr>
+                                @if (strtotime($ff) == strtotime(date("Y-m-d"))) 
+                                            <tr  class="encabezado">
+                                            <th scope="row" class="table-condensed">INVENTARIO CASCO:</th>
+                                            @foreach ($data5 as $item)                          
+                                                <td class="zrk-gamalobs" scope="row">
+                                                    {{number_format($item->T_CARP,2)}}
+                                                </td>                             
+                                                <td class="zrk-gamalobs" scope="row">
+                                                    {{number_format($item->T_ALMA,2)}}
+                                                </td>                             
+                                                <td class="zrk-gamalobs" scope="row">
+                                                    {{number_format($item->T_CAMI,2)}}
+                                                </td>                             
+                                                <td class="zrk-gamalobs" scope="row">
+                                                    {{number_format($item->T_KITT,2)}}
+                                                </td>                             
+                                                <td class="zrk-gamalobs" scope="row">
+                                                    {{number_format($item->T_TAPIZ,2)}}
+                                                </td>                             
+                                                <td class="zrk-gamalobs" scope="row">
+                                                {{''}}
+                                                </td>                             
+                                            @endforeach                                          
+                                        </tr>
+                                @endif
+                            </tfoot>
+                        </table>
                     </div>
-                    
-                    <!-- /.col-md-8 -->
-                </div><!-- /.row -->
+                </div>
+                
+                <!-- /.col-md-8 -->
+        </div><!--HIDE /.row -->
+        @endif
     </div>
   
     </div>

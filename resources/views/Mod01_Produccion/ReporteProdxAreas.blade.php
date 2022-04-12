@@ -84,9 +84,9 @@
                             <th class="zrk-cafe" scope="col">Terminado de Costura</th>
                             <th class="zrk-cafe" scope="col">Inspección Costura</th>
                             <th class="zrk-cafe" scope="col">Series Incompletas</th>
-                            <th class="zrk-teal" scope="col">Pegado Delcrón</th>
+                            {{-- <th class="zrk-teal" scope="col">Pegado Delcrón</th> --}}
 
-                            <th class="zrk-teal" scope="col">Llenado Cojin</th>
+                            {{-- <th class="zrk-teal" scope="col">Llenado Cojin</th> --}}
                             <th class="zrk-teal" scope="col">Acojinado</th>
                             <th class="zrk-tejelet" scope="col">Fundas Terminadas</th>
                             <th class="zrk-tejelet" scope="col">Kitting</th>
@@ -145,12 +145,12 @@
                             <td id="f13" scope="row">
                                 {{number_format($rep->VST139,2)}}
                             </td>
-                            <td id="f13" scope="row">
+                            {{-- <td id="f13" scope="row"> 
                                 {{number_format($rep->VST140,2)}}
                             </td>
                             <td id="f13" scope="row">
                                 {{number_format($rep->VST142,2)}}
-                            </td>
+                            </td>--}}
 
                             <td id="f14" scope="row">
                                 {{number_format($rep->VST145,2)}}
@@ -204,8 +204,8 @@
                             <td>0</td>
                             <td>0</td>
                             <td>0</td>
-                            <td>0</td>
-                            <td>0</td>
+                            {{-- <td>0</td>
+                            <td>0</td> --}}
                         </tr>
                         @if (strtotime($ff) == strtotime(date('d-m-Y'))) 
                             <tr  class="encabezado">
@@ -284,7 +284,7 @@
                                 <td>0</td>
                                 <td>0</td>                                
                             </tr>
-                             @if (strtotime($ff) == strtotime(date("d-m-Y"))) 
+                             @if (strtotime($ff) == strtotime(date("d-m-Y")) && $data7 != '') 
                                         <tr  class="encabezado">
                                                 <th scope="row" class="table-condensed zrk-dimgray">INVENTARIO:</th>
                                                 @foreach ($data7 as $item)                          
@@ -316,7 +316,96 @@
             <!-- /.col-md-8 -->
         </div>
         <!-- /.row -->
-        <div class="row">
+    <div class="row">
+            <div class="col-md-11">
+                <h4>Reporte de Hule</h4>
+            </div>
+            <div id="t5" class="col-md-11 table-scroll">
+                <div class="pane">
+                    <table id="main-table" class="table table-striped main-table" style="margin-bottom:0px">
+    
+                        <thead class="table-condensed">
+                            <tr class="encabezado">
+                                <th scope="col" style="min-width:150px;">Fecha</th>
+                                <th scope="col">Planeación</th>
+                                <th scope="col">Habilitado</th>
+                                <th scope="col">Armado</th>
+                                <th scope="col">Pegado</th>
+                                <th scope="col">Enpaque</th>
+                                <th scope="col">Entrega Almacén</th>                              
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if(count($data8)>0) 
+                            @foreach ($data8 as $rep8)
+                            <tr>
+                                <th id="f0" scope="row" class="table-condensed zrk-dimgray">
+                                    {{\AppHelper::instance()->getHumanDate($rep8->Fecha)}}
+                                </th>
+                                <td id="f1" scope="row">
+                                    {{number_format($rep8->VST200,2)}}
+                                </td>
+                                <td id="f3" scope="row">
+                                    {{number_format($rep8->VST206,2)}}
+                                </td>
+                                <td id="f4" scope="row">
+                                    {{number_format($rep8->VST209,2)}}
+                                </td>
+                                <td id="f5" scope="row">
+                                    {{number_format($rep8->VST212,2)}}
+                                </td>                               
+                                <td id="f6" scope="row">
+                                    {{number_format($rep8->VST218,2)}}
+                                </td>
+                                <td id="f2" scope="row">
+                                    {{number_format($rep8->VST221,2)}}
+                                </td>                               
+                            </tr>
+                            @endforeach @endif
+                        </tbody>
+                        <tfoot>
+                            <tr class="total5">
+                                <th scope="row" class="table-condensed zrk-dimgray">SUMA DE HULE:</th>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>                                
+                            </tr>
+                             @if (strtotime($ff) === strtotime(date("d-m-Y")) && $data9 !== '') 
+                                        <tr  class="encabezado">
+                                                <th scope="row" class="table-condensed zrk-dimgray">INVENTARIO:</th>
+                                                @foreach ($data9 as $item)                          
+                                                    <td scope="row">
+                                                        {{number_format($item->P200,2)}}
+                                                    </td>                             
+                                                    <td scope="row">
+                                                        {{number_format($item->H206,2)}}
+                                                    </td>                             
+                                                    <td scope="row">
+                                                        {{number_format($item->A209,2)}}
+                                                    </td>                             
+                                                    <td scope="row">
+                                                        {{number_format($item->P212,2)}}
+                                                    </td>                             
+                                                    <td scope="row">
+                                                        {{number_format($item->E218,2)}}
+                                                    </td>                             
+                                                    <td scope="row">
+                                                       {{number_format($item->E221, 2)}}
+                                                    </td>                             
+                                                @endforeach                                          
+                                            </tr>
+                                    @endif
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <!-- /.col-md-8 -->
+        </div>
+        <!-- /.row -->
+        <div class="row hide">
                 <div class="col-md-11">
                     <h4>Movimientos de Cascos</h4>
                 </div>
@@ -406,7 +495,7 @@
                 </div>
                 
                 <!-- /.col-md-8 -->
-            </div><!-- /.row -->
+        </div><!-- /.row movimiento Cascos-->
 </div>
 <br>
 <!-- /.container -->
@@ -471,7 +560,21 @@
         $(".total3 td").each(function(i) {               
                 $(this).html(totals[i].toFixed(2));        
         });
-    
+        
+        totals = [  0, 0, 0, 0, 0, 
+                    0, 0, 0, 0, 0, 
+                    0, 0, 0, 0, 0, 
+                    0, 0, 0, 0, 0, 
+                    0, 0];
+        $filas= $("#t5 tr:not('.total5, .encabezado')");
+        $filas.each(function() {
+            $(this).find('td').each(function(i) {       
+                totals[i] += parseFloat($(this).html());        
+            });
+        });
+        $(".total5 td").each(function(i) {
+            $(this).html(totals[i].toFixed(2));
+        });
     function mostrar()
     {
         $("#hiddendiv").show();

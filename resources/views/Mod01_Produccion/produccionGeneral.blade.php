@@ -109,8 +109,8 @@ $cant = $cant + $val['Cantidad'];
                                         </div>
                                         <div class="form-group">
                                             <label for="date_range" class="control-label">Rango de Fechas:</label><br>
-                                            Desde:<input type="date" id="FechIn" name="FechIn" class="form-control" >
-                                            Hasta:<input type="date" id="FechaFa" name="FechaFa" class="form-control" >
+                                            Desde:<input type="date" id="FechIn" name="FechIn" class="form-control" autofocus required>
+                                            Hasta:<input type="date" id="FechaFa" name="FechaFa" class="form-control" required>
                                         </div>
                                         <div class="form-group">
                                             <label for="dep" class="control-label">Departamento:</label>
