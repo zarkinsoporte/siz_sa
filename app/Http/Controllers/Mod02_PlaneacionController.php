@@ -65,14 +65,17 @@ public function indexGenerarOP(){
             $file_anterior = DB::table('SIZ_Log')
             ->where('LOG_cod_error', 'PRINT_PLANEACION')
             ->orderBy('LOG_fecha', 'desc')->first();
+            
             $pedidos_activos = DB::select("SELECT 
                     OW.OriginNum AS Pedido 
-                    FROM OWOR OW					
+                    FROM OWOR OW
+                    INNER JOIN OITM O on OW.ItemCode = O.ItemCode					
                     WHERE  
                      OW.Status in ('P', 'R' )
+                     AND O.U_TipoMat = 'PT'
 					GROUP BY OriginNum
                     ORDER BY OW.OriginNum");
-
+            $pedidos_activos = array_merge(['null'], $pedidos_activos);
             $data = array(
                 'cbopedido' => collect($pedidos_activos)->lists('Pedido'),
                 'actividades' => $actividades,
@@ -580,10 +583,12 @@ public function registros_gop_pedido(Request $request){
                     CASE OW.Status
                     WHEN 'R' THEN 'LIBERADA'
                     WHEN 'P' THEN 'PLANIFICADA' END AS Estado
-                    FROM OWOR OW					
+                    FROM OWOR OW
+                    INNER JOIN OITM O on OW.ItemCode = O.ItemCode				
                     WHERE  
                      OW.Status in ('P', 'R')
                      AND OW.OriginNum = ?
+                     AND O.U_TipoMat = 'PT'
                     ORDER BY OW.DocEntry";
             $sel =  preg_replace('/[ ]{2,}|[\t]|[\n]|[\r]/', ' ', ($sel));
             $consulta = DB::select($sel,[$pedido]);
@@ -994,7 +999,9 @@ public function registros_tabla_series(){
 					OW.ItemCode AS Codigo,
                    (SELECT CardName  FROM OCRD WHERE	OCRD.CardCode = OW.CardCode) Cliente,
                     OW.U_NoSerie AS NumSerie,
-                    OW.Status AS Estatus,
+                    CASE OW.Status
+                    WHEN 'R' THEN 'LIBERADA'
+                    WHEN 'P' THEN 'PLANIFICADA' END AS Estado,
                    (SELECT U_TipoMat  FROM OITM WHERE	OITM.ItemCode = OW.ItemCode) TipoMaterial
                     FROM OWOR OW					
                     WHERE  

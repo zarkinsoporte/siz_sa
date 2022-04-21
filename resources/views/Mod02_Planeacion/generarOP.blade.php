@@ -52,6 +52,21 @@
                 .ignoreme{
                     background-color: hsla(0, 100%, 46%, 0.10) !important;       
                 }
+                /*Botones de datatable*/
+                .left-col {
+                    float: left;
+                    width: 25%;
+                }
+                
+                .center-col {
+                    float: left;
+                    width: 50%;
+                }
+                
+                .right-col {
+                    float: left;
+                    width: 25%;
+                }
             </style>
 
                 <div class="container" >
@@ -293,7 +308,7 @@
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <button id='serie_reset' style="margin-top: 23px;"
-                                                    class="btn btn-primary form-control" style="margin-top:4px">Reset Serie</button>
+                                                    class="btn btn-primary form-control" style="margin-top:4px">Borra Serie</button>
                                             </div>
                                         </div>
                                     </div><!-- /.row -->
@@ -963,7 +978,7 @@ var tabla_series = $("#tabla_series").DataTable({
                 language:{
                  "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
                 }, 
-                dom: 'lfrtip',
+                "dom": '<"top"<"left-col"B><"center-col"l><"right-col"f>>rtip',
                 scrollX: true,
                 scrollY: "430px",
                 scrollCollapse: true,
@@ -972,10 +987,20 @@ var tabla_series = $("#tabla_series").DataTable({
                     columns: [                   
                     {data: "Grupal"},
                     {data: "Orden"},
+                    {data: "Estado"},
                     {data: "Codigo"},
                     {data: "Descripcion"},
-                    {data: "Cliente"},
                     {data: "Pedido"},
+                    {data: "Cliente"},
+                    ],
+                    buttons: [
+                        {
+                            text: 'Borra Series de Pedido',
+                            className: "btn-primary",
+                            action: function (e, dt, node, config){
+                            $('#modal_ordenes_pedido').modal('show');
+                            }
+                        }
                     ],
                     'columnDefs': [{
                         'targets': 0,
@@ -1678,7 +1703,7 @@ $('#modal_ordenes_pedido').on('shown.bs.modal', function () {
 $('#table_pedido tbody').on( 'click', 'tr', function () {
     $(this).toggleClass('selected');
 } );
-$('#btn_xpedido').on('click', function(e) {
+$('#serie_reset').on('click', function(e) {
         e.preventDefault();
         var countOP = table_pedido.rows('.selected').count();
         if (countOP == 0){
@@ -1742,7 +1767,9 @@ $('#btn_xpedido').on('click', function(e) {
                                 complete: function() {
                                     setTimeout($.unblockUI, 1500);
                                     reloadTablaPedido();
-                                    
+                                    reloadOrdenesSeries();
+                                    var $badge = $('#btn_enviar').find('.badge'); 
+                                    $badge.text('');
                                 }, 
                                 success: function(data){
                                 }
