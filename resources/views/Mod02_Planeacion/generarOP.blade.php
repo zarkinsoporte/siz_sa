@@ -267,6 +267,7 @@
                             </div>
                         </div>
                     </div>
+
                     <div class="modal fade" id="modal_ordenes_pedido" tabindex="-1" role="dialog">
                         <div class="modal-dialog modal-lg" role="document">
                             <div class="modal-content">
@@ -278,15 +279,33 @@
                                 </div>
                     
                                 <div class="modal-body" style='padding:16px'>
-                    
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="cbopedido"># Pedido</label>
+                                                {!! Form::select("cbopedido",$cbopedido, null, [
+                                                "class" => "form-control selectpicker","id"=>"cbopedido", "data-style" =>
+                                                "btn-success btn-sm", 'data-live-search' => 'true', 'data-none-selected-text' => 'Selecciona pedido',])
+                                                !!}
+                                            </div>
+                                        </div>                                
+                                        
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <button id='serie_reset' style="margin-top: 23px;"
+                                                    class="btn btn-primary form-control" style="margin-top:4px">Reset Serie</button>
+                                            </div>
+                                        </div>
+                                    </div><!-- /.row -->
                                     <div class="row">
                                         <div class="col-md-12">
                                             <div class="table-scroll" id="registros-provisionar">
-                                                <table id="table_op" class="table table-striped table-bordered hover" width="100%">
+                                                <table id="table_pedido" class="table table-striped table-bordered hover" width="100%">
                                                     <thead>
-                                                        <tr>
-                                                            <th>Selección</th>
+                                                        <tr>                                                            
                                                             <th>OP</th>
+                                                            <th>Estado</th>
+                                                            <th># Serie</th>
                                                             <th>Código</th>
                                                             <th>Descripción</th>
                     
@@ -300,7 +319,7 @@
                             </div>
                         </div>
                     </div>
-                    @endsection
+                @endsection
 
                      <script>
                         function js_iniciador() {
@@ -319,6 +338,7 @@
                             $("#sidebar").toggleClass("active"); 
                             $("#page-wrapper").toggleClass("content"); 
                             $(this).toggleClass("active"); 
+
                             const today = new Date();
                             $("#programar_fCompra").datepicker( {
                                     language: "es",    
@@ -359,7 +379,7 @@
                            
                         }
                     }
-$(window).on('load',function(){      
+//$(window).on('load',function(){      
          
                 /*GENERAR OP*/
 var table = $("#tabla_pedidos").DataTable({
@@ -437,7 +457,7 @@ var table = $("#tabla_pedidos").DataTable({
 $.ajax({
         type: 'GET',
         async: true,       
-        url: '{!! route('datatables.gop') !!}',
+        url: "{!! route('datatables.gop') !!}",
         data: {
            
         },
@@ -498,6 +518,7 @@ $('#tabla_pedidos tbody').on( 'click', 'tr', function (e) {
                 break;
         }
      });
+     
      function click_programar_cambios(){
         var countOP = tabla_programar.rows('.selected').count();
         if (countOP == 0){
@@ -1511,6 +1532,7 @@ $('#myModal').on('shown.bs.modal', function () {
 .columns.adjust();
 });
 */
+
 $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
 
 $($.fn.dataTable.tables(true)).DataTable()
@@ -1548,7 +1570,190 @@ $('#lista-tab5').on('click', function(e) {
     $badge.text('');
 });
 
-      });//fin on load
+
+$("#cbopedido").on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
+    var options = [];         
+    var cbopedido =($('#cbopedido').val() == null) ? 0 : $('#cbopedido').val();    
+       if (cbopedido != 0) {
+           reloadTablaPedido();
+       }
+        
+});
+
+function reloadTablaPedido(){        
+    $.ajax({
+        type: 'GET',
+        async: true,       
+        url: '{!! route('datatables_gop_pedido') !!}',
+        data: {
+            "_token": "{{ csrf_token() }}",
+            cbopedido: ($("#cbopedido option:selected").text()).trim()
+           
+        },
+        beforeSend: function() {
+            $.blockUI({
+                baseZ: 2000,
+                message: '<h2>Su petición esta siendo procesada,</h2><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                css: {
+                    border: 'none',
+                    padding: '16px',
+                    width: '50%',
+                    top: '40%',
+                    left: '30%',
+                    backgroundColor: '#fefefe',
+                    '-webkit-border-radius': '10px',
+                    '-moz-border-radius': '10px',
+                    opacity: .7,
+                    color: '#000000'
+                }
+            });
+        },
+        complete: function() {
+            setTimeout($.unblockUI, 1500);
+        },
+        success: function(data){ 
+            $("#table_pedido").DataTable().clear().draw();           
+            if(data.datos.length > 0){
+                $("#table_pedido").dataTable().fnAddData(data.datos);           
+            }else{
+                bootbox.dialog({
+                title: "Mensaje",
+                message: "<div class='alert alert-danger m-b-0'>No hay Ordenes de Producción</div>",
+                buttons: {
+                success: {
+                label: "Ok",
+                className: "btn-success m-r-5 m-b-5"
+                }
+                }
+                }).find('.modal-content').css({'font-size': '14px'} );
+            }            
+        }
+    });
+}
+var table_pedido = $("#table_pedido").DataTable({
+                language:{
+                 "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                }, 
+                dom: 'Bfrtip',
+                buttons: [
+                    {
+                        text: '<i class="fa fa-check-square"></i>',
+                        titleAttr: 'seleccionar',
+                        action: function() {
+                            table_pedido.rows({
+                                page: 'current'
+                            }).select();
+                            
+                        }
+                    },
+                    {
+                        text: '<i class="fa fa-square"></i>',
+                        titleAttr: 'deseleccionar',
+                        action: function() {
+                            table_pedido.rows({
+                                page: 'current'
+                            }).deselect();
+                        }
+                    },
+                ],
+                scrollX: true,
+                scrollY: "300px",
+                scrollCollapse: true,
+                deferRender: true,        
+                   pageLength:-1,
+                    columns: [          
+                    {data: "OP"},
+                    {data: "Estado"},
+                    {data: "Serie"},
+                    {data: "Codigo"},
+                    {data: "Descripcion"}
+                    ],
+                    'columnDefs': [
+                    ],
+}); 
+$('#modal_ordenes_pedido').on('shown.bs.modal', function () {
+  $($.fn.dataTable.tables(true)).DataTable()
+.columns.adjust();
+});
+$('#table_pedido tbody').on( 'click', 'tr', function () {
+    $(this).toggleClass('selected');
+} );
+$('#btn_xpedido').on('click', function(e) {
+        e.preventDefault();
+        var countOP = table_pedido.rows('.selected').count();
+        if (countOP == 0){
+            bootbox.dialog({
+                title: "Mensaje",
+                message: "<div class='alert alert-danger m-b-0'>No hay registros seleccionados.</div>",
+                buttons: {
+                success: {
+                label: "Ok",
+                className: "btn-success m-r-5 m-b-5"
+                }
+                }
+            }).find('.modal-content').css({'font-size': '14px'} );
+        }else{
+            bootbox.confirm({
+                    size: "small",
+                    centerVertical: true,
+                    message: "Confirma para borrar Serie...",
+                    callback: function(result){ 
+                        
+                        if (result) {
+                            var ordvta = table_pedido.rows('.selected').data();
+                            
+                            var ops = '';
+                            var registros = ordvta == null ? 0 : ordvta.length;
+                            for(var i=0; i < registros; i++){
+                                if (i == registros - 1) {
+                                    ops += ordvta[i].OP;
+                                } else {
+                                    ops += ordvta[i].OP + ",";
+                                }      
+                            }
+                            
+                            if(registros > 0){
+
+                                $.ajax({
+                                type: 'POST',       
+                                url: '{!! route('reset_series_op') !!}',
+                                data: {
+                                    "_token": "{{ csrf_token() }}",                       
+                                    ordenes: ops            
+                                },
+                                beforeSend: function() {
+                                    $.blockUI({
+                                        baseZ: 2000,
+                                        message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                                        css: {
+                                            border: 'none',
+                                            padding: '16px',
+                                            width: '50%',
+                                            top: '40%',
+                                            left: '30%',
+                                            backgroundColor: '#fefefe',
+                                            '-webkit-border-radius': '10px',
+                                            '-moz-border-radius': '10px',
+                                            opacity: .7,
+                                            color: '#000000'
+                                        }
+                                    });
+                                },
+                                complete: function() {
+                                    setTimeout($.unblockUI, 1500);
+                                    reloadTablaPedido();
+                                    
+                                }, 
+                                success: function(data){
+                                }
+                                });
+                            }
+                        }
+                    }
+                    });
+        }
+     });
+      //});//fin on load
 
       
 }  //fin js_iniciador               

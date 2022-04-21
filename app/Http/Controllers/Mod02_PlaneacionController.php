@@ -65,7 +65,16 @@ public function indexGenerarOP(){
             $file_anterior = DB::table('SIZ_Log')
             ->where('LOG_cod_error', 'PRINT_PLANEACION')
             ->orderBy('LOG_fecha', 'desc')->first();
+            $pedidos_activos = DB::select("SELECT 
+                    OW.OriginNum AS Pedido 
+                    FROM OWOR OW					
+                    WHERE  
+                     OW.Status in ('P', 'R' )
+					GROUP BY OriginNum
+                    ORDER BY OW.OriginNum");
+
             $data = array(
+                'cbopedido' => collect($pedidos_activos)->lists('Pedido'),
                 'actividades' => $actividades,
                 'ultimo' => count($actividades),
                 'file_anterior' => $file_anterior->LOG_descripcion,
@@ -410,6 +419,26 @@ public function asignar_series(Request $request){
             return 'No se ha seleccionado ninguna Orden';
         }
 }
+public function reset_series_op(Request $request){
+    ini_set('memory_limit', '-1');
+    set_time_limit(0);
+    $mensajeErrr= '';
+    if(strlen($request->input('ordenes')) > 0 ){
+        //dd($request->input('ordenes'));
+        $preOrdenes = explode(',', $request->input('ordenes'));
+        $numSerie = '1';
+        foreach ($preOrdenes as $key => $preorden) {                
+            $rs = SAP::updateSerieOrden($preorden, $numSerie);
+            if(!is_numeric($rs)){
+                $mensajeErrr = $mensajeErrr.$rs;
+            }
+        }
+        // dd($mensajeErrr);
+        return compact('mensajeErrr');
+    }else{
+        return 'No se ha seleccionado ninguna Orden';
+    }
+}
 public function updateOV(Request $request){
     ini_set('memory_limit', '-1');
         set_time_limit(0);
@@ -524,9 +553,43 @@ public function registros_gop(Request $request){
                 ValorPrioridad, [Fecha inicio], DocTime";
             $sel =  preg_replace('/[ ]{2,}|[\t]|[\n]|[\r]/', ' ', ($sel));
             $consulta = DB::select($sel);
-//U_LineNum = T1.LineNum AND
+    //U_LineNum = T1.LineNum AND
             $pedidos_gop = collect($consulta);
             return compact('pedidos_gop');
+        } catch (\Exception $e) {
+            header('HTTP/1.1 500 Internal Server Error');
+            header('Content-Type: application/json; charset=UTF-8');
+            die(json_encode(array(
+                "mensaje" => $e->getMessage(),
+                "codigo" => $e->getCode(),
+                "clase" => $e->getFile(),
+                "linea" => $e->getLine()
+            )));
+        }
+}
+public function registros_gop_pedido(Request $request){
+        try {
+            ini_set('memory_limit', '-1');
+            set_time_limit(0);            
+            $pedido = $request->input('cbopedido');
+            $sel = "SELECT 
+                    OW.DocEntry as OP,
+					OW.ProdName AS Descripcion,
+					OW.ItemCode AS Codigo,
+                    OW.U_NoSerie AS Serie,
+                    CASE OW.Status
+                    WHEN 'R' THEN 'LIBERADA'
+                    WHEN 'P' THEN 'PLANIFICADA' END AS Estado
+                    FROM OWOR OW					
+                    WHERE  
+                     OW.Status in ('P', 'R')
+                     AND OW.OriginNum = ?
+                    ORDER BY OW.DocEntry";
+            $sel =  preg_replace('/[ ]{2,}|[\t]|[\n]|[\r]/', ' ', ($sel));
+            $consulta = DB::select($sel,[$pedido]);
+    //U_LineNum = T1.LineNum AND
+            $datos = collect($consulta);
+            return compact('datos');
         } catch (\Exception $e) {
             header('HTTP/1.1 500 Internal Server Error');
             header('Content-Type: application/json; charset=UTF-8');
@@ -914,6 +977,15 @@ public function registros_tabla_series(){
         try {
             ini_set('memory_limit', '-1');
             set_time_limit(0);
+            
+            $sel = "SELECT O.u_tipoMat, OW.DocEntry from OWOR OW
+					INNER JOIN OITM O on OW.ItemCode = O.ItemCode
+					WHERE U_NoSerie = 1 AND Status in ('P', 'R' ) AND O.U_TipoMat <> 'PT'";
+            $subensambles = DB::select($sel);
+            foreach ($subensambles as $key => $value) {
+                SAP::updateSerieOrden($value->DocEntry, '2');
+            }
+
             $sel = "SELECT 
                     '0' [Grupal],
                     OW.DocEntry as Orden,
@@ -927,17 +999,11 @@ public function registros_tabla_series(){
                     FROM OWOR OW					
                     WHERE  
                     OW.U_NoSerie = 1
-                    AND OW.Status = 'P' 
+                    AND OW.Status in ('P', 'R' )
                     ORDER BY OW.DocEntry";
             $sel =  preg_replace('/[ ]{2,}|[\t]|[\n]|[\r]/', ' ', ($sel));
             $consulta = DB::select($sel);
-            $sel = "select O.u_tipoMat, OW.DocEntry from OWOR OW
-					INNER JOIN OITM O on OW.ItemCode = O.ItemCode
-					WHERE U_NoSerie = 1 AND Status = 'P' AND O.U_TipoMat <> 'PT'";
-            $subensambles = DB::select($sel);
-            foreach ($subensambles as $key => $value) {
-                SAP::updateSerieOrden($value->DocEntry, '2');
-            }
+            
             $tabla_series = collect($consulta);
             return compact('tabla_series');
         } catch (\Exception $e) {
