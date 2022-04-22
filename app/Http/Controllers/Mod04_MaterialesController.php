@@ -2978,13 +2978,16 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
             left join OITM T2 on  T0.father = T2.ItemCode 
             WHERE T0.[Code] = ?", [$codigo]);
         }else{
+            //retiramos where (and V1.IssuedQty =0 ) de la consulta,
+            //Para que tome en cuenta también los artículos que tengan cargados ya una parcialidad del material.
             $consulta = DB::select("SELECT V3.Status as Estatus, V3.DocEntry as OP, V3.PlannedQty as Cant, V3.ItemCode as Codigo, V4.ItemName as Mueble, 
             V1.ItemCode as Material, v2.ItemName as Nombre_Material, V1.BaseQty as Cant_Mat, V1.wareHouse as Almacen
             from WOR1 V1
             inner join OITM V2 on V1.ItemCode=V2.ItemCode
             inner join OWOR V3 on V1.DocEntry=V3.DocEntry
             inner join OITM V4 on V3.ItemCode=V4.ItemCode
-            where V1.ItemCode = ? and V1.IssuedQty =0 and V3.Status<>'C' and V3.Status<>'L'
+            where V1.ItemCode = ? 
+            and V3.Status<>'C' and V3.Status<>'L'
             order by V3.DocEntry", [$codigo]);  
         }
         
