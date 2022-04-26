@@ -198,6 +198,19 @@ class Mod09_FinanzasListaPreciosController extends Controller
             ->setFilename('SIZ Simulador Costo')
             ->export('xlsx');
     }
+    public function simulador_guarda_cometario_modelo(Request $request){
+        $comentario = strtoupper( $request->input('comentario') );
+        $codigo = $request->input('codigo');
+        //$articulos = explode(',', $articulos);
+        $mensajeErr = '-';
+       
+        $rs = SAP::updateItemComentario($codigo, $comentario);  
+        if($rs !== 'ok'){
+            $mensajeErr = 'Error : articulo #'.$codigo.', SAP:'.$rs;
+        }        
+        
+        return compact('mensajeErr');
+    }
     public function simulador_actualizarPrecios(Request $request){
         $check = $request->input('check');
         $articulos = $request->input('articulos');
@@ -364,13 +377,16 @@ class Mod09_FinanzasListaPreciosController extends Controller
             $tc = DB::select('SELECT TOP 1 TC_can can, TC_usd usd, TC_eur eur
                         FROM SIZ_TipoCambio 
                         WHERE YEAR(TC_date) = YEAR(GETDATE())');
-            
+            $item = DB::table('OITM')
+            ->where('ItemCode', $modelo)
+            ->first();
             $data = array(
                 'actividades' => $actividades,
                 'ultimo' => count($actividades),
                 'modelo' => $modelo,
                 'modelo_descr' => $modelo_descr,
-                'tc' => $tc
+                'tc' => $tc,
+                'comentario' => $item->UserText
             );
             return view('Mod09_Finanzas.simulador', $data);
         } else {
@@ -707,13 +723,12 @@ class Mod09_FinanzasListaPreciosController extends Controller
         if (Auth::check()) {
             $user = Auth::user();
             $actividades = $user->getTareas();
-
+            
             $data = array(
                 'actividades' => $actividades,
                 'ultimo' => count($actividades),
                 'modelo' => $modelo,
                 'modelo_descr' => $modelo_descr
-
             );
             return view('Mod09_Finanzas.detalleModelos', $data);
         } else {

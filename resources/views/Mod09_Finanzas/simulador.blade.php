@@ -92,6 +92,10 @@
 
             </h3>
             <h4><b>MODELO {{$modelo. ' ' . $modelo_descr}}</b></h4>
+            <div class="input-group">
+                <textarea id="comentarios" class="form-control custom-control" rows="2" style="resize:none">{{$comentario}}</textarea>     
+                <span id="btn_comentarios" style="background-color:#337AB7" class="input-group-addon btn btn-primary" ><i style="color: white" class="fa fa-save fa-lg"></i></span>
+            </div>
         </div>
 
         <div class="col-md-12 ">
@@ -1155,6 +1159,72 @@
             $('#btn_aplicar_cambios').on('click', function (e) {
                 reloadTable();
                 $('#modal_price').modal('hide');
+            });
+
+            $('#btn_comentarios').on('click', function (e) {
+                let comentario = $('#comentarios').val()
+
+                if (comentario == '' || comentario.length == 0) {
+                    bootbox.dialog({
+                        title: "Mensaje",
+                        message: "<div class='alert alert-danger m-b-0'>El campo no debe estar vacío.</div>",
+                        buttons: {
+                            success: {
+                                label: "Ok",
+                                className: "btn-primary m-r-5 m-b-5"
+                            }
+                        }
+                    }).find('.modal-content').css({ 'font-size': '14px' });
+                } else {
+
+                $.ajax({                   
+                    type: 'POST',
+                    data:  {
+                        "_token": "{{ csrf_token() }}",
+                        "codigo": "{{$modelo}}",                       
+                        "comentario" : comentario
+                    },
+                    url: '{!! route('simulador_guarda_cometario_modelo') !!}',
+                    beforeSend: function () {
+                    $.blockUI({
+                        message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                        css: {
+                        border: 'none',
+                        padding: '16px',
+                        width: '50%',
+                        top: '40%',
+                        left: '30%',
+                        backgroundColor: '#fefefe',
+                        '-webkit-border-radius': '10px',
+                        '-moz-border-radius': '10px',
+                        opacity: .7,
+                        color: '#000000'
+                        }  
+                        });
+                    },
+                    success: function(data, textStatus, jqXHR) {                       
+                        $('#comentarios').val(comentario.toUpperCase())            
+                    },
+                    
+                    complete: function(){
+                        setTimeout($.unblockUI, 1500);
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        var msg = '';
+                        if (jqXHR.status === 0) {
+                            msg = 'Not connect.\n Verify Network.';
+                        } else if (jqXHR.status == 404) {
+                            msg = 'Requested page not found. [404]';
+                        } else if (jqXHR.status == 500) {
+                            msg = 'Internal Server Error [500].';
+                        
+                        } else {
+                            msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                        }
+                        console.log(msg);
+                    }
+                    });
+                }
             });
 
             $('#btn_xls').on('click', function (e) {

@@ -195,6 +195,23 @@ class SAP extends Model
             return true;
         }
     }
+    public static function updateItemComentario($codigo, $comentario){
+        (self::$vCmp == false) ? self::Connect() : '';
+        //self::$vCmp->XmlExportType("xet_ExportImportMode");
+        //OITM ARTICULOS ES EL OBJETO 4
+        $vItem = self::$vCmp->GetBusinessObject("4"); 
+        //ENTRE PARENTESIS VA EL CODIGO DEL ARTICULO A ACTUALIZAR
+        $RetVal = $vItem->GetByKey($codigo); 
+        
+        //Seleccionar 
+        $vItem->User_Text = $comentario;
+        $retCode = $vItem->Update;
+        if ($retCode != 0) {
+            return self::$vCmp->GetLastErrorDescription();
+        } else {
+            return 'ok';
+        }
+    }
     public static function updateItemPriceList($codigo, $priceList, $precio, $moneda){
         (self::$vCmp == false) ? self::Connect() : '';
         //self::$vCmp->XmlExportType("xet_ExportImportMode");

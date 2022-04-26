@@ -513,6 +513,7 @@ Route::get('datatables_tparametros', 'Mod09_FinanzasListaPreciosController@datat
 Route::get('home/SIMULADOR COSTOS/simulador/{modelo}/{modelo_descr}', 'Mod09_FinanzasListaPreciosController@Simulador');
 Route::get('datatables_simulador_precios', 'Mod09_FinanzasListaPreciosController@datatables_simulador_precios')->name('datatables_simulador_precios');
 Route::any('simulador_actualizarPrecios', 'Mod09_FinanzasListaPreciosController@simulador_actualizarPrecios')->name('simulador_actualizarPrecios');
+Route::any('simulador_guarda_cometario_modelo', 'Mod09_FinanzasListaPreciosController@simulador_guarda_cometario_modelo')->name('simulador_guarda_cometario_modelo');
 Route::get('simuladorXLS/{tc_usd}/{tc_can}/{tc_eur}', 'Mod09_FinanzasListaPreciosController@ReporteSimuladorXLS')->name('simuladorXLS');
 Route::post('simulador_session_json', 'Mod09_FinanzasListaPreciosController@simuladorAjaxToSession')->name('simulador_session_json');
 
