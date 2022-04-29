@@ -462,6 +462,7 @@ class Reportes_ProduccionController extends Controller
             }
             $lista_precio = 1;
             $xCodeSub[0] = $info->ItemCode;
+            $plannedqty = $info->plannedqty * 1;
             //dd($xCodeSub);
             $index = 0;
             while ($index < count($xCodeSub)) {
@@ -556,6 +557,7 @@ class Reportes_ProduccionController extends Controller
                     break;
             }
             $data = array(
+                'plannedqty' => $plannedqty,
                 'data' => $consulta,
                 'op' => $op,
                 'actividades' => $actividades,
