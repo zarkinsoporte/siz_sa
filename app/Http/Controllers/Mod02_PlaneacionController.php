@@ -279,6 +279,7 @@ public function impresion_op(Request $request){
                     $info = OP::getInfoOwor($op);
                     $lista_precio = 1;
                     $xCodeSub[0] = $info->ItemCode;
+                    $plannedqty = $info->plannedqty * 1;
                     //dd($xCodeSub);
                     $index = 0;
                     while ($index < count($xCodeSub)) {
@@ -334,6 +335,7 @@ public function impresion_op(Request $request){
                         INNER JOIN OITM a ON a.ItemCode=o.ItemCode
                         WHERE o.U_NoSerie = ? ", [$info->U_NoSerie]);  
                     $data = array(
+                        'plannedqty' => $plannedqty,
                         'ordenes_serie' => $ordenesSerie,
                         'composicion' => $composicion,
                         'total_vs' => $total_vs,

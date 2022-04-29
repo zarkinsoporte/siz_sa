@@ -84,7 +84,7 @@ background-color: #f2f2f2;
                                 {{ $rep->UDM }}
                             </td>
                             <td align="center" scope="row">
-                            <?php echo number_format($rep->CANTIDAD,2); ?>
+                            <?php echo number_format($rep->CANTIDAD * $plannedqty,2); ?>
                             </td>
                             <td align="center" scope="row">
                                 {{ $rep->ORIGEN }}
@@ -107,7 +107,7 @@ background-color: #f2f2f2;
                                 {{ $rep->UDM }}
                             </td>
                             <td align="center"scope="row">
-                                <?php echo number_format($rep->CANTIDAD,2); ?>
+                                <?php echo number_format($rep->CANTIDAD * $plannedqty,2); ?>
 
                             </td>
                             <td align="center" scope="row">

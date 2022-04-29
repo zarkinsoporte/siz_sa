@@ -169,7 +169,6 @@ Route::post('home/reporte/DetinsPiel', 'Mod01_ProduccionController@repCortePiel'
 Route::get('home/repCortePielExl', 'Mod01_ProduccionController@repCortePielExl');
 //PDF de Historial por OP
 Route::get('home/ReporteOpPDF/{op}', 'Mod01_ProduccionController@ReporteOpPDF');
-Route::get('home/ReporteMaterialesPDF/{op}', 'Mod01_ProduccionController@ReporteMaterialesPDF');
 Route::get('OPPDF/{op}', 'GuestController@OPPDF')->middleware('guest');
 Route::get('home/ReporteProduccionPDF', 'Reportes_ProduccionController@ReporteProduccionPDF');
 Route::get('home/ReporteProduccionEXL', 'Reportes_ProduccionController@ReporteProduccionEXL');
@@ -180,6 +179,7 @@ Route::get('home/reporte/historialXLS', 'Reportes_ProduccionController@historial
 //REPORTE DE MATERIALES X OP
 Route::get('home/MATERIALES OP', 'Reportes_ProduccionController@showModal')->middleware('routelog');
 Route::post('home/reporte/MATERIALES OP', 'Reportes_ProduccionController@materialesOP');
+Route::get('home/ReporteMaterialesPDF/{op}', 'Mod01_ProduccionController@ReporteMaterialesPDF');
 Route::get('home/reporte/materialesXLS', 'Reportes_ProduccionController@materialesOPXLS');
 //REPORTE BACK ORDER
 Route::get('home/BACK ORDER', 'Reportes_ProduccionController@backorder')->middleware('routelog');

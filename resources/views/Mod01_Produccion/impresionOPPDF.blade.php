@@ -102,7 +102,7 @@
                         {{ $rep->UDM }}
                     </td>
                     <td align="center" scope="row">
-                        <?php echo number_format($rep->CANTIDAD,2); ?>
+                        <?php echo number_format($rep->CANTIDAD * $plannedqty,2); ?>
                     </td>
                     <td align="center" scope="row">
                         {{ $rep->ORIGEN }}
@@ -127,7 +127,7 @@
                         {{ $rep->UDM }}
                     </td>
                     <td align="center" scope="row">
-                        <?php echo number_format($rep->CANTIDAD,2); ?>
+                        <?php echo number_format($rep->CANTIDAD * $plannedqty,2); ?>
 
                     </td>
                     <td align="center" scope="row">

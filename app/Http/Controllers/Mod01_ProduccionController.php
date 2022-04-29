@@ -90,7 +90,8 @@ class Mod01_ProduccionController extends Controller
         $info = OP::getInfoOwor($op);
         $lista_precio = 1;
         $xCodeSub[0] = $info->ItemCode;
-        //dd($xCodeSub);
+        $plannedqty = $info->plannedqty * 1;
+        //dd($plannedqty);
         $index = 0;
         while ($index < count($xCodeSub)) {
 
@@ -192,6 +193,7 @@ class Mod01_ProduccionController extends Controller
                             $marcaagua = 'reimpresion';                            
                         }                                     
         $data = array(
+            'plannedqty' => $plannedqty,
             'marcaagua' => $marcaagua,
             'ordenes_serie' => $ordenesSerie,
             'composicion' => $composicion,
