@@ -1253,11 +1253,11 @@ class Reportes_ProduccionController extends Controller
              return $cDate->diffInDays();
         })
         ->addColumn('totalproc', function ($rowbo) {            
-            return ($rowbo->PorIniciar + $rowbo->Habilitado + $rowbo->Armado + $rowbo->Preparado + $rowbo->Inspeccion);
+            return ($rowbo->Tapado + $rowbo->PorIniciar + $rowbo->Habilitado + $rowbo->Armado + $rowbo->Preparado + $rowbo->Inspeccion);
         })
         ->addColumn('totalvs', function ($rowbo) {            
             return number_format(($rowbo->U_VS * 
-            ($rowbo->PorIniciar + $rowbo->Habilitado + $rowbo->Armado + $rowbo->Preparado + $rowbo->Inspeccion)),2);
+            ($rowbo->Tapado + $rowbo->PorIniciar + $rowbo->Habilitado + $rowbo->Armado + $rowbo->Preparado + $rowbo->Inspeccion)),2);
         })
         ->addColumn('uvs', function ($rowbo) {            
             return number_format($rowbo->U_VS,2);

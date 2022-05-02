@@ -203,13 +203,14 @@ public function liberacion_op(Request $request){
                                 //esta linea obtiene el consecutivo del numero
                                 $consecutivo = DB::select('select max (CONVERT(INT,Code)) as Code from [@CP_OF]');
                                 //aqui acaba num consecutivo
+                                $primer_estacion = OP::getRuta($op)[0];
                                 $newCode = new OP();
                                 $newCode->Code = ((int) $consecutivo[0]->Code) + 1;
                                 $newCode->Name = ((int) $consecutivo[0]->Code) + 1;
                                 $newCode->U_DocEntry = $op;
-                                $newCode->U_CT = '100';
+                                $newCode->U_CT = $primer_estacion;
                                 $newCode->U_Entregado = 0;
-                                $newCode->U_Orden = '100';
+                                $newCode->U_Orden = $primer_estacion;
                                 $newCode->U_Procesado = 0;
                                 $newCode->U_Recibido = intval($PlannedQty);
                                 $newCode->U_Reproceso = "N";
@@ -223,7 +224,7 @@ public function liberacion_op(Request $request){
                                 $lot->Code = ((int) $consecutivologot[0]->Code) + 1;
                                 $lot->Name = ((int) $consecutivologot[0]->Code) + 1;
                                 $lot->U_idEmpleado = Auth::user()->empID;
-                                $lot->U_CT = '100';
+                                $lot->U_CT = $primer_estacion;
                                 $lot->U_Status = "O";
                                 $lot->U_FechaHora = $dt;
                                 $lot->U_OP = $op;
@@ -698,6 +699,7 @@ public function registros_tabla_liberacion(Request $request){
             'tipo' => ['PT', 'CA', 'OTRO'],
             'estado' => ['Planificadas', 'Liberadas']
             */
+            $criterio = "";
             switch ($estado) {
                 case 0:
                     $estado = 'P'; //PLANIFICADAS
@@ -712,6 +714,7 @@ public function registros_tabla_liberacion(Request $request){
             switch ($tipo) {
                 case 0:
                     $tipo = "dbo.OITM.U_TipoMat = 'PT'";//PRODUCTO TERMINADO
+                    $criterio = " AND U_NoSerie > 1 ";
                     break;
                 case 1:
                     $tipo = "dbo.OITM.U_TipoMat = 'CA'"; //CASCO
@@ -739,7 +742,7 @@ public function registros_tabla_liberacion(Request $request){
                                 dbo.OWOR ON dbo.ORDR.DocNum = dbo.OWOR.OriginNum INNER JOIN
                                 dbo.OITM ON dbo.OWOR.ItemCode = dbo.OITM.ItemCode
                 WHERE   (Status = '". $estado ."') AND (". $tipo .")
-                AND U_NoSerie > 1
+                ".$criterio."
                 ORDER BY Pedido";
             $sel =  preg_replace('/[ ]{2,}|[\t]|[\n]|[\r]/', ' ', ($sel));
             $consulta = DB::select($sel);
