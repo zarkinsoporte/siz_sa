@@ -243,7 +243,9 @@ function js_iniciador() {
         deferRender: true,
         ajax: {
             url: routeapp + 'datatables_ioWhs',
+            "type" : "POST",
             data: function (d) {
+                d._token= tokenapp,
                 d.fi = $('#fstart').val(),
                 d.ff = $('#fend').val(),
                 d.almacenes = getSel('sel_almacen'),

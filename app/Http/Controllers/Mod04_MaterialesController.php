@@ -34,6 +34,7 @@ class Mod04_MaterialesController extends Controller
         // check if user is autenticated for non-ajax request
         $this->middleware('auth');
     }
+   
     public function reporteEntradasAlmacen()
     {
         if (Auth::check()) {
