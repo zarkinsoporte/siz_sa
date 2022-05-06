@@ -535,7 +535,7 @@ Route::get('cppXLS', 'Mod03_ComprasController@cppXLS')->name('cppXLS');
 
 //REPORTE DE ENTRADAS Y SALIDAS
 //Route::get('home/ENTRADAS SALIDAS', 'Mod04_MaterialesController@showModal')->middleware('routelog');
-Route::get('home/ENTRADAS SALIDAS', 'Mod04_MaterialesController@index_EntradasSalidas');
+Route::get('home/ENTRADAS SALIDAS', 'Mod04_MaterialesController@index_EntradasSalidas')->middleware('routelog');
 Route::post('datatables_ioWhs', 'Mod04_MaterialesController@datatables_ioWhs')->name('datatables_ioWhs');
 Route::any('entradasSalidas_combobox_tipoMat', 'Mod04_MaterialesController@entradasSalidas_combobox_tipoMat')->name('entradasSalidas_combobox_tipoMat');
 Route::any('entradasSalidas_combobox_articulos', 'Mod04_MaterialesController@entradasSalidas_combobox_articulos')->name('entradasSalidas_combobox_articulos');
