@@ -217,27 +217,25 @@ function js_iniciador() {
     
     var wrapper = $('#wrapper');
     var resizeStartHeight = wrapper.height();
+    console.log(resizeStartHeight)
     var height = (resizeStartHeight * 130) / 100;
     if (height < 200) {
         height = 200;
     }
+    console.log(height)
     var table = $('#tentradas').DataTable({
         "order": [
             [1, "desc"],
             [0, "asc"],
             [2, "asc"]
         ],
-        dom: "<'row'<'col-sm-9'B><'col-sm-3'l>>" + 'rtip',
-        "pageLength": 100,
-        "lengthMenu": [
-            [100, 50, 25, -1],
-            [100, 50, 25, "Todo"]
-        ],
+        dom: "<'row'<'col-sm-9'B><'col-sm-3'f>>" + 'rtip',
+        
         orderCellsTop: true,
         scrollY: height,
         scrollX: true,
         scrollCollapse: true,
-        paging: true,
+        paging: false,
         fixedColumns: true,
         processing: true,
         deferRender: true,
