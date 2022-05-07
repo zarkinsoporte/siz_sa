@@ -39,10 +39,10 @@ class SAPi extends Model
         (self::$vCmp == false) ? self::Connect() : '';
         $vItem = self::$vCmp->GetBusinessObject("202");
         $RetVal = $vItem->GetByKey($orden.'');
-        clock($RetVal);
+        //clock($RetVal);
         $vItem->UserFields->Fields->Item('U_Impreso')->Value = ''.$impreso;
         $retCode = $vItem->Update;
-        clock($retCode);
+        //clock($retCode);
         if ($retCode != 0) {
             return 'Error, '.self::$vCmp->GetLastErrorDescription();
         } else {

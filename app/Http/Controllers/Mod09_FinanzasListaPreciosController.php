@@ -527,7 +527,7 @@ class Mod09_FinanzasListaPreciosController extends Controller
             $original_hules = DB::select('SELECT composicionCodigo, um, codigo, cantidad, precio, precioUSD, precioMXP, moneda from SIZ_simulador_temp
                 where grupoPlaneacion = 6 AND subModelo <> \'C\'');
             Session::put('simulador_original_hules', $original_hules);
-            clock($original_hules);
+            //clock($original_hules);
             $hules = DB::select('SELECT CASE WHEN SWeight1 = 0 OR SWeight1 IS NULL THEN 1
             ELSE 0 END AS err, composicionCodigo, codigo, descripcion, um, convert (decimal(18,2), precio) precio, moneda 
             , SWeight1 pesoKG
@@ -558,8 +558,8 @@ class Mod09_FinanzasListaPreciosController extends Controller
         } //end insert
         $margenVtas = 50;
         $cuenta_tparametros = count($tparametros);
-        clock('parametros');
-        clock($tparametros);
+        //clock('parametros');
+        //clock($tparametros);
             for ($x = 0; $x < $cuenta_tparametros; $x++) {
 
                 if ($tparametros[$x]['codigo'] == '10007') {
@@ -569,15 +569,15 @@ class Mod09_FinanzasListaPreciosController extends Controller
                     //PUESTO QUE LOS CALCULOS DE CANTIDAD E IMPORTE GUIANDONOS POR KILOS INCLUYE EL PESO.
                     if (Session::has('simulador_original_hules')) {
                         $hules = Session::get('simulador_original_hules');
-                        clock($hules);
+                        //clock($hules);
                         foreach ($hules as $hule) {
                              DB::update('update Siz_simulador_temp set um = ?, cantidad = ?, precioUSD = ?, precio = ?, precioMXP = ?, moneda = ?
                              where codigo = ? AND composicionCodigo = ?', 
                              [$hule->um, $hule->cantidad, $hule->precioUSD, $hule->precio, $hule->precioMXP, 'USD', $hule->codigo, $hule->composicionCodigo]);
                          }
                      }
-                     clock('CHECK');
-                     clock($tparametros[$x]['checkbox']);
+                     //clock('CHECK');
+                     //clock($tparametros[$x]['checkbox']);
                     if ($tparametros[$x]['checkbox']) {
                         $hules = DB::select('SELECT CASE WHEN SWeight1 = 0 OR SWeight1 IS NULL THEN 1
                         ELSE 0 END AS err, composicionCodigo, codigo, descripcion, um, convert (decimal(18,2), precio) precio, moneda 
