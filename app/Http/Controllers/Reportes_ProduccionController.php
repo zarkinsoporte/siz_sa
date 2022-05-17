@@ -36,7 +36,17 @@ class Reportes_ProduccionController extends Controller
     {
         return view('Mod00_Administrador.admin');
     }
-
+    public function backorderHule()
+    {                               
+        if (Auth::check()) {            
+                $user = Auth::user();
+                $actividades = $user->getTareas(); 
+                $ultimo = count($actividades);
+            return view('Mod01_Produccion.ReporteBackOrderHule', compact('user', 'actividades', 'ultimo'));
+        } else {
+            return redirect()->route('auth/login');
+        }
+    }    
     public function Produccion1(Request $request)
     {
 
