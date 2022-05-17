@@ -112,6 +112,16 @@
             $("#page-wrapper").toggleClass("content"); 
             $(this).toggleClass("active"); 
         });
+        $("#sidebar").toggleClass("active"); 
+        $("#page-wrapper").toggleClass("content"); 
+        $(this).toggleClass("active");
+        var wrapper = $('#wrapper');
+        var resizeStartHeight = wrapper.height();
+        var height = (resizeStartHeight *70)/100;
+        if ( height < 200 ) {
+            height = 200;
+        }
+        console.log(wrapper.height()+' height_datatable ' + height)
 $('#tbackorder thead tr').clone(true).appendTo( '#tbackorder thead' );
 
 $('#tbackorder thead tr:eq(1) th').each( function (i) {
@@ -206,7 +216,7 @@ var table = $('#tbackorder').DataTable({
     ],
    
     orderCellsTop: true,    
-    scrollY:        "300px",
+    scrollY: height,
     "pageLength": 50,
     scrollX:        true,
     scrollCollapse: true,
