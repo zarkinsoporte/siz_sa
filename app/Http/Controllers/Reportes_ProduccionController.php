@@ -1267,10 +1267,10 @@ class Reportes_ProduccionController extends Controller
         })
         ->addColumn('totalvs', function ($rowbo) {            
             return number_format(($rowbo->U_VS * 
-            ($rowbo->Tapado + $rowbo->PorIniciar + $rowbo->Habilitado + $rowbo->Armado + $rowbo->Preparado + $rowbo->Inspeccion)),2);
+            ($rowbo->Tapado + $rowbo->PorIniciar + $rowbo->Habilitado + $rowbo->Armado + $rowbo->Preparado + $rowbo->Inspeccion)), 3);
         })
         ->addColumn('uvs', function ($rowbo) {            
-            return number_format($rowbo->U_VS,2);
+            return number_format($rowbo->U_VS,3);
         })
         ->addColumn('xiniciar', function ($rowbo) {            
             return  number_format($rowbo->PorIniciar,0);         
@@ -1295,10 +1295,40 @@ class Reportes_ProduccionController extends Controller
         })
         ->addColumn('totalvs', function ($rowbo) {            
             return number_format(($rowbo->U_VS * 
-            ($rowbo->PorIniciar + $rowbo->Habilitado + $rowbo->Armado + $rowbo->Preparado + $rowbo->Inspeccion)),2);
+            ($rowbo->PorIniciar + $rowbo->Habilitado + $rowbo->Armado + $rowbo->Preparado + $rowbo->Inspeccion)),3);
         })
         ->addColumn('uvs', function ($rowbo) {            
-            return number_format($rowbo->U_VS,2);
+            return number_format($rowbo->U_VS,3);
+        })
+        ->addColumn('xiniciar', function ($rowbo) {            
+            return  number_format($rowbo->PorIniciar,0);         
+        })
+        ->make(true);
+        }else {
+            return redirect()->route('auth/login');
+        }
+    }
+    public function DataShowbackorderHule()
+    {             
+        if (Auth::check()) {
+        $rowsBo = DB::table('SIZ_View_ReporteBOHule')->where('proceso', '>', 0)->orWhere('poriniciar', '>', 0);
+         
+        return Datatables::of($rowsBo)
+        ->addColumn('diasproc', function ($rowbo) {
+             $cDate = Carbon::parse($rowbo->U_Entrega_Piel);
+             return $cDate->diffInDays();
+        })
+        ->addColumn('totalproc', function ($rowbo) {            
+            return ($rowbo->PorIniciar + $rowbo->Habilitado + $rowbo->Armado + $rowbo->Pegado 
+            + $rowbo->Empaque + $rowbo->Entrega);
+        })
+        ->addColumn('totalvs', function ($rowbo) {            
+            return number_format(($rowbo->U_VS * 
+            ($rowbo->PorIniciar + $rowbo->Habilitado + $rowbo->Armado + $rowbo->Pegado
+                    + $rowbo->Empaque + $rowbo->Entrega)),3);
+        })
+        ->addColumn('uvs', function ($rowbo) {            
+            return number_format($rowbo->U_VS,3);
         })
         ->addColumn('xiniciar', function ($rowbo) {            
             return  number_format($rowbo->PorIniciar,0);         
@@ -1335,8 +1365,7 @@ class Reportes_ProduccionController extends Controller
                 $totales_pzas['Armado'] += $item->Armado; 
                 $totales_pzas['Tapado'] += $item->Tapado; 
                 $totales_pzas['Preparado'] += $item->Preparado; 
-                $totales_pzas['Inspeccion'] += $item->Inspeccion; 
-                $totales_pzas['totalvs'] += $item->totalvs;           
+                $totales_pzas['Inspeccion'] += $item->Inspeccion;          
         }         
         $pdf = \PDF::loadView('Mod01_Produccion.ReporteBackOrderCascoPDF', compact('data', 'totales_pzas', 'totales_vs'));
         $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);             
@@ -1348,7 +1377,7 @@ class Reportes_ProduccionController extends Controller
     public function ReporteBackOrderPatasPDF()
     {    
         if (Auth::check()) {       
-        $data = json_decode(stripslashes(Session::get('bocasco')));      
+        $data = json_decode(stripslashes(Session::get('bopatas')));      
         
         $totales_pzas = array('Proceso'=>0, 'PorIniciar'=>0, 'Habilitado'=>0, 'Armado'=>0, 'Tapado'=>0, 'Preparado'=>0, 'Inspeccion'=>0, 'totalvs'=>0);   
         $totales_vs = array('Proceso'=>0, 'PorIniciar'=>0, 'Habilitado'=>0, 'Armado'=>0, 'Tapado'=>0, 'Preparado'=>0, 'Inspeccion'=>0, 'totalvs'=>0);   
@@ -1367,12 +1396,44 @@ class Reportes_ProduccionController extends Controller
                 $totales_pzas['Armado'] += $item->Armado; 
                 $totales_pzas['Tapado'] += $item->Tapado; 
                 $totales_pzas['Preparado'] += $item->Preparado; 
-                $totales_pzas['Inspeccion'] += $item->Inspeccion; 
-                $totales_pzas['totalvs'] += $item->totalvs;           
+                $totales_pzas['Inspeccion'] += $item->Inspeccion;           
         }         
         $pdf = \PDF::loadView('Mod01_Produccion.ReporteBackOrderPatasPDF', compact('data', 'totales_pzas', 'totales_vs'));
         $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);             
         return $pdf->stream('Siz_Reporte_BackOrderPatas ' . ' - ' .date("d/m/Y") . '.Pdf');
+        }else {
+            return redirect()->route('auth/login');
+        }
+    }
+    public function ReporteBackOrderHulePDF()
+    {    
+        if (Auth::check()) {       
+        $data = json_decode(stripslashes(Session::get('bohule')));      
+        
+        $totales_pzas = array('Proceso'=>0, 'PorIniciar'=>0, 'Habilitado'=>0, 'Armado'=>0, 'Pegado'=>0, 
+        'Empaque'=>0, 'Entrega'=>0);   
+        $totales_vs = array('Proceso'=>0, 'PorIniciar'=>0, 'Habilitado'=>0, 'Armado'=>0, 'Pegado'=>0, 
+        'Empaque'=>0, 'Entrega'=>0);   
+        foreach($data as $item){            
+                $totales_vs['Proceso'] += $item->Proceso * $item->uvs;
+                $totales_vs['PorIniciar'] += $item->PorIniciar * $item->uvs; 
+                $totales_vs['Habilitado'] += $item->Habilitado * $item->uvs;
+                $totales_vs['Armado'] += $item->Armado * $item->uvs;
+                $totales_vs['Pegado'] += $item->Pegado * $item->uvs;
+                $totales_vs['Empaque'] += $item->Empaque * $item->uvs;
+                $totales_vs['Entrega'] += $item->Entrega * $item->uvs;
+                               
+                $totales_pzas['Proceso'] += $item->Proceso; 
+                $totales_pzas['PorIniciar'] += $item->PorIniciar; 
+                $totales_pzas['Habilitado'] += $item->Habilitado; 
+                $totales_pzas['Armado'] += $item->Armado; 
+                $totales_pzas['Pegado'] += $item->Pegado; 
+                $totales_pzas['Empaque'] += $item->Empaque; 
+                $totales_pzas['Entrega'] += $item->Entrega;           
+        }         
+        $pdf = \PDF::loadView('Mod01_Produccion.ReporteBackOrderHulePDF', compact('data', 'totales_pzas', 'totales_vs'));
+        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);             
+        return $pdf->stream('Siz_Reporte_BackOrderHule ' . ' - ' .date("d/m/Y") . '.Pdf');
         }else {
             return redirect()->route('auth/login');
         }

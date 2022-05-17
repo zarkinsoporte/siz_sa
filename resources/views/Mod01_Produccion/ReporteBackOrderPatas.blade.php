@@ -163,6 +163,7 @@ var table = $('#tbackorder').DataTable({
             text: '<i class="fa fa-file-excel-o"></i> Excel',
             className: "btn-success",
             extend: 'excelHtml5',
+            title: 'BO_Patas',
             message: $('#EMPRESA_NAME').val()+"\n",
             messagetwo: "BACK ORDER PATAS Y BASTIDORES.\n",
             messagethree: f,
@@ -179,7 +180,7 @@ var table = $('#tbackorder').DataTable({
                          var json = JSON.stringify( data );
                          $.ajax({
                             type:'POST',
-                            url:'reporte/ajaxtosession/bocasco',
+                            url:'reporte/ajaxtosession/bopatas',
                             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},                            
                             data: {
                                 "_token": "{{ csrf_token() }}",
@@ -194,7 +195,6 @@ var table = $('#tbackorder').DataTable({
        
         {
             text: '<i class="fa fa-print"></i> Imprimir',
-           
             extend: 'print',
             title: 'Reporte de Back Order Patas',
             exportOptions: {

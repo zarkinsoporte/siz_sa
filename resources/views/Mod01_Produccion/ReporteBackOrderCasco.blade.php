@@ -163,6 +163,7 @@ var table = $('#tbackorder').DataTable({
             text: '<i class="fa fa-file-excel-o"></i> Excel',
             className: "btn-success",
             extend: 'excelHtml5',
+            title: 'BO_Casco',
             message: $('#EMPRESA_NAME').val()+"\n",
             messagetwo: "BACK ORDER PROGRAMADO CASCO.\n",
             messagethree: f,

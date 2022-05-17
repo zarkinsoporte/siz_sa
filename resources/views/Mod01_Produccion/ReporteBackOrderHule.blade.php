@@ -65,7 +65,8 @@
                         <th>Pegado (212)</th>
                         <th>Empaque (218)</th>
                         <th>Entrega Almacén (221)</th>
-                                              
+                        <th>VS</th>
+                        <th>Total Valor Sala</th>                      
                     </tr>
                 </thead>
                 <tbody>
@@ -84,6 +85,8 @@
                    <th></th>
                    <th></th>
                    
+                   <th></th>
+                   <th></th>
                    <th></th>
                    <th></th>
                    <th></th>
@@ -163,6 +166,7 @@ var table = $('#tbackorder').DataTable({
             text: '<i class="fa fa-file-excel-o"></i> Excel',
             className: "btn-success",
             extend: 'excelHtml5',
+            title: 'BO_Hule',
             message: $('#EMPRESA_NAME').val()+"\n",
             messagetwo: "BACK ORDER HULE.\n",
             messagethree: f,
@@ -175,7 +179,7 @@ var table = $('#tbackorder').DataTable({
             className: "btn-danger",            
                     action: function ( e, dt, node, config ) {  
                         this.text('<i class="fa fa-spinner fa-pulse fa-lg fa-fw"></i> Pdf');                              
-                         var data=table.rows( { filter : 'applied'} ).data().toArray();               
+                         var data=table.rows().data().toArray();               
                          var json = JSON.stringify( data );
                          $.ajax({
                             type:'POST',
@@ -186,7 +190,7 @@ var table = $('#tbackorder').DataTable({
                                 "arr": json
                                 },
                                 success:function(data){
-                                    window.open('reporte/backorderPatasPDF', '_blank');                                   
+                                    window.open('reporte/backorderHulePDF', '_blank');                                   
                             }
                          });
                      }         
@@ -196,7 +200,7 @@ var table = $('#tbackorder').DataTable({
             text: '<i class="fa fa-print"></i> Imprimir',
            
             extend: 'print',
-            title: 'Reporte de Back Order Patas',
+            title: 'Reporte de Back Order Hule',
             exportOptions: {
                 columns: ':visible',                
             }
@@ -214,7 +218,7 @@ var table = $('#tbackorder').DataTable({
     processing:true,     
     deferRender:    true,
     ajax: {
-        url: '{!! route('datatables.showbackorderpatas') !!}',
+        url: '{!! route('datatables.showbackorderhule') !!}',
         data: function () {
                          
                         }              
@@ -238,9 +242,9 @@ var table = $('#tbackorder').DataTable({
         { data: 'Habilitado', name:  'Habilitado'},
         { data: 'Armado', name:  'Armado'},
 
-        { data: 'Tapado', name:  'Tapado'},
-        { data: 'Preparado', name:  'Preparado' },
-        { data: 'Inspeccion', name:  'Inspeccion'},
+        { data: 'Pegado', name:  'Pegado'},
+        { data: 'Empaque', name:  'Empaque' },
+        { data: 'Entrega', name:  'Entrega'},
         { data: 'uvs', name:  'uvs'},
         { data: 'totalvs', name:  'totalvs' },
 

@@ -126,7 +126,7 @@
                                 <th>{{$totales_vs['Preparado']}}</th>
                                 <th>{{$totales_vs['Inspeccion']}}</th>
                                 <th></th>
-                                <th>{{$totales_vs['Proceso']}}</th>
+                                <th></th>
                             </tr>   
                             <tr>
                                 <th>Orden Casco</th>

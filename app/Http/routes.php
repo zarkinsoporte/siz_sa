@@ -430,7 +430,7 @@ Route::get('/sap', function (Request $request) {
    
     $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
     $vCmp->DbServerType="10"; 
-    $vCmp->server = env('SAP_server');;
+    $vCmp->server = env('SAP_server');
     $vCmp->LicenseServer = env('SAP_LicenseServer');
     $vCmp->CompanyDB = env('SAP_CompanyDB');
     $vCmp->username = env('SAP_username');
@@ -540,8 +540,8 @@ Route::post('datatables_ioWhs', 'Mod04_MaterialesController@datatables_ioWhs')->
 Route::any('entradasSalidas_combobox_tipoMat', 'Mod04_MaterialesController@entradasSalidas_combobox_tipoMat')->name('entradasSalidas_combobox_tipoMat');
 Route::any('entradasSalidas_combobox_articulos', 'Mod04_MaterialesController@entradasSalidas_combobox_articulos')->name('entradasSalidas_combobox_articulos');
 //Route::get('home/reporte/ENTRADAS SALIDAS', 'Mod04_MaterialesController@reporteiowhsPDF');
-Route::get('entradasysalidasXLS', 'Mod04_MaterialesController@iowhsXLS')->name('entradasysalidasXLS');;
-Route::get('entradasysalidasPDF', 'Mod04_MaterialesController@iowhsPDF')->name('entradasysalidasPDF');;
+Route::get('entradasysalidasXLS', 'Mod04_MaterialesController@iowhsXLS')->name('entradasysalidasXLS');
+Route::get('entradasysalidasPDF', 'Mod04_MaterialesController@iowhsPDF')->name('entradasysalidasPDF');
 /*
 Route::get('home/ENTRADAS SALIDAS', 'Reportes_ProduccionController@showModal')->middleware('routelog');
 Route::post('home/reporte/ENTRADAS SALIDAS', 'Mod04_MaterialesController@EntradasSalidas');
@@ -552,6 +552,6 @@ Route::get('home/reporte/entradasysalidasPDF', 'Mod04_MaterialesController@iowhs
 */
 Route::any('datatables_donde_usado', 'Mod04_MaterialesController@datatables_donde_usado')->name('datatables_donde_usado');
 
-Route::get('home/BACK ORDER HULE', 'Reportes_ProduccionController@backorderHule')->middleware('routelog');
+Route::get('home/BACKORDER_HULE', 'Reportes_ProduccionController@backorderHule')->middleware('routelog');
 Route::get('datatables.showbackorderhule', 'Reportes_ProduccionController@DataShowbackorderHule')->name('datatables.showbackorderhule');
 Route::get('home/reporte/backorderHulePDF', 'Reportes_ProduccionController@ReporteBackOrderHulePDF');
