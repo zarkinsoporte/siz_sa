@@ -426,6 +426,25 @@ Route::get('/pruebas', function (Request $request) {
 
 Route::get('/crear-orden', 'Mod02_PlaneacionController@crearOrden');
 
+Route::get('edit-xml', function(){
+    $pathh = public_path('assets/xml/sap/ldm/20185.xml'); //"C:\Users\Administrador\Documents\Invoice.xml";
+    
+    //$xmlString = file_get_contents($pathh);
+    //$library = simplexml_load_string($xmlString);
+    $library = simplexml_load_file($pathh);
+   
+    $book = $library->xpath('/BOM/BO/ProductTrees_Lines/row[ItemCode="20189"]');
+    if(count($book) == 1){        
+        $book[0]->Quantity = '2';
+    } else{
+        return 'articulo no encontrado';
+    }
+    
+    // header("Content-type: text/xml");
+    // echo $library->asXML();
+    $library->asXML($pathh);
+});
+
 Route::get('/sap', function (Request $request) {
    
     $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
@@ -438,14 +457,35 @@ Route::get('/sap', function (Request $request) {
     $vCmp->DbUserName = env('SAP_DbUserName');
     $vCmp->DbPassword = env('SAP_DbPassword');
     $vCmp->UseTrusted = false;
+    $vCmp->XMLAsString = true;
     //$vCmp->language = "6";
     $lRetCode = $vCmp->Connect;
     
-    $vCmp->XmlExportType = '3';
+    $vCmp->XmlExportType = '3'; //BoXmlExportTypes.xet_ExportImportMode;
     $vItem = $vCmp->GetBusinessObject("66");
     $RetVal = $vItem->GetByKey("20185");
-    $pathh = "C:\Users\Administrador\Documents\Invoice.xml";
-    $vItem->SaveXML($pathh);
+    //$pathh = "C:\Users\Administrador\Documents\Invoice.xml";
+    //$vItem->SaveXML($pathh);
+    $xmlString = $vItem->GetAsXML();
+    $oXML= simplexml_load_string($xmlString);
+    //$vItem = (Documents)oCompany.GetBusinessObject(BoObjectTypes.oOrders);
+    //doc.GetByKey(259);
+    //$library = simplexml_load_file($pathh);
+   
+    $item = $oXML->xpath('/BOM/BO/ProductTrees_Lines/row[ItemCode="20189"]');
+    if(count($item) == 1){        
+        $item[0]->Quantity = '2';
+    } else{
+        return 'articulo no encontrado';
+    }
+    
+    // header("Content-type: text/xml");
+    // echo $library->asXML();
+    ////$library->asXML($pathh);
+    $vItem->Browser->ReadXml($oXML, 0);
+    //$RetVal2 = $vItem->UpdateFromXML($pathh);
+    $RetVal2 = $vItem->Update;
+    dd($RetVal2);
     Session::flash('error', $vCmp->GetLastErrorDescription());
     if ($lRetCode <> 0) {
        Session::flash('error', $vCmp->GetLastErrorDescription());
