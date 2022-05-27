@@ -427,26 +427,29 @@ Route::get('/pruebas', function (Request $request) {
 Route::get('/crear-orden', 'Mod02_PlaneacionController@crearOrden');
 
 Route::get('edit-xml', function(){
-    $pathh = public_path('assets/xml/sap/ldm/20185.xml'); //"C:\Users\Administrador\Documents\Invoice.xml";
     
-    //$xmlString = file_get_contents($pathh);
-    //$library = simplexml_load_string($xmlString);
-    $library = simplexml_load_file($pathh);
+    $pathh = public_path('assets/xml/sap/ldm/20185.xml'); //"C:\Users\Administrador\Documents\fileName.xml";
+    
+    //$xmlString = file_get_contents($pathh); //leer archivo
+    //$library = simplexml_load_string($xmlString); //crear object SimpleXML
+    $library = simplexml_load_file($pathh); //leemos archivo y creamos object SimpleXML
    
+    //Edit XML – Edit specific Elements (accessed conditionally)
+    //https://abstraction.blog/2010/09/04/php-xml-create-add-edit-modify-using-dom-simplexml-xpath
     $book = $library->xpath('/BOM/BO/ProductTrees_Lines/row[ItemCode="20189"]');
     if(count($book) == 1){        
         $book[0]->Quantity = '2';
     } else{
         return 'articulo no encontrado';
     }
-    
-    // header("Content-type: text/xml");
-    // echo $library->asXML();
+    //elaborar XML y escribirlo en archivo
     $library->asXML($pathh);
 });
 
 Route::get('/sap', function (Request $request) {
-   
+    
+    //https://biuan.com/ProductTrees/
+
     $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
     $vCmp->DbServerType="10"; 
     $vCmp->server = env('SAP_server');
@@ -457,44 +460,55 @@ Route::get('/sap', function (Request $request) {
     $vCmp->DbUserName = env('SAP_DbUserName');
     $vCmp->DbPassword = env('SAP_DbPassword');
     $vCmp->UseTrusted = false;
-    $vCmp->XMLAsString = true;
+    //la siguiente linea permite leer XML como string y no como archivo en "Browser->ReadXml"
+    $vCmp->XMLAsString = true; //The default value is False - XML as files.
+    
     //$vCmp->language = "6";
-    $lRetCode = $vCmp->Connect;
+    $vCmp->Connect; //conectar a Sociedad SAP
     
-    $vCmp->XmlExportType = '3'; //BoXmlExportTypes.xet_ExportImportMode;
-    $vItem = $vCmp->GetBusinessObject("66");
-    $RetVal = $vItem->GetByKey("20185");
-    //$pathh = "C:\Users\Administrador\Documents\Invoice.xml";
-    //$vItem->SaveXML($pathh);
-    $xmlString = $vItem->GetAsXML();
-    $oXML= simplexml_load_string($xmlString);
-    //$vItem = (Documents)oCompany.GetBusinessObject(BoObjectTypes.oOrders);
-    //doc.GetByKey(259);
-    //$library = simplexml_load_file($pathh);
-   
-    $item = $oXML->xpath('/BOM/BO/ProductTrees_Lines/row[ItemCode="20189"]');
-    if(count($item) == 1){        
-        $item[0]->Quantity = '2';
-    } else{
-        return 'articulo no encontrado';
-    }
+    //Obtener XML de un LDM 
+        $vCmp->XmlExportType = '3'; //BoXmlExportTypes.xet_ExportImportMode; /solo los campos modificables
+        $vItem = $vCmp->GetBusinessObject("66"); //ProductTrees table: OITT.
+        $vItem->GetByKey("20185"); //LDM Docentry
+        //$vItem->SaveXML($pathh); //Guardar en archivo
+        $xmlString = $vItem->GetAsXML(); //Guardar XML en buffer
+        //retiramos Utf16 del XML obtenido
+        $xmlString = preg_replace('/(<\?xml[^?]+?)utf-16/i', '$1utf-8', $xmlString); 
+        //Leemos XML(string) y creamos Object SimpleXML 
+        $oXML= simplexml_load_string($xmlString);
+        //$library = simplexml_load_file($pathh); //Crear Object SimpleXML de un archivo
     
-    // header("Content-type: text/xml");
-    // echo $library->asXML();
-    ////$library->asXML($pathh);
-    $vItem->Browser->ReadXml($oXML, 0);
-    //$RetVal2 = $vItem->UpdateFromXML($pathh);
-    $RetVal2 = $vItem->Update;
-    dd($RetVal2);
-    Session::flash('error', $vCmp->GetLastErrorDescription());
-    if ($lRetCode <> 0) {
+    //Modificar los campos en el XML (de un articulo de la LDM)
+        $item = $oXML->xpath('/BOM/BO/ProductTrees_Lines/row[ItemCode="20189"]');
+        if(count($item) == 1){        
+            $item[0]->Quantity = '3';
+        } else{
+            return 'articulo no encontrado';
+        }
+    
+    //Cargar el XML en la LDM y actualizar en SAP
+        //$library->asXML($pathh); //Elaborar y Escribir el XML
+        
+        //To use ReadXML method, set the XmlExportType to xet_ExportImportMode (3).
+        $vItem->Browser->ReadXml($oXML->asXML(), 0);
+        // $vItem->UpdateFromXML($pathh);
+        $resultadoOperacion = $vItem->Update;
+
+    
+    if ($resultadoOperacion <> 0) {
        Session::flash('error', $vCmp->GetLastErrorDescription());
     } else {
         Session::flash('info',' - conexión con SAP DI API exitosa!!'. ' ultimo err:'. $vCmp->GetLastErrorDescription());
     } 
-   
-    return redirect('home');
     
+    $vCmp->Disconnect;
+    $vCmp = null;
+    $vItem = null;
+    $xmlString = null;
+    $oXML = null;
+    $item = null;
+    $resultadoOperacion = null;
+    return redirect('home');
 });
 
 Route::post('home/traslados/terminar', 'Mod01_ProduccionController@terminarOP');
