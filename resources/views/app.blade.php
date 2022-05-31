@@ -267,6 +267,8 @@ li.dt-button.active a::before{
 {!! Html::script('assets/js/bootstrap.min.js') !!}
 <!--<script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>-->
 {!! Html::script('assets/js/moment.min.js') !!}
+
+{!! Html::script('plugins/datetime-moment.js') !!}
 {!! Html::script('assets/js/shortcut.js') !!}
 <!-- Include Date Range Picker -->
 <!-- Latest compiled and minified CSS -->
