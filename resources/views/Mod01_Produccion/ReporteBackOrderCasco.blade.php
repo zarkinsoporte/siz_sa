@@ -139,6 +139,7 @@ $('#tbackorder thead tr:eq(1) th').each( function (i) {
                 
     } );
 } );
+$.fn.dataTable.moment('DD-MM-YYYY');
 var meses = new Array ("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
 var diasSemana = new Array("Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado");
 var f=new Date();

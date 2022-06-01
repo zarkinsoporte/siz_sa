@@ -105,18 +105,27 @@
  
 <script>
     function js_iniciador() {
-                            $('.toggle').bootstrapSwitch();
-                            $('[data-toggle="tooltip"]').tooltip();
-                            $('.boot-select').selectpicker();
-                            $('.dropdown-toggle').dropdown();
-                            setTimeout(function() {
-                            $('#infoMessage').fadeOut('fast');
-                            }, 5000); // <-- time in milliseconds
-                            $("#sidebarCollapse").on("click", function() {
-                                $("#sidebar").toggleClass("active"); 
-                                $("#page-wrapper").toggleClass("content"); 
-                                $(this).toggleClass("active"); 
-                            });
+        $('.toggle').bootstrapSwitch();
+        $('[data-toggle="tooltip"]').tooltip();
+        $('.boot-select').selectpicker();
+        $('.dropdown-toggle').dropdown();
+        setTimeout(function() {
+        $('#infoMessage').fadeOut('fast');
+        }, 5000); // <-- time in milliseconds
+        $("#sidebarCollapse").on("click", function() {
+            $("#sidebar").toggleClass("active"); 
+            $("#page-wrapper").toggleClass("content"); 
+            $(this).toggleClass("active"); 
+        });
+            $("#sidebar").toggleClass("active"); 
+            $("#page-wrapper").toggleClass("content"); 
+            $(this).toggleClass("active"); 
+        var wrapper = $('#wrapper');
+        var resizeStartHeight = wrapper.height();
+        var height = (resizeStartHeight *70)/100;
+        if ( height < 200 ) {
+            height = 200;
+        }
 $('#tbackorder thead tr').clone(true).appendTo( '#tbackorder thead' );
 
 $('#tbackorder thead tr:eq(1) th').each( function (i) {
@@ -136,7 +145,7 @@ $('#tbackorder thead tr:eq(1) th').each( function (i) {
     } );    
 } );
 
-
+$.fn.dataTable.moment('DD/MM/YYYY');
 
 var meses = new Array ("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
 var diasSemana = new Array("Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado");
@@ -241,7 +250,7 @@ var table = $('#tbackorder').DataTable({
     ],
    
     orderCellsTop: true,    
-    scrollY:        "270px",
+    scrollY: height,
     scrollX:        true,
     scrollCollapse: true,
     paging:         false,
