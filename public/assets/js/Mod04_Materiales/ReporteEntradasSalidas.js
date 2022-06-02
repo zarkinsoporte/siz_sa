@@ -80,7 +80,7 @@ function js_iniciador() {
     //$('#fend').datepicker('setDate', end);    
     let todos_articulos = 0;
     let todos_tipomat = 0;
-    
+    $.fn.dataTable.moment('DD-MM-YYYY');
 
     function comboboxTipoMat_reload() {
         var options = [];
@@ -225,10 +225,9 @@ function js_iniciador() {
     console.log(height)
     var table = $('#tentradas').DataTable({
         "order": [
-            [1, "desc"],
-            [0, "asc"],
-            [2, "asc"]
+            [1, "desc"]
         ],
+       
         dom: "<'row'<'col-sm-9'B><'col-sm-3'f>>" + 'rtip',
         
         orderCellsTop: true,
@@ -417,9 +416,8 @@ function js_iniciador() {
                 }
             }
         },
-        columnDefs: [
-
-        ],
+        columnDefs: [],
+    
         "initComplete": function(settings, json) {
           
         },

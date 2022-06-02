@@ -447,7 +447,8 @@ Route::get('edit-xml', function(){
 });
 
 Route::get('/sap', function (Request $request) {
-    
+    //Ref
+    //https://answers.sap.com/questions/1448088/using-xml-to-update-objects-in-diapi.html
     //https://biuan.com/ProductTrees/
 
     $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
