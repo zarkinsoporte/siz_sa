@@ -2823,7 +2823,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
         from OINM  inner join OUSR on OINM.UserSign=OUSR.USERID 
         inner join OITM on OINM.ItemCode=OITM.ItemCode left join OWOR on OINM.AppObjAbs = OWOR.DocEntry 
         inner join ITM1 on OINM.ItemCode= ITM1.ItemCode and ITM1.PriceList = '10'  
-        Where Cast (OINM.CreateDate as DATE) between  '".$fi."' and '".$ff."' 
+        Where Cast (OINM.CreateDate as DATE) between  '".$fi." 00:00:00' and '".$ff." 23:59:59' 
         ".$criterio."
         order by OINM.CreateDate, Dscription, ItemCode, ALM_ORG" );
         //dd(DB::getQueryLog());
