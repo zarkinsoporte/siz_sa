@@ -15,6 +15,7 @@ use App;
 //use Illuminate\Support\Facades\Validator;
 use Datatables;
 use App\ACABADO;
+use App\Jobs\LdmUpdate;
 ini_set("memory_limit", '512M');
 ini_set('max_execution_time', 0);
 class Mod08_DisenioController extends Controller
@@ -179,5 +180,9 @@ class Mod08_DisenioController extends Controller
         $material->idUser = Auth::user()->U_EmpGiro;
         $material->save();
         return compact('material');
+    }
+
+    public function lmdUpdate(){
+        $this->dispatch(new LdmUpdate());
     }
 }

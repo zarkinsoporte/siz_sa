@@ -12,12 +12,12 @@ class SizPedidosTable extends Migration
      */
     public function up()
     {
-        Schema::create('Siz_Pedidos_Csv', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('usuario',50);
-            $table->integer('pedido'); 
-            $table->timestamps();
-        });
+        // Schema::create('Siz_Pedidos_Csv', function (Blueprint $table) {
+        //     $table->increments('id');
+        //     $table->string('usuario',50);
+        //     $table->integer('pedido'); 
+        //     $table->timestamps();
+        // });
     }
 
     /**
@@ -27,6 +27,6 @@ class SizPedidosTable extends Migration
      */
     public function down()
     {
-        Schema::drop('Siz_Pedidos_Csv');
+        // Schema::drop('Siz_Pedidos_Csv');
     }
 }

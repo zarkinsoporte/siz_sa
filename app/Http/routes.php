@@ -445,6 +445,7 @@ Route::get('edit-xml', function(){
     //elaborar XML y escribirlo en archivo
     $library->asXML($pathh);
 });
+Route::get('test_queue', 'Mod08_DisenioController@ldmUpdate');
 
 Route::get('/sap', function (Request $request) {
     //Ref
