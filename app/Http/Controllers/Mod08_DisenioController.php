@@ -182,7 +182,11 @@ class Mod08_DisenioController extends Controller
         return compact('material');
     }
 
-    public function lmdUpdate(){
-        $this->dispatch(new LdmUpdate());
+    public function ldmUpdate(){
+        for ($i=0; $i < 10; $i++) { 
+            # code...
+            $this->dispatch(new LdmUpdate());
+        }
+        return 'HEllo';
     }
 }

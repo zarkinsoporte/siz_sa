@@ -845,10 +845,14 @@ class SAP extends Model
 
         //Modificar los campos en el XML (de un articulo de la LDM)
         $item = $oXML->xpath('/BOM/BO/ProductTrees_Lines/row[ItemCode="20189"]');
-        if (count($item) == 1) {
-            $item[0]->Quantity = '3';
+
+        if (count($item) >= 1) {
+            foreach ($item as $i) {
+                $i->Quantity = '7';
+            }
         } else {
-            return 'articulo no encontrado';
+
+            throw new \Exception("Error Processing ldmUpdate", 1);
         }
 
         //Cargar el XML en la LDM y actualizar en SAP
@@ -858,14 +862,16 @@ class SAP extends Model
         $vItem->Browser->ReadXml($oXML->asXML(), 0);
         // $vItem->UpdateFromXML($pathh);
         $resultadoOperacion = $vItem->Update;
-
+        if ($resultadoOperacion <> 0) {
+            throw new \Exception( $vCmp->GetLastErrorDescription(), 1);
+        } 
         $vCmp->Disconnect;
         $vCmp = null;
         $vItem = null;
         $xmlString = null;
         $oXML = null;
         $item = null;
-        return $resultadoOperacion;
+        $resultadoOperacion = null;
     }
 }
 /*
