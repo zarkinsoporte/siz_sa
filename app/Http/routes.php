@@ -445,7 +445,7 @@ Route::get('edit-xml', function(){
     //elaborar XML y escribirlo en archivo
     $library->asXML($pathh);
 });
-Route::get('test_queue', 'Mod08_DisenioController@ldmUpdate');
+//Route::get('test_queue', 'Mod08_DisenioController@ldmUpdate');
 
 Route::get('/sap', function (Request $request) {
     //Ref
@@ -611,3 +611,10 @@ Route::any('datatables_donde_usado', 'Mod04_MaterialesController@datatables_dond
 Route::get('home/BACKORDER_HULE', 'Reportes_ProduccionController@backorderHule')->middleware('routelog');
 Route::get('datatables.showbackorderhule', 'Reportes_ProduccionController@DataShowbackorderHule')->name('datatables.showbackorderhule');
 Route::get('home/reporte/backorderHulePDF', 'Reportes_ProduccionController@ReporteBackOrderHulePDF');
+
+//Mantenimiento LDM
+Route::get('home/MTTO_LDM', 'Mod08_DisenioController@mtto_ldm')->middleware('routelog');
+Route::any('datatables_mtto_ldm', 'Mod08_DisenioController@datatables_mtto_ldm')->name('datatables_mtto_ldm');
+Route::any('actualizarCantidad_mtto_ldm', 'Mod08_DisenioController@actualizarCantidad_mtto_ldm')->name('actualizarCantidad_mtto_ldm');
+Route::any('mtto_ldm_combobox_articulos', 'Mod08_DisenioController@mtto_ldm_combobox_articulos')->name('mtto_ldm_combobox_articulos');
+

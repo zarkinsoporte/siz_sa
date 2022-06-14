@@ -11,15 +11,18 @@ use \COM;
 class LdmUpdate extends Job implements SelfHandling, ShouldQueue
 {
     use InteractsWithQueue, SerializesModels;
-
+    protected $codigo_origen, $codigo, $cantidad, $delete_option;
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($codigo, $codigo_origen, $cantidad, $delete_option)
     {
-        //
+        $this->codigo = $codigo;
+        $this->codigo_origen = $codigo_origen;
+        $this->cantidad = $cantidad;
+        $this->delete_option = $delete_option;
     }
 
     /**
@@ -53,7 +56,7 @@ class LdmUpdate extends Job implements SelfHandling, ShouldQueue
         //Obtener XML de un LDM 
         $vCmp->XmlExportType = '3'; //BoXmlExportTypes.xet_ExportImportMode; /solo los campos modificables
         $vItem = $vCmp->GetBusinessObject("66"); //ProductTrees table: OITT.
-        $vItem->GetByKey("20185"); //LDM Docentry
+        $vItem->GetByKey($codigo_origen.''); //LDM Docentry
         //$vItem->SaveXML($pathh); //Guardar en archivo
         $xmlString = $vItem->GetAsXML(); //Guardar XML en buffer
         //retiramos Utf16 del XML obtenido
@@ -63,20 +66,22 @@ class LdmUpdate extends Job implements SelfHandling, ShouldQueue
         //$library = simplexml_load_file($pathh); //Crear Object SimpleXML de un archivo
 
         //Modificar los campos en el XML (de un articulo de la LDM)
-        $item = $oXML->xpath('/BOM/BO/ProductTrees_Lines/row[ItemCode="20189"]');
-
-        if (count($item) >= 1) {
-            foreach ($item as $i) {
-                $i->Quantity = '1';
+        $item = $oXML->xpath('/BOM/BO/ProductTrees_Lines/row[ItemCode="'.$codigo.'"]');
+        
+        if ( $delete_option && !empty($item)) {
+            unset($item[0][0]);
+        } else{
+            if (count($item) >= 1 && !empty($item)) {
+                foreach ($item as $i) {
+                    $i->Quantity = $cantidad.'';
+                }
+            } else {
+                throw new \Exception("Error Processing ldmUpdate, item no encontrado", 1);
             }
-        } else {
-
-            throw new \Exception("Error Processing ldmUpdate", 1);
         }
 
         //Cargar el XML en la LDM y actualizar en SAP
         //$library->asXML($pathh); //Elaborar y Escribir el XML
-
         //To use ReadXML method, set the XmlExportType to xet_ExportImportMode (3).
         $vItem->Browser->ReadXml($oXML->asXML(), 0);
         // $vItem->UpdateFromXML($pathh);
@@ -92,9 +97,10 @@ class LdmUpdate extends Job implements SelfHandling, ShouldQueue
         $item = null;
         $resultadoOperacion = null;
 
-           } catch (\Exception $e) {
-               dd($e->getMessage());
-           }
+        } catch (\Exception $e) {
+            throw new \Exception("Error Processing ldmUpdate ". $e , 1);
+            
+        }
         
     }
 }

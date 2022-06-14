@@ -189,4 +189,76 @@ class Mod08_DisenioController extends Controller
         }
         return 'HEllo';
     }
+
+    public function mtto_ldm()
+    {
+        $user = Auth::user();
+        $actividades = $user->getTareas();
+        $data = array(
+            'actividades' => $actividades,
+            'tipomat' => ['CA', 'MP', 'SP', 'RF', 'HB'],
+            'articulos' => [],
+            'ultimo' => count($actividades),                
+        );
+        return view('Mod08_Disenio.mtto_ldm', $data);
+       
+    }
+
+    public function datatables_mtto_ldm(Request $request)
+    {
+
+        $codigo = $request->get('codigo');
+        
+            $consulta = DB::select("SELECT T0.[Father] codigo_origen ,T2.[ItemName] as descripcion_origen, 
+            T0.[Code] codigo, 
+            T1.[ItemName] descripcion, T0.[Quantity] cantidad,T1.[invntryuom] as um,T0.[Price] precio, T0.[Quantity]*T0.[Price] as consumo 
+            FROM ITT1 T0 
+            INNER JOIN OITM T1 ON T0.Code = T1.ItemCode
+            left join OITM T2 on  T0.father = T2.ItemCode 
+            WHERE T0.[Code] = ?", [$codigo]);
+        
+        //dd(DB::getQueryLog());
+        return response()->json(array('arts' => $consulta));
+    }
+
+    public function mtto_ldm_combobox_articulos(Request $request)
+    {
+        //DB::connection()->enableQueryLog();
+        $q = "SELECT OITM.ItemCode, OITM.ItemCode +' - '+ OITM.ItemName AS descr
+            from OITM  
+            WHERE ValidFor = 'Y' and FrozenFor = 'N' and OITM.U_TipoMat = ?
+            GROUP BY OITM.ItemCode, OITM.ItemName
+            order by OITM.ItemName";
+        $oitms = DB::select($q, [$request->get('tipomat')]);
+        //dd(DB::getQueryLog());
+        return compact('oitms');
+    }
+
+    public function actualizarCantidad_mtto_ldm(Request $request){
+        $articulos = $request->input('articulos');
+        $input_update = $request->input('input_update');
+        $input_modificacion = $request->input('input_modificacion');
+        $option = $request->input('option');
+        $codigo = $request->input('codigo');
+        $delete_option = false;
+        $articulos = explode(',', $articulos);            
+        $mensajeErr= '-';
+        foreach ($articulos as $key => $articulo) {
+            $pos = explode('&',$articulo);
+            
+            $codigo_origen = $pos[0];
+            $cantidad = $pos[1];
+
+            if ($option == '1') { 
+                $cantidad = $input_update;
+            } else if ($option == '2') { 
+                $cantidad += $cantidad * ( $input_modificacion / 100 );
+            } else if ($option == '3') {
+                $delete_option = true;
+            }
+            $this->dispatch(new LdmUpdate($codigo, $codigo_origen, $cantidad, $delete_option));
+            
+        }
+        return compact('mensajeErr');
+    }
 }
