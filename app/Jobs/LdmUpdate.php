@@ -8,10 +8,14 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Bus\SelfHandling;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use \COM;
+use App\LOG;
 class LdmUpdate extends Job implements SelfHandling, ShouldQueue
 {
     use InteractsWithQueue, SerializesModels;
-    protected $codigo_origen, $codigo, $cantidad, $delete_option;
+    protected $codigo_origen;
+    protected $codigo;
+    protected $cantidad;
+    protected $delete_option;
     /**
      * Create a new job instance.
      *
@@ -30,8 +34,10 @@ class LdmUpdate extends Job implements SelfHandling, ShouldQueue
      *
      * @return void
      */
-    public function handle()
+    
+     public function handle()
     {
+         //dd($this->codigo_origen);
         try{
             //Ref
         //https://answers.sap.com/questions/1448088/using-xml-to-update-objects-in-diapi.html
@@ -56,7 +62,8 @@ class LdmUpdate extends Job implements SelfHandling, ShouldQueue
         //Obtener XML de un LDM 
         $vCmp->XmlExportType = '3'; //BoXmlExportTypes.xet_ExportImportMode; /solo los campos modificables
         $vItem = $vCmp->GetBusinessObject("66"); //ProductTrees table: OITT.
-        $vItem->GetByKey($codigo_origen.''); //LDM Docentry
+        $vItem->GetByKey($this->codigo_origen.''); //LDM Docentry
+        //$pathh = public_path('assets/xml/sap/ldm/20185.xml');
         //$vItem->SaveXML($pathh); //Guardar en archivo
         $xmlString = $vItem->GetAsXML(); //Guardar XML en buffer
         //retiramos Utf16 del XML obtenido
@@ -66,17 +73,18 @@ class LdmUpdate extends Job implements SelfHandling, ShouldQueue
         //$library = simplexml_load_file($pathh); //Crear Object SimpleXML de un archivo
 
         //Modificar los campos en el XML (de un articulo de la LDM)
-        $item = $oXML->xpath('/BOM/BO/ProductTrees_Lines/row[ItemCode="'.$codigo.'"]');
-        
-        if ( $delete_option && !empty($item)) {
+        $item = $oXML->xpath('/BOM/BO/ProductTrees_Lines/row[ItemCode="'.$this->codigo.'"]');
+       // clock($item);
+        if ( $this->delete_option && !empty($item)) {
             unset($item[0][0]);
         } else{
             if (count($item) >= 1 && !empty($item)) {
                 foreach ($item as $i) {
-                    $i->Quantity = $cantidad.'';
+                    $i->Quantity =  $this->cantidad.'';
+                   // clock($this->cantidad);
                 }
             } else {
-                throw new \Exception("Error Processing ldmUpdate, item no encontrado", 1);
+              throw new \Exception("Error Processing ldmUpdate, item no encontrado", 1);
             }
         }
 
@@ -86,6 +94,7 @@ class LdmUpdate extends Job implements SelfHandling, ShouldQueue
         $vItem->Browser->ReadXml($oXML->asXML(), 0);
         // $vItem->UpdateFromXML($pathh);
         $resultadoOperacion = $vItem->Update;
+
         if ($resultadoOperacion <> 0) {
             throw new \Exception( $vCmp->GetLastErrorDescription(), 1);
         } 

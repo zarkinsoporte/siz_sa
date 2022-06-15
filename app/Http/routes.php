@@ -428,7 +428,7 @@ Route::get('/crear-orden', 'Mod02_PlaneacionController@crearOrden');
 
 Route::get('edit-xml', function(){
     
-    $pathh = public_path('assets/xml/sap/ldm/20185.xml'); //"C:\Users\Administrador\Documents\fileName.xml";
+     $pathh = public_path('assets/xml/sap/ldm/20185.xml');//"C:\Users\Administrador\Documents\fileName.xml";
     
     //$xmlString = file_get_contents($pathh); //leer archivo
     //$library = simplexml_load_string($xmlString); //crear object SimpleXML
@@ -445,7 +445,7 @@ Route::get('edit-xml', function(){
     //elaborar XML y escribirlo en archivo
     $library->asXML($pathh);
 });
-//Route::get('test_queue', 'Mod08_DisenioController@ldmUpdate');
+Route::get('test_queue', 'Mod08_DisenioController@ldmUpdate');
 
 Route::get('/sap', function (Request $request) {
     //Ref
@@ -467,7 +467,7 @@ Route::get('/sap', function (Request $request) {
     
     //$vCmp->language = "6";
     $vCmp->Connect; //conectar a Sociedad SAP
-    
+    dd($vCmp->GetLastErrorDescription());
     //Obtener XML de un LDM 
         $vCmp->XmlExportType = '3'; //BoXmlExportTypes.xet_ExportImportMode; /solo los campos modificables
         $vItem = $vCmp->GetBusinessObject("66"); //ProductTrees table: OITT.

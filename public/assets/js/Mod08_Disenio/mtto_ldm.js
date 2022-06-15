@@ -461,7 +461,18 @@
                              'font-size': '14px'
                          });
                      } else {
-
+                        bootbox.dialog({
+                            title: "Mensaje",
+                            message: "<div class='alert alert-success m-b-0'>Los cambios se realizarán en breve...</div>",
+                            buttons: {
+                                success: {
+                                    label: "Ok",
+                                    className: "btn-success m-r-5 m-b-5"
+                                }
+                            }
+                        }).find('.modal-content').css({
+                            'font-size': '14px'
+                        });   
                      }
                  }
              });

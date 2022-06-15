@@ -183,11 +183,10 @@ class Mod08_DisenioController extends Controller
     }
 
     public function ldmUpdate(){
-        for ($i=0; $i < 10; $i++) { 
-            # code...
-            $this->dispatch(new LdmUpdate());
-        }
-        return 'HEllo';
+        
+        $var = $this->dispatch(new LdmUpdate('19732','383124-ESTRUCTURA', 8, false));
+        
+        return $var;
     }
 
     public function mtto_ldm()
