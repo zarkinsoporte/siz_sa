@@ -49,7 +49,7 @@
                                 <div class="col-md-2">
                                     <p style="margin-bottom: 23px"></p>
                                     <a style="margin-right: 5px;" id="btn_enviar" class="btn btn-success btn-sm" data-operacion='1'><i
-                                        class="fa fa-send"></i> Actualizar <span class="badge"></span></a>
+                                        class="fa fa-send"></i> Programar Cambios <span class="badge"></span></a>
                                 </div>
                             </div>
                         </div>  

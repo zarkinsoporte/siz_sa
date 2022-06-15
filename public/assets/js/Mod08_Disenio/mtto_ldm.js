@@ -95,6 +95,33 @@
                      var $badge = $('#btn_enviar').find('.badge');
                      $badge.text(count);
                  }
+             },
+             {
+                 text: '<i class="fa fa-refresh"></i>',
+                 titleAttr: 'recargar',
+                 action: function () {
+                    if ($("#sel_articulos").val() == '') {
+                        bootbox.dialog({
+                            title: "Mensaje",
+                            message: "<div class='alert alert-danger m-b-0'>Seleccionar artículo.</div>",
+                            buttons: {
+                                success: {
+                                    label: "Ok",
+                                    className: "btn-success m-r-5 m-b-5"
+                                }
+                            }
+                        }).find('.modal-content').css({
+                            'font-size': '14px'
+                        });
+                    } else {
+                        reload_tabla_arts(true);
+                        var count = table.rows('.selected').count();
+                        var $badge = $('#btn_enviar').find('.badge');
+                        $badge.text(count);
+                    }
+                        
+                   
+                 }
              }
 
          ],
