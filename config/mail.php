@@ -54,7 +54,7 @@ return [
     |
     */
 
-    'from' => ['address' => 'siz.zarkin2018@gmail.com', 'name' => 'Zarkin Sistemas '],
+    'from' => ['address' => 'zarkinsoporte@gmail.com', 'name' => 'Zarkin Sistemas '],
 
     /*
     |--------------------------------------------------------------------------
