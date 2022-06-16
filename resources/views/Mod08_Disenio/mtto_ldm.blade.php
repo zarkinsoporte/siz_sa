@@ -53,11 +53,7 @@
                                     <a style="" id="btn_enviar" class="btn btn-success btn-sm" data-operacion='1'><i
                                         class="fa fa-send"></i> Programar Cambios <span class="badge"></span></a>
                                 </div>
-                                <div class="col-md-2">
-                                    <p style="margin-bottom: 23px"></p>
-                                    <a style="" id="btn_pendientes" class="btn btn-success btn-sm"><i
-                                        class="fa fa-check"></i> Cambios Pendientes </a>
-                                </div>
+                                
                             </div>
                         </div>  
                         <div class="col-md-12 ">
@@ -130,27 +126,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="modal fade" id="cambios_pendientes" tabindex="-1" role="dialog">
-                        <div class="modal-dialog modal-md" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                            aria-hidden="true">&times;</span></button>
-                                    <h4 class="modal-title" > Cambios Pendientes</h4>
-                                </div>
-    
-                                <div class="modal-body" style='padding:16px'>
-                                     
-                                                                                       
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-succes" data-dismiss="modal">Cerrar</button>
-                                    
-                                </div>
-                    
-                            </div>
-                        </div>
-                    </div>
+                   
 
                     @endsection
 

@@ -16,17 +16,19 @@ class LdmUpdate extends Job implements SelfHandling, ShouldQueue
     protected $codigo;
     protected $cantidad;
     protected $delete_option;
+    public $user_nomina;
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($codigo, $codigo_origen, $cantidad, $delete_option)
+    public function __construct($codigo, $codigo_origen, $cantidad, $delete_option, $user_nomina)
     {
         $this->codigo = $codigo;
         $this->codigo_origen = $codigo_origen;
         $this->cantidad = $cantidad;
         $this->delete_option = $delete_option;
+        $this->user_nomina = $user_nomina;
     }
 
     /**
@@ -67,7 +69,7 @@ class LdmUpdate extends Job implements SelfHandling, ShouldQueue
         //$vItem->SaveXML($pathh); //Guardar en archivo
         $xmlString = $vItem->GetAsXML(); //Guardar XML en buffer
         //retiramos Utf16 del XML obtenido
-        $xmlString = preg_replace('/(<\?xml[^?]+?)utf-16/i', '$1utf-8', $xmlString);
+        $xmlString = utf8_encode(preg_replace('/(<\?xml[^?]+?)utf-16/i', '$1utf-8', $xmlString));
         //Leemos XML(string) y creamos Object SimpleXML 
         $oXML = simplexml_load_string($xmlString);
         //$library = simplexml_load_file($pathh); //Crear Object SimpleXML de un archivo

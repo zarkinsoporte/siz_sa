@@ -183,8 +183,8 @@ class Mod08_DisenioController extends Controller
     }
 
     public function ldmUpdate(){
-        
-        $var = $this->dispatch(new LdmUpdate('19732','383124-ESTRUCTURA', 8, false));
+        $user = Auth::user()->U_EmpGiro;
+        $var = $this->dispatch(new LdmUpdate('19732','383124-ESTRUCTURA', 8, false, $user));
         
         return $var;
     }
@@ -255,7 +255,8 @@ class Mod08_DisenioController extends Controller
             } else if ($option == '3') {
                 $delete_option = true;
             }
-            $this->dispatch(new LdmUpdate($codigo, $codigo_origen, $cantidad, $delete_option));
+            $user = Auth::user()->U_EmpGiro;
+            $this->dispatch(new LdmUpdate($codigo, $codigo_origen, $cantidad, $delete_option, $user));
             
         }
         return compact('mensajeErr');
