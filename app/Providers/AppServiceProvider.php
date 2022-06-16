@@ -2,8 +2,9 @@
 
 namespace App\Providers;
 
+use Queue;
 use Illuminate\Support\ServiceProvider;
-
+use App\Jobs\LdmNotification;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -13,7 +14,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        Queue::after(function ($connection, $job, $data) {
+            clock($connection, $job, $data, $job->getName());
+            //$this->dispatch(new LdmNotification('Beto', 'alberto.medina@zarkin.com'));
+        });
     }
 
     /**

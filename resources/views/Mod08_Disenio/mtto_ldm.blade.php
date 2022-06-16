@@ -10,7 +10,9 @@
 <style>
     /* ajusta el encabezado de las columnas de la tabla al ocultar la barra de Menu */
     .dataTables_scrollHeadInner, .table{ width:100%!important; }
-
+    .col-md-2 {
+    width: auto;
+    }
 </style>
           
                 <div class="container" >
@@ -48,8 +50,13 @@
 
                                 <div class="col-md-2">
                                     <p style="margin-bottom: 23px"></p>
-                                    <a style="margin-right: 5px;" id="btn_enviar" class="btn btn-success btn-sm" data-operacion='1'><i
+                                    <a style="" id="btn_enviar" class="btn btn-success btn-sm" data-operacion='1'><i
                                         class="fa fa-send"></i> Programar Cambios <span class="badge"></span></a>
+                                </div>
+                                <div class="col-md-2">
+                                    <p style="margin-bottom: 23px"></p>
+                                    <a style="" id="btn_pendientes" class="btn btn-success btn-sm"><i
+                                        class="fa fa-check"></i> Cambios Pendientes </a>
                                 </div>
                             </div>
                         </div>  
@@ -118,6 +125,27 @@
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
                                     <button id='btn_modificacion'class="btn btn-primary"> Guardar</button>
+                                </div>
+                    
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal fade" id="cambios_pendientes" tabindex="-1" role="dialog">
+                        <div class="modal-dialog modal-md" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                            aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title" > Cambios Pendientes</h4>
+                                </div>
+    
+                                <div class="modal-body" style='padding:16px'>
+                                     
+                                                                                       
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-succes" data-dismiss="modal">Cerrar</button>
+                                    
                                 </div>
                     
                             </div>
