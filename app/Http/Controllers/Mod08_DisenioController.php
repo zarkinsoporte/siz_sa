@@ -229,17 +229,29 @@ class Mod08_DisenioController extends Controller
             GROUP BY OITM.ItemCode, OITM.ItemName
             order by OITM.ItemName";
         $oitms = DB::select($q, [$request->get('tipomat')]);
+        $oitms2 = [];
+        if ($request->get('carga_combo_modal')) {
+            $q = "SELECT OITM.ItemCode, OITM.ItemCode +' - '+ OITM.ItemName AS descr
+                from OITM  
+                WHERE ValidFor = 'Y' and FrozenFor = 'N'
+                GROUP BY OITM.ItemCode, OITM.ItemName
+                order by OITM.ItemName";
+            $oitms2 = DB::select($q);
+        }
         //dd(DB::getQueryLog());
-        return compact('oitms');
+        return compact('oitms', 'oitms2');
     }
 
     public function actualizarCantidad_mtto_ldm(Request $request){
         $articulos = $request->input('articulos');
         $input_update = $request->input('input_update');
         $input_modificacion = $request->input('input_modificacion');
+        $input_factor = $request->input('input_factor');
         $option = $request->input('option');
         $codigo = $request->input('codigo');
+        $codigo_cambio = $request->input('codigo_cambio');
         $delete_option = false;
+        $cambio_option = false;
         $articulos = explode(',', $articulos);            
         $mensajeErr= '-';
         foreach ($articulos as $key => $articulo) {
@@ -254,9 +266,12 @@ class Mod08_DisenioController extends Controller
                 $cantidad += $cantidad * ( $input_modificacion / 100 );
             } else if ($option == '3') {
                 $delete_option = true;
+            } else if ($option == '4') {
+                $cantidad += $cantidad * ($input_factor);
+                $cambio_option = true;                
             }
             $user = Auth::user()->U_EmpGiro;
-            $this->dispatch(new LdmUpdate($codigo, $codigo_origen, $cantidad, $delete_option, $user));
+            $this->dispatch(new LdmUpdate($codigo, $codigo_origen, $cantidad, $delete_option, $cambio_option, $user));
             
         }
         return compact('mensajeErr');

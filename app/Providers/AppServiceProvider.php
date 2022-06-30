@@ -19,12 +19,19 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        //cualquier cambio en archivos de Colas, debemos hacer:
+        //php artisan config:cache
+        //php artisan queue:restart
+        //TAREAS PROGRAMADAS TIENE UN PROCESO PARA EJECUTAR LOS JOBS
+        //use en pruebas para arrancar el proceso "php artisan queue:work --daemon"
+        //ISW Beto Jimenez
+        //se ejecuta despues de cada job 
+        //cualquier problema lo podemos detectar en el archivo storage/logs/laravel.log
         Queue::after(function ($connection, $job, $data) {
-           //https://stackoverflow.com/questions/42558903/expected-response-code-250-but-got-code-535-with-message-535-5-7-8-username
-            if ($job->getQueue() == 'LdmUpdate') {
-                # code...
-                
-                //$this->dispatch(new LdmNotification('Beto', 'alberto.medina@zarkin.com'));
+           
+           //verificamos que sean solo jobs de la cola LdmUpdate
+           if ($job->getQueue() == 'LdmUpdate') {
+                //cuando sea el ultimo job de esta cola procedemos a enviar el correo al usuario del job
                 $jobs = DB::select("SELECT queue from jobs
                 where queue = 'LdmUpdate'");
                 if (count($jobs) == 0) {

@@ -69,8 +69,7 @@
                                                 <th>Descripción Origen</th>
                                                                                   
                                                 <th>UM</th>         
-                                                <th>Cantidad</th>         
-                                                <th>Precio</th>         
+                                                <th>Cantidad</th>       
                                             </tr>
                                         </thead>
                                     </table>
@@ -79,43 +78,50 @@
                     </div>                     
                 </div>   <!-- /.container -->
                     <div class="modal fade" id="updateprogramar" tabindex="-1" role="dialog">
-                        <div class="modal-dialog modal-sm" role="document">
+                        <div class="modal-dialog modal-lg" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                                             aria-hidden="true">&times;</span></button>
-                                    <h4 class="modal-title" > Modificación LDM</h4>
+                                    <h4 class="modal-title" > Modificación LDM <b id="descripcion_articulo"></b></h4>
                                 </div>
     
                                 <div class="modal-body" style='padding:16px'>
                                     
                                             <div class="row">
-                                                <div class="col-md-12">
+                                                <div class="col-md-6">
                                                     <div class="form-group">
                                                         <input class="form-check-input" type="radio" name="r1" id="ch1" value="1" checked>
                                                         <label for="fecha_provision">Nueva Cantidad:</label>
                                                         <input  type="number" id="input_update" name="input_update" min=".0001" step=".0001" class='form-control' autocomplete="off">
                                                     </div>
-                                                </div>
-                                                
-                                            </div><!-- /.row -->
-                                            
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <div class="form-group">
+                                                    <div class="form-group">    
                                                         <input class="form-check-input" type="radio" name="r1" id="ch2" value="2" >
                                                         <label for="fecha_provision">Incrementar /decrementar %</label>
                                                         <input  type="number" id="input_modificacion" name="input_modificacion" min="-99" max="100" class='form-control' autocomplete="off">
                                                     </div>
+                                                    <div class="form-group">    
+                                                        <input class="form-check-input" type="radio" name="r1" id="ch3" value="3">
+                                                        <label for="fecha_provision">Borrar de LDM</label>
+                                                    </div>
                                                 </div>
-                                               
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <input class="form-check-input" type="radio" name="r1" id="ch4" value="4">
+                                                        <label for="sel_articulos">Cambiar Artículo por:</label>
+                                                        {!! Form::select("sel_articulos2", $articulos, null, [
+                                                            "data-selected-text-format"=>"count", "class" => "form-control selectpicker","id"
+                                                            =>"sel_articulos2", "data-size" => "5", "data-style" => "btn-success btn-sm",
+                                                            'data-live-search' => 'true', 'title'=>"Selecciona..."])
+                                                        !!}
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="fecha_provision">Factor:</label>
+                                                        <input value="1" type="number" id="input_factor" name="input_factor" min="1" step=".0001" class='form-control'
+                                                            autocomplete="off">
+                                                    </div>
+                                                </div>
                                             </div><!-- /.row -->
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <input class="form-check-input" type="radio" name="r1" id="ch3" value="3">
-                                                    <label for="fecha_provision">Borrar de LDM</label>
-                                                </div>
-                                            </div>
                                                                                        
                                 </div>
                                 <div class="modal-footer">

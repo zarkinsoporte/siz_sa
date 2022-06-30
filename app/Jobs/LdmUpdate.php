@@ -16,18 +16,20 @@ class LdmUpdate extends Job implements SelfHandling, ShouldQueue
     protected $codigo;
     protected $cantidad;
     protected $delete_option;
+    protected $cambio_option;
     public $user_nomina;
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($codigo, $codigo_origen, $cantidad, $delete_option, $user_nomina)
+    public function __construct($codigo, $codigo_origen, $cantidad, $delete_option, $cambio_option, $user_nomina)
     {
         $this->codigo = $codigo;
         $this->codigo_origen = $codigo_origen;
         $this->cantidad = $cantidad;
         $this->delete_option = $delete_option;
+        $this->cambio_option = $cambio_option;
         $this->user_nomina = $user_nomina;
     }
 
@@ -76,8 +78,38 @@ class LdmUpdate extends Job implements SelfHandling, ShouldQueue
 
         //Modificar los campos en el XML (de un articulo de la LDM)
         $item = $oXML->xpath('/BOM/BO/ProductTrees_Lines/row[ItemCode="'.$this->codigo.'"]');
-       // clock($item);
-        if ( $this->delete_option && !empty($item)) {
+        // clock($item);
+        if ($this->cambio_option) {
+            $items_root = $oXML->xpath('/BOM/BO/ProductTrees_Lines');
+            if (count($item) >= 1 && !empty($item)) {                
+                foreach ($item as $i) {
+                       /*  $pelicula = $items_root->addChild('pelicula');
+                        $pelicula->addChild('ItemCode', $this->codigo);
+                         $pelicula->addChild('Warehouse', 'APG-ST');*/
+                    
+           /*          <ItemCode>20189</ItemCode>
+<Quantity>1.300000</Quantity>
+<Warehouse>APG-ST</Warehouse>
+<Price>119.700000</Price>
+<Currency>MXP</Currency>
+<IssueMethod>im_Backflush</IssueMethod>
+<ParentItem>20185</ParentItem>
+<PriceList>1</PriceList>
+<ItemType>pit_Item</ItemType>
+<AdditionalQuantity>0.000000</AdditionalQuantity>
+<ChildNum>0</ChildNum>
+<ItemName>HE, 17E</ItemName>
+<U_Estacion>145</U_Estacion> */
+
+                        $i->Quantity =  $this->cantidad . '';
+                        $i->ItemName = '';
+                        $i->Price = '';
+                        $i->ItemCode =  $this->codigo . '';
+                }
+            } else {
+                throw new \Exception("Error Processing ldmUpdate, item no encontrado", 1);
+            }
+        }else if ( $this->delete_option && !empty($item)) {
             unset($item[0][0]);
         } else{
             if (count($item) >= 1 && !empty($item)) {

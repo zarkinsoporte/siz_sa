@@ -47,15 +47,23 @@
         noneResultsText: 'Ningún resultado coincide',
         countSelectedText: '{0} de {1} seleccionados'
     });
+     $("#input_factor").click(function () {
+         $("#ch1").prop("checked", false);
+         $("#ch2").prop("checked", false);
+         $("#ch3").prop("checked", false);
+         $("#ch4").prop("checked", true);
+     });
      $("#input_update").click(function () {
          $("#ch1").prop("checked", true);
          $("#ch2").prop("checked", false);
          $("#ch3").prop("checked", false);
+         $("#ch4").prop("checked", false);
      });
      $("#input_modificacion").click(function () {
          $("#ch2").prop("checked", true);
          $("#ch1").prop("checked", false);
          $("#ch3").prop("checked", false);
+         $("#ch4").prop("checked", false);
      });
      //$(window).on('load', function () {
      var wrapper = $('#page-wrapper');
@@ -140,11 +148,7 @@
              },
              {
                  data: "cantidad"
-             },
-             {
-                 data: "precio"
              }
-
          ],
          'columnDefs': [{
 
@@ -160,26 +164,6 @@
                      } else {
 
                          return '';
-
-                     }
-
-                 }
-
-             },
-             {
-
-                 "targets": [4],
-                 "searchable": false,
-                 "orderable": false,
-                 "render": function (data, type, row) {
-
-                     if (row['precio'] != '') {
-
-                         return number_format(row['precio'], 2, '.', ',');
-
-                     } else {
-
-                         return '0.00';
 
                      }
 
@@ -240,6 +224,7 @@
          $("#ch1").prop("checked", true);
          $("#ch2").prop("checked", false);
          $("#ch3").prop("checked", false);
+         $("#ch4").prop("checked", false);
          $('#updateprogramar').modal('show');
 
 
@@ -290,6 +275,7 @@
              $("#ch1").prop("checked", true);
              $("#ch2").prop("checked", false);
              $("#ch3").prop("checked", false);
+             $("#ch4").prop("checked", false);
              $('#updateprogramar').modal('show');
          }
      }
@@ -328,27 +314,51 @@
                  });
              } else {
                  click_programar(2);
+             }         
+         } else if ($("#ch4").is(":checked")){
+             if ($('#input_factor').val() == '' || $('#sel_articulos2').val() == '') {
+                 bootbox.dialog({
+                     title: "Mensaje",
+                     message: "<div class='alert alert-danger m-b-0'>Factor no capturado o artículo no seleccionado.</div>",
+                     buttons: {
+                         success: {
+                             label: "Ok",
+                             className: "btn-success m-r-5 m-b-5"
+                         }
+                     }
+                 }).find('.modal-content').css({
+                     'font-size': '14px'
+                 });
+             } else {
+                 click_programar(4);
              }
          } else {
              click_programar(3);
          }
      });
      
-     comboboxArticulos_reload();
+     comboboxArticulos_reload(true); //carga_combo_modal
      $("#sel_articulos").val('').selectpicker('refresh');
 
      $("#sel_tipomat").on("changed.bs.select", function (e, clickedIndex, newValue, oldValue) {
          e.preventDefault();
-         comboboxArticulos_reload();
+         comboboxArticulos_reload(false);
 
      });
      $("#sel_articulos").on("changed.bs.select", function (e, clickedIndex, newValue, oldValue) {
          e.preventDefault();
+         $('#descripcion_articulo').text($("#sel_articulos option:selected").text());
          reload_tabla_arts(true);
 
      });
-
-     function comboboxArticulos_reload() {
+     $("#sel_articulos2").on("changed.bs.select", function (e, clickedIndex, newValue, oldValue) {
+         e.preventDefault();
+        $("#ch1").prop("checked", false);
+        $("#ch2").prop("checked", false);
+        $("#ch3").prop("checked", false);
+        $("#ch4").prop("checked", true);
+     });
+     function comboboxArticulos_reload(carga_combo_modal) {
          $.ajax({
              type: 'POST',
              headers: {
@@ -356,7 +366,8 @@
              },
              data: {
                  "_token": tokenapp,
-                 tipomat: $("#sel_tipomat option:selected" ).text()
+                 tipomat: $("#sel_tipomat option:selected" ).text(),
+                 carga_combo_modal: carga_combo_modal
              },
              url: routeapp + "mtto_ldm_combobox_articulos",
              beforeSend: function () {
@@ -383,7 +394,7 @@
 
             },
              success: function (data) {
-                 console.log(data)
+                 //console.log(data)
                  options = [];
 
                  $("#sel_articulos").empty();
@@ -391,6 +402,7 @@
                      options.push('<option value="' + data.oitms[i]['ItemCode'] + '">' +
                          data.oitms[i]['descr'] + '</option>');
                  }
+
                  if (data.oitms.length <= 0) {
 
                  } else {
@@ -400,6 +412,22 @@
                  
                  $('#sel_articulos').selectpicker('refresh');
 
+                 options = [];
+
+                 $("#sel_articulos2").empty();
+                 for (var i = 0; i < data.oitms2.length; i++) {
+                     options.push('<option value="' + data.oitms2[i]['ItemCode'] + '">' +
+                         data.oitms2[i]['descr'] + '</option>');
+                 }
+
+                 if (data.oitms2.length <= 0) {
+
+                 } else {
+                     $('#sel_articulos2').append(options);
+                     //$('#sel_articulos option').attr("selected", "selected");
+                 }
+
+                 $('#sel_articulos2').selectpicker('refresh');
              }
          });
      }
@@ -431,8 +459,10 @@
                      articulos: ops,
                      input_update: $('#input_update').val(),                    
                      input_modificacion: $('#input_modificacion').val(),
+                     input_factor: $('#input_factor').val(),
                      option: option,
-                     codigo: $("#sel_articulos").val()
+                     codigo: $("#sel_articulos").val(),
+                     codigo_cambio: $("#sel_articulos2").val()
                  },
                  url: routeapp + "actualizarCantidad_mtto_ldm",
                  beforeSend: function () {
