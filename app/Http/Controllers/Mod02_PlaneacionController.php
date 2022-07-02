@@ -23,6 +23,7 @@ use App\OP;
 use App\Modelos\MOD01\LOGOF;
 use App\Modelos\MOD01\LOGOT;
 use Cache;
+use App\Jobs\ItemPrecioUpdate;
 ini_set("memory_limit", '512M');
 ini_set('max_execution_time', 0);
 class Mod02_PlaneacionController extends Controller
@@ -640,12 +641,12 @@ public function processRollout(Request $request){
         //    Cache::forever('roll', true);
                 $index = 1;
                 $priceList = (int) $request->input('priceList'); 
-                while ($index >= 1) {
+                //while ($index >= 1) {
                     $articulos = DB::select('exec SIZ_SP_ROLLOUT_SIMULADOR_COSTOS ?', [$priceList]);
                     
                     //clock($index.'-'.$priceList);
                     //clock($articulos);
-                   // clock(count($articulos));
+                    //clock(count($articulos));
                     if (count($articulos) > 0) {
                         
                         $mensajeErr= '';
@@ -653,13 +654,16 @@ public function processRollout(Request $request){
                             $codigo = $articulo->ItemCode;
                             $precio = $articulo->PRICE_SAVE;
                             $moneda = $articulo->MONEDA;
-                            $rs = SAP::updateItemPriceList($codigo, $priceList - 1, $precio, $moneda); 
+                            //$rs = SAP::updateItemPriceList($codigo, $priceList - 1, $precio, $moneda); 
                             //clock($codigo, $rs);
-                            if($rs !== 'ok'){
+                            /* if($rs !== 'ok'){
                                 $mensajeErr = 'Error : Art#'.$codigo.', SAP:'.$rs;
                                 $mensaje = $mensaje.$mensajeErr;
-                            }
-                            //break;
+                            } */
+                        //break;
+                        $user = Auth::user()->U_EmpGiro;
+                        $this->dispatch(new ItemPrecioUpdate($codigo, $priceList - 1, $precio, $moneda, $user));
+                        
                         }
                         $index++;
                         //clock($mensajeErr);
@@ -668,7 +672,7 @@ public function processRollout(Request $request){
                  //       Cache::forget('roll');
                     }
                     
-                }
+                //}//end while
             
         //} else {
        //     $mensaje = 'Aviso: existe otro ROLLOUT en proceso.';

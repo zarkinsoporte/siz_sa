@@ -223,7 +223,7 @@ li.dt-button.active a::before{
                     <a href="#"> {{Auth::user()->getPuesto()}}</a>
                     </li>
                     <li>
-                    <a href="{!! url('Mod01_Produccion/Noticias') !!}"><i class="fa fa-bell"></i> <span class="badge badge-danger"> {{Auth::user()->getCountNotificacion()}}</span></a>
+                    <a id="link_noticias" href="{!! url('Mod01_Produccion/Noticias') !!}"><i class="fa fa-bell "></i> <span class="badge badge-danger"> {{Auth::user()->getCountNotificacion()}}</span></a>
                     </li>  
                     <li class="dropdown">
 
@@ -280,6 +280,25 @@ li.dt-button.active a::before{
 
 <script>
     let routeapp = "{{url().'/'}}";
+    if("{{!Auth::user()->isProductionUser()}}"){
+
+        setInterval(ajaxCall, 300000); //300000
+    }
+    
+    function ajaxCall(){
+        $.ajax({
+                 type: 'GET',
+                 headers: {
+                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                 },
+                 url: routeapp + "cantnoticias",                 
+                 success: function (data) {
+                    var count = data.cantnoticias;
+                    var $badge = $('#link_noticias').find('.badge');
+                    $badge.text(count);
+                 }
+             });
+    }
     $(document).ready(js_iniciador);
     $( document ).ajaxError(function( event, jqxhr, settings, thrownError ) {
         if (jqxhr.status === 403) {
@@ -290,6 +309,7 @@ li.dt-button.active a::before{
                 });     
         }
     });
+
 </script>
   
 </html>

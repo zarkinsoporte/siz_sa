@@ -100,7 +100,7 @@ class HomeController extends Controller
     public function UPT_Noticias($id){     
        DB::table('Siz_Noticias')
         ->where('Id', $id)
-        ->update(['Leido' => 'Si']);
+        ->update(['Leido' => 'S']);
         $user = Auth::user();                
        return redirect()->back();
     }
@@ -109,6 +109,14 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Http\Response
 */
+public function cantnoticias(){
+        $cantnoticias = DB::select("SELECT autor.firstName + autor.lastName as autor, destin.firstName + destin.lastName as destinatario, n.* FROM Siz_Noticias n
+            inner join ohem autor on autor.U_EmpGiro = n.Autor
+            inner join ohem destin on destin.U_EmpGiro = n.Destinatario
+            WHERE Destinatario='790'and Leido='N'");
+        $cantnoticias = count($cantnoticias);
+        return compact('cantnoticias');
+}
     public function create(Request $request)
     { 
         $user = Auth::user();
@@ -116,9 +124,12 @@ class HomeController extends Controller
         $id_noticia=$request->input("id");
 
         $id_user=Auth::user()->U_EmpGiro;    
-        $noticias=DB::select(DB::raw("SELECT * FROM Siz_Noticias WHERE Destinatario='$id_user'and Leido='N'"));
+        $noticias=DB::select(DB::raw("SELECT autor.firstName + autor.lastName as autor, destin.firstName + destin.lastName as destinatario, n.* FROM Siz_Noticias n
+            inner join ohem autor on autor.U_EmpGiro = n.Autor
+            inner join ohem destin on destin.U_EmpGiro = n.Destinatario
+            WHERE Destinatario='790'and Leido='N'"));
 
-      return view('Mod01_Produccion/Noticias', ['actividades' => $actividades,'noticias' => $noticias,'id_user' => $id_user, 'ultimo' => count($actividades)]);
+      return view('Mod01_Produccion.Noticias', ['actividades' => $actividades,'noticias' => $noticias,'id_user' => $id_user, 'ultimo' => count($actividades)]);
     }
 
     public function showPdf($PdfName){

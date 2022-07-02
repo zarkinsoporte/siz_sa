@@ -158,6 +158,7 @@ Route::post('home/traslados/Reprocesos', 'Mod01_ProduccionController@Retroceso')
 Route::post('/', 'HomeController@index');
 Route::get('Mod01_Produccion/Noticias', 'HomeController@create');
 Route::get('leido/{id}', 'HomeController@UPT_Noticias');
+Route::get('cantnoticias', 'HomeController@cantnoticias');
 Route::post('/leido', 'HomeController@UPT_Noticias');
 //REPORTE DE PRODUCCION
 Route::get('home/REPORTE PRODUCCION', 'Reportes_ProduccionController@produccion1')->middleware('routelog');
@@ -412,15 +413,18 @@ Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@pr
 //Route::get('/pruebassap', 'Mod02_PlaneacionController@updateOV');
 
 Route::get('/pruebas', function (Request $request) {
-    
-    Session::flush();
-    DB::disconnect('sqlsrv');
-    Auth::logout();
-//AVANCE DE OP (NO PIEL)
-//Cuando una orden se libera en planeación revisamos si se le cargara piel 106 (revisando su ruta), 
-//en caso de que no lleve piel, entonces le cambiamos en status y le colocamos la fecha de inicio.
-//casco: 400 armado - 300 habilitado ()
-
+    DB::table('Siz_Noticias')->insert(
+        [
+            'Autor' => '7',
+            'Destinatario' => '790',
+            'Descripcion' => 'Hemos terminado de actualizar las Ldm...',
+            //  'Estacion_Act' => $Est_act,
+            //  'Estacion_Destino' => $Est_ant,
+            //  'Cant_Enviada'=>$cant_r,
+            //  'Nota' => $nota,
+            'Leido' => 'N',
+        ]
+    );
    
 });
 

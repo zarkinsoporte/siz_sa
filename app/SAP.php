@@ -15,6 +15,11 @@ class SAP extends Model
     private static $vCmp = false;
 
 
+    public static function destroy()
+    {
+        self::$vCmp = null;
+       
+    }
     public static function Connect()
     {
         self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
