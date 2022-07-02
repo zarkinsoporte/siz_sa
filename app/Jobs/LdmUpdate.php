@@ -9,11 +9,13 @@ use Illuminate\Contracts\Bus\SelfHandling;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use \COM;
 use App\LOG;
+use DB;
 class LdmUpdate extends Job implements SelfHandling, ShouldQueue
 {
     use InteractsWithQueue, SerializesModels;
     protected $codigo_origen;
     protected $codigo;
+    protected $codigo_cambio;
     protected $cantidad;
     protected $delete_option;
     protected $cambio_option;
@@ -23,9 +25,10 @@ class LdmUpdate extends Job implements SelfHandling, ShouldQueue
      *
      * @return void
      */
-    public function __construct($codigo, $codigo_origen, $cantidad, $delete_option, $cambio_option, $user_nomina)
+    public function __construct($codigo, $codigo_origen, $cantidad, $delete_option, $cambio_option, $codigo_cambio, $user_nomina)
     {
         $this->codigo = $codigo;
+        $this->codigo_cambio = $codigo_cambio;
         $this->codigo_origen = $codigo_origen;
         $this->cantidad = $cantidad;
         $this->delete_option = $delete_option;
@@ -80,8 +83,9 @@ class LdmUpdate extends Job implements SelfHandling, ShouldQueue
         $item = $oXML->xpath('/BOM/BO/ProductTrees_Lines/row[ItemCode="'.$this->codigo.'"]');
         // clock($item);
         if ($this->cambio_option) {
-            $items_root = $oXML->xpath('/BOM/BO/ProductTrees_Lines');
-            if (count($item) >= 1 && !empty($item)) {                
+            //$items_root = $oXML->xpath('/BOM/BO/ProductTrees_Lines');
+            if (count($item) >= 1 && !empty($item)) {    
+                $nombreItem = DB::table('OITM')->where('ItemCode', $this->codigo_cambio)->value('ItemName');            
                 foreach ($item as $i) {
                        /*  $pelicula = $items_root->addChild('pelicula');
                         $pelicula->addChild('ItemCode', $this->codigo);
@@ -102,9 +106,9 @@ class LdmUpdate extends Job implements SelfHandling, ShouldQueue
 <U_Estacion>145</U_Estacion> */
 
                         $i->Quantity =  $this->cantidad . '';
-                        $i->ItemName = '';
+                        $i->ItemName = $nombreItem;
                         $i->Price = '';
-                        $i->ItemCode =  $this->codigo . '';
+                        $i->ItemCode =  $this->codigo_cambio . '';
                 }
             } else {
                 throw new \Exception("Error Processing ldmUpdate, item no encontrado", 1);

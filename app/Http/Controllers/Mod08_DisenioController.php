@@ -267,11 +267,11 @@ class Mod08_DisenioController extends Controller
             } else if ($option == '3') {
                 $delete_option = true;
             } else if ($option == '4') {
-                $cantidad += $cantidad * ($input_factor);
+                $cantidad = $cantidad * ($input_factor);
                 $cambio_option = true;                
             }
             $user = Auth::user()->U_EmpGiro;
-            $this->dispatch(new LdmUpdate($codigo, $codigo_origen, $cantidad, $delete_option, $cambio_option, $user));
+            $this->dispatch(new LdmUpdate($codigo, $codigo_origen, $cantidad, $delete_option, $cambio_option, $codigo_cambio, $user));
             
         }
         return compact('mensajeErr');
