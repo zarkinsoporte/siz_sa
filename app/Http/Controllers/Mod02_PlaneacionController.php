@@ -662,7 +662,7 @@ public function processRollout(Request $request){
                             } */
                         //break;
                         $user = Auth::user()->U_EmpGiro;
-                        $this->dispatch(new ItemPrecioUpdate($codigo, $priceList - 1, $precio, $moneda, $user));
+                        $this->dispatch((new ItemPrecioUpdate($codigo, $priceList - 1, $precio, $moneda, $user))->onQueue('ItemPrecioUpdate'));
                         
                         }
                         $index++;

@@ -431,7 +431,7 @@
                     setTimeout($.unblockUI, 1500);
                    setTimeout( function () { bootbox.dialog({
                             title: "Mensaje",
-                            message: "<div class='alert alert-success m-b-0'>Proceso Terminado</div>",
+                            message: "<div class='alert alert-success m-b-0'>Proceso ROLLOUT iniciado, enviaremos una notificación al terminar...</div>",
                             buttons: {
                                 success: {
                                     label: "Ok",

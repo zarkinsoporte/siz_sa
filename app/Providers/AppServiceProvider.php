@@ -2,17 +2,19 @@
 
 namespace App\Providers;
 
+use DB;
 use Queue;
-use App\User;
 
+use App\User;
 use App\Jobs\LdmNotification;
 use App\Jobs\ItemPrecioUpdate;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
+    
     /**
      * Bootstrap any application services.
      *
@@ -69,8 +71,12 @@ class AppServiceProvider extends ServiceProvider
                 //cuando sea el ultimo job de esta cola procedemos a enviar el correo al usuario del job
                 $jobs = DB::select("SELECT queue from jobs
                 where queue = 'ItemPrecioUpdate'");
-                if (count($jobs) == 0) {
-                    $articulos = DB::select('exec SIZ_SP_ROLLOUT_SIMULADOR_COSTOS ?', [$priceList]);
+                if (count($jobs) <= 1) {
+                    $datos =  unserialize($data['data']['command']);
+                    Log::warning("countJobs .".count($jobs));
+                    Log::warning("priceList .".$datos->priceList);
+                    $articulos = DB::select('exec SIZ_SP_ROLLOUT_SIMULADOR_COSTOS ?', [(int)$datos->priceList]);
+                    Log::warning("countArts .".count($articulos));
                     if (count($articulos) > 0) {
                         foreach ($articulos as $key => $articulo) {
                             $codigo = $articulo->ItemCode;
@@ -84,10 +90,10 @@ class AppServiceProvider extends ServiceProvider
                             } */
                             //break;
                             $user = Auth::user()->U_EmpGiro;
-                            $this->dispatch(new ItemPrecioUpdate($codigo, $priceList - 1, $precio, $moneda, $user));
+                            $this->dispatch((new ItemPrecioUpdate($codigo, $priceList - 1, $precio, $moneda, $user))->onQueue('ItemPrecioUpdate'));
+                            Log::warning("dispatch ItemPrecioUpdate.".$codigo);
                         }
                     }else {
-                        $datos =  unserialize($data['data']['command']);
                         $user_nomina = $datos->user_nomina;
 
                         $user = User::find($user_nomina);

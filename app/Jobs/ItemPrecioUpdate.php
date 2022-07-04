@@ -14,9 +14,9 @@ class ItemPrecioUpdate extends Job implements SelfHandling, ShouldQueue
 {
     use InteractsWithQueue, SerializesModels;
     protected $codigo;
-    protected $priceList;
     protected $precio;
     protected $moneda;
+    public $priceList;
     public $user_nomina;
     /**
      * Create a new job instance.
@@ -39,6 +39,6 @@ class ItemPrecioUpdate extends Job implements SelfHandling, ShouldQueue
      */
     public function handle()
     {
-        SAP::updateItemPriceList($codigo, $priceList, $precio, $moneda);
+        SAP::updateItemPriceList($this->codigo, $this->priceList, $this->precio, $this->moneda);
     }
 }

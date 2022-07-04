@@ -184,7 +184,7 @@ class Mod08_DisenioController extends Controller
 
     public function ldmUpdate(){
         $user = Auth::user()->U_EmpGiro;
-        $var = $this->dispatch(new LdmUpdate('19732','383124-ESTRUCTURA', 8, false, $user));
+        $var = $this->dispatch((new LdmUpdate('19732','383124-ESTRUCTURA', 8, false, $user))->onQueue('LdmUpdate'));
         
         return $var;
     }
