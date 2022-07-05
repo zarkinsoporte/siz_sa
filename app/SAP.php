@@ -285,7 +285,7 @@ class SAP extends Model
         self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
         self::$vCmp->DbServerType = "10";
         self::$vCmp->server = env('SAP_server');;
-        self::$vCmp->LicenseServer = env('SAP_LicenseServer');
+        self::$vCmp->LicenseServer = env('SAP_LicenseServer','ZARKIN-088:30000');
         self::$vCmp->CompanyDB = env('SAP_CompanyDB');
         self::$vCmp->username = env('SAP_username');
         self::$vCmp->password = env('SAP_password');
