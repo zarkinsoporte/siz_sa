@@ -72,7 +72,7 @@
                                     <a style="margin-right: 5px;" id="btn_enviar" class="btn btn-success btn-sm" data-operacion='1'><i
                                         class="fa fa-send"></i> Actualizar <span class="badge"></span></a>
                                     @if (!$hide_rollout)
-                                        <button id="btn_rollout" style="margin-right: 5px;" type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#confirma">
+                                        <button id="btn_rollout" style="margin-right: 5px;" type="button" class="btn btn-success btn-sm">
                                             <i class="fa fa-cogs" aria-hidden="true"></i> Roll Out <span class="badge"></span>
                                         </button>
                                     @endif
@@ -256,9 +256,9 @@
      $("#ch2").prop("checked", true);
      $("#ch1").prop("checked", false);
     });
-    $(window).on('load', function () {
+  //  $(window).on('load', function () {
 
-        /*GENERAR OP*/
+    let proceso_rollout_activo = false;
     var table = $("#tabla_arts").DataTable({
         language: {
             "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
@@ -396,6 +396,25 @@
         click_programar_cambios();
             
     });
+    $('#btn_rollout').on('click', function (e) {
+        e.preventDefault();
+        count_rollout();
+       if(proceso_rollout_activo){
+            $('#confirma').modal('show');
+       }else{
+            bootbox.dialog({
+                title: "Mensaje",
+                message: "<div class='alert alert-danger m-b-0'>Ya existe un ROLLOUT en curso...</div>",
+                buttons: {
+                    success: {
+                        label: "Ok",
+                        className: "btn-success m-r-5 m-b-5"
+                    }
+                }
+            }).find('.modal-content').css({ 'font-size': '14px' });
+       }
+            
+    });
     $('#btn_roll').on('click', function (e) {
         e.preventDefault();
         
@@ -429,7 +448,8 @@
                     //rollout
                     
                     setTimeout($.unblockUI, 1500);
-                   setTimeout( function () { bootbox.dialog({
+                   setTimeout( function () { 
+                       bootbox.dialog({
                             title: "Mensaje",
                             message: "<div class='alert alert-success m-b-0'>Proceso ROLLOUT iniciado, enviaremos una notificación al terminar...</div>",
                             buttons: {
@@ -454,8 +474,7 @@
                     reload_tabla_arts(false);
                     var $badge = $('#btn_enviar').find('.badge');
                     $badge.text('');
-                    var $badgeroll = $('#btn_rollout').find('.badge');
-                    $badgeroll.text('');
+                    count_rollout();
                     $('#updateprogramar').modal('hide');
                     $('#precio_nuevo').val('');
                     $('#moneda_nueva').val('').selectpicker('refresh');
@@ -589,9 +608,11 @@
     });
     function count_rollout()
     {
+        
         $.ajax({
                 type: 'GET',
                 headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                async: false,
                 data: {
                     "_token": "{{ csrf_token() }}",
                     priceList: $('#input-lista').val()
@@ -613,9 +634,16 @@
 
                                 }
                             }, 2000);
-                   
                     var $badgeroll = $('#btn_rollout').find('.badge');
-                    $badgeroll.text(data.count);
+                    if(data.count > 0){
+                        $badgeroll.text(data.count);
+                        proceso_rollout_activo = false;
+                    }else{
+                        $badgeroll.text('');
+                        proceso_rollout_activo = true;
+                        $('#btn_rollout').text('<i class="fa fa-spinner fa-pulse fa-lg fa-fw"></i> Roll Out en proceso...')                        
+                    }
+                    
                   
                   
                 }
@@ -790,7 +818,7 @@
         }
         return s.join(dec);
     }
-});//fin on load
+//});//fin on load
 
 }  //fin js_iniciador               
 function val_btn(val) {

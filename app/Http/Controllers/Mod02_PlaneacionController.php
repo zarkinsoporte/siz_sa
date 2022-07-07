@@ -613,10 +613,16 @@ public function registros_gop_pedido(Request $request){
 public function countRollout(Request $request){
     try {
         ini_set('memory_limit', '-1');
-        set_time_limit(0);       
-        $priceList = (int) $request->input('priceList');         
-        $articulos = DB::select('exec SIZ_SP_ROLLOUT_SIMULADOR_COSTOS ?', [$priceList]);
-        $count = count($articulos) * 2;
+        set_time_limit(0);
+        $jobs = DB::select("SELECT queue from jobs
+            where queue = 'ItemPrecioUpdate' OR queue = 'ItemPrecioControl'");
+        if (count($jobs) > 0) {
+            $count = -1;
+        }else{
+            $priceList = (int) $request->input('priceList');         
+            $articulos = DB::select('exec SIZ_SP_ROLLOUT_SIMULADOR_COSTOS ?', [$priceList]);
+            $count = count($articulos) * 2;
+        }//end count jobs        
         return compact('count');
     } catch (\Exception $e) {
         Cache::forget('roll');
