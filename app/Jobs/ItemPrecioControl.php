@@ -74,8 +74,8 @@ class ItemPrecioControl extends Job implements SelfHandling, ShouldQueue
             }
             DB::table('Siz_Noticias')->insert(
                 [
-                    'Autor' => $user_nomina,
-                    'Destinatario' => $user_nomina,
+                    'Autor' => $this->user_nomina,
+                    'Destinatario' => $this->user_nomina,
                     'Descripcion' => 'El proceso ROLLOUT de actualización de precios de LISTA #'.$this->priceList.' termino...',
                     //  'Estacion_Act' => $Est_act,
                     //  'Estacion_Destino' => $Est_ant,
