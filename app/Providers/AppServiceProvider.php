@@ -75,7 +75,7 @@ class AppServiceProvider extends ServiceProvider
                 if (count($jobs) == 0) {
                     $datos =  unserialize($data['data']['command']);
                     
-                    dispatch((new ItemPrecioControl($datos->priceList, $datos->user_nomina))->onQueue('ItemPrecioUpdate')->delay(20));
+                    dispatch((new ItemPrecioControl($datos->priceList, $datos->user_nomina))->onQueue('ItemPrecioControl')->delay(20));
                     //Log::warning("dispatch ItemPrecioControl.");
                        
                 }//end count jobs
