@@ -638,10 +638,11 @@
                     if(data.count > 0){
                         $badgeroll.text(data.count);
                         proceso_rollout_activo = false;
+                        ('#btn_rollout').text('Roll Out');
                     }else{
                         $badgeroll.text('');
                         proceso_rollout_activo = true;
-                        $('#btn_rollout').text('<i class="fa fa-spinner fa-pulse fa-lg fa-fw"></i> Roll Out en proceso...')                        
+                        $('#btn_rollout').text('<i class="fa fa-spinner fa-pulse fa-lg fa-fw"></i> Roll Out en proceso...');                       
                     }
                     
                   
