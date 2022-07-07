@@ -110,10 +110,11 @@ class HomeController extends Controller
      * @return \Illuminate\Http\Response
 */
 public function cantnoticias(){
+        
         $cantnoticias = DB::select("SELECT autor.firstName + autor.lastName as autor, destin.firstName + destin.lastName as destinatario, n.* FROM Siz_Noticias n
             inner join ohem autor on autor.U_EmpGiro = n.Autor
             inner join ohem destin on destin.U_EmpGiro = n.Destinatario
-            WHERE Destinatario='790'and Leido='N'");
+            WHERE Destinatario =".Auth::user()->U_EmpGiro." and Leido='N'");
         $cantnoticias = count($cantnoticias);
         return compact('cantnoticias');
 }
@@ -127,7 +128,7 @@ public function cantnoticias(){
         $noticias=DB::select(DB::raw("SELECT autor.firstName + autor.lastName as autor, destin.firstName + destin.lastName as destinatario, n.* FROM Siz_Noticias n
             inner join ohem autor on autor.U_EmpGiro = n.Autor
             inner join ohem destin on destin.U_EmpGiro = n.Destinatario
-            WHERE Destinatario='790'and Leido='N'"));
+            WHERE Destinatario= ".$id_user."and Leido='N'"));
 
       return view('Mod01_Produccion.Noticias', ['actividades' => $actividades,'noticias' => $noticias,'id_user' => $id_user, 'ultimo' => count($actividades)]);
     }

@@ -1015,7 +1015,7 @@ return redirect()->route('home');
             }                      
             DB::table('Siz_Noticias')->insert(
                 [
-                    'Autor' => $Nom_User,
+                    'Autor' => $Num_user,
                     'Destinatario' => $N_Emp->U_EmpGiro,
                     'N_Empleado' => $No_Nomina,
                     'No_Orden' => $orden,
