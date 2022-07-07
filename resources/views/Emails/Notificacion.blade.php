@@ -37,7 +37,7 @@
   <div class="row">
     <div class="col-md-12">
         <h3>Notificación</h3>
-        <h4>Estimado {{$paraUsuario}}:</h4>
+        <h4>Estimado Usuario: {{$paraUsuario}}:</h4>
         <h4>{{$mensaje}}</h4>
       
     </div>

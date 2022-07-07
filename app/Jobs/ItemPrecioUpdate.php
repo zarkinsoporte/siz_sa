@@ -39,6 +39,6 @@ class ItemPrecioUpdate extends Job implements SelfHandling, ShouldQueue
      */
     public function handle()
     {
-        SAP::updateItemPriceList($this->codigo, $this->priceList, $this->precio, $this->moneda);
+        SAP::updateItemPriceList($this->codigo, $this->priceList -1, $this->precio, $this->moneda);
     }
 }
