@@ -654,7 +654,7 @@ public function processRollout(Request $request){
                             $codigo = $articulo->ItemCode;
                             $precio = $articulo->PRICE_SAVE;
                             $moneda = $articulo->MONEDA;
-                            //$rs = SAP::updateItemPriceList($codigo, $priceList - 1, $precio, $moneda); 
+                            //$rs = SAP::updateItemPriceList($codigo, $priceList , $precio, $moneda); 
                             //clock($codigo, $rs);
                             /* if($rs !== 'ok'){
                                 $mensajeErr = 'Error : Art#'.$codigo.', SAP:'.$rs;
@@ -662,7 +662,7 @@ public function processRollout(Request $request){
                             } */
                         //break;
                         $user = Auth::user()->U_EmpGiro;
-                        $this->dispatch((new ItemPrecioUpdate($codigo, $priceList - 1, $precio, $moneda, $user))->onQueue('ItemPrecioUpdate'));
+                        $this->dispatch((new ItemPrecioUpdate($codigo, $priceList , $precio, $moneda, $user))->onQueue('ItemPrecioUpdate'));
                         
                         }
                         $index++;
