@@ -635,13 +635,13 @@
                                 }
                             }, 2000);
                            // console.log(data.count)
-                    var $badgeroll = $('#btn_rollout').find('.badge');
                     if(data.count >= 0){
+                        $('#btn_rollout').html('<i class="fa fa-cogs" aria-hidden="true"></i> Roll Out <span class="badge"></span>');
+                        var $badgeroll = $('#btn_rollout').find('.badge');
                         $badgeroll.text(data.count);
                         proceso_rollout_activo = false;
-                        ('#btn_rollout').text('Roll Out');
                     }else{
-                        $badgeroll.text('');
+                        //$badgeroll.text('');
                         proceso_rollout_activo = true;
                         $('#btn_rollout').html('<i class="fa fa-spinner fa-pulse fa-lg fa-fw"></i> Roll Out en proceso...');                       
                     }
