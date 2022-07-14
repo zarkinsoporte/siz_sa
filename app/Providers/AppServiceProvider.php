@@ -27,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
         //php artisan config:cache
         //php artisan queue:restart
         //TAREAS PROGRAMADAS TIENE UN PROCESO PARA EJECUTAR LOS JOBS
-        //use en pruebas para arrancar el proceso "php artisan queue:work --daemon"
+        //use en pruebas para arrancar el proceso "php artisan queue:work --queue=LdmUpdate,ItemPrecioUpdate,ItemPrecioControl  --daemon --tries=2"
         //ISW Beto Jimenez
         //se ejecuta despues de cada job 
         //cualquier problema lo podemos detectar en el archivo storage/logs/laravel.log
@@ -74,7 +74,7 @@ class AppServiceProvider extends ServiceProvider
                 where queue = 'ItemPrecioUpdate'");
                 if (count($jobs) == 0) {
                     $datos =  unserialize($data['data']['command']);
-                    dispatch((new ItemPrecioControl($datos->priceList, $datos->user_nomina))->onQueue('ItemPrecioControl')->delay(20));
+                    dispatch((new ItemPrecioControl($datos->priceList, $datos->user_nomina))->onQueue('ItemPrecioControl')->delay(5));
                     //Log::warning("dispatch ItemPrecioControl.");
                        
                 }//end count jobs

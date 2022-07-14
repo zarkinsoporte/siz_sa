@@ -604,7 +604,7 @@
                 click_programar(2);
             }
         }
-        count_rollout();
+        
     });
     function count_rollout()
     {
@@ -716,6 +716,7 @@
                     reload_tabla_arts(false);
                     var $badge = $('#btn_enviar').find('.badge');
                     $badge.text('');
+                    count_rollout();
                     $('#updateprogramar').modal('hide');
                     $('#precio_nuevo').val('');
                     $('#moneda_nueva').val('').selectpicker('refresh');

@@ -4,8 +4,10 @@ namespace App\Jobs;
 
 use DB;
 use Auth;
+use Cache;
 use App\User;
 use App\Jobs\Job;
+use Carbon\Carbon;
 use App\Jobs\ItemPrecioUpdate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -58,10 +60,11 @@ class ItemPrecioControl extends Job implements SelfHandling, ShouldQueue
                 //Log::warning("dispatch ItemPrecioUpdate.".$codigo);
             }
         }else {
-            //$user_nomina = $datos->user_nomina;
-            $fecha_inicial = Carbon::createFromTimestamp($_COOKIE['hora_init_rollout']);
+            //$user_nomina = $datos->user_nomina;   
+            $fecha_inicial = Carbon::parse(Cache::get('hora_init_rollout'));
             $fecha_final = Carbon::now();
-            $tiempo_proceso = $fecha_inicial->diffInHours($fecha_final);
+            $tiempo_proceso = $fecha_inicial->diffInMinutes($fecha_final);
+             Log::warning("dispatch .".$tiempo_proceso);
             $user = User::find($this->user_nomina);
             $email = $user->email.'@zarkin.com';
             if (strlen($email) > 11) {
@@ -69,8 +72,8 @@ class ItemPrecioControl extends Job implements SelfHandling, ShouldQueue
                 Mail::send('Emails.Notificacion', [
                     'paraUsuario' => $user->firstName.' '.$user->lastName,
                     'mensaje' => 'El proceso ROLLOUT de actualización de precios de 
-                    LISTA #'.$this->priceList.'finalizó <br> 
-                    Duración: '. $tiempo_proceso. ', Inicio: '. $fecha_inicial .', Terminó: '.$fecha_final
+                    LISTA #'.$this->priceList.' finalizó <br> 
+                    Duración: '. $tiempo_proceso. ' minutos, Inicio: '. $fecha_inicial
                 ], function ($msj) use ($email) {
                     $msj->subject('SIZ ROLLOUT ACTUALIZACION PRECIOS'); //ASUNTO DEL CORREO
                     $msj->to([$email]); //Correo del destinatario
@@ -81,8 +84,8 @@ class ItemPrecioControl extends Job implements SelfHandling, ShouldQueue
                     'Autor' => $this->user_nomina,
                     'Destinatario' => $this->user_nomina,
                     'Descripcion' => 'El proceso ROLLOUT de actualización de precios de 
-                    LISTA #' . $this->priceList . 'finalizó <br> 
-                    Duración: ' . $tiempo_proceso . ', Inicio: ' . $fecha_inicial . ', Terminó: ' . $fecha_final,
+                    LISTA #' . $this->priceList . ' finalizó <br> 
+                    Duración: '. $tiempo_proceso. ' minutos, Inicio: '. $fecha_inicial,
                     //  'Estacion_Act' => $Est_act,
                     //  'Estacion_Destino' => $Est_ant,
                     //  'Cant_Enviada'=>$cant_r,
@@ -90,6 +93,7 @@ class ItemPrecioControl extends Job implements SelfHandling, ShouldQueue
                     'Leido' => 'N',
                 ]
             );
+            //Cache::forget('hora_init_rollout');
         }   
     }
 }

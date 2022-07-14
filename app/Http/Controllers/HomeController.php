@@ -125,7 +125,7 @@ public function cantnoticias(){
         $id_noticia=$request->input("id");
 
         $id_user=Auth::user()->U_EmpGiro;    
-        $noticias=DB::select(DB::raw("SELECT autor.firstName + autor.lastName as autor, destin.firstName + destin.lastName as destinatario, n.* FROM Siz_Noticias n
+        $noticias=DB::select(DB::raw("SELECT autor.firstName + ' '+autor.lastName as autor, destin.firstName + destin.lastName as destinatario, n.* FROM Siz_Noticias n
             inner join ohem autor on autor.U_EmpGiro = n.Autor
             inner join ohem destin on destin.U_EmpGiro = n.Destinatario
             WHERE Destinatario= ".$id_user."and Leido='N'"));

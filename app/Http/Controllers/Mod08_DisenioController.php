@@ -1,21 +1,22 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\User;
-use App\Http\Controllers\Controller;
 use DB;
-use Illuminate\Http\Request;
-//use Session;
+use App;
 use Auth;
-use Carbon\Carbon;
+use App\User;
+//use Session;
+use Datatables;
+use App\ACABADO;
 //excel
 //use Maatwebsite\Excel\Facades\Excel;
 
-use App;
+use Carbon\Carbon;
 //use Illuminate\Support\Facades\Validator;
-use Datatables;
-use App\ACABADO;
 use App\Jobs\LdmUpdate;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Cache;
 ini_set("memory_limit", '512M');
 ini_set('max_execution_time', 0);
 class Mod08_DisenioController extends Controller
@@ -254,7 +255,7 @@ class Mod08_DisenioController extends Controller
         $cambio_option = false;
         $articulos = explode(',', $articulos);            
         $mensajeErr= '-';
-        setcookie('hora_init_rollout', Carbon::now()->timestamp, 0);
+        Cache::forever('hora_init_rollout', Carbon::now());
         foreach ($articulos as $key => $articulo) {
             $pos = explode('&',$articulo);
             
