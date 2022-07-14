@@ -413,16 +413,8 @@ Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@pr
 //Route::get('/pruebassap', 'Mod02_PlaneacionController@updateOV');
 
 Route::get('/pruebas', function (Request $request) {
-    $rs = DB::select("select u_Ruta from OWOR where DocEntry = '326'");
-   
-    if(count($rs) > 0){
-        return "'".str_replace(",", "','", $rs[0]->u_Ruta)."'";
-         
-    }else{
-        return "'-'";
-    }
-    
-   
+    dd(Cache::get('hora_init_rollout'));
+    dd(Carbon\Carbon::createFromTimestamp(Carbon\Carbon::now()->getTimestamp())->toDateTimeString()); 
 });
 
 Route::get('/crear-orden', 'Mod02_PlaneacionController@crearOrden');

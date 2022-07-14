@@ -24,6 +24,8 @@ use App\Modelos\MOD01\LOGOF;
 use App\Modelos\MOD01\LOGOT;
 use Cache;
 use App\Jobs\ItemPrecioUpdate;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Log AS LALog;
 ini_set("memory_limit", '512M');
 ini_set('max_execution_time', 0);
 class Mod02_PlaneacionController extends Controller
@@ -641,10 +643,14 @@ public function processRollout(Request $request){
         ini_set('memory_limit', '-1');
         set_time_limit(0);            
         $sel = "";
-        //Cache::forget('roll');
         $mensaje= '';            
-        //if (!Cache::has('roll')) {
-        //    Cache::forever('roll', true);
+        if (Cache::has('hora_init_rollout')) {
+            Cache::forget('hora_init_rollout');
+        }
+        $fi = Carbon::now();
+        Cache::forever('hora_init_rollout', $fi);
+        // LALog::warning("fi desig");    
+        // LALog::warning($fi);    
                 $index = 1;
                 $priceList = (int) $request->input('priceList'); 
                 //while ($index >= 1) {

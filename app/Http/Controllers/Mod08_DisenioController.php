@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use App\Jobs\LdmUpdate;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Log;
 use Cache;
 ini_set("memory_limit", '512M');
 ini_set('max_execution_time', 0);
@@ -255,7 +256,7 @@ class Mod08_DisenioController extends Controller
         $cambio_option = false;
         $articulos = explode(',', $articulos);            
         $mensajeErr= '-';
-        Cache::forever('hora_init_rollout', Carbon::now());
+          
         foreach ($articulos as $key => $articulo) {
             $pos = explode('&',$articulo);
             

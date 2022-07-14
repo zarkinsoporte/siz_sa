@@ -60,9 +60,14 @@ class ItemPrecioControl extends Job implements SelfHandling, ShouldQueue
                 //Log::warning("dispatch ItemPrecioUpdate.".$codigo);
             }
         }else {
-            //$user_nomina = $datos->user_nomina;   
+            //$user_nomina = $datos->user_nomina; 
+            
             $fecha_inicial = Carbon::parse(Cache::get('hora_init_rollout'));
+            // Log::warning("fecha_inicial");
+            // Log::warning($fecha_inicial);
             $fecha_final = Carbon::now();
+            // Log::warning("fecha_final");
+            // Log::warning($fecha_final);
             $tiempo_proceso = $fecha_inicial->diffInMinutes($fecha_final);
             // Log::warning("dispatch .".$tiempo_proceso);
             $user = User::find($this->user_nomina);
@@ -92,8 +97,7 @@ class ItemPrecioControl extends Job implements SelfHandling, ShouldQueue
                     //  'Nota' => $nota,
                     'Leido' => 'N',
                 ]
-            );
-            //Cache::forget('hora_init_rollout');
+            );            
         }   
     }
 }
