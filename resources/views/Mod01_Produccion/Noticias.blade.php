@@ -27,7 +27,7 @@
              <strong>{{$noticia->autor}}:</strong> 
              
              <br>
-             <strong> {{$noticia->Descripcion}}</strong>.
+             <strong> {!!$noticia->Descripcion!!}</strong>.
              <br>            
 <span style="display:flex; justify-content:flex-end; width:100%; padding:0;">
     <a href="../leido/{{$noticia->Id}}" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i> Leido</a></div>

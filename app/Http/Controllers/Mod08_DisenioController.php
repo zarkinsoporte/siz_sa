@@ -254,6 +254,7 @@ class Mod08_DisenioController extends Controller
         $cambio_option = false;
         $articulos = explode(',', $articulos);            
         $mensajeErr= '-';
+        setcookie('hora_init_rollout', Carbon::now()->timestamp, 0);
         foreach ($articulos as $key => $articulo) {
             $pos = explode('&',$articulo);
             
