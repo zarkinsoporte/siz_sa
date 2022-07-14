@@ -43,7 +43,7 @@ class ItemPrecioControl extends Job implements SelfHandling, ShouldQueue
        
         $articulos = DB::select('exec SIZ_SP_ROLLOUT_SIMULADOR_COSTOS ?',
         [(int)$this->priceList]);
-        Log::warning("countArts .".count($articulos));
+        //Log::warning("countArts .".count($articulos));
         if (count($articulos) > 0) {
             foreach ($articulos as $key => $articulo) {
                 $codigo = $articulo->ItemCode;
@@ -64,7 +64,7 @@ class ItemPrecioControl extends Job implements SelfHandling, ShouldQueue
             $fecha_inicial = Carbon::parse(Cache::get('hora_init_rollout'));
             $fecha_final = Carbon::now();
             $tiempo_proceso = $fecha_inicial->diffInMinutes($fecha_final);
-             Log::warning("dispatch .".$tiempo_proceso);
+            // Log::warning("dispatch .".$tiempo_proceso);
             $user = User::find($this->user_nomina);
             $email = $user->email.'@zarkin.com';
             if (strlen($email) > 11) {
