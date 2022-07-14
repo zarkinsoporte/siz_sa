@@ -59,14 +59,18 @@ class ItemPrecioControl extends Job implements SelfHandling, ShouldQueue
             }
         }else {
             //$user_nomina = $datos->user_nomina;
-
+            $fecha_inicial = Carbon::createFromTimestamp($_COOKIE['hora_init_rollout']);
+            $fecha_final = Carbon::now();
+            $tiempo_proceso = $fecha_inicial->diffInHours($fecha_final);
             $user = User::find($this->user_nomina);
             $email = $user->email.'@zarkin.com';
             if (strlen($email) > 11) {
             
                 Mail::send('Emails.Notificacion', [
-                    'paraUsuario' => $user->firstName.' '.$user->lastName, 
-                    'mensaje' => 'El proceso ROLLOUT de actualización de precios de LISTA #'.$this->priceList.' termino...'
+                    'paraUsuario' => $user->firstName.' '.$user->lastName,
+                    'mensaje' => 'El proceso ROLLOUT de actualización de precios de 
+                    LISTA #'.$this->priceList.'finalizó <br> 
+                    Duración: '. $tiempo_proceso. ', Inicio: '. $fecha_inicial .', Terminó: '.$fecha_final
                 ], function ($msj) use ($email) {
                     $msj->subject('SIZ ROLLOUT ACTUALIZACION PRECIOS'); //ASUNTO DEL CORREO
                     $msj->to([$email]); //Correo del destinatario
@@ -76,7 +80,9 @@ class ItemPrecioControl extends Job implements SelfHandling, ShouldQueue
                 [
                     'Autor' => $this->user_nomina,
                     'Destinatario' => $this->user_nomina,
-                    'Descripcion' => 'El proceso ROLLOUT de actualización de precios de LISTA #'.$this->priceList.' termino...',
+                    'Descripcion' => 'El proceso ROLLOUT de actualización de precios de 
+                    LISTA #' . $this->priceList . 'finalizó <br> 
+                    Duración: ' . $tiempo_proceso . ', Inicio: ' . $fecha_inicial . ', Terminó: ' . $fecha_final,
                     //  'Estacion_Act' => $Est_act,
                     //  'Estacion_Destino' => $Est_ant,
                     //  'Cant_Enviada'=>$cant_r,

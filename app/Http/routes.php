@@ -413,18 +413,15 @@ Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@pr
 //Route::get('/pruebassap', 'Mod02_PlaneacionController@updateOV');
 
 Route::get('/pruebas', function (Request $request) {
-    DB::table('Siz_Noticias')->insert(
-        [
-            'Autor' => '7',
-            'Destinatario' => '790',
-            'Descripcion' => 'Hemos terminado de actualizar las Ldm...',
-            //  'Estacion_Act' => $Est_act,
-            //  'Estacion_Destino' => $Est_ant,
-            //  'Cant_Enviada'=>$cant_r,
-            //  'Nota' => $nota,
-            'Leido' => 'N',
-        ]
-    );
+    $rs = DB::select("select u_Ruta from OWOR where DocEntry = '326'");
+   
+    if(count($rs) > 0){
+        return "'".str_replace(",", "','", $rs[0]->u_Ruta)."'";
+         
+    }else{
+        return "'-'";
+    }
+    
    
 });
 

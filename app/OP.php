@@ -10,7 +10,6 @@ class OP extends Model
     protected $primaryKey = 'Code';
     public $timestamps = false;
 
-
     public static function getRuta($docEntry){
     $rs = DB::select('select u_Ruta from OWOR where DocEntry ='. $docEntry);
     //dd($rs);
@@ -22,28 +21,28 @@ class OP extends Model
     }
    }
    public static function ContieneRuta($docEntry, $ruta){
-   return in_array ($ruta , self::getRuta($docEntry));
+    return in_array ($ruta , self::getRuta($docEntry));
    }
    public static function getRutaNombres($docEntry){
-    $rs = DB::select('select u_Ruta from OWOR where DocEntry ='. $docEntry);
+        $rs = DB::select('select u_Ruta from OWOR where DocEntry ='. $docEntry);
 
-    foreach ($rs as $r) {
-        $ruta = explode(",",str_replace(array("\r","\n","\r\n"),'', $r->u_Ruta));
+        foreach ($rs as $r) {
+            $ruta = explode(",",str_replace(array("\r","\n","\r\n"),'', $r->u_Ruta));
 
-    }
-   
-    $data1= [];
-    $i= 0;
+        }
+    
+        $data1= [];
+        $i= 0;
 
-foreach($ruta as $e){
+        foreach($ruta as $e){
 
-    $irs =DB::table('@PL_RUTAS')->where('U_Orden', ($e))->value('Name');
-           $data = array ( $e, $irs );     
-           $data1 +=[$i=>$data];
-           $i++;
-}
+            $irs =DB::table('@PL_RUTAS')->where('U_Orden', ($e))->value('Name');
+                $data = array ( $e, $irs );     
+                $data1 +=[$i=>$data];
+                $i++;
+        }
 
-return $data1;
+        return $data1;
    }
    
    public static function getTodasRutas(){
