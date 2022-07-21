@@ -11,8 +11,22 @@ class AppHelper
         $this->meses = array("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
         $this->meses_min = array("Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic");
         $this->diasSem_min = array('Dom','Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab');                
-    }   
-
+    }
+  public function generateEAN($number)
+  {
+    $code = str_pad($number, 12, '0');
+    $weightflag = true;
+    $sum = 0;
+    // Weight for a digit in the checksum is 3, 1, 3.. starting from the last digit. 
+    // loop backwards to make the loop length-agnostic. The same basic functionality 
+    // will work for codes of different lengths.
+    for ($i = strlen($code) - 1; $i >= 0; $i--) {
+      $sum += (int)$code[$i] * ($weightflag ? 3 : 1);
+      $weightflag = !$weightflag;
+    }
+    $code .= (10 - ($sum % 10)) % 10;
+    return $code;
+  }
     public function getHumanDate($stringDate)
       {
         $fecha = Carbon::parse($stringDate);

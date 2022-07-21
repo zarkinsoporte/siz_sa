@@ -23,29 +23,29 @@ use Illuminate\Http\Request;
 
 Route::get('/', 'HomeController@index');
 Route::get(
-    '/home',
-    [
-        'as' => 'home',
-        'uses' => 'HomeController@index',
-    ]
+	'/home',
+	[
+		'as' => 'home',
+		'uses' => 'HomeController@index',
+	]
 );
 route::get('admin-password', function (){
-    /*
-        esta funcion es para establecer la contraseña de Admin en un inicio
-        No debe dejarse abierta a los demas usuarios
-    */
-    //return  'no-autorizado';
-    //return  \DB::connection()->getDatabaseName();
-    try {
-        $password = Hash::make('1234');
-        DB::table('dbo.OHEM')
-            ->where('U_EmpGiro', 790 )
-            ->update(['U_CP_Password' => $password]);
-    } catch(\Exception $e) {
-        echo  $e->getMessage();
-    }
+	/*
+		esta funcion es para establecer la contraseña de Admin en un inicio
+		No debe dejarse abierta a los demas usuarios
+	*/
+	//return  'no-autorizado';
+	//return  \DB::connection()->getDatabaseName();
+	try {
+		$password = Hash::make('1234');
+		DB::table('dbo.OHEM')
+			->where('U_EmpGiro', 790 )
+			->update(['U_CP_Password' => $password]);
+	} catch(\Exception $e) {
+		echo  $e->getMessage();
+	}
 
-    echo 'password inicial Administrador establecida en '.DB::connection()->getDatabaseName();
+	echo 'password inicial Administrador establecida en '.DB::connection()->getDatabaseName();
 });
 /*
 |--------------------------------------------------------------------------
@@ -130,14 +130,14 @@ Route::post('admin/delete_Noti/', 'Mod00_AdministradorController@delete_Noti');
 
 Route::get('updateprivilegio', 'Mod00_AdministradorController@updateprivilegio');
 Route::get('dropdown', function () {
-    return TAREA_MENU::where('id_menu_item', Input::get('option'))
-    ->lists('name', 'id');
+	return TAREA_MENU::where('id_menu_item', Input::get('option'))
+	->lists('name', 'id');
 });
 Route::get('switch', function () {
-    $vava = MODULOS_GRUPO_SIZ::find(2);
-    $vava->id_menu = null;
-    $vava->save();
-    var_dump(count(MODULOS_GRUPO_SIZ::find(1)));
+	$vava = MODULOS_GRUPO_SIZ::find(2);
+	$vava->id_menu = null;
+	$vava->save();
+	var_dump(count(MODULOS_GRUPO_SIZ::find(1)));
 });
 Route::post('nuevatarea', 'Mod00_AdministradorController@nuevatarea');
 /*
@@ -146,7 +146,7 @@ Route::post('nuevatarea', 'Mod00_AdministradorController@nuevatarea');
 |--------------------------------------------------------------------------
 */
 Route::get('home/TRASLADO ÷ AREAS', [
-    'middleware' => 'routelog', 'as' => 'traslado', 'uses' => 'Mod01_ProduccionController@traslados'
+	'middleware' => 'routelog', 'as' => 'traslado', 'uses' => 'Mod01_ProduccionController@traslados'
 ]);
 Route::post('home/TRASLADO ÷ AREAS', 'Mod01_ProduccionController@traslados');
 Route::get('home/TRASLADO ÷ AREAS/{id}', 'Mod01_ProduccionController@getOP');
@@ -228,7 +228,7 @@ Route::post('/excel', 'Mod07_CalidadController@excel');
 Route::get('home/CALIDAD POR DEPTO', 'Mod07_CalidadController@repCalidad')->middleware('routelog');
 Route::post('home/CALIDAD POR DEPTO', 'Mod07_CalidadController@repCalidad2');
 Route::get('getAutocomplete', function () {
-    return view('Mod07_Calidad.RechazoFrame');
+	return view('Mod07_Calidad.RechazoFrame');
 })->name('getAutocomplete');
 Route::get('search', array('as' => 'search', 'uses' => 'Mod07_CalidadController@search'));
 Route::get('autocomplete', array('as' => 'autocomplete', 'uses' => 'Mod07_CalidadController@autocomplete'));
@@ -304,17 +304,17 @@ Route::get('home/lotes/{tabla}/{alm}/{item}', 'Mod04_MaterialesController@vistaL
 Route::post('home/lotes/insert', 'Mod04_MaterialesController@insertLotes');
 Route::get('home/lotes/remove/{id}/{lote}/{alm}', 'Mod04_MaterialesController@removeLote');
 Route::get('disponibilidadAlmacenMP', function(){
-    
-    $data = DB::select("SELECT 
+	
+	$data = DB::select("SELECT 
 		 COALESCE (SUM(CASE WHEN WhsCode = 'APG-PA'  
-         THEN OnHand ELSE 0 END) - (COALESCE (t1.A, 0) + COALESCE (tr.A, 0)), 0) 
-         AS stockapgpa, 
+		 THEN OnHand ELSE 0 END) - (COALESCE (t1.A, 0) + COALESCE (tr.A, 0)), 0) 
+		 AS stockapgpa, 
 		 COALESCE (SUM(CASE WHEN WhsCode = 'AMP-ST' 
-          THEN OnHand ELSE 0 END) - (COALESCE (t1.B, 0) + COALESCE (tr.B, 0)), 0) 
-          AS stockampst		
-        FROM dbo.OITW
+		  THEN OnHand ELSE 0 END) - (COALESCE (t1.B, 0) + COALESCE (tr.B, 0)), 0) 
+		  AS stockampst		
+		FROM dbo.OITW
 		LEFT JOIN (select ItemCode, sum(Cant_ASurtir_Origen_A)  A , sum(Cant_ASurtir_Origen_B)  B  
-        from SIZ_MaterialesSolicitudes where 
+		from SIZ_MaterialesSolicitudes where 
 		  EstatusLinea in ('S', 'P', 'I', 'E', 'N')
 		 group by ItemCode) as t1 on t1.ItemCode = OITW.ItemCode
 		 LEFT JOIN(
@@ -327,9 +327,9 @@ Route::get('disponibilidadAlmacenMP', function(){
 			group by ItemCode
 		 ) tr on tr.ItemCode = OITW.ItemCode
 		where OITW.ItemCode = ?
-        GROUP BY OITW.ItemCode, t1.A, t1.B, tr.A, tr.B",[Input::get('codigo')]);
-        return $data;
-        });
+		GROUP BY OITW.ItemCode, t1.A, t1.B, tr.A, tr.B",[Input::get('codigo')]);
+		return $data;
+		});
 // 4 TRASLADOS
 Route::get('home/4 GENERAR TRASLADO', 'Mod04_MaterialesController@TrasladosArticulos')->middleware('routelog');
 Route::get('datatables.solicitudesTraslados', 'Mod04_MaterialesController@DataTraslados')->name('datatables.solicitudesTraslados');
@@ -413,97 +413,102 @@ Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@pr
 //Route::get('/pruebassap', 'Mod02_PlaneacionController@updateOV');
 
 Route::get('/pruebas', function (Request $request) {
-    dd(Cache::get('hora_init_rollout'));
-    dd(Carbon\Carbon::createFromTimestamp(Carbon\Carbon::now()->getTimestamp())->toDateTimeString()); 
+	$a = array(); 
+	array_push($a, Carbon\Carbon::createFromDate(1991, 1, 5)->diff(Carbon\Carbon::now())->format('%y'));
+	array_push($a, Carbon\Carbon::createFromDate(1991, 1, 5)->diff(Carbon\Carbon::now())->format('%m'));
+	array_push($a, Carbon\Carbon::createFromDate(1991, 1, 5)->diff(Carbon\Carbon::now())->format('%d'));
+	dd($a);
+	// dd(Cache::get('hora_init_rollout'));
+	// dd(Carbon\Carbon::createFromTimestamp(Carbon\Carbon::now()->getTimestamp())->toDateTimeString()); 
 });
 
 Route::get('/crear-orden', 'Mod02_PlaneacionController@crearOrden');
 
 Route::get('edit-xml', function(){
-    
-     $pathh = public_path('assets/xml/sap/ldm/20185.xml');//"C:\Users\Administrador\Documents\fileName.xml";
-    
-    //$xmlString = file_get_contents($pathh); //leer archivo
-    //$library = simplexml_load_string($xmlString); //crear object SimpleXML
-    $library = simplexml_load_file($pathh); //leemos archivo y creamos object SimpleXML
+	
+	 $pathh = public_path('assets/xml/sap/ldm/20185.xml');//"C:\Users\Administrador\Documents\fileName.xml";
+	
+	//$xmlString = file_get_contents($pathh); //leer archivo
+	//$library = simplexml_load_string($xmlString); //crear object SimpleXML
+	$library = simplexml_load_file($pathh); //leemos archivo y creamos object SimpleXML
    
-    //Edit XML – Edit specific Elements (accessed conditionally)
-    //https://abstraction.blog/2010/09/04/php-xml-create-add-edit-modify-using-dom-simplexml-xpath
-    $book = $library->xpath('/BOM/BO/ProductTrees_Lines/row[ItemCode="20189"]');
-    if(count($book) == 1){        
-        $book[0]->Quantity = '2';
-    } else{
-        return 'articulo no encontrado';
-    }
-    //elaborar XML y escribirlo en archivo
-    $library->asXML($pathh);
+	//Edit XML – Edit specific Elements (accessed conditionally)
+	//https://abstraction.blog/2010/09/04/php-xml-create-add-edit-modify-using-dom-simplexml-xpath
+	$book = $library->xpath('/BOM/BO/ProductTrees_Lines/row[ItemCode="20189"]');
+	if(count($book) == 1){        
+		$book[0]->Quantity = '2';
+	} else{
+		return 'articulo no encontrado';
+	}
+	//elaborar XML y escribirlo en archivo
+	$library->asXML($pathh);
 });
 Route::get('test_queue', 'Mod08_DisenioController@ldmUpdate');
 
 Route::get('/sap', function (Request $request) {
-    //Ref
-    //https://answers.sap.com/questions/1448088/using-xml-to-update-objects-in-diapi.html
-    //https://biuan.com/ProductTrees/
+	//Ref
+	//https://answers.sap.com/questions/1448088/using-xml-to-update-objects-in-diapi.html
+	//https://biuan.com/ProductTrees/
 
-    $vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
-    $vCmp->DbServerType="10"; 
-    $vCmp->server = env('SAP_server');
-    $vCmp->LicenseServer = env('SAP_LicenseServer');
-    $vCmp->CompanyDB = env('SAP_CompanyDB');
-    $vCmp->username = env('SAP_username');
-    $vCmp->password = env('SAP_password');
-    $vCmp->DbUserName = env('SAP_DbUserName');
-    $vCmp->DbPassword = env('SAP_DbPassword');
-    $vCmp->UseTrusted = false;
-    //la siguiente linea permite leer XML como string y no como archivo en "Browser->ReadXml"
-    $vCmp->XMLAsString = true; //The default value is False - XML as files.
-    
-    //$vCmp->language = "6";
-    $vCmp->Connect; //conectar a Sociedad SAP
-    dd($vCmp->GetLastErrorDescription());
-    //Obtener XML de un LDM 
-        $vCmp->XmlExportType = '3'; //BoXmlExportTypes.xet_ExportImportMode; /solo los campos modificables
-        $vItem = $vCmp->GetBusinessObject("66"); //ProductTrees table: OITT.
-        $vItem->GetByKey("20185"); //LDM Docentry
-        //$vItem->SaveXML($pathh); //Guardar en archivo
-        $xmlString = $vItem->GetAsXML(); //Guardar XML en buffer
-        //retiramos Utf16 del XML obtenido
-        $xmlString = preg_replace('/(<\?xml[^?]+?)utf-16/i', '$1utf-8', $xmlString); 
-        //Leemos XML(string) y creamos Object SimpleXML 
-        $oXML= simplexml_load_string($xmlString);
-        //$library = simplexml_load_file($pathh); //Crear Object SimpleXML de un archivo
-    
-    //Modificar los campos en el XML (de un articulo de la LDM)
-        $item = $oXML->xpath('/BOM/BO/ProductTrees_Lines/row[ItemCode="20189"]');
-        if(count($item) == 1){        
-            $item[0]->Quantity = '3';
-        } else{
-            return 'articulo no encontrado';
-        }
-    
-    //Cargar el XML en la LDM y actualizar en SAP
-        //$library->asXML($pathh); //Elaborar y Escribir el XML
-        
-        //To use ReadXML method, set the XmlExportType to xet_ExportImportMode (3).
-        $vItem->Browser->ReadXml($oXML->asXML(), 0);
-        // $vItem->UpdateFromXML($pathh);
-        $resultadoOperacion = $vItem->Update;
+	$vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
+	$vCmp->DbServerType="10"; 
+	$vCmp->server = env('SAP_server');
+	$vCmp->LicenseServer = env('SAP_LicenseServer');
+	$vCmp->CompanyDB = env('SAP_CompanyDB');
+	$vCmp->username = env('SAP_username');
+	$vCmp->password = env('SAP_password');
+	$vCmp->DbUserName = env('SAP_DbUserName');
+	$vCmp->DbPassword = env('SAP_DbPassword');
+	$vCmp->UseTrusted = false;
+	//la siguiente linea permite leer XML como string y no como archivo en "Browser->ReadXml"
+	$vCmp->XMLAsString = true; //The default value is False - XML as files.
+	
+	//$vCmp->language = "6";
+	$vCmp->Connect; //conectar a Sociedad SAP
+	dd($vCmp->GetLastErrorDescription());
+	//Obtener XML de un LDM 
+		$vCmp->XmlExportType = '3'; //BoXmlExportTypes.xet_ExportImportMode; /solo los campos modificables
+		$vItem = $vCmp->GetBusinessObject("66"); //ProductTrees table: OITT.
+		$vItem->GetByKey("20185"); //LDM Docentry
+		//$vItem->SaveXML($pathh); //Guardar en archivo
+		$xmlString = $vItem->GetAsXML(); //Guardar XML en buffer
+		//retiramos Utf16 del XML obtenido
+		$xmlString = preg_replace('/(<\?xml[^?]+?)utf-16/i', '$1utf-8', $xmlString); 
+		//Leemos XML(string) y creamos Object SimpleXML 
+		$oXML= simplexml_load_string($xmlString);
+		//$library = simplexml_load_file($pathh); //Crear Object SimpleXML de un archivo
+	
+	//Modificar los campos en el XML (de un articulo de la LDM)
+		$item = $oXML->xpath('/BOM/BO/ProductTrees_Lines/row[ItemCode="20189"]');
+		if(count($item) == 1){        
+			$item[0]->Quantity = '3';
+		} else{
+			return 'articulo no encontrado';
+		}
+	
+	//Cargar el XML en la LDM y actualizar en SAP
+		//$library->asXML($pathh); //Elaborar y Escribir el XML
+		
+		//To use ReadXML method, set the XmlExportType to xet_ExportImportMode (3).
+		$vItem->Browser->ReadXml($oXML->asXML(), 0);
+		// $vItem->UpdateFromXML($pathh);
+		$resultadoOperacion = $vItem->Update;
 
-    
-    if ($resultadoOperacion <> 0) {
-       Session::flash('error', $vCmp->GetLastErrorDescription());
-    } else {
-        Session::flash('info',' - conexión con SAP DI API exitosa!!'. ' ultimo err:'. $vCmp->GetLastErrorDescription());
-    } 
-    
-    $vCmp->Disconnect;
-    $vCmp = null;
-    $vItem = null;
-    $xmlString = null;
-    $oXML = null;
-    $item = null;
-    $resultadoOperacion = null;
-    return redirect('home');
+	
+	if ($resultadoOperacion <> 0) {
+	   Session::flash('error', $vCmp->GetLastErrorDescription());
+	} else {
+		Session::flash('info',' - conexión con SAP DI API exitosa!!'. ' ultimo err:'. $vCmp->GetLastErrorDescription());
+	} 
+	
+	$vCmp->Disconnect;
+	$vCmp = null;
+	$vItem = null;
+	$xmlString = null;
+	$oXML = null;
+	$item = null;
+	$resultadoOperacion = null;
+	return redirect('home');
 });
 
 Route::post('home/traslados/terminar', 'Mod01_ProduccionController@terminarOP');
@@ -582,23 +587,23 @@ Route::post('home/cpp_combobox_articulos', 'Mod03_ComprasController@cpp_combobox
 Route::post('home/cpp_combobox_proveedores', 'Mod03_ComprasController@cpp_combobox_proveedores');
 Route::get('cppXLS', 'Mod03_ComprasController@cppXLS')->name('cppXLS');
 
+//CODIGO DE BARRAS
+Route::get('home/INDEX_CODIGO_BARRAS', 'Mod05_VentasController@index_codigo_barras')->middleware('routelog');
+Route::any('datatables_oitm_index_codigo_barras', 'Mod05_VentasController@datatables_oitm_index_codigo_barras')->name('datatables_oitm_index_codigo_barras');
+Route::any('home/pdf_codibarr', 'Mod05_VentasController@codigo_barras_PDF');
+
+Route::get('/codibarr/{code}', 'Mod05_VentasController@test_codibarr');
+//muestra un archivo pdf de la carpeta public/pdf:
+Route::get('home/pdf/{filenameOriginal}/{filename}', 'HomeController@getPdf');
+
 //REPORTE DE ENTRADAS Y SALIDAS
-//Route::get('home/ENTRADAS SALIDAS', 'Mod04_MaterialesController@showModal')->middleware('routelog');
 Route::get('home/ENTRADAS SALIDAS', 'Mod04_MaterialesController@index_EntradasSalidas')->middleware('routelog');
 Route::post('datatables_ioWhs', 'Mod04_MaterialesController@datatables_ioWhs')->name('datatables_ioWhs');
 Route::any('entradasSalidas_combobox_tipoMat', 'Mod04_MaterialesController@entradasSalidas_combobox_tipoMat')->name('entradasSalidas_combobox_tipoMat');
 Route::any('entradasSalidas_combobox_articulos', 'Mod04_MaterialesController@entradasSalidas_combobox_articulos')->name('entradasSalidas_combobox_articulos');
-//Route::get('home/reporte/ENTRADAS SALIDAS', 'Mod04_MaterialesController@reporteiowhsPDF');
 Route::get('entradasysalidasXLS', 'Mod04_MaterialesController@iowhsXLS')->name('entradasysalidasXLS');
 Route::get('entradasysalidasPDF', 'Mod04_MaterialesController@iowhsPDF')->name('entradasysalidasPDF');
-/*
-Route::get('home/ENTRADAS SALIDAS', 'Reportes_ProduccionController@showModal')->middleware('routelog');
-Route::post('home/reporte/ENTRADAS SALIDAS', 'Mod04_MaterialesController@EntradasSalidas');
-Route::any('datatables.ioWhs', 'Mod04_MaterialesController@DataShowEntradasSalidas')->name('datatables.ioWhs');
-//Route::get('home/reporte/ENTRADAS SALIDAS', 'Mod04_MaterialesController@reporteiowhsPDF');
-Route::get('home/reporte/entradasysalidasXLS', 'Mod04_MaterialesController@iowhsXLS');
-Route::get('home/reporte/entradasysalidasPDF', 'Mod04_MaterialesController@iowhsPDF');
-*/
+
 Route::any('datatables_donde_usado', 'Mod04_MaterialesController@datatables_donde_usado')->name('datatables_donde_usado');
 
 Route::get('home/BACKORDER_HULE', 'Reportes_ProduccionController@backorderHule')->middleware('routelog');
