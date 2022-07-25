@@ -3259,13 +3259,13 @@ $consultaj = collect($consulta);
                 }                                
                              
             } else {
-                Session::put('notfound','El material escaneado no esta en la solicitud #'.$id_sol);
+                Session::put('notfound','El material escaneado no esta en la solicitud o no hay ninguna solicitud activa');
               
                 $item = null;
                 $cant = null;
                 $showmodalqr = false;
-                return redirect()
-                ->action('Mod04_MaterialesController@ShowDetalleSolicitud', compact('id_sol', 'item', 'cant', 'showmodalqr'));        
+                // return redirect()
+                // ->action('Mod04_MaterialesController@ShowDetalleSolicitud', compact('id_sol', 'item', 'cant', 'showmodalqr'));        
             }
             
         
