@@ -218,10 +218,9 @@ var table = $('#tbackorder').DataTable({
    
     orderCellsTop: true,    
     scrollY: height,
-    "pageLength": 50,
     scrollX:        true,
     scrollCollapse: true,
-    paging:         true,
+    paging:         false,
     fixedColumns:   true,
     processing:true,     
     deferRender:    true,
@@ -314,7 +313,7 @@ var table = $('#tbackorder').DataTable({
 
         // Total over this page for VS
         pageTotal = api
-            .column( 6, { page: 'current'} )
+            .column( 6, { filter: 'applied'} )
             .data()
             .reduce( function (a, b) {
                 return intVal(a) + intVal(b);
@@ -341,7 +340,7 @@ var table = $('#tbackorder').DataTable({
             }, 0 );
         // Total over this page for TVS
         pageTotal = api
-            .column( 7, { page: 'current'} )
+            .column( 7, {filter: 'applied'} )
             .data()
             .reduce( function (a, b) {
                 return intVal(a) + intVal(b);
@@ -361,7 +360,7 @@ var table = $('#tbackorder').DataTable({
             }, 0 );
         // Total over this page for TVS
         pageTotal = api
-            .column( 8, { page: 'current'} )
+            .column( 8, {filter: 'applied'} )
             .data()
             .reduce( function (a, b) {
                 return intVal(a) + intVal(b);
@@ -381,7 +380,7 @@ var table = $('#tbackorder').DataTable({
             }, 0 );
         // Total over this page for TVS
         pageTotal = api
-            .column( 9, { page: 'current'} )
+            .column( 9, {filter: 'applied'} )
             .data()
             .reduce( function (a, b) {
                 return intVal(a) + intVal(b);
@@ -401,7 +400,7 @@ var table = $('#tbackorder').DataTable({
             }, 0 );
         // Total over this page for TVS
         pageTotal = api
-            .column( 10, { page: 'current'} )
+            .column( 10, {filter: 'applied'} )
             .data()
             .reduce( function (a, b) {
                 return intVal(a) + intVal(b);
@@ -421,7 +420,7 @@ var table = $('#tbackorder').DataTable({
             }, 0 );
         // Total over this page for TVS
         pageTotal = api
-            .column( 11, { page: 'current'} )
+            .column( 11, {filter: 'applied'} )
             .data()
             .reduce( function (a, b) {
                 return intVal(a) + intVal(b);
@@ -441,7 +440,7 @@ var table = $('#tbackorder').DataTable({
             }, 0 );
         // Total over this page for TVS
         pageTotal = api
-            .column( 12, { page: 'current'} )
+            .column( 12, {filter: 'applied'} )
             .data()
             .reduce( function (a, b) {
                 return intVal(a) + intVal(b);
@@ -461,7 +460,7 @@ var table = $('#tbackorder').DataTable({
             }, 0 );
         // Total over this page for TVS
         pageTotal = api
-            .column( 14, { page: 'current'} )
+            .column( 14, {filter: 'applied'} )
             .data()
             .reduce( function (a, b) {
                 return intVal(a) + intVal(b);
