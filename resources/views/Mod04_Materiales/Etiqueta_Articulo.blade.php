@@ -131,7 +131,7 @@ width: 100% !important;
             </ul>
         </div>
         <div class="col-md-3 col-sm-12">
-        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#confirma" {{$privilegioTarea}}>
+        <button type="button" class="btn btn-success"  data-toggle="modal" data-target="#confirma" {{$privilegioTarea}}>
                                             <i class="fa fa-print" aria-hidden="true"></i> Etiqueta
                             </button>
         </div>
@@ -229,9 +229,24 @@ width: 100% !important;
                                 $(this).toggleClass("active"); 
                             });
 $("#submitBtn").click(function(){        
+    let valor_proveedor = $('#proveedor option:selected').text();
+    console.log(valor_proveedor);
+    if (valor_proveedor == 'SIN DATOS'){
+        bootbox.dialog({
+            title: "Mensaje",
+            message: "<div class='alert alert-danger m-b-0'>El proveedor es obligatorio.</div>",
+            buttons: {
+                success: {
+                    label: "Ok",
+                    className: "btn-success m-r-5 m-b-5"
+                }
+            }
+        }).find('.modal-content').css({'font-size': '14px'} );
+    }else{
+       $("#mainform").submit(); // Submit the form
+        $('#confirma').modal('hide');
+    }
 
-$("#mainform").submit(); // Submit the form
-$('#confirma').modal('hide');
 
 });
 $("#showImg").click(function(){        

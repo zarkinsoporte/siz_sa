@@ -280,10 +280,11 @@ li.dt-button.active a::before{
 
 <script>
     let routeapp = "{{url().'/'}}";
-    if("{{!Auth::user()->isProductionUser()}}"){
+   
+        if("{{Auth::check() && !Auth::user()->isProductionUser()}}"){
 
         setInterval(ajaxCall, 300000); //300000
-    }
+        }
     
     function ajaxCall(){
         $.ajax({

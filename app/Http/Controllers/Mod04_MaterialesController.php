@@ -32,7 +32,7 @@ class Mod04_MaterialesController extends Controller
         $this->middleware('ajax-session-expired');
 
         // check if user is autenticated for non-ajax request
-        $this->middleware('auth');
+        //$this->middleware('auth');
     }
    
     public function reporteEntradasAlmacen()

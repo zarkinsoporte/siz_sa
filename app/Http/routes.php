@@ -518,7 +518,7 @@ Route::post('home/reporte/GENERACION ETIQUETAS/{redirek?}', 'Mod04_MaterialesCon
 Route::post('etiquetaQR', 'Mod04_MaterialesController@generaEtiquetaQR');
 
 //Visualizacion de Articulos para INVITADOS
-Route::get('qr/{itemCode}/{proveedor}/{cantXbulto}', 'GuestController@getArticulo')->name('qr')->middleware('guest');
+//Route::get('qr/{itemCode}/{proveedor}/{cantXbulto}', 'GuestController@getArticulo')->name('qr')->middleware('guest');
 Route::get('qr/{itemCode}/{proveedor}/{cantXbulto}', 'Mod04_MaterialesController@getArticulo')->name('qr2');
 
 //CAPTURA DEFECTIVOS
