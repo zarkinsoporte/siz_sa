@@ -44,12 +44,12 @@ if (realpath(__FILE__) == realpath($_SERVER['SCRIPT_FILENAME'])) {
 
 class barcode_generator {
 
-	public function output_image($format, $symbology, $data, $options) {
+	public function output_image($format, $symbology, $data, $options, $savepath=null) {
 		switch (strtolower(preg_replace('/[^A-Za-z0-9]/', '', $format))) {
 			case 'png':
 				header('Content-Type: image/png');
 				$image = $this->render_image($symbology, $data, $options);
-				imagepng($image);
+				imagepng($image, $savepath);
 				imagedestroy($image);
 				break;
 			case 'gif':

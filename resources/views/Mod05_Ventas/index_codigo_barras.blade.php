@@ -14,7 +14,7 @@
         <div class="col-md-11">
             <h3 class="page-header">
                 Codigos de Barras
-                <small></small>
+                <small>{{$sociedad}}</small>
             </h3>
             <!--
            
@@ -29,7 +29,7 @@
                     <tr>
                         <th>Código</th>
                         <th>Descripción</th>
-                        <th>Precódigo</th>
+                        <th>PreCódigo</th>
                     </tr>
                
                 </thead>

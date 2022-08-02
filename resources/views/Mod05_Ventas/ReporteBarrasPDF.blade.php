@@ -121,8 +121,8 @@
                     <tr>
                                     <th style="widthy:100px" class="zrk-silver-w" scope="col">Código</th>
                                     <th style="widthy:120px" class="zrk-silver-w" scope="col">Descripción</th>
-                                    <th style="widthy:110px" class="zrk-silver-w" scope="col">Precódigo</th>
                                     <th style="widthy:457px" class="zrk-silver-w" scope="col">Código Barra</th>
+                                    <th style="widthy:110px" class="zrk-silver-w" scope="col">Proveedor</th>
                                   
                     </tr>
                     <?php 
@@ -138,13 +138,13 @@
                                 <td style="widthy:450px" class="zrk-gris-claro" scope="row">
                                     {{$rep->ItemName }}
                                 </td>
-                                <td style="widthy:57px" class="zrk-gris-claro" scope="row">
-                                    {{$rep->codibarr}}
-                                </td>
                                 <td style="widthy:70px" class="zrk-gris-claro" scope="row">
                                     {{$generator->output_image('svg', 'ean-13-nopad', $codigo->generateEAN($rep->codibarr), [])}}
                                 </td>
+                                <td style="widthy:57px" class="zrk-gris-claro" scope="row">
+                                    <p>{{$proveedor}}</p>
                                     
+                                </td>    
                             </tr>         
                         @endforeach 
                 </table>

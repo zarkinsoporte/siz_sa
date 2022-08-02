@@ -1,26 +1,27 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Libraries\barcode_generator;
-
 use DB;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Input;
-use Session;
-use Auth;
-
-use Carbon\Carbon;
-//excel
-use Maatwebsite\Excel\Facades\Excel;
-//DOMPDF
-use Dompdf\Dompdf;
 use App;
+
+use Auth;
+use Session;
+use Datatables;
+use Carbon\Carbon;
+use Dompdf\Dompdf;
+use PHPExcel_Worksheet_Drawing;
+use Illuminate\Http\Request;
+//excel
+use App\Http\Controllers\Controller;
+//DOMPDF
+use App\Libraries\barcode_generator;
+use Maatwebsite\Excel\Facades\Excel;
 //use Pdf;
 //Fin DOMPDF
+use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use Datatables;
 
 
 class Mod05_VentasController extends Controller
@@ -29,12 +30,60 @@ class Mod05_VentasController extends Controller
     {
         $user = Auth::user();
         $actividades = $user->getTareas();
+        $sociedad = DB::table('OADM')->value('CompnyName');
         $data = array(
             'actividades' => $actividades,
             'ultimo' => count($actividades),
-            'generator' => new barcode_generator()
+            'generator' => new barcode_generator(),
+            'sociedad' => $sociedad
         );
         return view('Mod05_Ventas.index_codigo_barras', $data);
+    }
+    public function codigos_barra_xls(){
+        $path = public_path() . '/assets/plantillas_excel/Mod_05/SIZ_codibarr.xlsx';
+        $data = json_decode(Session::get('codigos_barra'));
+        //dd($data);
+       
+        Excel::load($path, function ($excel) use ($data) {
+            $excel->sheet('Detalles', function ($sheet) use ($data) {
+                $generator = new barcode_generator();
+                $proveedor = DB::table('OADM')
+                ->select(DB::raw("CompnyName + ' ' + CompnyAddr AS CompnyAddr"))
+                ->value('CompnyAddr');
+                
+                $index = 7;
+                foreach ($data as $row) {
+                    
+                    $codigoean = self::generateEAN($row->codibarr);
+                    //nombre
+                    $path = public_path('codibarr/' . $codigoean . ".png");
+                    //guardamos la imagen
+                    $options = [];
+                    $generator->output_image('png', 'ean-13-nopad', $codigoean, $options, $path);
+
+                    $renglon = [
+                        $row->ItemCode,
+                        $row->ItemName,
+                        $proveedor
+                    ];
+                    
+                        $sheet->getRowDimension($index)->setRowHeight(75);
+                        $objDrawing = new PHPExcel_Worksheet_Drawing;
+                        $objDrawing->setPath($path);                        
+                        $objDrawing->setCoordinates('A' . $index);
+                        $objDrawing->setWidthAndHeight(140, 125);
+                        $objDrawing->setResizeProportional(true);
+                        $objDrawing->setWorksheet($sheet);
+                        //ponemos un vacio al inicio de la fila:
+                        array_unshift($renglon, '');
+
+                    $sheet->row($index, $renglon);
+                    $index++;
+                }
+            });
+        })
+        ->setFilename('SIZ Codigos de Barra')
+        ->export('xlsx');
     }
     public function datatables_oitm_index_codigo_barras(Request $request)
     {
@@ -59,15 +108,17 @@ class Mod05_VentasController extends Controller
         )->render();
        
         $generator = new barcode_generator();
-        //test a vista:
+        $proveedor = DB::table('OADM')
+        ->select(DB::raw("CompnyName + ' ' + CompnyAddr AS CompnyAddr"))
+        ->value('CompnyAddr');
         //return view('Mod05_Ventas.ReporteBarrasPDF', compact('a', 'generator'));
-        $pdf = \SPDF::loadView('Mod05_Ventas.ReporteBarrasPDF', compact('a', 'generator'));
+        $pdf = \SPDF::loadView('Mod05_Ventas.ReporteBarrasPDF', compact('a', 'generator', 'proveedor'));
        
         $pdf->setOption('header-html', $headerHtml);
         $pdf->setOption('footer-center', 'Pagina [page] de [toPage]');
-        $pdf->setOption('footer-left', 'SIZ');
-        $pdf->setOption('orientation', 'Landscape');
-        $pdf->setOption('margin-top', '40mm');
+        //$pdf->setOption('footer-left', 'SIZ');
+        //$pdf->setOption('orientation', 'Landscape');
+        $pdf->setOption('margin-top', '25mm');
         $pdf->setOption('margin-left', '5mm');
         $pdf->setOption('margin-right', '5mm');
         $pdf->setOption('page-size', 'Letter');
@@ -83,11 +134,15 @@ class Mod05_VentasController extends Controller
     {
         $generator = new barcode_generator();
         $options = array();
-        $codigo = self::generateEAN($code);
+        $codigoean = self::generateEAN($code);
         /* Output directly to standard output. */
-        return $generator->output_image('svg', 'ean-13-nopad', self::generateEAN($code), $options);     
+        $path = public_path('codibarr/'. $codigoean.".png");
+        return $generator->output_image('png', 'ean-13-nopad', $codigoean, $options, $path);
+        
+             
     }
     
+    //la funcion principal de generateEAN esta en AppHelper
     public function generateEAN($number)
     {
         $code = str_pad($number, 12, '0');

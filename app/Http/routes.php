@@ -196,7 +196,8 @@ Route::get('datatables.showbackordercasco', 'Reportes_ProduccionController@DataS
 Route::get('home/reporte/backorderCascoPDF', 'Reportes_ProduccionController@ReporteBackOrderCascoPDF');
 
 //Ruta generica para guardar ajaxtoSession
-Route::post('home/reporte/ajaxtosession/{id}', 'Reportes_ProduccionController@AjaxToSession');
+Route::any('home/reporte/ajaxtosession/{id}', 'Reportes_ProduccionController@AjaxToSession');
+Route::any('home/ajaxtosession/{id}', 'Reportes_ProduccionController@AjaxToSession');
 
 Route::get('home/BACK ORDER PATAS', 'Reportes_ProduccionController@backorderPatas')->middleware('routelog');
 Route::get('datatables.showbackorderpatas', 'Reportes_ProduccionController@DataShowbackorderPatas')->name('datatables.showbackorderpatas');
@@ -591,6 +592,7 @@ Route::get('cppXLS', 'Mod03_ComprasController@cppXLS')->name('cppXLS');
 Route::get('home/INDEX_CODIGO_BARRAS', 'Mod05_VentasController@index_codigo_barras')->middleware('routelog');
 Route::any('datatables_oitm_index_codigo_barras', 'Mod05_VentasController@datatables_oitm_index_codigo_barras')->name('datatables_oitm_index_codigo_barras');
 Route::any('home/pdf_codibarr', 'Mod05_VentasController@codigo_barras_PDF');
+Route::get('home/codigos_barra_xls', 'Mod05_VentasController@codigos_barra_xls')->name('codigos_barra_xls');
 
 Route::get('/codibarr/{code}', 'Mod05_VentasController@test_codibarr');
 //muestra un archivo pdf de la carpeta public/pdf:

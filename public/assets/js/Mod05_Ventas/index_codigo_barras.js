@@ -43,7 +43,10 @@ function js_iniciador() {
             [1, "desc"]
         ],
         dom: "<'row'<'col-sm-9'B><'col-sm-3'f>>" + 'rtip',
-        select: true,
+        
+        select: {
+            style: 'multi'
+        },
         orderCellsTop: true,
         scrollY: height,
         scrollX: true,
@@ -77,6 +80,56 @@ function js_iniciador() {
             
         ],
         buttons: [
+             {
+                 text: '<i class="fa fa-square"></i> Deseleccionar',
+                 titleAttr: 'deseleccionar',
+                 action: function () {
+                     table.rows().deselect();
+                 }
+             },
+            {
+                text: '<i class="fa fa-file-excel-o"></i> Excel',
+                className: "btn-success",
+                action: function (e, dt, node, config) {
+                     var count = table.rows({
+                         selected: true
+                     }).count();
+                     console.log(count)
+                     if (count > 0) {
+
+                        var data = table.rows({
+                            selected: true
+                        }).data().toArray();
+                        var json = JSON.stringify(data);
+                        $.ajax({
+                            type: 'POST',
+                            url: 'ajaxtosession/codigos_barra',
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            data: {
+                                "arr": json
+                            },
+                            success: function (data) {
+                                window.location.href = 'codigos_barra_xls';
+                            }
+                        });
+                    } else {
+                        bootbox.dialog({
+                            title: "Mensaje",
+                            message: "<div class='alert alert-danger m-b-0'>No ha seleccionado ningún código</div>",
+                            buttons: {
+                                success: {
+                                    label: "Ok",
+                                    className: "btn-success m-r-5 m-b-5"
+                                }
+                            }
+                        }).find('.modal-content').css({
+                            'font-size': '14px'
+                        });
+                    }
+                }
+            },
             {
                 text: '<i class="fa fa-file-pdf-o"></i> Pdf',
                 className: "btn-danger",
@@ -146,7 +199,10 @@ function js_iniciador() {
             }
         ],
         "language": {
-            "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"        
+            "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json",
+            select: {
+                rows: " %d filas seleccionadas"
+            }
         },
         columnDefs: [],
     
