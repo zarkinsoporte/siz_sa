@@ -72,7 +72,7 @@ Route::get('home/MOD00-SISTEMAS', 'Mod00_AdministradorController@index');
 Route::get('admin/users', 'Mod00_AdministradorController@allUsers');
 Route::get('admin/detalle-depto/{depto}', 'Mod00_AdministradorController@showUsers');
 Route::get('admin/plantilla/{depto}', 'Mod00_AdministradorController@PlantillaExcel');
-Route::get('admin/Plantilla_PDF/{depto}', 'Mod00_AdministradorController@Plantilla_PDF');
+Route::get('admin/Plantilla_PDF/{depto?}', 'Mod00_AdministradorController@Plantilla_PDF');
 Route::get('datatables.showusers', 'Mod00_AdministradorController@DataShowUsers')->name('datatables.showusers');
 Route::get('users/edit/{empid}', 'Mod00_AdministradorController@editUser');
 Route::post('cambio.password', 'Mod00_AdministradorController@cambiopassword');
@@ -618,3 +618,5 @@ Route::any('datatables_mtto_ldm', 'Mod08_DisenioController@datatables_mtto_ldm')
 Route::any('actualizarCantidad_mtto_ldm', 'Mod08_DisenioController@actualizarCantidad_mtto_ldm')->name('actualizarCantidad_mtto_ldm');
 Route::any('mtto_ldm_combobox_articulos', 'Mod08_DisenioController@mtto_ldm_combobox_articulos')->name('mtto_ldm_combobox_articulos');
 
+Route::get('home/PLANTILLA DE PERSONAL', 'Reportes_ProduccionController@showModal')->middleware('routelog');
+Route::any('home/reporte/PLANTILLA DE PERSONAL', 'Mod00_AdministradorController@Plantilla_PDF');

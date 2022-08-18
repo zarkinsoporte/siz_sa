@@ -173,4 +173,11 @@ class User extends Model implements AuthenticatableContract,
 
         return $dept." - ".$pos." - ".$puesto;
      }
+     public function getDepto(){
+         //DEPARTAMENTO
+         $dept = DB::table('OUDP')->where('Code', $this->dept)
+        ->value('Name');
+        
+        return $dept;
+     }
 }

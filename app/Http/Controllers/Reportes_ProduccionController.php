@@ -217,10 +217,14 @@ class Reportes_ProduccionController extends Controller
         $data_selSiete = [];
         $text_selOcho = '';
         $data_selOcho = [];
+        $text_selNueve = '';
+        $data_selNueve = [];
         $sizeModal = 'modal-sm';
         $data_table = '';
         $btn3 = '';
         $btnSubmitText = 'Generar';
+        $optionselected = '';
+        $target = '_self';//'_blank';
         switch ($nombre) {
             case "HISTORIAL OP":
                 $fieldOtroNumber = 'OP';
@@ -259,6 +263,19 @@ class Reportes_ProduccionController extends Controller
                 break;
             case "ACTUALIZAR MRP":
                 $Text = "Esta a punto de actualizar el MRP. ¿Desea continuar?";
+                break;
+            case "PLANTILLA DE PERSONAL":
+                $deptos =
+                DB::table('Siz_View_Plantilla_Personal')
+                ->select('Depto as llave', 'Depto as valor')
+                ->groupBy('Depto')
+                ->orderBy('Depto') ->get();    
+                $Text = "Selecciona un Departamento:";
+                //seleccionamos el departamento del usuario actual
+                $optionselected = Auth::user()->getDepto();
+                $text_selNueve = 'Departamentos'; 
+                $data_selNueve = $deptos;
+                $target = '_blank';
                 break;
             case "TRASLADO ENTREGA":
                 $almacenesOrigen = DB::table('SIZ_AlmacenesTransferencias')
@@ -351,15 +368,19 @@ class Reportes_ProduccionController extends Controller
             'data_selCuatro' => $data_selCuatro,
             'text_selCinco' => $text_selCinco,
             'data_selCinco' => $data_selCinco,
-            'text_selSiete' => $text_selCinco,
-            'data_selSiete' => $data_selCinco,
-            'text_selOcho' => $text_selCinco,
-            'data_selOcho' => $data_selCinco,
+            'text_selSiete' => $text_selSiete,
+            'data_selSiete' => $data_selSiete,
+            'text_selOcho' => $text_selOcho,
+            'data_selOcho' => $data_selOcho,
+            'text_selNueve' => $text_selNueve,
+            'data_selNueve' => $data_selNueve,
             'sizeModal' => $sizeModal,
             'data_table' => $data_table,
             'btn3' => $btn3,
             'btnSubmitText' => $btnSubmitText,
-            'unafecha' => $unafecha
+            'unafecha' => $unafecha,
+            'optionselected' => $optionselected,
+            'target' => $target
             ]);
         } else {
             return redirect()->route('auth/login');

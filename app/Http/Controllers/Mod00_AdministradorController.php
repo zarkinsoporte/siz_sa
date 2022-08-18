@@ -105,15 +105,20 @@ class Mod00_AdministradorController extends Controller
             )
             ->make(true);
         }
-           public function Plantilla_PDF($clave)
+public function Plantilla_PDF($clave = null)
 {
+    //este metodo lo usan 2 rutas:
+    //home/reporte/PLANTILLA PERSONAL
+    //admin/Plantilla_PDF/{depto?}
+    if(is_null($clave)){
+        $clave = Input::get('text_selNueve');
+    }
     $users = DB::table('Siz_View_Plantilla_Personal')
     ->where('Depto', 'like', '%'.$clave.'%')->orderBy('jobTitle')->get();
-  
-    $sociedad=DB::table('OADM')->value('CompnyName');
-    $pdf = \PDF::loadView('Mod00_Administrador.PlantillaPDF',compact('users','sociedad','clave'));
+     
+    $pdf = \PDF::loadView('Mod00_Administrador.PlantillaPDF',compact('users','clave'));
     $pdf->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);
-    return $pdf->stream('Siz_Plantilla_Personal'.$clave.' - '.$hoy = date("d/m/Y").'.Pdf');
+    return $pdf->stream('Siz_Plantilla_Personal '.$clave.' - '.$hoy = date("d/m/Y").'.Pdf');
  }
      
 

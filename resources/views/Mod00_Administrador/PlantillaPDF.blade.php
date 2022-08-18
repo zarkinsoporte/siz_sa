@@ -65,11 +65,10 @@
             <table border="1px" class="table table-striped">
                 <thead class="thead-dark">  
                         <tr>
-                         <td colspan="6" align="center" bgcolor="#fff">
-                         <b><?php echo $sociedad ?></b><br>    
-                         <b>Mod00 - Administrador</b>
+                         <td colspan="6" align="center" bgcolor="#fff">   
+                         <b>{{env('EMPRESA_NAME')}}</b>
                          <h3>Plantilla de Personal</h3>
-                         <h3>{{$clave}}</h3></td>
+                         <h2>{{$clave}}</h2></td>
 
                          </tr>
                          </thead>                      
@@ -108,7 +107,7 @@
                 <script type="text/php">
                 $text = 'Pagina: {PAGE_NUM} / {PAGE_COUNT}';
                 $date = 'Fecha de impresion : <?php echo $hoy = date("d-m-Y H:i:s");?>';
-                $tittle = 'Siz_Administrador_Plantilla_Personal.Pdf';
+                $tittle = 'Siz_Plantilla_Personal.Pdf';
                 $font = $fontMetrics->get_font("Arial, Helvetica, sans-serif", "normal");
                 $pdf->page_text(35, 755, $text, $font, 9);
                 $pdf->page_text(405, 23, $date, $font, 9);

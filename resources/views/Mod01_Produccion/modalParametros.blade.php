@@ -49,7 +49,7 @@
 
                                         <h4 class="modal-title" id="pwModalLabel">{{$nombre}}</h4>
                                     </div>
-                                    {!! Form::open(['url' => 'home/reporte/'.$nombre, 'method' => 'POST']) !!}
+                                    {!! Form::open(['url' => 'home/reporte/'.$nombre, 'method' => 'POST', 'target'=>''.$target]) !!}
 
                                     <div class="modal-body">
                                         @if($text <> '')
@@ -161,7 +161,8 @@
                                                 </select>
                                             </div>
                                         @endif
-                                        @if($text_selSiete <> '')
+                                       
+                                        @if($text_selSiete !== '')
                                             <div class="form-group">
                                                 <label for="text_selSiete">{{$text_selSiete}}:</label>
                                                 
@@ -213,7 +214,28 @@
                                                 </select>
                                             </div>
                                         @endif
+                                         @if($text_selNueve <> '')
+                                            <div class="form-group">
+                                                <label for="text_selOcho">{{$text_selNueve}}:</label>
+                                                
+                                                <select 
+                                                data-live-search="true" 
+                                                class="boot-select form-control" 
+                                                title="No has seleccionado nada" 
+                                                data-size="5"
+                                                data-dropup-auto="false" 
+                                                 
+                                                data-live-search-placeholder="Busqueda" 
+                                                id="text_selNueve"
+                                                name="text_selNueve" 
+                                                autofocus required>
 
+                                                    @foreach ($data_selNueve as $item)
+                                                        <option value="{{$item->llave}}">{{$item->valor}}</option> 
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        @endif
                                         @if($data_table <> '')
                                            
                                               <div class="col-md-12">
@@ -402,13 +424,17 @@
                                 $("#page-wrapper").toggleClass("content"); 
                                 $(this).toggleClass("active"); 
                             });
+                            
+                            
+                            $('#text_selNueve').val('{{$optionselected}}').selectpicker('refresh');  
+                            
                             $('#pass').modal(
                                 {
                                     show: true,
                                     backdrop: 'static',
                                     keyboard: false
                                 }
-                            );    
+                            );  
                         }                                                    
                     </script>
                     @endif
@@ -416,4 +442,5 @@
                         function mostrar(){
                             $("#hiddendiv").show();
                         }; 
+                       
                     </script>
