@@ -1,27 +1,51 @@
 
 @extends('Mod00_Administrador.admin')
 
-
+<style type="text/css">
+    #myBtn {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 30px;
+    z-index: 99;
+    font-size: 18px;
+    border: none;
+    outline: none;
+   
+    color: white;
+    cursor: pointer;
+    padding: 15px;
+    border-radius: 4px;
+    }
+    
+</style>
 
 @section('subcontent-01')
 
-    <!-- @aareachart( 'beto', 'chart') -->
-
-<div id="chart"></div>
-
-    <div class="visible-lg"><br><br><br></div>
-
-
-       <h4>Usuarios Activos</h4>
+    <div class="row">
+        <div class="col-md-6">
+            <button onclick="topFunction()" class="btn btn-primary" id="myBtn" title="Go to top">Ir arriba</button>
+            <h3>Usuarios Activos</h3>
+        </div>
+        <div class="col-md-6">
+            <select style="" class="form-control btn-default" id="sel1" name="sel1">
+        @foreach($finalarray as $key => $value)
+        <option value="{{$key}}">{{$key}}</option>
+        @endforeach
+        </div>
+        
+    
+    </select>
+</div>
         <div class="row">
        @foreach($finalarray as $clave => $valor)
 
-           <div class="col-md-3">
+           <div class="col-md-12">
 
                <?php
                $total = 0
                ?>
-               <div class="panel panel-default">
+               <div class="panel panel-default" id="{{$clave}}">
                    <div class="panel-heading">
                        <h3 class="panel-title"><i class="fa fa-users fa-fw"></i>&nbsp;{{$clave}}</h3>
                    </div>
@@ -42,23 +66,23 @@
                            @endforeach
                            <a href="#" class="list-group-item">
                                <span class="badge">{{$total}}</span>
-                               <i class="fa fa-fw fa-users"></i> Total General
+                               <i class="fa fa-fw fa-users"></i> TOTAL {{$clave}}
                            </a>
 
                        </div>
-  <div class="text-right">                      
+  <div class="text-left">                      
 <a  class="btn btn-success btn-sm" href="plantilla/{{$clave}}"> <i class="fa fa-file-excel-o"></i>
 </a>
 <a class="btn btn-danger btn-sm" href="Plantilla_PDF/{{$clave}}" target="_blank"><i class="fa fa-file-pdf-o"></i></a>  
                       
-                           <a href="detalle-depto/{{$clave}}">Ver detalles <i class="fa fa-arrow-circle-right"></i></a>
+                           &nbsp;<a href="detalle-depto/{{$clave}}">Ver detalles <i class="fa fa-arrow-circle-right"></i></a>
                        </div>
                    </div>
                </div>
            </div>
 
    @endforeach   </div> <!-- /.row -->
-
+   
            <div class="row">
 
                @if (count($errors) > 0)
@@ -76,7 +100,6 @@
                @endif
 
            </div>
-
                 <!-- Modal -->
 
                 <div class="modal fade" id="mymodal" tabindex="-1" role="dialog" >
@@ -121,8 +144,33 @@
                             modal.find('#userId').val(recipient)
                         });
                     });
+$('#sel1').on('change', function() {
 
+    $([document.documentElement, document.body]).animate({
+    scrollTop: $("#"+this.value).offset().top-100
+    }, 2000);
+});
+         //Get the button
+        var mybutton = document.getElementById("myBtn");
+        
+        // When the user scrolls down 20px from the top of the document, show the button
+        window.onscroll = function() {scrollFunction()};
+        
+        function scrollFunction() {
+        if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+        mybutton.style.display = "block";
+        } else {
+        mybutton.style.display = "none";
+        }
+        }
+        
+        // When the user clicks on the button, scroll to the top of the document
+        function topFunction() {
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+        }           
                 </script>
+               
 
         </div>
 

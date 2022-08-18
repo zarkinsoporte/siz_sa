@@ -14,21 +14,8 @@
                 <div class="col-md-12 col-sm-12">
                     <div class="visible-xs visible-sm"><br><br></div>
                     <h3 class="page-header">
-                       Módulo Administrador
+                       MOD00-SISTEMAS
                     </h3>
-               
-                    <div class="hidden-xs">
-                        <div class="hidden-sm">
-                            <ol class="breadcrumb">
-                                <li>
-                                    <i class="fa fa-dashboard"></i>  <a href="{!! url('home') !!}">Inicio</a>
-                                </li>
-                                <li>
-                                    <i class="fa fa-archive"></i> <a href="admin/users">Administrador</a>
-                                </li>
-                            </ol>
-                        </div>
-                    </div>
                 </div>
             </div>
             <!-- /.row -->

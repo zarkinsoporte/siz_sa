@@ -181,7 +181,7 @@ li.dt-button.active a::before{
 
 </head>
 <body style="width: 100%">
-        <div id="wrapper">
+        <div id="wrapper" style="overflow: hidden;">
 
             <!-- Navigation -->
             <nav class="navbar navbar-inverse navbar-fixed-top"  style="background-color: #181510;" role="navigation">

@@ -68,7 +68,7 @@ Route::get('viewpassword', ['as' => 'viewpassword', 'uses' => 'Auth\FunctionsCon
 | MOD00-ADMINISTRADOR Routes
 |--------------------------------------------------------------------------
  */
-Route::get('MOD00-ADMINISTRADOR', 'Mod00_AdministradorController@index');
+Route::get('home/MOD00-SISTEMAS', 'Mod00_AdministradorController@index');
 Route::get('admin/users', 'Mod00_AdministradorController@allUsers');
 Route::get('admin/detalle-depto/{depto}', 'Mod00_AdministradorController@showUsers');
 Route::get('admin/plantilla/{depto}', 'Mod00_AdministradorController@PlantillaExcel');

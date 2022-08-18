@@ -5,11 +5,11 @@
         <ul class="nav navbar-nav side-nav">
 
             <li>
-                <img src="{{asset('images/zarkinlogo.jpg')}}" class="img-responsive">
+               <!-- <img src="{{asset('images/zarkinlogo.jpg')}}" class="img-responsive">-->
                 <ul id="demo" class="">
                     @foreach ($grupos as $a)
                         <li>
-                            <a href="{!! url("admin/grupos/".$a->typeID) !!}">{{ $a->name }}</a>
+                            <a style="padding-left: 16px" href="{!! url("admin/grupos/".$a->typeID) !!}">{{ $a->name }}</a>
                         </li>
                     @endforeach
                     <li class="divider"></li>
@@ -26,17 +26,17 @@
            
                 <div  class="row">
                     <h3 class="page-header">
-                        Menu del Módulo {{$modulo->name}}:
+                        CONFIGURACIÓN {{$modulo->name}}:
                     </h3>
                     <ol class="breadcrumb">
                         <li>
                             <i class="fa fa-dashboard"></i>  <a href="{!! url('MOD00-ADMINISTRADOR') !!}">Administrador</a>
                         </li>
                         <li class="active">
-                            <i class="fa fa-file"></i> <a href="{!! url('admin/grupos/'.$id_grupo) !!}">Módulos</a>
+                            </i> <a href="{!! url('admin/grupos/'.$id_grupo) !!}">Módulos</a>
                         </li>
                         <li class="active">
-                            <i class="fa fa-file"></i> <a href="{!! url('admin/grupos/conf_modulo/'.$id_modulo) !!}">Tareas</a>
+                            </i> <a href="{!! url('admin/grupos/conf_modulo/'.$id_modulo) !!}">Tareas</a>
                         </li>
                     </ol>
                 </div>
@@ -54,7 +54,7 @@
                         <div class="thumbnail">
                             <div class="caption">
                                 <h4>Grupo: {{$grupo->name}}</h4>
-                                <p>Modulo: {{$modulo->name}}</p>
+                                <p>Módulo: {{$modulo->name}}</p>
                             </div>
                         </div>
                     </div>

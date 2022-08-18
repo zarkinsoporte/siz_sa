@@ -11,11 +11,11 @@ img{
         <ul class="nav navbar-nav side-nav">
 
             <li>
-                <img src="{{asset('images/white.png')}}" class="img-responsive">
+               
                 <ul id="demo" class="">
                     @foreach ($grupos as $a)
                         <li>
-                            <a href="{!! url("admin/grupos/".$a->typeID) !!}">{{ $a->name }}</a>
+                            <a style="padding-left: 16px" href="{!! url("admin/grupos/".$a->typeID) !!}"><i class="fa fa-fw fa-dashboard"></i> {{ $a->name }}</a>
                         </li>
                     @endforeach
                     <li class="divider"></li>
@@ -44,10 +44,10 @@ img{
                                 <i class="fa fa-dashboard"></i> <a href="{!! url('home') !!}">Inicio</a>
                             </li>
                             <li>
-                                <i class="fa fa-archive"></i>  <a href="{!! url('MOD00-ADMINISTRADOR') !!}">MOD-Administrador</a>
+                                <i class="fa fa-archive"></i>  <a href="{!! url('MOD00-ADMINISTRADOR') !!}">MOD00-SISTEMAS</a>
                             </li>
                             <li class="active">
-                                <i class="fa fa-file"></i> <a href="{!! url('admin/grupos/'.$id_grupo) !!}">Módulos</a>
+                                <i class="fa fa-archive"></i> <a href="{!! url('admin/grupos/'.$id_grupo) !!}">{{$nombre_grupo}}</a>
                             </li>
                             </ol>
                         </div>

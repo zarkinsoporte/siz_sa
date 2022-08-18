@@ -13,6 +13,7 @@ $index = 0;
     <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
     <div class="collapse navbar-collapse navbar-ex1-collapse">
         <nav id="sidebar" class="nav navbar-nav side-nav">
+            
             @foreach($actividades as $n1)
                 <?php
                  $index = $index + 1;
@@ -100,19 +101,6 @@ $index = 0;
                     @endif
 
 @endforeach
-
-
-
-
-@if(isset($isAdmin))
-@if ($isAdmin)
-<li>
-    <a href="{!! url('/MOD00-ADMINISTRADOR') !!}">Administrador</a>
-</li>
-@endif
-@endif
-
-
                 @include('partials.section-navbar')
         </ul>
     </div>
