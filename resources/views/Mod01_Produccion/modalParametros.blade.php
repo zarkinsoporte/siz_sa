@@ -440,7 +440,12 @@
                     @endif
                     <script>
                         function mostrar(){
-                            $("#hiddendiv").show();
+                            $("#hiddendiv").show()
+                            setTimeout(espere, 5000);
                         }; 
+
+                        function espere(){
+                            $("#hiddendiv").hide()
+                        }
                        
                     </script>
