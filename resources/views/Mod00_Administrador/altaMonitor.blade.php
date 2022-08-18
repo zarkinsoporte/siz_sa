@@ -19,16 +19,16 @@
                         <div class="hidden-sm">
                     <ol class="breadcrumb">
                         <li>
-                            <i class="fa fa-dashboard"></i>  <a href="MOD00-Administrador">MOD-Administrador</a>
+                            <i class="fa fa-dashboard"></i>  <a href="MOD00-SISTEMAS">MOD00-SISTEMAS</a>
                         </li>
                         <li>
-                            <i class="fa fa-archive"></i>  <a href="inventario">Gestiòn de Inventarios</a>
+                              <a href="inventario">GESTIÓN INVENTARIOS</a>
                         </li>
                         <li>
-                            <i class="fa fa-archive"></i> <a href="monitores">Monitores</a>
+                             <a href="monitores">MONITORES</a>
                         </li>
                         <li>
-                            <i class="fa fa-archive"></i>  <a href="altaMonitor">Alta Monitores</a>
+                             <a href="altaMonitor">ALTA</a>
                         </li>
 
                     </ol>

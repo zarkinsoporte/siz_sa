@@ -52,10 +52,10 @@
                                 <i class="fa fa-dashboard"></i> <a href="{!! url('home') !!}">Inicio</a>
                             </li>
                             <li>
-                                <i class="fa fa-archive"></i> <a href="{!! url('MOD00-ADMINISTRADOR') !!}">MOD-Administrador</a>
+                                 <a href="{!! url('home/MOD00-SISTEMAS') !!}">MOD-SISTEMAS</a>
                             </li>
                             <li>
-                                <i class="fa fa-archive"></i> <a href="#">Inventario cómputo</a>
+                                 <a href="#">Inventario cómputo</a>
                             </li>
                         </ol>
                     </div>

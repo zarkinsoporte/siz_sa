@@ -19,13 +19,13 @@
                     <i class="fa fa-dashboard"></i> <a href="{!! url('home') !!}">Inicio</a>
                 </li>
                 <li>
-                    <i class="fa fa-archive"></i> <a href="{!! url('MOD00-ADMINISTRADOR') !!}">MOD-Asministrador</a>
+                    <a href="{!! url('home/MOD00-SISTEMAS') !!}">MOD00-SISTEMAS</a>
                 </li>
                 <li>
-                    <i class="fa fa-archive"></i> <a href="{{Request::root().'/admin/inventario'}}">Inventario cómputo</a>
+                    <a href="{{Request::root().'/admin/inventario'}}">INVENTARIO COMPUTO</a>
                 </li>
                 <li>
-                    <i class="fa fa-archive"></i> <a href="#">Modificación de inventario</a>
+                    <a href="#">MODIFICACIÓN</a>
                 </li>
 
             </ol>

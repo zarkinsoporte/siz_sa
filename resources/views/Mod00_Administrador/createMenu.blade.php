@@ -30,13 +30,13 @@
                     </h3>
                     <ol class="breadcrumb">
                         <li>
-                            <i class="fa fa-dashboard"></i>  <a href="{!! url('MOD00-ADMINISTRADOR') !!}">Administrador</a>
+                            <i class="fa fa-dashboard"></i>  <a href="{!! url('home/MOD00-SISTEMAS') !!}">MOD00-SISTEMAS</a>
                         </li>
                         <li class="active">
-                            </i> <a href="{!! url('admin/grupos/'.$id_grupo) !!}">Módulos</a>
+                            <a href="{!! url('admin/grupos/'.$id_grupo) !!}">MÓDULOS</a>
                         </li>
                         <li class="active">
-                            </i> <a href="{!! url('admin/grupos/conf_modulo/'.$id_modulo) !!}">Tareas</a>
+                             <a href="{!! url('admin/grupos/conf_modulo/'.$id_modulo) !!}">TAREAS</a>
                         </li>
                     </ol>
                 </div>

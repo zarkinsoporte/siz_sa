@@ -44,10 +44,10 @@ img{
                                 <i class="fa fa-dashboard"></i> <a href="{!! url('home') !!}">Inicio</a>
                             </li>
                             <li>
-                                <i class="fa fa-archive"></i>  <a href="{!! url('MOD00-ADMINISTRADOR') !!}">MOD00-SISTEMAS</a>
+                                 <a href="{!! url('home/MOD00-SISTEMAS') !!}">MOD00-SISTEMAS</a>
                             </li>
                             <li class="active">
-                                <i class="fa fa-archive"></i> <a href="{!! url('admin/grupos/'.$id_grupo) !!}">{{$nombre_grupo}}</a>
+                                 <a href="{!! url('admin/grupos/'.$id_grupo) !!}">{{$nombre_grupo}}</a>
                             </li>
                             </ol>
                         </div>

@@ -23,13 +23,13 @@
                             <i class="fa fa-dashboard"></i> <a href="{!! url('home') !!}">Inicio</a>
                         </li>
                         <li>
-                            <i class="fa fa-archive"></i>  <a href="{!! url('MOD00-ADMINISTRADOR') !!}">MOD-Administrador</a>
+                            <a href="{!! url('home/MOD00-SISTEMAS') !!}">MOD00-SISTEMAS</a>
                         </li>
                         <li>
-                            <i class="fa fa-archive"></i>  <a href="inventario">Gestiòn de Inventario</a>
+                            <a href="inventario">GESTIÓN INVENTARIO</a>
                         </li>
                         <li>
-                            <i class="fa fa-archive"></i>  <a href="monitores">Monitores</a>
+                            <a href="monitores">MONITORES</a>
                         </li>
 
                     </ol>
