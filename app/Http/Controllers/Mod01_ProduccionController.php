@@ -668,7 +668,7 @@ class Mod01_ProduccionController extends Controller
                 Session::put('op', $Code_actual->U_DocEntry);
                 $U_CT_siguiente = OP::getEstacionSiguiente($Code_actual->Code, 2); //obtiene la estacion siguiente formato numero
 
-$dt = date('Ymd h:i');
+$dt = date('Ymd H:i');
 //AVANCE DE OP (NO PIEL)
 //Cuando una orden se libera en planeación revisamos si se le cargara piel 106 (revisando su ruta), 
 //en caso de que no lleve piel, entonces le cambiamos en status y le colocamos la fecha de inicio.
@@ -987,7 +987,7 @@ return redirect()->route('home');
             $reason = $request->input('reason');
             $leido = 'N';
             $banderita = false; // esta banbbgdera sirva para verificar si la estacion destino es un retroceso creado o ya existente
-            $dt = date('Ymd h:m:s');
+            $dt = date('Ymd H:i:s');
 //$dt = date('Y-m-d H:i:s');  no usar
 //$Code_actual = OP::find(Input::get('code'));
 //Session::put('op', $Code_actual->U_DocEntry);
@@ -1387,7 +1387,7 @@ public function terminarOP(Request $request){
 
                 if (strpos($result, 'Recibo') !== false) {
                 //agregar linea en LOGOF del avance
-                    $dt = date('Ymd h:m:s');
+                    $dt = date('Ymd H:i:s');
                     $user = User::find($request->input('userId'));
 
                     $Con_Logof = DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOF]');

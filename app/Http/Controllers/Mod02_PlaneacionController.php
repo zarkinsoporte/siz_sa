@@ -202,7 +202,7 @@ public function liberacion_op(Request $request){
                                 //DB::beginTransaction();
                                 $PlannedQty = DB::table('OWOR')->where('DocNum', $op)->value('PlannedQty');
                                 //dd($PlannedQty);
-                                $dt = date('Ymd h:i');
+                                $dt = date('Ymd H:i');
                                 //esta linea obtiene el consecutivo del numero
                                 $consecutivo = DB::select('select max (CONVERT(INT,Code)) as Code from [@CP_OF]');
                                 //aqui acaba num consecutivo
