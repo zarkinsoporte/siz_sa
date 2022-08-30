@@ -52,22 +52,25 @@
                    <div class="panel-body">
                        <div class="list-group">
                            @foreach($valor as $dept)
-                               <a href="#" class="list-group-item">
-                                   <span class="badge">{{$dept->c}}</span>
+                               <li href="#" class="list-group-item">
+                                   
+                                   <span class="badge" id="{{$clave.$dept->jobTitle}}">{{$dept->c}}</span>
+                                   <span style="float: right; padding-right: 8px;"> <button data-toggle="modal" data-target="#modal_add_user" data-puesto="{{$dept->jobTitle}}" data-depto="{{$clave}}" class="btn btn-sm btn-success"><i class="fa fa-user-plus"></i> </button></span>
                                    @if(empty($dept->jobTitle))
                                         NO CAPTURADO
                                    @else
                                       {{$dept->jobTitle}}
                                    @endif
+                                   
                                    <?php
                                    $total = $total + $dept->c
                                    ?>
                                </a>
                            @endforeach
-                           <a href="#" class="list-group-item">
+                           <li href="#" class="list-group-item">
                                <span class="badge">{{$total}}</span>
                                <i class="fa fa-fw fa-users"></i> TOTAL {{$clave}}
-                           </a>
+                           </li>
 
                        </div>
   <div class="text-left">                      
@@ -130,20 +133,155 @@
                         </div>
                     </div>
                 </div>
+                <div class="modal fade" id="modal_add_user" role="dialog">
+                    <div class="modal-dialog modal-lg" role="document">
+                        {!! Form::open(['url' => 'home/add_user', 'method' => 'POST']) !!}
+                        <div class="modal-content">
+                
+                            <div class="modal-header">
+                
+                                <h4 class="modal-title" id="pwModalLabel">ALTA DE USUARIO</h4>
+                            </div>
+                
+                            <div class="modal-body">
+                                <div class="">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="input_user_depto">Departamento *</label>
+                                                <input type="text" id="input_user_depto" name="input_user_depto" class='form-control' readonly>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="input_user_puesto">Puesto *</label>
+                                                <input type="text" id="input_user_puesto" name="input_user_puesto" class='form-control' readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label for="input_user_nomina"># Nomina *</label>
+                                                <input type="number" id="input_user_nomina" name="input_user_nomina" class='form-control'>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div class="form-group">
+                                                <label for="input_user_nombre">Nombre *</label>
+                                                <input type="text" id="input_user_nombre" name="input_user_nombre" class='form-control'>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div class="form-group">
+                                                <label for="input_user_apellido">Apellido *</label>
+                                                <input type="text" class="form-control" id="input_user_apellido" name="input_user_apellido">
+                                            </div>
+                                        </div>
+                                    </div><!-- /.row -->
+                                
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="input_user_correo">Correo *</label>
+                                                <div class="input-group">
+                                                    <input type="text" id="input_user_correo" name="input_user_correo" class='form-control'
+                                                        onfocus="correo_sugerido()">
+                                                    <span class="input-group-addon" id="basic-addon2">@zarkin.com</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="cant">Grupo Usuario en SIZ *</label>
+                                                {!! Form::select("cbo_user_grupo", [], null, [
+                                                "class" => "form-control selectpicker","id"=>"cbo_user_grupo", "data-style" => "btn-success btn-sm"])
+                                                !!}
+                                            </div>
+                                        </div>
+                                    </div>
+                                
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label for="input_user_estaciones">(OPCIONAL) Estaciones Autorizadas Control Piso (separadas por
+                                                    coma)</label>
+                                                <textarea class="form-control" maxlength="50" rows="1" name="input_user_estaciones"
+                                                    id="input_user_estaciones" style="text-transform:uppercase;" value=""
+                                                    onkeyup="javascript:this.value=this.value.toUpperCase();"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                   
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                
+                               
+                                <button type="button" class="btn btn-default" data-dismiss="modal" aria-label="Close">Cancelar</button>
+                                <input id="guardar_user" name="submit" value="Guardar" 
+                                    class="btn btn-primary" />
+                            </div>
+                
+                        </div>
+                        {!! Form::close() !!}
+                    </div>
+                </div><!-- /modal -->
                
-                <script type="text/javascript" >
-                    $(document).ready(function (event) {
+<script type="text/javascript" >
+    $(document).ready(function (event) {
 
-                        $('#mymodal').on('show.bs.modal', function (event) {
-                            var button = $(event.relatedTarget) // Button that triggered the modal
-                            var recipient = button.data('whatever') // Extract info from data-* attributes
-                            // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
-                            // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
-                            var modal = $(this)
+        $('#mymodal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget) // Button that triggered the modal
+            var recipient = button.data('whatever') // Extract info from data-* attributes
+            // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+            // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+            var modal = $(this)
 
-                            modal.find('#userId').val(recipient)
-                        });
-                    });
+            modal.find('#userId').val(recipient)
+        });
+
+        $('#modal_add_user').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget) // Button that triggered the modal
+            var puesto = button.data('puesto') // Extract info from data-* attributes
+            var depto = button.data('depto') // Extract info from data-* attributes
+            // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+            // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+            var modal = $(this)
+
+                modal.find('#input_user_depto').val(depto)
+                modal.find('#input_user_puesto').val(puesto)
+        });
+        $("#guardar_user").click(function(){ valida() });
+    });
+    function valida(){
+        var test = /^[1-8]{3}(,[1-8]{3})*$/; //regex 
+        var value = $("#input_user_estaciones").val(); 
+        if(value.match(test) ) { 
+            console.log("estaciones correcto")
+        }else{ 
+             console.log("estaciones no correcto") 
+        }
+    var test = /^\w+\.*\w+$/; //regex 
+    var value = $("#input_user_correo").val(); 
+    if (value.match(test) ) {
+        console.log("correo correcto") }else{ console.log("correo no correcto") 
+    } 
+}
+    function correo_sugerido(){ 
+        let nombre = $("#input_user_nombre").val() 
+        let nombres = []; 
+        let apellido = $("#input_user_apellido").val() 
+        let apellidos = []; 
+        if (nombre !== '' && apellido !== '') { 
+            nombres = nombre.split(" ");
+            apellidos = apellido.split(" "); 
+            $("#input_user_correo").val(nombres[0]+ '.' + apellidos[0]) 
+        }else if(nombre !== ''){
+            nombres = nombre.split(" "); 
+            $("#input_user_correo").val(nombres[0]) 
+        } 
+    }
 $('#sel1').on('change', function() {
 
     $([document.documentElement, document.body]).animate({
