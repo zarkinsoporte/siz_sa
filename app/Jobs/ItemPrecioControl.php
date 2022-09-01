@@ -68,7 +68,8 @@ class ItemPrecioControl extends Job implements SelfHandling, ShouldQueue
             $fecha_final = Carbon::now();
             // Log::warning("fecha_final");
             // Log::warning($fecha_final);
-            $tiempo_proceso = $fecha_inicial->diffInMinutes($fecha_final);
+            $tiempo_proceso = $fecha_final->diff($fecha_inicial)->format('%H:%I:%S');
+            //$tiempo_proceso = $fecha_inicial->diffInMinutes($fecha_final);
             // Log::warning("dispatch .".$tiempo_proceso);
             $user = User::find($this->user_nomina);
             $email = $user->email.'@zarkin.com';
@@ -78,7 +79,7 @@ class ItemPrecioControl extends Job implements SelfHandling, ShouldQueue
                     'paraUsuario' => $user->firstName.' '.$user->lastName,
                     'mensaje' => 'El proceso ROLLOUT de actualización de precios de 
                     LISTA #'.$this->priceList.' finalizó <br> 
-                    Duración: '. $tiempo_proceso. ' minutos, Inicio: '. $fecha_inicial
+                    Duración (h:m:s): '. $tiempo_proceso. ', Inicio: '. $fecha_inicial
                 ], function ($msj) use ($email) {
                     $msj->subject('SIZ ROLLOUT ACTUALIZACION PRECIOS'); //ASUNTO DEL CORREO
                     $msj->to([$email]); //Correo del destinatario
@@ -90,7 +91,7 @@ class ItemPrecioControl extends Job implements SelfHandling, ShouldQueue
                     'Destinatario' => $this->user_nomina,
                     'Descripcion' => 'El proceso ROLLOUT de actualización de precios de 
                     LISTA #' . $this->priceList . ' finalizó <br> 
-                    Duración: '. $tiempo_proceso. ' minutos, Inicio: '. $fecha_inicial,
+                    Duración (h:m:s): '. $tiempo_proceso. ', Inicio: '. $fecha_inicial,
                     //  'Estacion_Act' => $Est_act,
                     //  'Estacion_Destino' => $Est_ant,
                     //  'Cant_Enviada'=>$cant_r,

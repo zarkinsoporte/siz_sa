@@ -693,7 +693,7 @@ public function processRollout(Request $request){
         
         return compact('mensaje');
     } catch (\Exception $e) {
-        Cache::forget('roll');
+        //Cache::forget('roll');
         header('HTTP/1.1 500 Internal Server Error');
         header('Content-Type: application/json; charset=UTF-8');
         die(json_encode(array(
