@@ -145,20 +145,7 @@
                 
                             <div class="modal-body">
                                 <div class="">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="input_user_depto">Departamento *</label>
-                                                <input type="text" id="input_user_depto" name="input_user_depto" class='form-control' readonly>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="input_user_puesto">Puesto *</label>
-                                                <input type="text" id="input_user_puesto" name="input_user_puesto" class='form-control' readonly>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    
                                     <div class="row">
                                         <div class="col-md-2">
                                             <div class="form-group">
@@ -179,7 +166,52 @@
                                             </div>
                                         </div>
                                     </div><!-- /.row -->
-                                
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="input_user_depto">Departamento *</label>
+                                                <input type="text" id="input_user_depto" name="input_user_depto" class='form-control' readonly>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="input_user_puesto">Puesto *</label>
+                                                <input type="text" id="input_user_puesto" name="input_user_puesto" class='form-control' readonly>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="cbo_user_posicion">Posición *</label>
+                                                {!! Form::select("cbo_user_posicion", $posiciones, null, [
+                                                "class" => "form-control selectpicker","id"=>"cbo_user_posicion", "data-style" => "btn-success btn-sm"])
+                                                !!}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="cbo_user_sucursal">Sucursal *</label>
+                                                {!! Form::select("cbo_user_sucursal", $sucursales, null, [
+                                                "class" => "form-control selectpicker","id"=>"cbo_user_sucursal", "data-style" => "btn-success btn-sm"])
+                                                !!}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="input_user_fingreso">Fecha Ingreso *</label>
+                                                <input type="text" id="input_user_fingreso" name="input_user_fingreso" class='form-control'>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="cbo_user_estatus">Estatus *</label>
+                                                {!! Form::select("cbo_user_estatus", $estatus, null, [
+                                                "class" => "form-control selectpicker","id"=>"cbo_user_estatus", "data-style" => "btn-success btn-sm"])
+                                                !!}
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group">
@@ -193,18 +225,43 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="cant">Grupo Usuario en SIZ *</label>
-                                                {!! Form::select("cbo_user_grupo", [], null, [
+                                                <label for="cbo_user_grupo">Grupo Usuario SIZ *</label>
+                                                {!! Form::select("cbo_user_grupo", $grupos, null, [
                                                 "class" => "form-control selectpicker","id"=>"cbo_user_grupo", "data-style" => "btn-success btn-sm"])
                                                 !!}
                                             </div>
                                         </div>
                                     </div>
-                                
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="cbo_user_sexo">Sexo *</label>
+                                                {!! Form::select("cbo_user_sexo", $sexos, null, [
+                                                "class" => "form-control selectpicker","id"=>"cbo_user_sexo", "data-style" => "btn-success btn-sm"])
+                                                !!}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="cbo_user_tipo">Tipo usuario *</label>
+                                                {!! Form::select("cbo_user_tipo", $tipos, null, [
+                                                "class" => "form-control selectpicker","id"=>"cbo_user_tipo", "data-style" => "btn-success btn-sm"])
+                                                !!}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="cbo_user_operacion">Tipo Operación *</label>
+                                                {!! Form::select("cbo_user_operacion", $operaciones, null, [
+                                                "class" => "form-control selectpicker","id"=>"cbo_user_operacion", "data-style" => "btn-success btn-sm"])
+                                                !!}
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="row">
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label for="input_user_estaciones">(OPCIONAL) Estaciones Autorizadas Control Piso (separadas por
+                                                <label for="input_user_estaciones">Estaciones de Trabajo Control Piso (separadas por
                                                     coma)</label>
                                                 <textarea class="form-control" maxlength="50" rows="1" name="input_user_estaciones"
                                                     id="input_user_estaciones" style="text-transform:uppercase;" value=""
