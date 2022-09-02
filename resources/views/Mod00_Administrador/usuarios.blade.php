@@ -135,7 +135,7 @@
                 </div>
                 <div class="modal fade" id="modal_add_user" role="dialog">
                     <div class="modal-dialog modal-lg" role="document">
-                        {!! Form::open(['url' => 'home/add_user', 'method' => 'POST']) !!}
+                        {!! Form::open(['url' => 'admin/guardar_usuario', 'method' => 'POST', 'id' => 'form_guardarUsuario']) !!}
                         <div class="modal-content">
                 
                             <div class="modal-header">
@@ -145,7 +145,7 @@
                 
                             <div class="modal-body">
                                 <div class="">
-                                    
+                                    <input type="hidden" id="nuevo" name="nuevo" value="1" class='form-control' >
                                     <div class="row">
                                         <div class="col-md-2">
                                             <div class="form-group">
@@ -276,8 +276,8 @@
                 
                                
                                 <button type="button" class="btn btn-default" data-dismiss="modal" aria-label="Close">Cancelar</button>
-                                <input id="guardar_user" name="submit" value="Guardar" 
-                                    class="btn btn-primary" />
+                                <a id="guardar_user" name="submit" value="Guardar" 
+                                    class="btn btn-primary"> Guardar</a>
                             </div>
                 
                         </div>
@@ -308,8 +308,11 @@
 
                 modal.find('#input_user_depto').val(depto)
                 modal.find('#input_user_puesto').val(puesto)
+        });        
+        $("#guardar_user").click(function(){ 
+            $("#form_guardarUsuario").submit();
+           // valida() 
         });
-        $("#guardar_user").click(function(){ valida() });
     });
     function valida(){
         var test = /^[1-8]{3}(,[1-8]{3})*$/; //regex 
