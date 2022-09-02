@@ -92,75 +92,42 @@ class Mod00_AdministradorController extends Controller
             $vCmp->UseTrusted = false;
             //la siguiente linea permite leer XML como string y no como archivo en "Browser->ReadXml"
             $vCmp->XMLAsString = true; //The default value is False - XML as files.
-
+           
             //$vCmp->language = "6";
             $vCmp->Connect; //conectar a Sociedad SAP
 
-            //Obtener XML de un LDM 
+            //Obtener XML de un  
             $vCmp->XmlExportType = '3'; //BoXmlExportTypes.xet_ExportImportMode; /solo los campos modificables
             $vItem = $vCmp->GetBusinessObject("171"); //EmployeesInfo table: OHEM.
-            $vItem->GetByKey('1'); //LDM Docentry
-            $pathh = public_path('assets/xml/sap/1.xml');
-            $vItem->SaveXML($pathh); //Guardar en archivo
-            dd('listo');
-            $xmlString = $vItem->GetAsXML(); //Guardar XML en buffer
+            //$vItem->GetByKey('2'); // Docentry
+                $pathh = public_path('assets/xml/sap/ldm/empleado_v2.xml');
+            //$r = $vItem->SaveXML($pathh); //Guardar en archivo
+            //dd($r, $pathh);
+    //$xmlString = $vItem->GetAsXML(); //Guardar XML en buffer
             //retiramos Utf16 del XML obtenido
-            $xmlString = utf8_encode(preg_replace('/(<\?xml[^?]+?)utf-16/i', '$1utf-8', $xmlString));
+    //        $xmlString = utf8_encode(preg_replace('/(<\?xml[^?]+?)utf-16/i', '$1utf-8', $xmlString));
             //Leemos XML(string) y creamos Object SimpleXML 
-            $oXML = simplexml_load_string($xmlString);
-            //$library = simplexml_load_file($pathh); //Crear Object SimpleXML de un archivo
+    //        $oXML = simplexml_load_string($xmlString);
+            $oXML = simplexml_load_file($pathh); //Crear Object SimpleXML de un archivo
 
             //Modificar los campos en el XML (de un articulo de la LDM)
-            $item = $oXML->xpath('/BOM/BO/ProductTrees_Lines/row[ItemCode="' . $this->codigo . '"]');
-            // clock($item);
-            if ($this->cambio_option) {
-                //$items_root = $oXML->xpath('/BOM/BO/ProductTrees_Lines');
-                if (count($item) >= 1 && !empty($item)) {
-                    $nombreItem = DB::table('OITM')->where('ItemCode', $this->codigo_cambio)->value('ItemName');
-                    foreach ($item as $i) {
-                        /*  $pelicula = $items_root->addChild('pelicula');
-                        $pelicula->addChild('ItemCode', $this->codigo);
-                         $pelicula->addChild('Warehouse', 'APG-ST');*/
-
-                        /*          <ItemCode>20189</ItemCode>
-                        <Quantity>1.300000</Quantity>
-                        <Warehouse>APG-ST</Warehouse>
-                        <Price>119.700000</Price>
-                        <Currency>MXP</Currency>
-                        <IssueMethod>im_Backflush</IssueMethod>
-                        <ParentItem>20185</ParentItem>
-                        <PriceList>1</PriceList>
-                        <ItemType>pit_Item</ItemType>
-                        <AdditionalQuantity>0.000000</AdditionalQuantity>
-                        <ChildNum>0</ChildNum>
-                        <ItemName>HE, 17E</ItemName>
-                        <U_Estacion>145</U_Estacion> */
-
-                        $i->Quantity =  $this->cantidad . '';
-                        $i->ItemName = $nombreItem;
-                        $i->Price = '';
-                        $i->ItemCode =  $this->codigo_cambio . '';
-                    }
-                } else {
-                    throw new \Exception("Error Processing ldmUpdate, item no encontrado", 1);
-                }
-            } else if ($this->delete_option && !empty($item)) {
-                unset($item[0][0]);
+            $item = $oXML->xpath('/BOM/BO/EmployeesInfo/row');
+            if (count($item) >= 1) {
+                
+                $item[0]->Gender = 'gt_Female';
+                
             } else {
-                if (count($item) >= 1 && !empty($item)) {
-                    foreach ($item as $i) {
-                        $i->Quantity =  $this->cantidad . '';
-                        // clock($this->cantidad);
-                    }
-                } else {
-                    throw new \Exception("Error Processing ldmUpdate, item no encontrado", 1);
-                }
+                
+                throw new \Exception("Error Procesando Empleado", 1);
             }
-
+           // dd($item);
+      
             //Cargar el XML en la LDM y actualizar en SAP
             //$library->asXML($pathh); //Elaborar y Escribir el XML
             //To use ReadXML method, set the XmlExportType to xet_ExportImportMode (3).
+            
             $vItem->Browser->ReadXml($oXML->asXML(), 0);
+    
             // $vItem->UpdateFromXML($pathh);
             $resultadoOperacion = $vItem->Update;
 
@@ -175,7 +142,7 @@ class Mod00_AdministradorController extends Controller
             $item = null;
             $resultadoOperacion = null;
         } catch (\Exception $e) {
-            throw new \Exception("Error Processing ldmUpdate " . $e, 1);
+            throw new \Exception("Error Procesando Empleado " . $e, 1);
         }
     }
     public function plantilla( Request $request)

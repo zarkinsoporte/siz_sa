@@ -75,6 +75,7 @@ Route::get('admin/plantilla/{depto}', 'Mod00_AdministradorController@PlantillaEx
 Route::get('admin/Plantilla_PDF/{depto?}', 'Mod00_AdministradorController@Plantilla_PDF');
 Route::get('datatables.showusers', 'Mod00_AdministradorController@DataShowUsers')->name('datatables.showusers');
 Route::get('users/edit/{empid}', 'Mod00_AdministradorController@editUser');
+Route::post('admin/guardar_usuario', 'Mod00_AdministradorController@guardar_usuario');
 Route::post('cambio.password', 'Mod00_AdministradorController@cambiopassword');
 //Rutas del Módulo de inventarios
 Route::get('admin/inventario', 'Mod00_AdministradorController@inventario');
@@ -414,12 +415,12 @@ Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@pr
 //Route::get('/pruebassap', 'Mod02_PlaneacionController@updateOV');
 
 Route::get('/pruebas', function (Request $request) {
+	dd(Cache::get('hora_init_rollout'));
 	$a = array(); 
 	array_push($a, Carbon\Carbon::createFromDate(1991, 1, 5)->diff(Carbon\Carbon::now())->format('%y'));
 	array_push($a, Carbon\Carbon::createFromDate(1991, 1, 5)->diff(Carbon\Carbon::now())->format('%m'));
 	array_push($a, Carbon\Carbon::createFromDate(1991, 1, 5)->diff(Carbon\Carbon::now())->format('%d'));
 	dd($a);
-	// dd(Cache::get('hora_init_rollout'));
 	// dd(Carbon\Carbon::createFromTimestamp(Carbon\Carbon::now()->getTimestamp())->toDateTimeString()); 
 });
 
