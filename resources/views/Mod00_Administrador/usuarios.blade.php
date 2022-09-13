@@ -55,7 +55,10 @@
                                <li href="#" class="list-group-item">
                                    
                                    <span class="badge" id="{{$clave.$dept->jobTitle}}">{{$dept->c}}</span>
-                                   <span style="float: right; padding-right: 8px;"> <button data-toggle="modal" data-target="#modal_add_user" data-puesto="{{$dept->jobTitle}}" data-depto="{{$clave}}" class="btn btn-sm btn-success"><i class="fa fa-user-plus"></i> </button></span>
+                                   <span style="float: right; padding-right: 8px;"> 
+                                   <button data-toggle="modal" data-target="#modal_add_user" 
+                                   data-puesto="{{$dept->jobTitle}}" data-depto="{{$dept->dept}}" 
+                                   data-grupo="{{$dept->ROL_GRUPO_ID}}" class="btn btn-sm btn-success"><i class="fa fa-user-plus"></i> </button></span>
                                    @if(empty($dept->jobTitle))
                                         NO CAPTURADO
                                    @else
@@ -169,8 +172,80 @@
                                     <div class="row">
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="input_user_depto">Departamento *</label>
-                                                <input type="text" id="input_user_depto" name="input_user_depto" class='form-control' readonly>
+                                                <label for="cbo_user_sexo">Sexo *</label>
+                                                <select 
+                                                    id="cbo_user_sexo"
+                                                    name="cbo_user_sexo" 
+                                                    data-live-search="true" 
+                                                    class="boot-select form-control" 
+                                                    title="No has seleccionado nada" 
+                                                    data-size="5"
+                                                    data-dropup-auto="false" 
+                                                    data-live-search-placeholder="Busqueda" 
+                                                    autofocus required>
+                                                    @foreach ($sexos as $v)
+                                                        <option value="{{$v->llave}}" selected>{{$v->valor}}</option> 
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="cbo_user_estatus">Estatus *</label>
+                                                <select 
+                                                    id="cbo_user_estatus"
+                                                    name="cbo_user_estatus" 
+                                                    data-live-search="true" 
+                                                    class="boot-select form-control" 
+                                                    title="No has seleccionado nada" 
+                                                    data-size="5"
+                                                    data-dropup-auto="false" 
+                                                    data-live-search-placeholder="Busqueda" 
+                                                    autofocus required>
+                                                    @foreach ($estatus as $v)
+                                                        <option value="{{$v->llave}}" selected>{{$v->valor}}</option> 
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="cbo_user_sucursal">Sucursal *</label>
+                                                <select 
+                                                    id="cbo_user_sucursal"
+                                                    name="cbo_user_sucursal" 
+                                                    data-live-search="true" 
+                                                    class="boot-select form-control" 
+                                                    title="No has seleccionado nada" 
+                                                    data-size="5"
+                                                    data-dropup-auto="false" 
+                                                    data-live-search-placeholder="Busqueda" 
+                                                    autofocus required>
+                                                    @foreach ($sucursales as $v)
+                                                        <option value="{{$v->llave}}" selected>{{$v->valor}}</option> 
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="cbo_user_depto">Departamento *</label>
+                                                <select 
+                                                    id="cbo_user_depto"
+                                                    name="cbo_user_depto" 
+                                                    data-live-search="true" 
+                                                    class="boot-select form-control" 
+                                                    title="No has seleccionado nada" 
+                                                    data-size="5"
+                                                    data-dropup-auto="false" 
+                                                    data-live-search-placeholder="Busqueda" 
+                                                    autofocus required>
+                                                    @foreach ($departamentos as $v)
+                                                        <option value="{{$v->llave}}" selected>{{$v->valor}}</option> 
+                                                    @endforeach
+                                                </select>
                                             </div>
                                         </div>
                                         <div class="col-md-4">
@@ -182,40 +257,28 @@
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="cbo_user_posicion">Posición *</label>
-                                                {!! Form::select("cbo_user_posicion", $posiciones, null, [
-                                                "class" => "form-control selectpicker","id"=>"cbo_user_posicion", "data-style" => "btn-success btn-sm"])
-                                                !!}
+                                                <select 
+                                                    id="cbo_user_posicion"
+                                                    name="cbo_user_posicion" 
+                                                    data-live-search="true" 
+                                                    class="boot-select form-control" 
+                                                    title="No has seleccionado nada" 
+                                                    data-size="5"
+                                                    data-dropup-auto="false" 
+                                                    data-live-search-placeholder="Busqueda" 
+                                                    autofocus required>
+                                                    @foreach ($posiciones as $v)
+                                                        <option value="{{$v->llave}}" selected>{{$v->valor}}</option> 
+                                                    @endforeach
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="cbo_user_sucursal">Sucursal *</label>
-                                                {!! Form::select("cbo_user_sucursal", $sucursales, null, [
-                                                "class" => "form-control selectpicker","id"=>"cbo_user_sucursal", "data-style" => "btn-success btn-sm"])
-                                                !!}
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="input_user_fingreso">Fecha Ingreso *</label>
-                                                <input type="text" id="input_user_fingreso" name="input_user_fingreso" class='form-control'>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="cbo_user_estatus">Estatus *</label>
-                                                {!! Form::select("cbo_user_estatus", $estatus, null, [
-                                                "class" => "form-control selectpicker","id"=>"cbo_user_estatus", "data-style" => "btn-success btn-sm"])
-                                                !!}
-                                            </div>
-                                        </div>
-                                    </div>
+                                    
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="input_user_correo">Correo *</label>
+                                                <label for="input_user_correo">Correo </label>
                                                 <div class="input-group">
                                                     <input type="text" id="input_user_correo" name="input_user_correo" class='form-control'
                                                         onfocus="correo_sugerido()">
@@ -226,35 +289,20 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="cbo_user_grupo">Grupo Usuario SIZ *</label>
-                                                {!! Form::select("cbo_user_grupo", $grupos, null, [
-                                                "class" => "form-control selectpicker","id"=>"cbo_user_grupo", "data-style" => "btn-success btn-sm"])
-                                                !!}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="cbo_user_sexo">Sexo *</label>
-                                                {!! Form::select("cbo_user_sexo", $sexos, null, [
-                                                "class" => "form-control selectpicker","id"=>"cbo_user_sexo", "data-style" => "btn-success btn-sm"])
-                                                !!}
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="cbo_user_tipo">Tipo usuario *</label>
-                                                {!! Form::select("cbo_user_tipo", $tipos, null, [
-                                                "class" => "form-control selectpicker","id"=>"cbo_user_tipo", "data-style" => "btn-success btn-sm"])
-                                                !!}
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="cbo_user_operacion">Tipo Operación *</label>
-                                                {!! Form::select("cbo_user_operacion", $operaciones, null, [
-                                                "class" => "form-control selectpicker","id"=>"cbo_user_operacion", "data-style" => "btn-success btn-sm"])
-                                                !!}
+                                               <select 
+                                                    id="cbo_user_grupo"
+                                                    name="cbo_user_grupo" 
+                                                    data-live-search="true" 
+                                                    class="boot-select form-control" 
+                                                    title="No has seleccionado nada" 
+                                                    data-size="5"
+                                                    data-dropup-auto="false" 
+                                                    data-live-search-placeholder="Busqueda" 
+                                                    autofocus required>
+                                                    @foreach ($grupos as $v)
+                                                        <option value="{{$v->llave}}" selected>{{$v->valor}}</option> 
+                                                    @endforeach
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
@@ -287,7 +335,9 @@
                
 <script type="text/javascript" >
     $(document).ready(function (event) {
-
+        $('.boot-select').selectpicker();
+        $('select[name=cbo_user_estatus]').val(1);
+        $('select[name=cbo_user_estatus]').selectpicker('refresh')
         $('#mymodal').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget) // Button that triggered the modal
             var recipient = button.data('whatever') // Extract info from data-* attributes
@@ -302,31 +352,61 @@
             var button = $(event.relatedTarget) // Button that triggered the modal
             var puesto = button.data('puesto') // Extract info from data-* attributes
             var depto = button.data('depto') // Extract info from data-* attributes
+            var grupo = button.data('grupo') 
             // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
             // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
             var modal = $(this)
+            $('select[name=cbo_user_grupo]').val(grupo);
+            $('select[name=cbo_user_grupo]').selectpicker('refresh')
+            $('select[name=cbo_user_depto]').val(depto);
+            $('select[name=cbo_user_depto]').selectpicker('refresh')
+            
+            modal.find('#input_user_puesto').val(puesto)
 
-                modal.find('#input_user_depto').val(depto)
-                modal.find('#input_user_puesto').val(puesto)
         });        
         $("#guardar_user").click(function(){ 
-            $("#form_guardarUsuario").submit();
-           // valida() 
+            if(valida()){
+                $("#form_guardarUsuario").submit();
+            }
         });
     });
     function valida(){
-        var test = /^[1-8]{3}(,[1-8]{3})*$/; //regex 
+        var test = /^[0-9]{3}(,[0-9]{3})*$/; //regex 
         var value = $("#input_user_estaciones").val(); 
-        if(value.match(test) ) { 
+        console.log(value)
+        if(value.match(test) || value == '') { 
             console.log("estaciones correcto")
         }else{ 
-             console.log("estaciones no correcto") 
+            bootbox.dialog({
+            title: "Mensaje",
+            message: "<div class='alert alert-danger m-b-0'>Campo de Estaciones Control de Piso inválido.</div>",
+            buttons: {
+            success: {
+            label: "Ok",
+            className: "btn-primary m-r-5 m-b-5"
+            }
+            }
+            }).find('.modal-content').css({ 'font-size': '14px' });
+            return false;
         }
-    var test = /^\w+\.*\w+$/; //regex 
-    var value = $("#input_user_correo").val(); 
-    if (value.match(test) ) {
-        console.log("correo correcto") }else{ console.log("correo no correcto") 
-    } 
+     test = /^\w+\.*\w+$/; //regex 
+     value = $("#input_user_correo").val(); 
+    if (value.match(test) || value == '') {
+        console.log("correo correcto") 
+    }else{ 
+        bootbox.dialog({
+        title: "Mensaje",
+        message: "<div class='alert alert-danger m-b-0'>Campo Correo incorrecto.</div>",
+        buttons: {
+        success: {
+        label: "Ok",
+        className: "btn-primary m-r-5 m-b-5"
+        }
+        }
+        }).find('.modal-content').css({ 'font-size': '14px' });
+        return false;
+    }
+    return false; 
 }
     function correo_sugerido(){ 
         let nombre = $("#input_user_nombre").val() 

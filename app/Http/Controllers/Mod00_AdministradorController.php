@@ -245,39 +245,55 @@ public function Plantilla_PDF($clave = null)
 
     public function allUsers(Request $request){
         $users = DB::select('SELECT depto, COUNT(*) as c  FROM Siz_View_Plantilla_Personal GROUP BY Depto');
-
-
-        ///$users = $this->arrayPaginator($users, $request);
-
-        //$stocksTable = Lava::DataTable();
-       // $stocksTable->addDateColumn('Day of Month')
-        //    ->addNumberColumn('Projected')
-          //  ->addNumberColumn('Official');
-
-        // Random Data For Example
-       // for ($a = 1; $a < 30; $a++) {
-         //   $stocksTable->addRow([
-             //   '2015-10-' . $a, rand(800,1000), rand(800,1000)
-           // ]);
-        //}
-
-        //$beto = Lava::AreaChart('beto', $stocksTable, [
-          //  'title' => 'Population Growth',
-            //'legend' => [
-              //  'position' => 'in'
-           // ]
-       // ]);
-
+        $posiciones = DB::table('OHPS')
+                ->select('posID as llave', 'name as valor')                
+                ->orderBy('name')->get();
+        $grupos = DB::table('OHTY')
+                ->select('typeID as llave', 'name as valor')                
+                ->orderBy('name')->get();
+        $estatus = DB::table('OHST')
+                ->select('statusID as llave', 'name as valor')                
+                ->orderBy('name')->get();
+        $sucursales =DB::table('OUBR')
+                ->select('Code as llave', 'Name as valor')                
+                ->orderBy('Name')->get();
+        $departamentos =DB::table('OUDP')
+                ->select('Code as llave', 'Name as valor')                
+                ->orderBy('Name')->get();
+        $sexos = DB::table('OHEM')
+        ->select('sex as llave', DB::raw("CASE WHEN sex = 'M' THEN 'MASCULINO' ELSE 'FEMENINO' END as valor"))
+        ->groupBy('sex')                
+        ->orderBy('sex')->get();
+       /*  $tipos = DB::table('UFD1')
+        ->select('FldValue as llave', 'Descr as valor')
+        ->where('TableID', 'OHEM')             
+        ->where('FieldID', '2')             
+        ->orderBy('Descr')->get();
+        $operaciones = DB::table('UFD1')
+        ->select('FldValue as llave', 'Descr as valor')
+        ->where('TableID', 'OHEM')             
+        ->where('FieldID', '3')             
+        ->orderBy('Descr')->get();
+                 */
         $finalarray = [];
         foreach ($users as $user)
         {
-
-            $miarray = DB::select('SELECT jobTitle, COUNT(*) as c FROM Siz_View_Plantilla_Personal where Depto like \'%'.$user->depto.'%\' GROUP BY jobTitle');
+            
+            $miarray = DB::select('SELECT jobTitle
+                ,TY.typeID AS ROL_GRUPO_ID
+                ,pp.dept
+                , COUNT(*) as c 
+                FROM Siz_View_Plantilla_Personal pp
+                INNER JOIN HEM6 H6 ON H6.empID = pp.empID
+                INNER JOIN OHTY TY ON TY.typeID = H6.roleID 
+                where Depto like \'%'.$user->depto.'%\' 
+                GROUP BY jobTitle, typeID, dept');
             $finalarray[$user->depto] = $miarray;
         }
-        return view('Mod00_Administrador.usuarios', compact('finalarray'));
+        return view('Mod00_Administrador.usuarios', 
+        compact('finalarray', 'posiciones', 'grupos', 'estatus', 'sucursales', 'sexos', 'departamentos'));
     }
-
+            
     public function arrayPaginator($array, $request)
     {
         $page = Input::get('page', 1);
