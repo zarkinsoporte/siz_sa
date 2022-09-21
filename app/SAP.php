@@ -56,18 +56,7 @@ class SAP extends Model
     }
     public static function updateImpresoOrden($orden, $impreso)
     {
-        self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
-        self::$vCmp->DbServerType = "10";
-        self::$vCmp->server = env('SAP_server');;
-        self::$vCmp->LicenseServer = env('SAP_LicenseServer');
-        self::$vCmp->CompanyDB = env('SAP_CompanyDB');
-        self::$vCmp->username = env('SAP_username');
-        self::$vCmp->password = env('SAP_password');
-        self::$vCmp->DbUserName = env('SAP_DbUserName');
-        self::$vCmp->DbPassword = env('SAP_DbPassword');
-        self::$vCmp->UseTrusted = false;
-        //self::$vCmp->language = "6";
-        $lRetCode = self::$vCmp->Connect;
+        
         (self::$vCmp == false) ? self::Connect() : '';
         $vItem = self::$vCmp->GetBusinessObject("202");
         $RetVal = $vItem->GetByKey($orden.'');
@@ -312,7 +301,7 @@ class SAP extends Model
         //dd($vItem->Printed);
         //echo $vItem->Lines->SetCurrentLine(0);
         //echo $vItem->Lines->ItemCode;
-        //dd($data['items']);
+        //dd(count($data['items']));
         DB::beginTransaction();
         if (count($data['items']) > 0) {
             //Crear Transferencia
@@ -323,9 +312,10 @@ class SAP extends Model
             $vItem->Comments = $data['observaciones'];
             $vItem->JournalMemo = "Traslados -";
             $vItem->ToWarehouse = $data['almacen_destino'];
-            
+            //return $vItem->FromWarehouse;
             foreach ($data['items'] as $item) {
-                $varDestino = explode(' - ', $item->Destino);
+                $varDestino = $item->Destino;
+                //$varDestino = explode(' - ', $item->Destino);
 
                 $surtido = DB::select('select WTR1.ItemCode, SUM(Quantity) as Cant
                     from WTR1 
@@ -342,16 +332,19 @@ class SAP extends Model
                 //agregar lineaS               
                 if ($data['almacen_origen'] == 'APG-PA') {
                     if ($item->Cant_PendienteA >= $item->CA) {
-                        $vItem->Lines->Quantity = $item->CA;
                         DB::table('SIZ_MaterialesSolicitudes')
-                            ->where('Id', $item->Id)
-                            ->update([
-                                'Cant_PendienteA' => ($item->Cant_PendienteA - $item->CA),
-                                'Cant_ASurtir_Origen_A' => 0
-                            ]);
+                        ->where('Id', $item->Id)
+                        ->update([
+                            'Cant_PendienteA' => ($item->Cant_PendienteA - $item->CA),
+                            'Cant_ASurtir_Origen_A' => 0
+                        ]);
                         $vItem->Lines->ItemCode = $item->ItemCode;
-                        $vItem->Lines->WarehouseCode = trim($varDestino[0]);
-                        if ($item->BatchNum > 0) {
+                        $vItem->Lines->Quantity = $item->CA;
+                        $vItem->Lines->FromWarehouseCode = "APG-PA";
+                        $vItem->Lines->WarehouseCode = $item->Destino;
+                        //$vItem->Lines->BaseLine = 0;
+                        //sttrans.Lines.BaseLine = 0
+                        if ($item->BatchNum > 0 && !is_null($item->BatchNum)) {
                             $lotes = DB::table('SIZ_MaterialesLotes')
                                 ->where('Id_Item', $item->Id)
                                 ->where('alm', 'APG-PA')
@@ -381,20 +374,22 @@ class SAP extends Model
                 } elseif ($data['almacen_origen'] == 'AMP-ST') {
 
                     if ($item->Cant_PendienteA >= $item->CB) {
-                        $vItem->Lines->Quantity = $item->CB;
                         DB::table('SIZ_MaterialesSolicitudes')
-                            ->where('Id', $item->Id)
-                            ->update([
-                                'Cant_PendienteA' => ($item->Cant_PendienteA - $item->CB),
-                                'Cant_ASurtir_Origen_B' => 0
-                            ]);
+                        ->where('Id', $item->Id)
+                        ->update([
+                            'Cant_PendienteA' => ($item->Cant_PendienteA - $item->CB),
+                            'Cant_ASurtir_Origen_B' => 0
+                        ]);
                         $vItem->Lines->ItemCode = $item->ItemCode;
-                        $vItem->Lines->WarehouseCode = trim($varDestino[0]);
-                        if ($item->BatchNum > 0) {
+                        $vItem->Lines->Quantity = floatval($item->CB);
+                        $vItem->Lines->FromWarehouseCode = "AMP-ST";
+                        $vItem->Lines->WarehouseCode = $item->Destino;
+                        //$vItem->Lines->BaseLine = 0;
+                        if ($item->BatchNum > 0 && !is_null($item->BatchNum)) {
                             $lotes = DB::table('SIZ_MaterialesLotes')
-                                ->where('Id_Item', $item->Id)
-                                ->where('alm', 'AMP-ST')
-                                ->get();
+                            ->where('Id_Item', $item->Id)
+                            ->where('alm', 'AMP-ST')
+                            ->get();
                             if (count($lotes) > 0) {
                                 foreach ($lotes as $l) {
                                     $vItem->Lines->BatchNumbers->BatchNumber = $l->lote;
@@ -407,6 +402,7 @@ class SAP extends Model
                             }
                         }
                         $vItem->Lines->Add();
+                        //return  ($vItem->Lines->FromWarehouseCode);
                         if (($item->Cant_PendienteA - $item->CB) == 0) {
                             DB::table('SIZ_MaterialesSolicitudes')
                                 ->where('Id', $item->Id)
@@ -458,11 +454,11 @@ class SAP extends Model
             $vItem->JournalMemo = "Traslados -";
             $vItem->ToWarehouse = $data['almacen_destino'];
             foreach ($data['items'] as $item) {
-                $varDestino = explode(' - ', $item->Destino);
+                $varDestino = $item->Destino;
+                //$varDestino = explode(' - ', $item->Destino);
                 //dd($data['almacen_origen']);
                 //agregar lineaS 
                 if ($item->Cant_PendienteA >= $item->CA) {
-                    $vItem->Lines->Quantity = $item->CA;
                     DB::table('SIZ_MaterialesTraslados')
                         ->where('Id', $item->Id)
                         ->update([
@@ -470,9 +466,11 @@ class SAP extends Model
                             'Cant_ASurtir_Origen_A' => ($item->Cant_PendienteA - $item->CA)
                         ]);
                     $vItem->Lines->ItemCode = $item->ItemCode;
-                    $vItem->Lines->WarehouseCode = trim($varDestino[0]);
-                    
-                    if ($item->BatchNum > 0) {
+                    $vItem->Lines->Quantity = $item->CA;
+                    $vItem->Lines->FromWarehouseCode = trim($data['almacen_origen']);
+                    $vItem->Lines->WarehouseCode = trim($varDestino);
+                    //$vItem->Lines->BaseLine = 0;
+                    if ($item->BatchNum > 0 && !is_null($item->BatchNum)) {
                         $lotes = DB::table('SIZ_MaterialesLotes')
                             ->where('Id_Item', $item->Id)
                             ->where('alm', $data['almacen_origen'])

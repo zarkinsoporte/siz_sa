@@ -132,9 +132,11 @@ class SAPCopia extends Model
             $vItem->FolioNumber = $id; //**/Vale:solicitud
             $vItem->Comments = $data['observaciones'];
             $vItem->JournalMemo = "Traslados -";
-
+            $vItem->ToWarehouse = $data['almacen_destino'];
+            //return $vItem->FromWarehouse;
             foreach ($data['items'] as $item) {
-                $varDestino = explode(' - ', $item->Destino);
+                $varDestino = $item->Destino;
+                //$varDestino = explode(' - ', $item->Destino);
 
                 $surtido = DB::select('select WTR1.ItemCode, SUM(Quantity) as Cant
                     from WTR1 
@@ -151,16 +153,19 @@ class SAPCopia extends Model
                 //agregar lineaS               
                 if ($data['almacen_origen'] == 'APG-PA') {
                     if ($item->Cant_PendienteA >= $item->CA) {
-                        $vItem->Lines->Quantity = $item->CA;
                         DB::table('SIZ_MaterialesSolicitudes')
-                            ->where('Id', $item->Id)
-                            ->update([
-                                'Cant_PendienteA' => ($item->Cant_PendienteA - $item->CA),
-                                'Cant_ASurtir_Origen_A' => 0
-                            ]);
+                        ->where('Id', $item->Id)
+                        ->update([
+                            'Cant_PendienteA' => ($item->Cant_PendienteA - $item->CA),
+                            'Cant_ASurtir_Origen_A' => 0
+                        ]);
                         $vItem->Lines->ItemCode = $item->ItemCode;
-                        $vItem->Lines->WarehouseCode = trim($varDestino[0]);
-                        if ($item->BatchNum > 0) {
+                        $vItem->Lines->Quantity = $item->CA;
+                        $vItem->Lines->FromWarehouseCode = 'APG-PA';
+                        $vItem->Lines->WarehouseCode = $item->Destino;
+                        //$vItem->Lines->BaseLine = 0;
+                        //sttrans.Lines.BaseLine = 0
+                        if ($item->BatchNum > 0 && !is_null($item->BatchNum)) {
                             $lotes = DB::table('SIZ_MaterialesLotes')
                                 ->where('Id_Item', $item->Id)
                                 ->where('alm', 'APG-PA')
@@ -190,20 +195,22 @@ class SAPCopia extends Model
                 } elseif ($data['almacen_origen'] == 'AMP-ST') {
 
                     if ($item->Cant_PendienteA >= $item->CB) {
-                        $vItem->Lines->Quantity = $item->CB;
                         DB::table('SIZ_MaterialesSolicitudes')
-                            ->where('Id', $item->Id)
-                            ->update([
-                                'Cant_PendienteA' => ($item->Cant_PendienteA - $item->CB),
-                                'Cant_ASurtir_Origen_B' => 0
-                            ]);
+                        ->where('Id', $item->Id)
+                        ->update([
+                            'Cant_PendienteA' => ($item->Cant_PendienteA - $item->CB),
+                            'Cant_ASurtir_Origen_B' => 0
+                        ]);
                         $vItem->Lines->ItemCode = $item->ItemCode;
-                        $vItem->Lines->WarehouseCode = trim($varDestino[0]);
-                        if ($item->BatchNum > 0) {
+                        $vItem->Lines->Quantity = $item->CB;
+                        $vItem->Lines->FromWarehouseCode = 'AMP-ST';
+                        $vItem->Lines->WarehouseCode = $item->Destino;
+                        //$vItem->Lines->BaseLine = 0;
+                        if ($item->BatchNum > 0 && !is_null($item->BatchNum)) {
                             $lotes = DB::table('SIZ_MaterialesLotes')
-                                ->where('Id_Item', $item->Id)
-                                ->where('alm', 'AMP-ST')
-                                ->get();
+                            ->where('Id_Item', $item->Id)
+                            ->where('alm', 'AMP-ST')
+                            ->get();
                             if (count($lotes) > 0) {
                                 foreach ($lotes as $l) {
                                     $vItem->Lines->BatchNumbers->BatchNumber = $l->lote;
@@ -216,6 +223,7 @@ class SAPCopia extends Model
                             }
                         }
                         $vItem->Lines->Add();
+                        return  ($vItem->Lines->FromWarehouseCode);
                         if (($item->Cant_PendienteA - $item->CB) == 0) {
                             DB::table('SIZ_MaterialesSolicitudes')
                                 ->where('Id', $item->Id)
