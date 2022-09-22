@@ -52,13 +52,13 @@ class LdmUpdate extends Job implements SelfHandling, ShouldQueue
 
         $vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
         $vCmp->DbServerType = "10";
-        $vCmp->server = env('SAP_server');
-        $vCmp->LicenseServer = env('SAP_LicenseServer');
-        $vCmp->CompanyDB = env('SAP_CompanyDB');
-        $vCmp->username = env('SAP_username');
-        $vCmp->password = env('SAP_password');
-        $vCmp->DbUserName = env('SAP_DbUserName');
-        $vCmp->DbPassword = env('SAP_DbPassword');
+        $vCmp->server = "".env('SAP_server');
+        $vCmp->LicenseServer = "".env('SAP_LicenseServer');
+        $vCmp->CompanyDB = "".env('SAP_CompanyDB');
+        $vCmp->username = "".env('SAP_username');
+        $vCmp->password = "".env('SAP_password');
+        $vCmp->DbUserName = "".env('SAP_DbUserName');
+        $vCmp->DbPassword = "".env('SAP_DbPassword');
         $vCmp->UseTrusted = false;
         //la siguiente linea permite leer XML como string y no como archivo en "Browser->ReadXml"
         $vCmp->XMLAsString = true; //The default value is False - XML as files.
@@ -67,9 +67,9 @@ class LdmUpdate extends Job implements SelfHandling, ShouldQueue
         $vCmp->Connect; //conectar a Sociedad SAP
 
         //Obtener XML de un LDM 
-        $vCmp->XmlExportType = '3'; //BoXmlExportTypes.xet_ExportImportMode; /solo los campos modificables
+        $vCmp->XmlExportType = "3"; //BoXmlExportTypes.xet_ExportImportMode; /solo los campos modificables
         $vItem = $vCmp->GetBusinessObject("66"); //ProductTrees table: OITT.
-        $vItem->GetByKey($this->codigo_origen.''); //LDM Docentry
+        $vItem->GetByKey($this->codigo_origen.""); //LDM Docentry
         //$pathh = public_path('assets/xml/sap/ldm/20185.xml');
         //$vItem->SaveXML($pathh); //Guardar en archivo
         $xmlString = $vItem->GetAsXML(); //Guardar XML en buffer
@@ -105,10 +105,10 @@ class LdmUpdate extends Job implements SelfHandling, ShouldQueue
 <ItemName>HE, 17E</ItemName>
 <U_Estacion>145</U_Estacion> */
 
-                        $i->Quantity =  $this->cantidad . '';
-                        $i->ItemName = $nombreItem;
-                        $i->Price = '';
-                        $i->ItemCode =  $this->codigo_cambio . '';
+                        $i->Quantity =  floatval($this->cantidad) . "";
+                        $i->ItemName = $nombreItem ."";
+                        $i->Price = "";
+                        $i->ItemCode =  $this->codigo_cambio . "";
                 }
             } else {
                 throw new \Exception("Error Processing ldmUpdate, item no encontrado", 1);
@@ -118,7 +118,7 @@ class LdmUpdate extends Job implements SelfHandling, ShouldQueue
         } else{
             if (count($item) >= 1 && !empty($item)) {
                 foreach ($item as $i) {
-                    $i->Quantity =  $this->cantidad.'';
+                    $i->Quantity = floatval($this->cantidad)."";
                    // clock($this->cantidad);
                 }
             } else {
@@ -131,7 +131,7 @@ class LdmUpdate extends Job implements SelfHandling, ShouldQueue
         //To use ReadXML method, set the XmlExportType to xet_ExportImportMode (3).
         $vItem->Browser->ReadXml($oXML->asXML(), 0);
         // $vItem->UpdateFromXML($pathh);
-        $resultadoOperacion = $vItem->Update;
+        $resultadoOperacion = "".$vItem->Update;
 
         if ($resultadoOperacion <> 0) {
             throw new \Exception( $vCmp->GetLastErrorDescription(), 1);

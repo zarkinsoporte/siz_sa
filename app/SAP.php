@@ -18,13 +18,13 @@ class SAP extends Model
     {
         self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
         self::$vCmp->DbServerType = "10";
-        self::$vCmp->server = env('SAP_server');;
-        self::$vCmp->LicenseServer = env('SAP_LicenseServer');
-        self::$vCmp->CompanyDB = env('SAP_CompanyDB');
-        self::$vCmp->username = env('SAP_username');
-        self::$vCmp->password = env('SAP_password');
-        self::$vCmp->DbUserName = env('SAP_DbUserName');
-        self::$vCmp->DbPassword = env('SAP_DbPassword');
+        self::$vCmp->server = "".env('SAP_server');
+        self::$vCmp->LicenseServer = "".env('SAP_LicenseServer');
+        self::$vCmp->CompanyDB = "".env('SAP_CompanyDB');
+        self::$vCmp->username = "".env('SAP_username');
+        self::$vCmp->password = "".env('SAP_password');
+        self::$vCmp->DbUserName = "".env('SAP_DbUserName');
+        self::$vCmp->DbPassword = "".env('SAP_DbPassword');
         self::$vCmp->UseTrusted = false;
         //self::$vCmp->language = "6";
         $lRetCode = self::$vCmp->Connect;
@@ -46,7 +46,7 @@ class SAP extends Model
         (self::$vCmp == false) ? self::Connect() : '';
         $vItem = self::$vCmp->GetBusinessObject("202");
         $RetVal = $vItem->GetByKey($orden);
-        $vItem->UserFields->Fields->Item('U_NoSerie')->Value = ''.$numSerie;
+        $vItem->UserFields->Fields->Item('U_NoSerie')->Value = "".$numSerie;
         $retCode = $vItem->Update;
         if ($retCode != 0) {
             return 'Error, '.self::$vCmp->GetLastErrorDescription();
@@ -59,9 +59,9 @@ class SAP extends Model
         
         (self::$vCmp == false) ? self::Connect() : '';
         $vItem = self::$vCmp->GetBusinessObject("202");
-        $RetVal = $vItem->GetByKey($orden.'');
+        $RetVal = $vItem->GetByKey($orden."");
        // clock($RetVal);
-        $vItem->UserFields->Fields->Item('U_Impreso')->Value = ''.$impreso;
+        $vItem->UserFields->Fields->Item('U_Impreso')->Value = "".$impreso;
         $retCode = $vItem->Update;
        // clock($retCode);
         if ($retCode != 0) {
@@ -74,48 +74,48 @@ class SAP extends Model
     {
         self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
         self::$vCmp->DbServerType = "10";
-        self::$vCmp->server = env('SAP_server');;
-        self::$vCmp->LicenseServer = env('SAP_LicenseServer');
-        self::$vCmp->CompanyDB = env('SAP_CompanyDB');
-        self::$vCmp->username = env('SAP_username');
-        self::$vCmp->password = env('SAP_password');
-        self::$vCmp->DbUserName = env('SAP_DbUserName');
-        self::$vCmp->DbPassword = env('SAP_DbPassword');
+        self::$vCmp->server = "".env('SAP_server');
+        self::$vCmp->LicenseServer = "".env('SAP_LicenseServer');
+        self::$vCmp->CompanyDB = "".env('SAP_CompanyDB');
+        self::$vCmp->username = "".env('SAP_username');
+        self::$vCmp->password = "".env('SAP_password');
+        self::$vCmp->DbUserName = "".env('SAP_DbUserName');
+        self::$vCmp->DbPassword = "".env('SAP_DbPassword');
         self::$vCmp->UseTrusted = false;
         //self::$vCmp->language = "6";
         $lRetCode = self::$vCmp->Connect;
         (self::$vCmp == false) ? self::Connect() : '';
         $vItem = self::$vCmp->GetBusinessObject("202");
-        $RetVal = $vItem->GetByKey($orden.'');
+        $RetVal = $vItem->GetByKey($orden."");
        // clock($RetVal);
         if($num_pedido !== ''){
-            $vItem->ProductionOrderOriginEntry = $num_pedido;
+            $vItem->ProductionOrderOriginEntry = "".$num_pedido;
         }
         if($prog_corte !== ''){
-            $vItem->UserFields->Fields->Item('U_Grupo')->Value = ''.$prog_corte;
+            $vItem->UserFields->Fields->Item('U_Grupo')->Value = "".$prog_corte;
         }
         if($hule !== ''){
-            $vItem->UserFields->Fields->Item('U_OF')->Value = ''.$hule;
+            $vItem->UserFields->Fields->Item('U_OF')->Value = "".$hule;
         }
         if($metales !== ''){
-            $vItem->UserFields->Fields->Item('U_Ubicacion')->Value = ''.$metales;
+            $vItem->UserFields->Fields->Item('U_Ubicacion')->Value = "".$metales;
         }
         if($sec_ot !== ''){
-            $vItem->UserFields->Fields->Item('U_OT')->Value = ''.$sec_ot;
+            $vItem->UserFields->Fields->Item('U_OT')->Value = "".$sec_ot;
         }
         if($estatus !== ''){
             
-            $vItem->UserFields->Fields->Item('U_Starus')->Value = '0'.$estatus;
+            $vItem->UserFields->Fields->Item('U_Starus')->Value = "0".$estatus;
         }
         if($prioridad !== ''){
             
-            $vItem->UserFields->Fields->Item('U_C_Orden')->Value = ''.$prioridad;
+            $vItem->UserFields->Fields->Item('U_C_Orden')->Value = "".$prioridad;
         }
         if($fCompra !== ''){
-            $vItem->UserFields->Fields->Item('U_FCompras')->Value = ''.$fCompra;
+            $vItem->UserFields->Fields->Item('U_FCompras')->Value = "".$fCompra;
         }
         if($fProduccion !== ''){
-            $vItem->UserFields->Fields->Item('U_FProduccion')->Value = ''.$fProduccion;
+            $vItem->UserFields->Fields->Item('U_FProduccion')->Value = "".$fProduccion;
         }
         $retCode = $vItem->Update;
        // clock($retCode);
@@ -129,22 +129,22 @@ class SAP extends Model
     {
         self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
         self::$vCmp->DbServerType = "10";
-        self::$vCmp->server = env('SAP_server');;
-        self::$vCmp->LicenseServer = env('SAP_LicenseServer');
-        self::$vCmp->CompanyDB = env('SAP_CompanyDB');
-        self::$vCmp->username = env('SAP_username');
-        self::$vCmp->password = env('SAP_password');
-        self::$vCmp->DbUserName = env('SAP_DbUserName');
-        self::$vCmp->DbPassword = env('SAP_DbPassword');
+        self::$vCmp->server = "".env('SAP_server');
+        self::$vCmp->LicenseServer = "".env('SAP_LicenseServer');
+        self::$vCmp->CompanyDB = "".env('SAP_CompanyDB');
+        self::$vCmp->username = "".env('SAP_username');
+        self::$vCmp->password = "".env('SAP_password');
+        self::$vCmp->DbUserName = "".env('SAP_DbUserName');
+        self::$vCmp->DbPassword = "".env('SAP_DbPassword');
         self::$vCmp->UseTrusted = false;
         //self::$vCmp->language = "6";
         $lRetCode = self::$vCmp->Connect;
         (self::$vCmp == false) ? self::Connect() : '';
         $vItem = self::$vCmp->GetBusinessObject("202");
-        $RetVal = $vItem->GetByKey($orden);
+        $RetVal = $vItem->GetByKey("".$orden);
        // clock($RetVal);U_Starus' =>  '01', 'U_Entrega_Piel'
-        $vItem->UserFields->Fields->Item('U_Starus')->Value = $status;
-        $vItem->UserFields->Fields->Item('U_Entrega_Piel')->Value = $FentregaPiel;
+        $vItem->UserFields->Fields->Item('U_Starus')->Value = "".$status;
+        $vItem->UserFields->Fields->Item('U_Entrega_Piel')->Value = "".$FentregaPiel;
         $retCode = $vItem->Update;
        // clock($retCode);
         if ($retCode != 0) {
@@ -157,13 +157,13 @@ class SAP extends Model
     {
         self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
         self::$vCmp->DbServerType = "10";
-        self::$vCmp->server = env('SAP_server');;
-        self::$vCmp->LicenseServer = env('SAP_LicenseServer');
-        self::$vCmp->CompanyDB = env('SAP_CompanyDB');
-        self::$vCmp->username = env('SAP_username');
-        self::$vCmp->password = env('SAP_password');
-        self::$vCmp->DbUserName = env('SAP_DbUserName');
-        self::$vCmp->DbPassword = env('SAP_DbPassword');
+        self::$vCmp->server = "".env('SAP_server');
+        self::$vCmp->LicenseServer = "".env('SAP_LicenseServer');
+        self::$vCmp->CompanyDB = "".env('SAP_CompanyDB');
+        self::$vCmp->username = "".env('SAP_username');
+        self::$vCmp->password = "".env('SAP_password');
+        self::$vCmp->DbUserName = "".env('SAP_DbUserName');
+        self::$vCmp->DbPassword = "".env('SAP_DbPassword');
         self::$vCmp->UseTrusted = false;
         //self::$vCmp->language = "6";
         $lRetCode = self::$vCmp->Connect;
@@ -174,8 +174,8 @@ class SAP extends Model
         //--C -> 3 OP1 cancelado
         (self::$vCmp == false) ? self::Connect() : '';
         $vItem = self::$vCmp->GetBusinessObject("202");
-        $RetVal = $vItem->GetByKey($orden);
-        $vItem->ProductionOrderStatus = $status;
+        $RetVal = $vItem->GetByKey("".$orden);
+        $vItem->ProductionOrderStatus = "".$status;
         $vItem->Update;
         if ($vItem->ProductionOrderStatus <> $status) {
             return false;
@@ -189,10 +189,10 @@ class SAP extends Model
         //OITM ARTICULOS ES EL OBJETO 4
         $vItem = self::$vCmp->GetBusinessObject("4"); 
         //ENTRE PARENTESIS VA EL CODIGO DEL ARTICULO A ACTUALIZAR
-        $RetVal = $vItem->GetByKey($codigo); 
+        $RetVal = $vItem->GetByKey("".$codigo); 
         
         //Seleccionar 
-        $vItem->User_Text = $comentario;
+        $vItem->User_Text = "".$comentario;
         $retCode = $vItem->Update;
         if ($retCode != 0) {
             return self::$vCmp->GetLastErrorDescription();
@@ -206,13 +206,13 @@ class SAP extends Model
         //OITM ARTICULOS ES EL OBJETO 4
         $vItem = self::$vCmp->GetBusinessObject("4"); 
         //ENTRE PARENTESIS VA EL CODIGO DEL ARTICULO A ACTUALIZAR
-        $RetVal = $vItem->GetByKey($codigo); 
+        $RetVal = $vItem->GetByKey("".$codigo); 
         
         //Seleccionar lista de Precios/CAMBIAR PRECIO Y MONEDA
-        $vItem->PriceList->SetCurrentLine($priceList);
-        $vItem->PriceList->Price = $precio;
+        $vItem->PriceList->SetCurrentLine("".$priceList);
+        $vItem->PriceList->Price = "".$precio;
         if ($moneda !== 'NOMONEDA') {
-            $vItem->PriceList->Currency = $moneda;
+            $vItem->PriceList->Currency = "".$moneda;
         }
        // $vItem->PriceList->Currency = $array['monedacompras'];
 
@@ -243,13 +243,13 @@ class SAP extends Model
         (self::$vCmp == false) ? self::Connect() : '';
         //self::$vCmp->XmlExportType("xet_ExportImportMode");
         $vItem = self::$vCmp->GetBusinessObject("4");
-        $RetVal = $vItem->GetByKey($array['pKey']);
+        $RetVal = $vItem->GetByKey("".$array['pKey']);
         //Actualizar Proveedor
-        $vItem->Mainsupplier = $array['proveedor'];
+        $vItem->Mainsupplier = "".$array['proveedor'];
         //Seleccionar lista de Precios
         $vItem->PriceList->SetCurrentLine(8);
-        $vItem->PriceList->Price = $array['costocompras'];
-        $vItem->PriceList->Currency = $array['monedacompras'];
+        $vItem->PriceList->Price = "".$array['costocompras'];
+        $vItem->PriceList->Currency = "".$array['monedacompras'];
 
         //$arrayName = array(
         //'metod' => $vItem->UserFields->Fields->Item('U_Metodo')->Value, 
@@ -258,9 +258,9 @@ class SAP extends Model
         //);  
         //dd($arrayName);
         
-        $vItem->UserFields->Fields->Item('U_Metodo')->Value = $array['metodo'];
-        $vItem->UserFields->Fields->Item('U_GrupoPlanea')->Value = $array['grupop'];
-        $vItem->UserFields->Fields->Item('U_Comprador')->Value = $array['comprador'];
+        $vItem->UserFields->Fields->Item('U_Metodo')->Value = "".$array['metodo'];
+        $vItem->UserFields->Fields->Item('U_GrupoPlanea')->Value = "".$array['grupop'];
+        $vItem->UserFields->Fields->Item('U_Comprador')->Value = "".$array['comprador'];
 
         $retCode = $vItem->Update;
         if ($retCode != 0) {
@@ -273,13 +273,13 @@ class SAP extends Model
     {
         self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
         self::$vCmp->DbServerType = "10";
-        self::$vCmp->server = env('SAP_server');;
-        self::$vCmp->LicenseServer = env('SAP_LicenseServer','ZARKIN-088:30000');
-        self::$vCmp->CompanyDB = env('SAP_CompanyDB');
-        self::$vCmp->username = env('SAP_username');
-        self::$vCmp->password = env('SAP_password');
-        self::$vCmp->DbUserName = env('SAP_DbUserName');
-        self::$vCmp->DbPassword = env('SAP_DbPassword');
+        self::$vCmp->server = "".env('SAP_server');
+        self::$vCmp->LicenseServer = "".env('SAP_LicenseServer','ZARKIN-088:30000');
+        self::$vCmp->CompanyDB = "".env('SAP_CompanyDB');
+        self::$vCmp->username = "".env('SAP_username');
+        self::$vCmp->password = "".env('SAP_password');
+        self::$vCmp->DbUserName = "".env('SAP_DbUserName');
+        self::$vCmp->DbPassword = "".env('SAP_DbPassword');
         self::$vCmp->UseTrusted = false;
         //self::$vCmp->language = "6";
         $lRetCode = self::$vCmp->Connect;
@@ -305,13 +305,13 @@ class SAP extends Model
         DB::beginTransaction();
         if (count($data['items']) > 0) {
             //Crear Transferencia
-            $vItem->DocDate = (new \DateTime('now'))->format('Y-m-d H:i:s');
-            $vItem->FromWarehouse = $data['almacen_origen']; //origen
-            $vItem->PriceList = $data['pricelist'];
-            $vItem->FolioNumber = $id; //**/Vale:solicitud
-            $vItem->Comments = $data['observaciones'];
+            $vItem->DocDate = "".(new \DateTime('now'))->format('Y-m-d H:i:s');
+            $vItem->FromWarehouse = "".$data['almacen_origen']; //origen
+            $vItem->PriceList = "".$data['pricelist'];
+            $vItem->FolioNumber = "".$id; //**/Vale:solicitud
+            $vItem->Comments = "".$data['observaciones'];
             $vItem->JournalMemo = "Traslados -";
-            $vItem->ToWarehouse = $data['almacen_destino'];
+            $vItem->ToWarehouse = "".$data['almacen_destino'];
             //return $vItem->FromWarehouse;
             foreach ($data['items'] as $item) {
                 $varDestino = $item->Destino;
@@ -338,21 +338,21 @@ class SAP extends Model
                             'Cant_PendienteA' => ($item->Cant_PendienteA - $item->CA),
                             'Cant_ASurtir_Origen_A' => 0
                         ]);
-                        $vItem->Lines->ItemCode = $item->ItemCode;
-                        $vItem->Lines->Quantity = $item->CA;
+                        $vItem->Lines->ItemCode = "".$item->ItemCode;
+                        $vItem->Lines->Quantity = "".floatval($item->CA);
                         $vItem->Lines->FromWarehouseCode = "APG-PA";
-                        $vItem->Lines->WarehouseCode = $item->Destino;
+                        $vItem->Lines->WarehouseCode = "".$item->Destino;
                         //$vItem->Lines->BaseLine = 0;
                         //sttrans.Lines.BaseLine = 0
-                        if ($item->BatchNum > 0 && !is_null($item->BatchNum)) {
+                        if ($item->BatchNum > 0 ) {
                             $lotes = DB::table('SIZ_MaterialesLotes')
                                 ->where('Id_Item', $item->Id)
                                 ->where('alm', 'APG-PA')
                                 ->get();
                             if (count($lotes) > 0) {
                                 foreach ($lotes as $l) {
-                                    $vItem->Lines->BatchNumbers->BatchNumber = $l->lote;
-                                    $vItem->Lines->BatchNumbers->Quantity = $l->Cant;
+                                    $vItem->Lines->BatchNumbers->BatchNumber = "".$l->lote;
+                                    $vItem->Lines->BatchNumbers->Quantity = "".floatval($l->Cant);
                                     $vItem->Lines->BatchNumbers->Add();
                                 }
                             } else {
@@ -380,21 +380,35 @@ class SAP extends Model
                             'Cant_PendienteA' => ($item->Cant_PendienteA - $item->CB),
                             'Cant_ASurtir_Origen_B' => 0
                         ]);
-                        $vItem->Lines->ItemCode = $item->ItemCode;
-                        $vItem->Lines->Quantity = floatval($item->CB);
+                        $vItem->Lines->ItemCode = "".$item->ItemCode;
+                        $vItem->Lines->Quantity = "".floatval($item->CB);
                         $vItem->Lines->FromWarehouseCode = "AMP-ST";
-                        $vItem->Lines->WarehouseCode = $item->Destino;
+                        $vItem->Lines->WarehouseCode = "".$item->Destino;
+                        //$vItem->Lines->SerialNumbers->ManufacturerSerialNumber = "1";
+                        //$vItem->Lines->UoMEntry = "-1";
+                        //$vItem->Lines->UseBaseUnits = "1";
+                        /*
+                            oDocuments.Lines.ItemCode = "Articulo";
+                            oDocuments.Lines.Quantity = 1;
+                            oDocuments.Lines.UoMEntry = 4; //Esta era la línea faltante
+                            oDocuments.Lines.UseBaseUnits = BoYesNoEnum.tNO;
+                        */
                         //$vItem->Lines->BaseLine = 0;
-                        if ($item->BatchNum > 0 && !is_null($item->BatchNum)) {
+                        if ($item->BatchNum > 0 ) {
                             $lotes = DB::table('SIZ_MaterialesLotes')
                             ->where('Id_Item', $item->Id)
                             ->where('alm', 'AMP-ST')
                             ->get();
+                           // return $item->Id;
                             if (count($lotes) > 0) {
+                                //$index = 0;
                                 foreach ($lotes as $l) {
-                                    $vItem->Lines->BatchNumbers->BatchNumber = $l->lote;
-                                    $vItem->Lines->BatchNumbers->Quantity = $l->Cant;
+                                    //$vItem->Lines->BatchNumbers->SetCurrentLine ( $index. "");
+                                    //$vItem->Lines->BatchNumbers->ManufacturerSerialNumber  = "1";
+                                    $vItem->Lines->BatchNumbers->BatchNumber = "".$l->lote;
+                                    $vItem->Lines->BatchNumbers->Quantity = "".floatval($l->Cant);
                                     $vItem->Lines->BatchNumbers->Add();
+                                    //$index ++;
                                 }
                             } else {
                                 DB::rollBack();
@@ -446,13 +460,13 @@ class SAP extends Model
         DB::beginTransaction();
         if (count($data['items']) > 0) {
             //Crear Transferencia
-            $vItem->DocDate = (new \DateTime('now'))->format('Y-m-d H:i:s');
-            $vItem->FromWarehouse = $data['almacen_origen']; //origen
-            $vItem->PriceList = $data['pricelist'];
-            $vItem->FolioNumber = $id; //**/Vale:solicitud
-            $vItem->Comments = $data['observaciones'];
+            $vItem->DocDate = "".(new \DateTime('now'))->format('Y-m-d H:i:s');
+            $vItem->FromWarehouse = "".$data['almacen_origen']; //origen
+            $vItem->PriceList = "".$data['pricelist'];
+            $vItem->FolioNumber = "".$id; //**/Vale:solicitud
+            $vItem->Comments = "".$data['observaciones'];
             $vItem->JournalMemo = "Traslados -";
-            $vItem->ToWarehouse = $data['almacen_destino'];
+            $vItem->ToWarehouse = "".$data['almacen_destino'];
             foreach ($data['items'] as $item) {
                 $varDestino = $item->Destino;
                 //$varDestino = explode(' - ', $item->Destino);
@@ -465,20 +479,25 @@ class SAP extends Model
                             'Cant_PendienteA' => ($item->Cant_PendienteA - $item->CA),
                             'Cant_ASurtir_Origen_A' => ($item->Cant_PendienteA - $item->CA)
                         ]);
-                    $vItem->Lines->ItemCode = $item->ItemCode;
-                    $vItem->Lines->Quantity = $item->CA;
-                    $vItem->Lines->FromWarehouseCode = trim($data['almacen_origen']);
-                    $vItem->Lines->WarehouseCode = trim($varDestino);
+                   // return trim($data['almacen_origen']);
+                    $vItem->Lines->ItemCode = "".$item->ItemCode;
+                    $vItem->Lines->Quantity = "".floatval($item->CA);
+                    $vItem->Lines->FromWarehouseCode = "".$data['almacen_origen'];
+                    $vItem->Lines->WarehouseCode = "".($varDestino);
+                    //$vItem->Lines->SerialNumbers->ManufacturerSerialNumber = "1";
+                    //$vItem->Lines->UoMEntry = "-1";
+                        //$vItem->Lines->UseBaseUnits = "1";
                     //$vItem->Lines->BaseLine = 0;
-                    if ($item->BatchNum > 0 && !is_null($item->BatchNum)) {
+                    if ($item->BatchNum > 0 ) {
                         $lotes = DB::table('SIZ_MaterialesLotes')
                             ->where('Id_Item', $item->Id)
                             ->where('alm', $data['almacen_origen'])
                             ->get();
                         if (count($lotes) > 0) {
                             foreach ($lotes as $l) {
-                                $vItem->Lines->BatchNumbers->BatchNumber = $l->lote;
-                                $vItem->Lines->BatchNumbers->Quantity = $l->Cant;
+                                //$vItem->Lines->BatchNumbers->ManufacturerSerialNumber  = "1";
+                                $vItem->Lines->BatchNumbers->BatchNumber = "".$l->lote;
+                                $vItem->Lines->BatchNumbers->Quantity = "".floatval($l->Cant);
                                 $vItem->Lines->BatchNumbers->Add();
                             }
                         } else {
@@ -519,11 +538,11 @@ class SAP extends Model
         (self::$vCmp == false) ? self::Connect() : '';
 
         $vItem = self::$vCmp->GetBusinessObject("59");
-        $vItem->Lines->BaseEntry = $docEntry;
-        $vItem->Lines->BaseType = '202';
-        $vItem->Lines->TransactionType = '0'; // botrntComplete
-        $vItem->Lines->Quantity = $Cant;
-        $vItem->Lines->WarehouseCode = 'APT-ST';
+        $vItem->Lines->BaseEntry = "".$docEntry;
+        $vItem->Lines->BaseType = "202";
+        $vItem->Lines->TransactionType = "0"; // botrntComplete
+        $vItem->Lines->Quantity = "".floatval($Cant);
+        $vItem->Lines->WarehouseCode = "APT-ST";
         $vItem->Lines->Add();
         if ($vItem->Add() == 0) { // cero es correcto   
             return 'Recibo de producción creado correctamente';
@@ -557,13 +576,13 @@ class SAP extends Model
             } else {
                 self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
                 self::$vCmp->DbServerType = "10";
-                self::$vCmp->server = env('SAP_server');;
-                self::$vCmp->LicenseServer = env('SAP_LicenseServer');
-                self::$vCmp->CompanyDB = env('SAP_CompanyDB');
-                self::$vCmp->username = env('SAP_username');
-                self::$vCmp->password = env('SAP_password');
-                self::$vCmp->DbUserName = env('SAP_DbUserName');
-                self::$vCmp->DbPassword = env('SAP_DbPassword');
+                self::$vCmp->server = "".env('SAP_server');
+                self::$vCmp->LicenseServer = "".env('SAP_LicenseServer');
+                self::$vCmp->CompanyDB = "".env('SAP_CompanyDB');
+                self::$vCmp->username = "".env('SAP_username');
+                self::$vCmp->password = "".env('SAP_password');
+                self::$vCmp->DbUserName = "".env('SAP_DbUserName');
+                self::$vCmp->DbPassword = "".env('SAP_DbPassword');
                 self::$vCmp->UseTrusted = false;
                 //self::$vCmp->language = "6";
                 $lRetCode = self::$vCmp->Connect;
@@ -587,10 +606,10 @@ class SAP extends Model
             //CABECERA IZQ
             $vItem->ProductionOrderType = 0; //Estandar
             $vItem->ProductionOrderStatus = 0; //Orden planeada
-            $vItem->ItemNo = $itemOV->ItemCode; // codigo del Articulo
-            $vItem->PlannedQuantity = $cantidadOP; //cant con la que se hace la orden
+            $vItem->ItemNo = "".$itemOV->ItemCode; // codigo del Articulo
+            $vItem->PlannedQuantity = "".floatval($cantidadOP); //cant con la que se hace la orden
             //$vItem->Warehouse = 'APT-ST';
-            $vItem->Warehouse = ''.$itemOV->DfltWH; //'APT-ST';
+            $vItem->Warehouse = "".$itemOV->DfltWH; //'APT-ST';
             //CABECERA DER (2)
             //fecha de finalizacion Fecha Entrega – 21 días (Compra de Materiales)
             $fecha = Carbon::parse($OV->DocDueDate);
@@ -598,10 +617,10 @@ class SAP extends Model
             if ($fecha->lessThan(Carbon::now())) {
                 $fecha = Carbon::now();
             }
-            $vItem->DueDate = $fecha->format('Y-m-d H:i:s'); //fecha de finalizacion
+            $vItem->DueDate = "".$fecha->format('Y-m-d H:i:s'); //fecha de finalizacion
             //--Usuario: El del Sistema //auto
             //--Origen: Manual
-            $vItem->ProductionOrderOriginEntry = $OV->DocEntry; // Num pedido (DocEntry de ORDR)
+            $vItem->ProductionOrderOriginEntry = "".$OV->DocEntry; // Num pedido (DocEntry de ORDR)
             //ProductionOrderOriginNumber
             $apellido = self::getApellidoPaternoUsuario(explode(' ', Auth::user()->lastName));
             $usuario_reporta = explode(' ', Auth::user()->firstName)[0] . ' ' . $apellido;
@@ -614,10 +633,10 @@ class SAP extends Model
                 ->where('ItemCode', $itemOV->ItemCode)
                 ->value('U_Ruta');
             //set ruta
-            $vItem->UserFields->Fields->Item('U_Ruta')->Value = $rutaOP;
+            $vItem->UserFields->Fields->Item('U_Ruta')->Value = "".$rutaOP;
 
             //$vItem->UserFields->Fields->Item('U_LineNum')->Value = '';
-            $vItem->UserFields->Fields->Item('U_Starus')->Value = '03'; //Falta de material
+            $vItem->UserFields->Fields->Item('U_Starus')->Value = "03"; //Falta de material
             //$vItem->UserFields->Fields->Item('U_NoSerie')->Value = '1';
 
             //Con Orden: Del pedido se toma la Prioridad y con ella se determina
@@ -627,37 +646,37 @@ class SAP extends Model
 
             switch ($OV->U_Prioridad) {
                 case '1':
-                    $item_uc_orden = 'C';
+                    $item_uc_orden = "C";
                     break;
                 case '2':
-                    $item_uc_orden = 'S';
+                    $item_uc_orden = "S";
                     break;
                 case '3':
-                    $item_uc_orden = 'P';
+                    $item_uc_orden = "P";
                     break;
                 default:
-                    $item_uc_orden = 'C';
+                    $item_uc_orden = "C";
                     break;
             }
             switch ($OV->U_Especial) {
                 case 'L':
-                    $atencion_especial = 'N';
+                    $atencion_especial = "N";
                     break;
                 case 'E':
-                    $atencion_especial = 'S';
+                    $atencion_especial = "S";
                     break;
 
                 default:
-                    $atencion_especial = 'N';
+                    $atencion_especial = "N";
                     break;
             }
 
-            $vItem->UserFields->Fields->Item('U_C_Orden')->Value = $item_uc_orden; //S,C o P
-            $vItem->UserFields->Fields->Item('U_AteEspecial')->Value = $atencion_especial; //S o N
+            $vItem->UserFields->Fields->Item('U_C_Orden')->Value = "".$item_uc_orden; //S,C o P
+            $vItem->UserFields->Fields->Item('U_AteEspecial')->Value = "".$atencion_especial; //S o N
             if (is_null( $OV->U_comp )) {
-               $complejo = 'N/A';
+               $complejo = "N/A";
             } else {
-                $complejo = $OV->U_comp;    
+                $complejo = "".$OV->U_comp;    
             }
             $vItem->UserFields->Fields->Item('U_cc')->Value = $complejo; //
 
@@ -675,7 +694,7 @@ class SAP extends Model
             }
             $fechaProduccion = $fechaProduccion->subDays(7);
 
-            $vItem->UserFields->Fields->Item('U_FProduccion')->Value = $fechaProduccion->format('Y-m-d H:i:s'); //
+            $vItem->UserFields->Fields->Item('U_FProduccion')->Value = "".$fechaProduccion->format('Y-m-d H:i:s'); //
 
 
             $fechaCompras = Carbon::now(); //vamos a guardar
@@ -687,7 +706,7 @@ class SAP extends Model
             }
             $fechaCompras = $fechaCompras->subDays(21);
 
-            $vItem->UserFields->Fields->Item('U_FCompras')->Value = $fechaCompras->format('Y-m-d H:i:s'); //
+            $vItem->UserFields->Fields->Item('U_FCompras')->Value = "".$fechaCompras->format('Y-m-d H:i:s'); //
 
             //Nota: Si el Producto no cuenta con LDM No se puede realizar la OP
 
@@ -772,13 +791,13 @@ class SAP extends Model
                         if ((int)$order[0]->sum_cant == (int)$order[0]->sum_procesado) { //si la cantidad de la OV es mayor a la procesada
                             self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
                             self::$vCmp->DbServerType = "10";
-                            self::$vCmp->server = env('SAP_server');;
-                            self::$vCmp->LicenseServer = env('SAP_LicenseServer');
-                            self::$vCmp->CompanyDB = env('SAP_CompanyDB');
-                            self::$vCmp->username = env('SAP_username');
-                            self::$vCmp->password = env('SAP_password');
-                            self::$vCmp->DbUserName = env('SAP_DbUserName');
-                            self::$vCmp->DbPassword = env('SAP_DbPassword');
+                            self::$vCmp->server = "".env('SAP_server');
+                            self::$vCmp->LicenseServer = "".env('SAP_LicenseServer');
+                            self::$vCmp->CompanyDB = "".env('SAP_CompanyDB');
+                            self::$vCmp->username = "".env('SAP_username');
+                            self::$vCmp->password = "".env('SAP_password');
+                            self::$vCmp->DbUserName = "".env('SAP_DbUserName');
+                            self::$vCmp->DbPassword = "".env('SAP_DbPassword');
                             self::$vCmp->UseTrusted = false;
                             //self::$vCmp->language = "6";
                             $lRetCode = self::$vCmp->Connect;
@@ -814,13 +833,13 @@ class SAP extends Model
 
         $vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
         $vCmp->DbServerType = "10";
-        $vCmp->server = env('SAP_server');
-        $vCmp->LicenseServer = env('SAP_LicenseServer');
-        $vCmp->CompanyDB = env('SAP_CompanyDB');
-        $vCmp->username = env('SAP_username');
-        $vCmp->password = env('SAP_password');
-        $vCmp->DbUserName = env('SAP_DbUserName');
-        $vCmp->DbPassword = env('SAP_DbPassword');
+        $vCmp->server = "".env('SAP_server');
+        $vCmp->LicenseServer = "".env('SAP_LicenseServer');
+        $vCmp->CompanyDB = "".env('SAP_CompanyDB');
+        $vCmp->username = "".env('SAP_username');
+        $vCmp->password = "".env('SAP_password');
+        $vCmp->DbUserName = "".env('SAP_DbUserName');
+        $vCmp->DbPassword = "".env('SAP_DbPassword');
         $vCmp->UseTrusted = false;
         //la siguiente linea permite leer XML como string y no como archivo en "Browser->ReadXml"
         $vCmp->XMLAsString = true; //The default value is False - XML as files.
