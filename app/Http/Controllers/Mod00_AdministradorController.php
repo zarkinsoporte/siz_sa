@@ -55,6 +55,8 @@ class Mod00_AdministradorController extends Controller
 
     }
     public function guardar_usuario(){
+
+        dd(Input::all());
         try {
             /*
              Dim lErrCode As Integer
@@ -261,7 +263,7 @@ public function Plantilla_PDF($clave = null)
                 ->select('Code as llave', 'Name as valor')                
                 ->orderBy('Name')->get();
         $sexos = DB::table('OHEM')
-        ->select('sex as llave', DB::raw("CASE WHEN sex = 'M' THEN 'MASCULINO' ELSE 'FEMENINO' END as valor"))
+        ->select(DB::raw("CASE WHEN sex = 'M' THEN 'gt_Male' ELSE 'gt_Female' END as llave, CASE WHEN sex = 'M' THEN 'MASCULINO' ELSE 'FEMENINO' END as valor"))
         ->groupBy('sex')                
         ->orderBy('sex')->get();
        /*  $tipos = DB::table('UFD1')
