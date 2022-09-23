@@ -1,0 +1,17 @@
+{
+    "files.autoSave": "onFocusChange",
+    "files.exclude": {
+        "**/.idea": true,
+       // "**/app/Jobs": true,
+        "**/app/Listeners": true,
+        "**/bootstrap": true,
+       // "**/ConfiguracionPHP": true,
+        "**/Console": true,
+        "**/Events": true,
+        "**/Exceptions": true,
+        "**/storage": true,
+        "**/tests": true,
+        //"**/vendor": true,
+        
+    }
+}

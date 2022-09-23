@@ -11,19 +11,18 @@ ini_set("memory_limit", '512M');
 ini_set('max_execution_time', 0);
 class SAPi extends Model
 {
-     private static $vCmp = false;
-
+    private static $vCmp = false;
 
     public static function Connect(){
         self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
         self::$vCmp->DbServerType = "10";
-        self::$vCmp->server = env('SAP_server');;
-        self::$vCmp->LicenseServer = env('SAP_LicenseServer');
-        self::$vCmp->CompanyDB = env('SAP_CompanyDB');
-        self::$vCmp->username = env('SAP_username');
-        self::$vCmp->password = env('SAP_password');
-        self::$vCmp->DbUserName = env('SAP_DbUserName');
-        self::$vCmp->DbPassword = env('SAP_DbPassword');
+        self::$vCmp->server = "".env('SAP_server');
+        self::$vCmp->LicenseServer = "".env('SAP_LicenseServer');
+        self::$vCmp->CompanyDB = "".env('SAP_CompanyDB');
+        self::$vCmp->username = "".env('SAP_username');
+        self::$vCmp->password = "".env('SAP_password');
+        self::$vCmp->DbUserName = "".env('SAP_DbUserName');
+        self::$vCmp->DbPassword = "".env('SAP_DbPassword');
         self::$vCmp->UseTrusted = false;
         //self::$vCmp->language = "6";
         $lRetCode = self::$vCmp->Connect;
@@ -38,9 +37,9 @@ class SAPi extends Model
     {
         (self::$vCmp == false) ? self::Connect() : '';
         $vItem = self::$vCmp->GetBusinessObject("202");
-        $RetVal = $vItem->GetByKey($orden.'');
+        $RetVal = $vItem->GetByKey($orden."");
         //clock($RetVal);
-        $vItem->UserFields->Fields->Item('U_Impreso')->Value = ''.$impreso;
+        $vItem->UserFields->Fields->Item('U_Impreso')->Value = "".$impreso;
         $retCode = $vItem->Update;
         //clock($retCode);
         if ($retCode != 0) {
@@ -57,13 +56,13 @@ public static function ReciboProduccion($docEntry, $whs, $Cant, $comentario, $me
       }else{
         self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
         self::$vCmp->DbServerType = "10";
-        self::$vCmp->server = env('SAP_server');;
-        self::$vCmp->LicenseServer = env('SAP_LicenseServer');
-        self::$vCmp->CompanyDB = env('SAP_CompanyDB');
-        self::$vCmp->username = env('SAP_username');
-        self::$vCmp->password = env('SAP_password');
-        self::$vCmp->DbUserName = env('SAP_DbUserName');
-        self::$vCmp->DbPassword = env('SAP_DbPassword');
+        self::$vCmp->server = "".env('SAP_server');
+        self::$vCmp->LicenseServer = "".env('SAP_LicenseServer');
+        self::$vCmp->CompanyDB = "".env('SAP_CompanyDB');
+        self::$vCmp->username = "".env('SAP_username');
+        self::$vCmp->password = "".env('SAP_password');
+        self::$vCmp->DbUserName = "".env('SAP_DbUserName');
+        self::$vCmp->DbPassword = "".env('SAP_DbPassword');
         self::$vCmp->UseTrusted = false;
         //self::$vCmp->language = "6";
         $lRetCode = self::$vCmp->Connect;
@@ -74,7 +73,7 @@ public static function ReciboProduccion($docEntry, $whs, $Cant, $comentario, $me
    }
    //bloque actualiza fecha de la orden
         $vItem = self::$vCmp->GetBusinessObject("202");
-        $RetVal = $vItem->GetByKey($docEntry);
+        $RetVal = $vItem->GetByKey("".$docEntry);
         $vItem->DueDate = date('d-m-Y');
         
         $retCode = $vItem->Update;
@@ -85,13 +84,13 @@ public static function ReciboProduccion($docEntry, $whs, $Cant, $comentario, $me
         //fin bloque actualiza fecha de la orden
     $vItem = self::$vCmp->GetBusinessObject("59");//Crear un recibo de Produccion
 
-    $vItem->Comments = utf8_decode($comentario);
-    $vItem->JournalMemo = utf8_decode($memo); //Asiento Contable
+    $vItem->Comments = "".utf8_decode($comentario);
+    $vItem->JournalMemo = "".utf8_decode($memo); //Asiento Contable
 
-        $vItem->Lines->BaseEntry = $docEntry; //OP
-        $vItem->Lines->BaseType = '202'; 
-        $vItem->Lines->TransactionType = '0'; // botrntComplete
-        $vItem->Lines->Quantity = $Cant;
+        $vItem->Lines->BaseEntry = "".$docEntry; //OP
+        $vItem->Lines->BaseType = "202"; 
+        $vItem->Lines->TransactionType = "0"; // botrntComplete
+        $vItem->Lines->Quantity = "".floatval($Cant);
         //$vItem->Lines->WarehouseCode = $whs;
         $vItem->Lines->Add(); //guardar Recibo de Produccion
         if ($vItem->Add() == 0) {// cero es correcto   

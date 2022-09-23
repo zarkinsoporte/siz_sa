@@ -1612,14 +1612,14 @@ public function HacerTraslados($id){
                         'items' => $segundo_origen,
                         'observaciones' => utf8_decode("SIZ VALE #".$id .", Solicitó: ". $nombreCompleto . $observacionesComplemento.". ". $solicitante->ComentarioUsuario )
                     );
-                        
+                    //dd(Session::get('transfer2'), $data);    
                     if (Session::has('transfer2')) {                        
                         if (Session::get('transfer2') > 0) {
                             $t2 = Session::get('transfer2');
                         } else {
                             $t2 = SAP::Transfer($data);
                         }
-                        } else {
+                    } else {
                             $t2 = SAP::Transfer($data);
                            
                     }

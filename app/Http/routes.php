@@ -446,11 +446,22 @@ Route::get('edit-xml', function(){
 	$library->asXML($pathh);
 });
 Route::get('test_queue', 'Mod08_DisenioController@ldmUpdate');
-
+Route::any('test-email', function () {
+	$data = array('name'=>"Alberto J");
+   
+      Mail::send(['text'=>'test-email'], $data, function($message) {
+         $message->to('alberto.medina@zarkin.com', 'Siz Test')->subject
+            ('Laravel Basic Testing Mail');
+         $message->from('xyz@gmail.com','Alberto J');
+      });
+      echo "Basic Email Sent. Check your inbox.";
+});
+//18267
 Route::get('/sap', function (Request $request) {
 	//Ref
 	//https://answers.sap.com/questions/1448088/using-xml-to-update-objects-in-diapi.html
 	//https://biuan.com/ProductTrees/
+	
 
 	$vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
 	$vCmp->DbServerType="10"; 
@@ -461,13 +472,46 @@ Route::get('/sap', function (Request $request) {
 	$vCmp->password = env('SAP_password');
 	$vCmp->DbUserName = env('SAP_DbUserName');
 	$vCmp->DbPassword = env('SAP_DbPassword');
-	$vCmp->UseTrusted = false;
+
+	/*$lRetCode = $vCmp->Connect;
+	$id = '1';
+
+	$vItem = $vCmp->GetBusinessObject("67");
+
+	$vItem->DocDate = (new \DateTime('now'))->format('Y-m-d H:i:s');
+	$vItem->FromWarehouse = 'AMP-ST'; //origen
+	$vItem->PriceList = '10';
+	$vItem->FolioNumber = $id; //Vale:solicitud
+	$vItem->Comments ='PRUEBAS SISTEMAS';
+	$vItem->JournalMemo = "Traslados -";
+	$vItem->ToWarehouse = 'ATL-DS';
+
+	$vItem->Lines->ItemCode = '17965';
+	$vItem->Lines->Quantity = '1';
+	$vItem->Lines->FromWarehouseCode = 'AMP-ST';
+	$vItem->Lines->WarehouseCode = 'ATL-DS';
+	//$vItem->Lines->BaseLine = 0;
+
+	$vItem->Lines->Add();
+
+	if ($vItem->Add() == 0) { // cero es correcto
+		DB::commit();
+		$docentry = DB::table('OWTR')
+			->where('FolioNum', $id)
+			->max('DocEntry');
+		
+		return $docentry;
+	} else {
+		DB::rollBack();
+		return 'Error desde SAP: ' . self::$vCmp->GetLastErrorDescription();
+	}*/
+	//$vCmp->UseTrusted = false;
 	//la siguiente linea permite leer XML como string y no como archivo en "Browser->ReadXml"
-	$vCmp->XMLAsString = true; //The default value is False - XML as files.
+	//$vCmp->XMLAsString = true; //The default value is False - XML as files.
 	
 	//$vCmp->language = "6";
-	$vCmp->Connect; //conectar a Sociedad SAP
-	dd($vCmp->GetLastErrorDescription());
+	 //conectar a Sociedad SAP
+/*	dd($vCmp->GetLastErrorDescription());
 	//Obtener XML de un LDM 
 		$vCmp->XmlExportType = '3'; //BoXmlExportTypes.xet_ExportImportMode; /solo los campos modificables
 		$vItem = $vCmp->GetBusinessObject("66"); //ProductTrees table: OITT.
@@ -495,12 +539,12 @@ Route::get('/sap', function (Request $request) {
 		$vItem->Browser->ReadXml($oXML->asXML(), 0);
 		// $vItem->UpdateFromXML($pathh);
 		$resultadoOperacion = $vItem->Update;
-
+*/
 	
-	if ($resultadoOperacion <> 0) {
+	if ($vCmp->Connect <> 0) {
 	   Session::flash('error', $vCmp->GetLastErrorDescription());
 	} else {
-		Session::flash('info',' - conexión con SAP DI API exitosa!!'. ' ultimo err:'. $vCmp->GetLastErrorDescription());
+		Session::flash('info',' - conexión con SAP DI API exitosa!!'. $vCmp->language. ' ultimo err:'. $vCmp->GetLastErrorDescription());
 	} 
 	
 	$vCmp->Disconnect;
@@ -513,6 +557,9 @@ Route::get('/sap', function (Request $request) {
 	return redirect('home');
 });
 
+Route::any('test-pdf-snappy', function () {
+	return SPDF::loadFile('http://www.google.com')->inline('github.pdf');
+});
 Route::post('home/traslados/terminar', 'Mod01_ProduccionController@terminarOP');
 //IMPRESION ETIQUETAS QR
 Route::get('home/GENERACION ETIQUETAS', 'Reportes_ProduccionController@showModal')->middleware('routelog');
