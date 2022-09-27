@@ -339,7 +339,9 @@ class SAP extends Model
                             'Cant_ASurtir_Origen_A' => 0
                         ]);
                         $vItem->Lines->ItemCode = "".$item->ItemCode;
-                        $vItem->Lines->Quantity = "".floatval($item->CA);
+                        $vItem->Lines->Quantity = (float) filter_var($item->CA, 
+		FILTER_SANITIZE_NUMBER_FLOAT, 
+		FILTER_FLAG_ALLOW_FRACTION);
                         $vItem->Lines->FromWarehouseCode = "APG-PA";
                         $vItem->Lines->WarehouseCode = "".$item->Destino;
                         //$vItem->Lines->BaseLine = 0;
@@ -352,7 +354,9 @@ class SAP extends Model
                             if (count($lotes) > 0) {
                                 foreach ($lotes as $l) {
                                     $vItem->Lines->BatchNumbers->BatchNumber = "".$l->lote;
-                                    $vItem->Lines->BatchNumbers->Quantity = "".floatval($l->Cant);
+                                    $vItem->Lines->BatchNumbers->Quantity = (float) filter_var($l->Cant, 
+		FILTER_SANITIZE_NUMBER_FLOAT, 
+		FILTER_FLAG_ALLOW_FRACTION);
                                     $vItem->Lines->BatchNumbers->Add();
                                 }
                             } else {
@@ -381,7 +385,9 @@ class SAP extends Model
                             'Cant_ASurtir_Origen_B' => 0
                         ]);
                         $vItem->Lines->ItemCode = "".$item->ItemCode;
-                        $vItem->Lines->Quantity = "".floatval($item->CB);
+                        $vItem->Lines->Quantity = (float) filter_var($item->CB, 
+		FILTER_SANITIZE_NUMBER_FLOAT, 
+		FILTER_FLAG_ALLOW_FRACTION);
                         $vItem->Lines->FromWarehouseCode = "AMP-ST";
                         $vItem->Lines->WarehouseCode = "".$item->Destino;
                         //$vItem->Lines->SerialNumbers->ManufacturerSerialNumber = "1";
@@ -406,7 +412,9 @@ class SAP extends Model
                                     //$vItem->Lines->BatchNumbers->SetCurrentLine ( $index. "");
                                     //$vItem->Lines->BatchNumbers->ManufacturerSerialNumber  = "1";
                                     $vItem->Lines->BatchNumbers->BatchNumber = "".$l->lote;
-                                    $vItem->Lines->BatchNumbers->Quantity = "".floatval($l->Cant);
+                                    $vItem->Lines->BatchNumbers->Quantity = (float) filter_var($l->Cant, 
+		FILTER_SANITIZE_NUMBER_FLOAT, 
+		FILTER_FLAG_ALLOW_FRACTION);
                                     $vItem->Lines->BatchNumbers->Add();
                                     //$index ++;
                                 }
@@ -481,7 +489,10 @@ class SAP extends Model
                         ]);
                    // return trim($data['almacen_origen']);
                     $vItem->Lines->ItemCode = "".$item->ItemCode;
-                    $vItem->Lines->Quantity = "".floatval($item->CA);
+                    $vItem->Lines->Quantity = (float) filter_var($item->CA, 
+		FILTER_SANITIZE_NUMBER_FLOAT, 
+		FILTER_FLAG_ALLOW_FRACTION);
+       
                     $vItem->Lines->FromWarehouseCode = "".$data['almacen_origen'];
                     $vItem->Lines->WarehouseCode = "".($varDestino);
                     //$vItem->Lines->SerialNumbers->ManufacturerSerialNumber = "1";
@@ -497,7 +508,9 @@ class SAP extends Model
                             foreach ($lotes as $l) {
                                 //$vItem->Lines->BatchNumbers->ManufacturerSerialNumber  = "1";
                                 $vItem->Lines->BatchNumbers->BatchNumber = "".$l->lote;
-                                $vItem->Lines->BatchNumbers->Quantity = "".floatval($l->Cant);
+                                $vItem->Lines->BatchNumbers->Quantity = (float) filter_var($l->Cant, 
+		FILTER_SANITIZE_NUMBER_FLOAT, 
+		FILTER_FLAG_ALLOW_FRACTION);
                                 $vItem->Lines->BatchNumbers->Add();
                             }
                         } else {
@@ -514,7 +527,7 @@ class SAP extends Model
                 }
             }
         } else {
-            return 'No hay ningun material que surtir';
+            return 'Error No hay ningun material que surtir';
         }
         //Guardar Transferencia
 
@@ -541,7 +554,10 @@ class SAP extends Model
         $vItem->Lines->BaseEntry = "".$docEntry;
         $vItem->Lines->BaseType = "202";
         $vItem->Lines->TransactionType = "0"; // botrntComplete
-        $vItem->Lines->Quantity = "".floatval($Cant);
+         
+        $vItem->Lines->Quantity = (float) filter_var($Cant, 
+		FILTER_SANITIZE_NUMBER_FLOAT, 
+		FILTER_FLAG_ALLOW_FRACTION);
         $vItem->Lines->WarehouseCode = "APT-ST";
         $vItem->Lines->Add();
         if ($vItem->Add() == 0) { // cero es correcto   
@@ -607,7 +623,9 @@ class SAP extends Model
             $vItem->ProductionOrderType = 0; //Estandar
             $vItem->ProductionOrderStatus = 0; //Orden planeada
             $vItem->ItemNo = "".$itemOV->ItemCode; // codigo del Articulo
-            $vItem->PlannedQuantity = "".floatval($cantidadOP); //cant con la que se hace la orden
+            $vItem->PlannedQuantity = (float) filter_var($cantidadOP, 
+		FILTER_SANITIZE_NUMBER_FLOAT, 
+		FILTER_FLAG_ALLOW_FRACTION); //cant con la que se hace la orden
             //$vItem->Warehouse = 'APT-ST';
             $vItem->Warehouse = "".$itemOV->DfltWH; //'APT-ST';
             //CABECERA DER (2)

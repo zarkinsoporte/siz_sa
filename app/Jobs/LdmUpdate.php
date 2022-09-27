@@ -105,7 +105,9 @@ class LdmUpdate extends Job implements SelfHandling, ShouldQueue
 <ItemName>HE, 17E</ItemName>
 <U_Estacion>145</U_Estacion> */
 
-                        $i->Quantity =  floatval($this->cantidad) . "";
+                        $i->Quantity =  (float) filter_var($this->cantidad, 
+                        FILTER_SANITIZE_NUMBER_FLOAT, 
+                        FILTER_FLAG_ALLOW_FRACTION);
                         $i->ItemName = $nombreItem ."";
                         $i->Price = "";
                         $i->ItemCode =  $this->codigo_cambio . "";
@@ -118,7 +120,9 @@ class LdmUpdate extends Job implements SelfHandling, ShouldQueue
         } else{
             if (count($item) >= 1 && !empty($item)) {
                 foreach ($item as $i) {
-                    $i->Quantity = floatval($this->cantidad)."";
+                    $i->Quantity = (float) filter_var($this->cantidad, 
+                    FILTER_SANITIZE_NUMBER_FLOAT, 
+                    FILTER_FLAG_ALLOW_FRACTION);
                    // clock($this->cantidad);
                 }
             } else {
