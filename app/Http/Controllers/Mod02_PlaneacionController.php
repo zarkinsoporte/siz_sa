@@ -623,7 +623,7 @@ public function countRollout(Request $request){
         }else{
             $priceList = (int) $request->input('priceList');         
             $articulos = DB::select('exec SIZ_SP_ROLLOUT_SIMULADOR_COSTOS ?', [$priceList]);
-            $count = count($articulos) * 2;
+            $count = count($articulos);
         }//end count jobs        
         return compact('count');
     } catch (\Exception $e) {

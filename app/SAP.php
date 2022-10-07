@@ -210,7 +210,9 @@ class SAP extends Model
         
         //Seleccionar lista de Precios/CAMBIAR PRECIO Y MONEDA
         $vItem->PriceList->SetCurrentLine("".$priceList);
-        $vItem->PriceList->Price = "".$precio;
+        $vItem->PriceList->Price = (float) filter_var($precio, 
+		FILTER_SANITIZE_NUMBER_FLOAT, 
+		FILTER_FLAG_ALLOW_FRACTION);
         if ($moneda !== 'NOMONEDA') {
             $vItem->PriceList->Currency = "".$moneda;
         }
@@ -248,7 +250,9 @@ class SAP extends Model
         $vItem->Mainsupplier = "".$array['proveedor'];
         //Seleccionar lista de Precios
         $vItem->PriceList->SetCurrentLine(8);
-        $vItem->PriceList->Price = "".$array['costocompras'];
+        $vItem->PriceList->Price = (float) filter_var($array['costocompras'], 
+		FILTER_SANITIZE_NUMBER_FLOAT, 
+		FILTER_FLAG_ALLOW_FRACTION);
         $vItem->PriceList->Currency = "".$array['monedacompras'];
 
         //$arrayName = array(
