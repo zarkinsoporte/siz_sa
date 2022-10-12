@@ -153,7 +153,7 @@
                                         <div class="col-md-2">
                                             <div class="form-group">
                                                 <label for="input_user_nomina"># Nomina *</label>
-                                                <input type="number" id="input_user_nomina" name="input_user_nomina" class='form-control'>
+                                                <input min="1" type="number" id="input_user_nomina" name="input_user_nomina" class='form-control'>
                                             </div>
                                         </div>
                                         <div class="col-md-5">
@@ -348,7 +348,9 @@
             modal.find('#userId').val(recipient)
         });
 
-        $('#modal_add_user').on('show.bs.modal', function (event) {
+        
+    });
+    $('#modal_add_user').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget) // Button that triggered the modal
             var puesto = button.data('puesto') // Extract info from data-* attributes
             var depto = button.data('depto') // Extract info from data-* attributes
@@ -369,7 +371,6 @@
                 $("#form_guardarUsuario").submit();
             }
         });
-    });
     function valida(){
         var test = /^[0-9]{3}(,[0-9]{3})*$/; //regex 
         var value = $("#input_user_estaciones").val(); 
@@ -391,23 +392,24 @@
         }
      test = /^\w+\.*\w+$/; //regex 
      value = $("#input_user_correo").val(); 
-    if (value.match(test) || value == '') {
-        console.log("correo correcto") 
-    }else{ 
-        bootbox.dialog({
-        title: "Mensaje",
-        message: "<div class='alert alert-danger m-b-0'>Campo Correo incorrecto.</div>",
-        buttons: {
-        success: {
-        label: "Ok",
-        className: "btn-primary m-r-5 m-b-5"
+        if (value.match(test) || value == '') {
+            console.log("correo correcto") 
+            return true;
+        }else{ 
+            bootbox.dialog({
+            title: "Mensaje",
+            message: "<div class='alert alert-danger m-b-0'>Campo Correo incorrecto.</div>",
+            buttons: {
+            success: {
+            label: "Ok",
+            className: "btn-primary m-r-5 m-b-5"
+            }
+            }
+            }).find('.modal-content').css({ 'font-size': '14px' });
+            return false;
         }
-        }
-        }).find('.modal-content').css({ 'font-size': '14px' });
-        return false;
+        return false; 
     }
-    return false; 
-}
     function correo_sugerido(){ 
         let nombre = $("#input_user_nombre").val() 
         let nombres = []; 
