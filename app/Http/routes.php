@@ -415,7 +415,18 @@ Route::get('home/reporte/produccionxareasXLS', 'Reportes_ProduccionController@pr
 //Route::get('/pruebassap', 'Mod02_PlaneacionController@updateOV');
 
 Route::get('/pruebas', function (Request $request) {
-	dd(Cache::get('hora_init_rollout'));
+	$fecha_db = DB::table('SIZ_PROCESOS_JOBS')->
+            where('PROJO_Name', 'Rollout')->
+            whereNull('PROJO_FechaFinal')->first();
+            //("SELECT PROJO_FechaInicio FROM SIZ_PROCESOS_JOBS WHERE PROJO_Name = '' AND PROJO_FechaFinal IS NULL")
+            $fecha_inicial = Carbon\Carbon::parse($fecha_db->PROJO_FechaInicio);
+            $fecha_final =  Carbon\Carbon::now();
+            DB::update("update SIZ_PROCESOS_JOBS set PROJO_FechaFinal = ? WHERE PROJO_Name = 'Rollout' AND PROJO_FechaFinal IS NULL", [$fecha_final]);
+            // Log::warning("fecha_final");
+            // Log::warning($fecha_final);
+            $tiempo_proceso = $fecha_final->diff($fecha_inicial)->format('%H:%I:%S');
+
+	dd($tiempo_proceso);
 	$a = array(); 
 	array_push($a, Carbon\Carbon::createFromDate(1991, 1, 5)->diff(Carbon\Carbon::now())->format('%y'));
 	array_push($a, Carbon\Carbon::createFromDate(1991, 1, 5)->diff(Carbon\Carbon::now())->format('%m'));
