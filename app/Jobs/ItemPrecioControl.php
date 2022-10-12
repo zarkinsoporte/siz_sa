@@ -62,14 +62,17 @@ class ItemPrecioControl extends Job implements SelfHandling, ShouldQueue
         }else {
             //$user_nomina = $datos->user_nomina; 
             
-            $fecha_inicial = Carbon::parse(Cache::get('hora_init_rollout'));
-            // Log::warning("fecha_inicial");
-            // Log::warning($fecha_inicial);
+            //$fecha_inicial = Carbon::parse(Cache::get('hora_init_rollout'));
+            $fecha_db = DB::table('SIZ_PROCESOS_JOBS')->
+            where('PROJO_Name', 'Rollout')->
+            whereNull('PROJO_FechaFinal')->first();
+            //("SELECT PROJO_FechaInicio FROM SIZ_PROCESOS_JOBS WHERE PROJO_Name = '' AND PROJO_FechaFinal IS NULL")
+            $fecha_inicial = Carbon::parse($fecha_db->PROJO_FechaInicio);
             $fecha_final = Carbon::now();
+            DB::update("update SIZ_PROCESOS_JOBS set PROJO_FechaFinal = ? WHERE PROJO_Name = 'Rollout' AND PROJO_FechaFinal IS NULL", [$fecha_final]);
             // Log::warning("fecha_final");
             // Log::warning($fecha_final);
             $tiempo_proceso = $fecha_final->diff($fecha_inicial)->format('%H:%I:%S');
-            //$tiempo_proceso = $fecha_inicial->diffInMinutes($fecha_final);
             // Log::warning("dispatch .".$tiempo_proceso);
             $user = User::find($this->user_nomina);
             $email = $user->email.'@zarkin.com';

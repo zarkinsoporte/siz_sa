@@ -2005,6 +2005,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
         $err = false;
         $id = 0;
         $arts = $request->get('arts');
+        //dd($arts);
         $almacen_origen = $request->get('almacen');
         $almacen_destino = $request->get('almacenDestino');
         $usercomment = mb_strtoupper($request->get('comentario'));
@@ -2093,7 +2094,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
             ->where('Id_Solicitud', $id)
             ->where('EstatusLinea', 'E')
             ->update(['EstatusLinea' => 'S']);  
-            DB::commit();
+            //DB::commit();
         }
        
         $traslado_interno =  array_where($todosArticulos, function ($key, $item) {            
@@ -2151,7 +2152,7 @@ $rates = DB::table('ORTT')->where('RateDate', date('Y-m-d'))->get();
                     'observaciones' => utf8_decode("SIZ VALE #".$id .", Envió: ". $nombreCompleto. $observacionesComplemento.". ". $solicitud->ComentarioUsuario )
                                         
                 );
-               //  dd($data);   
+                //dd($data);   
                 
                         $t3 = SAP::Transfer2($data);                                               
 
@@ -2181,18 +2182,21 @@ $rates = DB::table('ORTT')->where('RateDate', date('Y-m-d'))->get();
         $mensaje_traslado_interno = 'Error. No estan capturados todos los "Tipos de Cambio" en SAP.';                    
         }        
 }
-DB::commit();
 if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {                
-            return  $id .';'.$mensaje_traslado_interno;
-        } else if(count($traslado_interno) > 0) {
-            if (strpos($mensaje_traslado_interno, 'Error') !== false) {
-                 return $mensaje_traslado_interno;
-            }else{
-                return 'Mensaje:'.$mensaje_traslado_interno; //link pdf
-            }
-        } else if(count($traslado_externo) > 0) {
-            return ' Ha sido enviada la Entrega #' . $id;    
-        }                      
+    DB::commit();
+    return  $id .';'.$mensaje_traslado_interno;
+} else if(count($traslado_interno) > 0) {
+    if (strpos($mensaje_traslado_interno, 'Error') !== false) {
+        return $mensaje_traslado_interno;
+        DB::rollBack();    
+    }else{
+        DB::commit();
+        return 'Mensaje:'.$mensaje_traslado_interno; //link pdf
+    }
+} else if(count($traslado_externo) > 0) {
+    DB::commit();
+    return ' Ha sido enviada la Entrega #' . $id;    
+}                      
         
     }
     public function lotesdeptos(Request $request){
@@ -2836,7 +2840,12 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
         $item->AMLDEST = $almacenD;
         $tipo = 'SIN REGISTRO';
         $item->NUMOPER =  '';
-        $item->VSala = floatval($item->U_VS) * floatval($item->Movimiento);
+       
+        $item->VSala = (double)filter_var($item->U_VS, 
+		FILTER_SANITIZE_NUMBER_FLOAT, 
+		FILTER_FLAG_ALLOW_FRACTION) * (double)filter_var($item->Movimiento, 
+		FILTER_SANITIZE_NUMBER_FLOAT, 
+		FILTER_FLAG_ALLOW_FRACTION);
         $item->STDVAL =(strpos($item->JrnlMemo, 'Reval') !== false) ? $item->RevalTotal : $item->COST01;
         if ((strpos($item->JrnlMemo, 'Pedido') !== false) || ( strpos($item->JrnlMemo, 'Fact.') !== false )){
             $item->NUMOPER = "01 COMPRA";
@@ -3225,7 +3234,11 @@ $consultaj = collect($consulta);
                     Session::put('qrfound', $id_sol);
                     Session::flash('qrmsg','Cantidad agregada: '. $cantXbulto);
                     DB::update('UPDATE SIZ_MaterialesSolicitudes SET Cant_scan = ? WHERE Id_Solicitud = ? AND ItemCode=?', [($cantXbulto + $mi_material->Cant_scan), $id_sol, $itemCode]);
-                    $cantXbulto =(floatval($cantXbulto) + floatval($mi_material->Cant_scan)) * 1; 
+                    $cantXbulto =((double)filter_var(($cantXbulto), 
+                    FILTER_SANITIZE_NUMBER_FLOAT, 
+                    FILTER_FLAG_ALLOW_FRACTION) + (double)filter_var(($mi_material->Cant_scan), 
+                    FILTER_SANITIZE_NUMBER_FLOAT, 
+                    FILTER_FLAG_ALLOW_FRACTION)) * 1; 
                     $showmodalqr = true;
                     return redirect()                     
                 ->action('Mod04_MaterialesController@ShowDetalleSolicitud', compact('id_sol', 'itemCode', 'cantXbulto', 'showmodalqr')); 

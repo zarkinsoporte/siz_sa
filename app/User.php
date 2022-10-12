@@ -139,7 +139,7 @@ class User extends Model implements AuthenticatableContract,
                 return false;
             }
         }else{
-           return true;
+           return false;
         }
        }
        public static function getUserType($empId){

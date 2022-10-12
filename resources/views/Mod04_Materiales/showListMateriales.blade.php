@@ -669,8 +669,7 @@ $interpolateProvider.startSymbol('<%');
         }).then(function (response) {
             $( "#spin" ).html('<span><i class="fa fa-send"></i> Enviar</span>');
             $scope.articulos = [];
-            $scope.successVar = response.data;
-            
+            $scope.successVar = response.data;            
             
             if ($scope.successVar.includes('Mensaje')) {
                 var aux = $scope.successVar.split(':')

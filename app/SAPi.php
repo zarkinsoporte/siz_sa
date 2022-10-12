@@ -90,7 +90,11 @@ public static function ReciboProduccion($docEntry, $whs, $Cant, $comentario, $me
         $vItem->Lines->BaseEntry = "".$docEntry; //OP
         $vItem->Lines->BaseType = "202"; 
         $vItem->Lines->TransactionType = "0"; // botrntComplete
-        $vItem->Lines->Quantity = "".floatval($Cant);
+        /*(double)filter_var($str, 
+		FILTER_SANITIZE_NUMBER_FLOAT, 
+		FILTER_FLAG_ALLOW_FRACTION);*/
+        $vItem->Lines->Quantity = (float) filter_var($Cant, FILTER_SANITIZE_NUMBER_FLOAT, 
+		FILTER_FLAG_ALLOW_FRACTION);
         //$vItem->Lines->WarehouseCode = $whs;
         $vItem->Lines->Add(); //guardar Recibo de Produccion
         if ($vItem->Add() == 0) {// cero es correcto   

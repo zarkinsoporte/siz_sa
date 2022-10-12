@@ -7,7 +7,7 @@ use App\User;
 use Session;
 class SessionTimeout {
     protected $session;
-    protected $timeout=1900;
+    protected $timeout=3600; //3600
     public function __construct(Store $session){
         $this->session=$session;
     }

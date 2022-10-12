@@ -623,7 +623,7 @@ public function countRollout(Request $request){
         }else{
             $priceList = (int) $request->input('priceList');         
             $articulos = DB::select('exec SIZ_SP_ROLLOUT_SIMULADOR_COSTOS ?', [$priceList]);
-            $count = count($articulos) * 2;
+            $count = count($articulos);
         }//end count jobs        
         return compact('count');
     } catch (\Exception $e) {
@@ -644,11 +644,13 @@ public function processRollout(Request $request){
         set_time_limit(0);            
         $sel = "";
         $mensaje= '';            
-        if (Cache::has('hora_init_rollout')) {
-            Cache::forget('hora_init_rollout');
-        }
+        //if (Cache::has('hora_init_rollout')) {
+          //  Cache::forget('hora_init_rollout');
+        //}
         $fi = Carbon::now();
-        Cache::forever('hora_init_rollout', $fi);
+        DB::insert("INSERT INTO SIZ_PROCESOS_JOBS ( PROJO_Name, PROJO_FechaInicio, PROJO_Usuario) VALUES (?,?,?)", ["Rollout", $fi, Auth::user()->U_EmpGiro]);
+        
+       //Cache::forever('hora_init_rollout', $fi);
         // LALog::warning("fi desig");    
         // LALog::warning($fi);    
                 $index = 1;
