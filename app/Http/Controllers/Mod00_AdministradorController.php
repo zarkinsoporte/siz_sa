@@ -56,7 +56,7 @@ class Mod00_AdministradorController extends Controller
     }
     public function guardar_usuario(){
 
-        dd(Input::all());
+        //dd(Input::all());
         try {
             /*
              Dim lErrCode As Integer
@@ -112,26 +112,69 @@ class Mod00_AdministradorController extends Controller
     //        $oXML = simplexml_load_string($xmlString);
             $oXML = simplexml_load_file($pathh); //Crear Object SimpleXML de un archivo
 
-            //Modificar los campos en el XML (de un articulo de la LDM)
+            //Modificar los campos en el XML ()
             $item = $oXML->xpath('/BOM/BO/EmployeesInfo/row');
             if (count($item) >= 1) {
+               $nuevo = Input::get("nuevo");
+                $U_EmpGiro = Input::get("input_user_nomina");
+                $FirstName = Input::get("input_user_nombre");
+                $LastName = Input::get("input_user_apellido");
+                $Gender = Input::get("cbo_user_sexo");
+                $StatusCode = Input::get("cbo_user_estatus");
+                $Branch = Input::get("cbo_user_sucursal");
+                $Department = Input::get("cbo_user_depto");
+                $JobTitle = Input::get("input_user_puesto");
+                $Position = Input::get("cbo_user_posicion");
+                $eMail = Input::get("input_user_correo");
+                $U_CP_CT = Input::get("input_user_estaciones");
                 
-                $item[0]->Gender = 'gt_Female';
+                $item[0]->Gender = $Gender;
+                $item[0]->ExternalEmployeeNumber = $U_EmpGiro;
+                $item[0]->U_EmpGiro = $U_EmpGiro;
+                $item[0]->FirstName = $FirstName;
+                $item[0]->LastName = $LastName;
+                $item[0]->JobTitle = $JobTitle;
+                $item[0]->Position = $Position;
+                $item[0]->Department = $Department;
+                $item[0]->Branch = $Branch;
+                $item[0]->eMail = $eMail;
+                $item[0]->StatusCode = $StatusCode;
+                //$item[0]->Active = $Active;
+                $item[0]->U_CP_CT = $U_CP_CT;
+                if ($nuevo == 1){
+                    $item[0]->StartDate = Carbon\Carbon::now();
+                    
+                }
                 
             } else {
                 
                 throw new \Exception("Error Procesando Empleado", 1);
             }
-           // dd($item);
-      
+            // dd($item);
+            $item = $oXML->xpath('/BOM/BO/EmployeeRolesInfo/row');
+            if (count($item) >= 1) {
+                
+                $EmployeeID = Input::get("cbo_user_grupo");
+                $item[0]->EmployeeID = $EmployeeID;
+            } else {
+
+                throw new \Exception("Error Procesando Empleado", 1);
+            }
+
             //Cargar el XML en la LDM y actualizar en SAP
             //$library->asXML($pathh); //Elaborar y Escribir el XML
             //To use ReadXML method, set the XmlExportType to xet_ExportImportMode (3).
             
             $vItem->Browser->ReadXml($oXML->asXML(), 0);
-    
+
             // $vItem->UpdateFromXML($pathh);
-            $resultadoOperacion = $vItem->Update;
+            if ($nuevo == 1) {
+                
+                $resultadoOperacion = $vItem->Add();
+            } else {
+
+                $resultadoOperacion = $vItem->Update;
+            }
 
             if ($resultadoOperacion <> 0) {
                 throw new \Exception($vCmp->GetLastErrorDescription(), 1);
@@ -143,6 +186,11 @@ class Mod00_AdministradorController extends Controller
             $oXML = null;
             $item = null;
             $resultadoOperacion = null;
+            Session::flash('mensaje', 'Usuario guardado con exito!!.');
+            //return redirect('admin/Notificaciones');
+            //return redirect()->route('auth/login');
+            return redirect()->back();
+
         } catch (\Exception $e) {
             throw new \Exception("Error Procesando Empleado " . $e, 1);
         }
