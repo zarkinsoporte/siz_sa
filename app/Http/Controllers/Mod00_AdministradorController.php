@@ -26,7 +26,7 @@ use App;
 //Fin DOMPDF
 use Illuminate\Support\Facades\Route;
 use \COM;
-
+use Carbon\Carbon;
 use Datatables;
 class Mod00_AdministradorController extends Controller
 {
@@ -57,7 +57,7 @@ class Mod00_AdministradorController extends Controller
     public function guardar_usuario(){
 
         //dd(Input::all());
-        try {
+       // try {
             /*
              Dim lErrCode As Integer
             Dim sErrMsg As String
@@ -97,26 +97,29 @@ class Mod00_AdministradorController extends Controller
            
             //$vCmp->language = "6";
             $vCmp->Connect; //conectar a Sociedad SAP
-
+            //dd($vCmp);
             //Obtener XML de un  
             $vCmp->XmlExportType = '3'; //BoXmlExportTypes.xet_ExportImportMode; /solo los campos modificables
             $vItem = $vCmp->GetBusinessObject("171"); //EmployeesInfo table: OHEM.
             //$vItem->GetByKey('2'); // Docentry
-                $pathh = public_path('assets/xml/sap/ldm/empleado_v2.xml');
+            $pathh = public_path('assets/xml/sap/ldm/empleado_new.xml');
             //$r = $vItem->SaveXML($pathh); //Guardar en archivo
-            //dd($r, $pathh);
+            //dd($pathh);
     //$xmlString = $vItem->GetAsXML(); //Guardar XML en buffer
             //retiramos Utf16 del XML obtenido
     //        $xmlString = utf8_encode(preg_replace('/(<\?xml[^?]+?)utf-16/i', '$1utf-8', $xmlString));
             //Leemos XML(string) y creamos Object SimpleXML 
     //        $oXML = simplexml_load_string($xmlString);
             $oXML = simplexml_load_file($pathh); //Crear Object SimpleXML de un archivo
+            //dd($oXML);
 
             //Modificar los campos en el XML ()
             $item = $oXML->xpath('/BOM/BO/EmployeesInfo/row');
+            //dd($item);
+            //$RoleID = 
+            $U_EmpGiro = Input::get("input_user_nomina");
+            $nuevo = Input::get("nuevo");
             if (count($item) >= 1) {
-               $nuevo = Input::get("nuevo");
-                $U_EmpGiro = Input::get("input_user_nomina");
                 $FirstName = Input::get("input_user_nombre");
                 $LastName = Input::get("input_user_apellido");
                 $Gender = Input::get("cbo_user_sexo");
@@ -128,6 +131,7 @@ class Mod00_AdministradorController extends Controller
                 $eMail = Input::get("input_user_correo");
                 $U_CP_CT = Input::get("input_user_estaciones");
                 
+                //$item[0]->EmployeeID = $EmployeeID;
                 $item[0]->Gender = $Gender;
                 $item[0]->ExternalEmployeeNumber = $U_EmpGiro;
                 $item[0]->U_EmpGiro = $U_EmpGiro;
@@ -142,23 +146,29 @@ class Mod00_AdministradorController extends Controller
                 //$item[0]->Active = $Active;
                 $item[0]->U_CP_CT = $U_CP_CT;
                 if ($nuevo == 1){
-                    $item[0]->StartDate = Carbon\Carbon::now();
+                    $exist = User::find($U_EmpGiro);
+                    if($exist !== null){
+                        return redirect()->back()->withErrors(array('message' => 'Error, Ya existe un usuario con numero de Nómina '.$U_EmpGiro));
+                    }
+                    $item[0]->StartDate = "".(new \DateTime('now'))->format('Y-m-d H:i:s');
+                    $item[0]->U_CP_Password = Hash::make('1234');
                     
                 }
                 
             } else {
                 
-                throw new \Exception("Error Procesando Empleado", 1);
+                return redirect()->back()->withErrors(array('message' => 'Error, Procesando usuario (e1).'));
             }
             // dd($item);
             $item = $oXML->xpath('/BOM/BO/EmployeeRolesInfo/row');
             if (count($item) >= 1) {
                 
-                $EmployeeID = Input::get("cbo_user_grupo");
-                $item[0]->EmployeeID = $EmployeeID;
+                $RoleID = Input::get("cbo_user_grupo");
+                //$item[0]->EmployeeID = $EmployeeID;
+                $item[0]->RoleID = $RoleID;
             } else {
 
-                throw new \Exception("Error Procesando Empleado", 1);
+                return redirect()->back()->withErrors(array('message' => 'Error, Procesando usuario (e2).'));
             }
 
             //Cargar el XML en la LDM y actualizar en SAP
@@ -177,7 +187,8 @@ class Mod00_AdministradorController extends Controller
             }
 
             if ($resultadoOperacion <> 0) {
-                throw new \Exception($vCmp->GetLastErrorDescription(), 1);
+                return redirect()->back()->withErrors(array('message' => 'Error, SAP: '.$vCmp->GetLastErrorDescription()));
+                
             }
             $vCmp->Disconnect;
             $vCmp = null;
@@ -186,14 +197,19 @@ class Mod00_AdministradorController extends Controller
             $oXML = null;
             $item = null;
             $resultadoOperacion = null;
-            Session::flash('mensaje', 'Usuario guardado con exito!!.');
+
+            $exist = User::find($U_EmpGiro);
+            if($exist === null){
+                return redirect()->back()->withErrors(array('message' => 'Error, No encontramos el Usuario Guardado'.$U_EmpGiro));
+            }
+            Session::flash('mensaje', 'Nuevo Usuario Agregado: '. $exist->U_EmpGiro.' - '. $exist->firstName .' '. $exist->lastName.' Control Piso #'.$exist->empID);
             //return redirect('admin/Notificaciones');
             //return redirect()->route('auth/login');
             return redirect()->back();
 
-        } catch (\Exception $e) {
-            throw new \Exception("Error Procesando Empleado " . $e, 1);
-        }
+       // } catch (\Exception $e) {
+         //   return redirect()->back()->withErrors(array('message' => 'Error, Procesando usuario (e3).'));
+        //}
     }
     public function plantilla( Request $request)
     {
