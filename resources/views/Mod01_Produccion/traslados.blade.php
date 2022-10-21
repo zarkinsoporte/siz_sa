@@ -241,8 +241,9 @@ data-target="#Retroceder" class="btn btn-info btn-lg" data-codem="{{$of->U_Orden
     <?php   
     break;        
     case '5'; //Almacén de 
+     @if($of->U_CT_SIG !== "Terminar OP")
        $desabilitarretroceso = '';
-    ?> <!--Boton Retroceder--> 
+        ?> <!--Boton Retroceder--> 
        @if($of->U_Orden !== '109') 
        <?php   
         $desabilitarretroceso = 'disabled';
@@ -253,13 +254,24 @@ data-target="#Retroceder" class="btn btn-info btn-lg" data-codem="{{$of->U_Orden
        <i class="fa fa-mail-reply-all" aria-hidden="1">  Retroceder</i>
        </a> </td>
       
-<!--Boton Avanzar-->
+        <!--Boton Avanzar-->
         <td> <a class="btn btn-success {{$of->avanzar}}" data-toggle="modal"
         data-target="#cantidad" data-whatever="{{$of->Code}}"
         data-whatever2="{{$of->U_Recibido - $of->U_Procesado}}">
         <i class="fa fa-send-o" aria-hidden="true">   Avanzar</i>
         </a> </td>
-    <?php   
+        <?php
+    @else
+        <td>
+        <a class="btn btn-success {{$of->avanzar}}" data-toggle="modal"
+            data-target="#terminar" data-whatever="{{$of->Code}}"
+            data-whatever2="{{$of->U_Recibido - $of->U_Procesado}}">
+            <i class="fa fa-send-o" aria-hidden="true">   
+            Terminar 
+            </i>
+        </a> 
+        </td>
+    @endif   
     break;                
     case '4'; //Supervisor SAP
         break;
