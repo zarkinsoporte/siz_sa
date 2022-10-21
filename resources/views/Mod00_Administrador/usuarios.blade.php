@@ -281,8 +281,9 @@
                                                 <label for="input_user_correo">Correo </label>
                                                 <div class="input-group">
                                                     <input type="text" id="input_user_correo" name="input_user_correo" class='form-control'
-                                                        onfocus="correo_sugerido()">
-                                                    <span class="input-group-addon" id="basic-addon2">@zarkin.com</span>
+                                                       placeholder="nombre.apellido" onfocus="correo_sugerido()">
+                                                    <span class="input-group-addon primary-color" style="background-color: darkslategrey;
+                                                    color: white;" id="basic-addon2">@zarkin.com</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -334,6 +335,8 @@
                 </div><!-- /modal -->
                
 <script type="text/javascript" >
+function js_iniciador() {
+}
     $(document).ready(function (event) {
         $('.boot-select').selectpicker();
         $('select[name=cbo_user_estatus]').val(1);
@@ -372,9 +375,61 @@
             }
         });
     function valida(){
+        if($("#input_user_nomina").val() == '') { 
+            bootbox.dialog({
+            title: "Mensaje",
+            message: "<div class='alert alert-danger m-b-0'>Campo # Nòmina inválido.</div>",
+            buttons: {
+            success: {
+            label: "Ok",
+            className: "btn-primary m-r-5 m-b-5"
+            }
+            }
+            }).find('.modal-content').css({ 'font-size': '14px' });
+            return false;
+        }
+        if($("#input_user_nombre").val() == '') { 
+            bootbox.dialog({
+            title: "Mensaje",
+            message: "<div class='alert alert-danger m-b-0'>Campo Nombre inválido.</div>",
+            buttons: {
+            success: {
+            label: "Ok",
+            className: "btn-primary m-r-5 m-b-5"
+            }
+            }
+            }).find('.modal-content').css({ 'font-size': '14px' });
+            return false;
+        }
+        if($("#input_user_apellido").val() == '') { 
+            bootbox.dialog({
+            title: "Mensaje",
+            message: "<div class='alert alert-danger m-b-0'>Campo Apellido inválido.</div>",
+            buttons: {
+            success: {
+            label: "Ok",
+            className: "btn-primary m-r-5 m-b-5"
+            }
+            }
+            }).find('.modal-content').css({ 'font-size': '14px' });
+            return false;
+        }
+        if($("#input_user_nomina").val() == '') { 
+            bootbox.dialog({
+            title: "Mensaje",
+            message: "<div class='alert alert-danger m-b-0'>Campo # Nòmina inválido.</div>",
+            buttons: {
+            success: {
+            label: "Ok",
+            className: "btn-primary m-r-5 m-b-5"
+            }
+            }
+            }).find('.modal-content').css({ 'font-size': '14px' });
+            return false;
+        }
         var test = /^[0-9]{3}(,[0-9]{3})*$/; //regex 
         var value = $("#input_user_estaciones").val(); 
-        console.log(value)
+        //console.log(value)
         if(value.match(test) || value == '') { 
             console.log("estaciones correcto")
         }else{ 
