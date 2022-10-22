@@ -241,9 +241,9 @@ data-target="#Retroceder" class="btn btn-info btn-lg" data-codem="{{$of->U_Orden
     <?php   
     break;        
     case '5'; //Almacén de 
+    $desabilitarretroceso = '';
+    ?> <!--Boton Retroceder--> 
      @if($of->U_CT_SIG !== "Terminar OP")
-       $desabilitarretroceso = '';
-        ?> <!--Boton Retroceder--> 
        @if($of->U_Orden !== '109') 
        <?php   
         $desabilitarretroceso = 'disabled';
@@ -260,7 +260,7 @@ data-target="#Retroceder" class="btn btn-info btn-lg" data-codem="{{$of->U_Orden
         data-whatever2="{{$of->U_Recibido - $of->U_Procesado}}">
         <i class="fa fa-send-o" aria-hidden="true">   Avanzar</i>
         </a> </td>
-        <?php
+        
     @else
         <td>
         <a class="btn btn-success {{$of->avanzar}}" data-toggle="modal"
@@ -272,6 +272,7 @@ data-target="#Retroceder" class="btn btn-info btn-lg" data-codem="{{$of->U_Orden
         </a> 
         </td>
     @endif   
+    <?php
     break;                
     case '4'; //Supervisor SAP
         break;
