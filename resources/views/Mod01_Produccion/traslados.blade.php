@@ -243,7 +243,7 @@ data-target="#Retroceder" class="btn btn-info btn-lg" data-codem="{{$of->U_Orden
     case '5'; //Almacén de 
     $desabilitarretroceso = '';
     ?> <!--Boton Retroceder--> 
-     @if($of->U_CT_SIG !== "Terminar OP")
+     
        @if($of->U_Orden !== '109') 
        <?php   
         $desabilitarretroceso = 'disabled';
@@ -253,7 +253,7 @@ data-target="#Retroceder" class="btn btn-info btn-lg" data-codem="{{$of->U_Orden
        data-target="#Retroceder" class="btn btn-info btn-lg" data-codem="{{$of->U_Orden}}" data-recibido="{{$of->U_Recibido - $of->U_Procesado}}">
        <i class="fa fa-mail-reply-all" aria-hidden="1">  Retroceder</i>
        </a> </td>
-      
+    @if($of->U_CT_SIG !== "Terminar OP")  
         <!--Boton Avanzar-->
         <td> <a class="btn btn-success {{$of->avanzar}}" data-toggle="modal"
         data-target="#cantidad" data-whatever="{{$of->Code}}"
