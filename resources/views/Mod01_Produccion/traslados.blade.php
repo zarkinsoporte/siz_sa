@@ -263,13 +263,19 @@ data-target="#Retroceder" class="btn btn-info btn-lg" data-codem="{{$of->U_Orden
         
     @else
         <td>
-        <a class="btn btn-success {{$of->avanzar}}" data-toggle="modal"
+        <!--<a class="btn btn-success {{$of->avanzar}}" data-toggle="modal"
             data-target="#terminar" data-whatever="{{$of->Code}}"
             data-whatever2="{{$of->U_Recibido - $of->U_Procesado}}">
             <i class="fa fa-send-o" aria-hidden="true">   
             Terminar 
             </i>
         </a> 
+    -->
+        <a class="btn btn-success disabled" >
+            <i class="fa fa-send-o" aria-hidden="true">   
+              Terminar
+            </i>
+            </a>  
         </td>
     @endif   
     <?php
