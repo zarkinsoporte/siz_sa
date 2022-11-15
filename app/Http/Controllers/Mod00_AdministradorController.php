@@ -84,12 +84,12 @@ class Mod00_AdministradorController extends Controller
 
             $vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
             $vCmp->DbServerType = "10";
-            $vCmp->server = env('SAP_server');
-            $vCmp->LicenseServer = env('SAP_LicenseServer');
-            $vCmp->CompanyDB = env('SAP_CompanyDB');
-            $vCmp->username = env('SAP_username');
+            $vCmp->server = env('SAP_server').'';
+            $vCmp->LicenseServer = env('SAP_LicenseServer').'';
+            $vCmp->CompanyDB = env('SAP_CompanyDB').'';
+            $vCmp->username = env('SAP_username').'';
             $vCmp->password = env('SAP_password');
-            $vCmp->DbUserName = env('SAP_DbUserName');
+            $vCmp->DbUserName = env('SAP_DbUserName').'';
             $vCmp->DbPassword = env('SAP_DbPassword');
             $vCmp->UseTrusted = false;
             //la siguiente linea permite leer XML como string y no como archivo en "Browser->ReadXml"
@@ -102,14 +102,22 @@ class Mod00_AdministradorController extends Controller
             $vCmp->XmlExportType = '3'; //BoXmlExportTypes.xet_ExportImportMode; /solo los campos modificables
             $vItem = $vCmp->GetBusinessObject("171"); //EmployeesInfo table: OHEM.
             //$vItem->GetByKey('2'); // Docentry
-            $pathh = public_path('assets/xml/sap/ldm/empleado_new.xml');
+            $nuevo = Input::get("nuevo");
+            $empID = Input::get("input_user_empID");
+            if ($nuevo == 1){
+                
+                $pathh = public_path('assets/xml/sap/ldm/empleado_new.xml');
+            } else{
+                $pathh = public_path('assets/xml/sap/ldm/empleado_edit.xml');
+
+            }
             //$r = $vItem->SaveXML($pathh); //Guardar en archivo
             //dd($pathh);
-    //$xmlString = $vItem->GetAsXML(); //Guardar XML en buffer
-            //retiramos Utf16 del XML obtenido
-    //        $xmlString = utf8_encode(preg_replace('/(<\?xml[^?]+?)utf-16/i', '$1utf-8', $xmlString));
-            //Leemos XML(string) y creamos Object SimpleXML 
-    //        $oXML = simplexml_load_string($xmlString);
+        //$xmlString = $vItem->GetAsXML(); //Guardar XML en buffer
+                //retiramos Utf16 del XML obtenido
+        //        $xmlString = utf8_encode(preg_replace('/(<\?xml[^?]+?)utf-16/i', '$1utf-8', $xmlString));
+                //Leemos XML(string) y creamos Object SimpleXML 
+        //        $oXML = simplexml_load_string($xmlString);
             $oXML = simplexml_load_file($pathh); //Crear Object SimpleXML de un archivo
             //dd($oXML);
 
@@ -118,7 +126,7 @@ class Mod00_AdministradorController extends Controller
             //dd($item);
             //$RoleID = 
             $U_EmpGiro = Input::get("input_user_nomina");
-            $nuevo = Input::get("nuevo");
+            
             if (count($item) >= 1) {
                 $FirstName = Input::get("input_user_nombre");
                 $LastName = Input::get("input_user_apellido");
@@ -131,7 +139,6 @@ class Mod00_AdministradorController extends Controller
                 $eMail = Input::get("input_user_correo");
                 $U_CP_CT = Input::get("input_user_estaciones");
                 
-                //$item[0]->EmployeeID = $EmployeeID;
                 $item[0]->Gender = $Gender;
                 $item[0]->ExternalEmployeeNumber = $U_EmpGiro;
                 $item[0]->U_EmpGiro = $U_EmpGiro;
@@ -153,6 +160,9 @@ class Mod00_AdministradorController extends Controller
                     $item[0]->StartDate = "".(new \DateTime('now'))->format('Y-m-d H:i:s');
                     $item[0]->U_CP_Password = Hash::make('1234');
                     
+                }else {
+                    $item[0]->EmployeeID = $empID;
+                    $item[0]->EmployeeCode = $empID;
                 }
                 
             } else {
@@ -164,7 +174,9 @@ class Mod00_AdministradorController extends Controller
             if (count($item) >= 1) {
                 
                 $RoleID = Input::get("cbo_user_grupo");
-                //$item[0]->EmployeeID = $EmployeeID;
+                if ($nuevo == 0){
+                    $item[0]->EmployeeID = $empID;
+                }
                 $item[0]->RoleID = $RoleID;
             } else {
 
@@ -180,7 +192,7 @@ class Mod00_AdministradorController extends Controller
             // $vItem->UpdateFromXML($pathh);
             if ($nuevo == 1) {
                 
-                $resultadoOperacion = $vItem->Add();
+                //$resultadoOperacion = $vItem->Add();
             } else {
 
                 $resultadoOperacion = $vItem->Update;
@@ -202,7 +214,7 @@ class Mod00_AdministradorController extends Controller
             if($exist === null){
                 return redirect()->back()->withErrors(array('message' => 'Error, No encontramos el Usuario Guardado'.$U_EmpGiro));
             }
-            Session::flash('mensaje', 'Nuevo Usuario Agregado: '. $exist->U_EmpGiro.' - '. $exist->firstName .' '. $exist->lastName.' Control Piso #'.$exist->empID);
+            Session::flash('mensaje', 'Usuario Guardado: '. $exist->U_EmpGiro.' - '. $exist->firstName .' '. $exist->lastName.' Control Piso #'.$exist->empID);
             //return redirect('admin/Notificaciones');
             //return redirect()->route('auth/login');
             return redirect()->back();
@@ -242,11 +254,48 @@ class Mod00_AdministradorController extends Controller
     public function showUsers($depto)
     {
         if (Auth::check()) {
-            return view('Mod00_Administrador.usuariosDepto', compact('depto'));
+            $posiciones = DB::table('OHPS')
+            ->select('posID as llave', 'name as valor')                
+            ->orderBy('name')->get();
+            $grupos = DB::table('OHTY')
+                    ->select('typeID as llave', 'name as valor')                
+                    ->orderBy('name')->get();
+            $estatus = DB::table('OHST')
+                    ->select('statusID as llave', 'name as valor')                
+                    ->orderBy('name')->get();
+            $sucursales =DB::table('OUBR')
+                    ->select('Code as llave', 'Name as valor')                
+                    ->orderBy('Name')->get();
+            $departamentos =DB::table('OUDP')
+                    ->select('Code as llave', 'Name as valor')                
+                    ->orderBy('Name')->get();
+            $sexos = DB::table('OHEM')
+            ->select(DB::raw("CASE WHEN sex = 'M' THEN 'gt_Male' ELSE 'gt_Female' END as llave, CASE WHEN sex = 'M' THEN 'MASCULINO' ELSE 'FEMENINO' END as valor"))
+            ->groupBy('sex')                
+            ->orderBy('sex')->get();
+            return view('Mod00_Administrador.usuariosDepto', compact('depto', 'posiciones', 'grupos', 'estatus', 'sucursales', 'sexos', 'departamentos'));
             }else{
                 return redirect()->route('auth/login');
             }
         
+    }
+    public function carga_edicion_usuario(Request $request){
+        //return $request->all();
+        $user = User::find($request->get('nominaUsuario'));
+        $puesto = $user->jobTitle;
+        $nombre = $user->firstName;
+        $apellido = $user->lastName;
+        $sexo = ($user->sex == 'M')? 'gt_Male' : 'gt_Female'; 
+        $estatus = $user->status;
+        $sucursal = $user->branch;
+        $departamento = $user->dept;
+        $posicion = $user->position;
+        $correo = $user->email;
+        $estaciones = $user->U_CP_CT;
+        $rol = DB::select("select roleID from HEM6 H6 
+        INNER JOIN OHEM EMP ON H6.empID = ?", [$user->empID]);   
+        $grupo = $rol[0]->roleID;
+        return compact('puesto', 'nombre', 'apellido', 'sexo', 'estatus', 'sucursal', 'departamento', 'posicion', 'correo', 'estaciones', 'grupo');
     }
     public function DataShowUsers(Request $request)
     {
@@ -255,7 +304,10 @@ class Mod00_AdministradorController extends Controller
 
         return Datatables::of($users)
             ->addColumn('action', function ($user) {
-                return  '<button type="button" class="btn btn-default" data-toggle="modal" data-target="#mymodal" data-whatever="'.$user->U_EmpGiro.'">
+                return  '<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal_add_user" data-nomina="'.$user->U_EmpGiro.'" data-empid="'.$user->empID.'">
+                <i class="fa fa-pencil" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="btn btn-default" data-toggle="modal" data-target="#mymodal" data-whatever="'.$user->U_EmpGiro.'">
                                         <i class="fa fa-unlock" aria-hidden="true"></i>
                                     </button>';
             }

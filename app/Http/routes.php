@@ -76,6 +76,7 @@ Route::get('admin/Plantilla_PDF/{depto?}', 'Mod00_AdministradorController@Planti
 Route::get('datatables.showusers', 'Mod00_AdministradorController@DataShowUsers')->name('datatables.showusers');
 Route::get('users/edit/{empid}', 'Mod00_AdministradorController@editUser');
 Route::any('admin/guardar_usuario', 'Mod00_AdministradorController@guardar_usuario');
+Route::any('admin/detalle-depto/carga-edicion-usuario', 'Mod00_AdministradorController@carga_edicion_usuario');
 Route::post('cambio.password', 'Mod00_AdministradorController@cambiopassword');
 //Rutas del Módulo de inventarios
 Route::get('admin/inventario', 'Mod00_AdministradorController@inventario');

@@ -312,7 +312,7 @@
                                             <div class="form-group">
                                                 <label for="input_user_estaciones">Estaciones de Trabajo Control Piso (separadas por
                                                     coma)</label>
-                                                <textarea class="form-control" maxlength="50" rows="1" name="input_user_estaciones"
+                                                <textarea class="form-control" maxlength="60" rows="1" name="input_user_estaciones"
                                                     id="input_user_estaciones" style="text-transform:uppercase;" value=""
                                                     onkeyup="javascript:this.value=this.value.toUpperCase();"></textarea>
                                             </div>
@@ -371,120 +371,136 @@ function js_iniciador() {
         });        
         $("#guardar_user").click(function(){ 
             if(valida()){
+                $.blockUI({
+                    baseZ: 2000,
+                    message: '<h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                    css: {
+                        border: 'none',
+                        padding: '16px',
+                        width: '50%',
+                        top: '40%',
+                        left: '30%',
+                        backgroundColor: '#fefefe',
+                        '-webkit-border-radius': '10px',
+                        '-moz-border-radius': '10px',
+                        opacity: .7,
+                        color: '#000000'
+                    }
+                });
                 $("#form_guardarUsuario").submit();
             }
         });
-    function valida(){
-        if($("#input_user_nomina").val() == '') { 
-            bootbox.dialog({
-            title: "Mensaje",
-            message: "<div class='alert alert-danger m-b-0'>Campo # Nòmina inválido.</div>",
-            buttons: {
-            success: {
-            label: "Ok",
-            className: "btn-primary m-r-5 m-b-5"
+        function valida(){
+            if($("#input_user_nomina").val() == '') { 
+                bootbox.dialog({
+                title: "Mensaje",
+                message: "<div class='alert alert-danger m-b-0'>Campo # Nòmina inválido.</div>",
+                buttons: {
+                success: {
+                label: "Ok",
+                className: "btn-primary m-r-5 m-b-5"
+                }
+                }
+                }).find('.modal-content').css({ 'font-size': '14px' });
+                return false;
             }
+            if($("#input_user_nombre").val() == '') { 
+                bootbox.dialog({
+                title: "Mensaje",
+                message: "<div class='alert alert-danger m-b-0'>Campo Nombre inválido.</div>",
+                buttons: {
+                success: {
+                label: "Ok",
+                className: "btn-primary m-r-5 m-b-5"
+                }
+                }
+                }).find('.modal-content').css({ 'font-size': '14px' });
+                return false;
             }
-            }).find('.modal-content').css({ 'font-size': '14px' });
-            return false;
+            if($("#input_user_apellido").val() == '') { 
+                bootbox.dialog({
+                title: "Mensaje",
+                message: "<div class='alert alert-danger m-b-0'>Campo Apellido inválido.</div>",
+                buttons: {
+                success: {
+                label: "Ok",
+                className: "btn-primary m-r-5 m-b-5"
+                }
+                }
+                }).find('.modal-content').css({ 'font-size': '14px' });
+                return false;
+            }
+            if($("#input_user_nomina").val() == '') { 
+                bootbox.dialog({
+                title: "Mensaje",
+                message: "<div class='alert alert-danger m-b-0'>Campo # Nòmina inválido.</div>",
+                buttons: {
+                success: {
+                label: "Ok",
+                className: "btn-primary m-r-5 m-b-5"
+                }
+                }
+                }).find('.modal-content').css({ 'font-size': '14px' });
+                return false;
+            }
+            var test = /^[0-9]{3}(,[0-9]{3})*$/; //regex 
+            var value = $("#input_user_estaciones").val(); 
+            //console.log(value)
+            if(value.match(test) || value == '') { 
+                console.log("estaciones correcto")
+            }else{ 
+                bootbox.dialog({
+                title: "Mensaje",
+                message: "<div class='alert alert-danger m-b-0'>Campo de Estaciones Control de Piso inválido.</div>",
+                buttons: {
+                success: {
+                label: "Ok",
+                className: "btn-primary m-r-5 m-b-5"
+                }
+                }
+                }).find('.modal-content').css({ 'font-size': '14px' });
+                return false;
+            }
+            test = /^\w+\.*\w+$/; //regex 
+            value = $("#input_user_correo").val(); 
+            if (value.match(test) || value == '') {
+                console.log("correo correcto") 
+                return true;
+            }else{ 
+                bootbox.dialog({
+                title: "Mensaje",
+                message: "<div class='alert alert-danger m-b-0'>Campo Correo incorrecto.</div>",
+                buttons: {
+                success: {
+                label: "Ok",
+                className: "btn-primary m-r-5 m-b-5"
+                }
+                }
+                }).find('.modal-content').css({ 'font-size': '14px' });
+                return false;
+            }
+            return false; 
         }
-        if($("#input_user_nombre").val() == '') { 
-            bootbox.dialog({
-            title: "Mensaje",
-            message: "<div class='alert alert-danger m-b-0'>Campo Nombre inválido.</div>",
-            buttons: {
-            success: {
-            label: "Ok",
-            className: "btn-primary m-r-5 m-b-5"
-            }
-            }
-            }).find('.modal-content').css({ 'font-size': '14px' });
-            return false;
+        function correo_sugerido(){ 
+            let nombre = $("#input_user_nombre").val() 
+            let nombres = []; 
+            let apellido = $("#input_user_apellido").val() 
+            let apellidos = []; 
+            if (nombre !== '' && apellido !== '') { 
+                nombres = nombre.split(" ");
+                apellidos = apellido.split(" "); 
+                $("#input_user_correo").val(nombres[0]+ '.' + apellidos[0]) 
+            }else if(nombre !== ''){
+                nombres = nombre.split(" "); 
+                $("#input_user_correo").val(nombres[0]) 
+            } 
         }
-        if($("#input_user_apellido").val() == '') { 
-            bootbox.dialog({
-            title: "Mensaje",
-            message: "<div class='alert alert-danger m-b-0'>Campo Apellido inválido.</div>",
-            buttons: {
-            success: {
-            label: "Ok",
-            className: "btn-primary m-r-5 m-b-5"
-            }
-            }
-            }).find('.modal-content').css({ 'font-size': '14px' });
-            return false;
-        }
-        if($("#input_user_nomina").val() == '') { 
-            bootbox.dialog({
-            title: "Mensaje",
-            message: "<div class='alert alert-danger m-b-0'>Campo # Nòmina inválido.</div>",
-            buttons: {
-            success: {
-            label: "Ok",
-            className: "btn-primary m-r-5 m-b-5"
-            }
-            }
-            }).find('.modal-content').css({ 'font-size': '14px' });
-            return false;
-        }
-        var test = /^[0-9]{3}(,[0-9]{3})*$/; //regex 
-        var value = $("#input_user_estaciones").val(); 
-        //console.log(value)
-        if(value.match(test) || value == '') { 
-            console.log("estaciones correcto")
-        }else{ 
-            bootbox.dialog({
-            title: "Mensaje",
-            message: "<div class='alert alert-danger m-b-0'>Campo de Estaciones Control de Piso inválido.</div>",
-            buttons: {
-            success: {
-            label: "Ok",
-            className: "btn-primary m-r-5 m-b-5"
-            }
-            }
-            }).find('.modal-content').css({ 'font-size': '14px' });
-            return false;
-        }
-     test = /^\w+\.*\w+$/; //regex 
-     value = $("#input_user_correo").val(); 
-        if (value.match(test) || value == '') {
-            console.log("correo correcto") 
-            return true;
-        }else{ 
-            bootbox.dialog({
-            title: "Mensaje",
-            message: "<div class='alert alert-danger m-b-0'>Campo Correo incorrecto.</div>",
-            buttons: {
-            success: {
-            label: "Ok",
-            className: "btn-primary m-r-5 m-b-5"
-            }
-            }
-            }).find('.modal-content').css({ 'font-size': '14px' });
-            return false;
-        }
-        return false; 
-    }
-    function correo_sugerido(){ 
-        let nombre = $("#input_user_nombre").val() 
-        let nombres = []; 
-        let apellido = $("#input_user_apellido").val() 
-        let apellidos = []; 
-        if (nombre !== '' && apellido !== '') { 
-            nombres = nombre.split(" ");
-            apellidos = apellido.split(" "); 
-            $("#input_user_correo").val(nombres[0]+ '.' + apellidos[0]) 
-        }else if(nombre !== ''){
-            nombres = nombre.split(" "); 
-            $("#input_user_correo").val(nombres[0]) 
-        } 
-    }
-$('#sel1').on('change', function() {
+        $('#sel1').on('change', function() {
 
-    $([document.documentElement, document.body]).animate({
-    scrollTop: $("#"+this.value).offset().top-100
-    }, 2000);
-});
+            $([document.documentElement, document.body]).animate({
+            scrollTop: $("#"+this.value).offset().top-100
+            }, 2000);
+        });
          //Get the button
         var mybutton = document.getElementById("myBtn");
         
