@@ -101,30 +101,26 @@ class Mod00_AdministradorController extends Controller
             //Obtener XML de un  
             $vCmp->XmlExportType = '3'; //BoXmlExportTypes.xet_ExportImportMode; /solo los campos modificables
             $vItem = $vCmp->GetBusinessObject("171"); //EmployeesInfo table: OHEM.
-            //$vItem->GetByKey('2'); // Docentry
             $nuevo = Input::get("nuevo");
             $empID = Input::get("input_user_empID");
             if ($nuevo == 1){
                 
-                $pathh = public_path('assets/xml/sap/ldm/empleado_new.xml');
+                $pathh = public_path('assets/xml/sap/ohem/empleado_new.xml');
+                $oXML = simplexml_load_file($pathh); //Crear Object SimpleXML de un archivo
             } else{
-                $pathh = public_path('assets/xml/sap/ldm/empleado_edit.xml');
-
+                //$pathh = public_path('assets/xml/sap/ohem');
+                $vItem->GetByKey($empID); // Docentry
+                $xmlString = $vItem->GetAsXML(); //Guardar XML en buffer
+                 //retiramos Utf16 del XML obtenido
+                $xmlString = utf8_encode(preg_replace('/(<\?xml[^?]+?)utf-16/i', '$1utf-8', $xmlString));
+                //Leemos XML(string) y creamos Object SimpleXML 
+                $oXML = simplexml_load_string($xmlString);
             }
             //$r = $vItem->SaveXML($pathh); //Guardar en archivo
-            //dd($pathh);
-        //$xmlString = $vItem->GetAsXML(); //Guardar XML en buffer
-                //retiramos Utf16 del XML obtenido
-        //        $xmlString = utf8_encode(preg_replace('/(<\?xml[^?]+?)utf-16/i', '$1utf-8', $xmlString));
-                //Leemos XML(string) y creamos Object SimpleXML 
-        //        $oXML = simplexml_load_string($xmlString);
-            $oXML = simplexml_load_file($pathh); //Crear Object SimpleXML de un archivo
-            //dd($oXML);
-
+          
             //Modificar los campos en el XML ()
             $item = $oXML->xpath('/BOM/BO/EmployeesInfo/row');
-            //dd($item);
-            //$RoleID = 
+             
             $U_EmpGiro = Input::get("input_user_nomina");
             
             if (count($item) >= 1) {
@@ -160,9 +156,13 @@ class Mod00_AdministradorController extends Controller
                     $item[0]->StartDate = "".(new \DateTime('now'))->format('Y-m-d H:i:s');
                     $item[0]->U_CP_Password = Hash::make('1234');
                     
-                }else {
-                    $item[0]->EmployeeID = $empID;
-                    $item[0]->EmployeeCode = $empID;
+                }
+                // $item[0]->EmployeeID = $empID;
+                // $item[0]->EmployeeCode = $empID;
+                if ( $StatusCode == '2'){ //BAJA?
+                    
+                    $item[0]->TerminationDate = "".(new \DateTime('now'))->format('Y-m-d H:i:s');
+                   
                 }
                 
             } else {
@@ -192,7 +192,7 @@ class Mod00_AdministradorController extends Controller
             // $vItem->UpdateFromXML($pathh);
             if ($nuevo == 1) {
                 
-                //$resultadoOperacion = $vItem->Add();
+                $resultadoOperacion = $vItem->Add();
             } else {
 
                 $resultadoOperacion = $vItem->Update;
