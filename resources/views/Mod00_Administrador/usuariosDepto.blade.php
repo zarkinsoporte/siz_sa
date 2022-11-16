@@ -1,8 +1,15 @@
 @extends('Mod00_Administrador.admin')
 
 @section('subcontent-01')
+<div class="row">
+    <div class="col-md-12">
+            <a onclick="cargando()" href="javascript:history.back()" class="btn btn-primary">Atras</a>                
+             
+    </div> 
+</div>
        <h4>PLANTILLA DE {{$depto}}</h4>
    <div class="row">
+    
 <style>
     .dataTables_wrapper .dataTables_filter {
         float: right;
@@ -12,7 +19,7 @@
 </style>
 
                <div class="col-md-12">
-
+                   
                    <table class="table table-bordered" id="users-table2">
                        <thead>
                        <input hidden value="{{$depto}}" id="getValue" name="getValue"/>
