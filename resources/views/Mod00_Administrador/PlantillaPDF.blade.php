@@ -3,11 +3,6 @@
 
         <head>
             <meta charset="utf-8">
-            <meta http-equiv="X-UA-Compatible" content="IE=edge">
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-
-            <!-- CSRF Token -->
-            <meta name="csrf-token" content="{{ csrf_token() }}">
             <title>{{ 'Plantilla de Personal' }}</title>
                 <style>
                 /*
@@ -46,12 +41,14 @@
                     }
                     h3{
                         font-family: 'Helvetica';
+                        margin-top: 4px;
+                        margin-bottom: 3px;
                     }
                     b{
                         font-size:100%;
                     }
                 #header  {position: fixed; margin-top:2px; }
-                #content {position: relative; top:17%}
+                #content {position: relative; top:11%}
 
             </style>
         </head>
@@ -66,28 +63,35 @@
                 <thead class="thead-dark">  
                         <tr>
                          <td colspan="6" align="center" bgcolor="#fff">   
-                         <b>{{env('EMPRESA_NAME')}}</b>
-                         <h3>Plantilla de Personal</h3>
-                         <h2>{{$clave}}</h2></td>
+                         <b>MODULO 00 SISTEMAS </b>
+                         <h3>PLANTILLA DE PERSONAL</h3>
+                         <h3>{{'DEPARTAMENTO DE '.$clave}}</h3>
+                         <b>{{'Impreso por: '. Auth::user()->firstName .' '. Auth::user()->lastName}}</b>
+                        
+                        </td>
 
                          </tr>
                          </thead>                      
 </table>
-<br>
+</div> 
+<div id="content">
 <!--Cuerpo o datos de la tabla-->
     <table  border="1px" class="table table-striped">
-        <THead class="thead-dark">
+        <thead class="thead-dark">
   <tr>
+                <th>#</th>
                 <th>Funciones</th>
                 <th>Nombre</th>
                 <th>Apellido</th>
                 <th>No. Nomina</th>
                 <th>Estaciones</th>
                 </tr>
-        </THead><TBody>
-        @foreach($users as $P_user)
+        </thead><tbody>
+            
+        @foreach($users as $key => $P_user)
          
             <tr>              
+                <td>{{$key + 1}}</td>
                 <td>{{$P_user->jobTitle}}</td>                
                 <td>{{$P_user->firstName}}</td>
                 <td>{{$P_user->lastName}}</td>
@@ -96,11 +100,11 @@
             </tr>
            
          @endforeach
-         </TBody>
+         </tbody>
     </table>
   
-        
-</div> 
+</div>       
+
 
 
         <footer>

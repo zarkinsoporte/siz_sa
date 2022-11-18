@@ -326,7 +326,7 @@ public function Plantilla_PDF($clave = null)
     ->where('Depto', 'like', '%'.$clave.'%')->orderBy('jobTitle')->get();
      
     $pdf = \PDF::loadView('Mod00_Administrador.PlantillaPDF',compact('users','clave'));
-    $pdf->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);
+   // $pdf->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);
     return $pdf->stream('Siz_Plantilla_Personal '.$clave.' - '.$hoy = date("d/m/Y").'.Pdf');
  }
      
