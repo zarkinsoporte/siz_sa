@@ -50,7 +50,7 @@
                                         <h4 class="modal-title" id="pwModalLabel">{{$nombre}}</h4>
                                     </div>
                                     {!! Form::open(['url' => 'home/reporte/'.$nombre, 'method' => 'POST', 'target'=>''.$target]) !!}
-
+                                    {{ csrf_field() }}
                                     <div class="modal-body">
                                         @if($text <> '')
                                             <h5>{{$text}}</h5>
