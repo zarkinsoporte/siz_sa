@@ -3198,7 +3198,7 @@ $consultaj = collect($consulta);
         $cant = Input::get('cantx_bulto');
         $separador = ' - ';
         $CodigoQR = QrCode::margin(1)->format('png')->size(100)
-        ->generate("http://187.189.177.39:8082/siz_sa/public/qr/".
+        ->generate(env('DIR_SERVER')."qr/".
         $pKey."/".$cardCode."/".$cant);
 
         $pdf = \PDF::loadView('Mod04_Materiales.etiquetaQrPDF', 

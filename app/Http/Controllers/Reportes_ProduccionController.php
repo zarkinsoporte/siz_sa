@@ -13,6 +13,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Datatables;
 use Carbon\Carbon;
 
+use QrCode;
 ini_set("memory_limit", '512M');
 ini_set('max_execution_time', 0);
 class Reportes_ProduccionController extends Controller
@@ -1551,5 +1552,221 @@ class Reportes_ProduccionController extends Controller
             }
         })
         ->make(true);
+    }
+
+    public function etiquetas_empaque(){
+        if (Auth::check()) {
+            $user = Auth::user();
+            $actividades = $user->getTareas();
+            $file_anterior = DB::table('SIZ_Log')
+            ->where('LOG_cod_error', 'PRINT_ETIQ_EMPAQUE')
+            ->orderBy('LOG_fecha', 'desc')->first();
+            $data = array(
+                'actividades' => $actividades,
+                'ultimo' => count($actividades),
+                'file_anterior' => $file_anterior->LOG_descripcion
+            );
+            return view('Mod01_Produccion.etiquetas_empaque', $data);
+        } else {
+            return redirect()->route('auth/login');
+        }
+    }
+    public function registros_tabla_impresion_empaque(Request $request)
+    {
+        //dd($request->all());
+        try {
+            ini_set('memory_limit', '-1');
+            set_time_limit(0);
+            $estado = 'R';
+            $tipo = "dbo.OITM.U_TipoMat = 'PT'";
+            $sel = "SELECT
+					
+				dbo.ORDR.DocNum AS Pedido,
+				dbo.OWOR.DocNum AS OP, 
+                dbo.OWOR.ItemCode AS Codigo, 
+                dbo.OITM.ItemName AS Descripcion,
+				dbo.ORDR.CardCode +' - '+ dbo.ORDR.CardName AS Cliente
+                FROM      dbo.ORDR INNER JOIN
+                                dbo.OWOR ON dbo.ORDR.DocNum = dbo.OWOR.OriginNum INNER JOIN
+                                dbo.OITM ON dbo.OWOR.ItemCode = dbo.OITM.ItemCode
+                WHERE   (Status = '" . $estado . "') AND (" . $tipo . ")
+                AND U_NoSerie > 1 
+                ORDER BY Pedido";
+            $sel =  preg_replace('/[ ]{2,}|[\t]|[\n]|[\r]/', ' ', ($sel));
+            $consulta = DB::select($sel);
+            //dd($sel);
+            $tabla_impresion = collect($consulta);
+            return compact('tabla_impresion');
+        } catch (\Exception $e) {
+            header('HTTP/1.1 500 Internal Server Error');
+            header('Content-Type: application/json; charset=UTF-8');
+            die(json_encode(array(
+                "mensaje" => $e->getMessage(),
+                "codigo" => $e->getCode(),
+                "clase" => $e->getFile(),
+                "linea" => $e->getLine()
+            )));
+        }
+    }
+    public function impresion_op_empaque(Request $request){
+        ini_set('memory_limit', '-1');
+        set_time_limit(0);
+        if(strlen($request->input('ordenes')) > 0 ){
+    
+               // DB::beginTransaction();
+                    $preOrdenes = explode(',', $request->input('ordenes'));            
+                    $mensajeErrr = '';
+                  
+                    $pdf_final = new \Clegginabox\PDFMerger\PDFMerger;
+                    //clock($pdf_final);
+                    $user_path = public_path('pdf_ordenes_empaque/user_' . Auth::user()->U_EmpGiro);
+                    //clock($user_path);
+                    if (!\File::exists($user_path)) {
+                        \File::makeDirectory($user_path);
+                        //clock('creado dir');
+                    }
+                    //dd();
+                    array_map("unlink", glob($user_path . '/*.pdf'));
+                    $data = [];    
+                    foreach ($preOrdenes as $op) {
+                        //dd(base_path('vendor/h4cc/wkhtmltopdf-amd64/bin/wkhtmltopdf-amd64'));
+                       
+                            $etiq = DB::select("SELECT 
+                            ow.DocEntry OP
+                            , o.ItemCode CODIGO
+                            , o.ItemName AS DESCRIPCION
+                            , cliente.CardCode + ' ' +
+                             CardName AS CLIENTE
+                            , ow.OriginNum PEDIDO
+                            , U_NoSerie SERIE
+                            , U_cc DESTINO
+                            from OWOR ow
+                            inner join OITM o on o.ItemCode = ow.ItemCode
+                            inner join OCRD cliente on cliente.CardCode = ow.CardCode
+                            where ow.DocEntry = ?",
+                                [$op]);
+                        $etiq = $etiq[0];  
+                        //$headerHtml = view()->make('header', compact('etiq'))->render();
+                        //dd($etiq);
+                        $json='QR => '. json_encode($etiq);
+                       $CodigoQR = QrCode::margin(1)->format('png')->size(500)
+                        ->generate($json);
+                        
+                        $data = [
+                            'CodigoQR' => $CodigoQR,
+                            'op' => $etiq->OP,    
+                            'codigo' => implode(' ',str_split($etiq->CODIGO)),
+                            'descripcion' => $etiq->DESCRIPCION,
+                            'cliente' => $etiq->CLIENTE,
+                            'pedido' => $etiq->PEDIDO,  
+                            'serie' => $etiq->SERIE,    
+                            'destino' => $etiq->DESTINO 
+                        ];
+                       
+                        
+                        $pdf = \SPDF::loadView('Mod01_Produccion.etiquetaQrPDF', $data);
+                        //$pdf->setOption('header-html', $headerHtml);
+                        
+
+                       // clock($pdf);
+                        $pdf->setOption('margin-top', '5mm');
+                        $pdf->setOption('margin-left', '5mm');
+                        $pdf->setOption('margin-right', '5mm');
+                        $pdf->setOption('page-height', '101.6mm');
+                        $pdf->setOption('page-width', '101.6mm');
+                        $pdf->setOption('footer-center', '');
+                        $pdf->setOption('footer-left', 'SIZ');
+                        $pdf->save($user_path . '/' . $op . '.pdf');
+                      
+                        $pdf_final->addPDF($user_path . '/' . $op . '.pdf');
+                        
+                    
+                    } //end Foreach
+                    
+                    $pdf_final->merge('file', $user_path . '/ordenes.pdf', 'P');
+                    $file = '/pdf_ordenes_empaque/user_' . Auth::user()->U_EmpGiro.'/ordenes.pdf';
+                    return compact('mensajeErrr', 'file');
+                    
+          
+        }else{
+            return 'Error , No se ha seleccionado ninguna Orden';
+        }
+    }
+    public function impresion_op_empaque_t(Request $request){
+        ini_set('memory_limit', '-1');
+        set_time_limit(0);
+    
+               // DB::beginTransaction();
+                    
+                  $op = '22041';
+                    $pdf_final = new \Clegginabox\PDFMerger\PDFMerger;
+                    //clock($pdf_final);
+                    $user_path = public_path('pdf_ordenes_empaque/user_' . Auth::user()->U_EmpGiro);
+                    //clock($user_path);
+                    if (!\File::exists($user_path)) {
+                        \File::makeDirectory($user_path);
+                        //clock('creado dir');
+                    }
+                    //dd();
+                    array_map("unlink", glob($user_path . '/*.pdf'));
+                    $data = [];    
+                    
+                        //dd(base_path('vendor/h4cc/wkhtmltopdf-amd64/bin/wkhtmltopdf-amd64'));
+                       
+                            $etiq = DB::select("SELECT 
+                            ow.DocEntry OP
+                            , o.ItemCode CODIGO
+                            , o.ItemName AS DESCRIPCION
+                            , cliente.CardCode + ' ' +
+                             CardName AS CLIENTE
+                            , ow.OriginNum PEDIDO
+                            , U_NoSerie SERIE
+                            , U_cc DESTINO
+                            from OWOR ow
+                            inner join OITM o on o.ItemCode = ow.ItemCode
+                            inner join OCRD cliente on cliente.CardCode = ow.CardCode
+                            where ow.DocEntry = ?",
+                                ['22041']);
+                        $etiq = $etiq[0];  
+                        //$headerHtml = view()->make('header', compact('etiq'))->render();
+                        //dd($etiq);
+                        $json='qr => '. json_encode($etiq);
+                       $CodigoQR = QrCode::margin(1)->format('png')->size(300)
+                        ->generate($json);
+                        
+                        $data = [
+                            'CodigoQR' => $CodigoQR,
+                            'op' => $etiq->OP,    
+                            'codigo' => $etiq->CODIGO,
+                            'descripcion' => $etiq->DESCRIPCION,
+                            'cliente' => $etiq->CLIENTE,
+                            'pedido' => $etiq->PEDIDO,  
+                            'serie' => $etiq->SERIE,    
+                            'destino' => $etiq->DESTINO 
+                        ];
+                       
+                        
+                        $pdf = \SPDF::loadView('Mod01_Produccion.etiquetaQrPDF', $data);
+                        //$pdf->setOption('header-html', $headerHtml);
+                        
+
+                       // clock($pdf);
+                        $pdf->setOption('margin-top', '5mm');
+                        $pdf->setOption('margin-left', '5mm');
+                        $pdf->setOption('margin-right', '5mm');
+                        $pdf->setOption('page-height', '101.6mm');
+                        $pdf->setOption('page-width', '101.6mm');
+                        $pdf->save($user_path . '/' . $op . '.pdf');
+                      
+                        $pdf_final->addPDF($user_path . '/' . $op . '.pdf');
+                        
+                    
+                    
+                    return view('Mod01_Produccion.etiquetaQrPDF', $data);
+                    $pdf_final->merge('file', $user_path . '/ordenes.pdf', 'P');
+                    $file = '/pdf_ordenes_empaque/user_' . Auth::user()->U_EmpGiro.'/ordenes.pdf';
+                    return compact('mensajeErrr', 'file');
+                    
+       
     }
 }
