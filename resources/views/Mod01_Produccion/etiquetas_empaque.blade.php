@@ -306,7 +306,7 @@ var tabla_impresion = $("#tabla_impresion").DataTable({
                 text: '<x class="danger" target="_blank" id="btn_enviar"> Imprimir <span class="badge"></span></x>',
                 className: 'fa fa-file-pdf-o btn-danger',
                 action: function() {
-                   // window.open('{{url()}}'+'{{$file_anterior}}',"_blank");
+                   
                    click_impresion();
                 }
                

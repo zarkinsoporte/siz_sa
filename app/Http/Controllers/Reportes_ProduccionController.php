@@ -1558,13 +1558,13 @@ class Reportes_ProduccionController extends Controller
         if (Auth::check()) {
             $user = Auth::user();
             $actividades = $user->getTareas();
-            $file_anterior = DB::table('SIZ_Log')
-            ->where('LOG_cod_error', 'PRINT_ETIQ_EMPAQUE')
-            ->orderBy('LOG_fecha', 'desc')->first();
+            // $file_anterior = DB::table('SIZ_Log')
+            // ->where('LOG_cod_error', 'PRINT_ETIQ_EMPAQUE')
+            // ->orderBy('LOG_fecha', 'desc')->first();
             $data = array(
                 'actividades' => $actividades,
-                'ultimo' => count($actividades),
-                'file_anterior' => $file_anterior->LOG_descripcion
+                'ultimo' => count($actividades)//,
+                //'file_anterior' => $file_anterior->LOG_descripcion
             );
             return view('Mod01_Produccion.etiquetas_empaque', $data);
         } else {
