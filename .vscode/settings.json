@@ -13,5 +13,6 @@
         "**/tests": true,
         //"**/vendor": true,
         
-    }
+    },
+    "editor.fontSize": 16
 }

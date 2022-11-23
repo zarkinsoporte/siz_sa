@@ -77,3 +77,5 @@ public/pdf_ordenes
 public/pdf
 init.vbs
 ldm.bat
+.vscode/settings.json
+public/pdf_ordenes_empaque/
