@@ -82,7 +82,7 @@ class User extends Model implements AuthenticatableContract,
             ->leftJoin('Siz_Menu_Item','Siz_Menu_Item.id' ,'=', 'Siz_Modulos_Grupo.id_menu')
             ->leftJoin('Siz_Tarea_menu','Siz_Tarea_menu.id' ,'=', 'Siz_Modulos_Grupo.id_tarea')
             ->where('U_EmpGiro', Auth::user()->U_EmpGiro)
-            ->where('HEM6.line', '1')
+            //->where('HEM6.line', '1')
             ->whereNotNull('Siz_Modulos_Grupo.id_tarea')
             ->select('Siz_Modulos_Grupo.*',
                 'Siz_Modulo.name AS modulo',
