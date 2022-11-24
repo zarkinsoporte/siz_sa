@@ -699,4 +699,4 @@ Route::get('home/ETIQUETAS EMPAQUE', 'Reportes_ProduccionController@etiquetas_em
 // Route::any('liberacionOP', 'Mod02_PlaneacionController@liberacion_op')->name('liberacionOP');
 // Route::any('reset_series_op', 'Mod02_PlaneacionController@reset_series_op')->name('reset_series_op');
 Route::any('impresionOP_empaque', 'Reportes_ProduccionController@impresion_op_empaque')->name('impresionOP_empaque');
-Route::any('impresion_op_empaque_t', 'Reportes_ProduccionController@impresion_op_empaque_t')->name('impresion_op_empaque_t');
+Route::any('getOP_empaque', 'Reportes_ProduccionController@getOP_empaque')->name('getOP_empaque');

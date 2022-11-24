@@ -98,6 +98,19 @@
                                                     </div>
                                                     @endif
                                                 </div>
+                                                <div class="row" style="margin-bottom: 40px">
+                                                    <div class="form-group">
+                                                       <div class="col-md-4 col-xs-12 col-sm-6">
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control" placeholder="Ingresa OP..." id="input_op">
+                                                            <span class="input-group-btn">
+                                                              <button class="btn btn-success" id="boton-mostrar" type="button"><i
+                                                                class="fa fa-plus"></i> Agregar OP</button>
+                                                            </span>
+                                                          </div><!-- /input-group -->
+                                                       </div>
+                                                    </div>
+                                                </div>
                                                 <div class="row">
                                                     <div class="col-md-12">
                                                        <div class="table-scroll" id="registros-impresion">
@@ -148,7 +161,7 @@
                             $(this).toggleClass("active"); 
 
                             const today = new Date();
-                          
+                            $("#input_op").val('');
 
                     document.onkeyup = function(e) {
                         if (e.shiftKey && e.which == 112) {
@@ -277,6 +290,7 @@ var tabla_impresion = $("#tabla_impresion").DataTable({
                      "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
                 }, 
                 dom: 'Bfrtip',
+                order: [[1, 'asc']],
                 buttons: [
                     {
                 text: '<i class="fa fa-check-square"></i>',
@@ -384,7 +398,100 @@ function reloadOrdenesImpresion(){
     });
 }
 //FIN IMPRESION
- 
+function getop_empaque() {
+    $.ajax({
+
+        type: 'GET',
+        async: true,
+        url: '{!! route('getOP_empaque') !!}',
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        data:{
+            "op": $('#input_op').val()
+        },
+        beforeSend: function() {
+            $.blockUI({
+                message: '<h1>Agregando OP,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                css: {
+                    border: 'none',
+                    padding: '16px',
+                    width: '50%',
+                    top: '40%',
+                    left: '30%',
+                    backgroundColor: '#fefefe',
+                    '-webkit-border-radius': '10px',
+                    '-moz-border-radius': '10px',
+                    opacity: .7,
+                    color: '#000000'
+                }
+            });
+        },
+        complete: function() {
+            $("#input_op").val('');
+                     
+        },
+        success: function(data){
+            setTimeout($.unblockUI, 500);  
+
+            if (data.respuesta != 'ok') {
+                swal("", "La OP no existe", "error",  {
+                        buttons: false,
+                        timer: 2000,
+                    });
+            } else {
+                var bnd = 0;
+                //console.log();
+                tabla_impresion.rows().every( function ( rowIdx, tableLoop, rowLoop ) {
+                    var data2 = this.data();
+                    console.log(data2.OP);
+                    if (data2.OP == data.data.OP) {
+                        bnd = 1;
+                        var node=this.node();
+                        if ( $(node).hasClass("selected")) {
+
+                        } else {
+                            $(node).toggleClass('selected');
+                        }
+                    } 
+                } );
+                if (bnd == 0) {
+                    var a = $("#tabla_impresion").dataTable().fnAddData((data.data));
+                 
+                    var nTr =$("#tabla_impresion").dataTable().fnSettings().aoData[ a[0] ].nTr;
+                    nTr.className = "selected";  
+                    swal("", "OP Agregada a la tabla!", "success",  {
+                        buttons: false,
+                        timer: 2000,
+                    });
+                }
+                var count = tabla_impresion.rows( '.selected' ).count();
+                    
+                var $badge = $('#btn_enviar').find('.badge'); 
+                $badge.text(count);
+            }
+            
+            
+        },
+        error: function (xhr, ajaxOptions, thrownError) {          
+            $.unblockUI();
+            swal("", "Error agregando OP", "error",  {
+                        buttons: false,
+                        timer: 2000,
+                    });    
+        }
+
+    });
+}
+$('#boton-mostrar').on('click', function(e) {
+    getop_empaque();
+});
+$(document).keyup(function(event) {
+    if ($("#input_op").is(":focus") && event.key == "Enter") {
+        getop_empaque();
+    }
+    
+});
 }  //fin js_iniciador               
                    function val_btn(val) { 
                    

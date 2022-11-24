@@ -58,6 +58,7 @@
     <script src="{{ URL::asset('assets/DataTables/js/dataTables.tableTools.js')}}"></script>
     {!! Html::script('assets/js/dataTables.editor.min.js') !!}
     <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.10.15/features/scrollResize/dataTables.scrollResize.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
    
     
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
