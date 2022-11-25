@@ -1578,7 +1578,7 @@ class Reportes_ProduccionController extends Controller
             ini_set('memory_limit', '-1');
             set_time_limit(0);
             $estado = 'R';
-            $tipo = "dbo.OITM.U_TipoMat = 'PT'";
+            $tipo = "dbo.OITM.U_TipoMat in ( 'PT', 'RF') ";
             $sel = "SELECT
 					
 				dbo.ORDR.DocNum AS Pedido,
@@ -1641,6 +1641,7 @@ class Reportes_ProduccionController extends Controller
                             , ow.OriginNum PEDIDO
                             , U_NoSerie SERIE
                             , U_cc DESTINO
+                            , FORMAT (getdate(), 'dd-MM-yyyy hh:mm') FECHA_IMPRESION
                             from OWOR ow
                             inner join OITM o on o.ItemCode = ow.ItemCode
                             inner join OCRD cliente on cliente.CardCode = ow.CardCode
@@ -1650,7 +1651,7 @@ class Reportes_ProduccionController extends Controller
                         //$headerHtml = view()->make('header', compact('etiq'))->render();
                         //dd($etiq);
                         $json='QR => '. json_encode($etiq);
-                       $CodigoQR = QrCode::margin(1)->format('png')->size(500)
+                        $CodigoQR = QrCode::margin(1)->format('png')->size(500)
                         ->generate($json);
                         
                         $data = [
@@ -1661,7 +1662,7 @@ class Reportes_ProduccionController extends Controller
                             'cliente' => $etiq->CLIENTE,
                             'pedido' => $etiq->PEDIDO,  
                             'serie' => $etiq->SERIE,    
-                            'destino' => $etiq->DESTINO 
+                            'destino' => $etiq->DESTINO
                         ];
                        
                         
@@ -1675,8 +1676,11 @@ class Reportes_ProduccionController extends Controller
                         $pdf->setOption('margin-right', '5mm');
                         $pdf->setOption('page-height', '101.6mm');
                         $pdf->setOption('page-width', '101.6mm');
+
+                        $pdf->setOption('footer-font-name', 'Jolly');
                         $pdf->setOption('footer-center', '');
                         $pdf->setOption('footer-left', 'SIZ');
+                        $pdf->setOption('footer-right', 'UIM'.Auth::user()->U_EmpGiro);
                         $pdf->save($user_path . '/' . $op . '.pdf');
                       
                         $pdf_final->addPDF($user_path . '/' . $op . '.pdf');
@@ -1705,7 +1709,7 @@ class Reportes_ProduccionController extends Controller
         INNER JOIN dbo.OITM ON dbo.OWOR.ItemCode = dbo.OITM.ItemCode
         
         WHERE (Status <> 'C') AND 
-        (dbo.OITM.U_TipoMat = 'PT')
+        dbo.OITM.U_TipoMat in ( 'PT', 'RF')
         AND OWOR.DocNum = ?
         ", [$request->get('op')]);
         $data=[];
