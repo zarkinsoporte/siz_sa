@@ -1677,6 +1677,7 @@ class Reportes_ProduccionController extends Controller
                         $pdf->setOption('page-height', '101.6mm');
                         $pdf->setOption('page-width', '101.6mm');
 
+                        //$pdf->setOption('disable-smart-shrinking', true);
                         $pdf->setOption('footer-font-name', 'Jolly');
                         $pdf->setOption('footer-center', '');
                         $pdf->setOption('footer-left', 'SIZ');
