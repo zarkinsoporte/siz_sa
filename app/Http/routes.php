@@ -687,16 +687,13 @@ Route::any('home/reporte/PLANTILLA DE PERSONAL', 'Mod00_AdministradorController@
 //-------------------------//
 //
 Route::get('home/ETIQUETAS EMPAQUE', 'Reportes_ProduccionController@etiquetas_empaque')->middleware('routelog');
-// Route::any('datatables.gop', 'Mod02_PlaneacionController@registros_gop')->name('datatables.gop');
-// Route::any('datatables_gop_pedido', 'Mod02_PlaneacionController@registros_gop_pedido')->name('datatables_gop_pedido');
-//Route::any('generarOP', 'Mod02_PlaneacionController@generarOP')->name('generarOP');
-// Route::any('datatables.tabla_series', 'Mod02_PlaneacionController@registros_tabla_series')->name('datatables.tabla_series');
-// Route::any('datatables.tabla_liberacion', 'Mod02_PlaneacionController@registros_tabla_liberacion')->name('datatables.tabla_liberacion');
- Route::any('datatables.tabla_impresion_empaque', 'Reportes_ProduccionController@registros_tabla_impresion_empaque')->name('datatables.tabla_impresion_empaque');
-// Route::any('datatables.tabla_programar', 'Mod02_PlaneacionController@registros_tabla_programar')->name('datatables.tabla_programar');
-// Route::any('asignar_series', 'Mod02_PlaneacionController@asignar_series')->name('asignar_series');
-// Route::any('programarOP', 'Mod02_PlaneacionController@programar_op')->name('programarOP');
-// Route::any('liberacionOP', 'Mod02_PlaneacionController@liberacion_op')->name('liberacionOP');
-// Route::any('reset_series_op', 'Mod02_PlaneacionController@reset_series_op')->name('reset_series_op');
+Route::any('datatables.tabla_impresion_empaque', 'Reportes_ProduccionController@registros_tabla_impresion_empaque')->name('datatables.tabla_impresion_empaque');
 Route::any('impresionOP_empaque', 'Reportes_ProduccionController@impresion_op_empaque')->name('impresionOP_empaque');
 Route::any('getOP_empaque', 'Reportes_ProduccionController@getOP_empaque')->name('getOP_empaque');
+
+//REPORTE DE COMPRAS X PROVEEDOR
+Route::get('home/ULTIMOS PRECIOS', 'Mod03_ComprasController@index_ultimos_precios')->middleware('routelog');
+Route::any('datatables_compras_proveedor', 'Mod03_ComprasController@datatables_compras_proveedor')->name('datatables_compras_proveedor');
+Route::post('home/cpp_combobox_articulos', 'Mod03_ComprasController@cpp_combobox_articulos');
+Route::post('home/cpp_combobox_proveedores', 'Mod03_ComprasController@cpp_combobox_proveedores');
+Route::get('cppXLS', 'Mod03_ComprasController@cppXLS')->name('cppXLS');
