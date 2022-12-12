@@ -241,6 +241,7 @@ class Mod03_ComprasController extends Controller
         return $pdf->stream('Siz_Orden_Compra' . ' - ' . $hoy = date("d/m/Y") . '.Pdf');
     }
     public function cppXLS(){
+
         $path = public_path() . '/assets/plantillas_excel/Mod_03/SIZ_compras_proveedor.xlsx';
        
           
@@ -292,6 +293,86 @@ class Mod03_ComprasController extends Controller
             ->export('xlsx');    
     
     }
+    public function ultimos_precios_XLS(){
+
+        $path = public_path() . '/assets/plantillas_excel/Mod_03/SIZ_ultimos_precios.xlsx';
+               
+        $data_row = Session::get('datatables_ultimos_precios');
+       
+        $excel =  Excel::load($path, function ($excel) use ($data_row) {
+            $excel->sheet('COMPRAS', function ($sheet2) use ($data_row){
+                $index = 6;
+
+                $cant = count($data_row) + 6;
+                $range = 'A5:F5';
+                
+               
+                    $sheet2->cell('A4', function ($cell) {
+                        $cell->setValue('IMPRESO: '.(date("Y-m-d H:i:s")));
+                    });
+                    if (count($data_row) > 0) {
+                       
+                        $sheet2->cell('D4', function ($cell) use ($data_row){
+                            $cell->setValue($data_row[0]->CODIGO.' - '.$data_row[0]->MATERIAL. '  UDM:'. $data_row[0]->UDM);
+                        });
+                    }
+                foreach ($data_row as $row) {
+                    $sheet2->row($index, 
+                    [
+                        $row->ORDEN_C
+                        ,$row->COMPRA
+                        ,$row->FECHAF
+                        ,$row->PROVEEDOR
+                        , str_replace("$", "", $row->PRECIOF)
+                        ,$row->MONEDA
+                    ]
+                    );
+                    $index++;
+                }
+                $sheet2->getStyle('A6:F'.$cant)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+                //$sheet2->getColumnDimension('A')->setAutoSize(true);
+                $sheet2->getColumnDimension('D')->setAutoSize(true);               
+               // $sheet2->getColumnDimension('D')->setAutoSize(true);              
+                //$sheet2->getColumnDimension('F')->setAutoSize(true);
+                 $sheet2->setAutoFilter($range);
+            });
+        })
+            ->setFilename('SIZ Ultimos Precios')
+            ->export('xlsx');    
+    
+    }
+    public function ultimos_precios_PDF()
+    {
+        $data_row = Session::get('datatables_ultimos_precios');
+        $item = 'Sin registros';
+        if (count($data_row) > 0) {
+           $item = $data_row[0]->CODIGO.' - '.$data_row[0]->MATERIAL. '  UDM:'. $data_row[0]->UDM;
+        }
+        $fechaImpresion = date("d-m-Y H:i:s");
+        $headerHtml = view()->make(
+            'Mod03_Compras.ReporteUltimosPrecios_pdfheader',
+            [
+                'titulo' => 'Reporte Últimos Precios',
+                'fechaImpresion' => 'Fecha de Impresión: ' . $fechaImpresion,
+                'item' => $item
+            ]
+        )->render();
+
+        //return view('Mod05_Ventas.ReporteBarrasPDF', compact('a', 'generator'));
+        $pdf = \SPDF::loadView('Mod03_Compras.ReporteUltimosPreciosPDF', compact('data_row'));
+       
+        $pdf->setOption('header-html', $headerHtml);
+        $pdf->setOption('footer-center', 'Pagina [page] de [toPage]');
+        $pdf->setOption('footer-left', 'SIZ');
+        //$pdf->setOption('orientation', 'Landscape');
+        $pdf->setOption('margin-top', '33mm');
+        $pdf->setOption('margin-left', '5mm');
+        $pdf->setOption('margin-right', '5mm');
+        $pdf->setOption('page-size', 'Letter');
+
+        return $pdf->inline();
+
+    }
     public function index_ultimos_precios(){
         $user = Auth::user();
         $actividades = $user->getTareas();
@@ -303,5 +384,77 @@ class Mod03_ComprasController extends Controller
         return view('Mod04_Materiales.UltimosPrecios', 
         compact( 'actividades', 'ultimo', 
         'articulos', 'fstart'));    
+    }
+    public function datatables_ultimos_precios(Request $request)
+    {
+        // $registros = [];
+        // return compact('registros');
+        try {
+            ini_set('memory_limit', '-1');
+            set_time_limit(0);
+
+            $articulos = $request->input('articulos');
+           // $articulos = str_replace("'',", "", $articulos);
+           
+            $f1 = explode("/", Input::get('fstart'));
+            $fstart = $f1[2].$f1[1].$f1[0];
+          
+            $criterio = " ";
+            if ($articulos != '') {
+                $criterio = " AND (PDN1.ItemCode = '" . $articulos . "' ) ";
+
+            }
+
+            $sel = "SELECT
+                OITM.ItemCode AS CODIGO
+                        , OITM.ItemName AS MATERIAL
+                        , OITM.InvntryUom AS UDM
+                        , PDN1.BaseRef AS ORDEN_C
+                        , OPDN.DocNum AS COMPRA
+                        ,Convert(varchar, OPDN.DocDueDate, 23)AS FECHAF 
+                        ,(OPDN.CardCode +'  '+ OPDN.CardName)AS PROVEEDOR
+                        ,FORMAT(PDN1.Price,'C4','es-MX')AS PRECIOF
+                        , PDN1.Currency AS MONEDA
+                From PDN1
+                Inner Join OPDN on OPDN.DocEntry = PDN1.DocEntry
+                Inner Join OITM on OITM.ItemCode = PDN1.ItemCode
+                Where Cast(OPDN.DocDueDate as date) >= Cast('" . $fstart . "'  as date)
+                ".$criterio."
+                Order by PDN1.DocEntry desc";
+
+            $sel =  preg_replace('/[ ]{2,}|[\t]|[\n]|[\r]/', ' ', ($sel));
+            //dd($sel);
+            $consulta = DB::select($sel);
+            $registros = collect($consulta);
+            Session::put('datatables_ultimos_precios', $registros);
+            //Session::put('fechas_compras_proveedor', 'del '. Input::get('fstart') .' al '. Input::get('fend'));
+            return compact('registros');
+        } catch (\Exception $e) {
+            header('HTTP/1.1 500 Internal Server Error');
+            header('Content-Type: application/json; charset=UTF-8');
+            die(json_encode(array(
+                "mensaje" => $e->getMessage(),
+                "codigo" => $e->getCode(),
+                "clase" => $e->getFile(),
+                "linea" => $e->getLine()
+            )));
+        }
+    }
+     public function cpp_combobox_articulos_ultimos_precios(Request $request){
+        $f1 = explode("/", Input::get('fstart'));
+        $fstart = $f1[2].$f1[1].$f1[0];
+
+        $oitms = DB::select("SELECT 
+        PDN1.ItemCode codigo, PDN1.ItemCode +' - '+ OITM.ItemName AS descripcion,
+         OITM.ItemName AS descr, 
+         OITM.InvntryUom AS udm
+        From PDN1 
+        inner join OPDN on OPDN.DocEntry = PDN1.DocEntry left join OITM on PDN1.ItemCode = OITM.ItemCode
+        left join ITM1 on PDN1.ItemCode = ITM1.ItemCode and ITM1.PriceList= 9 
+        left join UFD1 T1 on OITM.U_GrupoPlanea=T1.FldValue and T1.TableID='OITM' and T1.FieldID=9 
+        Where OITM.ItemCode is not null AND Cast(OPDN.DocDueDate as date)>= Cast('" . $fstart . "'  as date)
+        GROUP BY PDN1.ItemCode, OITM.ItemName, InvntryUom
+        ORDER BY OITM.ItemName");
+        return compact('oitms');
     }
 }

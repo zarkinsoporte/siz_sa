@@ -693,7 +693,7 @@ Route::any('getOP_empaque', 'Reportes_ProduccionController@getOP_empaque')->name
 
 //REPORTE DE COMPRAS X PROVEEDOR
 Route::get('home/ULTIMOS PRECIOS', 'Mod03_ComprasController@index_ultimos_precios')->middleware('routelog');
-Route::any('datatables_compras_proveedor', 'Mod03_ComprasController@datatables_compras_proveedor')->name('datatables_compras_proveedor');
-Route::post('home/cpp_combobox_articulos', 'Mod03_ComprasController@cpp_combobox_articulos');
-Route::post('home/cpp_combobox_proveedores', 'Mod03_ComprasController@cpp_combobox_proveedores');
-Route::get('cppXLS', 'Mod03_ComprasController@cppXLS')->name('cppXLS');
+Route::any('datatables_ultimos_precios', 'Mod03_ComprasController@datatables_ultimos_precios')->name('datatables_ultimos_precios');
+Route::post('home/cpp_combobox_articulos_ultimos_precios', 'Mod03_ComprasController@cpp_combobox_articulos_ultimos_precios');
+Route::get('ultimos_precios_XLS', 'Mod03_ComprasController@ultimos_precios_XLS')->name('ultimos_precios_XLS');
+Route::get('home/reporte/ultimospreciosPDF', 'Mod03_ComprasController@ultimos_precios_PDF');

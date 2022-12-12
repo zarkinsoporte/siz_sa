@@ -497,6 +497,7 @@ function js_iniciador() {
             async: true,       
             url: '{!! route('datatables_compras_proveedor') !!}',
             data: {
+                "_token": "{{ csrf_token() }}",
                 articulos: articulos,
                 proveedores: proveedores,
                 fstart: $('#fstart').val(),

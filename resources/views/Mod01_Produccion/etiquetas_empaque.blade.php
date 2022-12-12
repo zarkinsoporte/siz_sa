@@ -442,6 +442,7 @@ function getop_empaque() {
             } else {
                 var bnd = 0;
                 //console.log();
+                //buscar si existe en la tabla el registro
                 tabla_impresion.rows().every( function ( rowIdx, tableLoop, rowLoop ) {
                     var data2 = this.data();
                     console.log(data2.OP);
@@ -455,7 +456,7 @@ function getop_empaque() {
                         }
                     } 
                 } );
-                if (bnd == 0) {
+                if (bnd == 0) { //si no existe entonces agregamos
                     var a = $("#tabla_impresion").dataTable().fnAddData((data.data));
                  
                     var nTr =$("#tabla_impresion").dataTable().fnSettings().aoData[ a[0] ].nTr;
