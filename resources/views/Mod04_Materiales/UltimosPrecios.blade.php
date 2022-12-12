@@ -164,7 +164,7 @@
                                             </div>
                                             <div class="row" style="margin-bottom: 40px">
                                                 <div class="form-group">
-                                                    <div class="col-md-1">
+                                                    <div class="col-md-2">
                                                         <label><strong>
                                                                 <font size="2">Código</font>
                                                             </strong></label>
