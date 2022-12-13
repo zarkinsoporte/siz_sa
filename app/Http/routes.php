@@ -690,6 +690,7 @@ Route::get('home/ETIQUETAS EMPAQUE', 'Reportes_ProduccionController@etiquetas_em
 Route::any('datatables.tabla_impresion_empaque', 'Reportes_ProduccionController@registros_tabla_impresion_empaque')->name('datatables.tabla_impresion_empaque');
 Route::any('impresionOP_empaque', 'Reportes_ProduccionController@impresion_op_empaque')->name('impresionOP_empaque');
 Route::any('getOP_empaque', 'Reportes_ProduccionController@getOP_empaque')->name('getOP_empaque');
+Route::any('getserie_empaque', 'Reportes_ProduccionController@getserie_empaque')->name('getserie_empaque');
 
 //REPORTE DE COMPRAS X PROVEEDOR
 Route::get('home/ULTIMOS PRECIOS', 'Mod03_ComprasController@index_ultimos_precios')->middleware('routelog');

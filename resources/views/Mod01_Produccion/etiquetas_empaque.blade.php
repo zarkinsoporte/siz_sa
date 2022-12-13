@@ -109,6 +109,15 @@
                                                             </span>
                                                           </div><!-- /input-group -->
                                                        </div>
+                                                       <div class="col-md-4 col-xs-12 col-sm-6">
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control" placeholder="Ingresa Serie..." id="input_serie">
+                                                            <span class="input-group-btn">
+                                                              <button class="btn btn-success" id="boton-mostrar-serie" type="button"><i
+                                                                class="fa fa-plus"></i> Agregar Por Serie</button>
+                                                            </span>
+                                                          </div><!-- /input-group -->
+                                                       </div>
                                                     </div>
                                                 </div>
                                                 <div class="row">
@@ -119,6 +128,7 @@
                                                                 <tr>
                                                                     
                                                                     <th>Pedido</th>
+                                                                    <th>Serie</th>
                                                                     <th>OP</th>
                                                                     <th>Codigo</th>
                                                                     <th>Descripción</th>
@@ -334,6 +344,7 @@ var tabla_impresion = $("#tabla_impresion").DataTable({
                     columns: [                   
                     
                     {data: "Pedido"},
+                    {data: "Serie"},
                     {data: "OP"},
                     {data: "Codigo"},
                     {data: "Descripcion"},
@@ -484,12 +495,107 @@ function getop_empaque() {
 
     });
 }
+function getserie_empaque() {
+    $.ajax({
+
+        type: 'GET',
+        async: true,
+        url: '{!! route('getserie_empaque') !!}',
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        data:{
+            "serie": $('#input_serie').val()
+        },
+        beforeSend: function() {
+            $.blockUI({
+                message: '<h1>Agregando Serie,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                css: {
+                    border: 'none',
+                    padding: '16px',
+                    width: '50%',
+                    top: '40%',
+                    left: '30%',
+                    backgroundColor: '#fefefe',
+                    '-webkit-border-radius': '10px',
+                    '-moz-border-radius': '10px',
+                    opacity: .7,
+                    color: '#000000'
+                }
+            });
+        },
+        complete: function() {
+            $("#input_serie").val('');
+                     
+        },
+        success: function(data){
+            setTimeout($.unblockUI, 500);  
+
+            if (data.respuesta != 'ok') {
+                swal("", "La Serie es inválida", "error",  {
+                        buttons: false,
+                        timer: 2000,
+                    });
+            } else {
+                console.log(data.rs)
+                
+                //buscar si existe en la tabla los registros
+                let find = 0;
+                (data.rs).forEach((element, index) => { 
+                    console.log('e_op: '+element.OP)
+                    find = 0;
+                    tabla_impresion.rows().every( function ( rowIdx, tableLoop, rowLoop ) {
+                        var data2 = this.data();
+                        console.log(data2.OP);
+                        if (data2.OP == element.OP) {//ya esta en la tabla
+                            find = 1;
+                            var node=this.node();
+                            if ( $(node).hasClass("selected")) {
+                            } else {
+                                $(node).toggleClass('selected');
+                            }
+                        } 
+                    });
+                    if (find == 0) { //no esta, agregamos
+                        var a = $("#tabla_impresion").dataTable().fnAddData((element));
+                        var nTr =$("#tabla_impresion").dataTable().fnSettings().aoData[ a[0] ].nTr;
+                        nTr.className = "selected";
+                    }
+                });
+                
+                swal("", "Ordenes de Serie Agregadas a la tabla!", "success", {
+                    buttons: false,
+                    timer: 2000,
+                });
+
+                var count = tabla_impresion.rows( '.selected' ).count();
+                    
+                var $badge = $('#btn_enviar').find('.badge'); 
+                $badge.text(count);
+            }
+        },
+        error: function (xhr, ajaxOptions, thrownError) {          
+            $.unblockUI();
+            swal("", "Error agregando OP", "error",  {
+                        buttons: false,
+                        timer: 2000,
+                    });    
+        }
+
+    });
+}
 $('#boton-mostrar').on('click', function(e) {
     getop_empaque();
+});
+$('#boton-mostrar-serie').on('click', function(e) {
+    getserie_empaque();
 });
 $(document).keyup(function(event) {
     if ($("#input_op").is(":focus") && event.key == "Enter") {
         getop_empaque();
+    }
+    if ($("#input_serie").is(":focus") && event.key == "Enter") {
+        getserie_empaque();
     }
     
 });

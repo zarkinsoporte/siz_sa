@@ -1582,6 +1582,7 @@ class Reportes_ProduccionController extends Controller
             $sel = "SELECT
 					
 				dbo.ORDR.DocNum AS Pedido,
+                U_NoSerie Serie,
 				dbo.OWOR.DocNum AS OP, 
                 dbo.OWOR.ItemCode AS Codigo, 
                 dbo.OITM.ItemName AS Descripcion,
@@ -1701,6 +1702,7 @@ class Reportes_ProduccionController extends Controller
     public function getOP_empaque(Request $request){
         $result = DB::select("SELECT					
         dbo.ORDR.DocNum AS Pedido,
+        U_NoSerie Serie,
         dbo.OWOR.DocNum AS OP, 
         dbo.OWOR.ItemCode AS Codigo, 
         dbo.OITM.ItemName AS Descripcion,
@@ -1721,5 +1723,30 @@ class Reportes_ProduccionController extends Controller
             $respuesta = 'Error, La OP no existe';
         }
         return compact('respuesta', 'data');
+    }
+    public function getserie_empaque(Request $request){
+        $result = DB::select("SELECT					
+        dbo.ORDR.DocNum AS Pedido,
+        U_NoSerie Serie,
+        dbo.OWOR.DocNum AS OP, 
+        dbo.OWOR.ItemCode AS Codigo, 
+        dbo.OITM.ItemName AS Descripcion,
+        dbo.ORDR.CardCode +' - '+ dbo.ORDR.CardName AS Cliente
+        FROM dbo.ORDR 
+        INNER JOIN dbo.OWOR ON dbo.ORDR.DocNum = dbo.OWOR.OriginNum 
+        INNER JOIN dbo.OITM ON dbo.OWOR.ItemCode = dbo.OITM.ItemCode
+        
+        WHERE (Status <> 'C') AND 
+        dbo.OITM.U_TipoMat in ( 'PT', 'RF')
+        AND U_NoSerie = ?
+        ", [$request->get('serie')]);
+        $rs=[];
+        if (count($result) > 0) {
+            $respuesta = 'ok';
+            $rs = $result;
+        } else {
+            $respuesta = 'Error, La Serie no existe';
+        }
+        return compact('respuesta', 'rs');
     }
 }
