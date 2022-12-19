@@ -74,6 +74,9 @@ class User extends Model implements AuthenticatableContract,
     }
 
     public function getTareas(){
+        return session('userActividades');
+    }
+    public function getTareas_ini(){
         $actividades = DB::table('OHEM')
             ->leftJoin('HEM6', 'OHEM.empID', '=', 'HEM6.empID')
             ->join('OHTY', 'OHTY.typeID', '=', 'HEM6.roleID')

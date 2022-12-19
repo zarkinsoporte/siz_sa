@@ -797,7 +797,8 @@ public function saveArt(Request $request){
             return 'Error: No se guardo la solicitud, favor de notificar a Sistemas';
         }else{
                 DB::commit();
-                $N_Emp = User::where('position', 4)
+               try {
+                 $N_Emp = User::where('position', 4)
                     ->select(DB::raw('case when email like \'%@%\' then email else email + cast(\'@zarkin.com\' as varchar)  end AS correo'))
                     ->where('dept', Auth::user()->dept)
                     ->where('status', 1)
@@ -823,6 +824,9 @@ public function saveArt(Request $request){
                     });                    
                 }               
                 return 'Mensaje: Tu Solicitud ha sido enviada (#'.$id.')';
+               } catch (\Throwable $th) {
+                 return 'Mensaje: Tu Solicitud ha sido enviada (#'.$id.'), pero no pudimos enviar el aviso por email';
+               }
         }
         DB::rollBack();  
         return 'reload';
@@ -1404,8 +1408,12 @@ public function Solicitud_A_Traslados($id){
         ->count();
       
         if ($cantLineas == $cantcheckLineas ) {
-            $apellido = Self::getApellidoPaternoUsuario(explode(' ',Auth::user()->lastName));
-            DB::update('UPDATE SIZ_SolicitudesMP SET Status = ?, PickingUsuario = ?  WHERE Id_Solicitud = ?', ['Traslado', explode(' ',Auth::user()->firstName)[0].' '.$apellido, $id]);
+            //$apellido = Self::getApellidoPaternoUsuario(explode(' ',Auth::user()->lastName));
+            $dt = new \DateTime();
+            $auth_user = session('userID');
+            DB::update('UPDATE SIZ_SolicitudesMP SET Status = ?, SMP_PickingFecha= ?,  PickingUsuario = ? 
+            WHERE Id_Solicitud = ?', 
+            ['Traslado', $dt, $auth_user,$id]);
             Session::flash('mensaje','Solicitud #'.$id.' Enviada a Traslados');
             return redirect()->action('Mod04_MaterialesController@pickingArticulos');
         } else {
@@ -1444,8 +1452,9 @@ public function Solicitud_A_Picking($id){
         ->join('OITM', 'OITM.ItemCode', '=' , 'SIZ_MaterialesSolicitudes.ItemCode')
         ->select('SIZ_MaterialesSolicitudes.*', 'OITM.ItemName', 'OITM.InvntryUom')        
         ->where('Id_Solicitud', $id)->get(); 
-        
-        if ((count($correos) > 0) && ($solicitante->Status === 'Autorizacion')) {                                        
+        $msge = '';
+        try {
+            if ((count($correos) > 0) && ($solicitante->Status === 'Autorizacion')) {                                        
             Mail::send('Emails.AutorizacionMP', [
                 'arts' => $arts, 'id' => $id, 'nombreCompleto' => $nombreCompleto
             ], function ($msj) use ($correos, $id) {
@@ -1453,9 +1462,15 @@ public function Solicitud_A_Picking($id){
                 $msj->to($correos); //Correo del destinatario
             });
         }
-        DB::update('UPDATE SIZ_SolicitudesMP SET Status = ? WHERE Id_Solicitud = ?', 
-            ['Pendiente', $id]);
-        Session::flash('mensaje','La Solicitud  #'.$id.' se ha enviado a Picking Almacén');
+        } catch (\Throwable $th) {
+            $msge = ', pero No pudimos notificar por email...';
+        }
+        
+        $dt = new \DateTime();
+        $auth_user = session('userID');
+        DB::update('UPDATE SIZ_SolicitudesMP SET Status = ?, SMP_AutorizacionFecha = ?, SMP_AutorizacionUsuario = ? WHERE Id_Solicitud = ?', 
+            ['Pendiente', $dt, $auth_user, $id]);
+        Session::flash('mensaje','La Solicitud  #'.$id.' se ha enviado a Picking Almacén'.$msge);
         return redirect()->action('Mod04_MaterialesController@AutorizacionSolicitudes');
     } else {
         return redirect()->route('auth/login');
@@ -1463,9 +1478,12 @@ public function Solicitud_A_Picking($id){
 }
 public function Solicitud_A_PickingTraslados($id){
  if (Auth::check()) {   
-    
+        $dt = new \DateTime();
+        $auth_user = session('userID');
+
         DB::update('UPDATE SIZ_SolicitudesMP SET Status = ? WHERE Id_Solicitud = ?', 
         ['Pendiente', $id]);
+        //['Pendiente', $dt, $auth_user, $id]);
         Session::flash('mensaje','La Solicitud  #'.$id.' se ha enviado a Picking Almacén');
         return redirect()->action('Mod04_MaterialesController@TrasladosArticulos');
        

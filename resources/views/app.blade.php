@@ -230,7 +230,7 @@ li.dt-button.active a::before{
 
                     
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="color: white"><i class="fa fa-user"></i>
-                                &nbsp;{{ Auth::user()->firstName.' '.Auth::user()->lastName }} &nbsp;
+                                &nbsp;{{ session('userID').' - '.session('userNombre') }} &nbsp;
                                 <b class="caret"></b></a>
 
 

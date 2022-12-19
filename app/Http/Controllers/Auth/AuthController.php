@@ -78,8 +78,14 @@ class AuthController extends Controller
             try {
                 if (Auth::attempt(['U_EmpGiro' => $request->get('id'), 'password'   => $request->get('password'), 'status' => 1])) {
                     //dd($request->all());
+                    $user = Auth::user();
+                    $apellido = Self::getApellidoPaternoUsuario(explode(' ',$user->lastName));
+                    $actividades = $user->getTareas_ini();
+                    $userNombre = explode(' ',$user->firstName)[0].' '.$apellido;
+                    $userID = $user->U_EmpGiro;
+                    session(['userActividades' => $actividades, 'userNombre'=> $userNombre, 'userID'=> $userID]);
+                    //->withCookie(cookie()->forever('user', $user->U_EmpGiro.'-'. ))->withCookie(cookie()->forever('actividades', $actividades))
                     if(User::isProductionUser()){
-                     
                        Session::flash('send', 'send');
                        Session::flash('miusuario', '');
                        Session::flash('pass', '0123');
@@ -112,5 +118,16 @@ class AuthController extends Controller
         }
 
     }
-   
+   public function getApellidoPaternoUsuario($apellido){
+        $preposiciones = ["DE", "LA", "LAS", "D", "LOS", "DEL"]; 
+        if (in_array($apellido[0], $preposiciones) && count($apellido)>1 ) {
+            if (in_array($apellido[1], $preposiciones) && count($apellido)>2 ) {
+               return $apellido[0].' '.$apellido[1].' '.$apellido[2];
+            } else {
+                return $apellido[0].' '.$apellido[1];
+            }            
+        } else {
+            return $apellido[0];
+        }
+    }
 }
