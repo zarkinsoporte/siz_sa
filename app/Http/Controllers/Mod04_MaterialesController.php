@@ -1320,9 +1320,26 @@ public function SolicitudPDF($id){
                     WHERE Id_Solicitud = ? AND mat.EstatusLinea = \'S\'', [$id]);       
   
        //haz el PDF para "Picking"
-        $pdf = \PDF::loadView('Mod04_Materiales.SolicitudPDF', compact('articulos', 'id', 'comment'));
-        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);             
-        return $pdf->stream('Siz_Picking_'.$id . ' - ' .date("d/m/Y") . '.Pdf');
+        $fechaImpresion = date("d-m-Y H:i:s"); 
+        $headerHtml = view()->make('Mod04_Materiales.ReporteIOWhs_pdfheader', 
+        [
+            'titulo' => 'Picking de Artículos',
+            'fechaImpresion' => 'Fecha de Impresión: ' . $fechaImpresion,
+            'fechas_entradas' => Session::get('param_entradasysalidas')
+        ])->render();
+        $pdf = \SPDF::loadView('Mod04_Materiales.SolicitudPDF', compact('articulos', 'id', 'comment'));
+        //$pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);  
+        //$pdf->setOption('header-html', $headerHtml);
+        $pdf->setOption('footer-center', 'Pagina [page] de [toPage]');
+        $pdf->setOption('footer-left', 'SIZ');
+        $pdf->setOption('orientation', 'Landscape');
+        $pdf->setOption('margin-top', '40mm');
+        $pdf->setOption('margin-left', '5mm');
+        $pdf->setOption('margin-right', '5mm');
+        $pdf->setOption('page-size', 'Letter');
+        
+        return $pdf->inline('Siz_Picking_' . ' ' . date("d/m/Y") . '.Pdf');           
+        //return $pdf->stream('Siz_Picking_'.$id . ' - ' .date("d/m/Y") . '.Pdf');
     } else {
         return redirect()->route('auth/login');
     }
@@ -1682,14 +1699,15 @@ public function HacerTraslados($id){
             ->where('Id_Solicitud', $id)
             ->whereIn('EstatusLinea', ['S', 'P', 'N'])
             ->count();            
+            $auth_user = session('userID');
             if ($filas > 0) {
                 DB::table('SIZ_SolicitudesMP')
                 ->where('Id_Solicitud', $id)
-                ->update(['Status' => 'Regresada']);
+                ->update(['SMP_FinalizadaUsuario' => $auth_user, 'Status' => 'Regresada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
             } elseif($filas == 0) {
                 DB::table('SIZ_SolicitudesMP')
                 ->where('Id_Solicitud', $id)
-                ->update(['Status' => 'Cerrada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
+                ->update(['SMP_FinalizadaUsuario' => $auth_user,'Status' => 'Cerrada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
             }
             return redirect()->action('Mod04_MaterialesController@ShowDetalleTraslado', [$id]);
            // return redirect()->route('home/TRASLADOS/solicitud', [$id]);
@@ -1987,9 +2005,10 @@ $rates = DB::table('ORTT')->where('RateDate', date('Y-m-d'))->get();
             if ($filas > 0) {
                
             } elseif($filas == 0) {
+                $auth_user = session('userID');
                 DB::table('SIZ_SolicitudesMP')
                 ->where('Id_Solicitud', $id)
-                ->update(['Status' => 'Cerrada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
+                ->update(['SMP_FinalizadaUsuario' => $auth_user, 'Status' => 'Cerrada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
             }
            
         }else {
@@ -2191,9 +2210,10 @@ $rates = DB::table('ORTT')->where('RateDate', date('Y-m-d'))->get();
             if ($filas > 0) {
                
             } elseif($filas == 0) {
+                $auth_user = session('userID');
                 DB::table('SIZ_SolicitudesMP')
                 ->where('Id_Solicitud', $id)
-                ->update(['Status' => 'Cerrada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
+                ->update(['SMP_FinalizadaUsuario' => $auth_user, 'Status' => 'Cerrada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
             }
            
         }else {
@@ -2633,9 +2653,11 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                     ->where('Id_Solicitud', $id)
                     ->update(['Status' => 'Pendiente']);
                 } elseif($filas == 0) {
+                    $auth_user = session('userID');
+               
                     DB::table('SIZ_SolicitudesMP')
                     ->where('Id_Solicitud', $id)
-                    ->update(['Status' => 'Cerrada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
+                    ->update(['SMP_FinalizadaUsuario' => $auth_user, 'Status' => 'Cerrada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
                 }
                 return redirect()->action('Mod04_MaterialesController@ShowDetalleTrasladoDeptos', [$id]);
             }else {
