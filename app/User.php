@@ -76,6 +76,22 @@ class User extends Model implements AuthenticatableContract,
     public function getTareas(){
         return session('userActividades');
     }
+    public function getName(){
+       $apellido = Self::getApellidoPaternoUsuario(explode(' ',$this->lastName));
+       return $this->U_EmpGiro .'-'. explode(' ',$this->firstName)[0].' '.$apellido;
+    }
+    public function getApellidoPaternoUsuario($apellido){
+        $preposiciones = ["DE", "LA", "LAS", "D", "LOS", "DEL"]; 
+        if (in_array($apellido[0], $preposiciones) && count($apellido)>1 ) {
+            if (in_array($apellido[1], $preposiciones) && count($apellido)>2 ) {
+               return $apellido[0].' '.$apellido[1].' '.$apellido[2];
+            } else {
+                return $apellido[0].' '.$apellido[1];
+            }            
+        } else {
+            return $apellido[0];
+        }
+    }
     public function getTareas_ini(){
         $actividades = DB::table('OHEM')
             ->leftJoin('HEM6', 'OHEM.empID', '=', 'HEM6.empID')
@@ -160,7 +176,7 @@ class User extends Model implements AuthenticatableContract,
         }
        }
        public static function getCountNotificacion(){
-        $id_user=Auth::user()->U_EmpGiro;
+        $id_user= session('userID');
         $noticias=DB::select(DB::raw("SELECT * FROM Siz_Noticias WHERE Destinatario='$id_user'and Leido='N'"));     
         return count($noticias);
        }

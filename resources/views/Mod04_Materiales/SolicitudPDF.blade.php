@@ -23,13 +23,13 @@
         th {
             color: white;
             font-weight: bold;
-            font-family: 'Helvetica';
+            font-family: 'Verdana';
             font-size: 12px;
             background-color: #333333;
         }
 
         td {
-            font-family: 'Helvetica';
+            font-family: 'Verdana';
             font-size: 11px;
         }
 
@@ -110,21 +110,7 @@
 </head>
 
 <body>
-    <div id="header">
-        <img src="{{ url('/images/Mod01_Produccion/siz1.png') }}">
-        <!--empieza encabezado, continua cuerpo-->
-        <table border="1px" class="table table-striped">
-            <thead class="thead-dark">
-                <tr>
-                    <td colspan="6" align="center" bgcolor="#fff">
-                        <div class="fz"><b>{{env('EMPRESA_NAME')}}</b><br>
-                            <b>Mod04 - Materiales</b></div>
-                        <h2>Picking de Artículos <small>Solicitud de Material #{{$id}}</small></h2>                       
-                    </td>
-                </tr>
-            </thead>
-        </table>
-    </div>
+   
     <!--Cuerpo o datos de la tabla-->
     <div id="content">
         @if(count($articulos)>0)

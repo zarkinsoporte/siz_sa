@@ -1320,16 +1320,18 @@ public function SolicitudPDF($id){
                     WHERE Id_Solicitud = ? AND mat.EstatusLinea = \'S\'', [$id]);       
   
        //haz el PDF para "Picking"
-        $fechaImpresion = date("d-m-Y H:i:s"); 
-        $headerHtml = view()->make('Mod04_Materiales.ReporteIOWhs_pdfheader', 
-        [
-            'titulo' => 'Picking de Artículos',
-            'fechaImpresion' => 'Fecha de Impresión: ' . $fechaImpresion,
-            'fechas_entradas' => Session::get('param_entradasysalidas')
-        ])->render();
-        $pdf = \SPDF::loadView('Mod04_Materiales.SolicitudPDF', compact('articulos', 'id', 'comment'));
+        $fechaImpresion = date("d-m-Y H:i:s");     
+         $headerHtml = view()->make(
+            'Mod03_Compras.ReporteUltimosPrecios_pdfheader',
+            [
+                'titulo' => 'Picking de Artículos',
+                'fechaImpresion' => 'Fecha de Impresión: ' . $fechaImpresion,
+                'item' => 'Solicitud de Material #'.$id
+            ]
+        )->render();
+        $pdf = \SPDF::loadView('Mod04_Materiales.SolicitudPDF', compact('articulos', 'comment'));
         //$pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);  
-        //$pdf->setOption('header-html', $headerHtml);
+        $pdf->setOption('header-html', $headerHtml);
         $pdf->setOption('footer-center', 'Pagina [page] de [toPage]');
         $pdf->setOption('footer-left', 'SIZ');
         $pdf->setOption('orientation', 'Landscape');
@@ -1348,25 +1350,57 @@ public function SolicitudPDF_Traslados($id){
     $solicitud = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $id)->first();
     $almacenOrigen = $solicitud->AlmacenOrigen;
     $transfer = 'Por Definir ';
-     $solicitante = DB::table('OHEM')
-                     ->where('U_EmpGiro', $solicitud->Usuario)->first();
-    $apellido = Self::getApellidoPaternoUsuario(explode(' ',$solicitante->lastName));
-    $UsuarioSolicitud = explode(' ',$solicitante->firstName)[0].' '.$apellido;
+
+    //USUARIOS
+    $Usuario_solicito = User::find($solicitud->Usuario)->getName();
+    $Usuario_autorizo = (is_null($solicitud->SMP_AutorizacionUsuario))? '' : User::find($solicitud->SMP_AutorizacionUsuario)->getName();
+    $Usuario_surtio = (is_null($solicitud->PickingUsuario))? '' : User::find($solicitud->PickingUsuario)->getName();
     
+    //FECHAS
+    $Fecha_solicito =(is_null($solicitud->FechaCreacion))? '' : \AppHelper::instance()->getHumanDate_format($solicitud->FechaCreacion, 'h:i A');
+    $Fecha_autorizo =(is_null($solicitud->SMP_AutorizacionFecha))? '' :\AppHelper::instance()->getHumanDate_format($solicitud->SMP_AutorizacionFecha, 'h:i A');
+    $Fecha_surtio =(is_null($solicitud->SMP_PickingFecha))? '' : \AppHelper::instance()->getHumanDate_format($solicitud->SMP_PickingFecha, 'h:i A');
+    $Fecha_recibio =(is_null($solicitud->FechaFinalizada))? '' : \AppHelper::instance()->getHumanDate_format($solicitud->FechaFinalizada, 'h:i A');
+    
+    //Duración (h:m:s)
+    $fecha_inicial = Carbon::parse($solicitud->FechaCreacion);
+    $fecha_final = (is_null($solicitud->SMP_AutorizacionFecha))? '' : Carbon::parse($solicitud->SMP_AutorizacionFecha);    
+    $duracion_autorizo = (($fecha_final) == '')? '' : $fecha_final->diff($fecha_inicial)->format('%H:%I:%S');
+
+    $fecha_inicial =(is_null($solicitud->SMP_AutorizacionFecha))? '' : Carbon::parse($solicitud->SMP_AutorizacionFecha);
+    $fecha_final = (is_null($solicitud->SMP_PickingFecha))? '' : Carbon::parse($solicitud->SMP_PickingFecha);    
+    $duracion_surtio =  (($fecha_inicial) == '' || ($fecha_final) == '')? '' : $fecha_final->diff($fecha_inicial)->format('%H:%I:%S');
+
+    $fecha_inicial = (is_null($solicitud->SMP_PickingFecha))? '' : Carbon::parse($solicitud->SMP_PickingFecha);
+    $fecha_final = (is_null($solicitud->FechaFinalizada))? '' : Carbon::parse($solicitud->FechaFinalizada);    
+    $duracion_recibio = (($fecha_inicial) == '' || ($fecha_final) == '')? '' : $fecha_final->diff($fecha_inicial)->format('%H:%I:%S');
+        
     if (is_null($almacenOrigen)) {
         $t = 'SIZ_MaterialesSolicitudes';
         $tipoDoc = 'Solicitud';
         $almacenOrigen = "Materia Prima";
-        $recibe = $UsuarioSolicitud;
+        $recibe = $Usuario_solicito;
         $entrega = $solicitud->SOLentrega_TRASrecibe_Usuario;
+        $seguimiento=[
+            ['seguimiento' => 'SOLICITO', 'usuario' => $Usuario_solicito, 'fecha' => $Fecha_solicito, 'duracion' => ''],
+            ['seguimiento' => 'AUTORIZO', 'usuario' => $Usuario_autorizo, 'fecha' => $Fecha_autorizo, 'duracion' => $duracion_autorizo],
+            ['seguimiento' => 'SURTIDO', 'usuario' => $Usuario_surtio, 'fecha' => $Fecha_surtio, 'duracion' => $duracion_surtio],
+            ['seguimiento' => 'RECIBIDO', 'usuario' => $recibe, 'fecha' => $Fecha_recibio, 'duracion' => $duracion_recibio]
+        ];
     } else {
         $t = 'SIZ_MaterialesTraslados';
         $tipoDoc = 'Traslado';
-        $entrega = $UsuarioSolicitud;
+        $entrega = $Usuario_solicito;
         $recibe = $solicitud->SOLentrega_TRASrecibe_Usuario;
+        $seguimiento=[
+            ['seguimiento' => 'SOLICITO', 'usuario' => $Usuario_solicito, 'fecha' => $Fecha_solicito, 'duracion' => ''],           
+            ['seguimiento' => 'RECIBIDO', 'usuario' => $recibe, 'fecha' => $Fecha_recibio, 'duracion' => $duracion_recibio]
+        ];
     }
-$transfer1 = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as unitMsr, 
-OITM.ItemName as Dscription, mat.Destino as WhsCode,
+    
+    
+    $transfer1 = DB::select('select mat.Id, mat.ItemCode, OITM.InvntryUom as unitMsr, 
+    OITM.ItemName as Dscription, mat.Destino as WhsCode,
       mat.Cant_Requerida, mat.Cant_Autorizada,
       mat.Cant_PendienteA, (mat.Cant_ASurtir_Origen_A + mat.Cant_ASurtir_Origen_B) AS Quantity
       from '.$t.' mat
@@ -1383,12 +1417,39 @@ OITM.ItemName as Dscription, mat.Destino as WhsCode,
         //$info1 = DB::select('select FolioNum, Filler, Printed, Comments  from OWTR where DocEntry = ? ', [$transfer]);
         $comentario = $solicitud->ComentarioUsuario;
         $fechaSol = $solicitud->FechaCreacion;
-        $pdf = \PDF::loadView('Mod04_Materiales.TrasladoPDF_SinPrecio', compact('id', 'transfer1', 'fechaSol',
-         'total1',  'transfer', 'comentario', 'almacenOrigen', 'recibe', 'tipoDoc', 'entrega'));
-        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);             
-        return $pdf->stream('Siz_Traslado_'.$id . ' - ' .date("d/m/Y") . '.Pdf');
-  
+        
+        //$pdf = \PDF::loadView('Mod04_Materiales.TrasladoPDF_SinPr ecio', compact('id', 'transfer1', 'fechaSol',
+        // 'total1',  'transfer', 'comentario', 'almacenOrigen', 'recibe', 'tipoDoc', 'entrega'));
+        //$pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);             
+       // return $pdf->stream('Siz_Traslado_'.$id . ' - ' .date("d/m/Y") . '.Pdf');
+       
+         $fechaImpresion = date("d-m-Y H:i:s");     
+         $headerHtml = view()->make(
+            'Mod03_Compras.ReporteUltimosPrecios_pdfheader',
+            [
+                'titulo' => 'Mod04 - Generación de Traslado',
+                'fechaImpresion' => 'Fecha de Impresión: ' . $fechaImpresion,
+                'item' => ''
+            ]
+        )->render();
 
+        $pdf = \SPDF::loadView('Mod04_Materiales.TrasladoPDF_SinPrecio', compact('seguimiento', 'id', 'transfer1', 'fechaSol',
+         'total1',  'transfer', 'comentario', 'almacenOrigen', 'recibe', 'tipoDoc', 'entrega'));
+        //$pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);  
+        $pdf->setOption('header-html', $headerHtml);
+        
+        //$pdf->setOption('header-left', 'Sociedad: ' . env('EMPRESA_NAME'));
+        //$pdf->setOption('header-right', 'Fecha de Impresión: ' . $fechaImpresion);
+        $pdf->setOption('footer-center', 'Pagina [page] de [toPage]');
+        $pdf->setOption('footer-left', 'SIZ');
+        $pdf->setOption('orientation', 'Landscape');
+        $pdf->setOption('margin-top', '40mm');
+        $pdf->setOption('margin-left', '5mm');
+        $pdf->setOption('margin-right', '5mm');
+        $pdf->setOption('page-size', 'Letter');
+        
+        return $pdf->inline('Siz_Traslado_'.$id . ' - ' .date("d/m/Y") . '.Pdf');
+/*
     if (Auth::check()) {   
         $comment = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $id)->value('ComentarioUsuario');
         DB::update('UPDATE SIZ_SolicitudesMP SET Status = ? WHERE Id_Solicitud = ?', ['En Proceso', $id]);
@@ -1404,12 +1465,36 @@ OITM.ItemName as Dscription, mat.Destino as WhsCode,
                     WHERE Id_Solicitud = ? AND mat.EstatusLinea = \'S\'', [$id]);       
   
        //haz el PDF para "Picking"
-        $pdf = \PDF::loadView('Mod04_Materiales.SolicitudPDF', compact('articulos', 'id', 'comment'));
-        $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);             
-        return $pdf->stream('Siz_Picking_'.$id . ' - ' .date("d/m/Y") . '.Pdf');
+       //* $pdf = \PDF::loadView('Mod04_Materiales.SolicitudPDF', compact('articulos', 'id', 'comment'));
+      //  $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);             
+      //  return $pdf->stream('Siz_Picking_'.$id . ' - ' .date("d/m/Y") . '.Pdf');
+
+         $fechaImpresion = date("d-m-Y H:i:s"); 
+       
+         $headerHtml = view()->make(
+            'Mod03_Compras.ReporteUltimosPrecios_pdfheader',
+            [
+                'titulo' => 'Picking de Artículos',
+                'fechaImpresion' => 'Fecha de Impresión: ' . $fechaImpresion,
+                'item' => 'Solicitud de Material #'.$id
+            ]
+        )->render();
+        $pdf = \SPDF::loadView('Mod04_Materiales.SolicitudPDF', compact('articulos', 'comment'));
+        //$pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);  
+        $pdf->setOption('header-html', $headerHtml);
+        $pdf->setOption('footer-center', 'Pagina [page] de [toPage]');
+        $pdf->setOption('footer-left', 'SIZ');
+        $pdf->setOption('orientation', 'Landscape');
+        $pdf->setOption('margin-top', '40mm');
+        $pdf->setOption('margin-left', '5mm');
+        $pdf->setOption('margin-right', '5mm');
+        $pdf->setOption('page-size', 'Letter');
+        
+        return $pdf->inline('Siz_Picking_' . ' ' . date("d/m/Y") . '.Pdf');
+
     } else {
         return redirect()->route('auth/login');
-    }
+    }*/
 }
 public function Solicitud_A_Traslados($id){
  if (Auth::check()) {
@@ -1537,16 +1622,17 @@ public function HacerTraslados($id){
         $rates = DB::table('ORTT')->where('RateDate', date('Y-m-d'))->get();
         if (count($rates) >= 3) {
             //GUARDAR USUARIO QUE HACE MOVIMIENTO
-            $apellido = Self::getApellidoPaternoUsuario(explode(' ',Auth::user()->lastName));
+            //$apellido = Self::getApellidoPaternoUsuario(explode(' ',Auth::user()->lastName));
              DB::table('SIZ_SolicitudesMP')
                     ->where('Id_Solicitud', $id)
-                    ->update(['SOLentrega_TRASrecibe_Usuario' => explode(' ',Auth::user()->firstName)[0].' '.$apellido]);
+                    ->update(['SOLentrega_TRASrecibe_Usuario' => session('userID').'-'.session('userNombre')]);
             //PERSONA QUE SOLICITA
             $solicitante = DB::table('SIZ_SolicitudesMP')       
                 ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
                 ->select('OHEM.firstName','OHEM.lastName', 'SIZ_SolicitudesMP.ComentarioUsuario',
                 'SIZ_SolicitudesMP.PickingUsuario', 'SIZ_SolicitudesMP.SOLentrega_TRASrecibe_Usuario')
                 ->where('SIZ_SolicitudesMP.Id_Solicitud', $id)->first();
+            $surtidor = User::find($solicitante->PickingUsuario);
             $apellido = Self::getApellidoPaternoUsuario(explode(' ',$solicitante->lastName));
             $nombreCompleto = explode(' ',$solicitante->firstName)[0].' '.$apellido;
             //articulos validos para transferencia
@@ -1579,7 +1665,7 @@ public function HacerTraslados($id){
             $info1 = 0;
             $info2 = 0;
             if (count($primer_origen) > 0) {
-                $observacionesComplemento = (!is_null($solicitante->PickingUsuario)) ? ", Surtió: ". $solicitante->PickingUsuario. ", Entrega: ". $solicitante->SOLentrega_TRASrecibe_Usuario : "";
+                $observacionesComplemento = (!is_null($surtidor)) ? ", Surtió: ". $surtidor->getName(). ", Entrega: ". $solicitante->SOLentrega_TRASrecibe_Usuario : "";
                 $data =  array(
                     'id_solicitud' => $id,
                     'pricelist' => '10',
@@ -1587,8 +1673,7 @@ public function HacerTraslados($id){
                     'almacen_destino' => $primer_origen[0]->Destino,
                     'items' => $primer_origen,
                     'observaciones' => utf8_decode("SIZ VALE #".$id .", Solicitó: ". $nombreCompleto . $observacionesComplemento . ". ".$solicitante->ComentarioUsuario )
-                                        
-
+                
                 );
                 if (Session::has('transfer1')) {   
                     if (Session::get('transfer1') > 0) {
@@ -1638,7 +1723,7 @@ public function HacerTraslados($id){
             });
             
                 if (count($segundo_origen) > 0) {
-                     $observacionesComplemento = (!is_null($solicitante->PickingUsuario)) ? ", Surtió: ". $solicitante->PickingUsuario. ", Entrega: ". $solicitante->SOLentrega_TRASrecibe_Usuario : "";
+                     $observacionesComplemento =  (!is_null($surtidor)) ? ", Surtió: ". $surtidor->getName(). ", Entrega: ". $solicitante->SOLentrega_TRASrecibe_Usuario : "";
                     $data =  array(
                         'id_solicitud' => $id,
                         'pricelist' => '10',
@@ -1752,31 +1837,90 @@ public function getPdfSolicitud(){
         left join SIZ_TransferSolicitudesMP as t on t.DocEntry_Transfer = OWTR.DocEntry
         where OWTR.DocEntry = ? ', [$transfer]);
         $solicitud = DB::table('SIZ_SolicitudesMP')->where('Id_Solicitud', $info1[0]->FolioNum)->first();
-        $solicitante = DB::table('OHEM')
-                     ->where('U_EmpGiro', $solicitud->Usuario)->first();
+         //USUARIOS
+        $Usuario_solicito = User::find($solicitud->Usuario)->getName();
+        $Usuario_autorizo = (is_null($solicitud->SMP_AutorizacionUsuario))? '' : User::find($solicitud->SMP_AutorizacionUsuario)->getName();
+        $Usuario_surtio = (is_null($solicitud->PickingUsuario))? '' : User::find($solicitud->PickingUsuario)->getName();
+        
+        //FECHAS
+        $Fecha_solicito =(is_null($solicitud->FechaCreacion))? '' : \AppHelper::instance()->getHumanDate_format($solicitud->FechaCreacion, 'h:i A');
+        $Fecha_autorizo =(is_null($solicitud->SMP_AutorizacionFecha))? '' :\AppHelper::instance()->getHumanDate_format($solicitud->SMP_AutorizacionFecha, 'h:i A');
+        $Fecha_surtio =(is_null($solicitud->SMP_PickingFecha))? '' : \AppHelper::instance()->getHumanDate_format($solicitud->SMP_PickingFecha, 'h:i A');
+        $Fecha_recibio =(is_null($solicitud->FechaFinalizada))? '' : \AppHelper::instance()->getHumanDate_format($solicitud->FechaFinalizada, 'h:i A');
+    
+        //Duración (h:m:s)
+        $fecha_inicial = Carbon::parse($solicitud->FechaCreacion);
+        $fecha_final = (is_null($solicitud->SMP_AutorizacionFecha))? '' : Carbon::parse($solicitud->SMP_AutorizacionFecha);    
+        $duracion_autorizo = (($fecha_final) == '')? '' : $fecha_final->diff($fecha_inicial)->format('%H:%I:%S');
 
-        $apellido = Self::getApellidoPaternoUsuario(explode(' ',$solicitante->lastName));      
+        $fecha_inicial =(is_null($solicitud->SMP_AutorizacionFecha))? '' : Carbon::parse($solicitud->SMP_AutorizacionFecha);
+        $fecha_final = (is_null($solicitud->SMP_PickingFecha))? '' : Carbon::parse($solicitud->SMP_PickingFecha);    
+        $duracion_surtio =  (($fecha_inicial) == '' || ($fecha_final) == '')? '' : $fecha_final->diff($fecha_inicial)->format('%H:%I:%S');
+
+        $fecha_inicial = (is_null($solicitud->SMP_PickingFecha))? '' : Carbon::parse($solicitud->SMP_PickingFecha);
+        $fecha_final = (is_null($solicitud->FechaFinalizada))? '' : Carbon::parse($solicitud->FechaFinalizada);    
+        $duracion_recibio =  (($fecha_inicial) == '' || ($fecha_final) == '')? '' : $fecha_final->diff($fecha_inicial)->format('%H:%I:%S');
         
-        
-        $UsuarioSolicitud = explode(' ',$solicitante->firstName)[0].' '.$apellido;
+        //$apellido = Self::getApellidoPaternoUsuario(explode(' ',$solicitante->lastName));      
+                       
     if (is_null($solicitud->AlmacenOrigen)) {
         $tipoDoc = 'Solicitud';
        // $almacenOrigen = "Materia Prima";
-        $recibe = $UsuarioSolicitud;
+        $recibe = $Usuario_solicito;
         $entrega = $solicitud->SOLentrega_TRASrecibe_Usuario;
+        $seguimiento=[
+          ['seguimiento' => 'SOLICITO', 'usuario' => $Usuario_solicito, 'fecha' => $Fecha_solicito, 'duracion' => ''],
+            ['seguimiento' => 'AUTORIZO', 'usuario' => $Usuario_autorizo, 'fecha' => $Fecha_autorizo, 'duracion' => $duracion_autorizo],
+            ['seguimiento' => 'SURTIDO', 'usuario' => $Usuario_surtio, 'fecha' => $Fecha_surtio, 'duracion' => $duracion_surtio],
+            ['seguimiento' => 'RECIBIDO', 'usuario' => $recibe, 'fecha' => $Fecha_recibio, 'duracion' => $duracion_recibio]
+    
+        ];
     } else {
         $tipoDoc = 'Traslado';
-        $entrega = $UsuarioSolicitud;
+        $entrega = $Usuario_solicito;
         $recibe = $solicitud->SOLentrega_TRASrecibe_Usuario;
+        $seguimiento=[
+          ['seguimiento' => 'SOLICITO', 'usuario' => $Usuario_solicito, 'fecha' => $Fecha_solicito, 'duracion' => ''],
+          ['seguimiento' => 'RECIBIDO', 'usuario' => $recibe, 'fecha' => $Fecha_recibio, 'duracion' => $duracion_recibio]    
+        ];
     }
     
+        //Mod04 - Generación de Traslado
         $comentario = $solicitud->ComentarioUsuario;
         $fechaSol = $solicitud->FechaCreacion;
-        $pdf = \PDF::loadView('Mod04_Materiales.TrasladoPDF_SinPrecio', 
+        /*
+        $pdf = \PDF::loadView('Mod04_Materiales.TrasladoPDF_SinPr ecio', 
         compact('info1', 'transfer1', 'fechaSol', 
          'total1',  'transfer', 'comentario','recibe', 'tipoDoc', 'entrega'));
         $pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);             
         return $pdf->stream('Siz_Traslado_'.$info1[0]->FolioNum . ' - ' .date("d/m/Y") . '.Pdf');
+        */
+         $fechaImpresion = date("d-m-Y H:i:s");     
+         $headerHtml = view()->make(
+            'Mod03_Compras.ReporteUltimosPrecios_pdfheader',
+            [
+                'titulo' => 'Mod04 - Generación de Traslado',
+                'fechaImpresion' => 'Fecha de Impresión: ' . $fechaImpresion,
+                'item' => ''
+            ]
+        )->render();
+        $pdf = \SPDF::loadView('Mod04_Materiales.TrasladoPDF_SinPrecio', compact('seguimiento', 'info1', 'transfer1', 'fechaSol', 
+         'total1',  'transfer', 'comentario','recibe', 'tipoDoc', 'entrega'));
+        //$pdf->setPaper('Letter','landscape')->setOptions(['isPhpEnabled'=>true, 'isRemoteEnabled' => true]);  
+        $pdf->setOption('header-html', $headerHtml);
+        
+        //$pdf->setOption('header-left', 'Sociedad: ' . env('EMPRESA_NAME'));
+        //$pdf->setOption('header-right', 'Fecha de Impresión: ' . $fechaImpresion);
+        $pdf->setOption('footer-center', 'Pagina [page] de [toPage]');
+        $pdf->setOption('footer-left', 'SIZ');
+        $pdf->setOption('orientation', 'Landscape');
+        $pdf->setOption('margin-top', '40mm');
+        $pdf->setOption('margin-left', '5mm');
+        $pdf->setOption('margin-right', '5mm');
+        $pdf->setOption('page-size', 'Letter');
+        
+        return $pdf->inline('Siz_Traslado_'.$info1[0]->FolioNum . ' - ' .date("d/m/Y") . '.Pdf');
+
   }
     public function trasladoEntrega()
     {
@@ -2574,10 +2718,10 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
             if (count($rates) >= 3) {
            // if (true) {
                //GUARDAR EL USUARIO QUE HACE EL MOVIMIENTO
-               $apellido = Self::getApellidoPaternoUsuario(explode(' ',Auth::user()->lastName));
+               //$apellido = Self::getApellidoPaternoUsuario(explode(' ',Auth::user()->lastName));
              DB::table('SIZ_SolicitudesMP')
                     ->where('Id_Solicitud', $id)
-                    ->update(['SOLentrega_TRASrecibe_Usuario' => explode(' ',Auth::user()->firstName)[0].' '.$apellido]);
+                    ->update(['SOLentrega_TRASrecibe_Usuario' => session('userID').'-'.session('userNombre')]);
                 //PERSONA QUE SOLICITA
                 $solicitud = DB::table('SIZ_SolicitudesMP')       
                     ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        

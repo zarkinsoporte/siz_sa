@@ -27,13 +27,13 @@
         th {
             color: white;
             font-weight: bold;
-            font-family: 'Helvetica';
+            font-family: 'Verdana';
             font-size: 12px;
             background-color: #333333;
         }
 
         td {
-            font-family: 'Helvetica';
+            font-family: 'Verdana';
             font-size: 11px;
         }
 
@@ -137,21 +137,7 @@
 </head>
 
 <body>
-    <div id="header">
-        <img src="{{ url('/images/Mod01_Produccion/siz1.png') }}">
-        <!--empieza encabezado, continua cuerpo-->
-        <table border="1px" class="table table-striped mytable">
-            <thead class="thead-dark">
-                <tr>
-                    <td colspan="6" align="center" bgcolor="#fff">
-                        <div class="fz"><b>{{env('EMPRESA_NAME')}}</b><br><br>
-                            <b>Mod04 - Generación de Traslado</b></div>
-
-                    </td>
-                </tr>
-            </thead>
-        </table>
-    </div>
+    
     <!--Cuerpo o datos de la tabla-->
     <div id="content">
 
@@ -281,6 +267,7 @@
                     </table>
                 </div>
                 @endif
+               
             </div>
             <br><br><br><br>
             <table class="firma">
@@ -300,24 +287,38 @@
                     </tr>
                 </tbody>
             </table>
+            <br><br>
+            <div>
+                @if (isset($seguimiento))
+                 <div class="col-md-6">
+                    <table class="mytable" style="width: 60%">
+                        <thead>
+                            <th style="width:10%;">Seguimiento:</th>
+                            <th style="width:20%;">Usuario</th>
+                            <th style="width:20%;">Fecha</th>
+                            <th style="width:10%;">Duración (h:m:s)</th>
+                        </thead>
+                        <tbody>
+                            @foreach ($seguimiento as $item)
+                            <tr>
+                                <td style="widt:90%;" class="text-left">{{$item['seguimiento']}}</td>
+                                <td style="widt:90%;" class="text-left">{{$item['usuario']}}</td>
+                                <td style="widt:90%;" class="text-left">{{$item['fecha']}}</td>
+                                <td style="widt:90%;" class="text-left">{{$item['duracion']}}</td>
+                            </tr>
+                            @endforeach
+                            
+                        </tbody>
+                    </table>
+                 </div>
+                @endif
+            </div>
         </div>
 
     </div>
 
 
-    <footer>
-        <script type="text/php">
-            $font = $fontMetrics->get_font("Arial, Helvetica, sans-serif","normal"); 
-            $empresa = 'Sociedad: <?php echo env('EMPRESA_NAME'); ?>'; 
-            $date = 'Fecha de impresion: <?php echo date("d-m-Y H:i:s"); ?>'; 
-            $text = 'Pagina: {PAGE_NUM} / {PAGE_COUNT}'; 
-            $tittle = 'Siz_Traslado.Pdf'; 
-            $pdf->page_text(40, 23,$empresa, $font, 9); 
-            $pdf->page_text(580, 23, $date, $font, 9); 
-            $pdf->page_text(35, 580, $text, $font, 9); 
-            $pdf->page_text(680, 580, $tittle, $font, 9);
-        </script>
-    </footer>
+   
     @yield('subcontent-01')
 
 </body>
