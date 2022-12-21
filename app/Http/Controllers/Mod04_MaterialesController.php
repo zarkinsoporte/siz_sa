@@ -1354,7 +1354,7 @@ public function SolicitudPDF_Traslados($id){
     //USUARIOS
     $Usuario_solicito = User::find($solicitud->Usuario)->getName();
     $Usuario_autorizo = (is_null($solicitud->SMP_AutorizacionUsuario))? '' : User::find($solicitud->SMP_AutorizacionUsuario)->getName();
-    $Usuario_surtio = (is_null($solicitud->PickingUsuario))? '' : User::find($solicitud->PickingUsuario)->getName();
+    $Usuario_surtio = (!is_numeric($solicitud->PickingUsuario))? $solicitud->PickingUsuario : User::find($solicitud->PickingUsuario)->getName();
     
     //FECHAS
     $Fecha_solicito =(is_null($solicitud->FechaCreacion))? '' : \AppHelper::instance()->getHumanDate_format($solicitud->FechaCreacion, 'h:i A');
@@ -1365,15 +1365,15 @@ public function SolicitudPDF_Traslados($id){
     //Duración (h:m:s)
     $fecha_inicial = Carbon::parse($solicitud->FechaCreacion);
     $fecha_final = (is_null($solicitud->SMP_AutorizacionFecha))? '' : Carbon::parse($solicitud->SMP_AutorizacionFecha);    
-    $duracion_autorizo = (($fecha_final) == '')? '' : $fecha_final->diff($fecha_inicial)->format('%H:%I:%S');
+    $duracion_autorizo = (($fecha_final) == '')? '-' : $fecha_final->diff($fecha_inicial)->format('%dd, %Hh:%Im');
 
     $fecha_inicial =(is_null($solicitud->SMP_AutorizacionFecha))? '' : Carbon::parse($solicitud->SMP_AutorizacionFecha);
     $fecha_final = (is_null($solicitud->SMP_PickingFecha))? '' : Carbon::parse($solicitud->SMP_PickingFecha);    
-    $duracion_surtio =  (($fecha_inicial) == '' || ($fecha_final) == '')? '' : $fecha_final->diff($fecha_inicial)->format('%H:%I:%S');
+    $duracion_surtio =  (($fecha_inicial) == '' || ($fecha_final) == '')? '-' : $fecha_final->diff($fecha_inicial)->format('%dd, %Hh:%Im');
 
     $fecha_inicial = (is_null($solicitud->SMP_PickingFecha))? '' : Carbon::parse($solicitud->SMP_PickingFecha);
     $fecha_final = (is_null($solicitud->FechaFinalizada))? '' : Carbon::parse($solicitud->FechaFinalizada);    
-    $duracion_recibio = (($fecha_inicial) == '' || ($fecha_final) == '')? '' : $fecha_final->diff($fecha_inicial)->format('%H:%I:%S');
+    $duracion_recibio = (($fecha_inicial) == '' || ($fecha_final) == '')? '-' : $fecha_final->diff($fecha_inicial)->format('%dd, %Hh:%Im');
         
     if (is_null($almacenOrigen)) {
         $t = 'SIZ_MaterialesSolicitudes';
@@ -1392,6 +1392,11 @@ public function SolicitudPDF_Traslados($id){
         $tipoDoc = 'Traslado';
         $entrega = $Usuario_solicito;
         $recibe = $solicitud->SOLentrega_TRASrecibe_Usuario;
+        
+        $fecha_inicial = Carbon::parse($solicitud->FechaCreacion);
+        $fecha_final = (is_null($solicitud->FechaFinalizada))? '' : Carbon::parse($solicitud->FechaFinalizada);    
+        $duracion_recibio = (($fecha_final) == '')? '-' : $fecha_final->diff($fecha_inicial)->format('%dd, %Hh:%Im');
+
         $seguimiento=[
             ['seguimiento' => 'SOLICITO', 'usuario' => $Usuario_solicito, 'fecha' => $Fecha_solicito, 'duracion' => ''],           
             ['seguimiento' => 'RECIBIDO', 'usuario' => $recibe, 'fecha' => $Fecha_recibio, 'duracion' => $duracion_recibio]
@@ -1580,8 +1585,8 @@ public function Solicitud_A_Picking($id){
 }
 public function Solicitud_A_PickingTraslados($id){
  if (Auth::check()) {   
-        $dt = new \DateTime();
-        $auth_user = session('userID');
+        //$dt = new \DateTime();
+        //$auth_user = session('userID');
 
         DB::update('UPDATE SIZ_SolicitudesMP SET Status = ? WHERE Id_Solicitud = ?', 
         ['Pendiente', $id]);
@@ -1784,15 +1789,15 @@ public function HacerTraslados($id){
             ->where('Id_Solicitud', $id)
             ->whereIn('EstatusLinea', ['S', 'P', 'N'])
             ->count();            
-            $auth_user = session('userID');
+            $auth_user = session('userID').'-'.session('userNombre');
             if ($filas > 0) {
                 DB::table('SIZ_SolicitudesMP')
                 ->where('Id_Solicitud', $id)
-                ->update(['SMP_FinalizadaUsuario' => $auth_user, 'Status' => 'Regresada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
+                ->update(['SOLentrega_TRASrecibe_Usuario' => $auth_user, 'Status' => 'Regresada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
             } elseif($filas == 0) {
                 DB::table('SIZ_SolicitudesMP')
                 ->where('Id_Solicitud', $id)
-                ->update(['SMP_FinalizadaUsuario' => $auth_user,'Status' => 'Cerrada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
+                ->update(['SOLentrega_TRASrecibe_Usuario' => $auth_user, 'Status' => 'Cerrada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
             }
             return redirect()->action('Mod04_MaterialesController@ShowDetalleTraslado', [$id]);
            // return redirect()->route('home/TRASLADOS/solicitud', [$id]);
@@ -1840,7 +1845,7 @@ public function getPdfSolicitud(){
          //USUARIOS
         $Usuario_solicito = User::find($solicitud->Usuario)->getName();
         $Usuario_autorizo = (is_null($solicitud->SMP_AutorizacionUsuario))? '' : User::find($solicitud->SMP_AutorizacionUsuario)->getName();
-        $Usuario_surtio = (is_null($solicitud->PickingUsuario))? '' : User::find($solicitud->PickingUsuario)->getName();
+        $Usuario_surtio = (!is_numeric($solicitud->PickingUsuario))? $solicitud->PickingUsuario : User::find($solicitud->PickingUsuario)->getName();
         
         //FECHAS
         $Fecha_solicito =(is_null($solicitud->FechaCreacion))? '' : \AppHelper::instance()->getHumanDate_format($solicitud->FechaCreacion, 'h:i A');
@@ -1851,15 +1856,15 @@ public function getPdfSolicitud(){
         //Duración (h:m:s)
         $fecha_inicial = Carbon::parse($solicitud->FechaCreacion);
         $fecha_final = (is_null($solicitud->SMP_AutorizacionFecha))? '' : Carbon::parse($solicitud->SMP_AutorizacionFecha);    
-        $duracion_autorizo = (($fecha_final) == '')? '' : $fecha_final->diff($fecha_inicial)->format('%H:%I:%S');
+        $duracion_autorizo = (($fecha_final) == '')? '-' : $fecha_final->diff($fecha_inicial)->format('%dd, %Hh:%Im');
 
         $fecha_inicial =(is_null($solicitud->SMP_AutorizacionFecha))? '' : Carbon::parse($solicitud->SMP_AutorizacionFecha);
         $fecha_final = (is_null($solicitud->SMP_PickingFecha))? '' : Carbon::parse($solicitud->SMP_PickingFecha);    
-        $duracion_surtio =  (($fecha_inicial) == '' || ($fecha_final) == '')? '' : $fecha_final->diff($fecha_inicial)->format('%H:%I:%S');
+        $duracion_surtio =  (($fecha_inicial) == '' || ($fecha_final) == '')? '-' : $fecha_final->diff($fecha_inicial)->format('%dd, %Hh:%Im');
 
         $fecha_inicial = (is_null($solicitud->SMP_PickingFecha))? '' : Carbon::parse($solicitud->SMP_PickingFecha);
         $fecha_final = (is_null($solicitud->FechaFinalizada))? '' : Carbon::parse($solicitud->FechaFinalizada);    
-        $duracion_recibio =  (($fecha_inicial) == '' || ($fecha_final) == '')? '' : $fecha_final->diff($fecha_inicial)->format('%H:%I:%S');
+        $duracion_recibio =  (($fecha_inicial) == '' || ($fecha_final) == '')? '-' : $fecha_final->diff($fecha_inicial)->format('%dd, %Hh:%Im');
         
         //$apellido = Self::getApellidoPaternoUsuario(explode(' ',$solicitante->lastName));      
                        
@@ -1879,6 +1884,11 @@ public function getPdfSolicitud(){
         $tipoDoc = 'Traslado';
         $entrega = $Usuario_solicito;
         $recibe = $solicitud->SOLentrega_TRASrecibe_Usuario;
+
+        $fecha_inicial = Carbon::parse($solicitud->FechaCreacion);
+        $fecha_final = (is_null($solicitud->FechaFinalizada))? '' : Carbon::parse($solicitud->FechaFinalizada);    
+        $duracion_recibio = (($fecha_final) == '')? '-' : $fecha_final->diff($fecha_inicial)->format('%dd, %Hh:%Im');
+
         $seguimiento=[
           ['seguimiento' => 'SOLICITO', 'usuario' => $Usuario_solicito, 'fecha' => $Fecha_solicito, 'duracion' => ''],
           ['seguimiento' => 'RECIBIDO', 'usuario' => $recibe, 'fecha' => $Fecha_recibio, 'duracion' => $duracion_recibio]    
@@ -2094,12 +2104,16 @@ public function getPdfSolicitud(){
             ");
             $correos = array_pluck($correos_db, 'correo');
             if (count($correos) > 0) {                    
-                Mail::send('Emails.TrasladosDeptos', [
+                try {
+                   Mail::send('Emails.TrasladosDeptos', [
                     'arts' => $traslado_externo, 'id' => $id, 'comentario' => $usercomment, 'origen' => $almacen_origen
-                ], function ($msj) use ($correos, $id) {
-                    $msj->subject('SIZ Traslado #' . $id); //ASUNTO DEL CORREO
-                    $msj->to($correos); //Correo del destinatario
-                });                        
+                    ], function ($msj) use ($correos, $id) {
+                        $msj->subject('SIZ Traslado #' . $id); //ASUNTO DEL CORREO
+                        $msj->to($correos); //Correo del destinatario
+                    }); 
+                } catch (\Throwable $th) {
+                    //throw $th;
+                }                       
             }
         }
 
@@ -2149,12 +2163,12 @@ $rates = DB::table('ORTT')->where('RateDate', date('Y-m-d'))->get();
             if ($filas > 0) {
                
             } elseif($filas == 0) {
-                $auth_user = session('userID');
+                $auth_user = session('userID').'-'.session('userNombre');
                 DB::table('SIZ_SolicitudesMP')
                 ->where('Id_Solicitud', $id)
-                ->update(['SMP_FinalizadaUsuario' => $auth_user, 'Status' => 'Cerrada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
+                ->update(['SOLentrega_TRASrecibe_Usuario' => $auth_user, 'Status' => 'Cerrada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
             }
-           
+           //SOLentrega_TRASrecibe_Usuario
         }else {
             $mensaje_traslado_interno = 'Error. No estan capturados todos los "Tipos de Cambio" en SAP.';                    
         }        
@@ -2354,10 +2368,10 @@ $rates = DB::table('ORTT')->where('RateDate', date('Y-m-d'))->get();
             if ($filas > 0) {
                
             } elseif($filas == 0) {
-                $auth_user = session('userID');
+                $auth_user = session('userID').'-'.session('userNombre');
                 DB::table('SIZ_SolicitudesMP')
                 ->where('Id_Solicitud', $id)
-                ->update(['SMP_FinalizadaUsuario' => $auth_user, 'Status' => 'Cerrada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
+                ->update(['SOLentrega_TRASrecibe_Usuario' => $auth_user, 'Status' => 'Cerrada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
             }
            
         }else {
@@ -2642,12 +2656,16 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                         ->where('Id_Solicitud', $id_sol)->get();
 
                     if ((count($correos) > 0) && ($solicitante->Status === 'Cancelada')) {
-                        Mail::send('Emails.TrasladoDeptosMaterialesCancelacion', [
+                       try {
+                         Mail::send('Emails.TrasladoDeptosMaterialesCancelacion', [
                             'arts' => $arts, 'id' => $id_sol, 'nombreCompleto' => $nombreCompleto
                         ], function ($msj) use ($correos, $id_sol) {
                             $msj->subject('SIZ Traslado Cancelación #' . $id_sol); //ASUNTO DEL CORREO
                             $msj->to($correos); //Correo del destinatario
                         });
+                       } catch (\Throwable $th) {
+                        //throw $th;
+                       }
                     }
                     Session::flash('mensaje', 'Solicitud #' . $id_sol . ' Cerrada');
                 }
@@ -2695,12 +2713,16 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                     $correos =array_pluck($correos_db, 'correo');
 
                     if (count($correos) > 0) {                        
-                        Mail::send('Emails.Err_TrasladoDeptos', [
+                        try {
+                            Mail::send('Emails.Err_TrasladoDeptos', [
                             'art' => $art
-                        ], function ($msj) use ($correos, $art) {
-                            $msj->subject('SIZ Traslado - Articulo  (' . $art->ItemCode . ')'); //ASUNTO DEL CORREO
-                            $msj->to($correos); //Correo del destinatario
-                        });                        
+                            ], function ($msj) use ($correos, $art) {
+                                $msj->subject('SIZ Traslado - Articulo  (' . $art->ItemCode . ')'); //ASUNTO DEL CORREO
+                                $msj->to($correos); //Correo del destinatario
+                            }); 
+                        } catch (\Throwable $th) {
+                            //throw $th;
+                        }                       
                     }
                 }
             } else {
@@ -2797,11 +2819,10 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                     ->where('Id_Solicitud', $id)
                     ->update(['Status' => 'Pendiente']);
                 } elseif($filas == 0) {
-                    $auth_user = session('userID');
-               
+                   $auth_user = session('userID').'-'.session('userNombre');
                     DB::table('SIZ_SolicitudesMP')
                     ->where('Id_Solicitud', $id)
-                    ->update(['SMP_FinalizadaUsuario' => $auth_user, 'Status' => 'Cerrada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
+                    ->update(['SOLentrega_TRASrecibe_Usuario' => $auth_user, 'Status' => 'Cerrada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
                 }
                 return redirect()->action('Mod04_MaterialesController@ShowDetalleTrasladoDeptos', [$id]);
             }else {

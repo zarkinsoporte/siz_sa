@@ -296,7 +296,7 @@
                             <th style="width:10%;">Seguimiento:</th>
                             <th style="width:20%;">Usuario</th>
                             <th style="width:20%;">Fecha</th>
-                            <th style="width:10%;">Duración (h:m:s)</th>
+                            <th style="width:10%;">Duración (d, h:m)</th>
                         </thead>
                         <tbody>
                             @foreach ($seguimiento as $item)
