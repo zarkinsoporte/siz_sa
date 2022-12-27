@@ -719,15 +719,27 @@ public function cancelProcessRollout(Request $request){
 
         DB::table('SIZ_PROCESOS_JOBS')->insert(
                 ['PROJO_Name' => 'stop']
-            );
-        //DB::delete("delete jobs where queue = 'ItemPrecioUpdate' OR queue = 'ItemPrecioControl' OR queue = 'stop'");
+        );
+         $jobs = DB::select("SELECT queue from jobs
+            where queue = 'ItemPrecioUpdate' OR queue = 'ItemPrecioControl'");
+        if (count($jobs) > 0) {
+        while (count($jobs) > 0) {
+            $jobs = DB::select("SELECT queue from jobs
+            where queue = 'ItemPrecioUpdate' OR queue = 'ItemPrecioControl'");
+            if (count($jobs) > 0) {
+                DB::delete("delete jobs where queue = 'ItemPrecioUpdate' OR queue = 'ItemPrecioControl'");
+                
+            }
+        }
+         DB::delete("delete SIZ_PROCESOS_JOBS 
+         where PROJO_Name = 'stop'");
         /*    
         \Artisan::call('queue:restart');           
         //\Artisan::call('queue:clear --queue=ItemPrecioUpdate');           
         DB::delete("delete jobs where queue = 'ItemPrecioUpdate' OR queue = 'ItemPrecioControl'");
         
         */
-        $mensaje = '';
+        $mensaje = 'ok';
         return compact('mensaje');
     } catch (\Exception $e) {
         //Cache::forget('roll');

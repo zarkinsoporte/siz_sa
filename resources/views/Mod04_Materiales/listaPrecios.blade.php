@@ -401,7 +401,7 @@
         e.preventDefault();
         swal({
         title: "¿Estas Seguro?",
-        text: "Se Cancelan los trabajos pendientes de RollOut!",
+        text: "Se Cancelan los trabajos pendientes de RollOut",
         buttons: true,
         dangerMode: true,
         })
@@ -460,7 +460,7 @@
        if(!proceso_rollout_activo){
             swal({
                 title: "¿Deseas Continuar?",
-                text: "Ejecución RollOut!",
+                text: "Ejecución RollOut",
                 buttons: true,
                 //dangerMode: true,
                 })
