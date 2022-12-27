@@ -709,8 +709,20 @@ public function processRollout(Request $request){
 public function cancelProcessRollout(Request $request){
     try {
         ini_set('memory_limit', '-1');
-        set_time_limit(0);            
+        set_time_limit(0); 
+
+
+        DB::table('jobs')
+            ->where('queue', 'ItemPrecioControl')
+            ->where('queue', 'ItemPrecioUpdate')
+            ->update(['queue' => 'stop']); 
+        //DB::delete("delete jobs where queue = 'ItemPrecioUpdate' OR queue = 'ItemPrecioControl' OR queue = 'stop'");
+        /*    
+        \Artisan::call('queue:restart');           
+        //\Artisan::call('queue:clear --queue=ItemPrecioUpdate');           
         DB::delete("delete jobs where queue = 'ItemPrecioUpdate' OR queue = 'ItemPrecioControl'");
+        
+        */
         $mensaje = '';
         return compact('mensaje');
     } catch (\Exception $e) {

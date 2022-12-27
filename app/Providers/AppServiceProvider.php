@@ -69,15 +69,26 @@ class AppServiceProvider extends ServiceProvider
                 }
             }
            if ($job->getQueue() == 'ItemPrecioUpdate') {
-                //cuando sea el ultimo job de esta cola procedemos a enviar el correo al usuario del job
                 $jobs = DB::select("SELECT queue from jobs
-                where queue = 'ItemPrecioUpdate'");
-                if (count($jobs) == 0) {
-                    $datos =  unserialize($data['data']['command']);
-                    dispatch((new ItemPrecioControl($datos->priceList, $datos->user_nomina))->onQueue('ItemPrecioControl')->delay(5));
-                    //Log::warning("dispatch ItemPrecioControl.");
-                       
-                }//end count jobs
+                    where queue = 'stop'");
+                if (count($jobs) > 0) {
+                    /*DB::delete("delete jobs where queue = 'ItemPrecioUpdate' OR queue = 'ItemPrecioControl'");
+                    $jobs = DB::select("SELECT queue from jobs
+                    where queue = 'ItemPrecioUpdate' OR queue = 'ItemPrecioControl'");
+                    if (count($jobs) == 0) {
+                        DB::delete("delete jobs where queue = 'stop'");
+                    }*/
+                } else {
+                    //cuando sea el ultimo job de esta cola procedemos a enviar el correo al usuario del job
+                    $jobs = DB::select("SELECT queue from jobs
+                    where queue = 'ItemPrecioUpdate'");
+                    if (count($jobs) == 0) {
+                        $datos =  unserialize($data['data']['command']);
+                        dispatch((new ItemPrecioControl($datos->priceList, $datos->user_nomina))->onQueue('ItemPrecioControl')->delay(5));
+                        //Log::warning("dispatch ItemPrecioControl.");
+                        
+                    }//end count jobs
+                }
             }
         });
     }

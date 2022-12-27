@@ -40,68 +40,73 @@ class ItemPrecioControl extends Job implements SelfHandling, ShouldQueue
      */
     public function handle()
     {
-       
-        $articulos = DB::select('exec SIZ_SP_ROLLOUT_SIMULADOR_COSTOS ?',
-        [(int)$this->priceList]);
-        //Log::warning("countArts .".count($articulos));
-        if (count($articulos) > 0) {
-            foreach ($articulos as $key => $articulo) {
-                $codigo = $articulo->ItemCode;
-                $precio = $articulo->PRICE_SAVE;
-                $moneda = $articulo->MONEDA;
-                //$rs = SAP::updateItemPriceList($codigo, $priceList , $precio, $moneda); 
-                //clock($codigo, $rs);
-                /* if($rs !== 'ok'){
-                    $mensajeErr = 'Error : Art#'.$codigo.', SAP:'.$rs;
-                    $mensaje = $mensaje.$mensajeErr;
-                } */
-                //break;
-                dispatch((new ItemPrecioUpdate($codigo, $this->priceList, $precio, $moneda, $this->user_nomina))->onQueue('ItemPrecioUpdate'));
-                //Log::warning("dispatch ItemPrecioUpdate.".$codigo);
+        $jobs = DB::select("SELECT queue from jobs
+            where queue = 'stop'");
+        if (count($jobs) > 0) {
+           //DB::delete("delete jobs where queue = 'ItemPrecioUpdate' OR queue = 'ItemPrecioControl'");
+        } else {
+            $articulos = DB::select('exec SIZ_SP_ROLLOUT_SIMULADOR_COSTOS ?',
+            [(int)$this->priceList]);
+            //Log::warning("countArts .".count($articulos));
+            if (count($articulos) > 0) {
+                foreach ($articulos as $key => $articulo) {
+                    $codigo = $articulo->ItemCode;
+                    $precio = $articulo->PRICE_SAVE;
+                    $moneda = $articulo->MONEDA;
+                    //$rs = SAP::updateItemPriceList($codigo, $priceList , $precio, $moneda); 
+                    //clock($codigo, $rs);
+                    /* if($rs !== 'ok'){
+                        $mensajeErr = 'Error : Art#'.$codigo.', SAP:'.$rs;
+                        $mensaje = $mensaje.$mensajeErr;
+                    } */
+                    //break;
+                    dispatch((new ItemPrecioUpdate($codigo, $this->priceList, $precio, $moneda, $this->user_nomina))->onQueue('ItemPrecioUpdate'));
+                    //Log::warning("dispatch ItemPrecioUpdate.".$codigo);
+                }
+            }else {
+                //$user_nomina = $datos->user_nomina; 
+                
+                //$fecha_inicial = Carbon::parse(Cache::get('hora_init_rollout'));
+                $fecha_db = DB::table('SIZ_PROCESOS_JOBS')->
+                where('PROJO_Name', 'Rollout')->
+                whereNull('PROJO_FechaFinal')->first();
+                //("SELECT PROJO_FechaInicio FROM SIZ_PROCESOS_JOBS WHERE PROJO_Name = '' AND PROJO_FechaFinal IS NULL")
+                $fecha_inicial = Carbon::parse($fecha_db->PROJO_FechaInicio);
+                $fecha_final = Carbon::now();
+                DB::update("update SIZ_PROCESOS_JOBS set PROJO_FechaFinal = ? WHERE PROJO_Name = 'Rollout' AND PROJO_FechaFinal IS NULL", [$fecha_final]);
+                // Log::warning("fecha_final");
+                // Log::warning($fecha_final);
+                $tiempo_proceso = $fecha_final->diff($fecha_inicial)->format('%H:%I:%S');
+                // Log::warning("dispatch .".$tiempo_proceso);
+                $user = User::find($this->user_nomina);
+                $email = $user->email.'@zarkin.com';
+                if (strlen($email) > 11) {
+                
+                    Mail::send('Emails.Notificacion', [
+                        'paraUsuario' => $user->firstName.' '.$user->lastName,
+                        'mensaje' => 'El proceso ROLLOUT de actualización de precios de 
+                        LISTA #'.$this->priceList.' finalizó <br> 
+                        Duración (h:m:s): '. $tiempo_proceso. ', Inicio: '. $fecha_inicial
+                    ], function ($msj) use ($email) {
+                        $msj->subject('SIZ ROLLOUT ACTUALIZACION PRECIOS'); //ASUNTO DEL CORREO
+                        $msj->to([$email]); //Correo del destinatario
+                    });
+                }
+                DB::table('Siz_Noticias')->insert(
+                    [
+                        'Autor' => $this->user_nomina,
+                        'Destinatario' => $this->user_nomina,
+                        'Descripcion' => 'El proceso ROLLOUT de actualización de precios de 
+                        LISTA #' . $this->priceList . ' finalizó <br> 
+                        Duración (h:m:s): '. $tiempo_proceso. ', Inicio: '. $fecha_inicial,
+                        //  'Estacion_Act' => $Est_act,
+                        //  'Estacion_Destino' => $Est_ant,
+                        //  'Cant_Enviada'=>$cant_r,
+                        //  'Nota' => $nota,
+                        'Leido' => 'N',
+                    ]
+                );            
             }
-        }else {
-            //$user_nomina = $datos->user_nomina; 
-            
-            //$fecha_inicial = Carbon::parse(Cache::get('hora_init_rollout'));
-            $fecha_db = DB::table('SIZ_PROCESOS_JOBS')->
-            where('PROJO_Name', 'Rollout')->
-            whereNull('PROJO_FechaFinal')->first();
-            //("SELECT PROJO_FechaInicio FROM SIZ_PROCESOS_JOBS WHERE PROJO_Name = '' AND PROJO_FechaFinal IS NULL")
-            $fecha_inicial = Carbon::parse($fecha_db->PROJO_FechaInicio);
-            $fecha_final = Carbon::now();
-            DB::update("update SIZ_PROCESOS_JOBS set PROJO_FechaFinal = ? WHERE PROJO_Name = 'Rollout' AND PROJO_FechaFinal IS NULL", [$fecha_final]);
-            // Log::warning("fecha_final");
-            // Log::warning($fecha_final);
-            $tiempo_proceso = $fecha_final->diff($fecha_inicial)->format('%H:%I:%S');
-            // Log::warning("dispatch .".$tiempo_proceso);
-            $user = User::find($this->user_nomina);
-            $email = $user->email.'@zarkin.com';
-            if (strlen($email) > 11) {
-            
-                Mail::send('Emails.Notificacion', [
-                    'paraUsuario' => $user->firstName.' '.$user->lastName,
-                    'mensaje' => 'El proceso ROLLOUT de actualización de precios de 
-                    LISTA #'.$this->priceList.' finalizó <br> 
-                    Duración (h:m:s): '. $tiempo_proceso. ', Inicio: '. $fecha_inicial
-                ], function ($msj) use ($email) {
-                    $msj->subject('SIZ ROLLOUT ACTUALIZACION PRECIOS'); //ASUNTO DEL CORREO
-                    $msj->to([$email]); //Correo del destinatario
-                });
-            }
-            DB::table('Siz_Noticias')->insert(
-                [
-                    'Autor' => $this->user_nomina,
-                    'Destinatario' => $this->user_nomina,
-                    'Descripcion' => 'El proceso ROLLOUT de actualización de precios de 
-                    LISTA #' . $this->priceList . ' finalizó <br> 
-                    Duración (h:m:s): '. $tiempo_proceso. ', Inicio: '. $fecha_inicial,
-                    //  'Estacion_Act' => $Est_act,
-                    //  'Estacion_Destino' => $Est_ant,
-                    //  'Cant_Enviada'=>$cant_r,
-                    //  'Nota' => $nota,
-                    'Leido' => 'N',
-                ]
-            );            
         }   
     }
 }

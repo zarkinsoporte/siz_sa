@@ -373,7 +373,7 @@
         } );    
     } );
 
-    //reload_tabla_arts(true);
+    reload_tabla_arts(true);
     count_rollout();
     $('#tabla_arts tbody').on('click', 'tr', function (e) {
         if ($(e.target).hasClass("ignoreme")) {
