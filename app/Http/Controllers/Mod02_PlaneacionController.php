@@ -720,17 +720,18 @@ public function cancelProcessRollout(Request $request){
         DB::table('SIZ_PROCESOS_JOBS')->insert(
                 ['PROJO_Name' => 'stop']
         );
-         $jobs = DB::select("SELECT queue from jobs
+        $jobs = DB::select("SELECT queue from jobs
             where queue = 'ItemPrecioUpdate' OR queue = 'ItemPrecioControl'");
-        if (count($jobs) > 0) {
+        
         while (count($jobs) > 0) {
             $jobs = DB::select("SELECT queue from jobs
             where queue = 'ItemPrecioUpdate' OR queue = 'ItemPrecioControl'");
             if (count($jobs) > 0) {
                 DB::delete("delete jobs where queue = 'ItemPrecioUpdate' OR queue = 'ItemPrecioControl'");
-                
+                 sleep(3); // this should halt for 3 seconds for every loop
             }
         }
+        
          DB::delete("delete SIZ_PROCESOS_JOBS 
          where PROJO_Name = 'stop'");
         /*    
