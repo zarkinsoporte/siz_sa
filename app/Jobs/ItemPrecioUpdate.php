@@ -39,6 +39,12 @@ class ItemPrecioUpdate extends Job implements SelfHandling, ShouldQueue
      */
     public function handle()
     {
-        SAP::updateItemPriceList($this->codigo, $this->priceList -1, $this->precio, $this->moneda);
+        $jobs = DB::select("SELECT queue from jobs
+            where queue = 'stop'");
+        if (count($jobs) > 0) {
+           //DB::delete("delete jobs where queue = 'ItemPrecioUpdate' OR queue = 'ItemPrecioControl'");
+        } else {
+            SAP::updateItemPriceList($this->codigo, $this->priceList -1, $this->precio, $this->moneda);
+        }
     }
 }

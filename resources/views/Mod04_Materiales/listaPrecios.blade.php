@@ -493,6 +493,7 @@
                                 });
                             },
                             complete: function () {
+                                setTimeout($.unblockUI, 1500);
                                 swal("", "Proceso ROLLOUT iniciado, enviaremos una notificación al terminar...", "error",  {
                                     buttons: false,
                                     timer: 2000,
