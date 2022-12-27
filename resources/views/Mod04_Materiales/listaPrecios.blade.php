@@ -494,7 +494,7 @@
                             },
                             complete: function () {
                                 setTimeout($.unblockUI, 1500);
-                                swal("", "Proceso ROLLOUT iniciado, enviaremos una notificación al terminar...", "error",  {
+                                swal("", "Proceso ROLLOUT iniciado, enviaremos una notificación al terminar...", "success",  {
                                     buttons: false,
                                     timer: 2000,
                                 });
