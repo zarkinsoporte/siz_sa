@@ -43,6 +43,7 @@ class ItemPrecioControl extends Job implements SelfHandling, ShouldQueue
         $jobs = DB::select("SELECT queue from jobs
             where queue = 'stop'");
         if (count($jobs) > 0) {
+            return '';
            //DB::delete("delete jobs where queue = 'ItemPrecioUpdate' OR queue = 'ItemPrecioControl'");
         } else {
             $articulos = DB::select('exec SIZ_SP_ROLLOUT_SIMULADOR_COSTOS ?',
