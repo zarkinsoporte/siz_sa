@@ -727,15 +727,13 @@ public function cancelProcessRollout(Request $request){
             $jobs = DB::select("SELECT queue from jobs
             where queue = 'ItemPrecioUpdate' OR queue = 'ItemPrecioControl'");
             if (count($jobs) > 0) {
-                DB::delete("delete jobs where queue = 'ItemPrecioUpdate' OR queue = 'ItemPrecioControl'");
+                //DB::delete("delete jobs where queue = 'ItemPrecioUpdate' OR queue = 'ItemPrecioControl'");
                  sleep(3); // this should halt for 3 seconds for every loop
-            } else {
-                DB::delete("delete SIZ_PROCESOS_JOBS 
-                where PROJO_Name = 'stop'");
             }
         }
         
-         
+         DB::delete("delete SIZ_PROCESOS_JOBS 
+         where PROJO_Name = 'stop'");
         /*    
         \Artisan::call('queue:restart');           
         //\Artisan::call('queue:clear --queue=ItemPrecioUpdate');           
