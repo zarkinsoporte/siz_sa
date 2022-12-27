@@ -712,10 +712,20 @@ public function cancelProcessRollout(Request $request){
         set_time_limit(0); 
 
 
-        DB::table('jobs')
+        /* DB::table('jobs')
             ->where('queue', 'ItemPrecioControl')
             ->where('queue', 'ItemPrecioUpdate')
-            ->update(['queue' => 'stop']); 
+            ->update(['queue' => 'stop']);  */
+
+        DB::table('jobs')->insert(
+                ['queue' => 'stop', 
+                'payload' => 'jobs', 
+                'attempts' => '0', 
+                'reserved' => '0', 
+                'reserved_at' => 123, 
+                'available_at' =>  123, 
+                'created_at' =>  123]
+            );
         //DB::delete("delete jobs where queue = 'ItemPrecioUpdate' OR queue = 'ItemPrecioControl' OR queue = 'stop'");
         /*    
         \Artisan::call('queue:restart');           
