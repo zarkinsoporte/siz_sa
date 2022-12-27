@@ -706,6 +706,25 @@ public function processRollout(Request $request){
         )));
     }
 }
+public function cancelProcessRollout(Request $request){
+    try {
+        ini_set('memory_limit', '-1');
+        set_time_limit(0);            
+        DB::delete("delete jobs where queue = 'ItemPrecioUpdate' OR queue = 'ItemPrecioControl'");
+        $mensaje = '';
+        return compact('mensaje');
+    } catch (\Exception $e) {
+        //Cache::forget('roll');
+        header('HTTP/1.1 500 Internal Server Error');
+        header('Content-Type: application/json; charset=UTF-8');
+        die(json_encode(array(
+            "mensaje" => $e->getMessage(),
+            "codigo" => $e->getCode(),
+            "clase" => $e->getFile(),
+            "linea" => $e->getLine()
+        )));
+    }
+}
 public function registros_tabla_liberacion(Request $request){
              //dd($request->all());
         try {

@@ -75,6 +75,7 @@
                                         <button id="btn_rollout" style="margin-right: 5px;" type="button" class="btn btn-success btn-sm">
                                             <i class="fa fa-cogs" aria-hidden="true"></i> Roll Out <span class="badge"></span>
                                         </button>
+                                        <button id="btn_cancel_rollout" class="btn btn-danger btn-sm"><i class="fa fa-ban"></i> Roll Out</button>
                                     @endif
                                         
                                    
@@ -372,7 +373,7 @@
         } );    
     } );
 
-    reload_tabla_arts(true);
+    //reload_tabla_arts(true);
     count_rollout();
     $('#tabla_arts tbody').on('click', 'tr', function (e) {
         if ($(e.target).hasClass("ignoreme")) {
@@ -396,121 +397,171 @@
         click_programar_cambios();
             
     });
+    $('#btn_cancel_rollout').on('click', function (e) {
+        e.preventDefault();
+        swal({
+        title: "¿Estas Seguro?",
+        text: "Se Cancelan los trabajos pendientes de RollOut!",
+        buttons: true,
+        dangerMode: true,
+        })
+        .then((willDelete) => {
+        if (willDelete) {
+            $.ajax({
+                    type: 'GET',
+                    headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                    data: {
+                    },
+                    url: '{!! route('cancel-process-rollout') !!}',
+                    beforeSend: function () {
+                        $.blockUI({
+                            baseZ: 2000,
+                            message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                            css: {
+                                border: 'none',
+                                padding: '16px',
+                                width: '50%',
+                                top: '40%',
+                                left: '30%',
+                                backgroundColor: '#fefefe',
+                                '-webkit-border-radius': '10px',
+                                '-moz-border-radius': '10px',
+                                opacity: .7,
+                                color: '#000000'
+                            }
+                        });
+                        },
+                        complete: function () {
+                            setTimeout($.unblockUI, 1500);
+                        },
+                        success: function (data) {
+                            setTimeout(function () {
+                                        var respuesta = JSON.parse(JSON.stringify(data));
+                                        console.log(respuesta)
+                                        if(respuesta.codigo == 302){
+                                            window.location = '{{ url("auth/login") }}';
+
+                                        }
+                                    }, 2000);
+
+                            count_rollout();
+                        
+                        }
+                });
+            
+        } else {
+            //swal("");
+        }
+        });
+    });
     $('#btn_rollout').on('click', function (e) {
         e.preventDefault();
         count_rollout();
        if(!proceso_rollout_activo){
-            $('#confirma').modal('show');
-       }else{
-            bootbox.dialog({
-                title: "Mensaje",
-                message: "<div class='alert alert-danger m-b-0'>Ya existe un ROLLOUT en curso...</div>",
-                buttons: {
-                    success: {
-                        label: "Ok",
-                        className: "btn-success m-r-5 m-b-5"
-                    }
+            swal({
+                title: "¿Deseas Continuar?",
+                text: "Ejecución RollOut!",
+                buttons: true,
+                //dangerMode: true,
+                })
+                .then((opt) => {
+                if (opt) {
+                   $.ajax({
+                            type: 'GET',
+                            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                            data: {
+                                "_token": "{{ csrf_token() }}",
+                                priceList: $('#input-lista').val()
+                            },
+                            url: '{!! route('process-rollout') !!}',
+                            beforeSend: function () {
+                                $.blockUI({
+                                    baseZ: 2000,
+                                    message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                                    css: {
+                                        border: 'none',
+                                        padding: '16px',
+                                        width: '50%',
+                                        top: '40%',
+                                        left: '30%',
+                                        backgroundColor: '#fefefe',
+                                        '-webkit-border-radius': '10px',
+                                        '-moz-border-radius': '10px',
+                                        opacity: .7,
+                                        color: '#000000'
+                                    }
+                                });
+                            },
+                            complete: function () {
+                                swal("", "Proceso ROLLOUT iniciado, enviaremos una notificación al terminar...", "error",  {
+                                    buttons: false,
+                                    timer: 2000,
+                                });
+                            },
+                            success: function (data) {
+                                setTimeout(function () {
+                                            var respuesta = JSON.parse(JSON.stringify(data));
+                                            console.log(respuesta)
+                                            if(respuesta.codigo == 302){
+                                                window.location = '{{ url("auth/login") }}';
+
+                                            }
+                                        }, 2000);
+
+                                reload_tabla_arts(false);
+                                var $badge = $('#btn_enviar').find('.badge');
+                                $badge.text('');
+                                count_rollout();
+                                $('#updateprogramar').modal('hide');
+                                $('#precio_nuevo').val('');
+                                $('#moneda_nueva').val('').selectpicker('refresh');
+                                $('#precio_porcentaje').val('');
+                                $('#confirma').modal('hide');
+                                        //console.log(data)
+                                if (data.mensaje.includes('Error')) {
+                                    bootbox.dialog({
+                                        title: "Mensaje",
+                                        message: "<div class='alert alert-danger m-b-0'>" + data.mensaje + "</div>",
+                                        buttons: {
+                                            success: {
+                                                label: "Ok",
+                                                className: "btn-success m-r-5 m-b-5"
+                                            }
+                                        }
+                                    }).find('.modal-content').css({ 'font-size': '14px' });
+                                }else if (data.mensaje.includes('Aviso')) {
+                                    bootbox.dialog({
+                                        title: "Mensaje",
+                                        message: "<div class='alert alert-info m-b-0'>" + data.mensaje + "</div>",
+                                        buttons: {
+                                            success: {
+                                                label: "Ok",
+                                                className: "btn-success m-r-5 m-b-5"
+                                            }
+                                        }
+                                    }).find('.modal-content').css({ 'font-size': '14px' });
+                                } else{
+
+                                }
+                            
+                            }
+                    });
+                    
+                } else {
+                    //swal("");
                 }
-            }).find('.modal-content').css({ 'font-size': '14px' });
+            });
+       }else{
+            swal("", "Ya existe un ROLLOUT en curso...", "error",  {
+                        buttons: false,
+                        timer: 2000,
+            });
        }
             
     });
     $('#btn_roll').on('click', function (e) {
         e.preventDefault();
-        
-        $.ajax({
-                type: 'GET',
-                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-                data: {
-                    "_token": "{{ csrf_token() }}",
-                    priceList: $('#input-lista').val()
-                },
-                url: '{!! route('process-rollout') !!}',
-                beforeSend: function () {
-                    $.blockUI({
-                        baseZ: 2000,
-                        message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
-                        css: {
-                            border: 'none',
-                            padding: '16px',
-                            width: '50%',
-                            top: '40%',
-                            left: '30%',
-                            backgroundColor: '#fefefe',
-                            '-webkit-border-radius': '10px',
-                            '-moz-border-radius': '10px',
-                            opacity: .7,
-                            color: '#000000'
-                        }
-                    });
-                },
-                complete: function () {
-                    //rollout
-                    
-                    setTimeout($.unblockUI, 1500);
-                   setTimeout( function () { 
-                       bootbox.dialog({
-                            title: "Mensaje",
-                            message: "<div class='alert alert-success m-b-0'>Proceso ROLLOUT iniciado, enviaremos una notificación al terminar...</div>",
-                            buttons: {
-                                success: {
-                                    label: "Ok",
-                                    className: "btn-success m-r-5 m-b-5"
-                                }
-                            }
-                        }).find('.modal-content').css({ 'font-size': '14px' });
-                    } ,2000)
-                },
-                success: function (data) {
-                    setTimeout(function () {
-                                var respuesta = JSON.parse(JSON.stringify(data));
-                                console.log(respuesta)
-                                if(respuesta.codigo == 302){
-                                    window.location = '{{ url("auth/login") }}';
 
-                                }
-                            }, 2000);
-
-                    reload_tabla_arts(false);
-                    var $badge = $('#btn_enviar').find('.badge');
-                    $badge.text('');
-                    count_rollout();
-                    $('#updateprogramar').modal('hide');
-                    $('#precio_nuevo').val('');
-                    $('#moneda_nueva').val('').selectpicker('refresh');
-                    $('#precio_porcentaje').val('');
-                    $('#confirma').modal('hide');
-                            //console.log(data)
-                    if (data.mensaje.includes('Error')) {
-                        bootbox.dialog({
-                            title: "Mensaje",
-                            message: "<div class='alert alert-danger m-b-0'>" + data.mensaje + "</div>",
-                            buttons: {
-                                success: {
-                                    label: "Ok",
-                                    className: "btn-success m-r-5 m-b-5"
-                                }
-                            }
-                        }).find('.modal-content').css({ 'font-size': '14px' });
-                    }else if (data.mensaje.includes('Aviso')) {
-                        bootbox.dialog({
-                            title: "Mensaje",
-                            message: "<div class='alert alert-info m-b-0'>" + data.mensaje + "</div>",
-                            buttons: {
-                                success: {
-                                    label: "Ok",
-                                    className: "btn-success m-r-5 m-b-5"
-                                }
-                            }
-                        }).find('.modal-content').css({ 'font-size': '14px' });
-                    } else{
-
-                    }
-                   
-                }
-            });
-        
-            
     });
     $('#tabla_arts tbody').on('dblclick','tr',function(e){
         var fila = table.rows(this).data()

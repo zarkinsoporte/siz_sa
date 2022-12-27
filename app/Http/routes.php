@@ -611,6 +611,7 @@ Route::get('home/ACTUALIZAR PRECIOS', 'Mod09_FinanzasListaPreciosController@list
 Route::any('datatables.arts', 'Mod09_FinanzasListaPreciosController@registros_listaPrecios')->name('datatables.arts');
 Route::any('actualizarPrecios', 'Mod09_FinanzasListaPreciosController@actualizarPrecios')->name('actualizarPrecios');
 Route::any('process-rollout', 'Mod02_PlaneacionController@processRollout')->name('process-rollout');
+Route::any('cancel-process-rollout', 'Mod02_PlaneacionController@cancelProcessRollout')->name('cancel-process-rollout');
 Route::any('count-rollout', 'Mod02_PlaneacionController@countRollout')->name('count-rollout');
 
 //SIMULADOR COSTOS
