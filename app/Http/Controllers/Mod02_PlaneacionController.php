@@ -717,14 +717,8 @@ public function cancelProcessRollout(Request $request){
             ->where('queue', 'ItemPrecioUpdate')
             ->update(['queue' => 'stop']);  */
 
-        DB::table('jobs')->insert(
-                ['queue' => 'stop', 
-                'payload' => 'jobs', 
-                'attempts' => '0', 
-                'reserved' => '0', 
-                'reserved_at' => 123, 
-                'available_at' =>  123, 
-                'created_at' =>  123]
+        DB::table('SIZ_PROCESOS_JOBS')->insert(
+                ['PROJO_Name' => 'stop']
             );
         //DB::delete("delete jobs where queue = 'ItemPrecioUpdate' OR queue = 'ItemPrecioControl' OR queue = 'stop'");
         /*    
