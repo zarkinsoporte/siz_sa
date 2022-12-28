@@ -457,7 +457,7 @@
     });
     $('#btn_rollout').on('click', function (e) {
         e.preventDefault();
-        count_rollout();
+        //count_rollout();
        if(!proceso_rollout_activo){
             swal({
                 title: "¿Deseas Continuar?",
@@ -685,7 +685,7 @@
                                 color: '#000000'
                             }
                         });
-                        },
+                },
                 complete: function () {
                             setTimeout($.unblockUI, 1500);
                     
