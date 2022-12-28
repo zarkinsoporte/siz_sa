@@ -669,10 +669,25 @@
                 },
                 url: '{!! route('count-rollout') !!}',
                 beforeSend: function () {
-                   
-                },
+                        $.blockUI({
+                            baseZ: 2000,
+                            message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                            css: {
+                                border: 'none',
+                                padding: '16px',
+                                width: '50%',
+                                top: '40%',
+                                left: '30%',
+                                backgroundColor: '#fefefe',
+                                '-webkit-border-radius': '10px',
+                                '-moz-border-radius': '10px',
+                                opacity: .7,
+                                color: '#000000'
+                            }
+                        });
+                        },
                 complete: function () {
-                   
+                            setTimeout($.unblockUI, 1500);
                     
                 },
                 success: function (data) {
