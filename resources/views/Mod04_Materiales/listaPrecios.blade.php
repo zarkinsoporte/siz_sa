@@ -401,7 +401,7 @@
         e.preventDefault();
         swal({
         title: "¿Estas Seguro?",
-        text: "Se Cancelan los trabajos pendientes de RollOut",
+        text: "Se Cancelarán los trabajos pendientes de RollOut, esto llevará un tiempo.",
         buttons: true,
         dangerMode: true,
         })
@@ -416,7 +416,7 @@
                     beforeSend: function () {
                         $.blockUI({
                             baseZ: 2000,
-                            message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                            message: '<h1>Cancelando Roll Out</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
                             css: {
                                 border: 'none',
                                 padding: '16px',
@@ -433,6 +433,7 @@
                         },
                         complete: function () {
                             setTimeout($.unblockUI, 1500);
+                            swal("Roll Out Cancelado", "...");
                         },
                         success: function (data) {
                             setTimeout(function () {
@@ -494,10 +495,7 @@
                             },
                             complete: function () {
                                 setTimeout($.unblockUI, 1500);
-                                swal("", "Proceso ROLLOUT iniciado, enviaremos una notificación al terminar...", "success",  {
-                                    buttons: false,
-                                    timer: 2000,
-                                });
+                                swal("Proceso Roll Out iniciado", "enviaremos una notificación al terminar...");
                             },
                             success: function (data) {
                                 setTimeout(function () {
