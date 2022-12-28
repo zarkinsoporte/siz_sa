@@ -507,7 +507,7 @@
                                             }
                                         }, 2000);
 
-                                reload_tabla_arts(false);
+                                //reload_tabla_arts(false);
                                 var $badge = $('#btn_enviar').find('.badge');
                                 $badge.text('');
                                 count_rollout();
