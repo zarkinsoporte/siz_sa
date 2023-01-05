@@ -86,6 +86,7 @@ https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css
 {!! Html::script('assets/datepicker/js/js/bootstrap-datepicker.min.js') !!}
 {!! Html::script('assets/datepicker/js/locales/bootstrap-datepicker.es.min.js') !!}
 {!! Html::style('assets/datepicker/js/css/bootstrap-datepicker.min.css') !!}
+{!! Html::style('plugins/bootstrap-daterangepicker/daterangepicker-bs3.css') !!}
 
 <style>
 .zrk-gris{
@@ -278,10 +279,10 @@ li.dt-button.active a::before{
 
 <!-- Latest compiled and minified JavaScript -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/js/bootstrap-select.min.js"></script>
-<script src="{{ URL::asset('plugins/bootstrap-daterangepicker/moment.min.js')}}"></script>
+<script src="{{ URL::asset('plugins/bootstrap-daterangepicker/daterangepicker.js')}}"></script>
 <script>
     let routeapp = "{{url().'/'}}";
-   
+    let assetapp = "{{ URL::asset('/')}}";
         if("{{Auth::check() && !Auth::user()->isProductionUser()}}"){
 
         setInterval(ajaxCall, 300000); //300000

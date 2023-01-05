@@ -1556,8 +1556,8 @@ class Reportes_ProduccionController extends Controller
 
     public function etiquetas_empaque(){
         if (Auth::check()) {
-            $user = Auth::user();
-            $actividades = $user->getTareas();
+            //$user = Auth::user();
+            $actividades = session('userActividades');
             // $file_anterior = DB::table('SIZ_Log')
             // ->where('LOG_cod_error', 'PRINT_ETIQ_EMPAQUE')
             // ->orderBy('LOG_fecha', 'desc')->first();

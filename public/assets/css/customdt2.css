@@ -1,0 +1,66 @@
+
+                th, td { white-space: nowrap; }
+                .btn{
+                    border-radius: 4px;
+                }
+                th {
+                    background: #dadada;
+                    color: black;
+                    font-weight: bold;
+                    font-style: italic; 
+                    font-family: 'Helvetica';
+                    font-size: 12px;
+                    border: 0px;
+                }
+                
+                td {
+                font-family: 'Helvetica';
+                font-size: 11px;
+                border: 0px;
+                line-height: 1;
+                }
+                tr:nth-of-type(odd) {
+                background: white;
+                }
+                .row-id {
+                width: 15%;
+                }
+                .row-nombre {
+                width: 60%;
+                }
+                .row-movimiento {
+                width: 25%;
+                }
+                table{
+                    table-layout: auto;
+                }
+                .width-full{
+                    margin: 5px;
+                }
+                .dataTables_wrapper.no-footer .dataTables_scrollBody {
+                border-bottom: 1px solid #111;
+                max-height: 250px;
+                }
+                .dataTables_wrapper .dataTables_filter {
+                float: right;
+                text-align: right;
+                visibility: visible;
+                }
+                .ignoreme{
+                    background-color: hsla(0, 100%, 46%, 0.10) !important;       
+                }
+                /*Botones de datatable*/
+                .left-col {
+                    float: left;
+                    width: 25%;
+                }
+                
+                .center-col {
+                    float: left;
+                    width: 50%;
+                }
+                
+                .right-col {
+                    float: left;
+                    width: 25%;
+                }

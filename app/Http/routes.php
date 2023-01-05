@@ -699,3 +699,9 @@ Route::any('datatables_ultimos_precios', 'Mod03_ComprasController@datatables_ult
 Route::post('home/cpp_combobox_articulos_ultimos_precios', 'Mod03_ComprasController@cpp_combobox_articulos_ultimos_precios');
 Route::get('ultimos_precios_XLS', 'Mod03_ComprasController@ultimos_precios_XLS')->name('ultimos_precios_XLS');
 Route::get('home/reporte/ultimospreciosPDF', 'Mod03_ComprasController@ultimos_precios_PDF');
+
+//ORDENES DE COMPRA
+Route::get('home/ORDENES DE COMPRA', 'Mod03_ComprasController@index_ordenes_compra')->middleware('routelog');
+Route::any('get_oc', 'Mod03_ComprasController@get_oc')->name('get_oc');
+Route::any('get_oc_xfecha', 'Mod03_ComprasController@get_oc_xfecha')->name('get_oc_xfecha');
+Route::any('orden_compra_pdf/{NumOC}', 'Mod03_ComprasController@orden_compra_pdf')->name('orden_compra_pdf');

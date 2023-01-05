@@ -374,8 +374,8 @@ class Mod03_ComprasController extends Controller
 
     }
     public function index_ultimos_precios(){
-        $user = Auth::user();
-        $actividades = $user->getTareas();
+        //$user = Auth::user();
+        $actividades = session('userActividades');;
         $ultimo = count($actividades);
 
         $articulos = [];
@@ -456,5 +456,101 @@ class Mod03_ComprasController extends Controller
         GROUP BY PDN1.ItemCode, OITM.ItemName, InvntryUom
         ORDER BY OITM.ItemName");
         return compact('oitms');
+    }
+
+    public function index_ordenes_compra(){
+        //$user = Auth::user();
+        $actividades = session('userActividades');
+        $ultimo = count($actividades);
+
+        $proveedores = [];
+        //$fstart = \Carbon\Carbon::now()->toDateString();
+
+        return view('Mod03_Compras.OrdenesCompra', 
+        compact( 'actividades', 'ultimo', 
+        'proveedores'));    
+    }
+    public function get_oc_xfecha(Request $request){
+        $query = "SELECT 
+            OPOR.DocNum as NumOC
+            , CONVERT(varchar, OPOR.DocDate, 23) as FechaOC
+            , OPOR.CardCode + ' - ' +OPOR.CardName as Proveedor
+            , OSLP.SlpName as Elaboro 
+            , CASE WHEN docstatus = 'C' THEN 'CERRADA' ELSE 'ABIERTA' END Estatus
+            , DocTotal Total
+            , OPOR.DocCur Moneda
+            FROM OPOR 
+            INNER JOIN POR1 ON OPOR.DocEntry = POR1.DocEntry
+            LEFT JOIN OSLP on OSLP.SlpCode= POR1.SlpCode 
+            WHERE 
+            DocType = 'I' AND
+            OPOR.DocDate between '".$request->get('fi')." 00:00:00' and  '".$request->get('ff')." 23:59:59'
+            GROUP BY DocNum, OPOR.DocDate, CardCode, SlpName, CardName, docstatus, DocCur, DocTotal                
+        ";
+        //dd($query);
+        $result = DB::select($query);
+        $data=[];
+        if (count($result) > 0) {
+            $respuesta = 'ok';
+            $data = $result;
+        } else {
+            $respuesta = 'Error, La OC no existe';
+        }
+        return compact('respuesta', 'data');
+    }
+    public function get_oc(Request $request){
+        $result = DB::select("SELECT 
+            OPOR.DocNum as NumOC
+            , CONVERT(varchar, OPOR.DocDate, 23) as FechaOC
+            , OPOR.CardCode + ' - ' +OPOR.CardName as Proveedor
+            , OSLP.SlpName as Elaboro 
+            , CASE WHEN docstatus = 'C' THEN 'CERRADA' ELSE 'ABIERTA' END Estatus
+            , FORMAT(DocTotal, '##.##') Total
+            , OPOR.DocCur Moneda
+            FROM OPOR 
+            INNER JOIN POR1 ON OPOR.DocEntry = POR1.DocEntry
+            LEFT JOIN OSLP on OSLP.SlpCode= POR1.SlpCode 
+            WHERE 
+            DocType = 'I' AND
+            OPOR.DocNum = ?
+            GROUP BY DocNum, OPOR.DocDate, CardCode, SlpName, CardName, docstatus, DocCur, DocTotal
+        ", [$request->get('oc')]);
+        $data=[];
+        if (count($result) > 0) {
+            $respuesta = 'ok';
+            $data = $result[0];
+        } else {
+            $respuesta = 'Error, La OC no existe';
+        }
+        return compact('respuesta', 'data');
+    }
+    public function orden_compra_pdf($NumOC)
+    {
+        //$NumOC = $request->get('NumOC');
+       
+        $fechaImpresion = date("d-m-Y H:i:s");
+        $headerHtml = view()->make(
+            'Mod03_Compras.ReporteUltimosPrecios_pdfheader',
+            [
+                'titulo' => 'Orden De Compra',
+                'fechaImpresion' => 'Fecha de Impresión: ' . $fechaImpresion,
+                'item' => ''
+            ]
+        )->render();
+
+       // return view('Mod03_Compras.OrdenCompraPDF');//, compact('a', 'generator'));
+        $pdf = \SPDF::loadView('Mod03_Compras.OrdenCompraPDF', []);
+       
+        $pdf->setOption('header-html', $headerHtml);
+        $pdf->setOption('footer-center', 'Pagina [page] de [toPage]');
+        $pdf->setOption('footer-left', 'SIZ');
+        //$pdf->setOption('orientation', 'Landscape');
+        $pdf->setOption('margin-top', '33mm');
+        $pdf->setOption('margin-left', '5mm');
+        $pdf->setOption('margin-right', '5mm');
+        $pdf->setOption('page-size', 'Letter');
+
+        return $pdf->inline();
+
     }
 }
