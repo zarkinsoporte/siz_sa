@@ -433,7 +433,6 @@
                         },
                         complete: function () {
                             setTimeout($.unblockUI, 1500);
-                            swal("Roll Out Cancelado", "...");
                         },
                         success: function (data) {
                             setTimeout(function () {
@@ -444,8 +443,12 @@
 
                                         }
                                     }, 2000);
-
-                            count_rollout();
+                            if (data.mensaje == 0) {
+                                swal("Sin Roll Out Activo", "...", "error");
+                            } else {
+                                swal("Roll Out Cancelado", "...");
+                                count_rollout();
+                            }        
                         
                         }
                 });

@@ -717,11 +717,17 @@ public function cancelProcessRollout(Request $request){
             ->where('queue', 'ItemPrecioUpdate')
             ->update(['queue' => 'stop']);  */
 
-        DB::table('SIZ_PROCESOS_JOBS')->insert(
+            $jobs = DB::select("SELECT queue from jobs
+                where queue = 'ItemPrecioUpdate' OR queue = 'ItemPrecioControl'");
+        if (count($jobs) > 0) {
+           DB::table('SIZ_PROCESOS_JOBS')->insert(
                 ['PROJO_Name' => 'stop']
-        );
-        $jobs = DB::select("SELECT queue from jobs
-            where queue = 'ItemPrecioUpdate' OR queue = 'ItemPrecioControl'");
+            );
+        } else {
+            $mensaje = 0;
+            return compact('mensaje');
+        }
+            
         
         while (count($jobs) > 0) {
             $jobs = DB::select("SELECT queue from jobs
@@ -740,7 +746,7 @@ public function cancelProcessRollout(Request $request){
         DB::delete("delete jobs where queue = 'ItemPrecioUpdate' OR queue = 'ItemPrecioControl'");
         
         */
-        $mensaje = 'ok';
+        $mensaje = 1;
         return compact('mensaje');
     } catch (\Exception $e) {
         //Cache::forget('roll');
