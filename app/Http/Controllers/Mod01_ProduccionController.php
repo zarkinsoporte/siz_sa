@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Modelos\MOD01\LOGOF;
 use App\Modelos\MOD01\LOGOT;
 use App\OP;
+use App\OWOR;
 use App\SAP;
 use App\SAPi;
 use App\User;
@@ -459,7 +460,9 @@ class Mod01_ProduccionController extends Controller
             } else{
                 $Codes = [];
             }
-       
+            if (OWOR::find($op)->u_Ruta == '') {
+               return redirect()->back()->withErrors(array('message' => 'La orden no tiene ruta en SAP.'));
+            }
             Session::flash('usertraslados', 2); //evita que salga el modal
 
             if (count($Codes) > 0) {
@@ -665,6 +668,7 @@ class Mod01_ProduccionController extends Controller
                 }
                 $Cant_procesar = Input::get('cant');
                 $Code_actual = OP::find(Input::get('code'));
+                
                 Session::put('op', $Code_actual->U_DocEntry);
                 $U_CT_siguiente = OP::getEstacionSiguiente($Code_actual->Code, 2); //obtiene la estacion siguiente formato numero
 

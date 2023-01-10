@@ -643,7 +643,8 @@ public function processRollout(Request $request){
         ini_set('memory_limit', '-1');
         set_time_limit(0);            
         $sel = "";
-        $mensaje= '';            
+        $mensaje= 0;            
+        $arts= '';            
         //if (Cache::has('hora_init_rollout')) {
           //  Cache::forget('hora_init_rollout');
         //}
@@ -674,9 +675,16 @@ public function processRollout(Request $request){
                                 $mensajeErr = 'Error : Art#'.$codigo.', SAP:'.$rs;
                                 $mensaje = $mensaje.$mensajeErr;
                             } */
-                        //break;
-                        $user = Auth::user()->U_EmpGiro;
-                        $this->dispatch((new ItemPrecioUpdate($codigo, $priceList , $precio, $moneda, $user))->onQueue('ItemPrecioUpdate'));
+                            //break;
+                        
+                             if (preg_match('/[\'^£$%&*()}Ññ{@#~?><,|=_+¬]/', $codigo))
+                            {
+                                $arts = $arts.', '.$codigo;
+                                $mensaje = 1;
+                            } else {
+                                $user = session('userID');
+                                $this->dispatch((new ItemPrecioUpdate($codigo, $priceList , $precio, $moneda, $user))->onQueue('ItemPrecioUpdate'));                        
+                            }
                         
                         }
                         $index++;
@@ -692,7 +700,9 @@ public function processRollout(Request $request){
        //     $mensaje = 'Aviso: existe otro ROLLOUT en proceso.';
        // }
         //Cache::forget('roll');
-        
+        if ($mensaje == 1) {
+           $mensaje = 'Error, No se permiten caracteres especiales: '. $arts;
+        }
         return compact('mensaje');
     } catch (\Exception $e) {
         //Cache::forget('roll');

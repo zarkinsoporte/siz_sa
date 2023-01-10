@@ -14,7 +14,8 @@ class OP extends Model
     $rs = DB::select('select u_Ruta from OWOR where DocEntry ='. $docEntry);
     //dd($rs);
     // "100,106,109,112"  
-    //[100,106,109]  
+    //[100,106,109] 
+    $ruta = []; 
     foreach ($rs as $r) {
         $ruta = explode(",", str_replace(" ","",$r->u_Ruta));
         return $ruta;
@@ -131,6 +132,9 @@ class OP extends Model
    }
 
    public static function onFirstEstacion($Code){
+    if (OP::find($Code)->U_CT == 0) {
+        return false;
+    }
     $i = array_search(OP::find($Code)->U_CT, self::getRuta(OP::find($Code)->U_DocEntry));
 
     if ($i>=count(self::getRuta(OP::find($Code)->U_DocEntry))){

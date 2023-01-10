@@ -61,8 +61,11 @@ class ItemPrecioControl extends Job implements SelfHandling, ShouldQueue
                         $mensaje = $mensaje.$mensajeErr;
                     } */
                     //break;
-                    dispatch((new ItemPrecioUpdate($codigo, $this->priceList, $precio, $moneda, $this->user_nomina))->onQueue('ItemPrecioUpdate'));
-                    //Log::warning("dispatch ItemPrecioUpdate.".$codigo);
+                    if (!preg_match('/[\'^£$%&*()}Ññ{@#~?><,|=_+¬]/', $codigo))
+                    {
+                        dispatch((new ItemPrecioUpdate($codigo, $this->priceList, $precio, $moneda, $this->user_nomina))->onQueue('ItemPrecioUpdate'));
+                        //Log::warning("dispatch ItemPrecioUpdate.".$codigo);
+                    } 
                 }
             }else {
                 //$user_nomina = $datos->user_nomina; 
