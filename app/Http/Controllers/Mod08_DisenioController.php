@@ -109,7 +109,7 @@ class Mod08_DisenioController extends Controller
                 CODIDATO IS NULL
                 AND InvntItem = 'Y' 
                 AND U_TipoMat = 'PT' AND U_TipoMat IS NOT NULL
-                AND OITM.frozenFor = 'N'
+                --AND OITM.frozenFor = 'N'
                 AND ItemName not like '%NEGRO%'
                 AND U_IsModel = 'N'
                 AND ItemCode like '%-%'
