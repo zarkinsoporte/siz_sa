@@ -81,7 +81,7 @@ class Mod08_DisenioController extends Controller
             FROM OITM 
                 WHERE PrchseItem = 'Y' AND InvntItem = 'Y' 
                 AND U_TipoMat <> 'PT' AND U_TipoMat IS NOT NULL
-                AND OITM.frozenFor = 'N'
+                --AND OITM.frozenFor = 'N'
                 AND U_GrupoPlanea in (
                 '18', --hilos
                 '19', --cierres
@@ -110,7 +110,7 @@ class Mod08_DisenioController extends Controller
                 AND InvntItem = 'Y' 
                 AND U_TipoMat = 'PT' AND U_TipoMat IS NOT NULL
                 --AND OITM.frozenFor = 'N'
-                AND ItemName not like '%NEGRO%'
+                --AND ItemName not like '%NEGRO%'
                 AND U_IsModel = 'N'
                 AND ItemCode like '%-%'
                 GROUP BY SUBSTRING(ItemCode , charindex('-', ItemCode, 6) + 1, LEN(ItemCode) - charindex('-', ItemCode, 6) + 1)
@@ -225,17 +225,20 @@ class Mod08_DisenioController extends Controller
     public function mtto_ldm_combobox_articulos(Request $request)
     {
         //DB::connection()->enableQueryLog();
+        //and FrozenFor = 'N' ---quitado de la consulta 19/01/2023
         $q = "SELECT OITM.ItemCode, OITM.ItemCode +' - '+ OITM.ItemName AS descr
             from OITM  
-            WHERE ValidFor = 'Y' and FrozenFor = 'N' and OITM.U_TipoMat = ?
+            WHERE ValidFor = 'Y' 
+            and OITM.U_TipoMat = ?
             GROUP BY OITM.ItemCode, OITM.ItemName
             order by OITM.ItemName";
         $oitms = DB::select($q, [$request->get('tipomat')]);
         $oitms2 = [];
         if ($request->get('carga_combo_modal')) {
+            //and FrozenFor = 'N' ---quitado de la consulta 19/01/2023
             $q = "SELECT OITM.ItemCode, OITM.ItemCode +' - '+ OITM.ItemName AS descr
                 from OITM  
-                WHERE ValidFor = 'Y' and FrozenFor = 'N'
+                WHERE ValidFor = 'Y' 
                 GROUP BY OITM.ItemCode, OITM.ItemName
                 order by OITM.ItemName";
             $oitms2 = DB::select($q);
