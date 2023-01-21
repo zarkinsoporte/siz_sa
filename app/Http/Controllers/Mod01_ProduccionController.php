@@ -460,9 +460,9 @@ class Mod01_ProduccionController extends Controller
             } else{
                 $Codes = [];
             }
-            if (OWOR::find($op)->u_Ruta == '') {
-               return redirect()->back()->withErrors(array('message' => 'La orden no tiene ruta en SAP.'));
-            }
+            // if (OWOR::find($op)->u_Ruta == '') {
+            //    return redirect()->back()->withErrors(array('message' => 'La orden no tiene ruta en SAP.'));
+            // }
             Session::flash('usertraslados', 2); //evita que salga el modal
 
             if (count($Codes) > 0) {
