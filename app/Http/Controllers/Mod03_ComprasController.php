@@ -463,7 +463,7 @@ class Mod03_ComprasController extends Controller
         $actividades = session('userActividades');
         $ultimo = count($actividades);
 
-        $proveedores = [];
+       $proveedores = DB::select('SELECT CardCode, CardName FROM OCRD WHERE CardType = ? ORDER BY CardName', ['S']);
         //$fstart = \Carbon\Carbon::now()->toDateString();
 
         return view('Mod03_Compras.OrdenesCompra', 
@@ -552,5 +552,18 @@ class Mod03_ComprasController extends Controller
 
         return $pdf->inline();
 
+    }
+    public function getProveedorOC(Request $request){
+        $result = DB::select("
+        
+        ", [$request->get('id')]);
+        $data=[];
+        if (count($result) > 0) {
+            $respuesta = 'ok';
+            $data = $result[0];
+        } else {
+            $respuesta = 'Error, No existe';
+        }
+        return compact('respuesta', 'data');
     }
 }
