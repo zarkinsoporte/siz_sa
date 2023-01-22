@@ -142,6 +142,11 @@ class Mod08_DisenioController extends Controller
         ACABADO::where('CODIDATO', $request->get('acabado_code'))
         ->update(array('ACA_Eliminado' => 1, 'FechaMov'=> date('Ymd'), 'idUser' =>  Auth::user()->U_EmpGiro));        
     }
+    public function guardar_acabado(Request $request)
+    {
+        ACABADO::where('CODIDATO', $request->get('acabado_code'))
+        ->update(array('DESCDATO' => $request->get('descacabado'), 'FechaMov'=> date('Ymd'), 'idUser' =>  Auth::user()->U_EmpGiro));        
+    }
     public function dbrecuperar_acabado(Request $request)
     {
         ACABADO::where('CODIDATO', $request->get('acabado_code'))

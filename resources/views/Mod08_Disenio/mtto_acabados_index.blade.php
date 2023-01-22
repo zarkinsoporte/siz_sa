@@ -119,6 +119,7 @@
                             </select>
                             <span class="input-group-btn">
                                 <button id="btn_add_code" class="btn btn-primary" type="button"><i class="fa fa-plus"></i> Código</button>
+                                <button id="btn_edit_acabado" class="btn btn-primary" type="button"><i class="fa fa-pencil"></i> Acabado</button>
                                 <button id="btn_add_acabado" class="btn btn-primary" type="button"><i class="fa fa-plus"></i> Acabado</button>
                                 <button id="btn_recuperar_acabado" class="btn btn-primary" type="button"><i class="fa fa-trash"></i> Recuperar</button>
                                 <button id="btn_del_acabado" class="btn btn-danger" type="button"><i class="fa fa-trash"></i> Acabado</button>
@@ -185,6 +186,36 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
                     <a id='btn_guarda_acabado' class="btn btn-success">Agregar</a>
+                </div>
+    
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="modal_edit_acabado" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Editar Acabado <codigo id='text_categoria'></codigo></h4>
+                </div>
+                <div class="modal-body" style='padding:16px'>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="sel_codigo_acabado">Código del acabado</label>
+                                <input type="text" id="text_codigo_acabado" class="form-control" readonly>
+                                
+                                <br>
+                                <label for="text_acabado_descripcion">Descripción del acabado</label>
+                                <input type="text" id="text_edit_acabado_descripcion" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    <a id='btn_editar_acabado' class="btn btn-success">Guardar</a>
                 </div>
     
             </div>
@@ -305,6 +336,7 @@
         });
             
             $('#btn_add_code').prop('disabled', true);
+            $('#btn_edit_acabado').prop('disabled', true);
             $('#btn_del_acabado').prop('disabled', true);
          
        
@@ -346,7 +378,7 @@
                         {"data" : "ID"},
                         {data: "ACA_Eliminado", "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
                             if ( oData.PCXC_Activo != 0 ) {
-                                $(nTd).html("<a id='btneliminar' role='button' class='btn btn-sm btn-danger' style='margin-right: 5px;'><i class='fa fa-trash'></i></a><a id='btnedit role='button' class='btn btn-sm btn-primary'><i class='fa fa-edit'></i></a>");
+                                $(nTd).html("<a id='btneliminar' role='button' class='btn btn-sm btn-danger' style='margin-right: 5px;'><i class='fa fa-trash'></i></a><a id='btnedit role='button' class='btn btn-sm btn-primary' style='margin-right: 5px;'><i class='fa fa-exchange'></i></a>");
                             }
                         }},
                         {"data" : "Arti", 
@@ -377,14 +409,23 @@
             $("#sel_acabado").on("changed.bs.select", 
                 function(e, clickedIndex, newValue, oldValue) {
                 console.log(this.value)
+               
+                //console.log(selectedText.trim())
                 if (this.value == "") {
                     $('#btn_add_code').prop('disabled', true);
+                    $('#btn_edit_acabado').prop('disabled', true);
                     $('#btn_del_acabado').prop('disabled', true);
                 } else {
+                    var selectedText = $(this).find("option:selected").text();
+                    var arrtext = selectedText.split("-");
+                    var descacabado = arrtext[1].trim()
                     $('#btn_add_code').prop('disabled', false);
+                    $('#btn_edit_acabado').prop('disabled', false);
                     $('#btn_del_acabado').prop('disabled', false);
-
+                    $('#text_codigo_acabado').val(this.value);
+                    $('#text_edit_acabado_descripcion').val(descacabado);
                 }
+
                 table_acabados.ajax.reload();
 
             });
@@ -402,6 +443,8 @@
 
                 console.log(event.currentTarget.id);
                 var id = rowdata['ID'];  
+                //var acabado = rowdata['CODIDATO'];  
+                //var descacabado = rowdata['DESCDATO'];  
                 var codigo = rowdata['Arti'];  
                 var codigo_surtir = rowdata['Surtir'];  
                 
@@ -451,20 +494,31 @@
                     }
                     });
                      
-                }else{
+                }else if ( event.currentTarget.id+'' == 'btnedit' ) {
                     $('#material_id').val(id);
                     $("#sel_codigo").val(codigo);
                     $("#sel_codigo").selectpicker("refresh");
                     $("#sel_surtir").val(codigo_surtir);
                     $("#sel_surtir").selectpicker("refresh");
                     $('#modal_edit_material').modal('show');
+                } else {
+
+                  
                 }
                 
             });
 
             $('#btn_add_acabado').on('click', function (e) {
                 e.preventDefault();
+                $('#text_acabado_descripcion').val('');
+                $('#sel_codigo_acabado').val('');
+                $('#sel_codigo_acabado').selectpicker('refresh');
                 $('#modal_add_acabado').modal('show');
+            });
+            $('#btn_edit_acabado').on('click', function (e) {
+                e.preventDefault();
+               
+                $('#modal_edit_acabado').modal('show');
             });
             $('#btn_recuperar_acabado').on('click', function (e) {
                 e.preventDefault();
@@ -621,6 +675,7 @@
                         $("#sel_acabado").val(codigo_nuevo);
                         $("#sel_acabado").selectpicker("refresh");
                         $('#btn_add_code').prop('disabled', false);
+                        $('#btn_edit_acabado').prop('disabled', false);
                         $('#modal_add_acabado').modal('hide');
                         $('#btn_del_acabado').prop('disabled', false);
                         var itemSelectorOption = $('#sel_codigo_acabado option:selected');
@@ -680,6 +735,7 @@
                                 $("#sel_acabado").selectpicker("refresh");
                                 
                                 $('#btn_add_code').prop('disabled', false);
+                                $('#btn_edit_acabado').prop('disabled', false);
                                 $('#modal_recuperar_acabado').modal('hide');
                                 $('#btn_del_acabado').prop('disabled', false);
                                 
@@ -713,6 +769,64 @@
                 $("#sel_surtir").val('');
                 $("#sel_surtir").selectpicker("refresh");
                 $('#modal_edit_material').modal('show');
+            });
+
+            $('#btn_editar_acabado').on('click', function (e) {
+                e.preventDefault();
+                bootbox.confirm({
+                    size: "small",
+                    centerVertical: true,
+                    message: "Confirma para Guardar Acabado...",
+                    callback: function(result){ 
+                    
+                        if (result) {
+                            $.ajax({
+                            type: 'POST',       
+                            url: '{!! route('guardar_acabado') !!}',
+                            data: {
+                                "_token": "{{ csrf_token() }}",                       
+                                acabado_code : $('#text_codigo_acabado').val(),              
+                                descacabado : $('#text_edit_acabado_descripcion').val()                
+                            },
+                            beforeSend: function() {
+                                $.blockUI({
+                                    baseZ: 2000,
+                                    message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                                    css: {
+                                        border: 'none',
+                                        padding: '16px',
+                                        width: '50%',
+                                        top: '40%',
+                                        left: '30%',
+                                        backgroundColor: '#fefefe',
+                                        '-webkit-border-radius': '10px',
+                                        '-moz-border-radius': '10px',
+                                        opacity: .7,
+                                        color: '#000000'
+                                    }
+                                });
+                            },
+                            complete: function() {
+                                setTimeout($.unblockUI, 1500);
+                                
+                            }, 
+                            success: function(data){
+                                //table_acabados.ajax.reload();
+                                var itemSelectorOption = $('#sel_acabado option:selected');
+                                itemSelectorOption.remove(); 
+                                var acabado_code = $('#text_codigo_acabado').val()
+                                var descacabado = $('#text_edit_acabado_descripcion').val()
+
+                                $("#sel_acabado").append('<option value="'+acabado_code+'">'+ acabado_code+ ' - ' + descacabado+'</option>');                                
+                                
+                                $('#sel_acabado').val(acabado_code);
+                                $('#sel_acabado').selectpicker('refresh');
+                                $('#modal_edit_acabado').modal('hide');
+                            }
+                            });
+                        }
+                    }
+                    });
             });
         }); //fin on load
     } //fin js_iniciador               
