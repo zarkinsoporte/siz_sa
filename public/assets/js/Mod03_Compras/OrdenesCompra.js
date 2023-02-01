@@ -11,16 +11,28 @@ function js_iniciador() {
         $("#page-wrapper").toggleClass("content"); 
         $(this).toggleClass("active"); 
     });
-    
     $("#sidebar").toggleClass("active"); 
     $("#page-wrapper").toggleClass("content"); 
     $(this).toggleClass("active"); 
-    
    
     var COL_BTN_EDITAR = 0;
     var COL_BTN_ELIMINAR = 1;
     var COL_BTN_PDF = 2;
-    
+
+    consultaDatos();
+    InicializaComboBox();
+    InicializaBuscadorArticulos()
+    cargaTablaArticulos();
+    InicializaTablas();
+
+     $("#input-fecha").datepicker({
+        format: "dd/mm/yyyy",
+        language: "es",
+        autoclose: true
+    }).on("change", function() {
+          
+    });
+    $('#input-fecha').datepicker('setDate', new Date());
     $("#input_date").daterangepicker({
         autoUpdateInput: false,
         format: "DD/MM/YYYY",
@@ -58,9 +70,29 @@ function js_iniciador() {
     }}, 
     function(start, end, label) {
         //alert("A new date range was chosen: " + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
-        reloadOrdenesImpresion(start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'));
+        //reloadOrdenesImpresion(start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'));
     });
-    
+
+  function InicializaComboBox()  {
+        // $('#cboMoneda').selectpicker({
+        //     noneSelectedText: 'Selecciona una opción',
+        // });
+        $('.selectpicker').selectpicker({
+            noneSelectedText: 'Selecciona una opción',
+        });
+        var options = [];
+        var opciones = [ //la llave es el Id que hay en la tabla ItekniaDB.ArticulosTipos
+            { 'llave': 'MXP', 'valor': 'MXP' },
+            { 'llave': 'USD', 'valor': 'USD' },
+            { 'llave': 'EUR', 'valor': 'EUR' },
+        ];
+        for (var i = 0; i < opciones.length; i++) {
+            options.push('<option value="' + opciones[i]['llave'] + '">' + opciones[i]['valor'] + '</option>');
+        }
+        $('#cboMoneda').append(options);
+        $('#cboMoneda').selectpicker('refresh');
+    };
+
     document.onkeyup = function(e) {
         if (e.shiftKey && e.which == 112) {
             var namefile= 'RG_'+$('#btn_pdf').attr('ayudapdf')+'.pdf';
@@ -208,10 +240,9 @@ var tabla_impresion = $("#tabla_impresion").DataTable({
                     'className': "dt-body-center",
                     "render": function ( data, type, row ) {
 
-                        //return 
-                        //'<button type="button" class="btn btn-primary" id="btnEditar"> <span class="glyphicon glyphicon-pencil"></span> </button>'
-                        //+ '<button type="button" class="btn btn-danger" id="btnEliminar"> <span class="glyphicon glyphicon-trash"></span></button>'
-                        return '' + '<button type="button" class="btn btn-danger btn-outline-danger" style="" id="boton-pdf"> <i class="fa fa-file-pdf-o" aria-hidden="true"></i></button>';
+                        return '<button type="button" class="btn btn-sm btn-primary" id="btnEditar"> <span class="glyphicon glyphicon-pencil"></span> </button>'
+                        + '<button type="button" class="btn btn-sm btn-danger" style="margin-left:5px" id="btnEliminar"> <span class="glyphicon glyphicon-trash"></span></button>'
+                         + '<button type="button" class="btn btn-sm btn-danger btn-outline-danger" style="margin-left:5px" id="boton-pdf"> <i class="fa fa-file-pdf-o" aria-hidden="true"></i></button>';
 
                     }
 
@@ -458,9 +489,713 @@ $(document).keyup(function(event) {
         }
         return s.join(dec);
     } 
+    $("#cboMoneda").on("changed.bs.select", function(e, clickedIndex, newValue, oldValue) {
+        var tipo_cambio_anterior = $('#input_tc').val();
+        console.log('cambiando moneda: ')
+        var moneda_anterior = oldValue;
+        var moneda = $('option:selected', this).val();
+        console.log('cboMoneda: '+ oldValue + ' > '+ moneda + ' tc:'+tipo_cambio_anterior)
+        carga_tipo_cambio(moneda);
+        calculaNuevaMoneda(moneda_anterior, moneda, tipo_cambio_anterior);
+        recargaTablaArticulos('');
+        cargaTablaArticulos();
+    });
+    $("#sel-proveedor").on("changed.bs.select", function(e, clickedIndex, newValue, oldValue) {
+        $.blockUI({
+                message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                css: {
+                    border: 'none',
+                    padding: '16px',
+                    width: '50%',
+                    top: '40%',
+                    left: '30%',
+                    backgroundColor: '#fefefe',
+                    '-webkit-border-radius': '10px',
+                    '-moz-border-radius': '10px',
+                    opacity: .7,
+                    color: '#000000'
+                }
+            });
+        var proveedor_moneda = $('option:selected', this).attr("data-moneda");
+        var proveedorId = $('option:selected', this).val();
+        $("#cboMoneda").val(proveedor_moneda);
+        $('#cboMoneda').selectpicker('refresh');
+        carga_tipo_cambio(proveedor_moneda);
+        carga_info_proveedor(proveedorId);
+        recargaTablaArticulos('');
+        cargaTablaArticulos();
+        $('#tblArticulosExistentesNueva').DataTable().clear().draw();
+        insertarFila();   
+        setTimeout($.unblockUI, 2000);   
+    });
+
+    $('#tblArticulosExistentesNueva').on('click', 'a#boton-articuloAE', function (e) {
+        e.preventDefault();
+        if ($("#sel-proveedor").val() != ""){
+            var tabla = $('#tblArticulosExistentesNueva').DataTable();
+            var fila = $(this).closest('tr');
+            fila = tabla.row(fila).index();
+            $('#modal-articulo #input-fila').val(fila);
+            $('#modal-articulo').modal('show');
+        } else {
+            bootbox.dialog({
+                message: "No se ha elegido un proveedor, elige uno por favor para continuar.",
+                title: "Ordenes de Compra",
+                buttons: {
+                    success: {
+                        label: "Si",
+                        className: "btn-success"
+                    }
+                }
+            });
+        }
+
+});
+$('#tblArticulosExistentesNueva').on('click', 'a#boton-eliminarAE', function (e) {
+    e.preventDefault();
+
+    var tabla = $('#tblArticulosExistentesNueva').DataTable();
+    var fila = $(this).closest('tr');
+    var datos = tabla.row(fila).data();
+    var index = tabla.row(fila).index();
+    var id = datos['ID_PARTIDA'];
+    if(id == ""){
+        tabla.row(fila).remove().draw(false);
+    }
+    else{
+        if (registroNuevo == 1){
+            //eliminarPartidaArtExis(fila);
+        }
+    }
+    calculaTotalOrdenCompra();
+    //actualizaLineaPartidaAE();
+    //calculaTipoCambio();
+    //PartidaResumenAE();
+});
+    function carga_info_proveedor(proveedorId){
+        $.ajax({
+            type: 'GET',
+            async: true,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            url: routeapp + 'get_detalleProveedor',
+            data: {
+                id: proveedorId
+            },
+            beforeSend: function() {
+               
+            },
+            complete: function() {
+               // setTimeout($.unblockUI, 500);
+            },
+            success: function(data){
+                var datos = data.proveedor
+
+                var codigoCliente = datos['PRO_Codigo'];
+                var razonSocial = datos['PRO_Nombre'];        
+                var Moneda = datos['Moneda'];
+                var Email = datos['PRO_Email'];
+                var domicilio = datos['PRO_Domicilio'];
+                var rfc = datos['PRO_RFC'];
+                var telefono = datos['PRO_Telefono'];
+                var contacto = datos['CON_Contacto'];
+                
+                ProveedorSeleccionadoOC(codigoCliente, razonSocial, Moneda, Email,
+                    domicilio, rfc, telefono, contacto);
+            }
+        });
+        
+    }
+     function ProveedorSeleccionadoOC(codigo, razonSocial, Moneda, Email, domicilio, rfc, telefono, contacto){
+        var editaProveedor = 0;
+        if(editaProveedor == 0){
+            //P1765	XINOVA SA DE CV	
+            //XIN100304FV5	
+            //juancarlos.verduzco@gmail.com	
+            //(442) 2175452	
+            //MXP	
+            //NULL	
+            //PINO SUAREZ, SANTA CLARA, MEXICO, MEX, MX. CP:50090   
+            $('#btnBuscarProveedores').text(codigo + ' - ' + razonSocial);
+            //MonId = MonedaId;
+            //document.getElementById('cboMoneda').value = MonedaId;
+            document.getElementById('nombreProveedor').innerText = codigo+' '+razonSocial;
+            document.getElementById('direccionProveedor').innerText = domicilio;
+            document.getElementById('codigoPostalProveedor').innerHTML = '<i class="fa fa-envelope" aria-hidden="true"></i> '+ ((Email==null)?'-':Email);
+            document.getElementById('rfcProveedor').innerText = 'RFC: '+rfc;
+            document.getElementById('telefonicosProveedor').innerHTML ='<i class="fa fa-phone" aria-hidden="true"></i> '+ ((telefono==null)?'-':telefono);
+            document.getElementById('contactoProveedor').innerHTML = '<i class="fa fa-vcard" aria-hidden="true"></i> '+ ((contacto==null)?'-':contacto);
+
+            // $("#ordenesCompraOC #cboSucursal").removeAttr('disabled');
+            // $("#ordenesCompraOC #cboSucursal").selectpicker('refresh');
+            // $("#ordenesCompraOC #cboMoneda").removeAttr('disabled');
+            // $("#ordenesCompraOC #cboMoneda").selectpicker('refresh');
+            // $("#ordenesCompraOC #cboTipoOC").removeAttr('disabled');
+            // $("#ordenesCompraOC #cboTipoOC").selectpicker('refresh');
+            // $("#ordenesCompraOC #cboAlmacen").removeAttr('disabled');
+            // $("#ordenesCompraOC #cboAlmacen").selectpicker('refresh');
+            // //$("#ordenesCompraOC #boton-datos-adicionales").removeAttr('disabled');
+            // $("#ordenesCompraOC #cboAgente").removeAttr('disabled');
+            // $("#ordenesCompraOC #cboAgente").selectpicker('refresh');
+            // $("#ordenesCompraOC #cboSucursalAgente").removeAttr('disabled');
+            // $("#ordenesCompraOC #cboSucursalAgente").selectpicker('refresh');
+
+            /*if(MonedaId != '748BE9C9-B56D-4FD2-A77F-EE4C6CD226A1'){//PESOS
+
+             $("#ordenesCompraOC #cboAgente").removeAttr('disabled');
+             $("#ordenesCompraOC #cboAgente").selectpicker('refresh');
+             $("#ordenesCompraOC #agenteAduanal").show();
+
+             }
+             else{
+
+             $("#ordenesCompraOC #cboAgente").val('');
+             $("#ordenesCompraOC #cboAgente").selectpicker('refresh');
+             $("#ordenesCompraOC #cboAgente").attr('disabled','disabled');
+             $("#ordenesCompraOC #agenteAduanal").hide();
+
+             }*/
+
+        }
+
+        // $('#' + nombreInputId).val(id);
+        // $('#' + nombreInputId).change();
+
+        // $('#cboMoneda').change();
+        // $('#modalBuscadorProveedores').modal('hide');
+        //$('#modalBuscadorProveedores').on('show.bs.modal', function () { }).modal("show");
+    }
+    function carga_tipo_cambio(moneda) {
+        $.ajax({
+            type: 'GET',
+            async: false,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            url: routeapp + 'get-rates',
+            data: {
+                mon: moneda
+            },
+            beforeSend: function() {
+               
+            },
+            complete: function() {
+               // setTimeout($.unblockUI, 500);
+            },
+            success: function(data){
+                if(data.rates.length > 0){
+                    $("#div-tipo-cambio").show();
+                    $("#input_tc").val(data.rates[0].Rate);
+                                     
+                }else{
+                    $("#div-tipo-cambio").hide();
+                }
+            }
+        });
+    }
     window.onload = function () { 
         tabla_impresion.columns.adjust().draw();     
     }
+    $('#tblArticulosExistentesNueva').on('change','input#input-cantidadAE',function (e) {
+        e.preventDefault();
+        if($(this).val() == '' || $(this).val() < 0){
+            $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
+        }
+
+        $(this).val(parseFloat(this.value).toFixed(CANTIDAD_DECIMALES));
+
+        if ($("#sel-proveedor").val() != ""){
+            var tabla = $('#tblArticulosExistentesNueva').DataTable();
+            var fila = $(this).closest('tr');
+            var index = tabla.row(fila).index();
+
+            var datos = tabla.row(fila).data();
+            var precio = 'input-precioAE';
+            var cantidad = 'input-cantidadAE';
+            var descuento = 'input-descuentoAE';
+            var referenciaId = datos['ID_AUX'];
+            var Cantidad_anterior = datos['CANTIDAD'];
+            var Precio_anterior = datos['PRECIO'];
+            var Descuento_anterior = datos['DESCUENTO'];
+            var IVA_anterior = datos['IVA'];
+            var ID_IVA_anterior = datos['ID_IVA'];
+            var cantidadNueva = $(this).val();
+
+            if(JSON_PARTIDA.hasOwnProperty(referenciaId)) {
+                bootbox.dialog({
+                    message: "¿Estas seguro de modificar la cantidad?.",
+                    title: "Ordenes de Compra",
+                    buttons: {
+                        success: {
+                            label: "Si",
+                            className: "btn-success",
+                            callback: function () {
+                                $.ajax({
+                                    type: "POST",
+                                    async: false,
+                                    data: {
+                                        detalleId: referenciaId
+                                        ,cantidad: cantidadNueva
+                                        ,precio: Precio_anterior
+                                        ,descuento: Descuento_anterior
+                                        ,iva: IVA_anterior
+                                        ,idIva: ID_IVA_anterior
+                                    },
+                                    dataType: "json",
+                                    url: "compras/editarPartida",
+                                    success: function () {
+                                        //delete JSON_PARTIDA[referenciaId];
+                                        datos['CANTIDAD'] = cantidadNueva;
+                                        RealizaCalculos(fila, tabla, precio, cantidad, descuento);
+                                        calculaTotalOrdenCompra();
+                                        calculaTipoCambio();
+                                        if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
+                                            PartidaResumenAE(index);
+                                        }
+                                    },
+                                    error: function (xhr, ajaxOptions, thrownError) {
+                                        $.unblockUI();
+                                        var error = JSON.parse(xhr.responseText);
+                                        bootbox.alert({
+                                            size: "large",
+                                            title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
+                                            message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
+                                            ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
+                                            ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
+                                            ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
+                                        });
+                                    }
+                                });
+
+                            }
+                        },
+                        default: {
+                            label: "No",
+                            className: "btn-default m-r-5 m-b-5",
+                            callback: function () {
+                                tabla.row(fila).nodes(fila,COL_CANTIDAD).to$().find('input#' + cantidad).val(parseFloat(Cantidad_anterior).toFixed(CANTIDAD_DECIMALES));
+                            }
+                        }
+                    }
+                });
+            }
+            else{
+
+                datos['CANTIDAD'] = $(this).val();
+
+                if (datos['CODIGO_ARTICULO'] != ""){
+                    RealizaCalculos(fila, tabla, precio, cantidad, descuento);
+                    console.log(['precio ' + precio, 'cantidad ' +cantidad, 'descuento ' + descuento]);
+                    calculaTotalOrdenCompra();
+                    //calculaTipoCambio();
+                    if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
+                        PartidaResumenAE(index);
+                    }
+                }
+                else{
+                    bootbox.dialog({
+                        message: "No se ha elegido un articulo, elige uno por favor para continuar.",
+                        title: "Ordenes de Compra",
+                        buttons: {
+                            success: {
+                                label: "Si",
+                                className: "btn-success"
+                            }
+                        }
+                    });
+                    $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
+                }
+            }
+        }else{
+            bootbox.dialog({
+                message: "No se ha elegido un proveedor, elige uno por favor para continuar.",
+                title: "Ordenes de Compra",
+                buttons: {
+                    success: {
+                        label: "Si",
+                        className: "btn-success"
+                    }
+                }
+            });
+            $(this).val("");
+        }
+});
+
+$('#tblArticulosExistentesNueva').on('change','input#input-precioAE',function (e) {
+    e.preventDefault();
+    if($(this).val() == '' || $(this).val() < 0){
+        $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
+    }
+
+    $(this).val(parseFloat(this.value).toFixed(CANTIDAD_DECIMALES));
+    if ($("#sel-proveedor").val() != ""){
+        var tabla = $('#tblArticulosExistentesNueva').DataTable();
+        var fila = $(this).closest('tr');
+        var index = tabla.row(fila).index();
+
+        var datos = tabla.row(fila).data();
+        var precio = 'input-precioAE';
+        var cantidad = 'input-cantidadAE';
+        var descuento = 'input-descuentoAE';
+        var referenciaId = datos['ID_AUX'];
+        var Cantidad_anterior = datos['CANTIDAD'];
+        var Precio_anterior = datos['PRECIO'];
+        var Descuento_anterior = datos['DESCUENTO'];
+        var IVA_anterior = datos['IVA'];
+        var ID_IVA_anterior = datos['ID_IVA'];
+        var precioNuevo = $(this).val();
+
+        if(JSON_PARTIDA.hasOwnProperty(referenciaId)) {
+
+            bootbox.dialog({
+                message: "¿Estas seguro de modificar el precio?.",
+                title: "Ordenes de Compra",
+                buttons: {
+                    success: {
+                        label: "Si",
+                        className: "btn-success",
+                        callback: function () {
+                            $.ajax({
+                                type: "POST",
+                                async: false,
+                                data: {
+                                    detalleId: referenciaId
+                                    ,precio: precioNuevo
+                                    ,cantidad: Cantidad_anterior
+                                    ,descuento: Descuento_anterior
+                                    ,iva: IVA_anterior
+                                    ,idIva: ID_IVA_anterior
+                                },
+                                dataType: "json",
+                                url: "compras/editarPartida",
+                                success: function () {
+                                    //delete JSON_PARTIDA[referenciaId];
+                                    datos['PRECIO'] = precioNuevo;
+                                    RealizaCalculos(fila, tabla, precio, cantidad, descuento);
+                                    calculaTotalOrdenCompra();
+                                    calculaTipoCambio();
+                                    if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
+                                        PartidaResumenAE(index);
+                                    }
+                                },
+                                error: function (xhr, ajaxOptions, thrownError) {
+                                    $.unblockUI();
+                                    var error = JSON.parse(xhr.responseText);
+                                    bootbox.alert({
+                                        size: "large",
+                                        title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
+                                        message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
+                                        ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
+                                        ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
+                                        ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
+                                    });
+                                }
+                            });
+
+                        }
+                    },
+                    default: {
+                        label: "No",
+                        className: "btn-default m-r-5 m-b-5",
+                        callback: function () {
+                            tabla.row(fila).nodes(fila,COL_PRECIO).to$().find('input#' + precio).val(parseFloat(Precio_anterior).toFixed(CANTIDAD_DECIMALES));
+                        }
+                    }
+                }
+            });
+
+        }
+        else{
+
+            datos['PRECIO'] = $(this).val();
+
+            if (datos['ID_ARTICULO'] != ""){
+                RealizaCalculos(fila, tabla, precio, cantidad, descuento);
+                calculaTotalOrdenCompra();
+                // calculaTipoCambio();
+                // if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
+                //     PartidaResumenAE(index);
+                // }
+            }
+            else{
+                bootbox.dialog({
+                    message: "No se ha elegido un articulo, elige uno por favor para continuar.",
+                    title: "Ordenes de Compra",
+                    buttons: {
+                        success: {
+                            label: "Si",
+                            className: "btn-success"
+                        }
+                    }
+                });
+                $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
+            }
+
+        }
+
+    }
+    else{
+        bootbox.dialog({
+            message: "No se ha elegido un proveedor, elige uno por favor para continuar.",
+            title: "Ordenes de Compra",
+            buttons: {
+                success: {
+                    label: "Si",
+                    className: "btn-success"
+                }
+            }
+        });
+        $(this).val("");
+    }
+});
+
+$('#tblArticulosExistentesNueva').on('change','input#input-descuentoAE',function (e) {
+
+    if($(this).val() == '' || $(this).val() < 0){
+        $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
+    }
+
+    if ($(this).val() >= 100){
+        $(this).val(parseFloat('100.00').toFixed(CANTIDAD_DECIMALES));
+    }
+
+    $(this).val(parseFloat(this.value).toFixed(CANTIDAD_DECIMALES));
+    if ($("#sel-proveedor").val() != ""){
+        var tabla = $('#tblArticulosExistentesNueva').DataTable();
+        var fila = $(this).closest('tr');
+        var index = tabla.row(fila).index();
+
+        var datos = tabla.row(fila).data();
+        var precio = 'input-precioAE';
+        var cantidad = 'input-cantidadAE';
+        var descuento = 'input-descuentoAE';
+        var referenciaId = datos['ID_AUX'];
+        var Cantidad_anterior = datos['CANTIDAD'];
+        var Precio_anterior = datos['PRECIO'];
+        var Descuento_anterior = datos['DESCUENTO'];
+        var IVA_anterior = datos['IVA'];
+        var ID_IVA_anterior = datos['ID_IVA'];
+        var descuentoNuevo = $(this).val();
+
+        if(JSON_PARTIDA.hasOwnProperty(referenciaId)) {
+
+            bootbox.dialog({
+                message: "¿Estas seguro de modificar el descuento?.",
+                title: "Ordenes de Compra",
+                buttons: {
+                    success: {
+                        label: "Si",
+                        className: "btn-success",
+                        callback: function () {
+                            $.ajax({
+                                type: "POST",
+                                async: false,
+                                data: {
+                                    detalleId: referenciaId
+                                    ,precio: Precio_anterior
+                                    ,cantidad: Cantidad_anterior
+                                    ,descuento: descuentoNuevo
+                                    ,iva: IVA_anterior
+                                    ,idIva: ID_IVA_anterior
+                                },
+                                dataType: "json",
+                                url: "compras/editarPartida",
+                                success: function () {
+                                    //delete JSON_PARTIDA[referenciaId];
+                                    datos['DESCUENTO'] = descuentoNuevo;
+                                    RealizaCalculos(fila, tabla, precio, cantidad, descuento);
+                                    calculaTotalOrdenCompra();
+                                    calculaTipoCambio();
+                                    if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
+                                        PartidaResumenAE(index);
+                                    }
+                                },
+                                error: function (xhr, ajaxOptions, thrownError) {
+                                    $.unblockUI();
+                                    var error = JSON.parse(xhr.responseText);
+                                    bootbox.alert({
+                                        size: "large",
+                                        title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
+                                        message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
+                                        ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
+                                        ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
+                                        ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
+                                    });
+                                }
+                            });
+
+                        }
+                    },
+                    default: {
+                        label: "No",
+                        className: "btn-default m-r-5 m-b-5",
+                        callback: function () {
+                            tabla.row(fila).nodes(fila,COL_DESCUENTO).to$().find('input#' + descuento).val(parseFloat(Descuento_anterior).toFixed(CANTIDAD_DECIMALES));
+                        }
+                    }
+                }
+            });
+
+        }
+        else{
+
+            datos['DESCUENTO'] = $(this).val();
+
+            if (datos['ID_ARTICULO'] != ""){
+                RealizaCalculos(fila, tabla, precio, cantidad, descuento);
+                calculaTotalOrdenCompra();
+                // calculaTipoCambio();
+                // if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
+                //     PartidaResumenAE(index);
+                // }
+            }
+            else{
+                bootbox.dialog({
+                    message: "No se ha elegido un articulo, elige uno por favor para continuar.",
+                    title: "Ordenes de Compra",
+                    buttons: {
+                        success: {
+                            label: "Si",
+                            className: "btn-success"
+                        }
+                    }
+                });
+                $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
+            }
+
+        }
+
+    }
+    else{
+        bootbox.dialog({
+            message: "No se ha elegido un proveedor, elige uno por favor para continuar.",
+            title: "Ordenes de Compra",
+            buttons: {
+                success: {
+                    label: "Si",
+                    className: "btn-success"
+                }
+            }
+        });
+        $(this).val("");
+    }
+});
+
+$('#tblArticulosExistentesNueva').on('change','select#cboIVAAE',function (e) {
+    e.preventDefault();
+    if ($("#sel-proveedor").val() != ""){
+        var tabla = $('#tblArticulosExistentesNueva').DataTable();
+        var fila = $(this).closest('tr');
+        var index = tabla.row(fila).index();
+
+        var datos = tabla.row(fila).data();
+        var precio = 'input-precioAE';
+        var cantidad = 'input-cantidadAE';
+        var descuento = 'input-descuentoAE';
+        var iva = 'cboIVAAM';
+        var referenciaId = datos['ID_AUX'];
+        var Cantidad_anterior = datos['CANTIDAD'];
+        var Precio_anterior = datos['PRECIO'];
+        var Descuento_anterior = datos['DESCUENTO'];
+        var IVA_anterior = datos['IVA'];
+        var ID_IVA_anterior = datos['ID_IVA'];
+        var id_iva_nuevo = $(this).val();
+        var iva_nuevo = $(this).val() == '' ? '0' : $(this).find('option:selected').text();
+
+        if(JSON_PARTIDA.hasOwnProperty(referenciaId)) {
+
+            bootbox.dialog({
+                message: "¿Estas seguro de modificar el IVA?.",
+                title: "Ordenes de Compra",
+                buttons: {
+                    success: {
+                        label: "Si",
+                        className: "btn-success",
+                        callback: function () {
+                            $.ajax({
+                                type: "POST",
+                                async: false,
+                                data: {
+                                    detalleId: referenciaId
+                                    ,precio: Precio_anterior
+                                    ,cantidad: Cantidad_anterior
+                                    ,descuento: Descuento_anterior
+                                    ,iva: iva_nuevo
+                                    ,idIva: id_iva_nuevo
+                                },
+                                dataType: "json",
+                                url: "compras/editarPartida",
+                                success: function () {
+                                    //delete JSON_PARTIDA[referenciaId];
+                                    datos["ID_IVA"] = id_iva_nuevo;
+                                    datos["IVA"] = iva_nuevo;
+                                    RealizaCalculos(fila, tabla, precio, cantidad, descuento);
+                                    calculaTotalOrdenCompra();
+                                    calculaTipoCambio();
+                                    if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
+                                        PartidaResumenAE(index);
+                                    }
+                                },
+                                error: function (xhr, ajaxOptions, thrownError) {
+                                    $.unblockUI();
+                                    var error = JSON.parse(xhr.responseText);
+                                    bootbox.alert({
+                                        size: "large",
+                                        title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
+                                        message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
+                                        ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
+                                        ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
+                                        ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
+                                    });
+                                }
+                            });
+
+                        }
+                    },
+                    default: {
+                        label: "No",
+                        className: "btn-default m-r-5 m-b-5",
+                        callback: function () {
+                            tabla.row(fila).nodes(fila,COL_IVA).to$().find('select#'+iva).val(ID_IVA_anterior);
+                        }
+                    }
+                }
+            });
+
+        }
+        else{
+
+            datos["ID_IVA"] = id_iva_nuevo;
+            datos["IVA"] = iva_nuevo;
+
+            if (datos['ID_ARTICULO'] != ""){
+                RealizaCalculos(fila, tabla, precio, cantidad, descuento);
+                calculaTotalOrdenCompra();
+               // calculaTipoCambio();
+                // if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
+                //     PartidaResumenAE(index);
+                // }
+            }
+            else{
+                bootbox.dialog({
+                    message: "No se ha elegido un articulo, elige uno por favor para continuar.",
+                    title: "Ordenes de Compra",
+                    buttons: {
+                        success: {
+                            label: "Si",
+                            className: "btn-success"
+                        }
+                    }
+                });
+                $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
+            }
+
+        }
+
+    }
+});
+
 }  //fin js_iniciador               
 function val_btn(val) { 
 

@@ -704,6 +704,10 @@ Route::get('home/reporte/ultimospreciosPDF', 'Mod03_ComprasController@ultimos_pr
 //ORDENES DE COMPRA
 Route::get('home/ORDENES DE COMPRA', 'Mod03_ComprasController@index_ordenes_compra')->middleware('routelog');
 Route::any('get_oc', 'Mod03_ComprasController@get_oc')->name('get_oc');
+Route::any('get-rates', 'Mod03_ComprasController@get_rates')->name('get-rates');
+Route::any('get_detalleProveedor', 'Mod03_ComprasController@get_detalleProveedor')->name('get_detalleProveedor');
+Route::any('consultaIvasYUnidadesMedida', 'Mod03_ComprasController@consultaIvasYUnidadesMedida')->name('consultaIvasYUnidadesMedida');
+Route::any('cargaTablaArticulos', 'Mod03_ComprasController@cargaTablaArticulos')->name('cargaTablaArticulos');
 Route::any('getProveedorOC', 'Mod03_ComprasController@getProveedorOC')->name('getProveedorOC');
 Route::any('get_oc_xfecha', 'Mod03_ComprasController@get_oc_xfecha')->name('get_oc_xfecha');
 Route::any('orden_compra_pdf/{NumOC}', 'Mod03_ComprasController@orden_compra_pdf')->name('orden_compra_pdf');

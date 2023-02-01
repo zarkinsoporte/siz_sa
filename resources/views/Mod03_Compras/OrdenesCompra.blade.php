@@ -3,12 +3,14 @@
 @section('homecontent')
             
 {!! Html::script('assets/js/Mod03_Compras/OrdenesCompra.js') !!}
+{!! Html::script('assets/js/Mod03_Compras/OrdenesCompraNueva.js') !!}
+{!! Html::script('assets/js/Mod03_Compras/buscadores-proveedor.js') !!}
+<link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/css/bootstrap-dialog.min.css">
+<script type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/js/bootstrap-dialog.min.js"></script>
 {!! Html::style('assets/css/invoice.css') !!}
 {!! Html::style('assets/css/customdt2.css') !!}
-
-<script async src="{{ URL::asset('assets/js/Mod03_Compras/ordenesCompraNueva.js')}}"></script>
-<script async src="{{ URL::asset('assets/js/Mod03_Compras/buscadores-proveedor.js')}}"></script>
-<script async src="{{ URL::asset('assets/js/Mod03_Compras/buscadorOtsRequisiciones.js')}}"></script>
 
 <div class="container" >
 
@@ -114,7 +116,7 @@
         <div class="panel-body">
             <div class="row">
                 <div class="form-group">
-                    <div class="col-md-8" id="selecpicker-cliente">
+                    <div class="col-md-6" id="selecpicker-cliente">
                         <label><strong>
                                 <font size="2">Proveedor</font>
                             </strong></label>
@@ -126,7 +128,7 @@
                            
                             <option value="">Selecciona una opción</option>
                             @foreach ($proveedores as $proveedor)
-                            <option value="{{old('proveedor',$proveedor->CardCode)}}">
+                            <option data-moneda="{{$proveedor->Currency}}" value="{{old('proveedor',$proveedor->CardCode)}}">
                                 <span>{{$proveedor->CardCode}} &nbsp;&nbsp;&nbsp; {{$proveedor->CardName}}</span>
                             </option>
                             @endforeach
@@ -147,6 +149,12 @@
                         {!! Form::select('MON_MonedaId', (["" => "Selecciona una opción"] ), null, ['id' =>
                         'cboMoneda', 'class' => 'form-control selectpicker', "data-size" => "8",
                         "data-style"=>"btn-success", "data-live-search"=>"true"]) !!}
+                    </div>
+                    <div class="col-md-2" id="div-tipo-cambio">
+                        <label><strong>
+                        <font size="2">Tipo Cambio</font>
+                            </strong></label>
+                       <input type="number" class="form-control" name="" value="1" id="input_tc">
                     </div>
                 </div>
             </div>
@@ -169,17 +177,21 @@
                            
                         </div>
                         <div class="invoice-date">
-                            <small>CÓDIGO</small>
+                            {{--  <small>CÓDIGO</small>
                             <div class="date m-t-5"><span id="codigoOC"></span></div>
                             <small>ESTADO OC</small>
-                            <div class="date m-t-5"><span id="estadoOC"></span></div>
+                            <div class="date m-t-5"><span id="estadoOC"></span></div>  --}}
                         </div>
                     </div>
                     <div class="invoice-content">
-                        <ul id="menuPrincipal" class="nav nav-tabs nav-tabs-inverse nav-justified nav-justified-mobile"
+                        <ul id="menuPrincipal" class="nav nav-tabs nav-justified nav-justified-mobile"
                             data-sortable-id="index-2">
-                            <li class="active"><a id="liArtExist" href="#articulosExistentes" data-toggle="tab"> <span class="hidden-xs">Artículos
-                                        </span></a></li>
+                            <li class="active">
+                                <a id="liArtExist" href="#articulosExistentes" data-toggle="tab">
+                                    <i class="fa fa-shopping-cart m-r-5"></i> 
+                                    <span class="hidden-xs">Artículos</span>
+                                </a>
+                            </li>
                            
                         </ul>
                         <div class="tab-content" data-sortable-id="index-3">
@@ -284,9 +296,16 @@
                     <button type="button" class="btn btn-default m-r-5 m-b-5" id="boton-cerrar">Cerrar</button>
                 </div>
             </div>
-    
+            
         </div>
     </div>
+    <div class="row">
+        @include('Mod03_Compras.OrdenesCompras.modalDetalles')
+    </div>
+    
+    <div class="row">
+        @include('Mod03_Compras.OrdenesCompras.modalBuscadorArticulo')
+    </div>
 </div>
-                    
+                  
 @endsection
