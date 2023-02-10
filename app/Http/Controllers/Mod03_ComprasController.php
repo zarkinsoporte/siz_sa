@@ -608,7 +608,20 @@ class Mod03_ComprasController extends Controller
     }
 
      public function cargaTablaArticulos(Request $request){
-        $sql = "SELECT top 10
+        //$tc_sys = 1;
+        if (false) {
+        //if ($request->get('moneda') != 'MXP') {
+            $tc_sys =  DB::table('ORTT')
+            //->where('Currency', $request->get('moneda'))
+            ->where('RateDate', date('Y-m-d'));
+        }
+        $tc_sys = DB::table('ORTT')        
+        ->where('RateDate', date('Y-m-d'))->get();
+        $tipos_cambio = [];
+        foreach ($tc_sys as $value) {
+            $tipos_cambio [$value->Currency] = $value->Rate.'';
+        }
+        $sql = "SELECT top 100
                         OITM.ItemCode ART_CodigoArticulo,
                         OITM.ItemName ART_Nombre,
                         OITM.U_TipoMat ATP_Descripcion,
@@ -616,14 +629,14 @@ class Mod03_ComprasController extends Controller
                         OITM.PurPackMsr UMC,   
                         Cast(CONVERT(DECIMAL(10,2), OITM.NumInBuy) as nvarchar) AFC_FactorConversion, 
                         OITM.BuyUnitMsr UMI,
-                        Cast(CONVERT(DECIMAL(10,4), ITM1.Price) as nvarchar) AS LIS_COMPRA,
-                        Cast(CONVERT(DECIMAL(10,4),
-                        CASE WHEN ITM1.Currency = '".$request->get('moneda')."' THEN
-                        (ITM1.Price * OITM.NumInBuy) 
-                        ELSE 
-                        (ITM1.Price * OITM.NumInBuy * '".$request->get('tipo_cambio')."')
-                        END 
-                        ) as nvarchar) Precio_Tipo_Cambio,
+                        Cast(CONVERT(DECIMAL(10,4), ITM1.Price) as nvarchar) AS LIS_COMPRA,                        
+                        ((ITM1.Price * OITM.NumInBuy * 
+                        CASE WHEN ITM1.Currency = 'MXP' THEN 1
+                        WHEN ITM1.Currency = 'USD' THEN CONVERT(DECIMAL(10,4),'".$tipos_cambio ['USD']."')
+                        WHEN ITM1.Currency = 'EUR' THEN CONVERT(DECIMAL(10,4),'".$tipos_cambio ['EUR']."')
+                        END
+                        ) / '".$request->get('tipo_cambio')."') AS 
+                        Precio_Tipo_Cambio,
                         Cast(CONVERT(DECIMAL(10,4), ITM1.Price * OITM.NumInBuy 
                         ) as nvarchar) Precio,
                         ITM1.Currency AS M_L
@@ -633,11 +646,12 @@ class Mod03_ComprasController extends Controller
                     AND ITM1.PriceList= 9
 
                     WHERE OITM.ItemCode IS NOT NULL 
-                    AND OITM.PrchseItem = 'Y' AND OITM.InvntItem = 'Y'";
-                    if ($request->get('moneda') == 'MXP'){
-                        $sql = $sql . " AND  ITM1.Currency = 'MXP' ";
-                    }
-                    $sql = $sql . "ORDER BY OITM.ItemName, OITM.ItemCode";
+                    AND OITM.PrchseItem = 'Y' AND OITM.InvntItem = 'Y'
+                    ORDER BY OITM.ItemName, OITM.ItemCode";
+                    // if ($request->get('moneda') == 'MXP'){
+                    //     $sql = $sql . " AND  ITM1.Currency = 'MXP' ";
+                    // }
+                    //$sql = $sql . "ORDER BY OITM.ItemName, OITM.ItemCode";
         try{
 
             $consulta2 = [];

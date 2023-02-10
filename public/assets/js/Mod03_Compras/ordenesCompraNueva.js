@@ -83,7 +83,7 @@ var ARTICULO_BUSCADOR_UMI_ID = '';
 var ARTICULO_BUSCADOR_UMC_ID = '';
 var ARTICULO_BUSCADOR_INDEX = '';
 var ARTICULO_BUSCADOR_ML = '';
-var ARTICULO_BUSCADOR_PRECIO_TC = '';
+var ARTICULO_BUSCADOR_PRECIO_MON = '';
 
 // Mapeo columnas tabla detalles
 var COL_DETALLE_CANTIDAD = 0;
@@ -621,9 +621,9 @@ function InicializaBuscadorArticulos(){
                 ARTICULO_BUSCADOR_UMI = datos['UMI'];
                 ARTICULO_BUSCADOR_FACTOR_CONVERSION = datos['AFC_FactorConversion'];
                 ARTICULO_BUSCADOR_UMC = datos['UMC'];
-                ARTICULO_BUSCADOR_PRECIO_COMPRA = datos['Precio'];
+                ARTICULO_BUSCADOR_PRECIO_COMPRA = datos['Precio_Tipo_Cambio'];
                 ARTICULO_BUSCADOR_ML = datos['M_L'];
-                ARTICULO_BUSCADOR_PRECIO_TC = datos['Precio_Tipo_Cambio'];
+                ARTICULO_BUSCADOR_PRECIO_MON = datos['Precio'];
                 //ARTICULO_BUSCADOR_UMI_ID = datos['UMI_CMUM_UMInventarioId'];
                 //ARTICULO_BUSCADOR_UMC_ID = datos['UMC_CMUM_UMCompraId'];
                 tabla.$('tr.selected').removeClass('selected');
@@ -647,9 +647,9 @@ function InicializaBuscadorArticulos(){
             ARTICULO_BUSCADOR_UMI = datos['UMI'];
             ARTICULO_BUSCADOR_FACTOR_CONVERSION = datos['AFC_FactorConversion'];
             ARTICULO_BUSCADOR_UMC = datos['UMC'];
-            ARTICULO_BUSCADOR_PRECIO_COMPRA = datos['Precio'];
+            ARTICULO_BUSCADOR_PRECIO_COMPRA = datos['Precio_Tipo_Cambio'];
             ARTICULO_BUSCADOR_ML = datos['M_L'];
-            ARTICULO_BUSCADOR_PRECIO_TC = datos['Precio_Tipo_Cambio'];
+            ARTICULO_BUSCADOR_PRECIO_MON = datos['Precio'];
             //ARTICULO_BUSCADOR_UMI_ID = datos['UMI_CMUM_UMInventarioId'];
             //ARTICULO_BUSCADOR_UMC_ID = datos['UMC_CMUM_UMCompraId'];
 
@@ -998,7 +998,8 @@ function changeProveedor(){
 
 }
 function cargaTablaArticulos(){
-
+    console.log('------------- carga Articulos modal')
+    console.log($('#input_tc').val()+ ' - ' +$('#cboMoneda').val())
     $.ajax({
         headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -1018,6 +1019,7 @@ function cargaTablaArticulos(){
             if(respuesta.codigo == 200){
 
                 recargaTablaArticulos(respuesta.data2);
+                console.log(respuesta.sql)
             }
             else{
 
@@ -1612,9 +1614,9 @@ function calculaTotalOrdenCompra(){
             Tiva = Tiva + iva;
             Tdescuento = Tdescuento + descuento;
 
-            $('#ordenCompra-subtotal').text(SIMBOLO_MONEDA + ' ' +  TSubtotal .toFixed(PRECIOS_DECIMALES));
-            $('#ordenCompra-descuento').text(SIMBOLO_MONEDA + ' ' +  Tdescuento.toFixed(PRECIOS_DECIMALES));
-            $('#ordenCompra-iva').text(SIMBOLO_MONEDA + ' ' +  Tiva.toFixed(PRECIOS_DECIMALES));
+            $('#ordenCompra-subtotal').text(TSubtotal .toFixed(PRECIOS_DECIMALES));
+            $('#ordenCompra-descuento').text(Tdescuento.toFixed(PRECIOS_DECIMALES));
+            $('#ordenCompra-iva').text(Tiva.toFixed(PRECIOS_DECIMALES));
             $('#ordenCompra-total').text(SIMBOLO_MONEDA + ' ' +  Ttotal.toFixed(PRECIOS_DECIMALES));
         }
 
@@ -1647,32 +1649,62 @@ function calculaNuevaMoneda(moneda_anterior, moneda, tipo_cambio_anterior){
             for (var i = 0; i < count; i++) {
                 datos = tabla.row( i ).data();
                 Precio_anterior = datos['PRECIO'];
-                //descuento_anterior = datos['DESCUENTO'];
                 console.log('calculaNuevaMoneda....... ')
                 console.log('precio_anterior: '+ Precio_anterior)
                 console.log('moneda: '+ moneda)
                 console.log('tipo_cambio_anterior: '+ tipo_cambio_anterior)
                 miprecio = getNuevoPrecio(Precio_anterior, moneda_anterior, moneda, tipo_cambio_anterior);
                 tabla.row(i).nodes(i, COL_PRECIO).to$().find('input#' + precio).val(miprecio);
-                //midescuento = getNuevoPrecio(descuento_anterior, moneda_anterior, moneda, tipo_cambio_anterior);
-                datos['PRECIO'] = miprecio;
-                //datos['DESCUENTO'] = midescuento;
                 
+                datos['PRECIO'] = miprecio;
                 console.log('precio_nuevo: '+ miprecio)
-                //console.log('DESCUENTO: '+ midescuento)
                 RealizaCalculos(i, tabla, precio, cantidad, descuento);
             }
         }
         calculaTotalOrdenCompra();
     }
 }
+function calculaNuevaTipoCambio(moneda, tipo_cambio){
+    
+        var tabla = $('#tblArticulosExistentesNueva').DataTable();
+        var datos = '';
+        var precio = 'input-precioAE';
+        var cantidad = 'input-cantidadAE';
+        var descuento = 'input-descuentoAE';
+        var Precio_anterior = 0;
+        var lengthAE = $('#tblArticulosExistentesNueva #boton-articuloAE').closest('tr');
+        var count = lengthAE.length; //+ lengthAM.length;
+        if (count > 0){
+
+            for (var i = 0; i < count; i++) {
+                datos = tabla.row( i ).data();
+                Precio_anterior = datos['PRECIO'];
+                console.log('calculaNuevoTipoCambio....... ')
+                console.log('precio_anterior: '+ Precio_anterior)
+                miprecio = getNuevoPrecioTC(Precio_anterior, tipo_cambio);
+                tabla.row(i).nodes(i, COL_PRECIO).to$().find('input#' + precio).val(miprecio);
+                datos['PRECIO'] = miprecio;
+                console.log('precio_nuevo: '+ miprecio)
+                RealizaCalculos(i, tabla, precio, cantidad, descuento);
+            }
+        }
+        $("#input_tc_anterior").val($("#input_tc").val());
+        calculaTotalOrdenCompra();
+    
+}
+function getNuevoPrecioTC(Precio_anterior, tipo_cambio_anterior){
+    var precio_nuevo = 0;
+    console.log('nuevoTC: '+$('#input_tc').val())
+    precio_nuevo = (Precio_anterior * tipo_cambio_anterior) / $('#input_tc').val();
+    return precio_nuevo;
+}
 function getNuevoPrecio(Precio_anterior, moneda_anterior, moneda, tipo_cambio_anterior){
     var precio_nuevo = 0;
     console.log('nuevoTC: '+$('#input_tc').val())
-    if (moneda_anterior = 'MXP') {
+    if (moneda_anterior == 'MXP') {
        precio_nuevo = Precio_anterior / $('#input_tc').val();
     } else {
-        if (moneda = 'MXP') {
+        if (moneda == 'MXP') {
             precio_nuevo = Precio_anterior * tipo_cambio_anterior;
         } else {
             precio_nuevo = (Precio_anterior * tipo_cambio_anterior) / $('#input_tc').val();
@@ -1685,21 +1717,21 @@ function getNuevoPrecio(Precio_anterior, moneda_anterior, moneda, tipo_cambio_an
 function validaSimbolo(){
 
     SIMBOLO_MONEDA = $('#cboMoneda').val() +' $';
-    if($('#cboMoneda').val() == '748BE9C9-B56D-4FD2-A77F-EE4C6CD226A1'){//PESOS
+    // if($('#cboMoneda').val() == '748BE9C9-B56D-4FD2-A77F-EE4C6CD226A1'){//PESOS
 
-        SIMBOLO_MONEDA = '$';
+    //     SIMBOLO_MONEDA = '$';
 
-    }
-    else if($('#cboMoneda').val() == '1EA50C6D-AD92-4DE6-A562-F155D0D516D3'){//DOLAR
+    // }
+    // else if($('#cboMoneda').val() == '1EA50C6D-AD92-4DE6-A562-F155D0D516D3'){//DOLAR
 
-        SIMBOLO_MONEDA = 'USD';
+    //     SIMBOLO_MONEDA = 'USD';
 
-    }
-    else if($('#cboMoneda').val() == '63D4F280-EE48-44A3-84F3-91ADF075BEBC'){//EURO
+    // }
+    // else if($('#cboMoneda').val() == '63D4F280-EE48-44A3-84F3-91ADF075BEBC'){//EURO
 
-        SIMBOLO_MONEDA = '€';
+    //     SIMBOLO_MONEDA = '€';
 
-    }
+    // }
 
 }
 
@@ -2183,7 +2215,7 @@ $(document).on('keyup', function (e) {
 
     e.preventDefault();
 
-    if(e.keyCode == 13){
+    if(e.shiftKey && e.keyCode == 13){
         if (BanderaOC == 0){
             TBL_ART_EXIST.row.add(
                 {
@@ -2216,36 +2248,36 @@ $(document).on('keyup', function (e) {
             ).draw( false );
             actualizaLineaPartidaAE();
         }
-        else{
-            TBL_ART_MISC.row.add({
-                "PARTIDA": ""
-                , "CODIGO_ARTICULO": ""
-                , "NOMBRE_ARTICULO": ""
-                , "UNIDAD_MEDIDA_INV": ""
-                , "FACTOR_CONVERSION": ""
-                , "UNIDAD_MEDIDA_COMPRAS": ""
-                , "CANTIDAD": "0.00"
-                , "PRECIO": "0.00"
-                , "SUBTOTAL": "0.00"
-                , "DESCUENTO": "0.00"
-                , "MONTO_DESCUENTO": "0.00"
-                , "IVA": ""
-                , "MONTO_IVA": "0.00"
-                , "TOTAL": "0.00"
-                , "PARTIDA_CERRADA": 0
-                , "BTN_ELIMINAR": null
-                , "ID_ARTICULO": ""
-                , "ID_PARTIDA": ""
-                , "ID_AUX" : generateGuid()
-                , "ID_UMI": ""
-                , "ID_UMC": ""
-                , "ID_IVA":""
-                , "ESTATUS_PARTIDA":""
-                , "CODIGO_OT": ""
-                , "ID_OT": ""
-            }).draw( false );
-             actualizaLineaPartidaAM();
-        }
+        // else{
+        //     TBL_ART_MISC.row.add({
+        //         "PARTIDA": ""
+        //         , "CODIGO_ARTICULO": ""
+        //         , "NOMBRE_ARTICULO": ""
+        //         , "UNIDAD_MEDIDA_INV": ""
+        //         , "FACTOR_CONVERSION": ""
+        //         , "UNIDAD_MEDIDA_COMPRAS": ""
+        //         , "CANTIDAD": "0.00"
+        //         , "PRECIO": "0.00"
+        //         , "SUBTOTAL": "0.00"
+        //         , "DESCUENTO": "0.00"
+        //         , "MONTO_DESCUENTO": "0.00"
+        //         , "IVA": ""
+        //         , "MONTO_IVA": "0.00"
+        //         , "TOTAL": "0.00"
+        //         , "PARTIDA_CERRADA": 0
+        //         , "BTN_ELIMINAR": null
+        //         , "ID_ARTICULO": ""
+        //         , "ID_PARTIDA": ""
+        //         , "ID_AUX" : generateGuid()
+        //         , "ID_UMI": ""
+        //         , "ID_UMC": ""
+        //         , "ID_IVA":""
+        //         , "ESTATUS_PARTIDA":""
+        //         , "CODIGO_OT": ""
+        //         , "ID_OT": ""
+        //     }).draw( false );
+        //      actualizaLineaPartidaAM();
+        // }
     }
 
 });

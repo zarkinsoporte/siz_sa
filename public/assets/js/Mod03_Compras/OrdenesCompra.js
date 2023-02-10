@@ -34,6 +34,7 @@ function js_iniciador() {
     });
     $('#input-fecha').datepicker('setDate', new Date());
     $("#input_date").daterangepicker({
+        
         autoUpdateInput: false,
         format: "DD/MM/YYYY",
         "locale": {
@@ -70,7 +71,7 @@ function js_iniciador() {
     }}, 
     function(start, end, label) {
         //alert("A new date range was chosen: " + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
-        //reloadOrdenesImpresion(start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'));
+        reloadOrdenes(start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'));
     });
 
   function InicializaComboBox()  {
@@ -161,7 +162,7 @@ function js_iniciador() {
                 });
                 },
                 complete: function() {
-                    //reloadOrdenesImpresion();
+                    //reloadOrdenes();
                     setTimeout($.unblockUI, 1500);
                 },
                 success: function(data){   
@@ -347,8 +348,8 @@ $('#tabla_impresion').on( 'click', 'button#boton-pdf', function (e) {
     $.unblockUI();
 });
  
-//reloadOrdenesImpresion();
-function reloadOrdenesImpresion(fi, ff){
+//reloadOrdenes();
+function reloadOrdenes(fi, ff){
     
     $("#tabla_impresion").DataTable().clear().draw();
     $.ajax({
@@ -459,6 +460,14 @@ function get_oc() {
 $('#boton-mostrar').on('click', function(e) {
     //getop_empaque();
 });
+$('#boton-mostrar-oc').on('click', function(e) {
+    get_oc();
+});
+$('#boton-mostrar-calendar').on('click', function(e) {
+   // $('#input_date').trigger('show.daterangepicker');
+    $('#input_date').click();
+});
+
 $('#boton-mostrar-serie').on('click', function(e) {
     //getserie_empaque();
 });
@@ -490,6 +499,21 @@ $(document).keyup(function(event) {
         return s.join(dec);
     } 
     $("#cboMoneda").on("changed.bs.select", function(e, clickedIndex, newValue, oldValue) {
+        $.blockUI({
+                message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                css: {
+                    border: 'none',
+                    padding: '16px',
+                    width: '50%',
+                    top: '40%',
+                    left: '30%',
+                    backgroundColor: '#fefefe',
+                    '-webkit-border-radius': '10px',
+                    '-moz-border-radius': '10px',
+                    opacity: .7,
+                    color: '#000000'
+                }
+            });
         var tipo_cambio_anterior = $('#input_tc').val();
         console.log('cambiando moneda: ')
         var moneda_anterior = oldValue;
@@ -499,6 +523,30 @@ $(document).keyup(function(event) {
         calculaNuevaMoneda(moneda_anterior, moneda, tipo_cambio_anterior);
         recargaTablaArticulos('');
         cargaTablaArticulos();
+        setTimeout($.unblockUI, 2000);
+    });
+    $('#input_tc').change(function (e){
+        $.blockUI({
+                message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                css: {
+                    border: 'none',
+                    padding: '16px',
+                    width: '50%',
+                    top: '40%',
+                    left: '30%',
+                    backgroundColor: '#fefefe',
+                    '-webkit-border-radius': '10px',
+                    '-moz-border-radius': '10px',
+                    opacity: .7,
+                    color: '#000000'
+                }
+            });
+        var moneda = $('#cboMoneda').val();       
+        var tipo_cambio_anterior = $('#input_tc_anterior').val(); 
+        calculaNuevaTipoCambio(moneda, tipo_cambio_anterior);
+        recargaTablaArticulos('');
+        cargaTablaArticulos();
+        setTimeout($.unblockUI, 2000);
     });
     $("#sel-proveedor").on("changed.bs.select", function(e, clickedIndex, newValue, oldValue) {
         $.blockUI({
@@ -667,32 +715,41 @@ $('#tblArticulosExistentesNueva').on('click', 'a#boton-eliminarAE', function (e)
         //$('#modalBuscadorProveedores').on('show.bs.modal', function () { }).modal("show");
     }
     function carga_tipo_cambio(moneda) {
-        $.ajax({
-            type: 'GET',
-            async: false,
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            url: routeapp + 'get-rates',
-            data: {
-                mon: moneda
-            },
-            beforeSend: function() {
-               
-            },
-            complete: function() {
-               // setTimeout($.unblockUI, 500);
-            },
-            success: function(data){
-                if(data.rates.length > 0){
-                    $("#div-tipo-cambio").show();
-                    $("#input_tc").val(data.rates[0].Rate);
-                                     
-                }else{
-                    $("#div-tipo-cambio").hide();
+        if (moneda == 'MXP') {
+            $("#div-tipo-cambio").hide();
+            $("#input_tc").val(1);
+            $("#input_tc_anterior").val(1);
+        } else {
+            $.ajax({
+                type: 'GET',
+                async: false,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                url: routeapp + 'get-rates',
+                data: {
+                    mon: moneda
+                },
+                beforeSend: function() {
+                
+                },
+                complete: function() {
+                // setTimeout($.unblockUI, 500);
+                },
+                success: function(data){
+                    if(data.rates.length > 0){
+                        $("#div-tipo-cambio").show();
+                        $("#input_tc").val(data.rates[0].Rate);
+                        $("#input_tc_anterior").val(data.rates[0].Rate);
+                                        
+                    }else{
+                        $("#div-tipo-cambio").hide();
+                        $("#input_tc").val(1);
+                        $("#input_tc_anterior").val(1);
+                    }
                 }
-            }
-        });
+            });
+        }
     }
     window.onload = function () { 
         tabla_impresion.columns.adjust().draw();     
@@ -1081,7 +1138,6 @@ $('#tblArticulosExistentesNueva').on('change','input#input-descuentoAE',function
         $(this).val("");
     }
 });
-
 $('#tblArticulosExistentesNueva').on('change','select#cboIVAAE',function (e) {
     e.preventDefault();
     if ($("#sel-proveedor").val() != ""){

@@ -64,7 +64,7 @@
                                     <div class="input-group">
                                         <input type="text" class="form-control" autocomplete="off" id="input_date">
                                         <span class="input-group-btn">
-                                            <button class="btn btn-success" id="boton-mostrar" type="button">
+                                            <button class="btn btn-success" id="boton-mostrar-calendar" type="button">
                                                 <i class="fa fa-calendar"></i> </button>
                                         </span>
                                     </div><!-- /input-group -->
@@ -155,6 +155,7 @@
                         <font size="2">Tipo Cambio</font>
                             </strong></label>
                        <input type="number" class="form-control" name="" value="1" id="input_tc">
+                       <input type="number" class="form-control" name="" value="1" id="input_tc_anterior" style="display: none">
                     </div>
                 </div>
             </div>
