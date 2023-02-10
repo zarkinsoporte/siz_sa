@@ -178,10 +178,10 @@
                            
                         </div>
                         <div class="invoice-date">
-                            {{--  <small>CÓDIGO</small>
+                            <small>CÓDIGO</small>
                             <div class="date m-t-5"><span id="codigoOC"></span></div>
                             <small>ESTADO OC</small>
-                            <div class="date m-t-5"><span id="estadoOC"></span></div>  --}}
+                            <div class="date m-t-5"><span id="estadoOC"></span></div>
                         </div>
                     </div>
                     <div class="invoice-content">

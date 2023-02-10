@@ -745,4 +745,65 @@ class Mod03_ComprasController extends Controller
 
     }
     
+    public function registraOC(){
+
+        \DB::beginTransaction();
+
+        try{
+
+            date_default_timezone_set('America/Mexico_City');
+            $hoy=date('d-m-Y H:i:s');
+            $dia=date('d-m-Y');
+
+            //$OC_CodigoOC = $_POST['OC_CodigoOC'] == '' ? null : $_POST['OC_CodigoOC'];
+            $OC_PRO_ProveedorId = $_POST['OC_PRO_ProveedorId'];
+            //$OC_PDOC_DireccionOCId = $_POST['OC_PDOC_DireccionOCId'] == '' ? null : $_POST['OC_PDOC_DireccionOCId'];
+            //$OC_CMM_TipoOCId = $_POST['OC_CMM_TipoOCId'];
+            $OC_MON_MonedaId = $_POST['OC_MON_MonedaId'];
+            $OC_MONP_Paridad = $_POST['OC_MONP_Paridad'] == '' ? null : $_POST['OC_MONP_Paridad'];
+            //$OC_MONP_ParidadId = $_POST['OC_MONP_ParidadId'] == '' ? null : $_POST['OC_MONP_ParidadId'];
+            
+          
+            //$OC_PorcentajeDescuento = $_POST['OC_PorcentajeDescuento'] == '' ? null : $_POST['OC_PorcentajeDescuento'];
+            //$OC_CMIVA_IVAId = $_POST['OC_CMIVA_IVAId'] == '' ? null : $_POST['OC_CMIVA_IVAId'];
+            if($OC_CMIVA_IVAId == null){
+
+                $OCD_CMIVA_PorcentajeIVA = 0;
+
+            }
+            else{
+
+                $OCD_CMIVA_PorcentajeIVA = $_POST['OCD_CMIVA_PorcentajeIVA'] == '' ? null : $_POST['OCD_CMIVA_PorcentajeIVA'];
+
+            }
+            
+            $TablaArticulosExistentes = isset($_POST['TablaArticulosExistentes']) ? json_decode($_POST['TablaArticulosExistentes'], true) : array();
+           
+            $empleadoId = '';//DataBaseSession::getEmpleadoId();
+            $editaProveedor = $_POST['editaProveedor'];
+
+            if($_POST['status'] == 0){
+
+                //INSERTA ORDEN DE COMPRA
+               
+                for($x = 0; $x < $cuentaTablaArtExis; $x ++){
+
+                    if($TablaArticulosExistentes[$x]['ID_ARTICULO'] != ""){
+
+                        $contadorPartida++;
+                                  \DB::commit();
+                    }
+                }  
+            }  
+            return ['Status' => 'Valido', 'respuesta' => $response];
+
+        }
+        catch (\Exception $e){
+
+            \DB::rollback();
+            return ['Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$e->getMessage()];
+
+        }
+
+    }
 }

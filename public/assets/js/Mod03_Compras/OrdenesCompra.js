@@ -1251,7 +1251,49 @@ $('#tblArticulosExistentesNueva').on('change','select#cboIVAAE',function (e) {
 
     }
 });
+$('#guardar').off().on('click', function(e) {
 
+    var estadoOC = $('#estadoOC').text();
+    if(estadoOC == 'Completa'){
+    
+         bootbox.dialog({
+            title: "Mensaje",
+            message: "<div class='alert alert-danger m-b-0'>No puedes editar la Orden de Compra porque ya esta Completa.</div>",
+            buttons: {
+            success: {
+            label: "Ok",
+            className: "btn-success m-r-5 m-b-5"
+            }
+            }
+        }).find('.modal-content').css({'font-size': '14px'} );
+
+    }
+    else if(estadoOC == 'Correspondida Completa'){
+
+        bootbox.dialog({
+            title: "Mensaje",
+            message: "<div class='alert alert-danger m-b-0'>No puedes editar la Orden de Compra porque ya esta Correspondida Completa.</div>",
+            buttons: {
+            success: {
+            label: "Ok",
+            className: "btn-success m-r-5 m-b-5"
+            }
+            }
+        }).find('.modal-content').css({'font-size': '14px'} );
+
+    }
+    else{
+
+        validarCampos();
+        if(bandera == 0){
+
+            registraOC();
+
+        }
+
+    }
+
+});
 }  //fin js_iniciador               
 function val_btn(val) { 
 

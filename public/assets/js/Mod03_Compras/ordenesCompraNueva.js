@@ -2847,60 +2847,16 @@ $('#tblArticulosMiscelaneosNueva').on('click', 'button#boton-eliminarAM', functi
     PartidaResumenAM();
 });
 
-$('#guardar').off().on('click', function(e) {
-
-    var estadoOC = $('#estadoOC').text();
-    if(estadoOC == 'Completa'){
-    
-         bootbox.dialog({
-            title: "Mensaje",
-            message: "<div class='alert alert-danger m-b-0'>No puedes editar la Orden de Compra porque ya esta Completa.</div>",
-            buttons: {
-            success: {
-            label: "Ok",
-            className: "btn-success m-r-5 m-b-5"
-            }
-            }
-        }).find('.modal-content').css({'font-size': '14px'} );
-
-    }
-    else if(estadoOC == 'Correspondida Completa'){
-
-        bootbox.dialog({
-            title: "Mensaje",
-            message: "<div class='alert alert-danger m-b-0'>No puedes editar la Orden de Compra porque ya esta Correspondida Completa.</div>",
-            buttons: {
-            success: {
-            label: "Ok",
-            className: "btn-success m-r-5 m-b-5"
-            }
-            }
-        }).find('.modal-content').css({'font-size': '14px'} );
-
-    }
-    else{
-
-        validarCampos();
-        if(bandera == 0){
-
-            registraOC();
-
-        }
-
-    }
-
-});
-
 function validarCampos(){
 
     var moneda = $("#cboMoneda").val();
-    var tipoCambio = $("#cboTipoCambio").val();
-    var tipoOC = $("#cboTipoOC").val();
-    var almacen = $("#cboAlmacen").val();
+    var tipoCambio = $("#input_tc").val();
+    //var tipoOC = $("#cboTipoOC").val();
+    //var almacen = $("#cboAlmacen").val();
     var tablaArtExis = document.getElementById("tblArticulosExistentesNueva");
     var cuentaTablaArtExis = tablaArtExis.rows.length;
-    var tablaArtMisc = document.getElementById("tblArticulosMiscelaneosNueva");
-    var cuentaTablaArtMisc = tablaArtMisc.rows.length;
+    //var tablaArtMisc = document.getElementById("tblArticulosMiscelaneosNueva");
+    //var cuentaTablaArtMisc = tablaArtMisc.rows.length;
     bandera = 0;
 
     if(moneda == ''){
@@ -2918,7 +2874,7 @@ function validarCampos(){
         }).find('.modal-content').css({'font-size': '14px'} );
 
     }
-    else if(moneda != '748BE9C9-B56D-4FD2-A77F-EE4C6CD226A1' && tipoCambio == ""){//PESOS
+    else if(moneda != 'MXP' && tipoCambio == ""){//PESOS
 
         //if(tipoCambio == ""){
 
@@ -2937,41 +2893,23 @@ function validarCampos(){
         //}
 
     }
-    else if(tipoOC == ""){
+    // else if(tipoOC == ""){
 
-        bandera = 1;
-         bootbox.dialog({
-            title: "Mensaje",
-            message: "<div class='alert alert-danger m-b-0'>Elegir tipo de OC.</div>",
-            buttons: {
-            success: {
-            label: "Ok",
-            className: "btn-success m-r-5 m-b-5"
-            }
-            }
-        }).find('.modal-content').css({'font-size': '14px'} );
+    //     bandera = 1;
+    //      bootbox.dialog({
+    //         title: "Mensaje",
+    //         message: "<div class='alert alert-danger m-b-0'>Elegir tipo de OC.</div>",
+    //         buttons: {
+    //         success: {
+    //         label: "Ok",
+    //         className: "btn-success m-r-5 m-b-5"
+    //         }
+    //         }
+    //     }).find('.modal-content').css({'font-size': '14px'} );
 
-    }
-    else if(cuentaTablaArtExis > 2 && almacen == ""){
-
-        //if(almacen == ""){
-
-        bandera = 1;
-        bootbox.dialog({
-            title: "Mensaje",
-            message: "<div class='alert alert-danger m-b-0'>Elegir almacén Destino.</div>",
-            buttons: {
-            success: {
-            label: "Ok",
-            className: "btn-success m-r-5 m-b-5"
-            }
-            }
-        }).find('.modal-content').css({'font-size': '14px'} );
-
-        //}
-
-    }
-    else if(cuentaTablaArtExis < 2 && cuentaTablaArtMisc < 2){
+    // }
+    else if(cuentaTablaArtExis < 2){
+    //else if(cuentaTablaArtExis < 2 && cuentaTablaArtMisc < 2){
 
         bandera = 1;
          bootbox.dialog({
@@ -2995,52 +2933,48 @@ function registraOC(){
     datosTablaArtExis = getTblArtExis();
     datosTablaArtExis = JSON.stringify(datosTablaArtExis);
 
-    var datosTablaArtMisc;
-    datosTablaArtMisc = getTblArtMisc();
-    datosTablaArtMisc = JSON.stringify(datosTablaArtMisc);
+    // var datosTablaArtMisc;
+    // datosTablaArtMisc = getTblArtMisc();
+    // datosTablaArtMisc = JSON.stringify(datosTablaArtMisc);
 
-    var TblPartidasDetalles;
-    TblPartidasDetalles = JSON.stringify(JSON_PARTIDA);
+    // var TblPartidasDetalles;
+    // TblPartidasDetalles = JSON.stringify(JSON_PARTIDA);
 
-    var datosTablaPedimentos;
-    datosTablaPedimentos = getTblPedimento();
+    // var datosTablaPedimentos;
+    // datosTablaPedimentos = getTblPedimento();
 
-    var paridad = '';
-    if($("#cboMoneda").val() == '748BE9C9-B56D-4FD2-A77F-EE4C6CD226A1'){//pesos
-        paridad = '';
-    }
-    else{
-        paridad = $("#cboTipoCambio option:selected").text();
-    }
+    
+    paridad = $("#input_tc").val();
+  
 
     $.ajax({
-        url: "compras/registraOC",
+        url: routeapp + "registraOC",
         data: {
             "status": registroNuevo,
-            "OC_CodigoOC": $("#codigoOC").text(),
-            "OC_PRO_ProveedorId": $("#input-proveedor").val(),
-            "OC_PDOC_DireccionOCId": $("#cboSucursal").val(),
-            "OC_CMM_TipoOCId": $("#cboTipoOC").val(),
+            //"OC_CodigoOC": $("#codigoOC").text(),
+            "OC_PRO_ProveedorId": $("#sel-proveedor option:selected").val(),
+            //"OC_PDOC_DireccionOCId": $("#cboSucursal").val(),
+            //"OC_CMM_TipoOCId": $("#cboTipoOC").val(),
             "OC_MON_MonedaId": $("#cboMoneda").val(),
             "OC_MONP_Paridad": paridad,
-            "OC_MONP_ParidadId": $("#cboTipoCambio").val(),
-            "OC_ALM_AlmacenId": $("#cboAlmacen").val(),
-            "OC_CMM_AgenteAduanal": $("#cboAgente").val(),
-            "OC_AGE_PDOC_DireccionOCId": $("#cboSucursalAgente").val(),
-            "OC_CMM_LibreABordoId": $("#modal-datos #cboLibreABordo").val(),
-            "OC_CMM_MetodoEmbarqueId": $("#modal-datos #cboMetodoEmbarque").val(),
-            "OC_PorcentajeDescuento": $("#modal-datos #input-descuento").val(),
-            "OC_CMIVA_IVAId": $("#modal-datos #cboIVA").val(),
-            "OCD_CMIVA_PorcentajeIVA": $("#cboIVA option:selected").text(),
-            "OC_EV_ProyectoId": $("#modal-datos #cboProyectos").val(),
-            "OC_OT_OrdenTrabajoId": $("#modal-datos #idOrdenTrabajo").val(),
-            "OC_Comentarios": $("#modal-datos #input-comentarios").val(),
-            "ArrayFehasRequeridas": TblPartidasDetalles,
-            "ArrayFehasRequeridasEditar": TblPartidasDetalles,
+            //"OC_MONP_ParidadId": $("#cboTipoCambio").val(),
+            //"OC_ALM_AlmacenId": $("#cboAlmacen").val(),
+            //"OC_CMM_AgenteAduanal": $("#cboAgente").val(),
+            //"OC_AGE_PDOC_DireccionOCId": $("#cboSucursalAgente").val(),
+            //"OC_CMM_LibreABordoId": $("#modal-datos #cboLibreABordo").val(),
+            //"OC_CMM_MetodoEmbarqueId": $("#modal-datos #cboMetodoEmbarque").val(),
+            //"OC_PorcentajeDescuento": $("#modal-datos #input-descuento").val(),
+            //"OC_CMIVA_IVAId": $("#modal-datos #cboIVA").val(),
+            //"OCD_CMIVA_PorcentajeIVA": $("#cboIVA option:selected").text(),
+            //"OC_EV_ProyectoId": $("#modal-datos #cboProyectos").val(),
+            //"OC_OT_OrdenTrabajoId": $("#modal-datos #idOrdenTrabajo").val(),
+            //"OC_Comentarios": $("#modal-datos #input-comentarios").val(),
+            //"ArrayFehasRequeridas": TblPartidasDetalles,
+            //"ArrayFehasRequeridasEditar": TblPartidasDetalles,
             "TablaArticulosExistentes": datosTablaArtExis,
-            "TablaArticulosMiscelaneos": datosTablaArtMisc,
-            "TablaPedimentos": datosTablaPedimentos,
-            "editaProveedor": editaProveedor
+            //"TablaArticulosMiscelaneos": datosTablaArtMisc,
+            //"TablaPedimentos": datosTablaPedimentos,
+            //"editaProveedor": editaProveedor
         },
         type: "POST",
         async:false,
@@ -3065,11 +2999,11 @@ function registraOC(){
                 reloadBuscadorOC();
                 InicializaComponentesOC();
                 $("#tblArticulosExistentesNueva").DataTable().clear().draw();
-                $("#tblArticulosMiscelaneosNueva").DataTable().clear().draw();
-                $("#tblArticulosExistentesResumenNueva").DataTable().clear().draw();
-                $("#tblArticulosMiscelaneosResumenNueva").DataTable().clear().draw();
+                // $("#tblArticulosMiscelaneosNueva").DataTable().clear().draw();
+                // $("#tblArticulosExistentesResumenNueva").DataTable().clear().draw();
+                // $("#tblArticulosMiscelaneosResumenNueva").DataTable().clear().draw();
                 calculaTotalOrdenCompra();
-                calculaTipoCambio();
+                //calculaTipoCambio();
 
             }
         },
@@ -3433,7 +3367,7 @@ function agregaPartidasOCDetalle(datos){
 
     }
     calculaTotalOrdenCompra();
-    calculaTipoCambio();
+    //calculaTipoCambio();
 
 }
 
