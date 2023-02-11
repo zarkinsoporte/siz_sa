@@ -96,8 +96,8 @@ public function indexGenerarOP(){
         }
 }
 public function generarOP(Request $request){
-        ini_set('memory_limit', '-1');
-        set_time_limit(0);
+        ////ini_set('memory_limit', '-1');
+        set_time_limit(600);
         $orders = '';
         if(strlen($request->input('ordenesvta')) > 0 ){                     
             $orders = SAP::crearOrdenesProduccion($request->input('ordenesvta'));                        
@@ -108,8 +108,8 @@ public function generarOP(Request $request){
 }
 public function programar_op(Request $request){
     // dd($request->all());
-    ini_set('memory_limit', '-1');
-    set_time_limit(0);
+    //ini_set('memory_limit', '-1');
+    set_time_limit(600);
     if(strlen($request->input('ordenes')) > 0 ){
         $preOrdenes = explode(',', $request->input('ordenes'));
         $mensajeErrr= [];
@@ -180,8 +180,8 @@ public function programar_op(Request $request){
     }
 }
 public function liberacion_op(Request $request){
-        ini_set('memory_limit', '-1');
-        set_time_limit(0);
+        //ini_set('memory_limit', '-1');
+        set_time_limit(300);
         if(strlen($request->input('ordenes')) > 0 ){
             $preOrdenes = explode(',', $request->input('ordenes'));
             $mensajeErrr= '';
@@ -259,8 +259,8 @@ public function liberacion_op(Request $request){
         }
 }
 public function impresion_op(Request $request){
-    ini_set('memory_limit', '-1');
-    set_time_limit(0);
+    //ini_set('memory_limit', '-1');
+    set_time_limit(150);
     if(strlen($request->input('ordenes')) > 0 ){
 
            // DB::beginTransaction();
@@ -387,8 +387,8 @@ public function impresion_op(Request $request){
     }
 }
 public function asignar_series(Request $request){
-        ini_set('memory_limit', '-1');
-        set_time_limit(0);
+        //ini_set('memory_limit', '-1');
+        set_time_limit(130);
         $mensajeErrr= '';
         if(strlen($request->input('ordenes')) > 0 ){
             //dd($request->input('ordenes'));
@@ -429,8 +429,8 @@ public function asignar_series(Request $request){
         }
 }
 public function reset_series_op(Request $request){
-    ini_set('memory_limit', '-1');
-    set_time_limit(0);
+    //ini_set('memory_limit', '-1');
+    set_time_limit(130);
     $mensajeErrr= '';
     if(strlen($request->input('ordenes')) > 0 ){
         //dd($request->input('ordenes'));
@@ -449,8 +449,8 @@ public function reset_series_op(Request $request){
     }
 }
 public function updateOV(Request $request){
-    ini_set('memory_limit', '-1');
-        set_time_limit(0);
+    //ini_set('memory_limit', '-1');
+        //set_time_limit(120);
         //if(strlen($request->input('ordenvta')) > 0 ){                     
        //     $orders = SAP::updateOV($request->input('ordenvta'));
         if(true ){
@@ -463,8 +463,8 @@ public function updateOV(Request $request){
 }
 public function registros_gop(Request $request){
         try {
-            ini_set('memory_limit', '-1');
-            set_time_limit(0);            
+            //ini_set('memory_limit', '-1');
+            //set_time_limit(130);            
             $sel = "SELECT
                 '0' [Grupal],
                 OITT.Code AS Code,
@@ -578,8 +578,8 @@ public function registros_gop(Request $request){
 }
 public function registros_gop_pedido(Request $request){
         try {
-            ini_set('memory_limit', '-1');
-            set_time_limit(0);            
+            //ini_set('memory_limit', '-1');
+            //set_time_limit(100);            
             $pedido = $request->input('cbopedido');
             $sel = "SELECT 
                     OW.DocEntry as OP,
@@ -614,8 +614,8 @@ public function registros_gop_pedido(Request $request){
 }
 public function countRollout(Request $request){
     try {
-        ini_set('memory_limit', '-1');
-        set_time_limit(0);
+        ////ini_set('memory_limit', '-1');
+        //set_time_limit(0);
         $jobs = DB::select("SELECT queue from jobs
             where queue = 'ItemPrecioUpdate' OR queue = 'ItemPrecioControl'");
         if (count($jobs) > 0) {
@@ -640,8 +640,8 @@ public function countRollout(Request $request){
 }
 public function processRollout(Request $request){
     try {
-        ini_set('memory_limit', '-1');
-        set_time_limit(0);            
+        //ini_set('memory_limit', '-1');
+        set_time_limit(150);            
         $sel = "";
         $mensaje= 0;            
         $arts= '';            
@@ -718,8 +718,8 @@ public function processRollout(Request $request){
 }
 public function cancelProcessRollout(Request $request){
     try {
-        ini_set('memory_limit', '-1');
-        set_time_limit(0); 
+        //ini_set('memory_limit', '-1');
+        set_time_limit(150); 
 
 
         /* DB::table('jobs')
@@ -773,8 +773,8 @@ public function cancelProcessRollout(Request $request){
 public function registros_tabla_liberacion(Request $request){
              //dd($request->all());
         try {
-            ini_set('memory_limit', '-1');
-            set_time_limit(0);
+            //ini_set('memory_limit', '-1');
+            //set_time_limit(0);
             $estado = $request->input('estado');
             $tipo = $request->input('tipo');
             /*
@@ -846,8 +846,8 @@ public function registros_tabla_liberacion(Request $request){
     {
         //dd($request->all());
         try {
-            ini_set('memory_limit', '-1');
-            set_time_limit(0);
+            //ini_set('memory_limit', '-1');
+            //set_time_limit(0);
             $estado = $request->input('estado');
             $tipo = $request->input('tipo');
             /*
@@ -993,8 +993,8 @@ public function registros_tabla_liberacion(Request $request){
     {
         //dd($request->all());
         try {
-            ini_set('memory_limit', '-1');
-            set_time_limit(0);
+            //ini_set('memory_limit', '-1');
+            //set_time_limit(0);
             $estado = $request->input('estado');
             $tipo = $request->input('tipo');
             /*
@@ -1067,8 +1067,8 @@ public function registros_tabla_liberacion(Request $request){
     }
 public function registros_tabla_series(){
         try {
-            ini_set('memory_limit', '-1');
-            set_time_limit(0);
+            //ini_set('memory_limit', '-1');
+            //set_time_limit(0);
             
             $sel = "SELECT O.u_tipoMat, OW.DocEntry from OWOR OW
 					INNER JOIN OITM O on OW.ItemCode = O.ItemCode

@@ -32,8 +32,8 @@ class Mod08_DisenioController extends Controller
     }
     public function mtto_acabados_PDF(){
 
-        ini_set('memory_limit', '-1');
-        set_time_limit(0);
+        //ini_set('memory_limit', '-1');
+        //set_time_limit(0);
         $acabados = ACABADO::where('ACA_Eliminado', 0)
             ->whereNotNull('CODIDATO')           
             ->orderBy('DESCDATO', 'asc')

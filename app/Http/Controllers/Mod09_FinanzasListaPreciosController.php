@@ -952,8 +952,8 @@ class Mod09_FinanzasListaPreciosController extends Controller
     }
     public function registros_listaPrecios(Request $request){
         try {
-            ini_set('memory_limit', '-1');
-            set_time_limit(0);
+            //ini_set('memory_limit', '-1');
+            //set_time_limit(0);
             $depList = $request->input('deplist');
             $consulta = DB::select('SELECT OITM.ItemCode as codigo, 
             SUBSTRING( ItemName, 1, 50) AS descripcion, InvntryUom AS um, BuyUnitMsr AS umc, 

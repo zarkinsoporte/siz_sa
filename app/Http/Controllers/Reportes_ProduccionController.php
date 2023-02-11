@@ -1575,8 +1575,8 @@ class Reportes_ProduccionController extends Controller
     {
         //dd($request->all());
         try {
-            ini_set('memory_limit', '-1');
-            set_time_limit(0);
+            //ini_set('memory_limit', '-1');
+            //set_time_limit(0);
             $estado = 'R';
             $tipo = "dbo.OITM.U_TipoMat in ( 'PT', 'RF') ";
             $sel = "SELECT
@@ -1611,8 +1611,8 @@ class Reportes_ProduccionController extends Controller
         }
     }
     public function impresion_op_empaque(Request $request){
-        ini_set('memory_limit', '-1');
-        set_time_limit(0);
+        //ini_set('memory_limit', '-1');
+        //set_time_limit(0);
         if(strlen($request->input('ordenes')) > 0 ){
     
                // DB::beginTransaction();
