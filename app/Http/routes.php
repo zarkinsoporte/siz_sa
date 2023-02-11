@@ -485,11 +485,14 @@ Route::get('/sap', function (Request $request) {
 	$vCmp->DbUserName = env('SAP_DbUserName');
 	$vCmp->DbPassword = env('SAP_DbPassword');
 
-	/*$lRetCode = $vCmp->Connect;
+	$lRetCode = $vCmp->Connect;
 	$id = '1';
-
-	$vItem = $vCmp->GetBusinessObject("67");
-
+	$vCmp->XmlExportType = '3';
+	$vItem = $vCmp->GetBusinessObject("22");
+	$vItem->GetByKey('');
+	$pathh = public_path('assets/xml/sap/2023.xml');
+	$vItem->SaveXML($pathh); //Guardar en archivo
+/*
 	$vItem->DocDate = (new \DateTime('now'))->format('Y-m-d H:i:s');
 	$vItem->FromWarehouse = 'AMP-ST'; //origen
 	$vItem->PriceList = '10';
@@ -551,14 +554,14 @@ Route::get('/sap', function (Request $request) {
 		$vItem->Browser->ReadXml($oXML->asXML(), 0);
 		// $vItem->UpdateFromXML($pathh);
 		$resultadoOperacion = $vItem->Update;
-*/
+
 	
 	if ($vCmp->Connect <> 0) {
 	   Session::flash('error', $vCmp->GetLastErrorDescription());
 	} else {
 		Session::flash('info',' - conexión con SAP DI API exitosa!!'. $vCmp->language. ' ultimo err:'. $vCmp->GetLastErrorDescription());
 	} 
-	
+	*/
 	$vCmp->Disconnect;
 	$vCmp = null;
 	$vItem = null;
@@ -704,6 +707,11 @@ Route::get('home/reporte/ultimospreciosPDF', 'Mod03_ComprasController@ultimos_pr
 //ORDENES DE COMPRA
 Route::get('home/ORDENES DE COMPRA', 'Mod03_ComprasController@index_ordenes_compra')->middleware('routelog');
 Route::any('get_oc', 'Mod03_ComprasController@get_oc')->name('get_oc');
+Route::any('get-rates', 'Mod03_ComprasController@get_rates')->name('get-rates');
+Route::any('get_detalleProveedor', 'Mod03_ComprasController@get_detalleProveedor')->name('get_detalleProveedor');
+Route::any('consultaIvasYUnidadesMedida', 'Mod03_ComprasController@consultaIvasYUnidadesMedida')->name('consultaIvasYUnidadesMedida');
+Route::any('cargaTablaArticulos', 'Mod03_ComprasController@cargaTablaArticulos')->name('cargaTablaArticulos');
 Route::any('getProveedorOC', 'Mod03_ComprasController@getProveedorOC')->name('getProveedorOC');
 Route::any('get_oc_xfecha', 'Mod03_ComprasController@get_oc_xfecha')->name('get_oc_xfecha');
 Route::any('orden_compra_pdf/{NumOC}', 'Mod03_ComprasController@orden_compra_pdf')->name('orden_compra_pdf');
+Route::any('registraOC', 'Mod03_ComprasController@registraOC')->name('registraOC');

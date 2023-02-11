@@ -463,12 +463,17 @@ class Mod03_ComprasController extends Controller
         $actividades = session('userActividades');
         $ultimo = count($actividades);
 
-       $proveedores = DB::select('SELECT CardCode, CardName FROM OCRD WHERE CardType = ? ORDER BY CardName', ['S']);
+        $proveedores = DB::select("SELECT CardCode, CardName, Currency FROM OCRD WHERE CardType = ? AND frozenFor='N' ORDER BY CardName", ['S']);
         //$fstart = \Carbon\Carbon::now()->toDateString();
-
+       
+        $rates = DB::table('ORTT')->where('RateDate', date('Y-m-d'))->get();        
+        if (count($rates) < 3) {
+           
+            Session::flash('error', 'No estan Capturados los Tipos de Cambio en SAP.');
+        }
         return view('Mod03_Compras.OrdenesCompra', 
         compact( 'actividades', 'ultimo', 
-        'proveedores'));    
+        'proveedores'));    // 'rates',
     }
     public function get_oc_xfecha(Request $request){
         $query = "SELECT 
@@ -565,5 +570,240 @@ class Mod03_ComprasController extends Controller
             $respuesta = 'Error, No existe';
         }
         return compact('respuesta', 'data');
+    }
+    public function get_rates(Request $request){
+        $rates = DB::table('ORTT')
+        ->where('Currency', $request->get('mon'))
+        ->where('RateDate', date('Y-m-d'))->get();
+       
+        return compact('rates');
+    }
+    public function get_detalleProveedor(Request $request){
+        $proveedor = DB::select("SELECT
+            Proveedores.CardCode PRO_Codigo,
+            CardName PRO_Nombre,
+            Proveedores.LicTradNum PRO_RFC,
+            Proveedores.E_Mail PRO_Email,
+            Phone1 PRO_Telefono,
+            Currency Moneda,
+            (select top 1
+            OCPR.Name + ' '+ OCPR.LastName + ', email:' + OCPR.E_MailL 
+            from OCPR where OCPR.CardCode = Proveedores.CardCode AND validFor = 'Y'
+            Group by 
+            OCPR.Name , OCPR.LastName , OCPR.E_MailL
+            ) AS CON_Contacto,
+
+            (select top 1
+            CRD1.Street + ', ' + CRD1.Block + ', '+ CRd1.City + ', '+ CRd1.State+', '+Crd1.Country + '. CP:'+ CRd1.ZipCode
+            from CRD1 where CRD1.CardCode = Proveedores.CardCode
+            Group by 
+            CRD1.Street , CRD1.Block , CRd1.City ,CRd1.State,Crd1.Country, CRd1.ZipCode
+            ) AS PRO_Domicilio
+            FROM OCRD Proveedores
+            WHERE CardType = 'S' AND frozenFor='N' AND Proveedores.CardCode = ?
+            ORDER BY CardName
+        ", [$request->get('id')]);
+        $proveedor = $proveedor[0];
+        return compact('proveedor');
+    }
+
+     public function cargaTablaArticulos(Request $request){
+        //$tc_sys = 1;
+        if (false) {
+        //if ($request->get('moneda') != 'MXP') {
+            $tc_sys =  DB::table('ORTT')
+            //->where('Currency', $request->get('moneda'))
+            ->where('RateDate', date('Y-m-d'));
+        }
+        $tc_sys = DB::table('ORTT')        
+        ->where('RateDate', date('Y-m-d'))->get();
+        $tipos_cambio = [];
+        foreach ($tc_sys as $value) {
+            $tipos_cambio [$value->Currency] = $value->Rate.'';
+        }
+        $sql = "SELECT top 100
+                        OITM.ItemCode ART_CodigoArticulo,
+                        OITM.ItemName ART_Nombre,
+                        OITM.U_TipoMat ATP_Descripcion,
+                        Cast(CONVERT(DECIMAL(10,2), OITM.PurPackUn) as nvarchar) PurPackUn, 
+                        OITM.PurPackMsr UMC,   
+                        Cast(CONVERT(DECIMAL(10,2), OITM.NumInBuy) as nvarchar) AFC_FactorConversion, 
+                        OITM.BuyUnitMsr UMI,
+                        Cast(CONVERT(DECIMAL(10,4), ITM1.Price) as nvarchar) AS LIS_COMPRA,                        
+                        ((ITM1.Price * OITM.NumInBuy * 
+                        CASE WHEN ITM1.Currency = 'MXP' THEN 1
+                        WHEN ITM1.Currency = 'USD' THEN CONVERT(DECIMAL(10,4),'".$tipos_cambio ['USD']."')
+                        WHEN ITM1.Currency = 'EUR' THEN CONVERT(DECIMAL(10,4),'".$tipos_cambio ['EUR']."')
+                        END
+                        ) / '".$request->get('tipo_cambio')."') AS 
+                        Precio_Tipo_Cambio,
+                        Cast(CONVERT(DECIMAL(10,4), ITM1.Price * OITM.NumInBuy 
+                        ) as nvarchar) Precio,
+                        ITM1.Currency AS M_L
+                                    
+                    FROM OITM
+                    LEFT JOIN ITM1 ON OITM.ItemCode = ITM1.ItemCode
+                    AND ITM1.PriceList= 9
+
+                    WHERE OITM.ItemCode IS NOT NULL 
+                    AND OITM.PrchseItem = 'Y' AND OITM.InvntItem = 'Y'
+                    ORDER BY OITM.ItemName, OITM.ItemCode";
+                    // if ($request->get('moneda') == 'MXP'){
+                    //     $sql = $sql . " AND  ITM1.Currency = 'MXP' ";
+                    // }
+                    //$sql = $sql . "ORDER BY OITM.ItemName, OITM.ItemCode";
+        try{
+
+            $consulta2 = [];
+            if ($request->get('moneda') != ''){
+                $consulta2 = \DB::select(
+                \DB::raw( //cambiar consulta para SAP
+                    $sql
+                    )
+                );
+            }
+                
+            $ajaxData = array();
+            $ajaxData['data2'] = $consulta2;
+            $ajaxData['codigo'] = 200;
+            $ajaxData['sql'] = $sql;
+
+            return $ajaxData;
+
+            //return $consulta;
+
+        } catch (\Exception $e){
+
+            header('HTTP/1.1 500 Internal Server Error');
+            header('Content-Type: application/json; charset=UTF-8');
+            die(json_encode(array("mensaje" => $e->getMessage(),
+                "codigo" => $e->getCode(),
+                "clase" => $e->getFile(),
+                "linea" => $e->getLine())));
+
+        }
+
+    }
+
+    public function consultaIvasYUnidadesMedida(){
+
+        try{
+
+            $ivas = \DB::select(
+                \DB::raw(
+                    "SELECT Code CMIVA_IVAId, Rate CMIVA_Porcentaje 
+                    FROM OSTC
+                    WHERE  ValidForAP = 'Y'
+                    ORDER BY Rate"
+                )
+            );
+
+            // $unidadesMedida = \DB::select(
+            //     \DB::raw(
+            //         "SELECT
+            //             CMUM_UnidadMedidaId,
+            //             CMUM_Nombre
+            //         FROM ControlesMaestrosUM
+            //         ORDER BY
+            //           CMUM_Nombre
+            //         "
+            //     )
+            // );
+
+            // $tipoPartidaMisc = \DB::select(
+            //     \DB::raw(
+            //         "SELECT
+            //             CMM_ControlId,
+            //             CMM_Valor
+            //         FROM ControlesMaestrosMultiples
+            //         WHERE CMM_Control = 'OC_CMM_TipoPartidaMiscelanea'
+            //         AND CMM_Eliminado = 0
+            //         "
+            //     )
+            // );
+
+            $ajaxData = array();
+            $ajaxData['ivas'] = $ivas;
+            $ajaxData['unidadesMedida'] = [];
+            $ajaxData['tipoPartidaMisc'] = [];
+            $ajaxData['codigo'] = 200;
+
+            return $ajaxData;
+
+            //return $consulta;
+
+        } catch (\Exception $e){
+
+            header('HTTP/1.1 500 Internal Server Error');
+            header('Content-Type: application/json; charset=UTF-8');
+            die(json_encode(array("mensaje" => $e->getMessage(),
+                "codigo" => $e->getCode(),
+                "clase" => $e->getFile(),
+                "linea" => $e->getLine())));
+
+        }
+
+    }
+    
+    public function registraOC(){
+
+        \DB::beginTransaction();
+
+        try{
+
+            date_default_timezone_set('America/Mexico_City');
+            $hoy=date('d-m-Y H:i:s');
+            $dia=date('d-m-Y');
+
+            //$OC_CodigoOC = $_POST['OC_CodigoOC'] == '' ? null : $_POST['OC_CodigoOC'];
+            $OC_PRO_ProveedorId = $_POST['OC_PRO_ProveedorId'];
+            //$OC_PDOC_DireccionOCId = $_POST['OC_PDOC_DireccionOCId'] == '' ? null : $_POST['OC_PDOC_DireccionOCId'];
+            //$OC_CMM_TipoOCId = $_POST['OC_CMM_TipoOCId'];
+            $OC_MON_MonedaId = $_POST['OC_MON_MonedaId'];
+            $OC_MONP_Paridad = $_POST['OC_MONP_Paridad'] == '' ? null : $_POST['OC_MONP_Paridad'];
+            //$OC_MONP_ParidadId = $_POST['OC_MONP_ParidadId'] == '' ? null : $_POST['OC_MONP_ParidadId'];
+            
+          
+            //$OC_PorcentajeDescuento = $_POST['OC_PorcentajeDescuento'] == '' ? null : $_POST['OC_PorcentajeDescuento'];
+            //$OC_CMIVA_IVAId = $_POST['OC_CMIVA_IVAId'] == '' ? null : $_POST['OC_CMIVA_IVAId'];
+            if($OC_CMIVA_IVAId == null){
+
+                $OCD_CMIVA_PorcentajeIVA = 0;
+
+            }
+            else{
+
+                $OCD_CMIVA_PorcentajeIVA = $_POST['OCD_CMIVA_PorcentajeIVA'] == '' ? null : $_POST['OCD_CMIVA_PorcentajeIVA'];
+
+            }
+            
+            $TablaArticulosExistentes = isset($_POST['TablaArticulosExistentes']) ? json_decode($_POST['TablaArticulosExistentes'], true) : array();
+           
+            $empleadoId = '';//DataBaseSession::getEmpleadoId();
+            $editaProveedor = $_POST['editaProveedor'];
+
+            if($_POST['status'] == 0){
+
+                //INSERTA ORDEN DE COMPRA
+               
+                for($x = 0; $x < $cuentaTablaArtExis; $x ++){
+
+                    if($TablaArticulosExistentes[$x]['ID_ARTICULO'] != ""){
+
+                        $contadorPartida++;
+                                  \DB::commit();
+                    }
+                }  
+            }  
+            return ['Status' => 'Valido', 'respuesta' => $response];
+
+        }
+        catch (\Exception $e){
+
+            \DB::rollback();
+            return ['Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$e->getMessage()];
+
+        }
+
     }
 }
