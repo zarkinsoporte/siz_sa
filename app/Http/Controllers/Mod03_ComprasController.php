@@ -68,8 +68,8 @@ class Mod03_ComprasController extends Controller
     public function datatables_compras_proveedor(Request $request)
     {
         try {
-            ini_set('memory_limit', '-1');
-            set_time_limit(0);
+           // ini_set('memory_limit', '-1');
+            //set_time_limit(0);
 
             $articulos = "'" . $request->input('articulos') . "'";
             $articulos = str_replace("'',", "", $articulos);
@@ -390,8 +390,8 @@ class Mod03_ComprasController extends Controller
         // $registros = [];
         // return compact('registros');
         try {
-            ini_set('memory_limit', '-1');
-            set_time_limit(0);
+           // ini_set('memory_limit', '-1');
+           // set_time_limit(0);
 
             $articulos = $request->input('articulos');
            // $articulos = str_replace("'',", "", $articulos);
