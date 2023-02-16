@@ -955,6 +955,7 @@ class SAP extends Model
         //$library->asXML($pathh); //Elaborar y Escribir el XML
 
         //To use ReadXML method, set the XmlExportType to xet_ExportImportMode (3).
+        $vItem = $vCmp->GetBusinessObject("22");
         $vItem->Browser->ReadXml($oXML->asXML(), 0);
         // $vItem->UpdateFromXML($pathh);
         $resultadoOperacion = $vItem->Add();
