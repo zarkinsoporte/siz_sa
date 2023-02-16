@@ -490,7 +490,7 @@ Route::get('/sap', function (Request $request) {
 	$id = '1';
 	$vCmp->XmlExportType = '3';
 	$vItem = $vCmp->GetBusinessObject("22");
-	$vItem->GetByKey('');
+	$vItem->GetByKey('5269');
 	$pathh = public_path('assets/xml/sap/2023.xml');
 	$vItem->SaveXML($pathh); //Guardar en archivo
 /*
