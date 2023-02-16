@@ -21,7 +21,7 @@ use Lava;
 use Mail;
 use Session;
 use Maatwebsite\Excel\Facades\Excel;
-
+use App\SAP;
 class Mod03_ComprasController extends Controller
 {
     public function cpp_combobox_articulos(Request $request){
@@ -747,6 +747,8 @@ class Mod03_ComprasController extends Controller
     
     public function registraOC(){
 
+        SAP::registraOC();    
+        return 'ok';
         \DB::beginTransaction();
 
         try{
