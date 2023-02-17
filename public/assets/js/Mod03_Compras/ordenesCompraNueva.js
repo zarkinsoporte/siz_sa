@@ -129,7 +129,6 @@ var InicializaFunciones = function () {
 var InicializaComponentes = function () {
 
     handleDatepicker();
-    InicializaBuscador();
     InicializaButton();
     consultaDatos();
     InicializaBuscadorProveedores();
@@ -166,131 +165,7 @@ var handleDatepicker = function() {
 
 };
 
-var InicializaBuscador = function () {
 
-    $("#tableOC").DataTable({
-
-        language:{
-
-            "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
-
-        },
-        "iDisplayLength": 10,
-        "aaSorting": [],
-        dom: 'T<"clear">lfrtip',
-        deferRender: true,
-        columns: [
-
-            {data: "OC_CodigoOC"},
-            {data: "PRO_CodigoProveedor"},
-            {data: "PRO_RazonSocial"},
-            {data: "PRO_NombreComercial"},
-            {data: "OC_CMM_EstadoOC"},
-            {data: "MON_Nombre"},
-            {data: "OC_Total"},
-            {data: "OC_FechaOC"},
-            {data: "OC_FechaUltimaModificacion", orderDataType: "dom-date-euro"},
-            {data: "BTN_EDITAR"},
-            {data: "BTN_ELIMINAR"},
-            {data: "PDF"}
-
-        ],
-        "columnDefs": [
-
-            {
-
-                "targets": [ COL_BTN_EDITAR ],
-                "searchable": false,
-                "orderable": false,
-                'className': "dt-body-center",
-                "render": function ( data, type, row ) {
-
-                    return '<button type="button" class="btn btn-primary" id="btnEditar"> <span class="glyphicon glyphicon-pencil"></span> </button>';
-
-                }
-
-            },
-            {
-
-                "targets": [ COL_BTN_ELIMINAR ],
-                "searchable": false,
-                "orderable": false,
-                'className': "dt-body-center",
-                "render": function ( data, type, row ) {
-
-                    return '<button type="button" class="btn btn-danger" id="btnEliminar"> <span class="glyphicon glyphicon-trash"></span> </button>';
-
-                }
-
-            },
-            {
-
-                "targets": [ COL_BTN_PDF ],
-                "searchable": false,
-                "orderable": false,
-                'className': "dt-body-center",
-                "render": function ( data, type, row ) {
-
-                    return '<button type="button" class="btn btn-outline-success" style="background-color:transparent;" id="boton-pdf"> <img src="img/pdf-icon.png" height="35"/> </button>';
-                }
-
-            }
-
-        ],
-        fixedColumns: false,
-        tableTools: {sSwfPath: "plugins/DataTables/swf/copy_csv_xls_pdf.swf"},
-        'order': [[COL_CODIGO_OC, 'DESC']]
-
-    });
-
-    reloadBuscadorOC();
-
-}
-
-function reloadBuscadorOC(){
-
-    $("#tableOC").DataTable().clear().draw();
-
-    $.ajax({
-
-        type: 'POST',
-        async: true,
-        url: "compras/ordenCompra-registros",
-        data:{
-
-            "fechaDesde": $('#fechaDesde').val(),
-            "fechaHasta": $('#fechaHasta').val()
-
-        },
-        success: function(data){
-
-            if(JSON.parse(data.oc).data != ''){
-
-                $("#tableOC").dataTable().fnAddData(JSON.parse(data.oc).data);
-
-            }
-
-        },
-        error: function (xhr, ajaxOptions, thrownError) {
-
-            $.unblockUI();
-            var error = JSON.parse(xhr.responseText);
-            bootbox.alert({
-
-                size: "large",
-                title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
-                message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
-                ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
-                ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
-                ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
-
-            });
-
-        }
-
-    });
-
-}
 
 var InicializaButton = function() {
 
@@ -2407,7 +2282,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','input#input-cantidadAM',function
                                     datos['CANTIDAD'] = cantidadNueva;
                                     RealizaCalculos(fila, tabla, precio, cantidad, descuento);
                                     calculaTotalOrdenCompra();
-                                    calculaTipoCambio();
+                                    //calculaTipoCambio();
                                     if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
                                         PartidaResumenAE(index);
                                     }
@@ -2443,7 +2318,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','input#input-cantidadAM',function
             datos['CANTIDAD'] = $(this).val();
             RealizaCalculos(fila, tabla, precio, cantidad, descuento);
             calculaTotalOrdenCompra();
-            calculaTipoCambio();
+            //calculaTipoCambio();
             if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
                 PartidaResumenAM(index);
             }
@@ -2552,7 +2427,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','input#input-precioAM',function (
                                     datos['PRECIO'] = precioNuevo;
                                     RealizaCalculos(fila, tabla, precio, cantidad, descuento);
                                     calculaTotalOrdenCompra();
-                                    calculaTipoCambio();
+                                    //calculaTipoCambio();
                                     if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
                                         PartidaResumenAE(index);
                                     }
@@ -2588,7 +2463,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','input#input-precioAM',function (
             datos['PRECIO'] = $(this).val();
             RealizaCalculos(fila, tabla, precio, cantidad, descuento);
             calculaTotalOrdenCompra();
-            calculaTipoCambio();
+            //calculaTipoCambio();
             if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
                 PartidaResumenAM(index);
             }
@@ -2667,7 +2542,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','input#input-descuentoAM',functio
                                     datos['DESCUENTO'] = descuentoNuevo;
                                     RealizaCalculos(fila, tabla, precio, cantidad, descuento);
                                     calculaTotalOrdenCompra();
-                                    calculaTipoCambio();
+                                    //calculaTipoCambio();
                                     if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
                                         PartidaResumenAE(index);
                                     }
@@ -2704,7 +2579,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','input#input-descuentoAM',functio
             datos['DESCUENTO'] = $(this).val();
             RealizaCalculos(fila, tabla, precio, cantidad, descuento);
             calculaTotalOrdenCompra();
-            calculaTipoCambio();
+            //calculaTipoCambio();
             if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
                 PartidaResumenAM(index);
             }
@@ -2776,7 +2651,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboIVAAM',function (e) {
                                     datos["IVA"] = iva_nuevo;
                                     RealizaCalculos(fila, tabla, precio, cantidad, descuento);
                                     calculaTotalOrdenCompra();
-                                    calculaTipoCambio();
+                                    //calculaTipoCambio();
                                     if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
                                         PartidaResumenAE(index);
                                     }
@@ -2815,7 +2690,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboIVAAM',function (e) {
 
             RealizaCalculos(fila, tabla, precio, cantidad, descuento);
             calculaTotalOrdenCompra();
-            calculaTipoCambio();
+            //calculaTipoCambio();
             if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
                 PartidaResumenAE(index);
             }
@@ -2843,7 +2718,7 @@ $('#tblArticulosMiscelaneosNueva').on('click', 'button#boton-eliminarAM', functi
     }
     calculaTotalOrdenCompra();
     actualizaLineaPartidaAM();
-    calculaTipoCambio();
+    //calculaTipoCambio();
     PartidaResumenAM();
 });
 
@@ -2952,11 +2827,11 @@ function registraOC(){
         data: {
             "status": registroNuevo,
             //"OC_CodigoOC": $("#codigoOC").text(),
-            "OC_PRO_ProveedorId": $("#sel-proveedor option:selected").val(),
+            "oc_proveedor": $("#sel-proveedor option:selected").val(),
             //"OC_PDOC_DireccionOCId": $("#cboSucursal").val(),
             //"OC_CMM_TipoOCId": $("#cboTipoOC").val(),
-            "OC_MON_MonedaId": $("#cboMoneda").val(),
-            "OC_MONP_Paridad": paridad,
+            "oc_moneda": $("#cboMoneda").val(),
+            "oc_tipo_cambio": paridad,
             //"OC_MONP_ParidadId": $("#cboTipoCambio").val(),
             //"OC_ALM_AlmacenId": $("#cboAlmacen").val(),
             //"OC_CMM_AgenteAduanal": $("#cboAgente").val(),
@@ -3003,7 +2878,7 @@ function registraOC(){
                 // $("#tblArticulosExistentesResumenNueva").DataTable().clear().draw();
                 // $("#tblArticulosMiscelaneosResumenNueva").DataTable().clear().draw();
                 calculaTotalOrdenCompra();
-                //calculaTipoCambio();
+                ////calculaTipoCambio();
 
             }
         },
@@ -3367,7 +3242,7 @@ function agregaPartidasOCDetalle(datos){
 
     }
     calculaTotalOrdenCompra();
-    //calculaTipoCambio();
+    ////calculaTipoCambio();
 
 }
 
@@ -3599,7 +3474,7 @@ function eliminarPartidaArtExis(fila){
 
                                      PartidaResumenAE();
                                      calculaTotalOrdenCompra();
-                                     calculaTipoCambio();
+                                     //calculaTipoCambio();
 
                                      var tabla = $('#tabla-detalles').DataTable();
                                      var datos = tabla.rows().data();
@@ -3630,7 +3505,7 @@ function eliminarPartidaArtExis(fila){
                         $.unblockUI();
                         PartidaResumenAE();
                         calculaTotalOrdenCompra();
-                        calculaTipoCambio();
+                        //calculaTipoCambio();
                     }
                 }
             },
@@ -3699,7 +3574,7 @@ function eliminarPartidaArtMisc(fila){
 
                                     PartidaResumenAE();
                                     calculaTotalOrdenCompra();
-                                    calculaTipoCambio();
+                                    //calculaTipoCambio();
 
                                 }
 
@@ -3721,7 +3596,7 @@ function eliminarPartidaArtMisc(fila){
                         $.unblockUI();
                         PartidaResumenAE();
                         calculaTotalOrdenCompra();
-                        calculaTipoCambio();
+                        //calculaTipoCambio();
                     }
                 }
             },
@@ -4267,20 +4142,7 @@ function limpiaTablaPedimentos(){
 
 }
 
-$('#boton-cerrar').off().on('click', function(e) {
 
-    $('#ordenesCompraOC').hide();
-    $('#btnBuscadorOC').show();
-    reloadBuscadorOC();
-    InicializaComponentesOC();
-    $("#tblArticulosExistentesNueva").DataTable().clear().draw();
-    $("#tblArticulosMiscelaneosNueva").DataTable().clear().draw();
-    $("#tblArticulosExistentesResumenNueva").DataTable().clear().draw();
-    $("#tblArticulosMiscelaneosResumenNueva").DataTable().clear().draw();
-    calculaTotalOrdenCompra();
-    calculaTipoCambio();
-
-});
 
 $('#tableOC').on( 'click', 'button#btnEliminar', function (e) {
 

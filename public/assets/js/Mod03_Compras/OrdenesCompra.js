@@ -21,10 +21,12 @@ function js_iniciador() {
 
     consultaDatos();
     InicializaComboBox();
+    $('#ordenesCompraOC').hide();
+    $('#btnBuscadorOC').show();
     InicializaBuscadorArticulos()
     cargaTablaArticulos();
     InicializaTablas();
-
+    
      $("#input-fecha").datepicker({
         format: "dd/mm/yyyy",
         language: "es",
@@ -118,99 +120,9 @@ function js_iniciador() {
         }
     }
 
-    function click_impresion() {
-        var ordvta = tabla_impresion.rows('.selected').data();
-        //var ordvtac = table.rows('.selected').node();
-        //console.log(ordvtac[0])
-        var ops = '';
-        var registros = ordvta == null ? 0 : ordvta.length;
-        for(var i=0; i < registros; i++){
-            if (i == registros - 1) {
-                ops += ordvta[i].OP;
-            } else {
-                ops += ordvta[i].OP + ",";
-            }
-            //console.log(ordvta[i]);         
-        }
-        
-        if(registros > 0){
-                $.ajax({
-                type: 'GET',
-                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                data: {
-                "_token": "{{ csrf_token() }}",
-                ordenes: ops,
-            
-                },
-                //url: '{!! route('impresionOP_empaque') !!}',
-                url: routeapp + "",
-                beforeSend: function() {
-                $.blockUI({
-                message: '<h2>Procesando</h2><h3>espere...<i class="fa fa-spin fa-spinner"></i></h3>',
-                css: {
-                border: 'none',
-                padding: '16px',
-                width: '50%',
-                top: '40%',
-                left: '30%',
-                backgroundColor: '#fefefe',
-                '-webkit-border-radius': '10px',
-                '-moz-border-radius': '10px',
-                opacity: .7,
-                color: '#000000'
-                }
-                });
-                },
-                complete: function() {
-                    //reloadOrdenes();
-                    setTimeout($.unblockUI, 1500);
-                },
-                success: function(data){   
-                    if (data.mensajeErrr.includes('Error')) {
-                        bootbox.dialog({
-                            title: "Mensaje",
-                            message: "<div class='alert alert-danger m-b-0'>Error al generar el PDF"+data.mensajeErrr+"</div>",
-                            buttons: {
-                            success: {
-                            label: "Ok",
-                            className: "btn-success m-r-5 m-b-5"
-                            }
-                            }
-                            }).find('.modal-content').css({'font-size': '14px'} );
-                    }else{
-                        if (data.mensajeErrr.includes('SAP')) {
-                            bootbox.dialog({
-                            title: "Mensaje",
-                            message: "<div class='alert alert-danger m-b-0'>Error, "+data.mensajeErrr+"</div>",
-                            buttons: {
-                            success: {
-                            label: "Ok",
-                            className: "btn-success m-r-5 m-b-5"
-                            }
-                            }
-                            }).find('.modal-content').css({'font-size': '14px'} );
-                        }
-                        window.open('{{url()}}'+data.file,"_blank");
-                    }
-                }
-                }); 
-        }else{
-              bootbox.dialog({
-                title: "Mensaje",
-                message: "<div class='alert alert-danger m-b-0'>No hay registros seleccionados.</div>",
-                buttons: {
-                success: {
-                label: "Ok",
-                className: "btn-success m-r-5 m-b-5"
-                }
-                }
-                }).find('.modal-content').css({'font-size': '14px'} );
-        }           
-    }
-
 // FIN LIBERACION
 // INICIO IMPRESION
-var tabla_impresion = $("#tabla_impresion").DataTable({
+var tableOC = $("#tableOC").DataTable({
                 language:{
                      "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
                 }, 
@@ -263,15 +175,15 @@ var tabla_impresion = $("#tabla_impresion").DataTable({
         ],       
 });
 
-$('#tabla_impresion thead tr').clone(true).appendTo( '#tabla_impresion thead' );
-$('#tabla_impresion thead tr:eq(1) th').each( function (i) {
+$('#tableOC thead tr').clone(true).appendTo( '#tableOC thead' );
+$('#tableOC thead tr:eq(1) th').each( function (i) {
     var title = $(this).text();
     $(this).html( '<input style="color: black;"  type="text" placeholder="Filtro '+title+'" />' );
 
     $( 'input', this ).on( 'keyup change', function () {       
             
-            if ( tabla_impresion.column(i).search() !== this.value ) {
-                tabla_impresion
+            if ( tableOC.column(i).search() !== this.value ) {
+                tableOC
                     .column(i)
                     .search(this.value, true, false)
                     
@@ -280,11 +192,11 @@ $('#tabla_impresion thead tr:eq(1) th').each( function (i) {
                 
     } );    
 } );    
-//tabla_impresion.columns.adjust().draw();
-$('#tabla_impresion tbody').on( 'click', 'tr', function () {
+reloadBuscadorOC();
+$('#tableOC tbody').on( 'click', 'tr', function () {
 } );
 
-$('#tabla_impresion').on( 'click', 'button#boton-pdf', function (e) {
+$('#tableOC').on( 'click', 'button#boton-pdf', function (e) {
     e.preventDefault();
 
     $.blockUI({ css: {
@@ -301,7 +213,7 @@ $('#tabla_impresion').on( 'click', 'button#boton-pdf', function (e) {
     var tipoFormato = 'pdf';
     var isChkPaginar = true;
     var isChkMostrarLogo = true;
-    var tblOC = $('#tabla_impresion').DataTable();
+    var tblOC = $('#tableOC').DataTable();
     var fila = $(this).closest('tr');
     var datos = tblOC.row(fila).data();
     NumOC = datos['NumOC'];
@@ -347,11 +259,15 @@ $('#tabla_impresion').on( 'click', 'button#boton-pdf', function (e) {
 
     $.unblockUI();
 });
- 
+ function reloadBuscadorOC(){
+     var end = moment();
+    var start = moment().subtract(15, "days");;
+    reloadOrdenes(start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'));
+ }
 //reloadOrdenes();
 function reloadOrdenes(fi, ff){
     
-    $("#tabla_impresion").DataTable().clear().draw();
+    $("#tableOC").DataTable().clear().draw();
     $.ajax({
         type: 'GET',
         async: true,       
@@ -386,7 +302,7 @@ function reloadOrdenes(fi, ff){
         success: function(data){
 
             if(data.data.length > 0){
-                $("#tabla_impresion").dataTable().fnAddData(data.data);           
+                $("#tableOC").dataTable().fnAddData(data.data);           
             }else{ 
 
             }        
@@ -438,8 +354,8 @@ function get_oc() {
                         timer: 2000,
                     });
             } else {
-                $("#tabla_impresion").DataTable().clear().draw();
-                $("#tabla_impresion").dataTable().fnAddData((data.data));
+                $("#tableOC").DataTable().clear().draw();
+                $("#tableOC").dataTable().fnAddData((data.data));
                 
                 swal("", "OC encontrada", "success",  {
                     buttons: false,
@@ -457,8 +373,22 @@ function get_oc() {
 
     });
 }
-$('#boton-mostrar').on('click', function(e) {
-    //getop_empaque();
+$('#boton-cerrar').off().on('click', function(e) {
+
+    $('#ordenesCompraOC').hide();
+    $('#btnBuscadorOC').show();
+    reloadBuscadorOC();
+    InicializaComponentesOC();
+    $("#tblArticulosExistentesNueva").DataTable().clear().draw();
+    //$("#tblArticulosMiscelaneosNueva").DataTable().clear().draw();
+    //$("#tblArticulosExistentesResumenNueva").DataTable().clear().draw();
+    //$("#tblArticulosMiscelaneosResumenNueva").DataTable().clear().draw();
+    calculaTotalOrdenCompra();
+    //calculaTipoCambio();
+});
+$('#boton-nuevo').on('click', function(e) {
+    $('#ordenesCompraOC').show();
+    $('#btnBuscadorOC').hide();
 });
 $('#boton-mostrar-oc').on('click', function(e) {
     get_oc();
@@ -752,7 +682,7 @@ $('#tblArticulosExistentesNueva').on('click', 'a#boton-eliminarAE', function (e)
         }
     }
     window.onload = function () { 
-        tabla_impresion.columns.adjust().draw();     
+        tableOC.columns.adjust().draw();     
     }
     $('#tblArticulosExistentesNueva').on('change','input#input-cantidadAE',function (e) {
         e.preventDefault();

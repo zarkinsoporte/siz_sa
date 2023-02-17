@@ -12,7 +12,7 @@
 {!! Html::style('assets/css/invoice.css') !!}
 {!! Html::style('assets/css/customdt2.css') !!}
 
-<div class="container" >
+<div class="container" id="btnBuscadorOC">
 
     <!-- Page Heading -->
     <div class="row">
@@ -74,11 +74,11 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="table-scroll" id="registros-impresion">
-                                    <table id="tabla_impresion" class="table table-striped table-bordered hover" width="100%">
+                                    <table id="tableOC" class="table table-striped table-bordered hover" width="100%">
                                         <thead>
                                             <tr>
                                                 
-                                                <th>Acción</th>
+                                                <th>Acciones</th>
                                                 <th>Código</th>
                                                 <th>Provedor</th>
                                                 <th>Elaboro</th>
@@ -103,7 +103,7 @@
 
 </div>   <!-- /.container -->
 
-<div class="container">
+<div class="container" id="ordenesCompraOC">
     <div class="row">
         <div class="col-md-11">
             <h3 class="page-header">
@@ -179,9 +179,9 @@
                         </div>
                         <div class="invoice-date">
                             <small>CÓDIGO</small>
-                            <div class="date m-t-5"><span id="codigoOC"></span></div>
+                            <div class="date m-t-5"><span id="codigoOC">POR DEFINIR</span></div>
                             <small>ESTADO OC</small>
-                            <div class="date m-t-5"><span id="estadoOC"></span></div>
+                            <div class="date m-t-5"><span id="estadoOC">Abierta</span></div>
                         </div>
                     </div>
                     <div class="invoice-content">

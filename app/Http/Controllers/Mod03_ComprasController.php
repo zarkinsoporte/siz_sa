@@ -477,7 +477,8 @@ class Mod03_ComprasController extends Controller
     }
     public function get_oc_xfecha(Request $request){
         $query = "SELECT 
-            OPOR.DocNum as NumOC
+            '' AS BTN_EDITAR
+            , OPOR.DocNum as NumOC
             , CONVERT(varchar, OPOR.DocDate, 23) as FechaOC
             , OPOR.CardCode + ' - ' +OPOR.CardName as Proveedor
             , OSLP.SlpName as Elaboro 
@@ -747,9 +748,9 @@ class Mod03_ComprasController extends Controller
     
     public function registraOC(){
 
-        SAP::registraOC();    
-        return 'ok';
-        \DB::beginTransaction();
+        //SAP::registraOC();    
+        //return 'ok';
+        //\DB::beginTransaction();
 
         try{
 
@@ -793,7 +794,7 @@ class Mod03_ComprasController extends Controller
                     if($TablaArticulosExistentes[$x]['ID_ARTICULO'] != ""){
 
                         $contadorPartida++;
-                                  \DB::commit();
+                                 // \DB::commit();
                     }
                 }  
             }  
@@ -802,7 +803,7 @@ class Mod03_ComprasController extends Controller
         }
         catch (\Exception $e){
 
-            \DB::rollback();
+            //\DB::rollback();
             return ['Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$e->getMessage()];
 
         }

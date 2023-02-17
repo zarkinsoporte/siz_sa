@@ -438,6 +438,7 @@ Route::get('/pruebas', function (Request $request) {
 
 Route::get('/crear-orden', 'Mod02_PlaneacionController@crearOrden');
 Route::get('/crear-ordenoc', 'Mod03_ComprasController@registraOC');
+Route::any('registraOC', 'Mod03_ComprasController@registraOC');
 
 Route::get('edit-xml', function(){
 	
