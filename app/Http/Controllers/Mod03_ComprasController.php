@@ -746,12 +746,12 @@ class Mod03_ComprasController extends Controller
 
     }
     
-    public function registraOC(){
+    public function registraOC(Request $request){
 
         //SAP::registraOC();    
         //return 'ok';
         //\DB::beginTransaction();
-
+        return $request->all();
         try{
 
             date_default_timezone_set('America/Mexico_City');

@@ -101,6 +101,9 @@ function js_iniciador() {
             var namefile= 'RG_'+$('#btn_pdf').attr('ayudapdf')+'.pdf';
             //console.log(namefile)
             $.ajax({
+                 headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
             url: assetapp + "ayudas_pdf/"+namefile,
             type:'HEAD',
             error: function()
@@ -719,6 +722,9 @@ $('#tblArticulosExistentesNueva').on('click', 'a#boton-eliminarAE', function (e)
                             className: "btn-success",
                             callback: function () {
                                 $.ajax({
+                                     headers: {
+                                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                                    },
                                     type: "POST",
                                     async: false,
                                     data: {
@@ -844,6 +850,9 @@ $('#tblArticulosExistentesNueva').on('change','input#input-precioAE',function (e
                         className: "btn-success",
                         callback: function () {
                             $.ajax({
+                                 headers: {
+                                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                                },
                                 type: "POST",
                                 async: false,
                                 data: {
@@ -976,6 +985,9 @@ $('#tblArticulosExistentesNueva').on('change','input#input-descuentoAE',function
                         className: "btn-success",
                         callback: function () {
                             $.ajax({
+                                 headers: {
+                                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                                },
                                 type: "POST",
                                 async: false,
                                 data: {
@@ -1100,6 +1112,9 @@ $('#tblArticulosExistentesNueva').on('change','select#cboIVAAE',function (e) {
                         className: "btn-success",
                         callback: function () {
                             $.ajax({
+                                 headers: {
+                                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                                },
                                 type: "POST",
                                 async: false,
                                 data: {
@@ -1218,7 +1233,7 @@ $('#guardar').off().on('click', function(e) {
         if(bandera == 0){
 
             registraOC();
-
+            InicializaComponentesOC();
         }
 
     }

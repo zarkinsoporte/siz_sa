@@ -703,13 +703,14 @@ function boton(){
 
 function InicializaComponentesOC() {
 
-    $("#btnBuscarProveedores").text('Selecciona Proveedor');
-    $("#btnBuscarProveedores").removeAttr('disabled');
-    $("#input-proveedor").text('');
-    $("#input-proveedor").removeAttr('oldvalue');
-    $("#input-proveedor").removeAttr('publicoGeneral');
-    $("#ordenesCompraOC #input-fecha").attr('disabled',true);
-    $("#ordenesCompraOC #boton-datos-adicionales").attr('disabled', true);
+    //$("#btnBuscarProveedores").text('Selecciona Proveedor');
+    //$("#btnBuscarProveedores").removeAttr('disabled');
+    $("#sel-proveedor").val('');
+    $("#sel-proveedor").selectpicker('refresh');
+
+  
+    //$("#ordenesCompraOC #input-fecha").attr('disabled',true);
+    //$("#ordenesCompraOC #boton-datos-adicionales").attr('disabled', true);
 
     $('#ordenesCompraOC #nombreProveedor').text('');
     $('#ordenesCompraOC #direccionProveedor').text('');
@@ -719,59 +720,60 @@ function InicializaComponentesOC() {
     $('#ordenesCompraOC #contactoProveedor').text('');
     $('#ordenesCompraOC #rfcProveedor').text('');
 
-    $('#ordenesCompraOC #nombreSucursal').text('');
-    $('#ordenesCompraOC #domicilioSucursal').text('');
-    $('#ordenesCompraOC #telefonicosSucursal').text('');
-    $('#ordenesCompraOC #emailSucursal').text('');
-    $('#ordenesCompraOC #codigopostalSucursal').text('');
-    $('#ordenesCompraOC #ciudadSucursal').text('');
+    //$('#ordenesCompraOC #nombreSucursal').text('');
+    //$('#ordenesCompraOC #domicilioSucursal').text('');
+    //$('#ordenesCompraOC #telefonicosSucursal').text('');
+    //$('#ordenesCompraOC #emailSucursal').text('');
+    //$('#ordenesCompraOC #codigopostalSucursal').text('');
+    //$('#ordenesCompraOC #ciudadSucursal').text('');
 
-    $("#ordenesCompraOC #cboSucursal").empty();
-    $("#ordenesCompraOC #cboSucursal").attr('disabled',true);
-    $('#ordenesCompraOC #cboSucursal').append('<option value="">Selecciona una opción</option>');
-    $("#ordenesCompraOC #cboSucursal").selectpicker('refresh');
+    //$("#ordenesCompraOC #cboSucursal").empty();
+    //$("#ordenesCompraOC #cboSucursal").attr('disabled',true);
+    //$('#ordenesCompraOC #cboSucursal').append('<option value="">Selecciona una opción</option>');
+    //$("#ordenesCompraOC #cboSucursal").selectpicker('refresh');
     $("#ordenesCompraOC #cboMoneda").attr('disabled',true);
     $("#ordenesCompraOC #cboMoneda").val('');
     $("#ordenesCompraOC #cboMoneda").selectpicker('refresh');
-    $("#ordenesCompraOC #cboTipoCambio").attr('disabled',true);
-    $("#ordenesCompraOC #cboTipoCambio").val('');
-    $("#ordenesCompraOC #cboTipoCambio").selectpicker('refresh');
-    $("#ordenesCompraOC #tipoCambio").hide();
+
+    //$("#ordenesCompraOC #cboTipoCambio").val('');
+    $("#ordenesCompraOC #input_tc").val(1);
+    //$("#ordenesCompraOC #cboTipoCambio").selectpicker('refresh');
+    //$("#ordenesCompraOC #tipoCambio").hide();
     //$("#ordenesCompraOC #cboAgente").attr('disabled',true);
-    $("#ordenesCompraOC #cboAgente").val('');
-    $("#ordenesCompraOC #cboAgente").attr('disabled',true);
-    $("#ordenesCompraOC #cboAgente").selectpicker('refresh');
-    $("#ordenesCompraOC #cboSucursalAgente").val('');
-    $("#ordenesCompraOC #cboSucursalAgente").attr('disabled',true);
-    $("#ordenesCompraOC #cboSucursalAgente").selectpicker('refresh');
+        // $("#ordenesCompraOC #cboAgente").val('');
+        // $("#ordenesCompraOC #cboAgente").attr('disabled',true);
+        // $("#ordenesCompraOC #cboAgente").selectpicker('refresh');
+        // $("#ordenesCompraOC #cboSucursalAgente").val('');
+        // $("#ordenesCompraOC #cboSucursalAgente").attr('disabled',true);
+        // $("#ordenesCompraOC #cboSucursalAgente").selectpicker('refresh');
     //$("#ordenesCompraOC #agenteAduanal").hide();
     //$("#ordenesCompraOC #tipoCambio").show();
-    $("#ordenesCompraOC #cboTipoOC").attr('disabled',true);
-    $("#ordenesCompraOC #cboTipoOC").val('');
-    $("#ordenesCompraOC #cboTipoOC").selectpicker('refresh');
-    $("#ordenesCompraOC #cboAlmacen").attr('disabled',true);
-    $("#ordenesCompraOC #cboAlmacen").val('');
-    $("#ordenesCompraOC #cboAlmacen").selectpicker('refresh');
+        // $("#ordenesCompraOC #cboTipoOC").attr('disabled',true);
+        // $("#ordenesCompraOC #cboTipoOC").val('');
+        // $("#ordenesCompraOC #cboTipoOC").selectpicker('refresh');
+        // $("#ordenesCompraOC #cboAlmacen").attr('disabled',true);
+        // $("#ordenesCompraOC #cboAlmacen").val('');
+        // $("#ordenesCompraOC #cboAlmacen").selectpicker('refresh');
 
-    $('#ordenesCompraOC #codigoOC').text('');
+    $('#ordenesCompraOC #codigoOC').text('Por Definir');
     $('#ordenesCompraOC #estadoOC').text('Abierta');
 
-    $("#ordenesCompraOC #boton-datos-adicionales").attr('disabled', true);
+    //$("#ordenesCompraOC #boton-datos-adicionales").attr('disabled', true);
 
     //limpiar datos adicionales
-    $("#modal-datos #cboProyectos").val('');
-    $("#ordenesCompraOC #cboProyectos").selectpicker('refresh');
+    //$("#modal-datos #cboProyectos").val('');
+    //$("#ordenesCompraOC #cboProyectos").selectpicker('refresh');
     //$("#modal-datos #cboOT").val('');
     //$("#ordenesCompraOC #cboOT").selectpicker('refresh');
-    $("#modal-datos #btnBuscarOts").text('');
-    $("#modal-datos #idOrdenTrabajo").val('');
-    $("#ordenesCompraOC #cboLibreABordo").selectpicker('refresh');
-    $("#modal-datos #cboMetodoEmbarque").val('');
-    $("#ordenesCompraOC #cboMetodoEmbarque").selectpicker('refresh');
-    $("#modal-datos #cboIVA").val('');
-    $("#ordenesCompraOC #cboIVA").selectpicker('refresh');
-    $("#modal-datos #input-descuento").val('');
-    $("#modal-datos #input-comentarios").val('');
+    //$("#modal-datos #btnBuscarOts").text('');
+    //$("#modal-datos #idOrdenTrabajo").val('');
+    //$("#ordenesCompraOC #cboLibreABordo").selectpicker('refresh');
+    //$("#modal-datos #cboMetodoEmbarque").val('');
+    //$("#ordenesCompraOC #cboMetodoEmbarque").selectpicker('refresh');
+    //$("#modal-datos #cboIVA").val('');
+    //$("#ordenesCompraOC #cboIVA").selectpicker('refresh');
+    //$("#modal-datos #input-descuento").val('');
+    //$("#modal-datos #input-comentarios").val('');
 
     InicializaDatepicker();
 
@@ -814,7 +816,9 @@ $('#input-proveedor').change(function (e){
 function changeProveedor(){
 
     $.ajax({
-
+         headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
         cache: false,
         async: false,
         url: "compras/consultaSucursalesProveedor",
@@ -894,7 +898,7 @@ function cargaTablaArticulos(){
             if(respuesta.codigo == 200){
 
                 recargaTablaArticulos(respuesta.data2);
-                console.log(respuesta.sql)
+                //console.log(respuesta.sql)
             }
             else{
 
@@ -1104,7 +1108,9 @@ function changeMoneda(){
     var fechaOc = $('#input-fecha').val();
 
     $.ajax({
-
+ headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
         cache: false,
         async: false,
         url: "compras/consultaTipoCambio",
@@ -1209,7 +1215,9 @@ function changeAgente(){
     var agenteId = $('#ordenesCompraOC #cboAgente').val();
 
     $.ajax({
-
+         headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
         cache: false,
         async: false,
         url: "compras/consultaSucursalesAgente",
@@ -2799,6 +2807,40 @@ function validarCampos(){
         }).find('.modal-content').css({'font-size': '14px'} );
 
     }
+    else if($('#ordenCompra-articulos').text() == '0'){
+    //else if(cuentaTablaArtExis < 2 && cuentaTablaArtMisc < 2){
+
+        bandera = 1;
+         bootbox.dialog({
+            title: "Mensaje",
+            message: "<div class='alert alert-danger m-b-0'>El artículo es inválido.</div>",
+            buttons: {
+            success: {
+            label: "Ok",
+            className: "btn-success m-r-5 m-b-5"
+            }
+            }
+        }).find('.modal-content').css({'font-size': '14px'} );
+
+    }
+    else if( parseFloat($('#ordenCompra-subtotal').text()) == 0){
+    //else if(cuentaTablaArtExis < 2 && cuentaTablaArtMisc < 2){
+
+        bandera = 1;
+         bootbox.dialog({
+            title: "Mensaje",
+            message: "<div class='alert alert-danger m-b-0'>El subtotal no puede ser cero</div>",
+            buttons: {
+            success: {
+            label: "Ok",
+            className: "btn-success m-r-5 m-b-5"
+            }
+            }
+        }).find('.modal-content').css({'font-size': '14px'} );
+
+    }
+
+
 
 }
 
@@ -2820,9 +2862,12 @@ function registraOC(){
 
     
     paridad = $("#input_tc").val();
-  
+    console.log('registrando OC')
 
     $.ajax({
+         headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
         url: routeapp + "registraOC",
         data: {
             "status": registroNuevo,
@@ -2854,6 +2899,7 @@ function registraOC(){
         type: "POST",
         async:false,
         success: function (datos, x, z) {
+            console.log(datos)
             if(datos["Status"] == "Error"){
                 bootbox.dialog({
                     title: "Mensaje",
@@ -3037,6 +3083,9 @@ $('#tableOC').on( 'click', 'button#btnEditar', function (e) {
     } });
 
     $.ajax({
+         headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
         type: "POST",
         async: false,
         data: {
@@ -3443,6 +3492,9 @@ function eliminarPartidaArtExis(fila){
 
                     if(detalleId != ''){
                         $.ajax({
+                             headers: {
+                                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                                },
                             type: "POST",
                             async: false,
                             data: {
@@ -4182,7 +4234,9 @@ $('#tableOC').on( 'click', 'button#btnEliminar', function (e) {
                         } });
 
                         $.ajax({
-
+                             headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
                             type: "POST",
                             async: false,
                             data: {
@@ -4304,7 +4358,55 @@ $('#tableOC').on( 'click', 'button#btnEliminar', function (e) {
     }
 
 });
+function reloadBuscadorOC(){
+     var end = moment();
+    var start = moment().subtract(15, "days");;
+    reloadOrdenes(start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'));
+ }
+ function reloadOrdenes(fi, ff){
+    
+    $("#tableOC").DataTable().clear().draw();
+    $.ajax({
+        type: 'GET',
+        async: true,       
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        url: routeapp + "get_oc_xfecha",
+        data: {           
+            "fi": fi,
+            "ff": ff
+        },
+        beforeSend: function() {
+             $.blockUI({
+                message: '<h1>Solicitando OC</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                css: {
+                    border: 'none',
+                    padding: '16px',
+                    width: '50%',
+                    top: '40%',
+                    left: '30%',
+                    backgroundColor: '#fefefe',
+                    '-webkit-border-radius': '10px',
+                    '-moz-border-radius': '10px',
+                    opacity: .7,
+                    color: '#000000'
+                }
+            });
+        },
+        complete: function() {
+          setTimeout($.unblockUI, 500); 
+        },
+        success: function(data){
 
+            if(data.data.length > 0){
+                $("#tableOC").dataTable().fnAddData(data.data);           
+            }else{ 
+
+            }        
+        }
+    });
+}
 $('#tableOC').on( 'click', 'button#boton-pdf', function (e) {
     e.preventDefault();
 //$('#tableOC #boton-pdf').click(function () {
