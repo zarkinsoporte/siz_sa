@@ -94,6 +94,9 @@ function js_iniciador() {
         }
         $('#cboMoneda').append(options);
         $('#cboMoneda').selectpicker('refresh');
+        $('#sel-tipo-oc').val(0);
+        $('#sel-tipo-oc').selectpicker('refresh');
+        $("#miscelaneosOC").hide();
     };
 
     document.onkeyup = function(e) {
@@ -383,15 +386,17 @@ $('#boton-cerrar').off().on('click', function(e) {
     reloadBuscadorOC();
     InicializaComponentesOC();
     $("#tblArticulosExistentesNueva").DataTable().clear().draw();
-    //$("#tblArticulosMiscelaneosNueva").DataTable().clear().draw();
+    $("#tblArticulosMiscelaneosNueva").DataTable().clear().draw();
     //$("#tblArticulosExistentesResumenNueva").DataTable().clear().draw();
     //$("#tblArticulosMiscelaneosResumenNueva").DataTable().clear().draw();
     calculaTotalOrdenCompra();
     //calculaTipoCambio();
 });
 $('#boton-nuevo').on('click', function(e) {
+    registroNuevo = 0;
     $('#ordenesCompraOC').show();
     $('#btnBuscadorOC').hide();
+    InicializaComponentesOC();
 });
 $('#boton-mostrar-oc').on('click', function(e) {
     get_oc();
@@ -506,6 +511,7 @@ $(document).keyup(function(event) {
         recargaTablaArticulos('');
         cargaTablaArticulos();
         $('#tblArticulosExistentesNueva').DataTable().clear().draw();
+        $('#tblArticulosMiscelaneosNueva').DataTable().clear().draw();
         insertarFila();   
         setTimeout($.unblockUI, 2000);   
     });
@@ -782,9 +788,9 @@ $('#tblArticulosExistentesNueva').on('click', 'a#boton-eliminarAE', function (e)
                     console.log(['precio ' + precio, 'cantidad ' +cantidad, 'descuento ' + descuento]);
                     calculaTotalOrdenCompra();
                     //calculaTipoCambio();
-                    if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
-                        PartidaResumenAE(index);
-                    }
+                    // if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
+                    //     PartidaResumenAE(index);
+                    // }
                 }
                 else{
                     bootbox.dialog({
@@ -1239,6 +1245,615 @@ $('#guardar').off().on('click', function(e) {
     }
 
 });
+
+$("#sel-tipo-oc").on("changed.bs.select", function(e, clickedIndex, newValue, oldValue) {
+        $.blockUI({
+                message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                css: {
+                    border: 'none',
+                    padding: '16px',
+                    width: '50%',
+                    top: '40%',
+                    left: '30%',
+                    backgroundColor: '#fefefe',
+                    '-webkit-border-radius': '10px',
+                    '-moz-border-radius': '10px',
+                    opacity: .7,
+                    color: '#000000'
+                }
+            });
+        
+      
+        InicializaComponentesOC();
+        $("#tblArticulosExistentesNueva").DataTable().clear().draw();
+        $("#tblArticulosMiscelaneosNueva").DataTable().clear().draw();
+        // $("#tblArticulosExistentesResumenNueva").DataTable().clear().draw();
+        // $("#tblArticulosMiscelaneosResumenNueva").DataTable().clear().draw();
+        calculaTotalOrdenCompra();
+        let val = $('option:selected', this).val();
+        console.log('sel-tipoOC: '+ val);
+        if (val == 0) {
+            $("#articulosOC").show();
+            $("#miscelaneosOC").hide();
+            BanderaOC = 0;
+        } else {
+            $("#articulosOC").hide();
+            $("#miscelaneosOC").show();
+            BanderaOC = 1;
+        }
+        setTimeout($.unblockUI, 2000);
+    });
+
+    $('#tblArticulosMiscelaneosNueva').on('click', 'span#boton-otAM', function (e) {
+    e.preventDefault();
+    if ($("#sel-proveedor").val() != ""){
+        var tabla = $('#tblArticulosMiscelaneosNueva').DataTable();
+        var fila = $(this).closest('tr');
+        fila = tabla.row(fila).index();
+        banderaFilaOC = 2;
+        $('#modal-ordenesTrabajo #input-fila').val(fila);
+        $('#modal-ordenesTrabajo').modal('show');
+    }
+    else{
+        bootbox.dialog({
+            message: "No se ha elegido un proveedor, elige uno por favor para continuar.",
+            title: "Ordenes de Compra",
+            buttons: {
+                success: {
+                    label: "Si",
+                    className: "btn-success"
+                }
+            }
+        });
+    }
+
+});
+
+$('#tblArticulosMiscelaneosNueva').on('change','input#input-nombreART-miselaneos',function (e) {
+
+    e.preventDefault();
+
+    if ($("#sel-proveedor").val() == ""){
+
+        bootbox.dialog({
+            message: "No se ha elegido un proveedor, elige uno por favor para continuar.",
+            title: "Ordenes de Compra",
+            buttons: {
+                success: {
+                    label: "Si",
+                    className: "btn-success"
+                }
+            }
+        });
+        $(this).val("");
+
+    }
+
+});
+
+$('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
+
+    e.preventDefault();
+
+    if ($("#sel-proveedor").val() == "") {
+        bootbox.dialog({
+            message: "No se ha elegido un proveedor, elige uno por favor para continuar.",
+            title: "Ordenes de Compra",
+            buttons: {
+                success: {
+                    label: "Si",
+                    className: "btn-success"
+                }
+            }
+        });
+        $(this).val("");
+    }
+});
+
+$('#tblArticulosMiscelaneosNueva').on('change','input#input-cantidadAM',function (e) {
+    e.preventDefault();
+    if($(this).val() == '' || $(this).val() < 0){
+        $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
+    }
+
+    $(this).val(parseFloat(this.value).toFixed(CANTIDAD_DECIMALES));
+
+    if ($("#sel-proveedor").val() != ""){
+        var tabla = $('#tblArticulosMiscelaneosNueva').DataTable();
+        var fila = $(this).closest('tr');
+        var index = tabla.row(fila).index();
+
+        var datos = tabla.row(fila).data();
+        datos['NOMBRE_ARTICULO'] = tabla.row(fila).nodes(fila, 1).to$().find("input#input-nombreART-miselaneos").val();
+        
+        console.log(datos)
+        var precio = 'input-precioAM';
+        var cantidad = 'input-cantidadAM';
+        var descuento = 'input-descuentoAM';
+        var referenciaId = datos['ID_AUX'];
+        var Cantidad_anterior = datos['CANTIDAD'];
+        var Precio_anterior = datos['PRECIO'];
+        var Descuento_anterior = datos['DESCUENTO'];
+        var IVA_anterior = datos['IVA'];
+        var ID_IVA_anterior = datos['ID_IVA'];
+        var cantidadNueva = $(this).val();
+
+        /* if(registroNuevo == 1){
+
+            bootbox.dialog({
+                message: "¿Estas seguro de modificar la cantidad?.",
+                title: "Ordenes de Compra",
+                buttons: {
+                    success: {
+                        label: "Si",
+                        className: "btn-success",
+                        callback: function () {
+                            $.ajax({
+                                type: "POST",
+                                async: false,
+                                data: {
+                                    detalleId: referenciaId
+                                    ,cantidad: cantidadNueva
+                                    ,precio: Precio_anterior
+                                    ,descuento: Descuento_anterior
+                                    ,iva: IVA_anterior
+                                    ,idIva: ID_IVA_anterior
+                                },
+                                dataType: "json",
+                                url: "compras/editarPartida",
+                                success: function () {
+                                    //delete JSON_PARTIDA[referenciaId];
+                                    datos['CANTIDAD'] = cantidadNueva;
+                                    RealizaCalculos(fila, tabla, precio, cantidad, descuento);
+                                    calculaTotalOrdenCompra();
+                                    //calculaTipoCambio();
+                                    if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
+                                        PartidaResumenAE(index);
+                                    }
+                                },
+                                error: function (xhr, ajaxOptions, thrownError) {
+                                    $.unblockUI();
+                                    var error = JSON.parse(xhr.responseText);
+                                    bootbox.alert({
+                                        size: "large",
+                                        title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
+                                        message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
+                                        ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
+                                        ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
+                                        ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
+                                    });
+                                }
+                            });
+
+                        }
+                    },
+                    default: {
+                        label: "No",
+                        className: "btn-default m-r-5 m-b-5",
+                        callback: function () {
+                            tabla.row(fila).nodes(fila,COL_CANTIDAD).to$().find('input#' + cantidad).val(parseFloat(Cantidad_anterior).toFixed(CANTIDAD_DECIMALES));
+                        }
+                    }
+                }
+            });
+
+        }
+        else{ */
+            if (datos['NOMBRE_ARTICULO'] != ""){
+                datos['CANTIDAD'] = $(this).val();
+                RealizaCalculos(fila, tabla, precio, cantidad, descuento);
+                calculaTotalOrdenCompra();
+                //calculaTipoCambio();
+                // if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
+                //     PartidaResumenAM(index);
+                // }
+            }
+            else{
+                bootbox.dialog({
+                    message: "No se ha capturado articulo, captura para continuar.",
+                    title: "Ordenes de Compra",
+                    buttons: {
+                        success: {
+                            label: "Si",
+                            className: "btn-success"
+                        }
+                    }
+                });
+                $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
+            }
+        //}
+
+    }else{
+        bootbox.dialog({
+            message: "No se ha elegido un proveedor, elige uno por favor para continuar.",
+            title: "Ordenes de Compra",
+            buttons: {
+                success: {
+                    label: "Si",
+                    className: "btn-success"
+                }
+            }
+        });
+        $(this).val("");
+    }
+});
+$('#tblArticulosMiscelaneosNueva').on('change','input#input-precioAM',function (e) {
+    e.preventDefault();
+    if($(this).val() == '' || $(this).val() < 0){
+        $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
+    }
+
+    $(this).val(parseFloat(this.value).toFixed(CANTIDAD_DECIMALES));
+    if ($("#sel-proveedor").val() != ""){
+
+        var tabla = $('#tblArticulosMiscelaneosNueva').DataTable();
+        var fila = $(this).closest('tr');
+        var index = tabla.row(fila).index();
+
+        var datos = tabla.row(fila).data();
+        var precio = 'input-precioAM';
+        var cantidad = 'input-cantidadAM';
+        var descuento = 'input-descuentoAM';
+        var referenciaId = datos['ID_AUX'];
+        var Cantidad_anterior = datos['CANTIDAD'];
+        var Precio_anterior = datos['PRECIO'];
+        var Descuento_anterior = datos['DESCUENTO'];
+        var IVA_anterior = datos['IVA'];
+        var ID_IVA_anterior = datos['ID_IVA'];
+        var precioNuevo = $(this).val();
+
+        /* if(registroNuevo == 1){
+
+            bootbox.dialog({
+                message: "¿Estas seguro de modificar el precio?.",
+                title: "Ordenes de Compra",
+                buttons: {
+                    success: {
+                        label: "Si",
+                        className: "btn-success",
+                        callback: function () {
+                            $.ajax({
+                                type: "POST",
+                                async: false,
+                                data: {
+                                    detalleId: referenciaId
+                                    ,precio: precioNuevo
+                                    ,cantidad: Cantidad_anterior
+                                    ,descuento: Descuento_anterior
+                                    ,iva: IVA_anterior
+                                    ,idIva: ID_IVA_anterior
+                                },
+                                dataType: "json",
+                                url: "compras/editarPartida",
+                                success: function () {
+                                    //delete JSON_PARTIDA[referenciaId];
+                                    datos['PRECIO'] = precioNuevo;
+                                    RealizaCalculos(fila, tabla, precio, cantidad, descuento);
+                                    calculaTotalOrdenCompra();
+                                    //calculaTipoCambio();
+                                    if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
+                                        PartidaResumenAE(index);
+                                    }
+                                },
+                                error: function (xhr, ajaxOptions, thrownError) {
+                                    $.unblockUI();
+                                    var error = JSON.parse(xhr.responseText);
+                                    bootbox.alert({
+                                        size: "large",
+                                        title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
+                                        message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
+                                        ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
+                                        ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
+                                        ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
+                                    });
+                                }
+                            });
+
+                        }
+                    },
+                    default: {
+                        label: "No",
+                        className: "btn-default m-r-5 m-b-5",
+                        callback: function () {
+                            tabla.row(fila).nodes(fila,COL_PRECIO).to$().find('input#' + precio).val(parseFloat(Precio_anterior).toFixed(CANTIDAD_DECIMALES));
+                        }
+                    }
+                }
+            });
+
+        }
+        else{ */
+             if (datos['NOMBRE_ARTICULO'] != ""){
+                    datos['PRECIO'] = $(this).val();
+                    RealizaCalculos(fila, tabla, precio, cantidad, descuento);
+                    calculaTotalOrdenCompra();
+                    //calculaTipoCambio();
+                    // if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
+                    //     PartidaResumenAM(index);
+                    // }
+            }
+            else{
+                bootbox.dialog({
+                    message: "No se ha capturado articulo, captura para continuar.",
+                    title: "Ordenes de Compra",
+                    buttons: {
+                        success: {
+                            label: "Si",
+                            className: "btn-success"
+                        }
+                    }
+                });
+                $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
+            }
+        //}
+
+    }
+    else{
+        bootbox.dialog({
+            message: "No se ha elegido un proveedor, elige uno por favor para continuar.",
+            title: "Ordenes de Compra",
+            buttons: {
+                success: {
+                    label: "Si",
+                    className: "btn-success"
+                }
+            }
+        });
+        $(this).val("");
+    }
+});
+
+$('#tblArticulosMiscelaneosNueva').on('change','input#input-descuentoAM',function (e) {
+
+    if($(this).val() == '' || $(this).val() < 0){
+        $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
+    }
+
+    if ($(this).val() >= 100){
+        $(this).val(parseFloat('100.00').toFixed(CANTIDAD_DECIMALES));
+    }
+
+    $(this).val(parseFloat(this.value).toFixed(CANTIDAD_DECIMALES));
+    if ($("#sel-proveedor").val() != ""){
+
+        var tabla = $('#tblArticulosMiscelaneosNueva').DataTable();
+        var fila = $(this).closest('tr');
+        var index = tabla.row(fila).index();
+
+        var datos = tabla.row(fila).data();
+        var precio = 'input-precioAM';
+        var cantidad = 'input-cantidadAM';
+        var descuento = 'input-descuentoAM';
+        var referenciaId = datos['ID_AUX'];
+        var Cantidad_anterior = datos['CANTIDAD'];
+        var Precio_anterior = datos['PRECIO'];
+        var Descuento_anterior = datos['DESCUENTO'];
+        var IVA_anterior = datos['IVA'];
+        var ID_IVA_anterior = datos['ID_IVA'];
+        var descuentoNuevo = $(this).val();
+
+        /* if(registroNuevo == 1){
+
+            bootbox.dialog({
+                message: "¿Estas seguro de modificar el descuento?.",
+                title: "Ordenes de Compra",
+                buttons: {
+                    success: {
+                        label: "Si",
+                        className: "btn-success",
+                        callback: function () {
+                            $.ajax({
+                                type: "POST",
+                                async: false,
+                                data: {
+                                    detalleId: referenciaId
+                                    ,precio: Precio_anterior
+                                    ,cantidad: Cantidad_anterior
+                                    ,descuento: descuentoNuevo
+                                    ,iva: IVA_anterior
+                                    ,idIva: ID_IVA_anterior
+                                },
+                                dataType: "json",
+                                url: "compras/editarPartida",
+                                success: function () {
+                                    //delete JSON_PARTIDA[referenciaId];
+                                    datos['DESCUENTO'] = descuentoNuevo;
+                                    RealizaCalculos(fila, tabla, precio, cantidad, descuento);
+                                    calculaTotalOrdenCompra();
+                                    //calculaTipoCambio();
+                                    if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
+                                        PartidaResumenAE(index);
+                                    }
+                                },
+                                error: function (xhr, ajaxOptions, thrownError) {
+                                    $.unblockUI();
+                                    var error = JSON.parse(xhr.responseText);
+                                    bootbox.alert({
+                                        size: "large",
+                                        title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
+                                        message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
+                                        ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
+                                        ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
+                                        ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
+                                    });
+                                }
+                            });
+
+                        }
+                    },
+                    default: {
+                        label: "No",
+                        className: "btn-default m-r-5 m-b-5",
+                        callback: function () {
+                            tabla.row(fila).nodes(fila,COL_DESCUENTO).to$().find('input#' + descuento).val(parseFloat(Descuento_anterior).toFixed(CANTIDAD_DECIMALES));
+                        }
+                    }
+                }
+            });
+
+        }
+        else{ */
+            if (datos['NOMBRE_ARTICULO'] != ""){    
+                datos['DESCUENTO'] = $(this).val();
+                RealizaCalculos(fila, tabla, precio, cantidad, descuento);
+                calculaTotalOrdenCompra();
+                //calculaTipoCambio();
+                // if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
+                //     PartidaResumenAM(index);
+                // }
+            }
+            else{
+                bootbox.dialog({
+                    message: "No se ha capturado articulo, captura para continuar.",
+                    title: "Ordenes de Compra",
+                    buttons: {
+                        success: {
+                            label: "Si",
+                            className: "btn-success"
+                        }
+                    }
+                });
+                $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
+            }
+    
+        //}
+    }
+    else{
+        bootbox.dialog({
+            message: "No se ha elegido un proveedor, elige uno por favor para continuar.",
+            title: "Ordenes de Compra",
+            buttons: {
+                success: {
+                    label: "Si",
+                    className: "btn-success"
+                }
+            }
+        });
+        $(this).val("");
+    }
+});
+
+$('#tblArticulosMiscelaneosNueva').on('change','select#cboIVAAM',function (e) {
+    e.preventDefault();
+    if ($("#sel-proveedor").val() != ""){
+        var tabla = $('#tblArticulosMiscelaneosNueva').DataTable();
+        var fila = $(this).closest('tr');
+        var index = tabla.row(fila).index();
+
+        var datos = tabla.row(fila).data();
+        var precio = 'input-precioAM';
+        var cantidad = 'input-cantidadAM';
+        var descuento = 'input-descuentoAM';
+        var iva = 'cboIVAAM';
+        var referenciaId = datos['ID_AUX'];
+        var Cantidad_anterior = datos['CANTIDAD'];
+        var Precio_anterior = datos['PRECIO'];
+        var Descuento_anterior = datos['DESCUENTO'];
+        var IVA_anterior = datos['IVA'];
+        var ID_IVA_anterior = datos['ID_IVA'];
+        var id_iva_nuevo = $(this).val();
+        var iva_nuevo = $(this).val() == '' ? '0' : $(this).find('option:selected').text();
+
+        if(registroNuevo == 1){
+
+            bootbox.dialog({
+                message: "¿Estas seguro de modificar el IVA?.",
+                title: "Ordenes de Compra",
+                buttons: {
+                    success: {
+                        label: "Si",
+                        className: "btn-success",
+                        callback: function () {
+                            $.ajax({
+                                type: "POST",
+                                async: false,
+                                data: {
+                                    detalleId: referenciaId
+                                    ,precio: Precio_anterior
+                                    ,cantidad: Cantidad_anterior
+                                    ,descuento: Descuento_anterior
+                                    ,iva: iva_nuevo
+                                    ,idIva: id_iva_nuevo
+                                },
+                                dataType: "json",
+                                url: "compras/editarPartida",
+                                success: function () {
+                                    //delete JSON_PARTIDA[referenciaId];
+                                    datos["ID_IVA"] = id_iva_nuevo;
+                                    datos["IVA"] = iva_nuevo;
+                                    RealizaCalculos(fila, tabla, precio, cantidad, descuento);
+                                    calculaTotalOrdenCompra();
+                                    //calculaTipoCambio();
+                                    if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
+                                        PartidaResumenAE(index);
+                                    }
+                                },
+                                error: function (xhr, ajaxOptions, thrownError) {
+                                    $.unblockUI();
+                                    var error = JSON.parse(xhr.responseText);
+                                    bootbox.alert({
+                                        size: "large",
+                                        title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
+                                        message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
+                                        ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
+                                        ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
+                                        ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
+                                    });
+                                }
+                            });
+
+                        }
+                    },
+                    default: {
+                        label: "No",
+                        className: "btn-default m-r-5 m-b-5",
+                        callback: function () {
+                            tabla.row(fila).nodes(fila,COL_IVA).to$().find('select#'+iva).val(ID_IVA_anterior);
+                        }
+                    }
+                }
+            });
+
+        }
+        else{
+
+            datos["ID_IVA"] = id_iva_nuevo;
+            datos["IVA"] = iva_nuevo;
+
+            RealizaCalculos(fila, tabla, precio, cantidad, descuento);
+            calculaTotalOrdenCompra();
+            //calculaTipoCambio();
+            if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
+                PartidaResumenAE(index);
+            }
+
+        }
+
+    }
+});
+
+$('#tblArticulosMiscelaneosNueva').on('click', 'button#boton-eliminarAM', function (e) {
+    e.preventDefault();
+
+    var tabla = $('#tblArticulosMiscelaneosNueva').DataTable();
+    var fila = $(this).closest('tr');
+    var datos = tabla.row(fila).data();
+    var index = tabla.row(fila).index();
+    var id = datos['ID_PARTIDA'];
+    if(id == ""){
+        tabla.row(fila).remove().draw(false);
+    }
+    else{
+        if (registroNuevo == 1){
+            eliminarPartidaArtMisc(fila);
+        }
+    }
+    calculaTotalOrdenCompra();
+    actualizaLineaPartidaAM();
+    //calculaTipoCambio();
+   //PartidaResumenAM();
+});
+
 }  //fin js_iniciador               
 function val_btn(val) { 
 

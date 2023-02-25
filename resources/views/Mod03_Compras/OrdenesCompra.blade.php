@@ -116,7 +116,22 @@
         <div class="panel-body">
             <div class="row">
                 <div class="form-group">
-                    <div class="col-md-6" id="selecpicker-cliente">
+                    <div class="col-md-2" id="selecpicker-cliente">
+                        <label><strong>
+                                <font size="2">Tipo OC</font>
+                            </strong></label>
+                        <select class="form-control selectpicker" id="sel-tipo-oc" name="sel-tipo-oc"
+                        data-size = "8",
+                        data-style="btn-success"
+                        >
+                           
+                            <option value="0">Artículos</option>
+                            <option value="1">Miscelaneos</option>
+                           
+                           
+                        </select>
+                    </div>
+                    <div class="col-md-4" id="selecpicker-cliente">
                         <label><strong>
                                 <font size="2">Proveedor</font>
                             </strong></label>
@@ -190,7 +205,7 @@
                             <li class="active">
                                 <a id="liArtExist" href="#articulosExistentes" data-toggle="tab">
                                     <i class="fa fa-shopping-cart m-r-5"></i> 
-                                    <span class="hidden-xs">Artículos</span>
+                                    <span class="hidden-xs">Artículos Orden de Compra</span>
                                 </a>
                             </li>
                            
@@ -198,16 +213,20 @@
                         <div class="tab-content" data-sortable-id="index-3">
                             <!-- Inicio Artiulos Existentes -->
                             <div class="tab-pane fade active in" id="articulosExistentes">
-                                <div data-scrollbar="true" style="height: 600px">                                   
-                                    @include('Mod03_Compras.TablaArticulosExistentesNueva')
+                                <div id="articulosOC">
+                                    <div data-scrollbar="true" style="height: 600px">
+                                        @include('Mod03_Compras.TablaArticulosExistentesNueva')
+                                    </div>
                                 </div>
-                            </div>
+                            <!--</div>-->
                             <!-- Fin Artiulos Existentes -->
     
                             <!-- Inicio Artiulos Miscelaneos -->
-                            <div class="tab-pane fade" id="articulosMiscelaneos">
-                                <div data-scrollbar="true" style="height: 600px">
-                                    @include('Mod03_Compras.TablaArticulosMiscelaneosNueva')
+                            <!--<div class="tab-pane fade" id="articulosMiscelaneos">-->
+                                <div id="miscelaneosOC" style="">
+                                    <div data-scrollbar="true" style="height: 600px">
+                                        @include('Mod03_Compras.TablaArticulosMiscelaneosNueva')
+                                    </div>
                                 </div>
                             </div>
                             <!-- Fin Artiulos Miscelaneos -->

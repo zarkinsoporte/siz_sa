@@ -1,33 +1,23 @@
-<div class="table-responsive" style="height: 400px">
-    <table id="tblArticulosMiscelaneosNueva" class="table table-striped nowrap">
+<div class="table-responsive" style="height: 400px; width: 100% !important" width = "100%">
+    <table id="tblArticulosMiscelaneosNueva" class="table table-striped nowrap" style="width: 100% !important" width = "100%">
         <thead>
         <tr>
             <th style="text-align: right;">#</th>
-            <th>Tipo Partida</th>
             <th>Nombre</th>
-            <th>UMI</th>
-            <th>Factor de Conversión</th>
-            <th>UMC</th>
+            <th>CTA Mayor</th>            
             <th style="text-align: right;">Cantidad Compra</th>
             <th style="text-align: right;">Precio</th>
+
             <th style="text-align: right;">Subtotal</th>
             <th style="text-align: right;">(%)Descuento</th>
             <th style="text-align: right;">Monto Descuento</th>
             <th style="text-align: right;">(%)I.V.A.</th>
             <th style="text-align: right;">Monto I.V.A.</th>
+
             <th style="text-align: right;">Total</th>
-            <th style="text-align: center;">Fechas Requeridas</th>
             <th style="text-align: center;">Cerrada</th>
             <th style="text-align: center;">Eliminar</th>
-            <th style="text-align: center;">Codigo OT</th>
-            <th>otId</th>
-            <th>articuloId</th>
-            <th>partidaId</th>
-            <th>auxiliarId</th>
-            <th>umiId</th>
-            <th>umcId</th>
             <th>ivaID</th>
-            <th>estatusPartida</th>
 
             <!--<th>Fecha Requerida</th>
             <th>UMI</th>
