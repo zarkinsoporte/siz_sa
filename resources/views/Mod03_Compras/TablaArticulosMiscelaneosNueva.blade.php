@@ -4,32 +4,22 @@
         <tr>
             <th style="text-align: right;">#</th>
             <th>Nombre</th>
-            <th>CTA Mayor</th>            
+            <th>CTA Mayor</th>    
+
             <th style="text-align: right;">Cantidad Compra</th>
             <th style="text-align: right;">Precio</th>
-
             <th style="text-align: right;">Subtotal</th>
+
             <th style="text-align: right;">(%)Descuento</th>
             <th style="text-align: right;">Monto Descuento</th>
             <th style="text-align: right;">(%)I.V.A.</th>
-            <th style="text-align: right;">Monto I.V.A.</th>
 
+            <th style="text-align: right;">Monto I.V.A.</th>
             <th style="text-align: right;">Total</th>
             <th style="text-align: center;">Cerrada</th>
+
             <th style="text-align: center;">Eliminar</th>
             <th>ivaID</th>
-
-            <!--<th>Fecha Requerida</th>
-            <th>UMI</th>
-            <th style="text-align: right;">Cantidad Compra</th>
-            <th style="text-align: center;">Editar</th>
-            <th>Comentarios</th>
-            <th>porcentajeDescuento</th>
-            <th>factorConversion</th>
-            <th>OCFR_PrecioConFactor</th>
-            <th>ART_ConFactor</th>
-            <th>porcentajeIva</th>-->
-
         </tr>
         </thead>
         <tbody></tbody>

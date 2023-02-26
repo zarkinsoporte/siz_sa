@@ -439,9 +439,10 @@ function InicializaTablas(){
                 "targets": [1],
                 "orderable" : false,
                 "render": function (data,type,row) {
-                    return '<input id= "input-nombreART-miselaneos" style="width: 100px" class="form-control input-sm" type="text">'
+                    return '<input id= "input-nombreART-miselaneos"  class="form-control input-sm" type="text">'
                 }
             },
+            
             {
                 "targets": [2],
                 "orderable" : false,
@@ -457,18 +458,18 @@ function InicializaTablas(){
                         }
                     }
 
-                    var select = '<select data-live-search="true" class="selectpicker form-control" data-style="btn-sm btn-success" style="width: 80px" id="cboTPM">' + opciones +'</select>';
+                    var select = '<select data-live-search="true" class="selectpicker form-control" data-style="btn-sm btn-success" style="width: 80px; display: block !important" id="cboTPM">' + opciones +'</select>';
                     return select;
                 }
-                /*"render": function ( data, type, row ) {
-                    return '                            <div class="input-group">\n' +
-                    '                                <input type="text" class="form-control input-sm codigo" style="width: 80px"id="input-articulo-codigoAM" value="' + row['CODIGO_ARTICULO'] + '">\n' +
-                    '                                <div class="input-group-btn">\n' +
-                    '                                    <span style="cursor: pointer;" class="btn btn-sm btn-success m-r-5" id="boton-articuloAM"><i class="fa fa-search" aria-hidden="true"></i></span>\n' +
-                    '                                </div>\n' +
-                    '                            </div>';
-                }*/
-            },
+            //     /*"render": function ( data, type, row ) {
+            //         return '                            <div class="input-group">\n' +
+            //         '                                <input type="text" class="form-control input-sm codigo" style="width: 80px"id="input-articulo-codigoAM" value="' + row['CODIGO_ARTICULO'] + '">\n' +
+            //         '                                <div class="input-group-btn">\n' +
+            //         '                                    <span style="cursor: pointer;" class="btn btn-sm btn-success m-r-5" id="boton-articuloAM"><i class="fa fa-search" aria-hidden="true"></i></span>\n' +
+            //         '                                </div>\n' +
+            //         '                            </div>';
+            //     }*/
+            // },
             
             // {
             //     "targets": [COL_UNIDAD_MEDIDA_INV],
@@ -502,14 +503,14 @@ function InicializaTablas(){
                 "targets": [3],
                 "orderable" : false,
                 "render": function ( data, type, row ) {
-                    return '<input id="input-cantidadAM" style="width: 70px" class="form-control input-sm cantidad" type="number" value="' + parseFloat(row['CANTIDAD']).toFixed(DECIMALES) + '">';
+                    return '<input id="input-cantidadAM"  class="form-control input-sm cantidad" type="number" value="' + parseFloat(row['CANTIDAD']).toFixed(DECIMALES) + '">';
                 }
             },
             {
                 "targets": [4],
                 "orderable" : false,
                 "render": function (data,type,row) {
-                    return '<input id= "input-precioAM" style="width: 100px" class="form-control input-sm precio" value="' + parseFloat(row['PRECIO']).toFixed(DECIMALES) + '" type="number">'
+                    return '<input id= "input-precioAM"  class="form-control input-sm precio" value="' + parseFloat(row['PRECIO']).toFixed(DECIMALES) + '" type="number">'
                 }
             },
             {
@@ -520,7 +521,7 @@ function InicializaTablas(){
                 "targets": [6],
                 "orderable" : false,
                 "render": function (data,type,row) {
-                    return '<input id= "input-descuentoAM" style="width: 100px" class="form-control input-sm" value="' + parseFloat(DESCUENTO_GENERAL).toFixed(DECIMALES) + '" type="number">'
+                    return '<input id= "input-descuentoAM"  class="form-control input-sm" value="' + parseFloat(DESCUENTO_GENERAL).toFixed(DECIMALES) + '" type="number">'
                 }
             },
             {
@@ -542,7 +543,7 @@ function InicializaTablas(){
                         }
                     }
 
-                    var select = '<select data-live-search="true" class="selectpicker form-control" data-style="btn-sm btn-success" style="width: 80px" id="cboIVAAM">' + opciones +'</select>';
+                    var select = '<select data-live-search="true" class="selectpicker form-control" data-style="btn-sm btn-success" style="width: 80px; display: block !important" id="cboIVAAM">' + opciones +'</select>';
                     return select;
                 }
             },
@@ -554,6 +555,10 @@ function InicializaTablas(){
                 "targets": [10],
                 "orderable" : false
             },
+            {
+                "targets": [11],
+                "orderable" : false
+            },
             
             {
                 "targets": [12],
@@ -561,7 +566,11 @@ function InicializaTablas(){
                 "render": function ( data, type, row ) {
                     return '<button type="button" class="btn btn-danger btn-sm" id="boton-eliminarAM"> <span class="fa fa-trash"></span> </button>';
                 }
-            }          
+            },
+            {
+                "targets": [13],
+                "orderable" : false
+            },          
         ]
     });
 
@@ -1139,6 +1148,7 @@ function recargaTablaArticulos(datos){
 }
 
 function insertarFila(){
+    console.log('insertar fila: ' + BanderaOC)
      if (BanderaOC == 0){
         TBL_ART_EXIST.row.add(
             {
@@ -1170,7 +1180,8 @@ function insertarFila(){
             }
         ).draw( false );
         actualizaLineaPartidaAE();
-        } else {        
+        } else {
+
          TBL_ART_MISC.row.add(
             {
                 "PARTIDA": ""
@@ -1182,24 +1193,27 @@ function insertarFila(){
                 , "CANTIDAD": "0.00"
                 , "PRECIO": "0.00"
                 , "SUBTOTAL": "0.00"
+
                 , "DESCUENTO": "0.00"
-                , "MONTO_DESCUENTO": "0.00"
-                , "IVA": "16"
-                , "MONTO_IVA": "0.00"
+                , "MONTO_DESCUENTO": ""
+                , "IVA": ""
+
+                , "MONTO_IVA": ""
                 , "TOTAL": "0.00"
                 , "PARTIDA_CERRADA": 0
+
                 , "BTN_ELIMINAR": null
                 // , "ID_ARTICULO": ""
                 // , "ID_PARTIDA": ""
                 // , "ID_AUX" : generateGuid()
                 // , "ID_UMI": ""
                 // , "ID_UMC": ""
-                , "ID_IVA":"W3"
+                , "ID_IVA":""
                 // , "ESTATUS_PARTIDA":""
                 // , "CODIGO_OT":""
                 // , "ID_OT":""
             }
-        ).draw( false );
+        ).draw( true );
         actualizaLineaPartidaAM(); 
         }
 }

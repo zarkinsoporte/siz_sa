@@ -103,7 +103,7 @@
 
 </div>   <!-- /.container -->
 
-<div class="container" id="ordenesCompraOC">
+<div class="container" id="ordenesCompraOC" style="display:none">
     <div class="row">
         <div class="col-md-11">
             <h3 class="page-header">

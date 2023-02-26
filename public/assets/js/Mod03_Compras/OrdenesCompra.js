@@ -1281,6 +1281,7 @@ $("#sel-tipo-oc").on("changed.bs.select", function(e, clickedIndex, newValue, ol
             $("#miscelaneosOC").show();
             BanderaOC = 1;
         }
+        console.log('sel-tipo-oc: '+BanderaOC)
         setTimeout($.unblockUI, 2000);
     });
 
@@ -1362,7 +1363,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','input#input-cantidadAM',function
         var tabla = $('#tblArticulosMiscelaneosNueva').DataTable();
         var fila = $(this).closest('tr');
         var index = tabla.row(fila).index();
-
+        //VARIFICAR EN LOS DEMAS CAMPOS Y VERIFICAR CAMPO DE CTASMAYOR        
         var datos = tabla.row(fila).data();
         datos['NOMBRE_ARTICULO'] = tabla.row(fila).nodes(fila, 1).to$().find("input#input-nombreART-miselaneos").val();
         

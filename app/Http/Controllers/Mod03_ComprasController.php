@@ -728,6 +728,7 @@ class Mod03_ComprasController extends Controller
             $ajaxData['unidadesMedida'] = [];
             $ajaxData['tipoPartidaMisc'] = [];
             $ajaxData['codigo'] = 200;
+            $ajaxData['respuesta'] = 'Error consultaIvasYUnidadesMedida';
 
             return $ajaxData;
 
