@@ -695,7 +695,14 @@ class Mod03_ComprasController extends Controller
                     "SELECT Code CMIVA_IVAId, Rate CMIVA_Porcentaje 
                     FROM OSTC
                     WHERE  ValidForAP = 'Y'
+                    
                     ORDER BY Rate"
+                )
+            );
+            
+            $CTAS_MAYOR = \DB::select(
+                \DB::raw(
+                    ""
                 )
             );
 
