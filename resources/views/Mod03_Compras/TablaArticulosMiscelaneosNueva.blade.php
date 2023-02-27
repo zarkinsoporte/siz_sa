@@ -20,6 +20,7 @@
 
             <th style="text-align: center;">Eliminar</th>
             <th>ivaID</th>
+            <th>partidaID</th>
         </tr>
         </thead>
         <tbody></tbody>

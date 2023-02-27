@@ -82,7 +82,10 @@ function js_iniciador() {
         // });
         $('.selectpicker').selectpicker({
             noneSelectedText: 'Selecciona una opción',
+            container: "body"
         });
+        
+        
         var options = [];
         var opciones = [ //la llave es el Id que hay en la tabla ItekniaDB.ArticulosTipos
             { 'llave': 'MXP', 'valor': 'MXP' },
@@ -94,6 +97,7 @@ function js_iniciador() {
         }
         $('#cboMoneda').append(options);
         $('#cboMoneda').selectpicker('refresh');
+        $('#cboTPM').selectpicker('refresh');
         $('#sel-tipo-oc').val(0);
         $('#sel-tipo-oc').selectpicker('refresh');
         $("#miscelaneosOC").hide();
@@ -1276,15 +1280,72 @@ $("#sel-tipo-oc").on("changed.bs.select", function(e, clickedIndex, newValue, ol
             $("#articulosOC").show();
             $("#miscelaneosOC").hide();
             BanderaOC = 0;
+            set_columns_index(0);
         } else {
             $("#articulosOC").hide();
             $("#miscelaneosOC").show();
             BanderaOC = 1;
+            set_columns_index(1);
         }
         console.log('sel-tipo-oc: '+BanderaOC)
         setTimeout($.unblockUI, 2000);
     });
+    function set_columns_index(BanderaOC){
+        if (BanderaOC == 0) {
+            //Tabla Articulos
+            COL_PARTIDA = 0;
+            COL_CODIGO_ART = 1;
+            COL_NOMBRE_ART = 2;
+            COL_NOMBRE_ART_MISC = 1;
+            COL_UNIDAD_MEDIDA_INV = 3;
+            COL_FACTOR_CONVERSION = 4;
+            COL_UNIDAD_MEDIDA_COMPRAS = 5;
+            COL_CANTIDAD = 6;
+            COL_PRECIO = 7;
+            COL_SUBTOTAL = 8;
+            COL_DESCUENTO = 9;
+            COL_MONTO_DESCUENTO = 10;
+            COL_IVA = 11;
+            COL_MONTO_IVA = 12;
+            COL_TOTAL = 13;
+            COL_PARTIDA_CERRADA = 14;
+            COL_BTN_ELIMINAR_COMPRA = 15;
+            COL_ID_IVA = 16;
+            COL_ID_PARTIDA = 17;
 
+            // COL_FECHA_REQUERIDA_COMPRA = 14;
+            // COL_CODIGO_OT = 17;
+            // COL_ID_OT = 18;
+            // COL_ID_ARTICULO = 19;
+            // COL_ID_AUX = 21;
+            // COL_ID_UMI = 22;
+            // COL_ID_UMC = 23;
+            // COL_ESTATUS_PARTIDA = 25;
+        } else {
+            //tabla Miscelaneos
+            COL_PARTIDA = 0;
+            //COL_CODIGO_ART = 1;
+            COL_NOMBRE_ART = 1;
+            COL_NOMBRE_ART_MISC = 1;
+
+            // COL_UNIDAD_MEDIDA_INV = 3;
+            COL_CTA_MAYOR = 2;       
+            // COL_FACTOR_CONVERSION = 4;
+            // COL_UNIDAD_MEDIDA_COMPRAS = 5;
+            COL_CANTIDAD = 3;
+            COL_PRECIO = 4;
+            COL_SUBTOTAL = 5;
+            COL_DESCUENTO = 6;
+            COL_MONTO_DESCUENTO = 7;
+            COL_IVA = 8;
+            COL_MONTO_IVA = 9;
+            COL_TOTAL = 10;
+            COL_PARTIDA_CERRADA = 11;
+            COL_BTN_ELIMINAR_COMPRA = 12;
+            COL_ID_IVA = 13;
+            COL_ID_PARTIDA = 14;
+        }
+    }
     $('#tblArticulosMiscelaneosNueva').on('click', 'span#boton-otAM', function (e) {
     e.preventDefault();
     if ($("#sel-proveedor").val() != ""){
@@ -1755,7 +1816,8 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboIVAAM',function (e) {
         var id_iva_nuevo = $(this).val();
         var iva_nuevo = $(this).val() == '' ? '0' : $(this).find('option:selected').text();
 
-        if(registroNuevo == 1){
+//        if(registroNuevo == 1){
+        if(false){
 
             bootbox.dialog({
                 message: "¿Estas seguro de modificar el IVA?.",
@@ -1824,9 +1886,9 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboIVAAM',function (e) {
             RealizaCalculos(fila, tabla, precio, cantidad, descuento);
             calculaTotalOrdenCompra();
             //calculaTipoCambio();
-            if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
-                PartidaResumenAE(index);
-            }
+            // if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
+            //     PartidaResumenAE(index);
+            // }
 
         }
 

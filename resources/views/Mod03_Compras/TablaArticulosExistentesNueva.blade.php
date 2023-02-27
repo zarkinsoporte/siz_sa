@@ -19,11 +19,11 @@
             <th style="text-align: center;">Cerrada</th>
             <th style="text-align: center;">Eliminar</th>
             <th>ivaID</th>
+            <th>partidaId</th>
              <!--<th style="text-align: center;">Codigo OT</th>
             <th style="text-align: center;">Fechas Requeridas</th>
             <th>otId</th>
             <th>articuloId</th>
-            <th>partidaId</th>
             <th>auxiliarId</th>
             <th>umiId</th>
             <th>umcId</th>

@@ -5,6 +5,7 @@
 {!! Html::script('assets/js/Mod03_Compras/OrdenesCompra.js') !!}
 {!! Html::script('assets/js/Mod03_Compras/OrdenesCompraNueva.js') !!}
 {!! Html::script('assets/js/Mod03_Compras/buscadores-proveedor.js') !!}
+
 <link rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/css/bootstrap-dialog.min.css">
 <script type="text/javascript"
@@ -124,13 +125,11 @@
                         data-size = "8",
                         data-style="btn-success"
                         >
-                           
                             <option value="0">Artículos</option>
                             <option value="1">Miscelaneos</option>
                            
                            
                         </select>
-                    </div>
                     <div class="col-md-4" id="selecpicker-cliente">
                         <label><strong>
                                 <font size="2">Proveedor</font>

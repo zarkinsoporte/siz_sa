@@ -695,14 +695,16 @@ class Mod03_ComprasController extends Controller
                     "SELECT Code CMIVA_IVAId, Rate CMIVA_Porcentaje 
                     FROM OSTC
                     WHERE  ValidForAP = 'Y'
-                    
+                    AND Code in ('IVAC0', 'W3')
                     ORDER BY Rate"
                 )
             );
             
             $CTAS_MAYOR = \DB::select(
                 \DB::raw(
-                    ""
+                    "SELECT AcctCode AS ControlId, FORMAT(CONVERT (int, FormatCode), '###-###-###')+' - '+AcctName AS Valor  from OACT
+                    where FrozenFor = 'N' AND FatherNum is not null AND FormatCode is not null
+                    AND LocManTran = 'N'"
                 )
             );
 
@@ -732,6 +734,7 @@ class Mod03_ComprasController extends Controller
 
             $ajaxData = array();
             $ajaxData['ivas'] = $ivas;
+            $ajaxData['ctasmayor'] = $CTAS_MAYOR;
             $ajaxData['unidadesMedida'] = [];
             $ajaxData['tipoPartidaMisc'] = [];
             $ajaxData['codigo'] = 200;

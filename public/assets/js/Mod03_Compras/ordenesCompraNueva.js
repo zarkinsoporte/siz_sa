@@ -71,6 +71,7 @@ var COL_ID_UMI = 22;
 var COL_ID_UMC = 23;
 var COL_ID_IVA = 16;
 var COL_ESTATUS_PARTIDA = 25;
+var COL_CTA_MAYOR = 2;
 
 //Tabla articulos delproveedor
 var ARTICULO_BUSCADOR_ID = '';
@@ -193,7 +194,7 @@ function consultaDatos (){
 
                 IVA = respuesta.ivas;
                // UNIDAD = respuesta.unidadesMedida;
-               // CTAS_MAYOR = respuesta.ctasmayor;
+                CTAS_MAYOR = respuesta.ctasmayor;
             }
             else{
 
@@ -278,7 +279,8 @@ function InicializaTablas(){
             {data: "TOTAL"},
             {data: "PARTIDA_CERRADA"},
             {data: "BTN_ELIMINAR", orderable: false},
-            {data: "ID_IVA", orderable:false, visible:false}
+            {data: "ID_IVA", orderable:false, visible:false},
+            {data: "ID_PARTIDA", orderable:false, visible:false}
 
         ],
         "columnDefs": [
@@ -292,7 +294,7 @@ function InicializaTablas(){
                 "orderable" : false,
                 "render": function ( data, type, row ) {
                     return '                            <div class="input-group">\n' +
-                    '                                <input type="text" class="form-control input-sm codigo" style="width: 80px"id="input-articulo-codigoAE" value="' + row['CODIGO_ARTICULO'] + '">\n' +
+                    '                                <input type="text" class="form-control input-sm codigo" style=""id="input-articulo-codigoAE" value="' + row['CODIGO_ARTICULO'] + '">\n' +
                     '                                <div class="input-group-btn">\n' +
                     '                                    <a style="cursor: pointer;" class="btn btn-sm btn-success m-r-5" id="boton-articuloAE"><i class="fa fa-search" aria-hidden="true"></i></a>\n' +
                     '                                </div>\n' +
@@ -319,7 +321,7 @@ function InicializaTablas(){
                 "targets": [COL_CANTIDAD],
                 "orderable" : false,
                 "render": function ( data, type, row ) {
-                    return '<input id="input-cantidadAE" style="width: 70px" class="form-control input-sm cantidad" type="number" value="' + parseFloat(row['CANTIDAD']).toFixed(DECIMALES) + '">';
+                    return '<input id="input-cantidadAE" style="" class="form-control input-sm cantidad" type="number" value="' + parseFloat(row['CANTIDAD']).toFixed(DECIMALES) + '">';
                 }
             },
             {
@@ -358,7 +360,7 @@ function InicializaTablas(){
                         }
                     }
 
-                    var select = '<select data-live-search="true" class="selectpicker form-control" data-style="btn-sm btn-success" style="width: 80px; display: block !important" id="cboIVAAE">' + opciones +'</select>';
+                    var select = '<select data-live-search="true" class="boot-select selectpicker form-control" data-style="btn-sm btn-success" style=" display: block !important" id="cboIVAAE">' + opciones +'</select>';
                     return select;
                 }
             },
@@ -401,6 +403,12 @@ function InicializaTablas(){
         language:{
             "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
         },
+         "drawCallback": function( settings ) {
+            $(".selectpicker").selectpicker({
+                noneSelectedText: 'Selecciona una opción',
+                container: "body"
+            });
+        },
         searching: false,
         iDisplayLength: 100,
         aaSorting: [],
@@ -427,7 +435,8 @@ function InicializaTablas(){
             {data: "PARTIDA_CERRADA"},
 
             {data: "BTN_ELIMINAR", orderable: false},
-            {data: "ID_IVA", orderable:false, visible:false}
+            {data: "ID_IVA", orderable:false, visible:false},
+            {data: "ID_PARTIDA", orderable:false, visible:false}
         ],
         "columnDefs": [
             {
@@ -458,12 +467,12 @@ function InicializaTablas(){
                         }
                     }
 
-                    var select = '<select data-live-search="true" class="selectpicker form-control" data-style="btn-sm btn-success" style="width: 80px; display: block !important" id="cboTPM">' + opciones +'</select>';
+                    var select = '<select data-live-search="true" class=" boot-select selectpicker form-control" data-style="btn-sm btn-success" style="display: block !important" id="cboTPM">' + opciones +'</select>';
                     return select;
                 }
             //     /*"render": function ( data, type, row ) {
             //         return '                            <div class="input-group">\n' +
-            //         '                                <input type="text" class="form-control input-sm codigo" style="width: 80px"id="input-articulo-codigoAM" value="' + row['CODIGO_ARTICULO'] + '">\n' +
+            //         '                                <input type="text" class="form-control input-sm codigo" style=""id="input-articulo-codigoAM" value="' + row['CODIGO_ARTICULO'] + '">\n' +
             //         '                                <div class="input-group-btn">\n' +
             //         '                                    <span style="cursor: pointer;" class="btn btn-sm btn-success m-r-5" id="boton-articuloAM"><i class="fa fa-search" aria-hidden="true"></i></span>\n' +
             //         '                                </div>\n' +
@@ -495,10 +504,10 @@ function InicializaTablas(){
             //         }
             //         //opciones.push('<option value="UMI1">UMI1</option>');
             //         //opciones.push('<option value="UMI2">UMI2</option>');
-            //         var select = '<select data-live-search="true" class="selectpicker form-control" data-style="btn-sm btn-success" style="width: 80px" id="cboUMAM">' + opciones +'</select>';
+            //         var select = '<select data-live-search="true" class="boot-select selectpicker form-control" data-style="btn-sm btn-success" style="" id="cboUMAM">' + opciones +'</select>';
             //         return select;
             //     }
-            // },
+             },
             {
                 "targets": [3],
                 "orderable" : false,
@@ -543,7 +552,7 @@ function InicializaTablas(){
                         }
                     }
 
-                    var select = '<select data-live-search="true" class="selectpicker form-control" data-style="btn-sm btn-success" style="width: 80px; display: block !important" id="cboIVAAM">' + opciones +'</select>';
+                    var select = '<select data-live-search="true" class="boot-select selectpicker form-control" data-style="btn-sm btn-success" style=" display: block !important" id="cboIVAAM">' + opciones +'</select>';
                     return select;
                 }
             },
@@ -1169,11 +1178,11 @@ function insertarFila(){
                 , "PARTIDA_CERRADA": 0
                 , "BTN_ELIMINAR": null
                 // , "ID_ARTICULO": ""
-                // , "ID_PARTIDA": ""
                 // , "ID_AUX" : generateGuid()
                 // , "ID_UMI": ""
                 // , "ID_UMC": ""
                 , "ID_IVA":"W3"
+                , "ID_PARTIDA": ""
                 // , "ESTATUS_PARTIDA":""
                 // , "CODIGO_OT":""
                 // , "ID_OT":""
@@ -1204,11 +1213,11 @@ function insertarFila(){
 
                 , "BTN_ELIMINAR": null
                 // , "ID_ARTICULO": ""
-                // , "ID_PARTIDA": ""
                 // , "ID_AUX" : generateGuid()
                 // , "ID_UMI": ""
                 // , "ID_UMC": ""
                 , "ID_IVA":""
+                , "ID_PARTIDA": ""
                 // , "ESTATUS_PARTIDA":""
                 // , "CODIGO_OT":""
                 // , "ID_OT":""
