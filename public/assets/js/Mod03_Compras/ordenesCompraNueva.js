@@ -869,7 +869,7 @@ function InicializaComponentesOC() {
     //$("#ordenesCompraOC #cboSucursal").attr('disabled',true);
     //$('#ordenesCompraOC #cboSucursal').append('<option value="">Selecciona una opción</option>');
     //$("#ordenesCompraOC #cboSucursal").selectpicker('refresh');
-    $("#ordenesCompraOC #cboMoneda").attr('disabled',true);
+    //$("#ordenesCompraOC #cboMoneda").attr('disabled',true);
     $("#ordenesCompraOC #cboMoneda").val('');
     $("#ordenesCompraOC #cboMoneda").selectpicker('refresh');
 
@@ -887,8 +887,8 @@ function InicializaComponentesOC() {
     //$("#ordenesCompraOC #agenteAduanal").hide();
     //$("#ordenesCompraOC #tipoCambio").show();
         // $("#ordenesCompraOC #cboTipoOC").attr('disabled',true);
-        // $("#ordenesCompraOC #cboTipoOC").val('');
-        // $("#ordenesCompraOC #cboTipoOC").selectpicker('refresh');
+    $("#sel-tipo-oc").val(0);
+    $("#sel-tipo-oc").selectpicker('refresh');
         // $("#ordenesCompraOC #cboAlmacen").attr('disabled',true);
         // $("#ordenesCompraOC #cboAlmacen").val('');
         // $("#ordenesCompraOC #cboAlmacen").selectpicker('refresh');
@@ -912,7 +912,9 @@ function InicializaComponentesOC() {
     //$("#ordenesCompraOC #cboIVA").selectpicker('refresh');
     //$("#modal-datos #input-descuento").val('');
     //$("#modal-datos #input-comentarios").val('');
-
+    $('#tblArticulosExistentesNueva').DataTable().clear().draw();
+    $('#tblArticulosMiscelaneosNueva').DataTable().clear().draw();
+    insertarFila();   
     InicializaDatepicker();
 
 };
@@ -1034,8 +1036,10 @@ function cargaTablaArticulos(){
             var respuesta = JSON.parse(JSON.stringify(datos));
             
             if(respuesta.codigo == 200){
+                if ((respuesta.data2).length > 0){
 
-                recargaTablaArticulos(respuesta.data2);
+                    recargaTablaArticulos(respuesta.data2);
+                }
                 //console.log(respuesta.sql)
             }
             else{
@@ -2553,7 +2557,7 @@ function registraOC(){
             //"OCD_CMIVA_PorcentajeIVA": $("#cboIVA option:selected").text(),
             //"OC_EV_ProyectoId": $("#modal-datos #cboProyectos").val(),
             //"OC_OT_OrdenTrabajoId": $("#modal-datos #idOrdenTrabajo").val(),
-            //"OC_Comentarios": $("#modal-datos #input-comentarios").val(),
+            "oc_comentarios": $("#input-comentarios").val(),
             //"ArrayFehasRequeridas": TblPartidasDetalles,
             //"ArrayFehasRequeridasEditar": TblPartidasDetalles,
             "TablaArticulosExistentes": datosTablaArtExis,

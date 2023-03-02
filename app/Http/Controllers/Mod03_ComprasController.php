@@ -476,22 +476,7 @@ class Mod03_ComprasController extends Controller
         'proveedores'));    // 'rates',
     }
     public function get_oc_xfecha(Request $request){
-        $query = "SELECT 
-            '' AS BTN_EDITAR
-            , OPOR.DocNum as NumOC
-            , CONVERT(varchar, OPOR.DocDate, 23) as FechaOC
-            , OPOR.CardCode + ' - ' +OPOR.CardName as Proveedor
-            , OSLP.SlpName as Elaboro 
-            , CASE WHEN docstatus = 'C' THEN 'CERRADA' ELSE 'ABIERTA' END Estatus
-            , DocTotal Total
-            , OPOR.DocCur Moneda
-            FROM OPOR 
-            INNER JOIN POR1 ON OPOR.DocEntry = POR1.DocEntry
-            LEFT JOIN OSLP on OSLP.SlpCode= POR1.SlpCode 
-            WHERE 
-            DocType = 'I' AND
-            OPOR.DocDate between '".$request->get('fi')." 00:00:00' and  '".$request->get('ff')." 23:59:59'
-            GROUP BY DocNum, OPOR.DocDate, CardCode, SlpName, CardName, docstatus, DocCur, DocTotal                
+        $query = "                 
         ";
         //dd($query);
         $result = DB::select($query);
@@ -509,17 +494,18 @@ class Mod03_ComprasController extends Controller
             OPOR.DocNum as NumOC
             , CONVERT(varchar, OPOR.DocDate, 23) as FechaOC
             , OPOR.CardCode + ' - ' +OPOR.CardName as Proveedor
-            , OSLP.SlpName as Elaboro 
+            --, OSLP.SlpName as Elaboro 
             , CASE WHEN docstatus = 'C' THEN 'CERRADA' ELSE 'ABIERTA' END Estatus
             , FORMAT(DocTotal, '##.##') Total
             , OPOR.DocCur Moneda
+            , OPOR.Comments Comentario
             FROM OPOR 
             INNER JOIN POR1 ON OPOR.DocEntry = POR1.DocEntry
             LEFT JOIN OSLP on OSLP.SlpCode= POR1.SlpCode 
             WHERE 
             DocType = 'I' AND
             OPOR.DocNum = ?
-            GROUP BY DocNum, OPOR.DocDate, CardCode, SlpName, CardName, docstatus, DocCur, DocTotal
+            GROUP BY Comments, DocNum, OPOR.DocDate, CardCode, SlpName, CardName, docstatus, DocCur, DocTotal
         ", [$request->get('oc')]);
         $data=[];
         if (count($result) > 0) {
@@ -619,9 +605,12 @@ class Mod03_ComprasController extends Controller
         $tc_sys = DB::table('ORTT')        
         ->where('RateDate', date('Y-m-d'))->get();
         $tipos_cambio = [];
+        $sql = "CAPTURA TIPOS DE CAMBIO";
         foreach ($tc_sys as $value) {
             $tipos_cambio [$value->Currency] = $value->Rate.'';
         }
+        if(count($tipos_cambio) > 0){
+        
         $sql = "SELECT top 100
                         OITM.ItemCode ART_CodigoArticulo,
                         OITM.ItemName ART_Nombre,
@@ -652,7 +641,8 @@ class Mod03_ComprasController extends Controller
                     // if ($request->get('moneda') == 'MXP'){
                     //     $sql = $sql . " AND  ITM1.Currency = 'MXP' ";
                     // }
-                    //$sql = $sql . "ORDER BY OITM.ItemName, OITM.ItemCode";
+                    //$sql = $sql . "ORDER BY OITM.ItemName, OITM.ItemCode"
+        }
         try{
 
             $consulta2 = [];
@@ -758,65 +748,22 @@ class Mod03_ComprasController extends Controller
     }
     
     public function registraOC(Request $request){
-
-        //SAP::registraOC();    
-        //return 'ok';
-        //\DB::beginTransaction();
-        return $request->all();
+        // return $request->all();
+        
+        // TablaArticulosExistentes
+        // TablaArticulosMiscelaneos
+        // oc_comentarios
+        // oc_moneda
+        // oc_proveedor
+        // oc_tipo
+        // oc_tipo_cambio
+        // status
+        
         try{
-
-            date_default_timezone_set('America/Mexico_City');
-            $hoy=date('d-m-Y H:i:s');
-            $dia=date('d-m-Y');
-
-            //$OC_CodigoOC = $_POST['OC_CodigoOC'] == '' ? null : $_POST['OC_CodigoOC'];
-            $OC_PRO_ProveedorId = $_POST['OC_PRO_ProveedorId'];
-            //$OC_PDOC_DireccionOCId = $_POST['OC_PDOC_DireccionOCId'] == '' ? null : $_POST['OC_PDOC_DireccionOCId'];
-            //$OC_CMM_TipoOCId = $_POST['OC_CMM_TipoOCId'];
-            $OC_MON_MonedaId = $_POST['OC_MON_MonedaId'];
-            $OC_MONP_Paridad = $_POST['OC_MONP_Paridad'] == '' ? null : $_POST['OC_MONP_Paridad'];
-            //$OC_MONP_ParidadId = $_POST['OC_MONP_ParidadId'] == '' ? null : $_POST['OC_MONP_ParidadId'];
-            
-          
-            //$OC_PorcentajeDescuento = $_POST['OC_PorcentajeDescuento'] == '' ? null : $_POST['OC_PorcentajeDescuento'];
-            //$OC_CMIVA_IVAId = $_POST['OC_CMIVA_IVAId'] == '' ? null : $_POST['OC_CMIVA_IVAId'];
-            if($OC_CMIVA_IVAId == null){
-
-                $OCD_CMIVA_PorcentajeIVA = 0;
-
-            }
-            else{
-
-                $OCD_CMIVA_PorcentajeIVA = $_POST['OCD_CMIVA_PorcentajeIVA'] == '' ? null : $_POST['OCD_CMIVA_PorcentajeIVA'];
-
-            }
-            
-            $TablaArticulosExistentes = isset($_POST['TablaArticulosExistentes']) ? json_decode($_POST['TablaArticulosExistentes'], true) : array();
-           
-            $empleadoId = '';//DataBaseSession::getEmpleadoId();
-            $editaProveedor = $_POST['editaProveedor'];
-
-            if($_POST['status'] == 0){
-
-                //INSERTA ORDEN DE COMPRA
-               
-                for($x = 0; $x < $cuentaTablaArtExis; $x ++){
-
-                    if($TablaArticulosExistentes[$x]['ID_ARTICULO'] != ""){
-
-                        $contadorPartida++;
-                                 // \DB::commit();
-                    }
-                }  
-            }  
-            return ['Status' => 'Valido', 'respuesta' => $response];
-
+            return SAP::registraOC($request->all());    
         }
         catch (\Exception $e){
-
-            //\DB::rollback();
             return ['Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$e->getMessage()];
-
         }
 
     }

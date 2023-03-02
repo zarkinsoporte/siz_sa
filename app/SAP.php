@@ -911,12 +911,45 @@ class SAP extends Model
         $item = null;
         $resultadoOperacion = null;
     }
-    public static function registraOC()
+    public static function registraOC($datos)
     {
         //Ref
         //https://answers.sap.com/questions/1448088/using-xml-to-update-objects-in-diapi.html
         //https://answers.sap.com/questions/232431/add-invoices-from-di-api-using-xml.html
 
+        date_default_timezone_set('America/Mexico_City');
+        $hoy=date('d-m-Y H:i:s');
+        $dia=date('d-m-Y');
+
+        $oc_comentarios = $datos["oc_comentarios"];
+        $oc_moneda = $datos["oc_moneda"];
+        $oc_proveedor = $datos["oc_proveedor"];
+        $oc_tipo = $datos["oc_tipo"];
+        $oc_tipo_cambio = $datos["oc_tipo_cambio"];
+        $status = $datos["status"];
+
+        if ($oc_tipo == 0) {
+            $oc_items = isset($datos["TablaArticulosExistentes"]) ? json_decode($datos["TablaArticulosExistentes"], true) : array();
+        } else {
+            $oc_items = isset($datos["TablaArticulosMiscelaneos"]) ? json_decode($datos["TablaArticulosMiscelaneos"], true) : array();         
+        }
+
+        if($status == 0){
+
+            //INSERTA ORDEN DE COMPRA
+            
+            for($x = 0; $x < count($oc_items); $x ++){
+
+                if($oc_items[$x]['NOMBRE_ARTICULO'] != ""){
+
+                    $contadorPartida++;
+                                // \DB::commit();
+                }
+            }  
+        }  
+        return ['Status' => 'Valido', 'respuesta' => 'success'];
+
+        //////////////////////////////////////////////////////////////////
         $vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
         $vCmp->DbServerType = "10";
         $vCmp->server = "".env('SAP_server');
@@ -929,7 +962,6 @@ class SAP extends Model
         $vCmp->UseTrusted = false;
         //la siguiente linea permite leer XML como string y no como archivo en "Browser->ReadXml"
         $vCmp->XMLAsString = true; //The default value is False - XML as files.
-
         //$vCmp->language = "6";
         $vCmp->Connect; //conectar a Sociedad SAP
 

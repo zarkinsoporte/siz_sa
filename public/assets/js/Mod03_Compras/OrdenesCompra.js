@@ -149,11 +149,11 @@ var tableOC = $("#tableOC").DataTable({
                     {data: "BTN_EDITAR"},    
                     {data: "NumOC"},
                     {data: "Proveedor"},
-                    {data: "Elaboro"},
                     {data: "Estatus"},
                     {data: "Total"},
                     {data: "Moneda"},
-                    {data: "FechaOC"}
+                    {data: "FechaOC"},
+                    {data: "Comentario"}
                 ],
                 'columnDefs': [
                 {
@@ -508,15 +508,18 @@ $(document).keyup(function(event) {
             });
         var proveedor_moneda = $('option:selected', this).attr("data-moneda");
         var proveedorId = $('option:selected', this).val();
-        $("#cboMoneda").val(proveedor_moneda);
-        $('#cboMoneda').selectpicker('refresh');
-        carga_tipo_cambio(proveedor_moneda);
+        if (proveedor_moneda != $("#cboMoneda").val()) {
+            $("#cboMoneda").val(proveedor_moneda);
+            $('#cboMoneda').selectpicker('refresh');
+            carga_tipo_cambio(proveedor_moneda);
+            recargaTablaArticulos('');
+            cargaTablaArticulos();
+            //$('#tblArticulosExistentesNueva').DataTable().clear().draw();
+            //$('#tblArticulosMiscelaneosNueva').DataTable().clear().draw();
+            //insertarFila();   
+        }
         carga_info_proveedor(proveedorId);
-        recargaTablaArticulos('');
-        cargaTablaArticulos();
-        $('#tblArticulosExistentesNueva').DataTable().clear().draw();
-        $('#tblArticulosMiscelaneosNueva').DataTable().clear().draw();
-        insertarFila();   
+        
         setTimeout($.unblockUI, 2000);   
     });
 

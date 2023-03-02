@@ -82,11 +82,11 @@
                                                 <th>Acciones</th>
                                                 <th>Código</th>
                                                 <th>Provedor</th>
-                                                <th>Elaboro</th>
                                                 <th>Estado OC</th>
                                                 <th>Total</th>
                                                 <th>Moneda</th>
                                                 <th>Fecha</th>
+                                                <th>Comentario</th>
                                                 
                                             </tr>
                                         </thead>
@@ -130,6 +130,7 @@
                            
                            
                         </select>
+                    </div>
                     <div class="col-md-4" id="selecpicker-cliente">
                         <label><strong>
                                 <font size="2">Proveedor</font>
@@ -170,6 +171,13 @@
                             </strong></label>
                        <input type="number" class="form-control" name="" value="1" id="input_tc">
                        <input type="number" class="form-control" name="" value="1" id="input_tc_anterior" style="display: none">
+                    </div>
+                    <div class="col-md-6" id="div-tipo-cambio" style="margin-top: 7px">
+                        <label><strong>
+                        <font size="2">Comentario</font>
+                            </strong></label>
+                            <textarea class="form-control user-success" id="input-comentarios" rows="1" maxlength="50"></textarea>                         
+  
                     </div>
                 </div>
             </div>
@@ -213,7 +221,7 @@
                             <!-- Inicio Artiulos Existentes -->
                             <div class="tab-pane fade active in" id="articulosExistentes">
                                 <div id="articulosOC">
-                                    <div data-scrollbar="true" style="height: 600px">
+                                    <div data-scrollbar="true" style="height: 400px">
                                         @include('Mod03_Compras.TablaArticulosExistentesNueva')
                                     </div>
                                 </div>
@@ -223,7 +231,7 @@
                             <!-- Inicio Artiulos Miscelaneos -->
                             <!--<div class="tab-pane fade" id="articulosMiscelaneos">-->
                                 <div id="miscelaneosOC" style="">
-                                    <div data-scrollbar="true" style="height: 600px">
+                                    <div data-scrollbar="true" style="height: 400px">
                                         @include('Mod03_Compras.TablaArticulosMiscelaneosNueva')
                                     </div>
                                 </div>
@@ -232,7 +240,7 @@
                             
                             <!-- Inicio Resumen -->
                             <div class="tab-pane fade" id="resumen">
-                                <div data-scrollbar="true" style="height: 600px">
+                                <div data-scrollbar="true" style="height: 400px">
                                     @include('Mod03_Compras.TablaResumenNueva')
                                 </div>
                             </div>
