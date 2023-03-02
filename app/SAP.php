@@ -948,7 +948,24 @@ class SAP extends Model
             }  
         }  
         return ['Status' => 'Valido', 'respuesta' => 'success'];
-
+        //BO/Documents/row   
+            // <DocType>dDocument_Items</DocType>//dDocument_Service
+            // <DocDate>20230215</DocDate>
+            // <DocDueDate>20230215</DocDueDate>
+            // <CardCode>P1324</CardCode>
+            // <DocCurrency>MXP</DocCurrency>
+            // <DocRate>1.000000</DocRate>
+            // <DocObjectCode>22</DocObjectCode>
+            // <JournalMemo>Pedidos - P0293</JournalMemo>    
+        //BO/Document_Lines/row
+            //<ItemDescription>seguro</ItemDescription>
+            // <AccountCode>_SYS00000000022</AccountCode>
+            // <ItemCode>10429</ItemCode>
+            // <Quantity>1.000000</Quantity>
+            // <Price>302.940000</Price> 
+            // <DiscountPercent>0.000000</DiscountPercent>
+            // <WarehouseCode>AMP-CC</WarehouseCode>
+            // <TaxCode>W3</TaxCode>
         //////////////////////////////////////////////////////////////////
         $vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
         $vCmp->DbServerType = "10";

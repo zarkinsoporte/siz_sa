@@ -489,8 +489,9 @@ Route::get('/sap', function (Request $request) {
 	$id = '1';
 	$vCmp->XmlExportType = '3';
 	$vItem = $vCmp->GetBusinessObject("22");
-	$vItem->GetByKey('5269');
-	$pathh = public_path('assets/xml/sap/2023.xml');
+
+	$vItem->GetByKey('5299'); //5269
+	$pathh = public_path('assets/xml/sap/2023MISC5299-5261.xml');
 	$vItem->SaveXML($pathh); //Guardar en archivo
 /*
 	$vItem->DocDate = (new \DateTime('now'))->format('Y-m-d H:i:s');
