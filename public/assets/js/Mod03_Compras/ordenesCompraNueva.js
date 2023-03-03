@@ -1209,7 +1209,7 @@ function insertarFila(){
 
                 , "DESCUENTO": "0.00"
                 , "MONTO_DESCUENTO": ""
-                , "IVA": ""
+                , "IVA": "16"
 
                 , "MONTO_IVA": ""
                 , "TOTAL": "0.00"
@@ -1220,7 +1220,7 @@ function insertarFila(){
                 // , "ID_AUX" : generateGuid()
                 // , "ID_UMI": ""
                 // , "ID_UMC": ""
-                , "ID_IVA":""
+                , "ID_IVA":"W3"
                 , "ID_PARTIDA": ""
                 // , "ESTATUS_PARTIDA":""
                 // , "CODIGO_OT":""

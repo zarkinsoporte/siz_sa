@@ -915,11 +915,7 @@ class SAP extends Model
     {
         //Ref
         //https://answers.sap.com/questions/1448088/using-xml-to-update-objects-in-diapi.html
-        //https://answers.sap.com/questions/232431/add-invoices-from-di-api-using-xml.html
-
-        date_default_timezone_set('America/Mexico_City');
-        $hoy=date('d-m-Y H:i:s');
-        $dia=date('d-m-Y');
+        //https://answers.sap.com/questions/232431/add-invoices-from-di-api-using-xml.html¡
 
         $oc_comentarios = $datos["oc_comentarios"];
         $oc_moneda = $datos["oc_moneda"];
@@ -928,27 +924,14 @@ class SAP extends Model
         $oc_tipo_cambio = $datos["oc_tipo_cambio"];
         $status = $datos["status"];
 
+        $xml_tipoOC = 'dDocument_Items';
         if ($oc_tipo == 0) {
             $oc_items = isset($datos["TablaArticulosExistentes"]) ? json_decode($datos["TablaArticulosExistentes"], true) : array();
         } else {
             $oc_items = isset($datos["TablaArticulosMiscelaneos"]) ? json_decode($datos["TablaArticulosMiscelaneos"], true) : array();         
+            $xml_tipoOC = 'dDocument_Service';
         }
-
-        if($status == 0){
-
-            //INSERTA ORDEN DE COMPRA
-            
-            for($x = 0; $x < count($oc_items); $x ++){
-
-                if($oc_items[$x]['NOMBRE_ARTICULO'] != ""){
-
-                    $contadorPartida++;
-                                // \DB::commit();
-                }
-            }  
-        }  
-        return ['Status' => 'Valido', 'respuesta' => 'success'];
-        //BO/Documents/row   
+         //BO/Documents/row   
             // <DocType>dDocument_Items</DocType>//dDocument_Service
             // <DocDate>20230215</DocDate>
             // <DocDueDate>20230215</DocDueDate>
@@ -956,7 +939,44 @@ class SAP extends Model
             // <DocCurrency>MXP</DocCurrency>
             // <DocRate>1.000000</DocRate>
             // <DocObjectCode>22</DocObjectCode>
-            // <JournalMemo>Pedidos - P0293</JournalMemo>    
+            // <JournalMemo>Pedidos - P0293</JournalMemo> 
+        if($status == 0){
+            $pathh = public_path('assets/xml/sap/ordenesCompra/new_oc_p1.xml');
+            $oXML = simplexml_load_file($pathh); //Crear Object SimpleXML de un archivo 
+            $root_items = $oXML->xpath('/BOM/BO/Document_Lines');
+            $root_oc_header = $oXML->xpath('/BOM/BO/Documents/row');
+
+            //INSERTA ORDEN DE COMPRA
+            $root_oc_header[0]->DocType = $xml_tipoOC;
+            $root_oc_header[0]->DocDate = "".(new \DateTime('now'))->format('Ymd');
+            $root_oc_header[0]->DocDueDate = "".(new \DateTime('now'))->format('Ymd');
+            $root_oc_header[0]->CardCode = $oc_proveedor;
+            $root_oc_header[0]->DocCurrency = $oc_moneda;
+            //$root_oc_header[0]->DocRate = $oc_tipo_cambio;
+            $root_oc_header[0]->DocObjectCode = $xml_tipoOC;
+            $root_oc_header[0]->JournalMemo = "ELABORO: ".session('userNombre').', '. strtoupper($oc_comentarios);
+
+            for($x = 0; $x < count($oc_items); $x ++){
+                $xml_item = $root_items->addChild('row');
+                
+                if ($oc_tipo == 0) {
+                    $xml_item->addChild('ItemCode', $oc_items[$x]['CODIGO_ARTICULO']);
+                    $xml_item->addChild('AccountCode', '_SYS00000000022');
+                    
+                } else {
+                    $xml_item->addChild('ItemDescription', $oc_items[$x]['NOMBRE_ARTICULO']);
+                    $xml_item->addChild('AccountCode', $oc_items[$x]['NOMBRE_ARTICULO']);
+                    
+                }
+                $xml_item->addChild('Quantity', $oc_items[$x]['CANTIDAD']);
+                $xml_item->addChild('Price', $oc_items[$x]['PRECIO']);
+                $xml_item->addChild('DiscountPercent', $oc_items[$x]['DESCUENTO']);
+                $xml_item->addChild('WarehouseCode', "AMP-CC");
+                $xml_item->addChild('TaxCode', $oc_items[$x]['ID_IVA']);
+            }  
+        }  
+        return ['Status' => 'Valido', 'respuesta' => 'success'];
+          
         //BO/Document_Lines/row
             //<ItemDescription>seguro</ItemDescription>
             // <AccountCode>_SYS00000000022</AccountCode>
