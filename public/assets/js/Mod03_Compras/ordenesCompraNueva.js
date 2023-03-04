@@ -2587,15 +2587,16 @@ function registraOC(){
                 $('#ordenesCompraOC').hide();
                 $('#btnBuscadorOC').show();
                 reloadBuscadorOC();
-                InicializaComponentesOC();
-                $("#tblArticulosExistentesNueva").DataTable().clear().draw();
-                $("#tblArticulosMiscelaneosNueva").DataTable().clear().draw();
-                // $("#tblArticulosExistentesResumenNueva").DataTable().clear().draw();
-                // $("#tblArticulosMiscelaneosResumenNueva").DataTable().clear().draw();
-                calculaTotalOrdenCompra();
-                ////calculaTipoCambio();
+                
 
             }
+            InicializaComponentesOC();
+            $("#tblArticulosExistentesNueva").DataTable().clear().draw();
+            $("#tblArticulosMiscelaneosNueva").DataTable().clear().draw();
+            // $("#tblArticulosExistentesResumenNueva").DataTable().clear().draw();
+            // $("#tblArticulosMiscelaneosResumenNueva").DataTable().clear().draw();
+            calculaTotalOrdenCompra();
+            ////calculaTipoCambio();
         },
         error: function (x, e) {
             var errorMessage = 'Error \n' + x.responseText;

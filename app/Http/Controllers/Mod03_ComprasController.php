@@ -611,7 +611,7 @@ class Mod03_ComprasController extends Controller
         }
         if(count($tipos_cambio) > 0){
         
-        $sql = "SELECT top 100
+        $sql = "SELECT
                         OITM.ItemCode ART_CodigoArticulo,
                         OITM.ItemName ART_Nombre,
                         OITM.U_TipoMat ATP_Descripcion,
@@ -637,6 +637,7 @@ class Mod03_ComprasController extends Controller
 
                     WHERE OITM.ItemCode IS NOT NULL 
                     AND OITM.PrchseItem = 'Y' AND OITM.InvntItem = 'Y'
+                    AND OITM.frozenFor = 'N' AND  OITM.U_TipoMat IN ('HB', 'MP', 'SP', 'RF') 
                     ORDER BY OITM.ItemName, OITM.ItemCode";
                     // if ($request->get('moneda') == 'MXP'){
                     //     $sql = $sql . " AND  ITM1.Currency = 'MXP' ";

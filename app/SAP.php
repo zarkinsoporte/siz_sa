@@ -953,8 +953,8 @@ class SAP extends Model
             $root_oc_header[0]->CardCode = $oc_proveedor;
             $root_oc_header[0]->DocCurrency = $oc_moneda;
             //$root_oc_header[0]->DocRate = $oc_tipo_cambio;
-            $root_oc_header[0]->DocObjectCode = $xml_tipoOC;
-            $root_oc_header[0]->JournalMemo = "ELABORO: ".session('userNombre').', '. strtoupper($oc_comentarios);
+            $root_oc_header[0]->DocObjectCode = "22";
+            $root_oc_header[0]->Comments = "ELABORO: ".session('userNombre').', '. strtoupper($oc_comentarios);
 
             for($x = 0; $x < count($oc_items); $x ++){
                 $xml_item = $root_items[0]->addChild('row');

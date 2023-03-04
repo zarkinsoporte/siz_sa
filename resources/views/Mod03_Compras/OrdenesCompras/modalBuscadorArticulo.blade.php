@@ -13,7 +13,7 @@
             </div>
             <div class="modal-body">
                 <div class="well">
-                    <input type="text" id="input-fila" style="">
+                    <input type="text" id="input-fila" style="display:none">
                     <div class="table-responsive" id="contenedor-articulo">
                         <table id="tabla-articulo" class="table table-bordered display" cellspacing="0" width="100%">
                             <thead>
