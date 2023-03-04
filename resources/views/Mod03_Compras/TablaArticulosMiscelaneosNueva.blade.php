@@ -3,7 +3,7 @@
         <thead>
         <tr>
             <th style="text-align: right;">#</th>
-            <th>Nombre</th>
+            <th>Descripción</th>
             <th>CTA Mayor</th>    
 
             <th style="text-align: right;">Cantidad Compra</th>

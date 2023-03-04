@@ -3,8 +3,8 @@
         <thead>
         <tr>
             <th style="text-align: right;">#</th>
-            <th>Artículo</th>
-            <th>Nombre</th>
+            <th>Código Artículo</th>
+            <th>Descripción</th>
             <th>UMI</th>
             <th>Factor de Conversión</th>
             <th>UMC</th>

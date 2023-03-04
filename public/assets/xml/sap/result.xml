@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BOM>
+    <BO>
+        <AdmInfo>
+            <Object>22</Object>
+            <Version>2</Version>
+        </AdmInfo>
+        <Documents>
+            <row>
+                <DocType>dDocument_Items</DocType>
+                <DocDate>20230303</DocDate>
+                <DocDueDate>20230303</DocDueDate>
+                <CardCode>P1926</CardCode>
+                <DocCurrency>MXP</DocCurrency>
+                <DocObjectCode>dDocument_Items</DocObjectCode>
+                <JournalMemo>ELABORO: ALBERTO JIMENEZ, COM PRUEBA</JournalMemo>
+            </row>
+        </Documents>
+        <Document_Lines>
+            <row>
+                <ItemCode>372403-H</ItemCode>
+                <AccountCode>_SYS00000000022</AccountCode>
+                <Quantity>1.00</Quantity>
+                <Price>998.587000</Price>
+                <DiscountPercent>0.000</DiscountPercent>
+                <WarehouseCode>AMP-CC</WarehouseCode>
+                <TaxCode>W3</TaxCode>
+            </row>
+        </Document_Lines>
+    </BO>
+</BOM>

@@ -957,7 +957,7 @@ class SAP extends Model
             $root_oc_header[0]->JournalMemo = "ELABORO: ".session('userNombre').', '. strtoupper($oc_comentarios);
 
             for($x = 0; $x < count($oc_items); $x ++){
-                $xml_item = $root_items->addChild('row');
+                $xml_item = $root_items[0]->addChild('row');
                 
                 if ($oc_tipo == 0) {
                     $xml_item->addChild('ItemCode', $oc_items[$x]['CODIGO_ARTICULO']);
@@ -975,8 +975,6 @@ class SAP extends Model
                 $xml_item->addChild('TaxCode', $oc_items[$x]['ID_IVA']);
             }  
         }  
-        return ['Status' => 'Valido', 'respuesta' => 'success'];
-          
         //BO/Document_Lines/row
             //<ItemDescription>seguro</ItemDescription>
             // <AccountCode>_SYS00000000022</AccountCode>
@@ -1004,33 +1002,18 @@ class SAP extends Model
 
         //Obtener XML de un LDM 
         $vCmp->XmlExportType = '3'; //BoXmlExportTypes.xet_ExportImportMode; /solo los campos modificables
-        $pathh = public_path('assets/xml/sap/ordenesCompra/new_oc_p1.xml');
-        //$oXML = simplexml_load_string($xmlString);
-        $oXML = simplexml_load_file($pathh); //Crear Object SimpleXML de un archivo
-
-        //Modificar los campos en el XML (de un articulo de la LDM)
-        //$item = $oXML->xpath('/BOM/BO/ProductTrees_Lines/row[ItemCode="20189"]');
-
-        // if (count($item) >= 1) {
-        //     foreach ($item as $i) {
-        //         $i->Quantity = '7';
-        //     }
-        // } else {
-
-        //     throw new \Exception("Error Processing ldmUpdate", 1);
-        // }
-
-        //Cargar el XML en la LDM y actualizar en SAP
-        //$library->asXML($pathh); //Elaborar y Escribir el XML
-
+       
         //To use ReadXML method, set the XmlExportType to xet_ExportImportMode (3).
         $vItem = $vCmp->GetBusinessObject("22");
         $vItem->Browser->ReadXml($oXML->asXML(), 0);
         // $vItem->UpdateFromXML($pathh);
         $resultadoOperacion = $vItem->Add();
         if ($resultadoOperacion <> 0) {
-            throw new \Exception( $vCmp->GetLastErrorDescription(), 1);
-        } 
+            //throw new \Exception( $vCmp->GetLastErrorDescription(), 1);
+            return ['Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$vCmp->GetLastErrorDescription()];
+        }else {
+            return ['Status' => 'Valido', 'respuesta' => 'success'];
+        }
         $vCmp->Disconnect;
         $vCmp = null;
         $vItem = null;
