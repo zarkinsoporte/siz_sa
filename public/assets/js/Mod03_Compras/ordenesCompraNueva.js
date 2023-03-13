@@ -360,7 +360,7 @@ function InicializaTablas(){
                         }
                     }
 
-                    var select = '<select data-live-search="true" class="boot-select selectpicker form-control" data-style="btn-sm btn-success" style=" display: block !important" id="cboIVAAE">' + opciones +'</select>';
+                    var select = '<select data-live-search="true" class="boot-select selectpicker form-control" data-style="btn-sm btn-success" style="padding:1px !important; display: block !important" id="cboIVAAE">' + opciones +'</select>';
                     return select;
                 }
             },
@@ -467,7 +467,7 @@ function InicializaTablas(){
                         }
                     }
 
-                    var select = '<select data-live-search="true" class=" boot-select selectpicker form-control" data-style="btn-sm btn-success" style="display: block !important" id="cboTPM">' + opciones +'</select>';
+                    var select = '<select data-live-search="true" class=" boot-select selectpicker form-control" data-style="btn-sm btn-success" style="padding: 1px !important; display: block !important" id="cboTPM">' + opciones +'</select>';
                     return select;
                 }
             //     /*"render": function ( data, type, row ) {
@@ -552,7 +552,7 @@ function InicializaTablas(){
                         }
                     }
 
-                    var select = '<select data-live-search="true" class="boot-select selectpicker form-control" data-style="btn-sm btn-success" style=" display: block !important" id="cboIVAAM">' + opciones +'</select>';
+                    var select = '<select data-live-search="true" class="boot-select selectpicker form-control" data-style="btn-sm btn-success" style="padding: 1px !important; display: block !important" id="cboIVAAM">' + opciones +'</select>';
                     return select;
                 }
             },

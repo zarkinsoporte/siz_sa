@@ -476,7 +476,23 @@ class Mod03_ComprasController extends Controller
         'proveedores'));    // 'rates',
     }
     public function get_oc_xfecha(Request $request){
-        $query = "                 
+        
+     $query = "SELECT 
+            OPOR.DocNum as NumOC
+            , CONVERT(varchar, OPOR.DocDate, 23) as FechaOC
+            , OPOR.CardCode + ' - ' +OPOR.CardName as Proveedor
+            --, OSLP.SlpName as Elaboro 
+            , CASE WHEN docstatus = 'C' THEN 'CERRADA' ELSE 'ABIERTA' END Estatus
+            , FORMAT(DocTotal, '##.##') Total
+            , OPOR.DocCur Moneda
+            , OPOR.Comments Comentario
+            FROM OPOR 
+            INNER JOIN POR1 ON OPOR.DocEntry = POR1.DocEntry
+            LEFT JOIN OSLP on OSLP.SlpCode= POR1.SlpCode 
+            WHERE 
+            DocType = 'I' AND
+            OPOR.DocDate BETWEEN '" . $request->get('fi') . "' and '" . $request->get('ff') ."' 
+            GROUP BY Comments, DocNum, OPOR.DocDate, CardCode, SlpName, CardName, docstatus, DocCur, DocTotal                 
         ";
         //dd($query);
         $result = DB::select($query);
@@ -683,7 +699,7 @@ class Mod03_ComprasController extends Controller
 
             $ivas = \DB::select(
                 \DB::raw(
-                    "SELECT Code CMIVA_IVAId, Rate CMIVA_Porcentaje 
+                    "SELECT Code CMIVA_IVAId, CONVERT (int, Rate) CMIVA_Porcentaje 
                     FROM OSTC
                     WHERE  ValidForAP = 'Y'
                     AND Code in ('IVAC0', 'W3')

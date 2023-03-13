@@ -13,7 +13,7 @@
             <th style="text-align: right;">Subtotal</th>
             <th style="text-align: right;">(%)Descuento</th>
             <th style="text-align: right;">Monto Descuento</th>
-            <th style="text-align: right;">(%)I.V.A.</th>
+            <th style="text-align: right;">(%) I.V.A.</th>
             <th style="text-align: right;">Monto I.V.A.</th>
             <th style="text-align: right;">Total</th>
             <th style="text-align: center;">Cerrada</th>
