@@ -643,11 +643,14 @@ public function processRollout(Request $request){
         //ini_set('memory_limit', '-1');
         set_time_limit(150);            
         $sel = "";
-        $mensaje= 0;            
+        $mensaje= "ok";            
         $arts= '';            
         //if (Cache::has('hora_init_rollout')) {
           //  Cache::forget('hora_init_rollout');
         //}
+        DB::table('SIZ_PROCESOS_JOBS')
+         ->where('PROJO_Name', 'stop')
+         ->delete();
         $fi = Carbon::now();
         DB::insert("INSERT INTO SIZ_PROCESOS_JOBS ( PROJO_Name, PROJO_FechaInicio, PROJO_Usuario) VALUES (?,?,?)", ["Rollout", $fi, Auth::user()->U_EmpGiro]);
         
@@ -669,13 +672,13 @@ public function processRollout(Request $request){
                             $codigo = $articulo->ItemCode;
                             $precio = $articulo->PRICE_SAVE;
                             $moneda = $articulo->MONEDA;
-                            //$rs = SAP::updateItemPriceList($codigo, $priceList , $precio, $moneda); 
-                            //clock($codigo, $rs);
-                            /* if($rs !== 'ok'){
-                                $mensajeErr = 'Error : Art#'.$codigo.', SAP:'.$rs;
-                                $mensaje = $mensaje.$mensajeErr;
-                            } */
-                            //break;
+                            // $rs = SAP::updateItemPriceList($codigo, $priceList , $precio, $moneda); 
+                            // //clock($codigo, $rs);
+                            //  if($rs != 'ok'){
+                            //     $mensaje = 'Error,'.$rs;
+                            //     $mensaje = 1;
+                            //     return compact('mensaje');
+                            // } 
                         
                              if (preg_match('/[\'^£$%&*()}Ññ{@#~?><,|=_+¬]/', $codigo))
                             {
@@ -748,8 +751,9 @@ public function cancelProcessRollout(Request $request){
             }
         }
         
-         DB::delete("delete SIZ_PROCESOS_JOBS 
-         where PROJO_Name = 'stop'");
+         DB::table('SIZ_PROCESOS_JOBS')
+         ->where('PROJO_Name', 'stop')
+         ->delete();
         /*    
         \Artisan::call('queue:restart');           
         //\Artisan::call('queue:clear --queue=ItemPrecioUpdate');           
