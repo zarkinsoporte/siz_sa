@@ -490,7 +490,7 @@ class Mod03_ComprasController extends Controller
             INNER JOIN POR1 ON OPOR.DocEntry = POR1.DocEntry
             LEFT JOIN OSLP on OSLP.SlpCode= POR1.SlpCode 
             WHERE 
-            DocType = 'I' AND
+            --DocType = 'I' AND
             OPOR.DocDate BETWEEN '" . $request->get('fi') . "' and '" . $request->get('ff') ."' 
             GROUP BY Comments, DocNum, OPOR.DocDate, CardCode, SlpName, CardName, docstatus, DocCur, DocTotal                 
         ";
@@ -519,7 +519,7 @@ class Mod03_ComprasController extends Controller
             INNER JOIN POR1 ON OPOR.DocEntry = POR1.DocEntry
             LEFT JOIN OSLP on OSLP.SlpCode= POR1.SlpCode 
             WHERE 
-            DocType = 'I' AND
+            --DocType = 'I' AND
             OPOR.DocNum = ?
             GROUP BY Comments, DocNum, OPOR.DocDate, CardCode, SlpName, CardName, docstatus, DocCur, DocTotal
         ", [$request->get('oc')]);
@@ -534,8 +534,21 @@ class Mod03_ComprasController extends Controller
     }
     public function orden_compra_pdf($NumOC)
     {
-        //$NumOC = $request->get('NumOC');
-       
+         
+        $rs1 = DB::select('exec SIZ_SP_OC_RESUMEN ?', [$NumOC]);
+        $detalle = DB::select('exec SIZ_SP_OC_DETALLE ?', [$NumOC]);
+        $rs2 = DB::select("SELECT 
+            CompnyName RAZON_SOCIAL
+            , TaxIdNum RFC
+            , Street+ ' ' + CASE WHEN Block is null THEN ' ' ELSE Block+', ' END+ City + ', MX.' DOMICILIO_FICAL
+            , ZipCode CP_FISCAL
+            , StreetF+ ' ' +  CASE WHEN BlockF is null THEN ' ' ELSE BlockF+', ' END+ CityF + ', MX.' DOMICILIO_ENTREGA
+            , ZipCodeF CP_ENTREGA
+            from ADM1
+			inner join OADM on OADM.Code = ADM1.Code");
+        $resumen = $rs1[0];
+        $comp = $rs2[0];
+        //dd($resumen, $detalle, $comp);
         $fechaImpresion = date("d-m-Y H:i:s");
         $headerHtml = view()->make(
             'Mod03_Compras.ReporteUltimosPrecios_pdfheader',
@@ -547,7 +560,7 @@ class Mod03_ComprasController extends Controller
         )->render();
 
        // return view('Mod03_Compras.OrdenCompraPDF');//, compact('a', 'generator'));
-        $pdf = \SPDF::loadView('Mod03_Compras.OrdenCompraPDF', []);
+        $pdf = \SPDF::loadView('Mod03_Compras.OrdenCompraPDF', compact('comp', 'resumen', 'detalle'));
        
         $pdf->setOption('header-html', $headerHtml);
         $pdf->setOption('footer-center', 'Pagina [page] de [toPage]');

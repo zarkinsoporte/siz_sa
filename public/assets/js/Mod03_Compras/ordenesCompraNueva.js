@@ -4030,7 +4030,7 @@ $('#tableOC').on( 'click', 'button#btnEliminar', function (e) {
 });
 function reloadBuscadorOC(){
      var end = moment();
-    var start = moment().subtract(15, "days");;
+    var start = moment().subtract(2, "days");;
     reloadOrdenes(start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'));
  }
  function reloadOrdenes(fi, ff){
