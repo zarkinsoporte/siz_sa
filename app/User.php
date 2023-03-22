@@ -81,7 +81,7 @@ class User extends Model implements AuthenticatableContract,
         $dept = DB::table('OUDP')->where('Code', $this->dept)->value('Name');
        return $this->U_EmpGiro .'-'
        . explode(' ',$this->firstName)[0].' '.$apellido
-       . ' ('.$dep.')';
+       . ' ('.$dept.')';
     }
     public function getApellidoPaternoUsuario($apellido){
         $preposiciones = ["DE", "LA", "LAS", "D", "LOS", "DEL"]; 
