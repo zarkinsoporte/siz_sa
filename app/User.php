@@ -77,8 +77,11 @@ class User extends Model implements AuthenticatableContract,
         return session('userActividades');
     }
     public function getName(){
-       $apellido = Self::getApellidoPaternoUsuario(explode(' ',$this->lastName));
-       return $this->U_EmpGiro .'-'. explode(' ',$this->firstName)[0].' '.$apellido;
+        $apellido = Self::getApellidoPaternoUsuario(explode(' ',$this->lastName));
+        $dept = DB::table('OUDP')->where('Code', $this->dept)->value('Name');
+       return $this->U_EmpGiro .'-'
+       . explode(' ',$this->firstName)[0].' '.$apellido
+       . ' ('.$dep.')';
     }
     public function getApellidoPaternoUsuario($apellido){
         $preposiciones = ["DE", "LA", "LAS", "D", "LOS", "DEL"]; 

@@ -83,7 +83,8 @@ class AuthController extends Controller
                     $actividades = $user->getTareas_ini();
                     $userNombre = explode(' ',$user->firstName)[0].' '.$apellido;
                     $userID = $user->U_EmpGiro;
-                    session(['userActividades' => $actividades, 'userNombre'=> $userNombre, 'userID'=> $userID]);
+                    $deptName = $user->getDepto();
+                    session(['userActividades' => $actividades, 'userNombre'=> $userNombre, 'userID'=> $userID, 'deptName' => $deptName]);
                     //->withCookie(cookie()->forever('user', $user->U_EmpGiro.'-'. ))->withCookie(cookie()->forever('actividades', $actividades))
                     if(User::isProductionUser()){
                        Session::flash('send', 'send');

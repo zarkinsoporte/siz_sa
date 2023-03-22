@@ -1630,7 +1630,7 @@ public function HacerTraslados($id){
             //$apellido = Self::getApellidoPaternoUsuario(explode(' ',Auth::user()->lastName));
              DB::table('SIZ_SolicitudesMP')
                     ->where('Id_Solicitud', $id)
-                    ->update(['SOLentrega_TRASrecibe_Usuario' => session('userID').'-'.session('userNombre')]);
+                    ->update(['SOLentrega_TRASrecibe_Usuario' => session('userID').'-'.session('userNombre').' ('.session('deptName').')']);
             //PERSONA QUE SOLICITA
             $solicitante = DB::table('SIZ_SolicitudesMP')       
                 ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
@@ -1789,7 +1789,7 @@ public function HacerTraslados($id){
             ->where('Id_Solicitud', $id)
             ->whereIn('EstatusLinea', ['S', 'P', 'N'])
             ->count();            
-            $auth_user = session('userID').'-'.session('userNombre');
+            $auth_user = session('userID').'-'.session('userNombre').' ('.session('deptName').')';
             if ($filas > 0) {
                 DB::table('SIZ_SolicitudesMP')
                 ->where('Id_Solicitud', $id)
@@ -2163,12 +2163,11 @@ $rates = DB::table('ORTT')->where('RateDate', date('Y-m-d'))->get();
             if ($filas > 0) {
                
             } elseif($filas == 0) {
-                $auth_user = session('userID').'-'.session('userNombre');
+                $auth_user = session('userID').'-'.session('userNombre'). ' ('.session('deptName').')';
                 DB::table('SIZ_SolicitudesMP')
                 ->where('Id_Solicitud', $id)
                 ->update(['SOLentrega_TRASrecibe_Usuario' => $auth_user, 'Status' => 'Cerrada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
             }
-           //SOLentrega_TRASrecibe_Usuario
         }else {
             $mensaje_traslado_interno = 'Error. No estan capturados todos los "Tipos de Cambio" en SAP.';                    
         }        
@@ -2368,7 +2367,7 @@ $rates = DB::table('ORTT')->where('RateDate', date('Y-m-d'))->get();
             if ($filas > 0) {
                
             } elseif($filas == 0) {
-                $auth_user = session('userID').'-'.session('userNombre');
+                $auth_user = session('userID').'-'.session('userNombre').' ('.session('deptName').')';
                 DB::table('SIZ_SolicitudesMP')
                 ->where('Id_Solicitud', $id)
                 ->update(['SOLentrega_TRASrecibe_Usuario' => $auth_user, 'Status' => 'Cerrada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
@@ -2743,7 +2742,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                //$apellido = Self::getApellidoPaternoUsuario(explode(' ',Auth::user()->lastName));
              DB::table('SIZ_SolicitudesMP')
                     ->where('Id_Solicitud', $id)
-                    ->update(['SOLentrega_TRASrecibe_Usuario' => session('userID').'-'.session('userNombre')]);
+                    ->update(['SOLentrega_TRASrecibe_Usuario' => session('userID').'-'.session('userNombre').' ('.session('deptName').')']);
                 //PERSONA QUE SOLICITA
                 $solicitud = DB::table('SIZ_SolicitudesMP')       
                     ->leftjoin('OHEM', 'OHEM.U_EmpGiro', '=', 'SIZ_SolicitudesMP.Usuario')        
@@ -2819,7 +2818,7 @@ if (count($traslado_interno) > 0 && count($traslado_externo) > 0) {
                     ->where('Id_Solicitud', $id)
                     ->update(['Status' => 'Pendiente']);
                 } elseif($filas == 0) {
-                   $auth_user = session('userID').'-'.session('userNombre');
+                   $auth_user = session('userID').'-'.session('userNombre').' ('.session('deptName').')';
                     DB::table('SIZ_SolicitudesMP')
                     ->where('Id_Solicitud', $id)
                     ->update(['SOLentrega_TRASrecibe_Usuario' => $auth_user, 'Status' => 'Cerrada', 'FechaFinalizada' => (new \DateTime('now'))->format('Y-m-d H:i:s')]);
