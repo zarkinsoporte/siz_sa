@@ -35,6 +35,15 @@ function js_iniciador() {
           
     });
     $('#input-fecha').datepicker('setDate', new Date());
+    $("#input-fecha-entrega").datepicker({
+        format: "dd/mm/yyyy",
+        language: "es",
+        autoclose: true
+    }).on("change", function() {
+          
+    });
+    $('#input-fecha-entrega').datepicker('setDate', new Date());
+
     $("#input_date").daterangepicker({
         
         autoUpdateInput: false,
