@@ -914,18 +914,33 @@ class SAP extends Model
     public static function CancelDoc($num_object, $docEntry)
     {
        
-        (self::$vCmp == false) ? self::Connect() : '';
-        $vItem = self::$vCmp->GetBusinessObject($num_object);
-        $RetVal = $vItem->GetByKey($docEntry);
+          $vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
+        $vCmp->DbServerType = "10";
+        $vCmp->server = "".env('SAP_server');
+        $vCmp->LicenseServer = "".env('SAP_LicenseServer');
+        $vCmp->CompanyDB = "".env('SAP_CompanyDB');
+        $vCmp->username = "".env('SAP_username');
+        $vCmp->password = "".env('SAP_password');
+        $vCmp->DbUserName = "".env('SAP_DbUserName');
+        $vCmp->DbPassword = "".env('SAP_DbPassword');
+        $vCmp->UseTrusted = false;
+        //la siguiente linea permite leer XML como string y no como archivo en "Browser->ReadXml"
+        $vCmp->XMLAsString = true; //The default value is False - XML as files.
+
+        //$vCmp->language = "6";
+        $vCmp->Connect; //conectar a Sociedad SAP
+
+        $vItem = $vCmp->GetBusinessObject($num_object.'');
+        //dd($num_object,$docEntry);
+        $RetVal = $vItem->GetByKey($docEntry."");
         $vItem->CreateCancellationDocument();
         $RetCode = $vItem->Add();
-        //$RetCode = $vItem->Cancel;
+        $RetCode = $vItem->Cancel;
 
         if ($RetCode != 0) {
-        
           //throw new \Exception( $vCmp->GetLastErrorDescription(), 1);
             return ['Status' => 'Error', 
-            'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .self::$vCmp->GetLastErrorDescription()];
+            'Mensaje' => 'Ocurrio un error al realizar el proceso. Error: ' .$vCmp->GetLastErrorDescription()];
         }else {
             return ['Status' => 'Valido', 'respuesta' => 'success'];
         }

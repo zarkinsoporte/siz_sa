@@ -479,6 +479,7 @@ class Mod03_ComprasController extends Controller
         
      $query = "SELECT 
             OPOR.DocNum as NumOC
+            , OPOR.DocEntry
             , CONVERT(varchar, OPOR.DocDate, 23) as FechaOC
             , OPOR.CardCode + ' - ' +OPOR.CardName as Proveedor
             --, OSLP.SlpName as Elaboro 
@@ -492,7 +493,7 @@ class Mod03_ComprasController extends Controller
             WHERE 
             --DocType = 'I' AND
             OPOR.DocDate BETWEEN '" . $request->get('fi') . "' and '" . $request->get('ff') ."' 
-            GROUP BY Comments, DocNum, OPOR.DocDate, CardCode, SlpName, CardName, docstatus, DocCur, DocTotal                 
+            GROUP BY Comments, OPOR.DocEntry, DocNum, OPOR.DocDate, CardCode, SlpName, CardName, docstatus, DocCur, DocTotal                 
         ";
         //dd($query);
         $result = DB::select($query);
@@ -508,6 +509,7 @@ class Mod03_ComprasController extends Controller
     public function get_oc(Request $request){
         $result = DB::select("SELECT 
             OPOR.DocNum as NumOC
+            , OPOR.DocEntry
             , CONVERT(varchar, OPOR.DocDate, 23) as FechaOC
             , OPOR.CardCode + ' - ' +OPOR.CardName as Proveedor
             --, OSLP.SlpName as Elaboro 
@@ -521,7 +523,7 @@ class Mod03_ComprasController extends Controller
             WHERE 
             --DocType = 'I' AND
             OPOR.DocNum = ?
-            GROUP BY Comments, DocNum, OPOR.DocDate, CardCode, SlpName, CardName, docstatus, DocCur, DocTotal
+            GROUP BY Comments, DocNum, OPOR.DocEntry, OPOR.DocDate, CardCode, SlpName, CardName, docstatus, DocCur, DocTotal
         ", [$request->get('oc')]);
         $data=[];
         if (count($result) > 0) {
@@ -798,13 +800,30 @@ class Mod03_ComprasController extends Controller
 
     }
     public function CancelDoc(Request $request){
+        ini_set('memory_limit', '-1');
+        set_time_limit(0);
         $docNum = $request->get('docNum');
         try{
             return SAP::CancelDoc("22", $docNum);
-                
+            //return ['Status' => 'Valido', 'respuesta' => 'success'];   
         }
         catch (\Exception $e){
             return ['Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$e->getMessage()];
+        }
+
+    }
+    public function CancelDoc2($docEntry){
+        // ini_set('memory_limit', '-1');
+            //set_time_limit(0);
+        try{
+            return SAP::CancelDoc("22", $docEntry);
+                
+        }
+        catch (\Exception $e){
+            $array = array();
+            $array['respuesta'] = json_encode(['Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$e->getMessage()]);
+
+            return $array;
         }
 
     }

@@ -2540,7 +2540,21 @@ function registraOC(){
     
     paridad = $("#input_tc").val();
     console.log('registrando OC')
-
+    $.blockUI({
+        message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+        css: {
+            border: 'none',
+            padding: '16px',
+            width: '50%',
+            top: '40%',
+            left: '30%',
+            backgroundColor: '#fefefe',
+            '-webkit-border-radius': '10px',
+            '-moz-border-radius': '10px',
+            opacity: .7,
+            color: '#000000'
+        }
+    });
     $.ajax({
          headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -2596,7 +2610,11 @@ function registraOC(){
                 $('#ordenesCompraOC').hide();
                 $('#btnBuscadorOC').show();
                 reloadBuscadorOC();
-                
+                $.unblockUI();
+                swal("", "OC encontrada", "success", {
+                    buttons: false,
+                    timer: 2000,
+                });
 
             }
             InicializaComponentesOC();

@@ -115,7 +115,7 @@
                         </div>
                     </div>
                     <div class="invoice-content">
-                        <ul id="menuPrincipal" class="nav nav-tabs nav-justified nav-justified-mobile"
+                        {{-- <ul id="menuPrincipal" class="nav nav-tabs nav-justified nav-justified-mobile"
                             data-sortable-id="index-2">
                             <li class="active">
                                 <a id="liArtExist" href="#articulosExistentes" data-toggle="tab">
@@ -124,7 +124,7 @@
                                 </a>
                             </li>
 
-                        </ul>
+                        </ul> --}}
                         <div class="tab-content" data-sortable-id="index-3">
                             <!-- Inicio Artiulos Existentes -->
                             <div class="tab-pane fade active in" id="articulosExistentes">

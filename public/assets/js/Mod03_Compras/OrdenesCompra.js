@@ -154,6 +154,10 @@ var tableOC = $("#tableOC").DataTable({
                 deferRender: true,        
                 pageLength:-1,
                 "paging": false,
+                createdRow: function (row, data, dataIndex) {
+                    console.log(data)
+                    $(row).attr('data-id', data.DocEntry);
+                },
                 columns: [                   
                     {data: "BTN_EDITAR"},    
                     {data: "NumOC"},
@@ -171,10 +175,14 @@ var tableOC = $("#tableOC").DataTable({
                     "orderable": false,
                     'className': "dt-body-center",
                     "render": function ( data, type, row ) {
-
-                        return '<button type="button" class="btn btn-sm btn-primary" id="btnEditar"> <span class="glyphicon glyphicon-pencil"></span> </button>'
-                        + '<button type="button" class="btn btn-sm btn-danger" style="margin-left:5px" id="btnEliminar"> <span class="glyphicon glyphicon-trash"></span></button>'
-                         + '<button type="button" class="btn btn-sm btn-danger btn-outline-danger" style="margin-left:5px" id="boton-pdf"> <i class="fa fa-file-pdf-o" aria-hidden="true"></i></button>';
+                        if(row['Estatus'] == 'CERRADA')  
+                            return '<button type="button" class="btn btn-sm btn-primary" id="btnEditar"> <span class="fa fa-folder-open-o"></span> </button>'
+                            + '<button type="button" class="btn btn-sm btn-danger" style="margin-left:5px" id="btnEliminar" disabled> <span class="glyphicon glyphicon-trash"></span></button>'
+                            + '<button type="button" class="btn btn-sm btn-danger btn-outline-danger" style="margin-left:5px" id="boton-pdf"> <i class="fa fa-file-pdf-o" aria-hidden="true"></i></button>';
+                        else  return '<button type="button" class="btn btn-sm btn-primary" id="btnEditar"> <span class="glyphicon glyphicon-pencil"></span> </button>'
+                            + '<button type="button" class="btn btn-sm btn-danger" style="margin-left:5px" id="btnEliminar"> <span class="glyphicon glyphicon-trash"></span></button>'
+                            + '<button type="button" class="btn btn-sm btn-danger btn-outline-danger" style="margin-left:5px" id="boton-pdf"> <i class="fa fa-file-pdf-o" aria-hidden="true"></i></button>';
+                       
 
                     }
 
@@ -190,7 +198,7 @@ var tableOC = $("#tableOC").DataTable({
 
                     }
 
-                }    
+                } 
         ],       
 });
 
@@ -282,72 +290,95 @@ $('#tableOC').on('click', 'button#btnEliminar', function (e) {
     e.preventDefault();
     var tblOC = $('#tableOC').DataTable();
     var fila = $(this).closest('tr');
+    var docentry = fila.attr('data-id')
     var datos = tblOC.row(fila).data();
-    NumOC = datos['NumOC'];
-    
-    bootbox.dialog({
-        message: "¿Estas seguro de Cancelar la Orden de Compra?.",
-        title: "Ordenes de Compra",
-        buttons: {
-            success: {
-                label: "Si",
-                className: "btn-success",
-                callback: function () {
-                    $.blockUI({
-                        message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
-                        css: {
-                            border: 'none',
-                            padding: '16px',
-                            width: '50%',
-                            top: '40%',
-                            left: '30%',
-                            backgroundColor: '#fefefe',
-                            '-webkit-border-radius': '10px',
-                            '-moz-border-radius': '10px',
-                            opacity: .7,
-                            color: '#000000'
-                        }
-                    });
-                    $.ajax({
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        type: "POST",
-                        async: false,
-                        data: {
-                            docNum: referenciaId
-                        },
-                        dataType: "json",
-                        url: routeapp + "cancelOC",
-                        success: function () {
-                            reloadBuscadorOC();
-                            $.unblockUI();
-                        },
-                        error: function (xhr, ajaxOptions, thrownError) {
-                            $.unblockUI();
-                            var error = JSON.parse(xhr.responseText);
-                            bootbox.alert({
-                                size: "large",
-                                title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
-                                message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
-                                    (error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '') +
-                                    (error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '') +
-                                    (error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '') + '</div>'
-                            });
-                        }
-                    });
+    var NumOC = datos['NumOC'];
+    if (datos['Estatus'] == 'ABIERTA') {
+            bootbox.dialog({
+            message: "¿Estas seguro de Cancelar la Orden de Compra?.",
+            title: "Ordenes de Compra",
+            buttons: {
+                success: {
+                    label: "Si",
+                    className: "btn-success",
+                    callback: function () {
+                        
+                        $.ajax({
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            type: "POST",
+                            async: false,
+                            data: {
+                                docNum: docentry
+                            },
+                            dataType: "json",
+                            url: routeapp + "cancelOC",
+                            beforeSend: function () {
+                                $.blockUI({
+                                    message: '<h2>Procesando</h2><h3>espere...<i class="fa fa-spin fa-spinner"></i></h3>',
+                                    css: {
+                                        border: 'none',
+                                        padding: '16px',
+                                        width: '50%',
+                                        top: '40%',
+                                        left: '30%',
+                                        backgroundColor: '#fefefe',
+                                        '-webkit-border-radius': '10px',
+                                        '-moz-border-radius': '10px',
+                                        opacity: .7,
+                                        color: '#000000'
+                                    }
+                                });
+                            },
+                            success: function (data) {
+                                //reloadBuscadorOC();
+                                //console.log(data)
+                                $.unblockUI();
+                                swal("", "OC" + NumOC +" Cancelada", "success", {
+                                    buttons: false,
+                                    timer: 2000,
+                                });
+                                if (data.Status == 'Valido') {  
+                                    //console.log(data)                                  
+                                    datos['Estatus'] = 'CERRADA';
+                                    tblOC.row(fila).data(datos).invalidate();
+                                }
 
-                }
-            },
-            default: {
-                label: "No",
-                className: "btn-default m-r-5 m-b-5",
-                callback: function () {
-                   
+                            },
+                            error: function (xhr, ajaxOptions, thrownError) {
+                                $.unblockUI();
+                                console.log(xhr.responseText)
+                                var error = [];
+                                bootbox.alert({
+                                    size: "large",
+                                    title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
+                                    message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
+                                        (error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '') +
+                                        (error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '') +
+                                        (error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '') + '</div>'
+                                });
+                            }
+                        });
+
+                    }
+                },
+                default: {
+                    label: "No",
+                    className: "btn-default m-r-5 m-b-5",
+                    callback: function () {
+                    
+                    }
                 }
             }
-        }
-    });
+        });
+    } else {
+        swal("", "La OC no esta Abierta", "error", {
+            buttons: false,
+            timer: 2000,
+        });   
+    }
+    
 });
  function reloadBuscadorOC(){
      var end = moment();
