@@ -52,6 +52,22 @@ class SAPCopia extends Model
             return true;
         }
     }
+    public static function CancelDoc($num_object, $docEntry)
+    {
+       
+        (self::$vCmp == false) ? self::Connect() : '';
+        $vItem = self::$vCmp->GetBusinessObject($num_object);
+        $RetVal = $vItem->GetByKey($docEntry);
+        $vItem->CreateCancellationDocument = $status;
+        $RetCode = $vItem->Add();
+
+        if ($RetCode != 0) {
+        
+            return false;
+        } else {
+            return true;
+        }
+    }
     public static function SaveArticulo($array)
     {
         //pKey

@@ -797,4 +797,15 @@ class Mod03_ComprasController extends Controller
         }
 
     }
+    public function CancelDoc(Request $request){
+        $docNum = $request->get('docNum');
+        try{
+            return SAP::CancelDoc("22", $docNum);
+                
+        }
+        catch (\Exception $e){
+            return ['Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$e->getMessage()];
+        }
+
+    }
 }

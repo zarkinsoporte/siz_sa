@@ -911,6 +911,25 @@ class SAP extends Model
         $item = null;
         $resultadoOperacion = null;
     }
+    public static function CancelDoc($num_object, $docEntry)
+    {
+       
+        (self::$vCmp == false) ? self::Connect() : '';
+        $vItem = self::$vCmp->GetBusinessObject($num_object);
+        $RetVal = $vItem->GetByKey($docEntry);
+        $vItem->CreateCancellationDocument();
+        $RetCode = $vItem->Add();
+        //$RetCode = $vItem->Cancel;
+
+        if ($RetCode != 0) {
+        
+          //throw new \Exception( $vCmp->GetLastErrorDescription(), 1);
+            return ['Status' => 'Error', 
+            'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .self::$vCmp->GetLastErrorDescription()];
+        }else {
+            return ['Status' => 'Valido', 'respuesta' => 'success'];
+        }
+    }
     public static function registraOC($datos)
     {
         //Ref

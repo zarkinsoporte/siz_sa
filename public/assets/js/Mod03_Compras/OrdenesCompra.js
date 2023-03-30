@@ -269,6 +269,77 @@ $('#tableOC').on( 'click', 'button#boton-pdf', function (e) {
 
     $.unblockUI();
 });
+$('#tableOC').on('click', 'button#btnEliminar', function (e) {
+    e.preventDefault();
+    var tblOC = $('#tableOC').DataTable();
+    var fila = $(this).closest('tr');
+    var datos = tblOC.row(fila).data();
+    NumOC = datos['NumOC'];
+    
+    bootbox.dialog({
+        message: "¿Estas seguro de Cancelar la Orden de Compra?.",
+        title: "Ordenes de Compra",
+        buttons: {
+            success: {
+                label: "Si",
+                className: "btn-success",
+                callback: function () {
+                    $.blockUI({
+                        message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                        css: {
+                            border: 'none',
+                            padding: '16px',
+                            width: '50%',
+                            top: '40%',
+                            left: '30%',
+                            backgroundColor: '#fefefe',
+                            '-webkit-border-radius': '10px',
+                            '-moz-border-radius': '10px',
+                            opacity: .7,
+                            color: '#000000'
+                        }
+                    });
+                    $.ajax({
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        type: "POST",
+                        async: false,
+                        data: {
+                            docNum: referenciaId
+                        },
+                        dataType: "json",
+                        url: routeapp + "cancelOC",
+                        success: function () {
+                            reloadBuscadorOC();
+                            $.unblockUI();
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                            $.unblockUI();
+                            var error = JSON.parse(xhr.responseText);
+                            bootbox.alert({
+                                size: "large",
+                                title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
+                                message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
+                                    (error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '') +
+                                    (error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '') +
+                                    (error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '') + '</div>'
+                            });
+                        }
+                    });
+
+                }
+            },
+            default: {
+                label: "No",
+                className: "btn-default m-r-5 m-b-5",
+                callback: function () {
+                   
+                }
+            }
+        }
+    });
+});
  function reloadBuscadorOC(){
      var end = moment();
     var start = moment().subtract(15, "days");;
