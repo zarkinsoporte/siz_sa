@@ -96,6 +96,9 @@
                     <td width="" style="font-size: 15px; padding: 15px;"><b></b></td>
                     </tr>
                     <tr>
+                    <td width="" style="padding: 2px;"> FECHA ENTREGA: <b>{{$resumen->OC_FECHA_ENTREGA}}</b></td>
+                    </tr>
+                    <tr>
                     <td width="" style="padding: 2px;"> ALMACEN: <b>ALMACEN DE MATERIA PRIMA</b></td>
                     </tr>
                     <tr>
@@ -112,7 +115,7 @@
                     </tr>
                     <!-- <tr>
                         <td width="" style="padding: 2px;">
-                            ENTREGAR A: <b>LUIS ALBERTO</b></td>
+                            ENTREGAR A: <b></b></td>
                     </tr> -->
                 
                 </table>

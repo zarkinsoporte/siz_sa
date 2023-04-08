@@ -17,25 +17,24 @@
             <div class="row">
                 <div class="form-group">
                     <div class="row">
-                        <div class="col-md-2" id="selecpicker-cliente">
+                        <div class="col-md-2">
                             <label><strong>
                                     <font size="2">Tipo OC</font>
                                 </strong></label>
-                            <select class="form-control selectpicker" id="sel-tipo-oc" name="sel-tipo-oc" data-size="8" ,
+                            <select class="form-control selectpicker" id="sel-tipo-oc" name="sel-tipo-oc" data-size="8"
                                 data-style="btn-success">
                                 <option value="0">Artículos</option>
                                 <option value="1">Miscelaneos</option>
-                        
-                        
                             </select>
+                            <input type="text" name="edit_tipo_oc" id="edit_tipo_oc" @readonly(true) class="form-control" disabled>
                         </div>
-                        <div class="col-md-4" id="selecpicker-cliente">
+                        <div class="col-md-4">
                             <label><strong>
                                     <font size="2">Proveedor</font>
                                 </strong></label>
                         
                             <select data-live-search="true" class="form-control selectpicker" id="sel-proveedor" name="proveedor" data-size="8"
-                                , data-style="btn-success">
+                                 data-style="btn-success">
                         
                                 <option value="">Selecciona una opción</option>
                                 @foreach ($proveedores as $proveedor)
@@ -45,20 +44,19 @@
                                 @endforeach
                         
                             </select>
+                            <input type="text" name="edit_proveedor" id="edit_proveedor" @readonly(true) class="form-control" disabled>
                         </div>
                         <div class="col-md-2">
                             <label><strong>
                                     <font size="2">Fecha de OC</font>
                                 </strong></label>
-                            <input type="text" class="form-control" id="input-fecha" placeholder="Selecciona una fecha" disabled
-                                onblur="blurFecha()" />
+                            <input type="text" class="form-control" id="input-fecha" placeholder="Selecciona una fecha" disabled/>
                         </div>
                         <div class="col-md-2">
                             <label><strong>
                                     <font size="2">Fecha de Entrega</font>
                                 </strong></label>
-                            <input type="text" class="form-control" id="input-fecha-entrega" placeholder="Selecciona una fecha"
-                                onblur="blurFecha()" />
+                            <input type="date" class="form-control" id="input-fecha-entrega" placeholder="Selecciona una fecha"/>
                         </div>
                     </div>
                     

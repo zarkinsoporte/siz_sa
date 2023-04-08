@@ -59,17 +59,19 @@ var COL_MONTO_DESCUENTO = 10;
 var COL_IVA = 11;
 var COL_MONTO_IVA = 12;
 var COL_TOTAL = 13;
-var COL_FECHA_REQUERIDA_COMPRA = 14;
-var COL_PARTIDA_CERRADA = 14;
-var COL_BTN_ELIMINAR_COMPRA = 15;
-var COL_CODIGO_OT = 17;
-var COL_ID_OT = 18;
-var COL_ID_ARTICULO = 19;
-var COL_ID_PARTIDA = 20;
-var COL_ID_AUX = 21;
-var COL_ID_UMI = 22;
-var COL_ID_UMC = 23;
-var COL_ID_IVA = 16;
+var COL_FECHA_ENTREGA_COMPRA = 14;
+var COL_PARTIDA_CERRADA = 15;
+var COL_BTN_ELIMINAR_COMPRA = 16;
+var COL_ID_IVA = 17;
+var COL_ID_PARTIDA = 18;
+
+var COL_CODIGO_OT = 19;
+var COL_ID_OT = 20;
+
+var COL_ID_ARTICULO = 21;
+var COL_ID_AUX = 22;
+var COL_ID_UMI = 23;
+var COL_ID_UMC = 24;
 var COL_ESTATUS_PARTIDA = 25;
 var COL_CTA_MAYOR = 2;
 
@@ -286,6 +288,7 @@ function InicializaTablas(){
             {data: "IVA"},
             {data: "MONTO_IVA"},
             {data: "TOTAL"},
+            {data: "FECHA_ENTREGA", orderable: false},
             {data: "PARTIDA_CERRADA"},
             {data: "BTN_ELIMINAR", orderable: false},
             {data: "ID_IVA", orderable:false, visible:false},
@@ -356,7 +359,7 @@ function InicializaTablas(){
                 "orderable" : false
             },
             {
-                "targets": [11],
+                "targets": [COL_IVA],
                 "orderable" : false,
                 "render": function (data,type,row) {
                     var id = row[1];
@@ -380,6 +383,14 @@ function InicializaTablas(){
             {
                 "targets": [COL_TOTAL],
                 "orderable" : false
+            },
+            {
+                "targets": [COL_FECHA_ENTREGA_COMPRA],
+                "orderable" : false,
+                "render": function (data, type, row) {
+                    var fecha_entrega = $('#input-fecha-entrega').val();
+                    return '<input id= "input-fecha-entrega-linea" style="width: 100px" class="form-control input-sm fila-dt" type="date" value="' + fecha_entrega +'">'
+                }
             },
             
             //articulos[i]["OVD_DetalleId"] == '' ? id nuevo : articulos[i]["OVD_DetalleId"];
@@ -441,6 +452,7 @@ function InicializaTablas(){
 
             {data: "MONTO_IVA"},
             {data: "TOTAL"},
+            {data: "FECHA_ENTREGA", orderable: false },
             {data: "PARTIDA_CERRADA"},
 
             {data: "BTN_ELIMINAR", orderable: false},
@@ -566,27 +578,45 @@ function InicializaTablas(){
                 }
             },
             {
-                "targets": [9],
+                "targets": [9], //monto IVA
                 "orderable" : false
             },
             {
-                "targets": [10],
+                "targets": [10], //total
                 "orderable" : false
             },
             {
                 "targets": [11],
-                "orderable" : false
+                "orderable": false,
+                "render": function (data, type, row) {
+                    var fecha_entrega = $('#input-fecha-entrega').val();
+                    return '<input id= "input-fecha-entrega-linea" style="width: 100px" class="form-control input-sm fila-dt" type="date" value="' + fecha_entrega + '">'
+                }
+            },
+
+            //articulos[i]["OVD_DetalleId"] == '' ? id nuevo : articulos[i]["OVD_DetalleId"];
+
+            {
+                "targets": [12],
+                "searchable": false,
+                "orderable": false,
+                'className': "dt-body-center",
+                "render": function (data, type, row) {
+
+                    return '<input type="checkbox" id="cerrarPartidaCheck" class="editor-active" disabled>';
+
+                }
             },
             
             {
-                "targets": [12],
+                "targets": [13],
                 "className": "dt-body-center",
                 "render": function ( data, type, row ) {
                     return '<button type="button" class="btn btn-danger btn-sm" id="boton-eliminarAM"> <span class="fa fa-trash"></span> </button>';
                 }
             },
             {
-                "targets": [13],
+                "targets": [14],
                 "orderable" : false
             },          
         ]
@@ -850,14 +880,8 @@ $("#ActualizarTablaOC" ).on( "click", function() {
 
 function InicializaComponentesOC() {
 
-    //$("#btnBuscarProveedores").text('Selecciona Proveedor');
-    //$("#btnBuscarProveedores").removeAttr('disabled');
     $("#sel-proveedor").val('');
     $("#sel-proveedor").selectpicker('refresh');
-
-  
-    //$("#ordenesCompraOC #input-fecha").attr('disabled',true);
-    //$("#ordenesCompraOC #boton-datos-adicionales").attr('disabled', true);
 
     $('#ordenesCompraOC #nombreProveedor').text('');
     $('#ordenesCompraOC #direccionProveedor').text('');
@@ -867,60 +891,17 @@ function InicializaComponentesOC() {
     $('#ordenesCompraOC #contactoProveedor').text('');
     $('#ordenesCompraOC #rfcProveedor').text('');
 
-    //$('#ordenesCompraOC #nombreSucursal').text('');
-    //$('#ordenesCompraOC #domicilioSucursal').text('');
-    //$('#ordenesCompraOC #telefonicosSucursal').text('');
-    //$('#ordenesCompraOC #emailSucursal').text('');
-    //$('#ordenesCompraOC #codigopostalSucursal').text('');
-    //$('#ordenesCompraOC #ciudadSucursal').text('');
-
-    //$("#ordenesCompraOC #cboSucursal").empty();
-    //$("#ordenesCompraOC #cboSucursal").attr('disabled',true);
-    //$('#ordenesCompraOC #cboSucursal').append('<option value="">Selecciona una opción</option>');
-    //$("#ordenesCompraOC #cboSucursal").selectpicker('refresh');
-    //$("#ordenesCompraOC #cboMoneda").attr('disabled',true);
     $("#ordenesCompraOC #cboMoneda").val('');
     $("#ordenesCompraOC #cboMoneda").selectpicker('refresh');
 
-    //$("#ordenesCompraOC #cboTipoCambio").val('');
     $("#ordenesCompraOC #input_tc").val(1);
-    //$("#ordenesCompraOC #cboTipoCambio").selectpicker('refresh');
-    //$("#ordenesCompraOC #tipoCambio").hide();
-    //$("#ordenesCompraOC #cboAgente").attr('disabled',true);
-        // $("#ordenesCompraOC #cboAgente").val('');
-        // $("#ordenesCompraOC #cboAgente").attr('disabled',true);
-        // $("#ordenesCompraOC #cboAgente").selectpicker('refresh');
-        // $("#ordenesCompraOC #cboSucursalAgente").val('');
-        // $("#ordenesCompraOC #cboSucursalAgente").attr('disabled',true);
-        // $("#ordenesCompraOC #cboSucursalAgente").selectpicker('refresh');
-    //$("#ordenesCompraOC #agenteAduanal").hide();
-    //$("#ordenesCompraOC #tipoCambio").show();
-        // $("#ordenesCompraOC #cboTipoOC").attr('disabled',true);
+    
     $("#sel-tipo-oc").val(0);
     $("#sel-tipo-oc").selectpicker('refresh');
-        // $("#ordenesCompraOC #cboAlmacen").attr('disabled',true);
-        // $("#ordenesCompraOC #cboAlmacen").val('');
-        // $("#ordenesCompraOC #cboAlmacen").selectpicker('refresh');
-
+      
     $('#ordenesCompraOC #codigoOC').text('Por Definir');
     $('#ordenesCompraOC #estadoOC').text('Abierta');
 
-    //$("#ordenesCompraOC #boton-datos-adicionales").attr('disabled', true);
-
-    //limpiar datos adicionales
-    //$("#modal-datos #cboProyectos").val('');
-    //$("#ordenesCompraOC #cboProyectos").selectpicker('refresh');
-    //$("#modal-datos #cboOT").val('');
-    //$("#ordenesCompraOC #cboOT").selectpicker('refresh');
-    //$("#modal-datos #btnBuscarOts").text('');
-    //$("#modal-datos #idOrdenTrabajo").val('');
-    //$("#ordenesCompraOC #cboLibreABordo").selectpicker('refresh');
-    //$("#modal-datos #cboMetodoEmbarque").val('');
-    //$("#ordenesCompraOC #cboMetodoEmbarque").selectpicker('refresh');
-    //$("#modal-datos #cboIVA").val('');
-    //$("#ordenesCompraOC #cboIVA").selectpicker('refresh');
-    //$("#modal-datos #input-descuento").val('');
-    //$("#modal-datos #input-comentarios").val('');
     $('#tblArticulosExistentesNueva').DataTable().clear().draw();
     $('#tblArticulosMiscelaneosNueva').DataTable().clear().draw();
     insertarFila();   
@@ -1188,6 +1169,7 @@ function insertarFila(){
                 , "IVA": "16"
                 , "MONTO_IVA": "0.00"
                 , "TOTAL": "0.00"
+                , "FECHA_ENTREGA":""
                 , "PARTIDA_CERRADA": 0
                 , "BTN_ELIMINAR": null
                 // , "ID_ARTICULO": ""
@@ -1208,7 +1190,7 @@ function insertarFila(){
             {
                 "PARTIDA": ""
                 , "NOMBRE_ARTICULO": ""
-                , "CTA_MAYOR": null
+                , "CTA_MAYOR": ""
                 //, "UNIDAD_MEDIDA_INV": ""
                 //, "FACTOR_CONVERSION": ""
                 //, "UNIDAD_MEDIDA_COMPRAS": ""
@@ -1222,6 +1204,7 @@ function insertarFila(){
 
                 , "MONTO_IVA": ""
                 , "TOTAL": "0.00"
+                 , "FECHA_ENTREGA": ""
                 , "PARTIDA_CERRADA": 0
 
                 , "BTN_ELIMINAR": null
@@ -2178,7 +2161,7 @@ function validaModal() {
         if(datos[i][COL_DETALLE_FECHA_PROMESA] == ''){
             banderaRequerida = false;
         }
-        if (datos[i][COL_FECHA_REQUERIDA_COMPRA] == ''){
+        if (datos[i][COL_FECHA_ENTREGA_COMPRA] == ''){
             banderaPromesa = false;
         }
         total = total + parseFloat(datos[i][COL_DETALLE_CANTIDAD]);
@@ -2571,7 +2554,7 @@ function registraOC(){
             "oc_tipo_cambio": paridad,
             //"OC_MONP_ParidadId": $("#cboTipoCambio").val(),
             //"OC_ALM_AlmacenId": $("#cboAlmacen").val(),
-            //"OC_CMM_AgenteAduanal": $("#cboAgente").val(),
+            "oc_fecha_entrega": $('#input-fecha-entrega').val(),
             //"OC_AGE_PDOC_DireccionOCId": $("#cboSucursalAgente").val(),
             //"OC_CMM_LibreABordoId": $("#modal-datos #cboLibreABordo").val(),
             //"OC_CMM_MetodoEmbarqueId": $("#modal-datos #cboMetodoEmbarque").val(),
@@ -2627,7 +2610,7 @@ function registraOC(){
         },
         error: function (x, e) {
             var errorMessage = 'Error \n' + x.responseText;
-           
+            $.unblockUI();
              bootbox.dialog({
                 title: "Mensaje",
                 message: "<div class='alert alert-danger m-b-0'>"+errorMessage+"</div>",
@@ -2638,6 +2621,7 @@ function registraOC(){
                 }
                 }
             }).find('.modal-content').css({'font-size': '14px'} );
+            
         }
     });
 
@@ -2652,7 +2636,8 @@ function getTblArtExis(){
 
     if (datos_Tabla.length != 0){
         for (var i = 0; i < fila; i++) {
-
+            //console.log(datos_Tabla[i])
+            //var fecha_entrega = $('#input-fecha-entrega').val();
             tblAE[i]={
 
                 "PARTIDA" : datos_Tabla[i]["PARTIDA"],
@@ -2669,7 +2654,7 @@ function getTblArtExis(){
                 "IVA" : datos_Tabla[i]["IVA"],
                 "MONTO_IVA" : datos_Tabla[i]["MONTO_IVA"],
                 "TOTAL": datos_Tabla[i]["TOTAL"],
-                "FECHA_REQUERIDA": null,
+                "FECHA_ENTREGA": $('input#input-fecha-entrega-linea', tabla.row(i).node()).val(),                
                 "PARTIDA_CERRADA": datos_Tabla[i]["PARTIDA_CERRADA"],
                 "ID_ARTICULO" : datos_Tabla[i]["ID_ARTICULO"],
                 "ID_PARTIDA": datos_Tabla[i]["ID_PARTIDA"],
@@ -2706,6 +2691,7 @@ function getTblArtMisc(){
                 //"UNIDAD_MEDIDA_INV" : datos_Tabla[i]["UNIDAD_MEDIDA_INV"],
                 //"FACTOR_CONVERSION" : datos_Tabla[i]["FACTOR_CONVERSION"],
                 //"UNIDAD_MEDIDA_COMPRAS" : datos_Tabla[i]["UNIDAD_MEDIDA_COMPRAS"],
+                "CTA_MAYOR": datos_Tabla[i]["CTA_MAYOR"],
                 "CANTIDAD" : datos_Tabla[i]["CANTIDAD"],
                 "PRECIO" : datos_Tabla[i]["PRECIO"],
                 "SUBTOTAL" : datos_Tabla[i]["SUBTOTAL"],
@@ -2714,7 +2700,7 @@ function getTblArtMisc(){
                 "IVA" : datos_Tabla[i]["IVA"],
                 "MONTO_IVA" : datos_Tabla[i]["MONTO_IVA"],
                 "TOTAL": datos_Tabla[i]["TOTAL"],
-                //"FECHA_REQUERIDA": null,
+                "FECHA_ENTREGA": $('input#input-fecha-entrega-linea', tabla.row(i).node()).val(),
                 "PARTIDA_CERRADA": datos_Tabla[i]["PARTIDA_CERRADA"],
                 //"ID_ARTICULO" : datos_Tabla[i]["ID_ARTICULO"],
                 "ID_PARTIDA": datos_Tabla[i]["ID_PARTIDA"],
@@ -2733,198 +2719,9 @@ function getTblArtMisc(){
 
 }
 
-function getTblPedimento(){
-
-    var tblPedimentos = new Array();
-
-    $('#tblPedimentos tbody tr').each(function(row, tr){
-
-        tblPedimentos[row]={
-            "0" : $(tr).find('td:eq(0)').text(),
-            "1" : $(tr).find('td:eq(1)').text(),
-            "2" : $(tr).find('td:eq(2)').text(),
-            "3" : $(tr).find('td:eq(3)').text(),
-            "4" : $(tr).find('td:eq(4)').text(),
-            "5" : $(tr).find('td:eq(5)').text(),
-            "6" : $(tr).find('td:eq(6)').text(),
-            "7" : $(tr).find('td:eq(7)').text(),
-            "8" : $(tr).find('td:eq(8)').text(),
-            "9" : $(tr).find('td:eq(9)').text(),
-            "10" : $(tr).find('td:eq(10)').text()
-        }
-
-    });
-
-    return JSON.stringify(tblPedimentos);
-
-}
-
-$('#tableOC').on( 'click', 'button#btnEditar', function (e) {
-
-    e.preventDefault();
-
-    registroNuevo = 1;
-    var tblOC = $('#tableOC').DataTable();
-    var fila = $(this).closest('tr');
-    var datos = tblOC.row(fila).data();
-    ocId = datos['DT_RowId'];
-
-    $.blockUI({ css: {
-        border: 'none',
-        padding: '15px',
-        backgroundColor: '#000',
-        '-webkit-border-radius': '10px',
-        '-moz-border-radius': '10px',
-        opacity: .5,
-        color: '#fff'
-    } });
-
-    $.ajax({
-         headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-        type: "POST",
-        async: false,
-        data: {
-            ocId: ocId
-        },
-        dataType: "json",
-        url: "compras/buscaOC",
-        success: function (data) {
-            setTimeout($.unblockUI, 2000);
-            setTimeout(function () {
-                var respuesta = JSON.parse(JSON.stringify(data));
-                if(respuesta.codigo == 200){
-
-                    llenaComboSucursalesAgente(respuesta.sucursalesAgente);
-                    agregarDatosOC(respuesta.ordenCompra,respuesta.consultaTipoMonedaProveedor);
-                    agregaPartidasOCDetalle(respuesta.ordenCompraDetalle);
-                    agregaPartidasOCFechasRequeridas(respuesta.ordenCompraFechasRequeridas);
-                    validaBotonPedimentos();
-                    /*agregaDatosArregloFR(respuesta.ordenCompraFechasRequeridas);
-                    llenaComboArtExis(respuesta.consultaArticulosProveedor);
-                    calculaTotalArticulosExistentes();
-                    calculaTotalArticulosExistentesResumen();
-                    calculaTotalArticulosMiscelaneos();
-                    calculaTotalArticulosMiscelaneosResumen();
-                    calculaTotalOC();
-                    validaCambiarFechaRequerida();*/
-                    $("#btnBuscadorOC").hide();
-                    $("#ordenesCompraOC").show();
-                    registroNuevo = 1;
-
-                } else {
-                    setTimeout($.unblockUI, 2000);
-                    bootbox.dialog({
-                        message: respuesta.respuesta,
-                        title: "Orden de Compra",
-                        buttons: {
-                            success: {
-                                label: "Si",
-                                className: "btn-success"
-                            }
-                        }
-                    });
-                }
-            }, 2000);
-        },
-        error: function (xhr, ajaxOptions, thrownError) {
-            $.unblockUI();
-            var error = JSON.parse(xhr.responseText);
-            bootbox.alert({
-                size: "large",
-                title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
-                message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
-                ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
-                ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
-                ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
-            });
-        }
-    });
-
-});
-
-function llenaComboSucursalesAgente(datos){
-
-    $('#ordenesCompraOC #cboSucursalAgente').removeAttr("disabled");
-    $('#ordenesCompraOC #cboSucursalAgente').empty();
-    $('#ordenesCompraOC #cboSucursalAgente').append('<option id="" value="">Selecciona una opción</option>');
-
-    var cuentaDatos = datos.length;
-    if(cuentaDatos > 0){
-
-        for(var x = 0; x < cuentaDatos; x ++){
-
-            $('#ordenesCompraOC #cboSucursalAgente').append('<option id="'+datos[x]['PDOC_DireccionOCId']+'" value="'+datos[x]['PDOC_DireccionOCId']+'">'+datos[x]['PDOC_Nombre']+'</option>');
-
-        }
-
-    }
-
-    $('#ordenesCompraOC #cboSucursalAgente').selectpicker('refresh');
-
-}
-
 function agregarDatosOC(datos,datos2){
 
-    $('#input-proveedor').val(datos[0]['OC_PRO_ProveedorId']);
-    $('#btnBuscarProveedores').text(datos[0]['PRO_Nombre']);
-    //$('#btnBuscarProveedores').attr("disabled","disabled");
-    $("#input-fecha").val(datos[0]['OC_FechaOC']);
-    $('#ordenesCompraOC #cboSucursal').append('<option id="'+datos[0]['OC_PDOC_DireccionOCId']+'" value="'+datos[0]['OC_PDOC_DireccionOCId']+'">'+datos[0]['PDOC_Nombre']+'</option>');
-    $("#ordenesCompraOC #cboSucursal").val(datos[0]['OC_PDOC_DireccionOCId']);
-    $("#ordenesCompraOC #cboMoneda").val(datos[0]['OC_MON_MonedaId']);
-
-    if(datos[0]['OC_MON_MonedaId'] != '748BE9C9-B56D-4FD2-A77F-EE4C6CD226A1'){//PESOS
-
-        changeMoneda();
-        $("#ordenesCompraOC #cboTipoCambio").val(datos[0]['OC_MONP_ParidadId']);
-        $("#ordenesCompraOC #tipoCambio").show();
-
-    }
-    else{
-
-        $("#ordenesCompraOC #cboTipoCambio").val('');
-        $("#ordenesCompraOC #tipoCambio").hide();
-
-    }
-
-    $("#ordenesCompraOC #cboAgente").val(datos[0]['OC_CMM_AgenteAduanalId']);
-    $("#ordenesCompraOC #cboAgente").selectpicker('refresh');
-
-    $("#ordenesCompraOC #cboSucursalAgente").val(datos[0]['OC_AGE_PDOC_DireccionOCId']);
-    $("#ordenesCompraOC #cboSucursalAgente").selectpicker('refresh');
-
-    /*if(datos2[0]['PCA_MON_MonedaId'] != '748BE9C9-B56D-4FD2-A77F-EE4C6CD226A1'){//PESOS
-
-     $("#ordenesCompraOC #cboAgente").val(datos[0]['OC_CMM_AgenteAduanalId']);
-     $("#ordenesCompraOC #cboAgente").selectpicker('refresh');
-     $("#ordenesCompraOC #agenteAduanal").show();
-
-     }
-     else{
-
-     $("#ordenesCompraOC #cboAgente").val('');
-     $("#ordenesCompraOC #cboAgente").removeAttr('disabled');
-     $("#ordenesCompraOC #cboAgente").selectpicker('refresh');
-     $("#ordenesCompraOC #agenteAduanal").hide();
-
-     }*/
-
-    $("#ordenesCompraOC #cboTipoOC").val(datos[0]['OC_TipoOCId']);
-    $("#ordenesCompraOC #cboAlmacen").val(datos[0]['OC_ALM_AlmacenId']);
-
-    $("#modal-datos #cboProyectos").val(datos[0]['OC_EV_ProyectoId']);
-    //$("#modal-datos #cboOT").val(datos[0]['OC_OT_OrdenTrabajoId']);
-    $("#modal-datos #btnBuscarOts").text(datos[0]['OT_Codigo']);
-    $("#modal-datos #idOrdenTrabajo").val(datos[0]['OC_OT_OrdenTrabajoId']);
-    $("#modal-datos #cboLibreABordo").val(datos[0]['OC_LibreABordoId']);
-    $("#modal-datos #cboMetodoEmbarque").val(datos[0]['OC_MetodoEmbarqueId']);
-    $("#modal-datos #cboIVA").val(datos[0]['OC_CMIVA_IVAId']);
-    $("#modal-datos #input-descuento").val(datos[0]['OC_PorcentajeDescuento']);
-    $("#modal-datos #input-comentarios").val(datos[0]['OC_Comentarios']);
-    $('#boton-datos-adicionales').removeAttr("disabled");
-
+   
     document.getElementById('nombreProveedor').innerText = datos[0]['PRO_Nombre'];
     document.getElementById('direccionProveedor').innerText = datos[0]['PRO_Domicilio'];
     document.getElementById('codigoPostalProveedor').innerText = datos[0]['PRO_CodigoPostal'];
@@ -2941,23 +2738,6 @@ function agregarDatosOC(datos,datos2){
 
     document.getElementById('codigoOC').innerText = datos[0]['OC_CodigoOC'];
     document.getElementById('estadoOC').innerText = datos[0]['CMM_EstatusOC'];
-
-    $("#ordenesCompraOC #cboSucursal").removeAttr('disabled');
-    $("#ordenesCompraOC #cboSucursal").selectpicker('refresh');
-    $("#ordenesCompraOC #cboMoneda").removeAttr('disabled');
-    $("#ordenesCompraOC #cboMoneda").selectpicker('refresh');
-    $("#ordenesCompraOC #cboTipoCambio").removeAttr('disabled');
-    $("#ordenesCompraOC #cboTipoCambio").selectpicker('refresh');
-    $("#ordenesCompraOC #cboTipoOC").removeAttr('disabled');
-    $("#ordenesCompraOC #cboTipoOC").selectpicker('refresh');
-    $("#ordenesCompraOC #cboAlmacen").removeAttr('disabled');
-    $("#ordenesCompraOC #cboAlmacen").selectpicker('refresh');
-    $("#ordenesCompraOC #cboAgente").removeAttr('disabled');
-    $("#ordenesCompraOC #cboAgente").selectpicker('refresh');
-    $("#ordenesCompraOC #cboSucursalAgente").removeAttr('disabled');
-    $("#ordenesCompraOC #cboSucursalAgente").selectpicker('refresh');
-
-    //ivaYDescuento();
 
 }
 
@@ -3050,7 +2830,7 @@ function agregaArtExis(datos,pos){
         tbl.row(pos).nodes(pos, COL_PRECIO).to$().find('input#input-precioAE').attr("disabled","disabled");
         tbl.row(pos).nodes(pos, COL_DESCUENTO).to$().find('input#input-descuentoAE').attr("disabled","disabled");
         tbl.row(pos).nodes(pos, COL_IVA).to$().find('select#cboIVAAE').attr("disabled","disabled");
-        //tbl.row(pos).nodes(pos, COL_FECHA_REQUERIDA_COMPRA).to$().find('input#boton-detalleAE').attr("disabled","disabled");
+        //tbl.row(pos).nodes(pos, COL_FECHA_ENTREGA_COMPRA).to$().find('input#boton-detalleAE').attr("disabled","disabled");
         tbl.row(pos).nodes(pos, COL_BTN_ELIMINAR_COMPRA).to$().find('button#boton-eliminarAE').attr("disabled","disabled");
 
     }
@@ -3125,43 +2905,6 @@ function agregaArtMisc(datos,pos){
 
 }
 
-function agregaPartidasOCFechasRequeridas(detalles){
-
-    var tabla = $('#tblArticulosExistentesNueva').DataTable();
-    var datos = tabla.rows().data();
-    var cont = 0;
-    for (var y = 0; y < datos.length; y++){
-        cont = 0;
-        JSON_DETALLES = {};
-        for (var i = 0; i < detalles.length; i++){
-            if (datos[y]["ID_AUX"] == detalles[i]['OCFR_OCD_PartidaId']){
-
-                var ObjetoDetalles = new Object();
-                ObjetoDetalles.VEN_Cantidad = parseFloat(detalles[i]['OCFR_CantidadRequerida']).toFixed(CANTIDAD_DECIMALES);
-                ObjetoDetalles.VEN_FechaRequerida = getFecha(detalles[i]['OCFR_FechaRequerida']);
-                ObjetoDetalles.VEN_FechaPromesa = getFecha(detalles[i]['OCFR_FechaPromesa']);
-                ObjetoDetalles.VEN_OVR_OVD_DetalleId = detalles[i]['DT_RowId'];
-
-                JSON_DETALLES['detalle' + (cont) ] = ObjetoDetalles;
-
-                JSON_PARTIDA[datos[y]['ID_AUX']] = {};
-                JSON_PARTIDA[datos[y]['ID_AUX']].VEN_ART_ArticuloId = '';
-                JSON_PARTIDA[datos[y]['ID_AUX']].VEN_ART_Nombre = '';
-                JSON_PARTIDA[datos[y]['ID_AUX']].Detalles = JSON_DETALLES;
-                cont++;
-
-            }
-        }
-    }
-
-}
-
-function getFecha($fecha) {
-
-    var $elemento = $fecha.split(" ");
-    return $elemento[0];
-
-}
 
 function eliminarPartidaArtExis(fila){
     PARTIDA_ART_EXIS_ELIMINADA.push($(document.getElementById('tblArticulosExistentesNueva').getElementsByTagName('tbody')[0]).children()[fila]);
@@ -3356,705 +3099,6 @@ function eliminarPartidaArtMisc(fila){
         }
     });
 }
-
-function eliminarFechaReq(fila, id){
-    bootbox.dialog({
-        title: "Ordenes de Compra",
-        message: "¿Estás seguro de eliminar la fecha requerida?, No podrás deshacer el cambio.",
-        buttons: {
-            success: {
-                label: "Si",
-                className: "btn-success m-r-5 m-b-5",
-                callback: function () {
-                    $.blockUI({ css: {
-                        border: 'none',
-                        padding: '15px',
-                        backgroundColor: '#000',
-                        '-webkit-border-radius': '10px',
-                        '-moz-border-radius': '10px',
-                        opacity: .5,
-                        color: '#fff'
-                    } });
-
-                    var tabla = $('#tabla-detalles').DataTable();
-                    var datos_detalles = tabla.row(fila).data();
-                    var detalleId = datos_detalles[4];
-
-                    if(detalleId != ''){
-                        $.ajax({
-                            type: "POST",
-                            async: false,
-                            data: {
-                                detalleId: detalleId
-                            },
-                            dataType: "json",
-                            url: "compras/eliminaPartidaFechaRequerida",
-                            //url: "Compras/OrdenVenta-eliminar-fechareq",
-                            success: function (data) {
-
-                                $.unblockUI();
-                                if(data['Status'] == 'Error'){
-
-                                   bootbox.dialog({
-                                        title: "Mensaje",
-                                        message: "<div class='alert alert-danger m-b-0'>"+datos["Mensaje"]+"</div>",
-                                        buttons: {
-                                        success: {
-                                        label: "Ok",
-                                        className: "btn-success m-r-5 m-b-5"
-                                        }
-                                        }
-                                    }).find('.modal-content').css({'font-size': '14px'} );
-
-                                }
-                                else{
-
-                                    var tabla = $('#tabla-detalles').DataTable();
-                                    var datos = tabla.rows().data();
-
-                                    for (var i = 0; i < datos.length-1; i++){
-                                        if (JSON_DETALLES["detalle"+i]["VEN_OVR_OVD_DetalleId"] == detalleId){
-                                            delete JSON_DETALLES["detalle"+i];
-                                        }
-                                    }
-                                    tabla.row(fila).remove().draw(false);
-
-                                }
-
-                            },
-                            error: function (xhr, ajaxOptions, thrownError) {
-                                $.unblockUI();
-                                var error = JSON.parse(xhr.responseText);
-                                bootbox.alert({
-                                    size: "large",
-                                    title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
-                                    message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
-                                    ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
-                                    ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
-                                    ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
-                                });
-                            }
-                        });
-                    } else {
-                        $.unblockUI();
-                    }
-                }
-            },
-            default: {
-                label: "No",
-                className: "btn-default m-r-5 m-b-5"
-            }
-        }
-    });
-}
-
-$('#boton-datos-pedimento').off().on( 'click', function (e) {
-
-    limpiarDatosPedimento();
-    if(banderaAddPedimento == 1){
-
-        $("#agregarPedimentoNuevo").hide();
-
-    }
-    else{
-
-        $("#agregarPedimentoNuevo").show();
-
-    }
-    $("#modal-datos-pedimento").modal("show");
-
-});
-
-function limpiarDatosPedimento(){
-
-    $("#modal-datos-pedimento #OCP_Pedimento").val('');
-    $("#modal-datos-pedimento #OCP_PesoPedimento").val('');
-    $("#modal-datos-pedimento #OCP_LoteProveedor").val('');
-    $("#modal-datos-pedimento #OCP_Planta").val('');
-    $("#modal-datos-pedimento #OCP_NumeroFactura").val('');
-    $("#modal-datos-pedimento #OCP_FechaFactura").val('');
-    $("#modal-datos-pedimento #OCP_Arancel").val('');
-
-}
-
-$('#agregarPedimento').off().on( 'click', function (e) {
-
-    //agrega a renglon
-    var bandera = validarDatosPedimento();
-    if(bandera){
-
-        if(banderaAddPedimento == 1){
-
-            actualizaDatosTablaPedimento();
-
-        }
-        else{
-
-            agregaDatosTablaPedimento();
-
-        }
-        limpiarDatosPedimento();
-        $("#agregarPedimentoNuevo").hide();
-        banderaAddPedimento = 1;
-
-    }
-
-});
-
-function validarDatosPedimento(){
-
-    var bandera = true;
-    var noPedimento = $("#modal-datos-pedimento #OCP_Pedimento").val();
-    var pesoPedimento = $("#modal-datos-pedimento #OCP_PesoPedimento").val();
-    var loteProveedor = $("#modal-datos-pedimento #OCP_LoteProveedor").val();
-    var planta = $("#modal-datos-pedimento #OCP_Planta").val();
-    var numeroFactura = $("#modal-datos-pedimento #OCP_NumeroFactura").val();
-    var fechaFactura = $("#modal-datos-pedimento #OCP_FechaFactura").val();
-    var arancel = $("#modal-datos-pedimento #OCP_Arancel").val();
-
-    if(noPedimento == ''){
-
-        bandera = false;
-        bootbox.dialog({
-            title: "Mensaje",
-            message: "<div class='alert alert-danger m-b-0'>Ingresa Numero de Pedimento.</div>",
-            buttons: {
-            success: {
-            label: "Ok",
-            className: "btn-success m-r-5 m-b-5"
-            }
-            }
-        }).find('.modal-content').css({'font-size': '14px'} );
-
-    }
-    else if(pesoPedimento == ''){
-
-        bandera = false;
-       bootbox.dialog({
-            title: "Mensaje",
-            message: "<div class='alert alert-danger m-b-0'>Ingresa Peso Pedimento</div>",
-            buttons: {
-            success: {
-            label: "Ok",
-            className: "btn-success m-r-5 m-b-5"
-            }
-            }
-        }).find('.modal-content').css({'font-size': '14px'} );
-
-    }
-    else if(loteProveedor == ''){
-
-        bandera = false;
-        bootbox.dialog({
-            title: "Mensaje",
-            message: "<div class='alert alert-danger m-b-0'>Ingresa Lote Proveedor</div>",
-            buttons: {
-            success: {
-            label: "Ok",
-            className: "btn-success m-r-5 m-b-5"
-            }
-            }
-        }).find('.modal-content').css({'font-size': '14px'} );
-
-    }
-    else if(planta == ''){
-
-        bandera = false;
-       bootbox.dialog({
-            title: "Mensaje",
-            message: "<div class='alert alert-danger m-b-0'>Ingresa Planta</div>",
-            buttons: {
-            success: {
-            label: "Ok",
-            className: "btn-success m-r-5 m-b-5"
-            }
-            }
-        }).find('.modal-content').css({'font-size': '14px'} );
-
-    }
-    else if(numeroFactura == ''){
-
-        bandera = false;
-    
-        bootbox.dialog({
-            title: "Mensaje",
-            message: "<div class='alert alert-danger m-b-0'>Ingrese No. de Factura.¡</div>",
-            buttons: {
-            success: {
-            label: "Ok",
-            className: "btn-success m-r-5 m-b-5"
-            }
-            }
-        }).find('.modal-content').css({'font-size': '14px'} );
-
-    }
-    else if(fechaFactura == ''){
-
-        bandera = false;
-      
-        bootbox.dialog({
-            title: "Mensaje",
-            message: "<div class='alert alert-danger m-b-0'>Seleccione fecha de Factura.</div>",
-            buttons: {
-            success: {
-            label: "Ok",
-            className: "btn-success m-r-5 m-b-5"
-            }
-            }
-        }).find('.modal-content').css({'font-size': '14px'} );
-
-    }
-    else if(arancel == ''){
-
-        bandera = false;
-         bootbox.dialog({
-            title: "Mensaje",
-            message: "<div class='alert alert-danger m-b-0'>Ingrese arancel.</div>",
-            buttons: {
-            success: {
-            label: "Ok",
-            className: "btn-success m-r-5 m-b-5"
-            }
-            }
-        }).find('.modal-content').css({'font-size': '14px'} );
-
-    }
-
-    return bandera;
-
-}
-
-function actualizaDatosTablaPedimento(){
-
-    var noPedimento = $("#modal-datos-pedimento #OCP_Pedimento").val();
-    var pesoPedimento = $("#modal-datos-pedimento #OCP_PesoPedimento").val();
-    var loteProveedor = $("#modal-datos-pedimento #OCP_LoteProveedor").val();
-    var planta = $("#modal-datos-pedimento #OCP_Planta").val();
-    var noFactura = $("#modal-datos-pedimento #OCP_NumeroFactura").val();
-    var fechaFactura = $("#modal-datos-pedimento #OCP_FechaFactura").val();
-    var arancel = $("#modal-datos-pedimento #OCP_Arancel").val();
-
-    $($("#tblPedimentos tbody tr")[filaTablaPedimento]).find("td:eq(0)").text(noPedimento);
-    $($("#tblPedimentos tbody tr")[filaTablaPedimento]).find("td:eq(1)").text(pesoPedimento);
-    $($("#tblPedimentos tbody tr")[filaTablaPedimento]).find("td:eq(2)").text(loteProveedor);
-    $($("#tblPedimentos tbody tr")[filaTablaPedimento]).find("td:eq(3)").text(planta);
-    $($("#tblPedimentos tbody tr")[filaTablaPedimento]).find("td:eq(4)").text(noFactura);
-    $($("#tblPedimentos tbody tr")[filaTablaPedimento]).find("td:eq(5)").text(fechaFactura);
-    $($("#tblPedimentos tbody tr")[filaTablaPedimento]).find("td:eq(6)").text(arancel);
-
-}
-
-function agregaDatosTablaPedimento(){
-
-    var tblArtExis = document.getElementById('tblPedimentos').getElementsByTagName('tbody')[0];
-    //var index = tblArtExis.rows.length + 1;
-    var fila   = tblArtExis.insertRow(tblArtExis.rows.length);
-
-    var noPedimento = fila.insertCell(COL_NO_PEDIMENTO);
-    var pesoPedimento = fila.insertCell(COL_PESO_PEDIMENTO);
-    var noLoteProveedor = fila.insertCell(COL_NO_LOTE_PROVEEDOR_PEDIMENTO);
-    var planta = fila.insertCell(COL_PLANTA_PEDIMENTO);
-    var noFactura = fila.insertCell(COL_NO_FACTURA_PEDIMENTO);
-    var fechaFactura = fila.insertCell(COL_FECHA_FACTURA_PEDIMENTO);
-    var arancel = fila.insertCell(COL_ARANCEL_PEDIMENTO);
-    var estatus = fila.insertCell(COL_ESTADO_PEDIMENTO);
-    var btnEditar = fila.insertCell(COL_BTN_EDITAR_PEDIMENTO);
-    var id = fila.insertCell(COL_ID_PEDIMENTO);
-    var idOCFR = fila.insertCell(COL_ID_OCFR);
-
-    noPedimento.innerHTML = $("#modal-datos-pedimento #OCP_Pedimento").val();
-    noPedimento.setAttribute("nowrap", "true");
-    pesoPedimento.innerHTML = $("#modal-datos-pedimento #OCP_PesoPedimento").val();
-    pesoPedimento.setAttribute("nowrap", "true");
-    noLoteProveedor.innerHTML = $("#modal-datos-pedimento #OCP_LoteProveedor").val();
-    noLoteProveedor.setAttribute("nowrap", "true");
-    planta.innerHTML = $("#modal-datos-pedimento #OCP_Planta").val();
-    planta.setAttribute("nowrap", "true");
-    noFactura.innerHTML = $("#modal-datos-pedimento #OCP_NumeroFactura").val();
-    noFactura.setAttribute("nowrap", "true");
-    fechaFactura.innerHTML = $("#modal-datos-pedimento #OCP_FechaFactura").val();
-    fechaFactura.setAttribute("nowrap", "true");
-    arancel.innerHTML = $("#modal-datos-pedimento #OCP_Arancel").val();
-    arancel.setAttribute("nowrap", "true");
-    estatus.innerHTML = "Abierto";
-    estatus.setAttribute("nowrap", "true");
-    btnEditar.innerHTML = '<button type="button" class="btn btn-primary" onclick="editarDatosPartidaPedimento(this.parentNode.parentNode.sectionRowIndex)" data-toggle="tooltip" data-placement="right" title="" data-original-title="Editar Fila"> <span class="glyphicon glyphicon-pencil"></span> </button>';
-    id.innerHTML = "";
-    id.setAttribute("nowrap", "true");
-    idOCFR.innerHTML = comboFechaRequeridaId;
-    idOCFR.setAttribute("nowrap", "true");
-
-    id.style.display = "none";
-    idOCFR.style.display = "none";
-
-}
-
-function editarDatosPartidaPedimento(fila){
-
-    filaTablaPedimento = fila;
-    $('#modal-datos-pedimento #OCP_Pedimento').val($($("#tblPedimentos tbody tr")[fila]).find("td:eq(0)").text());
-    $('#modal-datos-pedimento #OCP_PesoPedimento').val($($("#tblPedimentos tbody tr")[fila]).find("td:eq(1)").text());
-    $('#modal-datos-pedimento #OCP_LoteProveedor').val($($("#tblPedimentos tbody tr")[fila]).find("td:eq(2)").text());
-    $('#modal-datos-pedimento #OCP_Planta').val($($("#tblPedimentos tbody tr")[fila]).find("td:eq(3)").text());
-    $('#modal-datos-pedimento #OCP_NumeroFactura').val($($("#tblPedimentos tbody tr")[fila]).find("td:eq(4)").text());
-    $('#modal-datos-pedimento #OCP_FechaFactura').val($($("#tblPedimentos tbody tr")[fila]).find("td:eq(5)").text());
-    $('#modal-datos-pedimento #OCP_Arancel').val($($("#tblPedimentos tbody tr")[fila]).find("td:eq(6)").text());
-
-    $("#agregarPedimentoNuevo").show();
-
-}
-
-function validaBotonPedimentos(){
-
-    if(registroNuevo == 1){
-
-        if($("#ordenesCompraOC #cboMoneda").val() == "1EA50C6D-AD92-4DE6-A562-F155D0D516D3"){//DOLAR
-
-            $('#modal-detalles #datosPedimento').show();
-            banderaBuscaPedimento = 1;
-
-        }
-        else{
-
-            $('#modal-detalles #datosPedimento').hide();
-            banderaBuscaPedimento = 0;
-
-        }
-
-    }
-    else{
-
-        $('#modal-detalles #datosPedimento').hide();
-        banderaBuscaPedimento = 0;
-
-    }
-
-}
-
-function buscaPedimento(OCFR_OCD_PartidaId){
-
-    $.ajax({
-        type: "POST",
-        async: false,
-        data: {
-            "OCFR_OCD_PartidaId": OCFR_OCD_PartidaId
-        },
-        dataType: "json",
-        url: "compras/consultaDatosPedimento",
-        success: function (data) {
-            setTimeout($.unblockUI, 2000);
-            setTimeout(function () {
-                var respuesta = JSON.parse(JSON.stringify(data));
-                if(respuesta.codigo == 200){
-
-                    asignaVariableFechaRequerida(respuesta.ordenCompraFechasRequeridas);
-                    llenaTablaPedimentos(respuesta.pedimentos);
-
-                } else {
-                    setTimeout($.unblockUI, 2000);
-                    bootbox.dialog({
-                        message: respuesta.respuesta,
-                        title: "Orden de Compra",
-                        buttons: {
-                            success: {
-                                label: "Si",
-                                className: "btn-success"
-                            }
-                        }
-                    });
-                }
-            }, 2000);
-        },
-        error: function (xhr, ajaxOptions, thrownError) {
-            $.unblockUI();
-            var error = JSON.parse(xhr.responseText);
-            bootbox.alert({
-                size: "large",
-                title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
-                message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
-                ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
-                ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
-                ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
-            });
-        }
-    });
-
-}
-
-function asignaVariableFechaRequerida(datos){
-
-    comboFechaRequeridaId = datos[0]['OCFR_FechaRequeridaId'];
-
-}
-
-function llenaTablaPedimentos(datos){
-
-    limpiaTablaPedimentos();
-    var bandera = false;
-    var cuentaDatos = datos.length;
-    for(var x = 0; x < cuentaDatos; x ++){
-
-        //LLENAR TABLA PEDIMENTOS
-        var tblPedimentos = document.getElementById('tblPedimentos').getElementsByTagName('tbody')[0];
-        //var index = tblPedimentos.rows.length + 1;
-        var fila = tblPedimentos.insertRow(tblPedimentos.rows.length);
-
-        var noPedimento = fila.insertCell(COL_NO_PEDIMENTO);
-        var pesoPedimento = fila.insertCell(COL_PESO_PEDIMENTO);
-        var noLoteProveedor = fila.insertCell(COL_NO_LOTE_PROVEEDOR_PEDIMENTO);
-        var planta = fila.insertCell(COL_PLANTA_PEDIMENTO);
-        var noFactura = fila.insertCell(COL_NO_FACTURA_PEDIMENTO);
-        var fechaFactura = fila.insertCell(COL_FECHA_FACTURA_PEDIMENTO);
-        var arancel = fila.insertCell(COL_ARANCEL_PEDIMENTO);
-        var estatus = fila.insertCell(COL_ESTADO_PEDIMENTO);
-        var btnEditar = fila.insertCell(COL_BTN_EDITAR_PEDIMENTO);
-        var id = fila.insertCell(COL_ID_PEDIMENTO);
-        var idOCFR = fila.insertCell(COL_ID_OCFR);
-
-        noPedimento.innerHTML = datos[x]['OCP_Pedimento'];
-        noPedimento.setAttribute("nowrap", "true");
-        pesoPedimento.innerHTML = datos[x]['OCP_PesoPedimento'];
-        pesoPedimento.setAttribute("nowrap", "true");
-        noLoteProveedor.innerHTML = datos[x]['OCP_LoteProveedor'];
-        noLoteProveedor.setAttribute("nowrap", "true");
-        planta.innerHTML = datos[x]['OCP_Planta'];
-        planta.setAttribute("nowrap", "true");
-        noFactura.innerHTML = datos[x]['OCP_NumeroFactura'];
-        noFactura.setAttribute("nowrap", "true");
-
-        var subCadena = datos[x]['OCP_FechaFactura'].substring(0, 10);
-        var divideFecha = subCadena.split('-');
-        var fecha = divideFecha[2] + "/" + divideFecha[1] + "/" + divideFecha[0];
-        fechaFactura.innerHTML = fecha;
-        fechaFactura.setAttribute("nowrap", "true");
-
-        arancel.innerHTML = datos[x]['OCP_Arancel'];
-        arancel.setAttribute("nowrap", "true");
-
-        var edo = datos[x]['OCP_Abierto'];
-        if(edo == 1){
-
-            estatus.innerHTML = "Abierto";
-            estatus.setAttribute("nowrap", "true");
-            btnEditar.innerHTML = '<button type="button" class="btn btn-primary" onclick="editarDatosPartidaPedimento(this.parentNode.parentNode.sectionRowIndex)" data-toggle="tooltip" data-placement="right" title="" data-original-title="Editar Fila"> <span class="glyphicon glyphicon-pencil"></span> </button>';
-            bandera = true;
-
-        }
-        else{
-
-            estatus.innerHTML = "Cerrado";
-            estatus.setAttribute("nowrap", "true");
-            btnEditar.innerHTML = "";
-
-        }
-
-        id.innerHTML = datos[x]['OCP_PedimentoId'];
-        id.setAttribute("nowrap", "true");
-        idOCFR.innerHTML = datos[x]['OCP_OCFR_FechaRequeridaId'];
-        idOCFR.setAttribute("nowrap", "true");
-
-        id.style.display = "none";
-        idOCFR.style.display = "none";
-
-    }
-
-    if(bandera){
-
-        $("#agregarPedimentoNuevo").hide();
-        banderaAddPedimento = 1;
-
-    }
-    else{
-
-        $("#agregarPedimentoNuevo").show();
-        banderaAddPedimento = 0;
-
-    }
-
-    var tipoMoneda = $("#cboMoneda").val();
-    if(tipoMoneda != '748BE9C9-B56D-4FD2-A77F-EE4C6CD226A1' && registroNuevo == 1){
-
-        $("#datosPedimento").show();
-
-    }
-    else{
-
-        $("#datosPedimento").hide();
-
-    }
-
-}
-
-function limpiaTablaPedimentos(){
-
-    $("#tblPedimentos tbody tr").remove();
-
-}
-
-
-
-$('#tableOC').on( 'click', 'button#btnEliminar', function (e) {
-
-    e.preventDefault();
-
-    var tblOC = $('#tableOC').DataTable();
-    var fila = $(this).closest('tr');
-    var datos = tblOC.row(fila).data();
-    ocId = datos['DT_RowId'];
-    var codigoOC = datos['OC_CodigoOC'];
-    var estadoOC = datos['OC_CMM_EstadoOC'];
-
-    if(estadoOC == 'Abierta'){
-
-        bootbox.dialog({
-
-            title: "Orden de Compra",
-            message: "¿Estás seguro de eliminar la orden de compra "+ codigoOC +"?, No podrás deshacer el cambio.",
-            buttons: {
-
-                success: {
-
-                    label: "Si",
-                    className: "btn-success m-r-5 m-b-5",
-                    callback: function () {
-
-                        $.blockUI({ css: {
-
-                            border: 'none',
-                            padding: '15px',
-                            backgroundColor: '#000',
-                            '-webkit-border-radius': '10px',
-                            '-moz-border-radius': '10px',
-                            opacity: .5,
-                            color: '#fff'
-
-                        } });
-
-                        $.ajax({
-                             headers: {
-                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                            },
-                            type: "POST",
-                            async: false,
-                            data: {
-
-                                ocId: ocId
-
-                            },
-                            dataType: "json",
-                            url: "compras/eliminarOC",
-                            success: function (data) {
-
-                                setTimeout($.unblockUI, 2000);
-                                setTimeout(function () {
-
-                                    var respuesta = JSON.parse(JSON.stringify(data));
-                                    if(respuesta.codigo == 200){
-
-                                        bootbox.dialog({
-
-                                            message: "Se ha eliminado la orden de compra " + codigoOC + " con exito.",
-                                            title: "Orden de Compra",
-                                            buttons: {
-
-                                                success: {
-
-                                                    label: "Ok",
-                                                    className: "btn-success",
-                                                    callback: function () {
-
-                                                        reloadBuscadorOC();
-
-                                                    }
-
-                                                }
-
-                                            }
-
-                                        });
-
-                                    }
-                                    else{
-
-                                        setTimeout($.unblockUI, 2000);
-                                        bootbox.dialog({
-
-                                            message: respuesta.respuesta,
-                                            title: "Orden de Compra",
-                                            buttons: {
-
-                                                success: {
-
-                                                    label: "ok",
-                                                    className: "btn-success"
-
-                                                }
-
-                                            }
-
-                                        });
-
-                                    }
-
-                                }, 2000);
-
-                            },
-                            error: function (xhr, ajaxOptions, thrownError) {
-
-                                $.unblockUI();
-                                var error = JSON.parse(xhr.responseText);
-                                bootbox.alert({
-
-                                    size: "large",
-                                    title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
-                                    message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
-                                    ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
-                                    ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
-                                    ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
-
-                                });
-
-                            }
-
-                        });
-
-                    }
-
-                },
-                default: {
-
-                    label: "No",
-                    className: "btn-default m-r-5 m-b-5"
-
-                }
-
-            }
-
-        });
-
-    }
-    else{
-
-        bootbox.dialog({
-
-            message: 'Solo puedes eliminar Ordenes de Compra que esten con estatus Abierta.',
-            title: "Orden de Compra",
-            buttons: {
-
-                success: {
-
-                    label: "ok",
-                    className: "btn-success"
-
-                }
-
-            }
-
-        });
-
-    }
-
-});
 function reloadBuscadorOC(){
      var end = moment();
     var start = moment().subtract(2, "days");;

@@ -957,6 +957,7 @@ class SAP extends Model
         $oc_tipo = $datos["oc_tipo"];
         $oc_tipo_cambio = $datos["oc_tipo_cambio"];
         $status = $datos["status"];
+        $fecha_entrega = $datos["oc_fecha_entrega"];
 
         $xml_tipoOC = 'dDocument_Items';
         if ($oc_tipo == 0) {
@@ -983,11 +984,12 @@ class SAP extends Model
             //INSERTA ORDEN DE COMPRA
             $root_oc_header[0]->DocType = $xml_tipoOC;
             $root_oc_header[0]->DocDate = "".(new \DateTime('now'))->format('Ymd');
-            $root_oc_header[0]->DocDueDate = "".(new \DateTime('now'))->format('Ymd');
+            $root_oc_header[0]->DocDueDate = "".$fecha_entrega;
             $root_oc_header[0]->CardCode = $oc_proveedor;
             $root_oc_header[0]->DocCurrency = $oc_moneda;
             //$root_oc_header[0]->DocRate = $oc_tipo_cambio;
             $root_oc_header[0]->DocObjectCode = "22";
+            $root_oc_header[0]->U_SIZ_CreadoPor = "".session('userID');
             $root_oc_header[0]->Comments = "ELABORO: ".session('userNombre').', '. strtoupper($oc_comentarios);
 
             for($x = 0; $x < count($oc_items); $x ++){
@@ -999,7 +1001,7 @@ class SAP extends Model
                     
                 } else {
                     $xml_item->addChild('ItemDescription', $oc_items[$x]['NOMBRE_ARTICULO']);
-                    $xml_item->addChild('AccountCode', $oc_items[$x]['NOMBRE_ARTICULO']);
+                    $xml_item->addChild('AccountCode', $oc_items[$x]['CTA_MAYOR']);
                     
                 }
                 $xml_item->addChild('Quantity', $oc_items[$x]['CANTIDAD']);
@@ -1007,6 +1009,7 @@ class SAP extends Model
                 $xml_item->addChild('DiscountPercent', $oc_items[$x]['DESCUENTO']);
                 $xml_item->addChild('WarehouseCode', "AMP-CC");
                 $xml_item->addChild('TaxCode', $oc_items[$x]['ID_IVA']);
+                $xml_item->addChild('ShipDate', $oc_items[$x]['FECHA_ENTREGA']);
             }  
         }  
         //BO/Document_Lines/row

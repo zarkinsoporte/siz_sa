@@ -15,7 +15,8 @@
             <th style="text-align: right;">Monto Descuento</th>
             <th style="text-align: right;">(%) I.V.A.</th>
             <th style="text-align: right;">Monto I.V.A.</th>
-            <th style="text-align: right;">Total</th>
+            <th style="text-align: right;">Total</th>            
+            <th style="text-align: center;">Fecha Entrega</th>
             <th style="text-align: center;">Cerrada</th>
             <th style="text-align: center;">Eliminar</th>
             <th>ivaID</th>

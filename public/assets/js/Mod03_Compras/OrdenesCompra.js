@@ -35,14 +35,18 @@ function js_iniciador() {
           
     });
     $('#input-fecha').datepicker('setDate', new Date());
-    $("#input-fecha-entrega").datepicker({
-        format: "dd/mm/yyyy",
-        language: "es",
-        autoclose: true
-    }).on("change", function() {
-          
-    });
-    $('#input-fecha-entrega').datepicker('setDate', new Date());
+    
+    var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth() + 1; //January is 0!
+
+    var yyyy = today.getFullYear();
+    if (dd < 10) { dd = '0' + dd }
+    if (mm < 10) { mm = '0' + mm }
+    today = yyyy + '-' + mm + '-' + dd; 
+    console.log(today)
+    $('#input-fecha-entrega').val(today);
+    //$('#input-fecha-entrega').val(today);
 
     $("#input_date").daterangepicker({
         
@@ -139,8 +143,7 @@ function js_iniciador() {
         }
     }
 
-// FIN LIBERACION
-// INICIO IMPRESION
+// Inicializa tabla oc
 var tableOC = $("#tableOC").DataTable({
                 language:{
                      "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
@@ -155,7 +158,7 @@ var tableOC = $("#tableOC").DataTable({
                 pageLength:-1,
                 "paging": false,
                 createdRow: function (row, data, dataIndex) {
-                    console.log(data)
+                    //console.log(data)
                     $(row).attr('data-id', data.DocEntry);
                 },
                 columns: [                   
@@ -348,7 +351,7 @@ $('#tableOC').on('click', 'button#btnEliminar', function (e) {
                             },
                             error: function (xhr, ajaxOptions, thrownError) {
                                 $.unblockUI();
-                                console.log(xhr.responseText)
+                                //console.log(xhr.responseText)
                                 var error = [];
                                 bootbox.alert({
                                     size: "large",
@@ -509,6 +512,7 @@ $('#boton-cerrar').off().on('click', function(e) {
 });
 $('#boton-nuevo').on('click', function(e) {
     registroNuevo = 0;
+    MuestraComponentesOC()
     $('#ordenesCompraOC').show();
     $('#btnBuscadorOC').hide();
     InicializaComponentesOC();
@@ -601,6 +605,50 @@ $(document).keyup(function(event) {
         cargaTablaArticulos();
         setTimeout($.unblockUI, 2000);
     });
+    $('#input-fecha-entrega').change(function (e){
+        $.blockUI({
+                message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                css: {
+                    border: 'none',
+                    padding: '16px',
+                    width: '50%',
+                    top: '40%',
+                    left: '30%',
+                    backgroundColor: '#fefefe',
+                    '-webkit-border-radius': '10px',
+                    '-moz-border-radius': '10px',
+                    opacity: .7,
+                    color: '#000000'
+                }
+            });
+        actualiza_fecha_entrega()
+        setTimeout($.unblockUI, 2000);
+    });
+    function actualiza_fecha_entrega() {
+        var tabla_nombre = '#tblArticulosExistentesNueva';
+        if (BanderaOC == 1) {
+            tabla_nombre = '#tblArticulosMiscelaneosNueva';
+        }
+        var tabla = $(tabla_nombre).DataTable();
+        var fila = $(tabla_nombre+' tbody tr').length;
+        var datos_Tabla = tabla.rows().data();
+        //var tbl_datos = new Array();
+
+        if (datos_Tabla.length != 0) {
+            //var siguiente = 0;
+            //var producto = '';
+            var fecha_entrega = $('#input-fecha-entrega').val();
+            for (var i = 0; i < fila; i++) {
+                console.log(datos_Tabla[i])
+                //producto = datos_Tabla[i]["PRODUCTO"]
+                $('input#input-fecha-entrega-linea', tabla.row(i).node()).val(fecha_entrega)
+
+            }
+            
+
+        }
+
+    }
     $("#sel-proveedor").on("changed.bs.select", function(e, clickedIndex, newValue, oldValue) {
         $.blockUI({
                 message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
@@ -903,7 +951,7 @@ $('#tblArticulosExistentesNueva').on('click', 'a#boton-eliminarAE', function (e)
 
                 if (datos['CODIGO_ARTICULO'] != ""){
                     RealizaCalculos(fila, tabla, precio, cantidad, descuento);
-                    console.log(['precio ' + precio, 'cantidad ' +cantidad, 'descuento ' + descuento]);
+                    //console.log(['precio ' + precio, 'cantidad ' +cantidad, 'descuento ' + descuento]);
                     calculaTotalOrdenCompra();
                     //calculaTipoCambio();
                     // if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
@@ -1389,7 +1437,7 @@ $("#sel-tipo-oc").on("changed.bs.select", function(e, clickedIndex, newValue, ol
         // $("#tblArticulosMiscelaneosResumenNueva").DataTable().clear().draw();
         calculaTotalOrdenCompra();
         let val = $('option:selected', this).val();
-        console.log('sel-tipoOC: '+ val);
+        //console.log('sel-tipoOC: '+ val);
         if (val == 0) {
             $("#articulosOC").show();
             $("#miscelaneosOC").hide();
@@ -1401,7 +1449,7 @@ $("#sel-tipo-oc").on("changed.bs.select", function(e, clickedIndex, newValue, ol
             BanderaOC = 1;
             set_columns_index(1);
         }
-        console.log('sel-tipo-oc: '+BanderaOC)
+        //console.log('sel-tipo-oc: '+BanderaOC)
         setTimeout($.unblockUI, 2000);
     });
     function set_columns_index(BanderaOC){
@@ -1422,12 +1470,13 @@ $("#sel-tipo-oc").on("changed.bs.select", function(e, clickedIndex, newValue, ol
             COL_IVA = 11;
             COL_MONTO_IVA = 12;
             COL_TOTAL = 13;
-            COL_PARTIDA_CERRADA = 14;
-            COL_BTN_ELIMINAR_COMPRA = 15;
-            COL_ID_IVA = 16;
-            COL_ID_PARTIDA = 17;
+            COL_FECHA_ENTREGA_COMPRA = 14;
+            COL_PARTIDA_CERRADA = 15;
+            COL_BTN_ELIMINAR_COMPRA = 16;
+            COL_ID_IVA = 17;
+            COL_ID_PARTIDA = 18;
 
-            // COL_FECHA_REQUERIDA_COMPRA = 14;
+            // COL_FECHA_ENTREGA_COMPRA = 14;
             // COL_CODIGO_OT = 17;
             // COL_ID_OT = 18;
             // COL_ID_ARTICULO = 19;
@@ -1441,7 +1490,6 @@ $("#sel-tipo-oc").on("changed.bs.select", function(e, clickedIndex, newValue, ol
             //COL_CODIGO_ART = 1;
             COL_NOMBRE_ART = 1;
             COL_NOMBRE_ART_MISC = 1;
-
             // COL_UNIDAD_MEDIDA_INV = 3;
             COL_CTA_MAYOR = 2;       
             // COL_FACTOR_CONVERSION = 4;
@@ -1454,10 +1502,11 @@ $("#sel-tipo-oc").on("changed.bs.select", function(e, clickedIndex, newValue, ol
             COL_IVA = 8;
             COL_MONTO_IVA = 9;
             COL_TOTAL = 10;
-            COL_PARTIDA_CERRADA = 11;
-            COL_BTN_ELIMINAR_COMPRA = 12;
-            COL_ID_IVA = 13;
-            COL_ID_PARTIDA = 14;
+            COL_FECHA_ENTREGA_COMPRA = 11;
+            COL_PARTIDA_CERRADA = 12;
+            COL_BTN_ELIMINAR_COMPRA = 13;
+            COL_ID_IVA = 14;
+            COL_ID_PARTIDA = 15;
         }
     }
     $('#tblArticulosMiscelaneosNueva').on('click', 'span#boton-otAM', function (e) {
@@ -1542,7 +1591,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','input#input-cantidadAM',function
         var datos = tabla.row(fila).data();
         datos['NOMBRE_ARTICULO'] = tabla.row(fila).nodes(fila, 1).to$().find("input#input-nombreART-miselaneos").val();
         
-        console.log(datos)
+        //console.log(datos)
         var precio = 'input-precioAM';
         var cantidad = 'input-cantidadAM';
         var descuento = 'input-descuentoAM';
@@ -2031,9 +2080,136 @@ $('#tblArticulosMiscelaneosNueva').on('click', 'button#boton-eliminarAM', functi
    //PartidaResumenAM();
 });
 
-}  //fin js_iniciador               
-function val_btn(val) { 
+//boton editar OC
+    $('#tableOC').on('click', 'button#btnEditar', function (e) {
+        e.preventDefault();
+        var tblOC = $('#tableOC').DataTable();
+        var fila = $(this).closest('tr');
+        var docentry = fila.attr('data-id')
+        var datos = tblOC.row(fila).data();
+        var NumOC = datos['NumOC'];
+        if (datos['Estatus'] == 'ABIERTA') {
+            var ocId = datos['DT_RowId'];
 
-        $('#btn_enviar').attr('data-operacion', val);                                                     
-} 
+            $.blockUI({
+                css: {
+                    border: 'none',
+                    padding: '15px',
+                    backgroundColor: '#000',
+                    '-webkit-border-radius': '10px',
+                    '-moz-border-radius': '10px',
+                    opacity: .5,
+                    color: '#fff'
+                }
+            });
+
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                type: "POST",
+                async: false,
+                data: {
+                    ocId: ocId
+                },
+                dataType: "json",
+                url: routeapp + "compras/buscaOC",
+                success: function (data) {
+                    setTimeout($.unblockUI, 2000);
+                    setTimeout(function () {
+                        var respuesta = JSON.parse(JSON.stringify(data));
+                        if (respuesta.codigo == 200) {
+                            registroNuevo = 1;
+                            $('#ordenesCompraOC').show();
+                            $('#btnBuscadorOC').hide();
+                            MuestraComponentesOC()
+                            CargaComponentesOC();
+                            //agregarDatosOC(respuesta.ordenCompra, respuesta.consultaTipoMonedaProveedor);
+                            //agregaPartidasOCDetalle(respuesta.ordenCompraDetalle);
+                            //agregaPartidasOCFechasRequeridas(respuesta.ordenCompraFechasRequeridas);
+                        } else {
+                            setTimeout($.unblockUI, 2000);
+                            bootbox.dialog({
+                                message: respuesta.respuesta,
+                                title: "Orden de Compra",
+                                buttons: {
+                                    success: {
+                                        label: "Si",
+                                        className: "btn-success"
+                                    }
+                                }
+                            });
+                        }
+                    }, 2000);
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    $.unblockUI();
+                    var error = JSON.parse(xhr.responseText);
+                    bootbox.alert({
+                        size: "large",
+                        title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
+                        message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
+                            (error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '') +
+                            (error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '') +
+                            (error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '') + '</div>'
+                    });
+                }
+            });
+           
+        } else {
+            swal("", "La OC no esta Abierta", "error", {
+                buttons: false,
+                timer: 2000,
+            });
+        }
+
+    });
+
+    function MuestraComponentesOC() {
+        if (registroNuevo == 0) { //nueva OC
+            $('#sel-tipo-oc').show()
+            $('#edit_tipo_oc').hide()
+        } else { //Editar OC
+            $('#sel-tipo-oc').hide()
+            $('#edit_tipo_oc').show()
+            
+        }
+    }
+
+    function CargaComponentesOC() {
+
+        $("#sel-proveedor").val('');
+        $("#sel-proveedor").selectpicker('refresh');
+
+        $('#ordenesCompraOC #nombreProveedor').text('');
+        $('#ordenesCompraOC #direccionProveedor').text('');
+        $("#ordenesCompraOC #codigoPostalProveedor").text('');
+        $('#ordenesCompraOC #localizacionProveedor').text('');
+        $('#ordenesCompraOC #telefonicosProveedor').text('');
+        $('#ordenesCompraOC #contactoProveedor').text('');
+        $('#ordenesCompraOC #rfcProveedor').text('');
+
+        $("#ordenesCompraOC #cboMoneda").val('');
+        $("#ordenesCompraOC #cboMoneda").selectpicker('refresh');
+        //verificar cambio de moneda si es necesario
+
+        $("#ordenesCompraOC #input_tc").val(1);
+       
+        $("#sel-tipo-oc").val(0);
+        $("#sel-tipo-oc").selectpicker('refresh');
+      
+        $('#ordenesCompraOC #codigoOC').text('Por Definir');
+        $('#ordenesCompraOC #estadoOC').text('Abierta');
+    
+        $('#input-fecha').datepicker({ //fechaDOC
+            language: 'es',
+            format: 'yyyy-mm-dd',
+            todayHighlight: true,
+            autoclose: true
+        }).datepicker("setDate", new Date());
+
+        //fecha entrega
+
+    };    
+}  //fin js_iniciador       
                    
