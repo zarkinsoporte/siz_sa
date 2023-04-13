@@ -1583,7 +1583,7 @@ function calculaTotalOrdenCompra(){
     var Tiva = 0;
     var Tdescuento = 0;
 
-    var lengthAE = $('#tblArticulosExistentesNueva #boton-articuloAE').closest('tr');
+    var lengthAE = $('#tblArticulosExistentesNueva #input-articulo-codigoAE').closest('tr');
     var lengthAM = $('#tblArticulosMiscelaneosNueva #input-nombreART-miselaneos').closest('tr');
     var count = lengthAE.length + lengthAM.length;
     if (count > 0){

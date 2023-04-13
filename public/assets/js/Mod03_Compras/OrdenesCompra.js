@@ -143,6 +143,7 @@ function js_iniciador() {
         }
     }
 
+// set_columns_index(0)
 // Inicializa tabla oc
 var tableOC = $("#tableOC").DataTable({
                 language:{
@@ -669,19 +670,30 @@ $('#tblArticulosExistentesNueva').on('click', 'a#boton-eliminarAE', function (e)
 
     var tabla = $('#tblArticulosExistentesNueva').DataTable();
     var fila = $(this).closest('tr');
-    var datos = tabla.row(fila).data();
-    var index = tabla.row(fila).index();
-    var id = datos['ID_PARTIDA'];
-    if(id == ""){
-        tabla.row(fila).remove().draw(false);
-    }
-    else{
-        if (registroNuevo == 1){
-            //eliminarPartidaArtExis(fila);
+    //var datos = tabla.row(fila).data();
+    //console.log(datos['CODIGO_ARTICULO'])
+    swal({
+        title: '¿Eliminar partida?',
+        text: "",
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'OK',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true,
+        icon: "warning",
+        buttons: true
+    }).then(function (result) {
+        if (result) {
+            
+            //var index = tabla.row(fila).index();           
+            tabla.row(fila).remove().draw();
+            calculaTotalOrdenCompra();
+            actualizaLineaPartidaAE();
+            
+        } else {
+            
         }
-    }
-    calculaTotalOrdenCompra();
-    //actualizaLineaPartidaAE();
+    });
     //calculaTipoCambio();
     //PartidaResumenAE();
 });
@@ -2259,13 +2271,11 @@ $('#tblArticulosMiscelaneosNueva').on('click', 'button#boton-eliminarAM', functi
 
         }
 
-
+        tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('input#input-articulo-codigoAE').attr("disabled", "disabled");
+        tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('a#boton-articuloAE').attr("disabled", "disabled");
+        tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('a#boton-articuloAE').attr("id", "disabled");
         if (datos['LineStatus'] != 'O') {//ABIERTA
 
-            tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('input#input-articulo-codigoAE').attr("disabled", "disabled");
-            tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('a#boton-articuloAE').attr("disabled", "disabled");
-            tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('a#boton-articuloAE').attr("id", "disabled");
-                                                                  
             tbl.row(pos).nodes(pos, COL_CANTIDAD).to$().find('input#input-cantidadAE').attr("disabled", "disabled");
             tbl.row(pos).nodes(pos, COL_PRECIO).to$().find('input#input-precioAE').attr("disabled", "disabled");
             tbl.row(pos).nodes(pos, COL_DESCUENTO).to$().find('input#input-descuentoAE').attr("disabled", "disabled");
@@ -2281,7 +2291,7 @@ $('#tblArticulosMiscelaneosNueva').on('click', 'button#boton-eliminarAM', functi
             tbl.row(pos).nodes(pos, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("disabled", "disabled");
             tbl.row(pos).nodes(pos, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("id", "disabled");
         }
-
+        
     }
 }  //fin js_iniciador       
                    
