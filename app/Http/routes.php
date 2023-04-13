@@ -718,4 +718,5 @@ Route::any('orden_compra_pdf/{NumOC}', 'Mod03_ComprasController@orden_compra_pdf
 Route::any('registraOC', 'Mod03_ComprasController@registraOC')->name('registraOC');
 Route::get('/crear-ordenoc', 'Mod03_ComprasController@registraOC');
 Route::any('cancelOC', 'Mod03_ComprasController@CancelDoc');
+Route::any('compras/buscaOC', 'Mod03_ComprasController@buscaOC');
 Route::any('cancelOC-test/{docEntry}', 'Mod03_ComprasController@CancelDoc2');

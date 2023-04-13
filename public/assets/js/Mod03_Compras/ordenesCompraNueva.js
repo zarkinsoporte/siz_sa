@@ -2,9 +2,9 @@
  * Created by mgl_l on 15/08/2019.
  */
 
-var DECIMALES = 3;
+var DECIMALES = 2;
 var CANTIDAD_DECIMALES = 2;
-var PRECIOS_DECIMALES = 4;
+var PRECIOS_DECIMALES = 2;
 var TC_DECIMALES = 4;
 var PORCENTAJE_DECIMALES = 2;
 
@@ -60,10 +60,12 @@ var COL_IVA = 11;
 var COL_MONTO_IVA = 12;
 var COL_TOTAL = 13;
 var COL_FECHA_ENTREGA_COMPRA = 14;
-var COL_PARTIDA_CERRADA = 15;
-var COL_BTN_ELIMINAR_COMPRA = 16;
-var COL_ID_IVA = 17;
-var COL_ID_PARTIDA = 18;
+var COL_CANT_PENDIENTE = 15;
+var COL_PARTIDA_CERRADA = 16;
+var COL_BTN_ELIMINAR_COMPRA = 17;
+var COL_ID_IVA = 18;
+var COL_ID_PARTIDA = 19;
+var COL_ESTATUS_PARTIDA = 20;
 
 var COL_CODIGO_OT = 19;
 var COL_ID_OT = 20;
@@ -72,7 +74,6 @@ var COL_ID_ARTICULO = 21;
 var COL_ID_AUX = 22;
 var COL_ID_UMI = 23;
 var COL_ID_UMC = 24;
-var COL_ESTATUS_PARTIDA = 25;
 var COL_CTA_MAYOR = 2;
 
 //Tabla articulos delproveedor
@@ -137,10 +138,11 @@ var InicializaComponentes = function () {
     InicializaButton();
     consultaDatos();
     InicializaBuscadorProveedores();
-    InicializaTablas();
     InicializaBuscadorArticulos();
     InicializaBuscadorOtReq();
-
+    
+    InicializaTablas();
+    insertarFila()
 };
 
 var handleDatepicker = function() {
@@ -277,24 +279,40 @@ function InicializaTablas(){
             {data: "PARTIDA"},
             {data: "CODIGO_ARTICULO"},
             {data: "NOMBRE_ARTICULO"},
+
             {data: "UNIDAD_MEDIDA_INV"},
             {data: "FACTOR_CONVERSION"},
             {data: "UNIDAD_MEDIDA_COMPRAS"},
+
             {data: "CANTIDAD"},
             {data: "PRECIO"},
             {data: "SUBTOTAL"},
+
             {data: "DESCUENTO"},
             {data: "MONTO_DESCUENTO"},
             {data: "IVA"},
+
             {data: "MONTO_IVA"},
             {data: "TOTAL"},
             {data: "FECHA_ENTREGA", orderable: false},
+
+            { data: "CANT_PENDIENTE" },
             {data: "PARTIDA_CERRADA"},
             {data: "BTN_ELIMINAR", orderable: false},
+
             {data: "ID_IVA", orderable:false, visible:false},
-            {data: "ID_PARTIDA", orderable:false, visible:false}
+            {data: "ID_PARTIDA", orderable:false, visible:false},//20
+            { data: "ESTATUS_PARTIDA", orderable: false, visible: false }//21
 
         ],
+
+        "rowCallback": function (row, data, index) {
+            //console.log(data['Existencia']);
+            if (parseFloat(data['Existencia']) == 0) {
+                //  $(row).addClass("ignoreme");
+                $('td', row).addClass("ignoreme");
+            }
+        },
         "columnDefs": [
             {
                 searchable: false,
@@ -439,9 +457,7 @@ function InicializaTablas(){
             {data: "PARTIDA"},
             {data: "NOMBRE_ARTICULO"},
             {data: "CTA_MAYOR"},
-            //{data: "UNIDAD_MEDIDA_INV"},
-            //{data: "FACTOR_CONVERSION"},
-            //{data: "UNIDAD_MEDIDA_COMPRAS"},
+
             {data: "CANTIDAD"},
             {data: "PRECIO"},
             {data: "SUBTOTAL"},
@@ -453,11 +469,14 @@ function InicializaTablas(){
             {data: "MONTO_IVA"},
             {data: "TOTAL"},
             {data: "FECHA_ENTREGA", orderable: false },
+            
             {data: "PARTIDA_CERRADA"},
-
             {data: "BTN_ELIMINAR", orderable: false},
             {data: "ID_IVA", orderable:false, visible:false},
-            {data: "ID_PARTIDA", orderable:false, visible:false}
+
+            {data: "ID_PARTIDA", orderable:false, visible:false},//17
+            {data: "ESTATUS_PARTIDA", orderable:false, visible:false}//18
+            
         ],
         "columnDefs": [
             {
@@ -491,43 +510,6 @@ function InicializaTablas(){
                     var select = '<select data-live-search="true" class=" boot-select selectpicker form-control" data-style="btn-sm btn-success" style="padding: 1px !important; display: block !important" id="cboTPM">' + opciones +'</select>';
                     return select;
                 }
-            //     /*"render": function ( data, type, row ) {
-            //         return '                            <div class="input-group">\n' +
-            //         '                                <input type="text" class="form-control input-sm codigo" style=""id="input-articulo-codigoAM" value="' + row['CODIGO_ARTICULO'] + '">\n' +
-            //         '                                <div class="input-group-btn">\n' +
-            //         '                                    <span style="cursor: pointer;" class="btn btn-sm btn-success m-r-5" id="boton-articuloAM"><i class="fa fa-search" aria-hidden="true"></i></span>\n' +
-            //         '                                </div>\n' +
-            //         '                            </div>';
-            //     }*/
-            // },
-            
-            // {
-            //     "targets": [COL_UNIDAD_MEDIDA_INV],
-            //     "orderable" : false
-            // },
-            // {
-            //     "targets": [COL_FACTOR_CONVERSION],
-            //     "orderable" : false
-            // },
-            // {
-            //     "targets": [COL_UNIDAD_MEDIDA_COMPRAS],
-            //     "orderable" : false,
-            //     "render": function (data,type,row) {
-            //         var id = row[1];
-            //         var opciones = [];
-
-            //         for (var i=0; i < UNIDAD.length; i++){
-            //             if  (id == UNIDAD[i]['CMUM_UnidadMedidaId']){
-            //                 opciones.push('<option selected value="'+UNIDAD[i]['CMUM_UnidadMedidaId']+'">'+UNIDAD[i]['CMUM_Nombre']+'</option>');
-            //             }else{
-            //                 opciones.push('<option value="'+UNIDAD[i]['CMUM_UnidadMedidaId']+'">'+UNIDAD[i]['CMUM_Nombre']+'</option>');
-            //             }
-            //         }
-            //         //opciones.push('<option value="UMI1">UMI1</option>');
-            //         //opciones.push('<option value="UMI2">UMI2</option>');
-            //         var select = '<select data-live-search="true" class="boot-select selectpicker form-control" data-style="btn-sm btn-success" style="" id="cboUMAM">' + opciones +'</select>';
-            //         return select;
-            //     }
              },
             {
                 "targets": [3],
@@ -1158,29 +1140,29 @@ function insertarFila(){
                 "PARTIDA": ""
                 , "CODIGO_ARTICULO": ""
                 , "NOMBRE_ARTICULO": ""
+
                 , "UNIDAD_MEDIDA_INV": ""
                 , "FACTOR_CONVERSION": ""
                 , "UNIDAD_MEDIDA_COMPRAS": ""
+
                 , "CANTIDAD": "0.00"
                 , "PRECIO": "0.00"
                 , "SUBTOTAL": "0.00"
+
                 , "DESCUENTO": "0.00"
                 , "MONTO_DESCUENTO": "0.00"
                 , "IVA": "16"
+
                 , "MONTO_IVA": "0.00"
                 , "TOTAL": "0.00"
                 , "FECHA_ENTREGA":""
-                , "PARTIDA_CERRADA": 0
+
+                , "CANT_PENDIENTE":""
                 , "BTN_ELIMINAR": null
-                // , "ID_ARTICULO": ""
-                // , "ID_AUX" : generateGuid()
-                // , "ID_UMI": ""
-                // , "ID_UMC": ""
                 , "ID_IVA":"W3"
+                
                 , "ID_PARTIDA": ""
-                // , "ESTATUS_PARTIDA":""
-                // , "CODIGO_OT":""
-                // , "ID_OT":""
+                , "ESTATUS_PARTIDA":""//20
             }
         ).draw( false );
         actualizaLineaPartidaAE();
@@ -1191,9 +1173,7 @@ function insertarFila(){
                 "PARTIDA": ""
                 , "NOMBRE_ARTICULO": ""
                 , "CTA_MAYOR": ""
-                //, "UNIDAD_MEDIDA_INV": ""
-                //, "FACTOR_CONVERSION": ""
-                //, "UNIDAD_MEDIDA_COMPRAS": ""
+
                 , "CANTIDAD": "0.00"
                 , "PRECIO": "0.00"
                 , "SUBTOTAL": "0.00"
@@ -1204,19 +1184,14 @@ function insertarFila(){
 
                 , "MONTO_IVA": ""
                 , "TOTAL": "0.00"
-                 , "FECHA_ENTREGA": ""
-                , "PARTIDA_CERRADA": 0
+                , "FECHA_ENTREGA": ""
 
+                , "PARTIDA_CERRADA": 0
                 , "BTN_ELIMINAR": null
-                // , "ID_ARTICULO": ""
-                // , "ID_AUX" : generateGuid()
-                // , "ID_UMI": ""
-                // , "ID_UMC": ""
                 , "ID_IVA":"W3"
+
                 , "ID_PARTIDA": ""
-                // , "ESTATUS_PARTIDA":""
-                // , "CODIGO_OT":""
-                // , "ID_OT":""
+                , "ESTATUS_PARTIDA":""//17
             }
         ).draw( true );
         actualizaLineaPartidaAM(); 
@@ -1637,10 +1612,10 @@ function calculaTotalOrdenCompra(){
             Tiva = Tiva + iva;
             Tdescuento = Tdescuento + descuento;
 
-            $('#ordenCompra-subtotal').text(TSubtotal .toFixed(PRECIOS_DECIMALES));
-            $('#ordenCompra-descuento').text(Tdescuento.toFixed(PRECIOS_DECIMALES));
-            $('#ordenCompra-iva').text(Tiva.toFixed(PRECIOS_DECIMALES));
-            $('#ordenCompra-total').text(SIMBOLO_MONEDA + ' ' +  Ttotal.toFixed(PRECIOS_DECIMALES));
+            $('#ordenCompra-subtotal').text(TSubtotal.toLocaleString('es-MX'));
+            $('#ordenCompra-descuento').text(Tdescuento.toLocaleString('es-MX'));
+            $('#ordenCompra-iva').text(Tiva.toLocaleString('es-MX'));
+            $('#ordenCompra-total').text(SIMBOLO_MONEDA + ' ' + Ttotal.toLocaleString('es-MX'));
         }
 
         for (var i = 0; i < dataAM.length; i++){
@@ -2277,68 +2252,6 @@ $(document).on('keyup', function (e) {
 
     if(e.shiftKey && e.keyCode == 13){
         insertarFila();
-        /* if (BanderaOC == 0){
-            TBL_ART_EXIST.row.add(
-                {
-                    "PARTIDA": ""
-                    , "CODIGO_ARTICULO": ""
-                    , "NOMBRE_ARTICULO": ""
-                    , "UNIDAD_MEDIDA_INV": ""
-                    , "FACTOR_CONVERSION": ""
-                    , "UNIDAD_MEDIDA_COMPRAS": ""
-                    , "CANTIDAD": "0.00"
-                    , "PRECIO": "0.00"
-                    , "SUBTOTAL": "0.00"
-                    , "DESCUENTO": "0.00"
-                    , "MONTO_DESCUENTO": "0.00"
-                    , "IVA": ""
-                    , "MONTO_IVA": "0.00"
-                    , "TOTAL": "0.00"
-                    , "PARTIDA_CERRADA": 0
-                    , "BTN_ELIMINAR": null
-                    , "ID_ARTICULO": ""
-                    , "ID_PARTIDA": ""
-                    , "ID_AUX" : generateGuid()
-                    , "ID_UMI": ""
-                    , "ID_UMC": ""
-                    , "ID_IVA":""
-                    , "ESTATUS_PARTIDA":""
-                    , "CODIGO_OT": ""
-                    , "ID_OT": ""
-                }
-            ).draw( false );
-            actualizaLineaPartidaAE();
-        }
-        else{
-            TBL_ART_MISC.row.add({
-                "PARTIDA": ""
-                , "CODIGO_ARTICULO": ""
-                , "NOMBRE_ARTICULO": ""
-                , "UNIDAD_MEDIDA_INV": ""
-                , "FACTOR_CONVERSION": ""
-                , "UNIDAD_MEDIDA_COMPRAS": ""
-                , "CANTIDAD": "0.00"
-                , "PRECIO": "0.00"
-                , "SUBTOTAL": "0.00"
-                , "DESCUENTO": "0.00"
-                , "MONTO_DESCUENTO": "0.00"
-                , "IVA": ""
-                , "MONTO_IVA": "0.00"
-                , "TOTAL": "0.00"
-                , "PARTIDA_CERRADA": 0
-                , "BTN_ELIMINAR": null
-                , "ID_ARTICULO": ""
-                , "ID_PARTIDA": ""
-                , "ID_AUX" : generateGuid()
-                , "ID_UMI": ""
-                , "ID_UMC": ""
-                , "ID_IVA":""
-                , "ESTATUS_PARTIDA":""
-                , "CODIGO_OT": ""
-                , "ID_OT": ""
-            }).draw( false );
-             actualizaLineaPartidaAM();
-        } */
     }
 
 });
@@ -2741,7 +2654,7 @@ function agregarDatosOC(datos,datos2){
 
 }
 
-function agregaPartidasOCDetalle(datos){
+function agregaPartidasOCDetalle_old(datos){
 
     $("#tblArticulosExistentesNueva").DataTable().clear().draw();
     $("#tblArticulosMiscelaneosNueva").DataTable().clear().draw();
@@ -2772,7 +2685,7 @@ function agregaPartidasOCDetalle(datos){
 
 }
 
-function agregaArtExis(datos,pos){
+function agregaArtExis_old(datos,pos){
 
     var tbl = $('#tblArticulosExistentesNueva').DataTable();
     if(datos['OCFR_PartidaCerrada'] == null)datos['OCFR_PartidaCerrada'] = 0;

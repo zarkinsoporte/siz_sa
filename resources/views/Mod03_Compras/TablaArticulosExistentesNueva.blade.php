@@ -6,7 +6,7 @@
             <th>Código Artículo</th>
             <th>Descripción</th>
             <th>UMI</th>
-            <th>Factor de Conversión</th>
+            <th>Factor Conversión</th>
             <th>UMC</th>
             <th style="text-align: right;">Cantidad Compra</th>
             <th style="text-align: right;">Precio</th>
@@ -17,6 +17,7 @@
             <th style="text-align: right;">Monto I.V.A.</th>
             <th style="text-align: right;">Total</th>            
             <th style="text-align: center;">Fecha Entrega</th>
+            <th style="text-align: center;">Cant. Pendiente</th>
             <th style="text-align: center;">Cerrada</th>
             <th style="text-align: center;">Eliminar</th>
             <th>ivaID</th>
@@ -28,7 +29,6 @@
             <th>auxiliarId</th>
             <th>umiId</th>
             <th>umcId</th>
-            <th>estatusPartida</th>
 
             <th>Fecha Requerida</th>
             <th>UMI</th>

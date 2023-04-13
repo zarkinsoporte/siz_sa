@@ -263,7 +263,7 @@ var table = $('#tinventario').DataTable({
                                 "_token": "{{ csrf_token() }}",                               
                                 },
                                 success:function(data){
-                                    window.location.href = 'altaInventario';                                   
+                                    window.location.href = 'path';                                   
                             }
                          });
                      }           
