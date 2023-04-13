@@ -143,6 +143,7 @@ function js_iniciador() {
         }
     }
 
+// set_columns_index(0)
 // Inicializa tabla oc
 var tableOC = $("#tableOC").DataTable({
                 language:{
@@ -179,9 +180,7 @@ var tableOC = $("#tableOC").DataTable({
                     'className': "dt-body-center",
                     "render": function ( data, type, row ) {
                         if(row['Estatus'] == 'CERRADA')  
-                            return '<button type="button" class="btn btn-sm btn-primary" id="btnEditar"> <span class="fa fa-folder-open-o"></span> </button>'
-                            + '<button type="button" class="btn btn-sm btn-danger" style="margin-left:5px" id="btnEliminar" disabled> <span class="glyphicon glyphicon-trash"></span></button>'
-                            + '<button type="button" class="btn btn-sm btn-danger btn-outline-danger" style="margin-left:5px" id="boton-pdf"> <i class="fa fa-file-pdf-o" aria-hidden="true"></i></button>';
+                            return '<button type="button" class="btn btn-sm btn-danger btn-outline-danger" style="margin-left:5px" id="boton-pdf"> <i class="fa fa-file-pdf-o" aria-hidden="true"></i></button>';
                         else  return '<button type="button" class="btn btn-sm btn-primary" id="btnEditar"> <span class="glyphicon glyphicon-pencil"></span> </button>'
                             + '<button type="button" class="btn btn-sm btn-danger" style="margin-left:5px" id="btnEliminar"> <span class="glyphicon glyphicon-trash"></span></button>'
                             + '<button type="button" class="btn btn-sm btn-danger btn-outline-danger" style="margin-left:5px" id="boton-pdf"> <i class="fa fa-file-pdf-o" aria-hidden="true"></i></button>';
@@ -248,45 +247,7 @@ $('#tableOC').on( 'click', 'button#boton-pdf', function (e) {
     var datos = tblOC.row(fila).data();
     NumOC = datos['NumOC'];
     window.open(routeapp + 'orden_compra_pdf/'+NumOC, '_blank')
-    /* $.ajax({
-        type: 'POST',
-        async: true,
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        },
-        url: routeapp + 'orden_compra_pdf',
-        data: {
-            'NumOC': NumOC,
-        },
-        beforeSend: function() {
-            $.blockUI({
-                message: "<h1>Procesando Solicitud</h1><h3>por favor espere un momento...<i class='fa fa-spin fa-spinner'></i></h3>",
-                css: {
-                border: 'none',
-                padding: '16px',
-                width: '50%',
-                top: '40%',
-                left: '30%',
-                backgroundColor: '#fefefe',
-                '-webkit-border-radius': '10px',
-                '-moz-border-radius': '10px',
-                opacity: .7,
-                color: '#000000'
-                }
-            });
-        },
-        complete: function() {
-            setTimeout($.unblockUI, 500);
-        },
-        success: function(data){
-            var blob=new Blob([data]);
-            var link=document.createElement('a');
-            link.href=window.URL.createObjectURL(blob);
-            link.download="OrdenCompra.pdf";
-            link.click();
-        }
-    }); */
-
+    
     $.unblockUI();
 });
 $('#tableOC').on('click', 'button#btnEliminar', function (e) {
@@ -709,19 +670,30 @@ $('#tblArticulosExistentesNueva').on('click', 'a#boton-eliminarAE', function (e)
 
     var tabla = $('#tblArticulosExistentesNueva').DataTable();
     var fila = $(this).closest('tr');
-    var datos = tabla.row(fila).data();
-    var index = tabla.row(fila).index();
-    var id = datos['ID_PARTIDA'];
-    if(id == ""){
-        tabla.row(fila).remove().draw(false);
-    }
-    else{
-        if (registroNuevo == 1){
-            //eliminarPartidaArtExis(fila);
+    //var datos = tabla.row(fila).data();
+    //console.log(datos['CODIGO_ARTICULO'])
+    swal({
+        title: '¿Eliminar partida?',
+        text: "",
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'OK',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true,
+        icon: "warning",
+        buttons: true
+    }).then(function (result) {
+        if (result) {
+            
+            //var index = tabla.row(fila).index();           
+            tabla.row(fila).remove().draw();
+            calculaTotalOrdenCompra();
+            actualizaLineaPartidaAE();
+            
+        } else {
+            
         }
-    }
-    calculaTotalOrdenCompra();
-    //actualizaLineaPartidaAE();
+    });
     //calculaTipoCambio();
     //PartidaResumenAE();
 });
@@ -1458,55 +1430,56 @@ $("#sel-tipo-oc").on("changed.bs.select", function(e, clickedIndex, newValue, ol
             COL_PARTIDA = 0;
             COL_CODIGO_ART = 1;
             COL_NOMBRE_ART = 2;
-            COL_NOMBRE_ART_MISC = 1;
+
             COL_UNIDAD_MEDIDA_INV = 3;
             COL_FACTOR_CONVERSION = 4;
             COL_UNIDAD_MEDIDA_COMPRAS = 5;
+
             COL_CANTIDAD = 6;
             COL_PRECIO = 7;
             COL_SUBTOTAL = 8;
+
             COL_DESCUENTO = 9;
             COL_MONTO_DESCUENTO = 10;
             COL_IVA = 11;
+
             COL_MONTO_IVA = 12;
             COL_TOTAL = 13;
             COL_FECHA_ENTREGA_COMPRA = 14;
-            COL_PARTIDA_CERRADA = 15;
-            COL_BTN_ELIMINAR_COMPRA = 16;
-            COL_ID_IVA = 17;
-            COL_ID_PARTIDA = 18;
 
-            // COL_FECHA_ENTREGA_COMPRA = 14;
-            // COL_CODIGO_OT = 17;
-            // COL_ID_OT = 18;
-            // COL_ID_ARTICULO = 19;
-            // COL_ID_AUX = 21;
-            // COL_ID_UMI = 22;
-            // COL_ID_UMC = 23;
-            // COL_ESTATUS_PARTIDA = 25;
+            COL_CANT_PENDIENTE = 15;
+
+            COL_PARTIDA_CERRADA = 16;
+            COL_BTN_ELIMINAR_COMPRA = 17;
+            COL_ID_IVA = 18;
+
+            COL_ID_PARTIDA = 19;
+            COL_ESTATUS_PARTIDA = 20;
+
         } else {
             //tabla Miscelaneos
             COL_PARTIDA = 0;
-            //COL_CODIGO_ART = 1;
-            COL_NOMBRE_ART = 1;
             COL_NOMBRE_ART_MISC = 1;
-            // COL_UNIDAD_MEDIDA_INV = 3;
             COL_CTA_MAYOR = 2;       
-            // COL_FACTOR_CONVERSION = 4;
-            // COL_UNIDAD_MEDIDA_COMPRAS = 5;
+
             COL_CANTIDAD = 3;
             COL_PRECIO = 4;
             COL_SUBTOTAL = 5;
+
             COL_DESCUENTO = 6;
             COL_MONTO_DESCUENTO = 7;
             COL_IVA = 8;
+
             COL_MONTO_IVA = 9;
             COL_TOTAL = 10;
             COL_FECHA_ENTREGA_COMPRA = 11;
+
             COL_PARTIDA_CERRADA = 12;
             COL_BTN_ELIMINAR_COMPRA = 13;
             COL_ID_IVA = 14;
+
             COL_ID_PARTIDA = 15;
+            COL_ESTATUS_PARTIDA = 16;
         }
     }
     $('#tblArticulosMiscelaneosNueva').on('click', 'span#boton-otAM', function (e) {
@@ -2089,7 +2062,7 @@ $('#tblArticulosMiscelaneosNueva').on('click', 'button#boton-eliminarAM', functi
         var datos = tblOC.row(fila).data();
         var NumOC = datos['NumOC'];
         if (datos['Estatus'] == 'ABIERTA') {
-            var ocId = datos['DT_RowId'];
+            //var ocId = datos['DT_RowId'];
 
             $.blockUI({
                 css: {
@@ -2110,37 +2083,26 @@ $('#tblArticulosMiscelaneosNueva').on('click', 'button#boton-eliminarAM', functi
                 type: "POST",
                 async: false,
                 data: {
-                    ocId: ocId
+                    NumOC: NumOC
                 },
                 dataType: "json",
                 url: routeapp + "compras/buscaOC",
                 success: function (data) {
                     setTimeout($.unblockUI, 2000);
-                    setTimeout(function () {
-                        var respuesta = JSON.parse(JSON.stringify(data));
-                        if (respuesta.codigo == 200) {
-                            registroNuevo = 1;
-                            $('#ordenesCompraOC').show();
-                            $('#btnBuscadorOC').hide();
-                            MuestraComponentesOC()
-                            CargaComponentesOC();
-                            //agregarDatosOC(respuesta.ordenCompra, respuesta.consultaTipoMonedaProveedor);
-                            //agregaPartidasOCDetalle(respuesta.ordenCompraDetalle);
-                            //agregaPartidasOCFechasRequeridas(respuesta.ordenCompraFechasRequeridas);
-                        } else {
-                            setTimeout($.unblockUI, 2000);
-                            bootbox.dialog({
-                                message: respuesta.respuesta,
-                                title: "Orden de Compra",
-                                buttons: {
-                                    success: {
-                                        label: "Si",
-                                        className: "btn-success"
-                                    }
-                                }
-                            });
-                        }
-                    }, 2000);
+                        
+                    //agregarDatosOC(respuesta.ordenCompra, respuesta.consultaTipoMonedaProveedor);
+                    //agregaPartidasOCFechasRequeridas(respuesta.ordenCompraFechasRequeridas);
+                    
+                    
+                    //var respuesta = JSON.parse(JSON.stringify(data));
+                    
+                    registroNuevo = 1;
+                    $('#ordenesCompraOC').show();
+                    $('#btnBuscadorOC').hide();
+                    MuestraComponentesOC()
+                    CargaComponentesOC(data.resumen);
+                    agregaPartidasOCDetalle(data.detalle, (data.resumen).OC_TIPO);
+                    calculaTotalOrdenCompra();
                 },
                 error: function (xhr, ajaxOptions, thrownError) {
                     $.unblockUI();
@@ -2166,50 +2128,170 @@ $('#tblArticulosMiscelaneosNueva').on('click', 'button#boton-eliminarAM', functi
     });
 
     function MuestraComponentesOC() {
+        console.log(registroNuevo)
         if (registroNuevo == 0) { //nueva OC
-            $('#sel-tipo-oc').show()
+            $('.nuevaOC').show()
             $('#edit_tipo_oc').hide()
+            $('#edit_proveedor').hide()
+            $('#titulo').text('Orden de Compra Nueva')
+            
         } else { //Editar OC
-            $('#sel-tipo-oc').hide()
+            $('.nuevaOC').hide()
             $('#edit_tipo_oc').show()
+            $('#edit_proveedor').show()
+            $('#titulo').text('Editar Orden de Compra')
             
         }
     }
 
-    function CargaComponentesOC() {
+    function CargaComponentesOC(resumen) {
 
-        $("#sel-proveedor").val('');
+        $("#edit_tipo_oc").val(resumen.OC_TIPO);
+        $("#edit_proveedor").val(resumen.PRO_NOMBRE);
+        $("#sel-proveedor").val(resumen.CardCode);
         $("#sel-proveedor").selectpicker('refresh');
+        let opt = (resumen.OC_TIPO == 'ARTICULOS') ? 0 : 1;
+        $("#sel-tipo-oc").val(opt);
+        $("#sel-tipo-oc").selectpicker('refresh');
 
-        $('#ordenesCompraOC #nombreProveedor').text('');
-        $('#ordenesCompraOC #direccionProveedor').text('');
-        $("#ordenesCompraOC #codigoPostalProveedor").text('');
-        $('#ordenesCompraOC #localizacionProveedor').text('');
-        $('#ordenesCompraOC #telefonicosProveedor').text('');
-        $('#ordenesCompraOC #contactoProveedor').text('');
-        $('#ordenesCompraOC #rfcProveedor').text('');
-
-        $("#ordenesCompraOC #cboMoneda").val('');
+        carga_info_proveedor(resumen.CardCode);
+        
+        $("#ordenesCompraOC #cboMoneda").val(resumen.OC_MONEDA);
         $("#ordenesCompraOC #cboMoneda").selectpicker('refresh');
         //verificar cambio de moneda si es necesario
 
-        $("#ordenesCompraOC #input_tc").val(1);
-       
-        $("#sel-tipo-oc").val(0);
-        $("#sel-tipo-oc").selectpicker('refresh');
-      
-        $('#ordenesCompraOC #codigoOC').text('Por Definir');
-        $('#ordenesCompraOC #estadoOC').text('Abierta');
+        $("#ordenesCompraOC #input_tc").val(resumen.OC_RATE);               
+        if (resumen.OC_MONEDA == 'MXP') {
+            $("#div-tipo-cambio").hide();
+            $("#input_tc_anterior").val(1);
+        }
+
+        $('#ordenesCompraOC #codigoOC').text(resumen.OC_NUM);
+        $('#ordenesCompraOC #estadoOC').text(resumen.OC_ESTATUS);
     
         $('#input-fecha').datepicker({ //fechaDOC
             language: 'es',
             format: 'yyyy-mm-dd',
             todayHighlight: true,
             autoclose: true
-        }).datepicker("setDate", new Date());
+        }).datepicker("setDate", resumen.OC_DATE);
+        $('#input-fecha-entrega').datepicker({ //fechaDOC
+            language: 'es',
+            format: 'yyyy-mm-dd',
+            todayHighlight: true,
+            autoclose: true
+        }).datepicker("setDate", resumen.OC_FECHA_ENTREGA);
+        
+        $("#input-comentarios").val(resumen.OC_COMENTARIO);
 
-        //fecha entrega
+    };
 
-    };    
+    function agregaPartidasOCDetalle(datos, tipo) {
+
+        $("#tblArticulosExistentesNueva").DataTable().clear().draw();
+        $("#tblArticulosMiscelaneosNueva").DataTable().clear().draw();
+        var contador1 = 0;
+        var contador2 = 0;
+        BanderaOC = 1;
+        if (tipo == 'ARTICULOS') {
+            BanderaOC = 0;
+        }
+        set_columns_index(BanderaOC);
+        for (var x = 0; x < datos.length; x++) {
+
+            if (tipo == 'ARTICULOS') {
+
+                agregaArtExis(datos[x], contador1);
+                actualizaLineaPartidaAE();
+               
+                contador1++;
+
+            }
+            else {
+
+                agregaArtMisc(datos[x], contador2);
+                actualizaLineaPartidaAM();
+                contador2++;
+
+            }
+
+        }
+        
+        ////calculaTipoCambio();
+
+    }
+
+    function agregaArtExis(datos, pos) {
+
+        var tbl = $('#tblArticulosExistentesNueva').DataTable();
+
+        TBL_ART_EXIST.row.add(
+            {
+                "PARTIDA": datos['LIN_NUMERO']
+                , "CODIGO_ARTICULO": datos['LIN_CODIGO']
+                , "NOMBRE_ARTICULO": datos['LIN_DESCRIPCION']
+
+                , "UNIDAD_MEDIDA_INV": datos['LIN_UM']
+                , "FACTOR_CONVERSION": datos['LIN_FACTOR']
+                , "UNIDAD_MEDIDA_COMPRAS": datos['BuyUnitMsr']
+
+                , "CANTIDAD": datos['LIN_CANTIDAD']
+                , "PRECIO": datos['LIN_PRECIO']
+                , "SUBTOTAL": parseFloat(datos['LIN_TOTAL']).toFixed(DECIMALES)
+                
+                , "DESCUENTO": datos['LIN_PORCENTAJEDESCUENTO']
+                , "MONTO_DESCUENTO": parseFloat(datos['LIN_DISC']).toFixed(DECIMALES)
+                , "IVA": datos['LIN_PORCENTAJEIVA']
+                
+                , "MONTO_IVA": parseFloat(datos['LIN_IVA']).toFixed(DECIMALES)
+                , "TOTAL": parseFloat(datos['LIN_GTOTAL']).toFixed(DECIMALES)
+                , "FECHA_ENTREGA": datos['ShipDate']
+                
+                , "CANT_PENDIENTE": datos['CANTIDAD_PENDIENTE']
+                , "BTN_ELIMINAR": null
+
+                , "ID_IVA": datos['TaxCode']
+                , "ID_PARTIDA": ""
+                , "ESTATUS_PARTIDA": datos['LineStatus']
+            }
+        ).draw();
+        tbl.row(pos).nodes(pos, COL_DESCUENTO).to$().find('input#input-descuentoAE').val(parseFloat(datos['LIN_PORCENTAJEDESCUENTO']).toFixed(DECIMALES));
+        tbl.row(pos).nodes(pos, COL_IVA).to$().find('select#cboIVAAE').val(datos['TaxCode']);
+
+        if (datos['LineStatus'] == 'O') {
+
+            tbl.row(pos).nodes(pos, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').prop("checked", false);
+            tbl.row(pos).nodes(pos, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').removeAttr("disabled");
+
+        }
+        else {
+
+            tbl.row(pos).nodes(pos, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').prop("checked", true);
+            tbl.row(pos).nodes(pos, COL_PARTIDA_CERRADA).to$().find('checkbox#cerrarPartidaCheck').attr("disabled", "disabled");
+
+        }
+
+        tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('input#input-articulo-codigoAE').attr("disabled", "disabled");
+        tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('a#boton-articuloAE').attr("disabled", "disabled");
+        tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('a#boton-articuloAE').attr("id", "disabled");
+        if (datos['LineStatus'] != 'O') {//ABIERTA
+
+            tbl.row(pos).nodes(pos, COL_CANTIDAD).to$().find('input#input-cantidadAE').attr("disabled", "disabled");
+            tbl.row(pos).nodes(pos, COL_PRECIO).to$().find('input#input-precioAE').attr("disabled", "disabled");
+            tbl.row(pos).nodes(pos, COL_DESCUENTO).to$().find('input#input-descuentoAE').attr("disabled", "disabled");
+            tbl.row(pos).nodes(pos, COL_IVA).to$().find('select#cboIVAAE').attr("disabled", "disabled");
+            //tbl.row(pos).nodes(pos, COL_FECHA_ENTREGA_COMPRA).to$().find('input#boton-detalleAE').attr("disabled","disabled");
+           // tbl.row(pos).nodes(pos, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("disabled", "disabled");
+            //tbl.row(pos).nodes(pos, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("id", "disabled");
+
+            tbl.row(pos).nodes(pos, COL_FECHA_ENTREGA_COMPRA).to$().find('input#input-fecha-entrega-linea').attr("disabled", "disabled");
+
+        }
+        if (datos['EDO_CANTIDAD_PENDIENTE'] != 'SIN SURTIR') {
+            tbl.row(pos).nodes(pos, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("disabled", "disabled");
+            tbl.row(pos).nodes(pos, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("id", "disabled");
+        }
+        
+    }
 }  //fin js_iniciador       
                    

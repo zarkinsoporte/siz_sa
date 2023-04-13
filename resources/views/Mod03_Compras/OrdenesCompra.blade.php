@@ -4,6 +4,7 @@
             
 {!! Html::script('assets/js/Mod03_Compras/OrdenesCompra.js') !!}
 {!! Html::script('assets/js/Mod03_Compras/OrdenesCompraNueva.js') !!}
+
 {!! Html::script('assets/js/Mod03_Compras/buscadores-proveedor.js') !!}
 
 <link rel="stylesheet"

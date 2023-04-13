@@ -6,7 +6,7 @@
 <div class="container" id="ordenesCompraOC" style="display:none">
     <div class="row">
         <div class="col-md-11">
-            <h3 class="page-header">
+            <h3 class="page-header" id="titulo">
                 Orden de Compra Nueva
             </h3>
         </div>
@@ -17,33 +17,38 @@
             <div class="row">
                 <div class="form-group">
                     <div class="row">
-                        <div class="col-md-2">
+                        <div class="col-md-2" >
                             <label><strong>
                                     <font size="2">Tipo OC</font>
                                 </strong></label>
+                            <div class="nuevaOC">
                             <select class="form-control selectpicker" id="sel-tipo-oc" name="sel-tipo-oc" data-size="8"
                                 data-style="btn-success">
                                 <option value="0">Artículos</option>
                                 <option value="1">Miscelaneos</option>
                             </select>
+                            </div>    
+                            
                             <input type="text" name="edit_tipo_oc" id="edit_tipo_oc" @readonly(true) class="form-control" disabled>
                         </div>
                         <div class="col-md-4">
                             <label><strong>
                                     <font size="2">Proveedor</font>
                                 </strong></label>
-                        
-                            <select data-live-search="true" class="form-control selectpicker" id="sel-proveedor" name="proveedor" data-size="8"
-                                 data-style="btn-success">
-                        
-                                <option value="">Selecciona una opción</option>
-                                @foreach ($proveedores as $proveedor)
-                                <option data-moneda="{{$proveedor->Currency}}" value="{{old('proveedor',$proveedor->CardCode)}}">
-                                    <span>{{$proveedor->CardCode}} &nbsp;&nbsp;&nbsp; {{$proveedor->CardName}}</span>
-                                </option>
-                                @endforeach
-                        
-                            </select>
+                                <div class="nuevaOC">
+                                <select data-live-search="true" class="form-control selectpicker" id="sel-proveedor" name="proveedor" data-size="8"
+                                    data-style="btn-success">
+                            
+                                    <option value="">Selecciona una opción</option>
+                                    @foreach ($proveedores as $proveedor)
+                                    <option data-moneda="{{$proveedor->Currency}}" value="{{old('proveedor',$proveedor->CardCode)}}">
+                                        <span>{{$proveedor->CardCode}} &nbsp;&nbsp;&nbsp; {{$proveedor->CardName}}</span>
+                                    </option>
+                                    @endforeach
+                            
+                                </select>
+                                </div>
+                            
                             <input type="text" name="edit_proveedor" id="edit_proveedor" @readonly(true) class="form-control" disabled>
                         </div>
                         <div class="col-md-2">
@@ -103,13 +108,16 @@
                             </address>
                         </div>
                         <div class="invoice-to">
-
+                            <small>CÓDIGO</small>
+                            <div class="date m-t-5"><p id="codigoOC" style="
+                                    font-size: 25px;
+                                    margin-top: 5px;
+                                "> POR DEFINIR</p></div>
+                            <small>ESTADO OC</small>
+                            <div class="date m-t-5"><b><p id="estadoOC">Abierta</p></b></div>
                         </div>
                         <div class="invoice-date">
-                            <small>CÓDIGO</small>
-                            <div class="date m-t-5"><span id="codigoOC">POR DEFINIR</span></div>
-                            <small>ESTADO OC</small>
-                            <div class="date m-t-5"><span id="estadoOC">Abierta</span></div>
+                           
                         </div>
                     </div>
                     <div class="invoice-content">

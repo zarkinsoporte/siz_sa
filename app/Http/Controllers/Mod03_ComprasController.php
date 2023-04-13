@@ -827,4 +827,32 @@ class Mod03_ComprasController extends Controller
         }
 
     }
+    public function buscaOC(Request $request){
+        try{
+            $NumOC = $request->get('NumOC');
+            $rs1 = DB::select('exec SIZ_SP_OC_RESUMEN ?', [$NumOC]);
+            $detalle = DB::select('exec SIZ_SP_OC_DETALLE ?', [$NumOC]);
+            $rs2 = DB::select("SELECT 
+                CompnyName RAZON_SOCIAL
+                , TaxIdNum RFC
+                , Street+ ' ' + CASE WHEN Block is null THEN ' ' ELSE Block+', ' END+ City + ', MX.' DOMICILIO_FICAL
+                , ZipCode CP_FISCAL
+                , StreetF+ ' ' +  CASE WHEN BlockF is null THEN ' ' ELSE BlockF+', ' END+ CityF + ', MX.' DOMICILIO_ENTREGA
+                , ZipCodeF CP_ENTREGA
+                from ADM1
+                inner join OADM on OADM.Code = ADM1.Code");
+            $resumen = $rs1[0];
+            $comp = $rs2[0]; 
+            return compact('comp', 'resumen', 'detalle');
+        } catch (\Exception $e){
+
+            header('HTTP/1.1 500 Internal Server Error');
+            header('Content-Type: application/json; charset=UTF-8');
+            die(json_encode(array("mensaje" => $e->getMessage(),
+                "codigo" => $e->getCode(),
+                "clase" => $e->getFile(),
+                "linea" => $e->getLine())));
+
+        }
+    }
 }
