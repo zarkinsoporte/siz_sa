@@ -433,6 +433,10 @@ Route::get('/pruebas', function (Request $request) {
 	array_push($a, Carbon\Carbon::createFromDate(1991, 1, 5)->diff(Carbon\Carbon::now())->format('%m'));
 	array_push($a, Carbon\Carbon::createFromDate(1991, 1, 5)->diff(Carbon\Carbon::now())->format('%d'));
 	dd($a);
+	\Artisan::call('config:cache'); 
+	\Artisan::call('queue:restart'); 
+	//--queue=LdmUpdate,ItemPrecioUpdate,ItemPrecioControl  --daemon --tries=2"
+	\Artisan::call('queue:work',['--queue' => 'LdmUpdate,ItemPrecioUpdate,ItemPrecioControl', '--daemon'=> true, '--tries'=>2]);
 	// dd(Carbon\Carbon::createFromTimestamp(Carbon\Carbon::now()->getTimestamp())->toDateTimeString()); 
 });
 
