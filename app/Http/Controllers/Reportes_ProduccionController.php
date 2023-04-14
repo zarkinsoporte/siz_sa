@@ -86,7 +86,7 @@ class Reportes_ProduccionController extends Controller
                                         $produccion = DB::select('SELECT "CP_ProdTerminada"."orden", "CP_ProdTerminada"."Pedido", "CP_ProdTerminada"."Codigo",
                     "CP_ProdTerminada"."modelo", "CP_ProdTerminada"."VS", "CP_ProdTerminada"."fecha",
                     "CP_ProdTerminada"."CardName", 
-                    "CP_ProdTerminada"."Cantidad", "CP_ProdTerminada"."TVS"
+                    "CP_ProdTerminada"."Cantidad", "CP_ProdTerminada"."TVS", ItmsGrpNam 
                     FROM   "CP_ProdTerminada" "CP_ProdTerminada"
                     WHERE  ("CP_ProdTerminada"."fecha">=\'' . $fechaI . '\' AND
                     "CP_ProdTerminada"."fecha"<=\'' . $fechaF . '\') AND
@@ -162,8 +162,26 @@ class Reportes_ProduccionController extends Controller
                 $excel->sheet('Hoja 1', function ($sheet) use ($values) {
                     //$sheet->margeCells('A1:F5');     
                     $sheet->row(1, [
-                        'Cliente', 'Fecha', 'Orden', 'Pedido', 'Código', 'Modelo', 'VS', 'Cantidad', 'Total VS'
+                        'Cliente', 'Fecha', 'Orden', 'Pedido', 'Código', 'Modelo', 'VS', 'Cantidad', 'Total VS', 'Gpo. Articulo'
                     ]);
+                    $range = 'A1:J1';
+                    $sheet->getStyle($range)->
+                    applyFromArray(
+                        array(
+                            'font' => array(
+                                'name'      =>  'Arial',
+                                'size'      =>  11,
+                                'bold'      =>  true,
+                                'color' => array('rgb' => '473AC9')
+                            ),
+                            'borders' => array(
+                                'outline' => array(
+                                    'style' => \PHPExcel_Style_Border::BORDER_THICK,
+                                    
+                                ),
+                            ),
+                        ));
+                    $sheet->setAutoFilter($range); //esto agrega un filtro encabezados
                     //Datos    
                     $fila = 2;
                     foreach ($values['produccion'] as $produccion) {
@@ -181,6 +199,7 @@ class Reportes_ProduccionController extends Controller
                                 $produccion->VS,
                                 $produccion->Cantidad,
                                 $produccion->TVS,
+                                $produccion->ItmsGrpNam,
                                 //  $produccion->cant,
                                 //$produccion->tvs,
                             ]
