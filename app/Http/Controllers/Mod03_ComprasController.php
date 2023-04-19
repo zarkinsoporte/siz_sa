@@ -790,9 +790,15 @@ class Mod03_ComprasController extends Controller
         // oc_tipo
         // oc_tipo_cambio
         // status
+        // oc_fecha_entrega
         
         try{
-            return SAP::registraOC($request->all());    
+            if ($request->get('status') == 1) { // OC Nueva
+                return SAP::registraOC($request->all());                    
+            } else { //Actualizar OC
+                return SAP::actualizaOC($request->all());                                    
+            }
+            
         }
         catch (\Exception $e){
             return ['Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$e->getMessage()];
@@ -803,6 +809,21 @@ class Mod03_ComprasController extends Controller
         ini_set('memory_limit', '-1');
         set_time_limit(0);
         $docNum = $request->get('docNum');
+        try{
+            return SAP::CancelDoc("22", $docNum);
+            //return ['Status' => 'Valido', 'respuesta' => 'success'];   
+        }
+        catch (\Exception $e){
+            return ['Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$e->getMessage()];
+        }
+
+    }
+    public function getPartida(Request $request){
+        ini_set('memory_limit', '-1');
+        set_time_limit(0);
+        $docNum = $request->get('docNum');
+        $itemCode = $request->get('itemCode');
+        $lineNum = $request->get('lineNum');
         try{
             return SAP::CancelDoc("22", $docNum);
             //return ['Status' => 'Valido', 'respuesta' => 'success'];   

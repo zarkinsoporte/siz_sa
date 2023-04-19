@@ -257,84 +257,79 @@ $('#tableOC').on('click', 'button#btnEliminar', function (e) {
     var docentry = fila.attr('data-id')
     var datos = tblOC.row(fila).data();
     var NumOC = datos['NumOC'];
+    
     if (datos['Estatus'] == 'ABIERTA') {
-            bootbox.dialog({
-            message: "¿Estas seguro de Cancelar la Orden de Compra?.",
-            title: "Ordenes de Compra",
-            buttons: {
-                success: {
-                    label: "Si",
-                    className: "btn-success",
-                    callback: function () {
-                        
-                        $.ajax({
-                            headers: {
-                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                            },
-                            type: "POST",
-                            async: false,
-                            data: {
-                                docNum: docentry
-                            },
-                            dataType: "json",
-                            url: routeapp + "cancelOC",
-                            beforeSend: function () {
-                                $.blockUI({
-                                    message: '<h2>Procesando</h2><h3>espere...<i class="fa fa-spin fa-spinner"></i></h3>',
-                                    css: {
-                                        border: 'none',
-                                        padding: '16px',
-                                        width: '50%',
-                                        top: '40%',
-                                        left: '30%',
-                                        backgroundColor: '#fefefe',
-                                        '-webkit-border-radius': '10px',
-                                        '-moz-border-radius': '10px',
-                                        opacity: .7,
-                                        color: '#000000'
-                                    }
-                                });
-                            },
-                            success: function (data) {
-                                //reloadBuscadorOC();
-                                //console.log(data)
-                                $.unblockUI();
-                                swal("", "OC" + NumOC +" Cancelada", "success", {
-                                    buttons: false,
-                                    timer: 2000,
-                                });
-                                if (data.Status == 'Valido') {  
-                                    //console.log(data)                                  
-                                    datos['Estatus'] = 'CERRADA';
-                                    tblOC.row(fila).data(datos).invalidate();
-                                }
-
-                            },
-                            error: function (xhr, ajaxOptions, thrownError) {
-                                $.unblockUI();
-                                //console.log(xhr.responseText)
-                                var error = [];
-                                bootbox.alert({
-                                    size: "large",
-                                    title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
-                                    message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
-                                        (error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '') +
-                                        (error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '') +
-                                        (error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '') + '</div>'
-                                });
+        swal({
+            title: '¿Estas seguro de Cancelar la Orden de Compra?.',
+            text: "",
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'OK',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true,
+            icon: "warning",
+            buttons: true
+        }).then(function (result) {
+            if (result) {
+                $.ajax({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    type: "POST",
+                    async: false,
+                    data: {
+                        docNum: docentry
+                    },
+                    dataType: "json",
+                    url: routeapp + "cancelOC",
+                    beforeSend: function () {
+                        $.blockUI({
+                            message: '<h2>Procesando</h2><h3>espere...<i class="fa fa-spin fa-spinner"></i></h3>',
+                            css: {
+                                border: 'none',
+                                padding: '16px',
+                                width: '50%',
+                                top: '40%',
+                                left: '30%',
+                                backgroundColor: '#fefefe',
+                                '-webkit-border-radius': '10px',
+                                '-moz-border-radius': '10px',
+                                opacity: .7,
+                                color: '#000000'
                             }
                         });
+                    },
+                    success: function (data) {
+                        //reloadBuscadorOC();
+                        //console.log(data)
+                        $.unblockUI();
+                        swal("", "OC" + NumOC + " Cancelada", "success", {
+                            buttons: false,
+                            timer: 2000,
+                        });
+                        if (data.Status == 'Valido') {
+                            //console.log(data)                                  
+                            datos['Estatus'] = 'CERRADA';
+                            tblOC.row(fila).data(datos).invalidate();
+                        }
 
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        $.unblockUI();
+                        //console.log(xhr.responseText)
+                        var error = [];
+                        bootbox.alert({
+                            size: "large",
+                            title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
+                            message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
+                                (error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '') +
+                                (error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '') +
+                                (error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '') + '</div>'
+                        });
                     }
-                },
-                default: {
-                    label: "No",
-                    className: "btn-default m-r-5 m-b-5",
-                    callback: function () {
-                    
-                    }
-                }
-            }
+                });
+
+            } 
         });
     } else {
         swal("", "La OC no esta Abierta", "error", {
@@ -472,7 +467,7 @@ $('#boton-cerrar').off().on('click', function(e) {
     //calculaTipoCambio();
 });
 $('#boton-nuevo').on('click', function(e) {
-    registroNuevo = 0;
+    OC_nueva = 1;
     MuestraComponentesOC()
     $('#ordenesCompraOC').show();
     $('#btnBuscadorOC').hide();
@@ -652,15 +647,9 @@ $(document).keyup(function(event) {
             $('#modal-articulo #input-fila').val(fila);
             $('#modal-articulo').modal('show');
         } else {
-            bootbox.dialog({
-                message: "No se ha elegido un proveedor, elige uno por favor para continuar.",
-                title: "Ordenes de Compra",
-                buttons: {
-                    success: {
-                        label: "Si",
-                        className: "btn-success"
-                    }
-                }
+            swal("", "No se ha elegido un proveedor, elige uno por favor para continuar.", "error", {
+                buttons: false,
+                timer: 2000,
             });
         }
 
@@ -856,104 +845,29 @@ $('#tblArticulosExistentesNueva').on('click', 'a#boton-eliminarAE', function (e)
             var ID_IVA_anterior = datos['ID_IVA'];
             var cantidadNueva = $(this).val();
 
-            if(JSON_PARTIDA.hasOwnProperty(referenciaId)) {
-                bootbox.dialog({
-                    message: "¿Estas seguro de modificar la cantidad?.",
-                    title: "Ordenes de Compra",
-                    buttons: {
-                        success: {
-                            label: "Si",
-                            className: "btn-success",
-                            callback: function () {
-                                $.ajax({
-                                     headers: {
-                                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                                    },
-                                    type: "POST",
-                                    async: false,
-                                    data: {
-                                        detalleId: referenciaId
-                                        ,cantidad: cantidadNueva
-                                        ,precio: Precio_anterior
-                                        ,descuento: Descuento_anterior
-                                        ,iva: IVA_anterior
-                                        ,idIva: ID_IVA_anterior
-                                    },
-                                    dataType: "json",
-                                    url: "compras/editarPartida",
-                                    success: function () {
-                                        //delete JSON_PARTIDA[referenciaId];
-                                        datos['CANTIDAD'] = cantidadNueva;
-                                        RealizaCalculos(fila, tabla, precio, cantidad, descuento);
-                                        calculaTotalOrdenCompra();
-                                        calculaTipoCambio();
-                                        if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
-                                            PartidaResumenAE(index);
-                                        }
-                                    },
-                                    error: function (xhr, ajaxOptions, thrownError) {
-                                        $.unblockUI();
-                                        var error = JSON.parse(xhr.responseText);
-                                        bootbox.alert({
-                                            size: "large",
-                                            title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
-                                            message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
-                                            ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
-                                            ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
-                                            ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
-                                        });
-                                    }
-                                });
+            datos['CANTIDAD'] = $(this).val();
 
-                            }
-                        },
-                        default: {
-                            label: "No",
-                            className: "btn-default m-r-5 m-b-5",
-                            callback: function () {
-                                tabla.row(fila).nodes(fila,COL_CANTIDAD).to$().find('input#' + cantidad).val(parseFloat(Cantidad_anterior).toFixed(CANTIDAD_DECIMALES));
-                            }
-                        }
-                    }
-                });
+            if (datos['CODIGO_ARTICULO'] != ""){
+                RealizaCalculos(fila, tabla, precio, cantidad, descuento);
+                //console.log(['precio ' + precio, 'cantidad ' +cantidad, 'descuento ' + descuento]);
+                calculaTotalOrdenCompra();
+                //calculaTipoCambio();
+                // if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
+                //     PartidaResumenAE(index);
+                // }
             }
             else{
-
-                datos['CANTIDAD'] = $(this).val();
-
-                if (datos['CODIGO_ARTICULO'] != ""){
-                    RealizaCalculos(fila, tabla, precio, cantidad, descuento);
-                    //console.log(['precio ' + precio, 'cantidad ' +cantidad, 'descuento ' + descuento]);
-                    calculaTotalOrdenCompra();
-                    //calculaTipoCambio();
-                    // if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
-                    //     PartidaResumenAE(index);
-                    // }
-                }
-                else{
-                    bootbox.dialog({
-                        message: "No se ha elegido un articulo, elige uno por favor para continuar.",
-                        title: "Ordenes de Compra",
-                        buttons: {
-                            success: {
-                                label: "Si",
-                                className: "btn-success"
-                            }
-                        }
-                    });
-                    $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
-                }
+                swal("", "No se ha elegido un articulo, elige uno por favor para continuar.", "error", {
+                    buttons: false,
+                    timer: 2000,
+                });
+                $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
             }
+            
         }else{
-            bootbox.dialog({
-                message: "No se ha elegido un proveedor, elige uno por favor para continuar.",
-                title: "Ordenes de Compra",
-                buttons: {
-                    success: {
-                        label: "Si",
-                        className: "btn-success"
-                    }
-                }
+            swal("", "No se ha elegido un proveedor, elige uno por favor para continuar.", "error", {
+                buttons: false,
+                timer: 2000,
             });
             $(this).val("");
         }
@@ -983,108 +897,32 @@ $('#tblArticulosExistentesNueva').on('change','input#input-precioAE',function (e
         var ID_IVA_anterior = datos['ID_IVA'];
         var precioNuevo = $(this).val();
 
-        if(JSON_PARTIDA.hasOwnProperty(referenciaId)) {
 
-            bootbox.dialog({
-                message: "¿Estas seguro de modificar el precio?.",
-                title: "Ordenes de Compra",
-                buttons: {
-                    success: {
-                        label: "Si",
-                        className: "btn-success",
-                        callback: function () {
-                            $.ajax({
-                                 headers: {
-                                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                                },
-                                type: "POST",
-                                async: false,
-                                data: {
-                                    detalleId: referenciaId
-                                    ,precio: precioNuevo
-                                    ,cantidad: Cantidad_anterior
-                                    ,descuento: Descuento_anterior
-                                    ,iva: IVA_anterior
-                                    ,idIva: ID_IVA_anterior
-                                },
-                                dataType: "json",
-                                url: "compras/editarPartida",
-                                success: function () {
-                                    //delete JSON_PARTIDA[referenciaId];
-                                    datos['PRECIO'] = precioNuevo;
-                                    RealizaCalculos(fila, tabla, precio, cantidad, descuento);
-                                    calculaTotalOrdenCompra();
-                                    calculaTipoCambio();
-                                    if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
-                                        PartidaResumenAE(index);
-                                    }
-                                },
-                                error: function (xhr, ajaxOptions, thrownError) {
-                                    $.unblockUI();
-                                    var error = JSON.parse(xhr.responseText);
-                                    bootbox.alert({
-                                        size: "large",
-                                        title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
-                                        message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
-                                        ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
-                                        ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
-                                        ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
-                                    });
-                                }
-                            });
+        datos['PRECIO'] = $(this).val();
 
-                        }
-                    },
-                    default: {
-                        label: "No",
-                        className: "btn-default m-r-5 m-b-5",
-                        callback: function () {
-                            tabla.row(fila).nodes(fila,COL_PRECIO).to$().find('input#' + precio).val(parseFloat(Precio_anterior).toFixed(CANTIDAD_DECIMALES));
-                        }
-                    }
-                }
-            });
-
+        if (datos['ID_ARTICULO'] != ""){
+            RealizaCalculos(fila, tabla, precio, cantidad, descuento);
+            calculaTotalOrdenCompra();
+            // calculaTipoCambio();
+            // if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
+            //     PartidaResumenAE(index);
+            // }
         }
         else{
-
-            datos['PRECIO'] = $(this).val();
-
-            if (datos['ID_ARTICULO'] != ""){
-                RealizaCalculos(fila, tabla, precio, cantidad, descuento);
-                calculaTotalOrdenCompra();
-                // calculaTipoCambio();
-                // if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
-                //     PartidaResumenAE(index);
-                // }
-            }
-            else{
-                bootbox.dialog({
-                    message: "No se ha elegido un articulo, elige uno por favor para continuar.",
-                    title: "Ordenes de Compra",
-                    buttons: {
-                        success: {
-                            label: "Si",
-                            className: "btn-success"
-                        }
-                    }
-                });
-                $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
-            }
-
+            swal("", "No se ha elegido un articulo, elige uno por favor para continuar.", "error", {
+                buttons: false,
+                timer: 2000,
+            });
+            $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
         }
+
+        
 
     }
     else{
-        bootbox.dialog({
-            message: "No se ha elegido un proveedor, elige uno por favor para continuar.",
-            title: "Ordenes de Compra",
-            buttons: {
-                success: {
-                    label: "Si",
-                    className: "btn-success"
-                }
-            }
+        swal("", "No se ha elegido un proveedor, elige uno por favor para continuar.", "error", {
+            buttons: false,
+            timer: 2000,
         });
         $(this).val("");
     }
@@ -1118,108 +956,30 @@ $('#tblArticulosExistentesNueva').on('change','input#input-descuentoAE',function
         var ID_IVA_anterior = datos['ID_IVA'];
         var descuentoNuevo = $(this).val();
 
-        if(JSON_PARTIDA.hasOwnProperty(referenciaId)) {
+       
+        datos['DESCUENTO'] = $(this).val();
 
-            bootbox.dialog({
-                message: "¿Estas seguro de modificar el descuento?.",
-                title: "Ordenes de Compra",
-                buttons: {
-                    success: {
-                        label: "Si",
-                        className: "btn-success",
-                        callback: function () {
-                            $.ajax({
-                                 headers: {
-                                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                                },
-                                type: "POST",
-                                async: false,
-                                data: {
-                                    detalleId: referenciaId
-                                    ,precio: Precio_anterior
-                                    ,cantidad: Cantidad_anterior
-                                    ,descuento: descuentoNuevo
-                                    ,iva: IVA_anterior
-                                    ,idIva: ID_IVA_anterior
-                                },
-                                dataType: "json",
-                                url: "compras/editarPartida",
-                                success: function () {
-                                    //delete JSON_PARTIDA[referenciaId];
-                                    datos['DESCUENTO'] = descuentoNuevo;
-                                    RealizaCalculos(fila, tabla, precio, cantidad, descuento);
-                                    calculaTotalOrdenCompra();
-                                    calculaTipoCambio();
-                                    if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
-                                        PartidaResumenAE(index);
-                                    }
-                                },
-                                error: function (xhr, ajaxOptions, thrownError) {
-                                    $.unblockUI();
-                                    var error = JSON.parse(xhr.responseText);
-                                    bootbox.alert({
-                                        size: "large",
-                                        title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
-                                        message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
-                                        ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
-                                        ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
-                                        ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
-                                    });
-                                }
-                            });
-
-                        }
-                    },
-                    default: {
-                        label: "No",
-                        className: "btn-default m-r-5 m-b-5",
-                        callback: function () {
-                            tabla.row(fila).nodes(fila,COL_DESCUENTO).to$().find('input#' + descuento).val(parseFloat(Descuento_anterior).toFixed(CANTIDAD_DECIMALES));
-                        }
-                    }
-                }
-            });
-
+        if (datos['ID_ARTICULO'] != ""){
+            RealizaCalculos(fila, tabla, precio, cantidad, descuento);
+            calculaTotalOrdenCompra();
+            // calculaTipoCambio();
+            // if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
+            //     PartidaResumenAE(index);
+            // }
         }
         else{
-
-            datos['DESCUENTO'] = $(this).val();
-
-            if (datos['ID_ARTICULO'] != ""){
-                RealizaCalculos(fila, tabla, precio, cantidad, descuento);
-                calculaTotalOrdenCompra();
-                // calculaTipoCambio();
-                // if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
-                //     PartidaResumenAE(index);
-                // }
-            }
-            else{
-                bootbox.dialog({
-                    message: "No se ha elegido un articulo, elige uno por favor para continuar.",
-                    title: "Ordenes de Compra",
-                    buttons: {
-                        success: {
-                            label: "Si",
-                            className: "btn-success"
-                        }
-                    }
-                });
-                $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
-            }
-
+            swal("", "No se ha elegido un articulo, elige uno por favor para continuar.", "error", {
+                buttons: false,
+                timer: 2000,
+            });
+            $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
         }
 
     }
     else{
-        bootbox.dialog({
-            message: "No se ha elegido un proveedor, elige uno por favor para continuar.",
-            title: "Ordenes de Compra",
-            buttons: {
-                success: {
-                    label: "Si",
-                    className: "btn-success"
-                }
-            }
+        swal("", "No se ha elegido un proveedor, elige uno por favor para continuar.", "error", {
+            buttons: false,
+            timer: 2000,
         });
         $(this).val("");
     }
@@ -1245,141 +1005,62 @@ $('#tblArticulosExistentesNueva').on('change','select#cboIVAAE',function (e) {
         var id_iva_nuevo = $(this).val();
         var iva_nuevo = $(this).val() == '' ? '0' : $(this).find('option:selected').text();
 
-        if(JSON_PARTIDA.hasOwnProperty(referenciaId)) {
+        
 
-            bootbox.dialog({
-                message: "¿Estas seguro de modificar el IVA?.",
-                title: "Ordenes de Compra",
-                buttons: {
-                    success: {
-                        label: "Si",
-                        className: "btn-success",
-                        callback: function () {
-                            $.ajax({
-                                 headers: {
-                                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                                },
-                                type: "POST",
-                                async: false,
-                                data: {
-                                    detalleId: referenciaId
-                                    ,precio: Precio_anterior
-                                    ,cantidad: Cantidad_anterior
-                                    ,descuento: Descuento_anterior
-                                    ,iva: iva_nuevo
-                                    ,idIva: id_iva_nuevo
-                                },
-                                dataType: "json",
-                                url: "compras/editarPartida",
-                                success: function () {
-                                    //delete JSON_PARTIDA[referenciaId];
-                                    datos["ID_IVA"] = id_iva_nuevo;
-                                    datos["IVA"] = iva_nuevo;
-                                    RealizaCalculos(fila, tabla, precio, cantidad, descuento);
-                                    calculaTotalOrdenCompra();
-                                    calculaTipoCambio();
-                                    if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
-                                        PartidaResumenAE(index);
-                                    }
-                                },
-                                error: function (xhr, ajaxOptions, thrownError) {
-                                    $.unblockUI();
-                                    var error = JSON.parse(xhr.responseText);
-                                    bootbox.alert({
-                                        size: "large",
-                                        title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
-                                        message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
-                                        ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
-                                        ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
-                                        ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
-                                    });
-                                }
-                            });
+        datos["ID_IVA"] = id_iva_nuevo;
+        datos["IVA"] = iva_nuevo;
 
-                        }
-                    },
-                    default: {
-                        label: "No",
-                        className: "btn-default m-r-5 m-b-5",
-                        callback: function () {
-                            tabla.row(fila).nodes(fila,COL_IVA).to$().find('select#'+iva).val(ID_IVA_anterior);
-                        }
-                    }
-                }
-            });
-
+        if (datos['ID_ARTICULO'] != ""){
+            RealizaCalculos(fila, tabla, precio, cantidad, descuento);
+            calculaTotalOrdenCompra();
+            // calculaTipoCambio();
+            // if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
+            //     PartidaResumenAE(index);
+            // }
         }
         else{
-
-            datos["ID_IVA"] = id_iva_nuevo;
-            datos["IVA"] = iva_nuevo;
-
-            if (datos['ID_ARTICULO'] != ""){
-                RealizaCalculos(fila, tabla, precio, cantidad, descuento);
-                calculaTotalOrdenCompra();
-               // calculaTipoCambio();
-                // if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
-                //     PartidaResumenAE(index);
-                // }
-            }
-            else{
-                bootbox.dialog({
-                    message: "No se ha elegido un articulo, elige uno por favor para continuar.",
-                    title: "Ordenes de Compra",
-                    buttons: {
-                        success: {
-                            label: "Si",
-                            className: "btn-success"
-                        }
-                    }
-                });
-                $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
-            }
-
+            swal("", "No se ha elegido un articulo, elige uno por favor para continuar.", "error", {
+                buttons: false,
+                timer: 2000,
+            });
+            $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
         }
+
+        
 
     }
 });
 $('#guardar').off().on('click', function(e) {
 
     var estadoOC = $('#estadoOC').text();
-    if(estadoOC == 'Completa'){
+    if (estadoOC == 'CERRADA'){
     
-         bootbox.dialog({
-            title: "Mensaje",
-            message: "<div class='alert alert-danger m-b-0'>No puedes editar la Orden de Compra porque ya esta Completa.</div>",
-            buttons: {
-            success: {
-            label: "Ok",
-            className: "btn-success m-r-5 m-b-5"
-            }
-            }
-        }).find('.modal-content').css({'font-size': '14px'} );
-
-    }
-    else if(estadoOC == 'Correspondida Completa'){
-
-        bootbox.dialog({
-            title: "Mensaje",
-            message: "<div class='alert alert-danger m-b-0'>No puedes editar la Orden de Compra porque ya esta Correspondida Completa.</div>",
-            buttons: {
-            success: {
-            label: "Ok",
-            className: "btn-success m-r-5 m-b-5"
-            }
-            }
-        }).find('.modal-content').css({'font-size': '14px'} );
+        swal("", "La OC esta Cerrada", "error", {
+            buttons: false,
+            timer: 2000,
+        });
 
     }
     else{
-
-        validarCampos();
-        if(bandera == 0){
-
-            registraOC();
-            InicializaComponentesOC();
-        }
-
+        swal({
+            title: '¿Guardar Orden de Compra?.',
+            text: "",
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'OK',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true,
+            icon: "warning",
+            buttons: true
+        }).then(function (result) {
+            if (result) {
+                validarCampos();
+                if (bandera == 0) {
+                    registraOC();
+                    InicializaComponentesOC();
+                }
+            }
+        });
     }
 
 });
@@ -1493,15 +1174,10 @@ $("#sel-tipo-oc").on("changed.bs.select", function(e, clickedIndex, newValue, ol
         $('#modal-ordenesTrabajo').modal('show');
     }
     else{
-        bootbox.dialog({
-            message: "No se ha elegido un proveedor, elige uno por favor para continuar.",
-            title: "Ordenes de Compra",
-            buttons: {
-                success: {
-                    label: "Si",
-                    className: "btn-success"
-                }
-            }
+        
+        swal("", "No se ha elegido un proveedor, elige uno por favor para continuar.", "error", {
+            buttons: false,
+            timer: 2000,
         });
     }
 
@@ -1513,15 +1189,9 @@ $('#tblArticulosMiscelaneosNueva').on('change','input#input-nombreART-miselaneos
 
     if ($("#sel-proveedor").val() == ""){
 
-        bootbox.dialog({
-            message: "No se ha elegido un proveedor, elige uno por favor para continuar.",
-            title: "Ordenes de Compra",
-            buttons: {
-                success: {
-                    label: "Si",
-                    className: "btn-success"
-                }
-            }
+        swal("", "No se ha elegido un proveedor, elige uno por favor para continuar.", "error", {
+            buttons: false,
+            timer: 2000,
         });
         $(this).val("");
 
@@ -1534,15 +1204,9 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
     e.preventDefault();
 
     if ($("#sel-proveedor").val() == "") {
-        bootbox.dialog({
-            message: "No se ha elegido un proveedor, elige uno por favor para continuar.",
-            title: "Ordenes de Compra",
-            buttons: {
-                success: {
-                    label: "Si",
-                    className: "btn-success"
-                }
-            }
+        swal("", "No se ha elegido un proveedor, elige uno por favor para continuar.", "error", {
+            buttons: false,
+            timer: 2000,
         });
         $(this).val("");
     }
@@ -1576,105 +1240,29 @@ $('#tblArticulosMiscelaneosNueva').on('change','input#input-cantidadAM',function
         var ID_IVA_anterior = datos['ID_IVA'];
         var cantidadNueva = $(this).val();
 
-        /* if(registroNuevo == 1){
-
-            bootbox.dialog({
-                message: "¿Estas seguro de modificar la cantidad?.",
-                title: "Ordenes de Compra",
-                buttons: {
-                    success: {
-                        label: "Si",
-                        className: "btn-success",
-                        callback: function () {
-                            $.ajax({
-                                type: "POST",
-                                async: false,
-                                data: {
-                                    detalleId: referenciaId
-                                    ,cantidad: cantidadNueva
-                                    ,precio: Precio_anterior
-                                    ,descuento: Descuento_anterior
-                                    ,iva: IVA_anterior
-                                    ,idIva: ID_IVA_anterior
-                                },
-                                dataType: "json",
-                                url: "compras/editarPartida",
-                                success: function () {
-                                    //delete JSON_PARTIDA[referenciaId];
-                                    datos['CANTIDAD'] = cantidadNueva;
-                                    RealizaCalculos(fila, tabla, precio, cantidad, descuento);
-                                    calculaTotalOrdenCompra();
-                                    //calculaTipoCambio();
-                                    if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
-                                        PartidaResumenAE(index);
-                                    }
-                                },
-                                error: function (xhr, ajaxOptions, thrownError) {
-                                    $.unblockUI();
-                                    var error = JSON.parse(xhr.responseText);
-                                    bootbox.alert({
-                                        size: "large",
-                                        title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
-                                        message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
-                                        ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
-                                        ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
-                                        ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
-                                    });
-                                }
-                            });
-
-                        }
-                    },
-                    default: {
-                        label: "No",
-                        className: "btn-default m-r-5 m-b-5",
-                        callback: function () {
-                            tabla.row(fila).nodes(fila,COL_CANTIDAD).to$().find('input#' + cantidad).val(parseFloat(Cantidad_anterior).toFixed(CANTIDAD_DECIMALES));
-                        }
-                    }
-                }
-            });
-
-        }
-        else{ */
+        
             if (datos['NOMBRE_ARTICULO'] != ""){
                 datos['CANTIDAD'] = $(this).val();
                 RealizaCalculos(fila, tabla, precio, cantidad, descuento);
                 calculaTotalOrdenCompra();
-                //calculaTipoCambio();
-                // if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
-                //     PartidaResumenAM(index);
-                // }
             }
             else{
-                bootbox.dialog({
-                    message: "No se ha capturado articulo, captura para continuar.",
-                    title: "Ordenes de Compra",
-                    buttons: {
-                        success: {
-                            label: "Si",
-                            className: "btn-success"
-                        }
-                    }
+                swal("", "No se ha capturado articulo, captura para continuar.", "error", {
+                    buttons: false,
+                    timer: 2000,
                 });
                 $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
             }
-        //}
 
     }else{
-        bootbox.dialog({
-            message: "No se ha elegido un proveedor, elige uno por favor para continuar.",
-            title: "Ordenes de Compra",
-            buttons: {
-                success: {
-                    label: "Si",
-                    className: "btn-success"
-                }
-            }
+        swal("", "No se ha elegido un proveedor, elige uno por favor para continuar.", "error", {
+            buttons: false,
+            timer: 2000,
         });
         $(this).val("");
     }
 });
+
 $('#tblArticulosMiscelaneosNueva').on('change','input#input-precioAM',function (e) {
     e.preventDefault();
     if($(this).val() == '' || $(this).val() < 0){
@@ -1700,102 +1288,27 @@ $('#tblArticulosMiscelaneosNueva').on('change','input#input-precioAM',function (
         var ID_IVA_anterior = datos['ID_IVA'];
         var precioNuevo = $(this).val();
 
-        /* if(registroNuevo == 1){
-
-            bootbox.dialog({
-                message: "¿Estas seguro de modificar el precio?.",
-                title: "Ordenes de Compra",
-                buttons: {
-                    success: {
-                        label: "Si",
-                        className: "btn-success",
-                        callback: function () {
-                            $.ajax({
-                                type: "POST",
-                                async: false,
-                                data: {
-                                    detalleId: referenciaId
-                                    ,precio: precioNuevo
-                                    ,cantidad: Cantidad_anterior
-                                    ,descuento: Descuento_anterior
-                                    ,iva: IVA_anterior
-                                    ,idIva: ID_IVA_anterior
-                                },
-                                dataType: "json",
-                                url: "compras/editarPartida",
-                                success: function () {
-                                    //delete JSON_PARTIDA[referenciaId];
-                                    datos['PRECIO'] = precioNuevo;
-                                    RealizaCalculos(fila, tabla, precio, cantidad, descuento);
-                                    calculaTotalOrdenCompra();
-                                    //calculaTipoCambio();
-                                    if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
-                                        PartidaResumenAE(index);
-                                    }
-                                },
-                                error: function (xhr, ajaxOptions, thrownError) {
-                                    $.unblockUI();
-                                    var error = JSON.parse(xhr.responseText);
-                                    bootbox.alert({
-                                        size: "large",
-                                        title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
-                                        message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
-                                        ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
-                                        ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
-                                        ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
-                                    });
-                                }
-                            });
-
-                        }
-                    },
-                    default: {
-                        label: "No",
-                        className: "btn-default m-r-5 m-b-5",
-                        callback: function () {
-                            tabla.row(fila).nodes(fila,COL_PRECIO).to$().find('input#' + precio).val(parseFloat(Precio_anterior).toFixed(CANTIDAD_DECIMALES));
-                        }
-                    }
-                }
-            });
-
-        }
-        else{ */
+       
              if (datos['NOMBRE_ARTICULO'] != ""){
                     datos['PRECIO'] = $(this).val();
                     RealizaCalculos(fila, tabla, precio, cantidad, descuento);
                     calculaTotalOrdenCompra();
-                    //calculaTipoCambio();
-                    // if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
-                    //     PartidaResumenAM(index);
-                    // }
+                    
             }
             else{
-                bootbox.dialog({
-                    message: "No se ha capturado articulo, captura para continuar.",
-                    title: "Ordenes de Compra",
-                    buttons: {
-                        success: {
-                            label: "Si",
-                            className: "btn-success"
-                        }
-                    }
-                });
+                
+                 swal("", "No se ha capturado articulo, captura para continuar.", "error", {
+                     buttons: false,
+                     timer: 2000,
+                 });
                 $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
             }
-        //}
 
     }
     else{
-        bootbox.dialog({
-            message: "No se ha elegido un proveedor, elige uno por favor para continuar.",
-            title: "Ordenes de Compra",
-            buttons: {
-                success: {
-                    label: "Si",
-                    className: "btn-success"
-                }
-            }
+        swal("", "No se ha elegido un proveedor, elige uno por favor para continuar.", "error", {
+            buttons: false,
+            timer: 2000,
         });
         $(this).val("");
     }
@@ -1830,102 +1343,26 @@ $('#tblArticulosMiscelaneosNueva').on('change','input#input-descuentoAM',functio
         var ID_IVA_anterior = datos['ID_IVA'];
         var descuentoNuevo = $(this).val();
 
-        /* if(registroNuevo == 1){
-
-            bootbox.dialog({
-                message: "¿Estas seguro de modificar el descuento?.",
-                title: "Ordenes de Compra",
-                buttons: {
-                    success: {
-                        label: "Si",
-                        className: "btn-success",
-                        callback: function () {
-                            $.ajax({
-                                type: "POST",
-                                async: false,
-                                data: {
-                                    detalleId: referenciaId
-                                    ,precio: Precio_anterior
-                                    ,cantidad: Cantidad_anterior
-                                    ,descuento: descuentoNuevo
-                                    ,iva: IVA_anterior
-                                    ,idIva: ID_IVA_anterior
-                                },
-                                dataType: "json",
-                                url: "compras/editarPartida",
-                                success: function () {
-                                    //delete JSON_PARTIDA[referenciaId];
-                                    datos['DESCUENTO'] = descuentoNuevo;
-                                    RealizaCalculos(fila, tabla, precio, cantidad, descuento);
-                                    calculaTotalOrdenCompra();
-                                    //calculaTipoCambio();
-                                    if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
-                                        PartidaResumenAE(index);
-                                    }
-                                },
-                                error: function (xhr, ajaxOptions, thrownError) {
-                                    $.unblockUI();
-                                    var error = JSON.parse(xhr.responseText);
-                                    bootbox.alert({
-                                        size: "large",
-                                        title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
-                                        message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
-                                        ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
-                                        ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
-                                        ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
-                                    });
-                                }
-                            });
-
-                        }
-                    },
-                    default: {
-                        label: "No",
-                        className: "btn-default m-r-5 m-b-5",
-                        callback: function () {
-                            tabla.row(fila).nodes(fila,COL_DESCUENTO).to$().find('input#' + descuento).val(parseFloat(Descuento_anterior).toFixed(CANTIDAD_DECIMALES));
-                        }
-                    }
-                }
-            });
-
-        }
-        else{ */
+       
             if (datos['NOMBRE_ARTICULO'] != ""){    
                 datos['DESCUENTO'] = $(this).val();
                 RealizaCalculos(fila, tabla, precio, cantidad, descuento);
                 calculaTotalOrdenCompra();
-                //calculaTipoCambio();
-                // if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
-                //     PartidaResumenAM(index);
-                // }
+               
             }
             else{
-                bootbox.dialog({
-                    message: "No se ha capturado articulo, captura para continuar.",
-                    title: "Ordenes de Compra",
-                    buttons: {
-                        success: {
-                            label: "Si",
-                            className: "btn-success"
-                        }
-                    }
+                swal("", "No se ha capturado articulo, captura para continuar.", "error", {
+                    buttons: false,
+                    timer: 2000,
                 });
                 $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
             }
-    
-        //}
     }
     else{
-        bootbox.dialog({
-            message: "No se ha elegido un proveedor, elige uno por favor para continuar.",
-            title: "Ordenes de Compra",
-            buttons: {
-                success: {
-                    label: "Si",
-                    className: "btn-success"
-                }
-            }
+        
+        swal("", "No se ha elegido un proveedor, elige uno por favor para continuar.", "error", {
+            buttons: false,
+            timer: 2000,
         });
         $(this).val("");
     }
@@ -1952,82 +1389,12 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboIVAAM',function (e) {
         var id_iva_nuevo = $(this).val();
         var iva_nuevo = $(this).val() == '' ? '0' : $(this).find('option:selected').text();
 
-//        if(registroNuevo == 1){
-        if(false){
 
-            bootbox.dialog({
-                message: "¿Estas seguro de modificar el IVA?.",
-                title: "Ordenes de Compra",
-                buttons: {
-                    success: {
-                        label: "Si",
-                        className: "btn-success",
-                        callback: function () {
-                            $.ajax({
-                                type: "POST",
-                                async: false,
-                                data: {
-                                    detalleId: referenciaId
-                                    ,precio: Precio_anterior
-                                    ,cantidad: Cantidad_anterior
-                                    ,descuento: Descuento_anterior
-                                    ,iva: iva_nuevo
-                                    ,idIva: id_iva_nuevo
-                                },
-                                dataType: "json",
-                                url: "compras/editarPartida",
-                                success: function () {
-                                    //delete JSON_PARTIDA[referenciaId];
-                                    datos["ID_IVA"] = id_iva_nuevo;
-                                    datos["IVA"] = iva_nuevo;
-                                    RealizaCalculos(fila, tabla, precio, cantidad, descuento);
-                                    calculaTotalOrdenCompra();
-                                    //calculaTipoCambio();
-                                    if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
-                                        PartidaResumenAE(index);
-                                    }
-                                },
-                                error: function (xhr, ajaxOptions, thrownError) {
-                                    $.unblockUI();
-                                    var error = JSON.parse(xhr.responseText);
-                                    bootbox.alert({
-                                        size: "large",
-                                        title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
-                                        message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
-                                        ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
-                                        ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
-                                        ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
-                                    });
-                                }
-                            });
+        datos["ID_IVA"] = id_iva_nuevo;
+        datos["IVA"] = iva_nuevo;
 
-                        }
-                    },
-                    default: {
-                        label: "No",
-                        className: "btn-default m-r-5 m-b-5",
-                        callback: function () {
-                            tabla.row(fila).nodes(fila,COL_IVA).to$().find('select#'+iva).val(ID_IVA_anterior);
-                        }
-                    }
-                }
-            });
-
-        }
-        else{
-
-            datos["ID_IVA"] = id_iva_nuevo;
-            datos["IVA"] = iva_nuevo;
-
-            RealizaCalculos(fila, tabla, precio, cantidad, descuento);
-            calculaTotalOrdenCompra();
-            //calculaTipoCambio();
-            // if(datos['CANTIDAD'] != "" && datos['PRECIO'] != ""){
-            //     PartidaResumenAE(index);
-            // }
-
-        }
-
+        RealizaCalculos(fila, tabla, precio, cantidad, descuento);
+        calculaTotalOrdenCompra();
     }
 });
 
@@ -2043,14 +1410,10 @@ $('#tblArticulosMiscelaneosNueva').on('click', 'button#boton-eliminarAM', functi
         tabla.row(fila).remove().draw(false);
     }
     else{
-        if (registroNuevo == 1){
-            eliminarPartidaArtMisc(fila);
-        }
+       
     }
     calculaTotalOrdenCompra();
     actualizaLineaPartidaAM();
-    //calculaTipoCambio();
-   //PartidaResumenAM();
 });
 
 //boton editar OC
@@ -2062,7 +1425,6 @@ $('#tblArticulosMiscelaneosNueva').on('click', 'button#boton-eliminarAM', functi
         var datos = tblOC.row(fila).data();
         var NumOC = datos['NumOC'];
         if (datos['Estatus'] == 'ABIERTA') {
-            //var ocId = datos['DT_RowId'];
 
             $.blockUI({
                 css: {
@@ -2089,14 +1451,8 @@ $('#tblArticulosMiscelaneosNueva').on('click', 'button#boton-eliminarAM', functi
                 url: routeapp + "compras/buscaOC",
                 success: function (data) {
                     setTimeout($.unblockUI, 2000);
-                        
-                    //agregarDatosOC(respuesta.ordenCompra, respuesta.consultaTipoMonedaProveedor);
-                    //agregaPartidasOCFechasRequeridas(respuesta.ordenCompraFechasRequeridas);
                     
-                    
-                    //var respuesta = JSON.parse(JSON.stringify(data));
-                    
-                    registroNuevo = 1;
+                    OC_nueva = 0;
                     $('#ordenesCompraOC').show();
                     $('#btnBuscadorOC').hide();
                     MuestraComponentesOC()
@@ -2128,8 +1484,8 @@ $('#tblArticulosMiscelaneosNueva').on('click', 'button#boton-eliminarAM', functi
     });
 
     function MuestraComponentesOC() {
-        console.log(registroNuevo)
-        if (registroNuevo == 0) { //nueva OC
+        
+        if (OC_nueva == 1) { //nueva OC
             $('.nuevaOC').show()
             $('#edit_tipo_oc').hide()
             $('#edit_proveedor').hide()
@@ -2274,7 +1630,7 @@ $('#tblArticulosMiscelaneosNueva').on('click', 'button#boton-eliminarAM', functi
         tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('input#input-articulo-codigoAE').attr("disabled", "disabled");
         tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('a#boton-articuloAE').attr("disabled", "disabled");
         tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('a#boton-articuloAE').attr("id", "disabled");
-        if (datos['LineStatus'] != 'O') {//ABIERTA
+        if (datos['LineStatus'] != 'O') {//SI ESTA CERRADA
 
             tbl.row(pos).nodes(pos, COL_CANTIDAD).to$().find('input#input-cantidadAE').attr("disabled", "disabled");
             tbl.row(pos).nodes(pos, COL_PRECIO).to$().find('input#input-precioAE').attr("disabled", "disabled");
@@ -2293,5 +1649,133 @@ $('#tblArticulosMiscelaneosNueva').on('click', 'button#boton-eliminarAM', functi
         }
         
     }
+
+    $('#tblArticulosMiscelaneosNueva').on('change','input#cerrarPartidaCheck',function (e) {
+
+    var tabla = $('#tblArticulosMiscelaneosNueva').DataTable();
+    var fila = $(this).closest('tr');
+    var index = tabla.row(fila).index();
+    var datos = tabla.row(fila).data();
+    var referenciaId = datos['ID_AUX'];
+    datos['OCFR_PartidaCerrada'] = 1;
+    var partidaCerrada = datos['OCFR_PartidaCerrada'];
+
+    bootbox.dialog({
+        message: "¿Estas seguro de cerrar la partida?.",
+        title: "Ordenes de Compra",
+        buttons: {
+            success: {
+                label: "Si",
+                className: "btn-success",
+                callback: function () {
+                    $.ajax({
+                        type: "POST",
+                        async: false,
+                        data: {
+                            detalleId: referenciaId
+                            ,partidaCerrada: partidaCerrada
+                        },
+                        dataType: "json",
+                        url: "compras/editarPartidaCerrada",
+                        success: function () {
+                            tabla.row(fila).nodes(fila, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').attr("disabled","disabled");
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                            $.unblockUI();
+                            var error = JSON.parse(xhr.responseText);
+                            bootbox.alert({
+                                size: "large",
+                                title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
+                                message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
+                                ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
+                                ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
+                                ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
+                            });
+                        }
+                    });
+
+                }
+            },
+            default: {
+                label: "No",
+                className: "btn-default m-r-5 m-b-5",
+                callback: function () {
+                    tabla.row(fila).nodes(fila,COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').prop("checked",false);
+                }
+            }
+        }
+    });
+
+});
+
+$('#tblArticulosExistentesNueva').on('change','input#cerrarPartidaCheck',function (e) {
+
+    var tabla = $('#tblArticulosExistentesNueva').DataTable();
+    var fila = $(this).closest('tr');
+    var index = tabla.row(fila).index();
+    var datos = tabla.row(fila).data();
+    var referenciaId = datos['ID_AUX'];
+
+    bootbox.dialog({
+        message: "¿Estas seguro de cerrar la partida?.",
+        title: "Ordenes de Compra",
+        buttons: {
+            success: {
+                label: "Si",
+                className: "btn-success",
+                callback: function () {
+                    $.ajax({
+                        type: "POST",
+                        async: false,
+                        data: {
+                            detalleId: referenciaId
+                            ,partidaCerrada: partidaCerrada
+                        },
+                        dataType: "json",
+                        url: routeapp + "getPartida",
+                        success: function (data) {
+                            
+                            tabla.row(fila).nodes(fila, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').attr("disabled","disabled");
+                            datos['CANTIDAD'] = data.partida['LIN_CANTIDAD'];
+                            datos['PRECIO'] = data.partida['LIN_PRECIO'];
+                            datos['SUBTOTAL'] = parseFloat(data.partida['LIN_TOTAL']).toFixed(DECIMALES);
+                            datos['DESCUENTO'] = data.partida['LIN_PORCENTAJEDESCUENTO'];
+                            datos['MONTO_DESCUENTO'] = parseFloat(data.partida['LIN_DISC']).toFixed(DECIMALES);
+                            datos['IVA'] = data.partida['LIN_PORCENTAJEIVA'];
+                            datos['MONTO_IVA'] = data.partida['LIN_IVA'];
+                            datos['TOTAL'] = data.partida['LIN_GTOTAL'];
+
+                            tbl.row(fila).nodes(fila, COL_DESCUENTO).to$().find('input#input-descuentoAE').val(parseFloat(data.partida['LIN_PORCENTAJEDESCUENTO']).toFixed(DECIMALES));
+                            tbl.row(fila).nodes(fila, COL_IVA).to$().find('select#cboIVAAE').val(data.partida['TaxCode']);
+
+                            calculaTotalOrdenCompra();
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                            $.unblockUI();
+                            var error = JSON.parse(xhr.responseText);
+                            bootbox.alert({
+                                size: "large",
+                                title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
+                                message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
+                                ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
+                                ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
+                                ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
+                            });
+                        }
+                    });
+
+                }
+            },
+            default: {
+                label: "No",
+                className: "btn-default m-r-5 m-b-5",
+                callback: function () {
+                    tabla.row(fila).nodes(fila,COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').prop("checked",false);
+                }
+            }
+        }
+    });
+
+});
 }  //fin js_iniciador       
                    

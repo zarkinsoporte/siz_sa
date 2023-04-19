@@ -14,7 +14,7 @@ var COL_BTN_EDITAR = 9;
 var COL_BTN_ELIMINAR = 10;
 var COL_BTN_PDF = 11;
 
-var registroNuevo = 0;
+var OC_nueva = 0;
 var descuentoOC = 0;
 var banderaDatosAdicionales = 0;
 var ivaOC = 16;
@@ -849,17 +849,6 @@ $("#ActualizarTablaOC" ).on( "click", function() {
 
 });
 
-// function boton(){ //btn-nuevo
-
-//     $("#btnBuscadorOC").hide();
-//     $("#ordenesCompraOC").show();
-//     registroNuevo = 0;
-//     InicializaComponentesOC();
-//     //validaCambiarFechaRequerida();
-//     $("#datosPedimento").hide();
-
-// }
-
 function InicializaComponentesOC() {
 
     $("#sel-proveedor").val('');
@@ -901,29 +890,6 @@ var InicializaDatepicker = function() {
     }).datepicker("setDate", new Date());
 
 };
-
-/*function validaCambiarFechaRequerida(){
-
-    if(registroNuevo == 1){
-
-        $('#modal-datos #inputCambiarFecReq').show();
-
-    }
-    else{
-
-        $('#modal-datos #inputCambiarFecReq').hide();
-
-    }
-
-}*/
-
-// $('#input-proveedor').change(function (e){
-
-//     $('#ordenesCompraOC #cboTipoOC').val('05CA103A-B4B7-4E04-B2D8-080E0216AECF');
-//     $('#ordenesCompraOC #cboTipoOC').selectpicker('refresh');
-//     changeProveedor();
-
-// });
 
 function changeProveedor(){ //??
 
@@ -1158,9 +1124,10 @@ function insertarFila(){
                 , "FECHA_ENTREGA":""
 
                 , "CANT_PENDIENTE":""
+                , "PARTIDA_CERRADA": 0
                 , "BTN_ELIMINAR": null
-                , "ID_IVA":"W3"
                 
+                , "ID_IVA":"W3"                
                 , "ID_PARTIDA": ""
                 , "ESTATUS_PARTIDA":""//20
             }
@@ -1432,7 +1399,7 @@ $('#modal-datos #aceptar').off().on('click', function(e) {
     ivaYDescuento();
     if(banderaDatosAdicionales == 0){
 
-        if(registroNuevo == 1 || $("#ordenesCompraOC #cboTipoOC").val() == '05CA103A-B4B7-4E04-B2D8-080E0216AECF'){//ESTANDAR
+        if(OC_nueva == 1 || $("#ordenesCompraOC #cboTipoOC").val() == '05CA103A-B4B7-4E04-B2D8-080E0216AECF'){//ESTANDAR
 
             cambiarFechasRequeridasTablas();
 
@@ -1769,122 +1736,6 @@ function validaSimbolo(){
 
 }
 
-// $('#tblArticulosMiscelaneosNueva').on('change','input#cerrarPartidaCheck',function (e) {
-
-//     var tabla = $('#tblArticulosMiscelaneosNueva').DataTable();
-//     var fila = $(this).closest('tr');
-//     var index = tabla.row(fila).index();
-//     var datos = tabla.row(fila).data();
-//     var referenciaId = datos['ID_AUX'];
-//     datos['OCFR_PartidaCerrada'] = 1;
-//     var partidaCerrada = datos['OCFR_PartidaCerrada'];
-
-//     bootbox.dialog({
-//         message: "¿Estas seguro de cerrar la parida?.",
-//         title: "Ordenes de Compra",
-//         buttons: {
-//             success: {
-//                 label: "Si",
-//                 className: "btn-success",
-//                 callback: function () {
-//                     $.ajax({
-//                         type: "POST",
-//                         async: false,
-//                         data: {
-//                             detalleId: referenciaId
-//                             ,partidaCerrada: partidaCerrada
-//                         },
-//                         dataType: "json",
-//                         url: "compras/editarPartidaCerrada",
-//                         success: function () {
-//                             tabla.row(fila).nodes(fila, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').attr("disabled","disabled");
-//                         },
-//                         error: function (xhr, ajaxOptions, thrownError) {
-//                             $.unblockUI();
-//                             var error = JSON.parse(xhr.responseText);
-//                             bootbox.alert({
-//                                 size: "large",
-//                                 title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
-//                                 message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
-//                                 ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
-//                                 ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
-//                                 ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
-//                             });
-//                         }
-//                     });
-
-//                 }
-//             },
-//             default: {
-//                 label: "No",
-//                 className: "btn-default m-r-5 m-b-5",
-//                 callback: function () {
-//                     tabla.row(fila).nodes(fila,COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').prop("checked",false);
-//                 }
-//             }
-//         }
-//     });
-
-// });
-
-// $('#tblArticulosExistentesNueva').on('change','input#cerrarPartidaCheck',function (e) {
-
-//     var tabla = $('#tblArticulosExistentesNueva').DataTable();
-//     var fila = $(this).closest('tr');
-//     var index = tabla.row(fila).index();
-//     var datos = tabla.row(fila).data();
-//     var referenciaId = datos['ID_AUX'];
-//     datos['OCFR_PartidaCerrada'] = 1;
-//     var partidaCerrada = datos['OCFR_PartidaCerrada'];
-
-//     bootbox.dialog({
-//         message: "¿Estas seguro de cerrar la parida?.",
-//         title: "Ordenes de Compra",
-//         buttons: {
-//             success: {
-//                 label: "Si",
-//                 className: "btn-success",
-//                 callback: function () {
-//                     $.ajax({
-//                         type: "POST",
-//                         async: false,
-//                         data: {
-//                             detalleId: referenciaId
-//                             ,partidaCerrada: partidaCerrada
-//                         },
-//                         dataType: "json",
-//                         url: "compras/editarPartidaCerrada",
-//                         success: function () {
-//                             tabla.row(fila).nodes(fila, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').attr("disabled","disabled");
-//                         },
-//                         error: function (xhr, ajaxOptions, thrownError) {
-//                             $.unblockUI();
-//                             var error = JSON.parse(xhr.responseText);
-//                             bootbox.alert({
-//                                 size: "large",
-//                                 title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
-//                                 message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
-//                                 ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
-//                                 ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
-//                                 ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
-//                             });
-//                         }
-//                     });
-
-//                 }
-//             },
-//             default: {
-//                 label: "No",
-//                 className: "btn-default m-r-5 m-b-5",
-//                 callback: function () {
-//                     tabla.row(fila).nodes(fila,COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').prop("checked",false);
-//                 }
-//             }
-//         }
-//     });
-
-// });
-
 function RealizaCalculos(fila, tabla, input_precio, input_cantidad, input_descuento){
     console.log('Realiza Calculos.........')
     var tbl = tabla;
@@ -2016,60 +1867,6 @@ function actualizaLineaPartidaAE(){
     });
 }
 
-// $('#tblArticulosExistentesNueva').on('click', 'span#boton-detalleAE', function (e) {
-
-//     if ($("#input-cliente").val() != ""){
-//         var tabla = $('#tblArticulosExistentesNueva').DataTable();
-//         var fila = $(this).closest('tr');
-//         var datos = tabla.row(fila).data();
-//         var cantidad_a_devolver = parseFloat(datos['CANTIDAD']);
-//         var referenciaId = datos['ID_AUX'];
-
-//         if(cantidad_a_devolver > 0){
-//             DATOS_TEMP = datos;
-
-//             if(registroNuevo == 1 && banderaBuscaPedimento == 1){
-
-//                 buscaPedimento(referenciaId);
-
-//             }
-
-//             $('#modal-detalles').on('shown.bs.modal', function(event){
-//                 event.preventDefault();
-//                 $('#tabla-detalles').DataTable().clear().draw();
-//                 cargaModal(cantidad_a_devolver, referenciaId);
-//             });
-
-//             $("#modal-detalles").draggable({
-//                 handle: ".modal-header"
-//             });
-
-//             $('#modal-detalles').modal('show');
-
-//         } else {
-//             bootbox.alert({
-//                 size:"large",
-//                 title: "<h4><i class= 'fa fa-info-circle'></i> Alerta></h4>",
-//                 message:"<div class='alert alert-danger m-b-0'> Mensaje : La cantidad a devolver debe ser mayor a 0."
-//             });
-//         }
-//     }
-//     else{
-//         bootbox.dialog({
-//             message: "No se ha elegido un proveedor, elige uno por favor para continuar.",
-//             title: "Ordenes de Compra",
-//             buttons: {
-//                 success: {
-//                     label: "Si",
-//                     className: "btn-success"
-//                 }
-//             }
-//         });
-//         $(this).val("");
-//     }
-// });
-
-//??
 function cargaModal(cantidad_a_devolver, referenciaId) {
     $('#input-cantidad-devolver').val(cantidad_a_devolver);
 
@@ -2095,23 +1892,7 @@ $('#boton-agregar').on('click', function (e) {
     var tabla = $('#tabla-detalles').DataTable();
     tabla.row.add( [0, '', '', ''] ).draw( false );
 });
-//]??
-$('#tabla-detalles').on('click', 'button#boton-eliminar-detalle', function (e) {
-    e.preventDefault();
-    var tabla = $('#tabla-detalles').DataTable();
-    var fila = $(this).closest('tr');
-    var datos = tabla.row(fila).data();
-    var id = datos[4];
-    if(id == undefined){
-        tabla.row(fila).remove().draw(false);
-    }
-    else{
-        if (registroNuevo == 1 && datos[4] != undefined){
-            eliminarFechaReq(fila, id);
-        }
-    }
-});
-//??
+
 $('#modal-detalles #boton-aceptar').off().on('click', function(e) {
     e.preventDefault();
 
@@ -2426,13 +2207,6 @@ function registraOC(){
      var datosTablaArtMisc;
      datosTablaArtMisc = getTblArtMisc();
      datosTablaArtMisc = JSON.stringify(datosTablaArtMisc);
-
-    // var TblPartidasDetalles;
-    // TblPartidasDetalles = JSON.stringify(JSON_PARTIDA);
-
-    // var datosTablaPedimentos;
-    // datosTablaPedimentos = getTblPedimento();
-
     
     paridad = $("#input_tc").val();
     console.log('registrando OC')
@@ -2457,7 +2231,7 @@ function registraOC(){
             },
         url: routeapp + "registraOC",
         data: {
-            "status": registroNuevo,
+            "status": OC_nueva,
             //"OC_CodigoOC": $("#codigoOC").text(),
             "oc_proveedor": $("#sel-proveedor option:selected").val(),
             //"OC_PDOC_DireccionOCId": $("#cboSucursal").val(),
@@ -2568,7 +2342,7 @@ function getTblArtExis(){
                 "MONTO_IVA" : datos_Tabla[i]["MONTO_IVA"],
                 "TOTAL": datos_Tabla[i]["TOTAL"],
                 "FECHA_ENTREGA": $('input#input-fecha-entrega-linea', tabla.row(i).node()).val(),                
-                "PARTIDA_CERRADA": datos_Tabla[i]["PARTIDA_CERRADA"],
+                "PARTIDA_CERRADA": $('#cerrarPartidaCheck', tabla.row(i).node()).is(":checked"),
                 "ID_ARTICULO" : datos_Tabla[i]["ID_ARTICULO"],
                 "ID_PARTIDA": datos_Tabla[i]["ID_PARTIDA"],
                 "ID_AUX": datos_Tabla[i]["ID_AUX"],
@@ -2614,7 +2388,8 @@ function getTblArtMisc(){
                 "MONTO_IVA" : datos_Tabla[i]["MONTO_IVA"],
                 "TOTAL": datos_Tabla[i]["TOTAL"],
                 "FECHA_ENTREGA": $('input#input-fecha-entrega-linea', tabla.row(i).node()).val(),
-                "PARTIDA_CERRADA": datos_Tabla[i]["PARTIDA_CERRADA"],
+                //"PARTIDA_CERRADA": datos_Tabla[i]["PARTIDA_CERRADA"],
+                "PARTIDA_CERRADA": $('#cerrarPartidaCheck', tabla.row(i).node()).is(":checked"),
                 //"ID_ARTICULO" : datos_Tabla[i]["ID_ARTICULO"],
                 "ID_PARTIDA": datos_Tabla[i]["ID_PARTIDA"],
                 "ID_AUX": datos_Tabla[i]["ID_AUX"],

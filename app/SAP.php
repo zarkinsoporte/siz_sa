@@ -947,6 +947,7 @@ class SAP extends Model
     }
     public static function registraOC($datos)
     {
+        
         //Ref
         //https://answers.sap.com/questions/1448088/using-xml-to-update-objects-in-diapi.html
         //https://answers.sap.com/questions/232431/add-invoices-from-di-api-using-xml.html¡
@@ -966,6 +967,122 @@ class SAP extends Model
             $oc_items = isset($datos["TablaArticulosMiscelaneos"]) ? json_decode($datos["TablaArticulosMiscelaneos"], true) : array();         
             $xml_tipoOC = 'dDocument_Service';
         }
+        return ['registra' => $oc_items];
+         //BO/Documents/row   
+            // <DocType>dDocument_Items</DocType>//dDocument_Service
+            // <DocDate>20230215</DocDate>
+            // <DocDueDate>20230215</DocDueDate>
+            // <CardCode>P1324</CardCode>
+            // <DocCurrency>MXP</DocCurrency>
+            // <DocRate>1.000000</DocRate>
+            // <DocObjectCode>22</DocObjectCode>
+            // <JournalMemo>Pedidos - P0293</JournalMemo> 
+        if($status == 0){
+            $pathh = public_path('assets/xml/sap/ordenesCompra/new_oc_p1.xml');
+            $oXML = simplexml_load_file($pathh); //Crear Object SimpleXML de un archivo 
+            $root_items = $oXML->xpath('/BOM/BO/Document_Lines');
+            $root_oc_header = $oXML->xpath('/BOM/BO/Documents/row');
+
+            //INSERTA ORDEN DE COMPRA
+            $root_oc_header[0]->DocType = $xml_tipoOC;
+            $root_oc_header[0]->DocDate = "".(new \DateTime('now'))->format('Ymd');
+            $root_oc_header[0]->DocDueDate = "".$fecha_entrega;
+            $root_oc_header[0]->CardCode = $oc_proveedor;
+            $root_oc_header[0]->DocCurrency = $oc_moneda;
+            //$root_oc_header[0]->DocRate = $oc_tipo_cambio;
+            $root_oc_header[0]->DocObjectCode = "22";
+            $root_oc_header[0]->U_SIZ_CreadoPor = "".session('userID');
+            $root_oc_header[0]->Comments = "ELABORO: ".session('userNombre').', '. strtoupper($oc_comentarios);
+
+            for($x = 0; $x < count($oc_items); $x ++){
+                $xml_item = $root_items[0]->addChild('row');
+                
+                if ($oc_tipo == 0) {
+                    $xml_item->addChild('ItemCode', $oc_items[$x]['CODIGO_ARTICULO']);
+                    $xml_item->addChild('AccountCode', '_SYS00000000022');
+                    
+                } else {
+                    $xml_item->addChild('ItemDescription', $oc_items[$x]['NOMBRE_ARTICULO']);
+                    $xml_item->addChild('AccountCode', $oc_items[$x]['CTA_MAYOR']);
+                    
+                }
+                $xml_item->addChild('Quantity', $oc_items[$x]['CANTIDAD']);
+                $xml_item->addChild('Price', $oc_items[$x]['PRECIO']);
+                $xml_item->addChild('DiscountPercent', $oc_items[$x]['DESCUENTO']);
+                $xml_item->addChild('WarehouseCode', "AMP-CC");
+                $xml_item->addChild('TaxCode', $oc_items[$x]['ID_IVA']);
+                $xml_item->addChild('ShipDate', $oc_items[$x]['FECHA_ENTREGA']);
+            }  
+        }  
+        //BO/Document_Lines/row
+            //<ItemDescription>seguro</ItemDescription>
+            // <AccountCode>_SYS00000000022</AccountCode>
+            // <ItemCode>10429</ItemCode>
+            // <Quantity>1.000000</Quantity>
+            // <Price>302.940000</Price> 
+            // <DiscountPercent>0.000000</DiscountPercent>
+            // <WarehouseCode>AMP-CC</WarehouseCode>
+            // <TaxCode>W3</TaxCode>
+        //////////////////////////////////////////////////////////////////
+        $vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
+        $vCmp->DbServerType = "10";
+        $vCmp->server = "".env('SAP_server');
+        $vCmp->LicenseServer = "".env('SAP_LicenseServer');
+        $vCmp->CompanyDB = "".env('SAP_CompanyDB');
+        $vCmp->username = "".env('SAP_username');
+        $vCmp->password = "".env('SAP_password');
+        $vCmp->DbUserName = "".env('SAP_DbUserName');
+        $vCmp->DbPassword = "".env('SAP_DbPassword');
+        $vCmp->UseTrusted = false;
+        //la siguiente linea permite leer XML como string y no como archivo en "Browser->ReadXml"
+        $vCmp->XMLAsString = true; //The default value is False - XML as files.
+        //$vCmp->language = "6";
+        $vCmp->Connect; //conectar a Sociedad SAP
+
+        //Obtener XML de un LDM 
+        $vCmp->XmlExportType = '3'; //BoXmlExportTypes.xet_ExportImportMode; /solo los campos modificables
+       
+        //To use ReadXML method, set the XmlExportType to xet_ExportImportMode (3).
+        $vItem = $vCmp->GetBusinessObject("22");
+        $vItem->Browser->ReadXml($oXML->asXML(), 0);
+        // $vItem->UpdateFromXML($pathh);
+        $resultadoOperacion = $vItem->Add();
+        if ($resultadoOperacion <> 0) {
+            //throw new \Exception( $vCmp->GetLastErrorDescription(), 1);
+            return ['Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$vCmp->GetLastErrorDescription()];
+        }else {
+            return ['Status' => 'Valido', 'respuesta' => 'success'];
+        }
+        $vCmp->Disconnect;
+        $vCmp = null;
+        $vItem = null;
+        $xmlString = null;
+        $oXML = null;
+        $item = null;
+        $resultadoOperacion = null;
+    }
+    public static function actualizaOC($datos)
+    {
+        //Ref
+        //https://answers.sap.com/questions/1448088/using-xml-to-update-objects-in-diapi.html
+        //https://answers.sap.com/questions/232431/add-invoices-from-di-api-using-xml.html¡
+        
+        $oc_comentarios = $datos["oc_comentarios"];
+        $oc_moneda = $datos["oc_moneda"];
+        $oc_proveedor = $datos["oc_proveedor"];
+        $oc_tipo = $datos["oc_tipo"];
+        $oc_tipo_cambio = $datos["oc_tipo_cambio"];
+        $status = $datos["status"];
+        $fecha_entrega = $datos["oc_fecha_entrega"];
+        
+        $xml_tipoOC = 'dDocument_Items';
+        if ($oc_tipo == 0) {
+            $oc_items = isset($datos["TablaArticulosExistentes"]) ? json_decode($datos["TablaArticulosExistentes"], true) : array();
+        } else {
+            $oc_items = isset($datos["TablaArticulosMiscelaneos"]) ? json_decode($datos["TablaArticulosMiscelaneos"], true) : array();         
+            $xml_tipoOC = 'dDocument_Service';
+        }
+        return ['actualizacion' => $oc_items];
          //BO/Documents/row   
             // <DocType>dDocument_Items</DocType>//dDocument_Service
             // <DocDate>20230215</DocDate>
