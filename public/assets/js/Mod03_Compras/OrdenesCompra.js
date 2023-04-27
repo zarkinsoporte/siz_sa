@@ -1710,11 +1710,10 @@ $('#tblArticulosMiscelaneosNueva').on('click', 'button#boton-eliminarAM', functi
 
 $('#tblArticulosExistentesNueva').on('change','input#cerrarPartidaCheck',function (e) {
 
-    var tabla = $('#tblArticulosExistentesNueva').DataTable();
+    var tbl = $('#tblArticulosExistentesNueva').DataTable();
     var fila = $(this).closest('tr');
-    var index = tabla.row(fila).index();
-    var datos = tabla.row(fila).data();
-    var referenciaId = datos['ID_AUX'];
+    var index = tbl.row(fila).index();
+    var datos = tbl.row(fila).data();    
 
     bootbox.dialog({
         message: "¿Estas seguro de cerrar la partida?.",
@@ -1724,53 +1723,38 @@ $('#tblArticulosExistentesNueva').on('change','input#cerrarPartidaCheck',functio
                 label: "Si",
                 className: "btn-success",
                 callback: function () {
-                    $.ajax({
-                        type: "POST",
-                        async: false,
-                        data: {
-                            detalleId: referenciaId
-                            ,partidaCerrada: partidaCerrada
-                        },
-                        dataType: "json",
-                        url: routeapp + "getPartida",
-                        success: function (data) {
-                            
-                            tabla.row(fila).nodes(fila, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').attr("disabled","disabled");
-                            datos['CANTIDAD'] = data.partida['LIN_CANTIDAD'];
-                            datos['PRECIO'] = data.partida['LIN_PRECIO'];
-                            datos['SUBTOTAL'] = parseFloat(data.partida['LIN_TOTAL']).toFixed(DECIMALES);
-                            datos['DESCUENTO'] = data.partida['LIN_PORCENTAJEDESCUENTO'];
-                            datos['MONTO_DESCUENTO'] = parseFloat(data.partida['LIN_DISC']).toFixed(DECIMALES);
-                            datos['IVA'] = data.partida['LIN_PORCENTAJEIVA'];
-                            datos['MONTO_IVA'] = data.partida['LIN_IVA'];
-                            datos['TOTAL'] = data.partida['LIN_GTOTAL'];
+                    
+                    datos['CANT_PENDIENTE']="0.00";
+                    datos['PARTIDA_CERRADA']=1;
+                    tbl.row(fila).data(datos);
+                    tbl.row(fila).nodes(fila, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').attr("disabled","disabled");
+                    
+                    tbl.row(fila).nodes(fila, COL_CODIGO_ART).to$().find('input#input-articulo-codigoAE').attr("disabled", "disabled");
+                    tbl.row(fila).nodes(fila, COL_CODIGO_ART).to$().find('a#boton-articuloAE').attr("disabled", "disabled");
+                    tbl.row(fila).nodes(fila, COL_CODIGO_ART).to$().find('a#boton-articuloAE').attr("id", "disabled");
+                    
 
-                            tbl.row(fila).nodes(fila, COL_DESCUENTO).to$().find('input#input-descuentoAE').val(parseFloat(data.partida['LIN_PORCENTAJEDESCUENTO']).toFixed(DECIMALES));
-                            tbl.row(fila).nodes(fila, COL_IVA).to$().find('select#cboIVAAE').val(data.partida['TaxCode']);
+                    tbl.row(fila).nodes(fila, COL_CANTIDAD).to$().find('input#input-cantidadAE').attr("disabled", "disabled");
+                    tbl.row(fila).nodes(fila, COL_PRECIO).to$().find('input#input-precioAE').attr("disabled", "disabled");
+                    tbl.row(fila).nodes(fila, COL_DESCUENTO).to$().find('input#input-descuentoAE').attr("disabled", "disabled");
+                    tbl.row(fila).nodes(fila, COL_IVA).to$().find('select#cboIVAAE').attr("disabled", "disabled");
+                    //tbl.row(fila).nodes(fila, COL_FECHA_ENTREGA_COMPRA).to$().find('input#boton-detalleAE').attr("disabled","disabled");
+                    // tbl.row(fila).nodes(fila, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("disabled", "disabled");
+                    //tbl.row(fila).nodes(fila, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("id", "disabled");
 
-                            calculaTotalOrdenCompra();
-                        },
-                        error: function (xhr, ajaxOptions, thrownError) {
-                            $.unblockUI();
-                            var error = JSON.parse(xhr.responseText);
-                            bootbox.alert({
-                                size: "large",
-                                title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
-                                message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
-                                ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
-                                ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
-                                ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
-                            });
-                        }
-                    });
+                    tbl.row(fila).nodes(fila, COL_FECHA_ENTREGA_COMPRA).to$().find('input#input-fecha-entrega-linea').attr("disabled", "disabled");
 
-                }
+                    tbl.row(fila).nodes(fila, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("disabled", "disabled");
+                    tbl.row(fila).nodes(fila, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("id", "disabled");
+                    console.log(fila)
+
+                } 
             },
             default: {
                 label: "No",
                 className: "btn-default m-r-5 m-b-5",
                 callback: function () {
-                    tabla.row(fila).nodes(fila,COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').prop("checked",false);
+                    tbl.row(fila).nodes(fila,COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').prop("checked",false);
                 }
             }
         }

@@ -1068,46 +1068,39 @@ class SAP extends Model
         //https://answers.sap.com/questions/232431/add-invoices-from-di-api-using-xml.html¡
         
         $oc_comentarios = $datos["oc_comentarios"];
-        $oc_moneda = $datos["oc_moneda"];
-        $oc_proveedor = $datos["oc_proveedor"];
-        $oc_tipo = $datos["oc_tipo"];
-        $oc_tipo_cambio = $datos["oc_tipo_cambio"];
-        $status = $datos["status"];
+        $oc_moneda = $datos["oc_moneda"];        
         $fecha_entrega = $datos["oc_fecha_entrega"];
-        
-        $xml_tipoOC = 'dDocument_Items';
+        $oc_tipo = $datos["oc_tipo"];
+     
         if ($oc_tipo == 0) {
             $oc_items = isset($datos["TablaArticulosExistentes"]) ? json_decode($datos["TablaArticulosExistentes"], true) : array();
         } else {
-            $oc_items = isset($datos["TablaArticulosMiscelaneos"]) ? json_decode($datos["TablaArticulosMiscelaneos"], true) : array();         
-            $xml_tipoOC = 'dDocument_Service';
+            $oc_items = isset($datos["TablaArticulosMiscelaneos"]) ? json_decode($datos["TablaArticulosMiscelaneos"], true) : array();                   
         }
         return ['actualizacion' => $oc_items];
-         //BO/Documents/row   
-            // <DocType>dDocument_Items</DocType>//dDocument_Service
-            // <DocDate>20230215</DocDate>
-            // <DocDueDate>20230215</DocDueDate>
-            // <CardCode>P1324</CardCode>
-            // <DocCurrency>MXP</DocCurrency>
-            // <DocRate>1.000000</DocRate>
-            // <DocObjectCode>22</DocObjectCode>
-            // <JournalMemo>Pedidos - P0293</JournalMemo> 
-        if($status == 0){
-            $pathh = public_path('assets/xml/sap/ordenesCompra/new_oc_p1.xml');
-            $oXML = simplexml_load_file($pathh); //Crear Object SimpleXML de un archivo 
-            $root_items = $oXML->xpath('/BOM/BO/Document_Lines');
-            $root_oc_header = $oXML->xpath('/BOM/BO/Documents/row');
 
-            //INSERTA ORDEN DE COMPRA
-            $root_oc_header[0]->DocType = $xml_tipoOC;
-            $root_oc_header[0]->DocDate = "".(new \DateTime('now'))->format('Ymd');
-            $root_oc_header[0]->DocDueDate = "".$fecha_entrega;
-            $root_oc_header[0]->CardCode = $oc_proveedor;
-            $root_oc_header[0]->DocCurrency = $oc_moneda;
-            //$root_oc_header[0]->DocRate = $oc_tipo_cambio;
-            $root_oc_header[0]->DocObjectCode = "22";
-            $root_oc_header[0]->U_SIZ_CreadoPor = "".session('userID');
-            $root_oc_header[0]->Comments = "ELABORO: ".session('userNombre').', '. strtoupper($oc_comentarios);
+        //Obtener XML
+        $vCmp->XmlExportType = '3'; //BoXmlExportTypes.xet_ExportImportMode; /solo los campos modificables
+        $vItem = $vCmp->GetBusinessObject("22"); //
+        $vItem->GetByKey("20185"); //LDM Docentry
+        //$vItem->SaveXML($pathh); //Guardar en archivo
+        $xmlString = $vItem->GetAsXML(); //Guardar XML en buffer
+        //retiramos Utf16 del XML obtenido
+        $xmlString = preg_replace('/(<\?xml[^?]+?)utf-16/i', '$1utf-8', $xmlString);
+        //Leemos XML(string) y creamos Object SimpleXML 
+        $oXML = simplexml_load_string($xmlString);
+        //$library = simplexml_load_file($pathh); //Crear Object SimpleXML de un archivo
+        $root_oc_header = $oXML->xpath('/BOM/BO/Documents/row');
+
+        //Modificar los campos en el XML
+        $root_oc_header[0]->DocDueDate = "".$fecha_entrega;
+        $root_oc_header[0]->DocCurrency = $oc_moneda;
+        $root_oc_header[0]->Comments = strtoupper($oc_comentarios);
+        
+        $item = $oXML->xpath('/BOM/BO/Document_Lines');
+        $root = $oXML->xpath('/BOM/BO');
+        $root->addChild('Document_Lines');
+        $root_items = $oXML->xpath('/BOM/BO/Document_Lines');
 
             for($x = 0; $x < count($oc_items); $x ++){
                 $xml_item = $root_items[0]->addChild('row');
@@ -1127,8 +1120,9 @@ class SAP extends Model
                 $xml_item->addChild('WarehouseCode', "AMP-CC");
                 $xml_item->addChild('TaxCode', $oc_items[$x]['ID_IVA']);
                 $xml_item->addChild('ShipDate', $oc_items[$x]['FECHA_ENTREGA']);
+                $xml_item->addChild('LineStatus', $oc_items[$x]['PARTIDA_CERRADA']);
+
             }  
-        }  
         //BO/Document_Lines/row
             //<ItemDescription>seguro</ItemDescription>
             // <AccountCode>_SYS00000000022</AccountCode>

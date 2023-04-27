@@ -2342,7 +2342,7 @@ function getTblArtExis(){
                 "MONTO_IVA" : datos_Tabla[i]["MONTO_IVA"],
                 "TOTAL": datos_Tabla[i]["TOTAL"],
                 "FECHA_ENTREGA": $('input#input-fecha-entrega-linea', tabla.row(i).node()).val(),                
-                "PARTIDA_CERRADA": $('#cerrarPartidaCheck', tabla.row(i).node()).is(":checked"),
+                "PARTIDA_CERRADA": (datos_Tabla[i]["PARTIDA_CERRADA"] == 1) ? 'bost_Close' : 'bost_Open', 
                 "ID_ARTICULO" : datos_Tabla[i]["ID_ARTICULO"],
                 "ID_PARTIDA": datos_Tabla[i]["ID_PARTIDA"],
                 "ID_AUX": datos_Tabla[i]["ID_AUX"],
