@@ -825,8 +825,8 @@ class Mod03_ComprasController extends Controller
         $itemCode = $request->get('itemCode');
         $lineNum = $request->get('lineNum');
         try{
-            return SAP::CancelDoc("22", $docNum);
-            //return ['Status' => 'Valido', 'respuesta' => 'success'];   
+            $partida = DB::select("Select * OPOR1 where ", [1]);
+            return ['Status' => 'Valido', 'respuesta' => 'success'];   
         }
         catch (\Exception $e){
             return ['Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$e->getMessage()];

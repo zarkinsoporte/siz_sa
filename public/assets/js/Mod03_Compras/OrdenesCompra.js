@@ -674,10 +674,19 @@ $('#tblArticulosExistentesNueva').on('click', 'a#boton-eliminarAE', function (e)
     }).then(function (result) {
         if (result) {
             
-            //var index = tabla.row(fila).index();           
-            tabla.row(fila).remove().draw();
-            calculaTotalOrdenCompra();
-            actualizaLineaPartidaAE();
+            //var index = tabla.row(fila).index();  
+            if (table.rows().count() == 1) {
+                swal("", "La OC debe contener al menos una partida.", "error", {
+                    buttons: false,
+                    timer: 2000,
+                });
+
+            } else {
+                tabla.row(fila).remove().draw();
+                calculaTotalOrdenCompra();
+                actualizaLineaPartidaAE();
+            }         
+            
             
         } else {
             
@@ -1630,7 +1639,7 @@ $('#tblArticulosMiscelaneosNueva').on('click', 'button#boton-eliminarAM', functi
         tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('input#input-articulo-codigoAE').attr("disabled", "disabled");
         tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('a#boton-articuloAE').attr("disabled", "disabled");
         tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('a#boton-articuloAE').attr("id", "disabled");
-        if (datos['LineStatus'] != 'O') {//SI ESTA CERRADA
+        if (datos['LineStatus'] != 'O' || datos['EDO_CANTIDAD_PENDIENTE'] != 'SIN SURTIR') {//SI ESTA CERRADA
 
             tbl.row(pos).nodes(pos, COL_CANTIDAD).to$().find('input#input-cantidadAE').attr("disabled", "disabled");
             tbl.row(pos).nodes(pos, COL_PRECIO).to$().find('input#input-precioAE').attr("disabled", "disabled");
