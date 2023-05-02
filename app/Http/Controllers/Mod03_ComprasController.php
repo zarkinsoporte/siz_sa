@@ -791,6 +791,7 @@ class Mod03_ComprasController extends Controller
         // oc_tipo_cambio
         // status
         // oc_fecha_entrega
+        // oc_docEntry
         
         try{
             if ($request->get('status') == 1) { // OC Nueva

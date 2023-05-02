@@ -17,6 +17,7 @@
             <div class="row">
                 <div class="form-group">
                     <div class="row">
+                        <input type="hidden" id="docEntryOC">
                         <div class="col-md-2" >
                             <label><strong>
                                     <font size="2">Tipo OC</font>
