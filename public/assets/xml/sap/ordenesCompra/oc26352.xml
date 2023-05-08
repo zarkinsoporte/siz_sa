@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BOM>
+    <BO>
+        <AdmInfo>
+            <Object>22</Object>
+            <Version>2</Version>
+        </AdmInfo>
+        <Documents>
+            <row>
+                <DocEntry>6352</DocEntry>
+                <DocNum>6300</DocNum>
+                <DocType>dDocument_Items</DocType>
+                <HandWritten>tNO</HandWritten>
+                <Printed>psNo</Printed>
+                <DocDate>20230308</DocDate>
+                <DocDueDate>2023-03-31</DocDueDate>
+                <CardCode>P2094</CardCode>
+                <CardName>GUADARRAMA GRANADOS JOSUE DAVID</CardName>
+                <Address>16 DE SEPTIEMBRE
+
+                    ,50727, MEX
+                    MX</Address>
+                <DocTotal>23200.000000</DocTotal>
+                <DocCurrency>MXP</DocCurrency>
+                <DocRate>1.000000</DocRate>
+                <Reference1>6300</Reference1>
+                <Comments></Comments>
+                <JournalMemo>Pedidos - P2094</JournalMemo>
+                <PaymentGroupCode>8</PaymentGroupCode>
+                <DocTime>1415</DocTime>
+                <SalesPersonCode>2</SalesPersonCode>
+                <TransportationCode>-1</TransportationCode>
+                <Confirmed>tYES</Confirmed>
+                <SummeryType>dNoSummary</SummeryType>
+                <ContactPersonCode>0</ContactPersonCode>
+                <ShowSCN>tNO</ShowSCN>
+                <Series>15</Series>
+                <TaxDate>20230308</TaxDate>
+                <PartialSupply>tYES</PartialSupply>
+                <DocObjectCode>22</DocObjectCode>
+                <FederalTaxID>GUGJ990825GA9</FederalTaxID>
+                <DiscountPercent>0.000000</DiscountPercent>
+                <DocTotalFc>0.000000</DocTotalFc>
+                <RevisionPo>tYES</RevisionPo>
+                <BlockDunning>tNO</BlockDunning>
+                <Pick>tNO</Pick>
+                <PaymentMethod />
+                <PaymentBlock>tNO</PaymentBlock>
+                <MaximumCashDiscount>tNO</MaximumCashDiscount>
+                <WareHouseUpdateType>dwh_OrdersFromVendors</WareHouseUpdateType>
+                <Rounding>tNO</Rounding>
+                <DeferredTax>tYES</DeferredTax>
+                <NumberOfInstallments>1</NumberOfInstallments>
+                <ApplyTaxOnFirstInstallment>tNO</ApplyTaxOnFirstInstallment>
+                <DocumentSubType>bod_None</DocumentSubType>
+                <Address2>SAN FCO DE SALES No. 76 COLONIA LA PUNTA
+
+                    TONALA, JALISCO,45425, CDM
+                    MX</Address2>
+                <PayToCode>1</PayToCode>
+                <UseShpdGoodsAct>tNO</UseShpdGoodsAct>
+                <IsPayToBank>tNO</IsPayToBank>
+                <DownPayment>0.000000</DownPayment>
+                <ReserveInvoice>tNO</ReserveInvoice>
+                <LanguageCode>25</LanguageCode>
+                <SequenceModel>0</SequenceModel>
+                <UseCorrectionVATGroup>tNO</UseCorrectionVATGroup>
+                <DownPaymentAmount>0.000000</DownPaymentAmount>
+                <DownPaymentPercentage>0.000000</DownPaymentPercentage>
+                <DownPaymentType>dptInvoice</DownPaymentType>
+                <DownPaymentAmountSC>0.000000</DownPaymentAmountSC>
+                <DownPaymentAmountFC>0.000000</DownPaymentAmountFC>
+                <VatPercent>0.000000</VatPercent>
+                <ServiceGrossProfitPercent>0.000000</ServiceGrossProfitPercent>
+                <RoundingDiffAmount>0.000000</RoundingDiffAmount>
+                <ControlAccount>_SYS00000000058</ControlAccount>
+                <InsuranceOperation347>tNO</InsuranceOperation347>
+                <ArchiveNonremovableSalesQuotation>tNO</ArchiveNonremovableSalesQuotation>
+                <ExtraMonth>0</ExtraMonth>
+                <ExtraDays>0</ExtraDays>
+                <CashDiscountDateOffset>0</CashDiscountDateOffset>
+                <StartFrom>pdt_None</StartFrom>
+                <NTSApproved>tNO</NTSApproved>
+                <EDocGenerationType>edocNotRelevant</EDocGenerationType>
+                <EDocStatus>edoc_Ok</EDocStatus>
+                <DownPaymentStatus>so_Open</DownPaymentStatus>
+                <GroupHandWritten>tNO</GroupHandWritten>
+                <CreateOnlineQuotation>tNO</CreateOnlineQuotation>
+                <ApplyCurrentVATRatesForDownPaymentsToDraw>tNO</ApplyCurrentVATRatesForDownPaymentsToDraw>
+                <ClosingOption>coByCurrentSystemDate</ClosingOption>
+                <OpenForLandedCosts>tYES</OpenForLandedCosts>
+                <RelevantToGTS>tNO</RelevantToGTS>
+                <IsAlteration>tNO</IsAlteration>
+                <DocumentDelivery>ddtNoneSeleted</DocumentDelivery>
+                <ReuseDocumentNum>tNO</ReuseDocumentNum>
+                <ReuseNotaFiscalNum>tNO</ReuseNotaFiscalNum>
+                <PrintSEPADirect>tNO</PrintSEPADirect>
+                <InterimType>boidt_None</InterimType>
+                <RelatedType>-1</RelatedType>
+                <ExcludeFromTaxReportControlStatementVAT>tNO</ExcludeFromTaxReportControlStatementVAT>
+                <CommissionTrade>ct_Empty</CommissionTrade>
+                <CommissionTradeReturn>tNO</CommissionTradeReturn>
+                <UseBillToAddrToDetermineTax>tNO</UseBillToAddrToDetermineTax>
+                <U_B1SYS_MainUsage />
+                <U_Prioridad>1</U_Prioridad>
+                <U_Procesado>N</U_Procesado>
+                <U_MetodoDePago>PPD</U_MetodoDePago>
+                <U_Especial>L</U_Especial>
+            </row>
+        </Documents>
+        <LineTaxJurisdictions>
+            <row>
+                <JurisdictionCode>IVAC16</JurisdictionCode>
+                <JurisdictionType>7</JurisdictionType>
+                <TaxAmount>3200.000000</TaxAmount>
+                <DocEntry>6352</DocEntry>
+                <LineNumber>1</LineNumber>
+                <RowSequence>0</RowSequence>
+            </row>
+        </LineTaxJurisdictions>
+        <LineExpenseTaxJurisdictions>
+            <row>
+                <JurisdictionCode>IVAC16</JurisdictionCode>
+                <JurisdictionType>7</JurisdictionType>
+                <TaxAmount>3200.000000</TaxAmount>
+                <DocEntry>6352</DocEntry>
+                <LineNumber>1</LineNumber>
+                <RowSequence>0</RowSequence>
+            </row>
+        </LineExpenseTaxJurisdictions>
+        <ElectronicProtocols>
+            <row>
+                <ProtocolCode>edpc_CFDI</ProtocolCode>
+                <GenerationType>edgt_NotRelevant</GenerationType>
+                <MappingID>0</MappingID>
+            </row>
+        </ElectronicProtocols>
+        <DocExpenseTaxJurisdictions>
+            <row>
+                <JurisdictionCode>IVAC16</JurisdictionCode>
+                <JurisdictionType>7</JurisdictionType>
+                <TaxAmount>3200.000000</TaxAmount>
+                <DocEntry>6352</DocEntry>
+                <LineNumber>1</LineNumber>
+                <RowSequence>0</RowSequence>
+            </row>
+        </DocExpenseTaxJurisdictions>
+        <TaxExtension>
+            <row>
+                <NetWeight>0.000000</NetWeight>
+                <GrossWeight>0.000000</GrossWeight>
+                <StreetS>SAN FCO DE SALES No. 76</StreetS>
+                <BlockS>COLONIA LA PUNTA</BlockS>
+                <CityS>TONALA, JALISCO</CityS>
+                <ZipCodeS>45425</ZipCodeS>
+                <StateS>CDM</StateS>
+                <CountryS>MX</CountryS>
+                <StreetB>16 DE SEPTIEMBRE</StreetB>
+                <ZipCodeB>50727</ZipCodeB>
+                <StateB>MEX</StateB>
+                <CountryB>MX</CountryB>
+                <ImportOrExportType>et_IpmortsOrExports</ImportOrExportType>
+                <DocEntry>6352</DocEntry>
+                <BoEValue>0.000000</BoEValue>
+            </row>
+        </TaxExtension>
+        <AddressExtension>
+            <row>
+                <ShipToStreet>SAN FCO DE SALES No. 76</ShipToStreet>
+                <ShipToBlock>COLONIA LA PUNTA</ShipToBlock>
+                <ShipToCity>TONALA, JALISCO</ShipToCity>
+                <ShipToZipCode>45425</ShipToZipCode>
+                <ShipToState>CDM</ShipToState>
+                <ShipToCountry>MX</ShipToCountry>
+                <BillToStreet>16 DE SEPTIEMBRE</BillToStreet>
+                <BillToZipCode>50727</BillToZipCode>
+                <BillToState>MEX</BillToState>
+                <BillToCountry>MX</BillToCountry>
+                <DocEntry>6352</DocEntry>
+            </row>
+        </AddressExtension>
+        <Document_Lines>
+            <row>
+                <ItemCode>18022</ItemCode>
+                <AccountCode>_SYS00000000022</AccountCode>
+                <Quantity>20.00</Quantity>
+                <Price>1000.00</Price>
+                <DiscountPercent>.0</DiscountPercent>
+                <WarehouseCode>AMP-CC</WarehouseCode>
+                <TaxCode>W3</TaxCode>
+                <ShipDate>2023-03-31</ShipDate>
+                <LineStatus>bost_Open</LineStatus>
+            </row>
+        </Document_Lines>
+    </BO>
+</BOM>

@@ -862,8 +862,8 @@ function InicializaComponentesOC() {
     $('#ordenesCompraOC #contactoProveedor').text('');
     $('#ordenesCompraOC #rfcProveedor').text('');
 
-    $("#ordenesCompraOC #cboMoneda").val('');
-    $("#ordenesCompraOC #cboMoneda").selectpicker('refresh');
+    $("#cboMoneda").val('');
+    $("#cboMoneda").selectpicker('refresh');
 
     $("#ordenesCompraOC #input_tc").val(1);
     
@@ -903,7 +903,7 @@ function changeProveedor(){ //??
         data: {
 
             "proveedorId": $('#input-proveedor').val(),
-            "monedaId": $("#ordenesCompraOC #cboMoneda").val()
+            "monedaId": $("#cboMoneda").val()
 
         },
         type: "POST",
@@ -1185,7 +1185,7 @@ $('#cboMoneda').change(function (e){
 
 function changeMoneda(){
 
-    var tipoMoneda = $('#ordenesCompraOC #cboMoneda').val();
+    var tipoMoneda = $('#cboMoneda').val();
     var proveedor = $('#input-proveedor').val();
     var fechaOc = $('#input-fecha').val();
 
@@ -1253,7 +1253,7 @@ function changeMoneda(){
 //??
 function llenarComboTipoCambio(datos){
 
-    var tipoMoneda = $('#ordenesCompraOC #cboMoneda').val();
+    var tipoMoneda = $('#cboMoneda').val();
 
     if(tipoMoneda != '748BE9C9-B56D-4FD2-A77F-EE4C6CD226A1'){//PESOS
 
@@ -2342,8 +2342,8 @@ function CargaComponentesOC(resumen) {
 
     carga_info_proveedor(resumen.CardCode);
 
-    $("#ordenesCompraOC #cboMoneda").val(resumen.OC_MONEDA);
-    $("#ordenesCompraOC #cboMoneda").selectpicker('refresh');
+    $("#cboMoneda").val(resumen.OC_MONEDA);
+    $("#cboMoneda").selectpicker('refresh');
     //verificar cambio de moneda si es necesario
 
     $("#ordenesCompraOC #input_tc").val(resumen.OC_RATE);
@@ -2537,8 +2537,8 @@ function ProveedorSeleccionadoOC(codigo, razonSocial, Moneda, Email, domicilio, 
 
         // $("#ordenesCompraOC #cboSucursal").removeAttr('disabled');
         // $("#ordenesCompraOC #cboSucursal").selectpicker('refresh');
-        // $("#ordenesCompraOC #cboMoneda").removeAttr('disabled');
-        // $("#ordenesCompraOC #cboMoneda").selectpicker('refresh');
+        // $("#cboMoneda").removeAttr('disabled');
+        // $("#cboMoneda").selectpicker('refresh');
         // $("#ordenesCompraOC #cboTipoOC").removeAttr('disabled');
         // $("#ordenesCompraOC #cboTipoOC").selectpicker('refresh');
         // $("#ordenesCompraOC #cboAlmacen").removeAttr('disabled');
@@ -2745,8 +2745,8 @@ function getTblArtExis(){
                 "IVA" : datos_Tabla[i]["IVA"],
                 "MONTO_IVA" : datos_Tabla[i]["MONTO_IVA"],
                 "TOTAL": datos_Tabla[i]["TOTAL"],
-                "FECHA_ENTREGA": $('input#input-fecha-entrega-linea', tabla.row(i).node()).val(),                
-                "PARTIDA_CERRADA": (datos_Tabla[i]["PARTIDA_CERRADA"] == 1) ? 'bost_Close' : 'bost_Open', 
+                "FECHA_ENTREGA": $('input#input-fecha-entrega-linea', tabla.row(i).node()).val(),  
+                "PARTIDA_CERRADA": ($('#cerrarPartidaCheck', tabla.row(i).node()).is(":checked")) ? 'bost_Close' : 'bost_Open',
                 "ID_ARTICULO" : datos_Tabla[i]["ID_ARTICULO"],
                 "ID_PARTIDA": datos_Tabla[i]["ID_PARTIDA"],
                 "ID_AUX": datos_Tabla[i]["ID_AUX"],

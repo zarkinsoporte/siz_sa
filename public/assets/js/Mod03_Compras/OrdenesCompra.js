@@ -191,7 +191,7 @@ var tableOC = $("#tableOC").DataTable({
                 },
                 {
 
-                    "targets": [ 5 ],
+                    "targets": [ 4 ],
                     "searchable": false,
                     "orderable": false,
                     "render": function ( data, type, row ) {
@@ -1336,6 +1336,7 @@ $('#tblArticulosExistentesNueva').on('change','input#cerrarPartidaCheck',functio
                     datos['CANT_PENDIENTE']="0.00";
                     datos['PARTIDA_CERRADA']=1;
                     tbl.row(fila).data(datos);
+                    
                     tbl.row(fila).nodes(fila, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').attr("disabled","disabled");
                     
                     tbl.row(fila).nodes(fila, COL_CODIGO_ART).to$().find('input#input-articulo-codigoAE').attr("disabled", "disabled");
