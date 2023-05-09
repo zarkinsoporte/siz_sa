@@ -1098,24 +1098,24 @@ class SAP extends Model
         $vCmp->XmlExportType = '3'; //BoXmlExportTypes.xet_ExportImportMode; /solo los campos modificables
         $vItem = $vCmp->GetBusinessObject("22"); //
         $vItem->GetByKey($oc_docEntry); //LDM Docentry
-        $pathh = public_path('assets/xml/sap/ordenesCompra/oc'.$oc_docEntry.'.xml');
+        $pathh = public_path('assets/xml/sap/ordenesCompra/oc.xml');
         $pathh2 = public_path('assets/xml/sap/ordenesCompra/oc2'.$oc_docEntry.'.xml');
-        //$vItem->SaveXML($pathh2); //Guardar en archivo
-        $xmlString = $vItem->GetAsXML(); //Guardar XML en buffer
+        $vItem->SaveXML($pathh); //Guardar en archivo
+        /*$xmlString = $vItem->GetAsXML(); //Guardar XML en buffer
         //retiramos Utf16 del XML obtenido
         $xmlString = preg_replace('/(<\?xml[^?]+?)utf-16/i', '$1utf-8', $xmlString);
         //Leemos XML(string) y creamos Object SimpleXML 
         $oXML = simplexml_load_string($xmlString);
         //$library = simplexml_load_file($pathh); //Crear Object SimpleXML de un archivo
        
-       /*
+      
         $root_oc_header = $oXML->xpath('/BOM/BO/Documents/row');
 
         //Modificar los campos en el XML
         $root_oc_header[0]->DocDueDate = "".$fecha_entrega;
-        $root_oc_header[0]->DocCurrency = $oc_moneda;
+        //$root_oc_header[0]->DocCurrency = $oc_moneda;
         $root_oc_header[0]->Comments = strtoupper($oc_comentarios);
-        
+         *
         $item = $oXML->xpath('/BOM/BO/Document_Lines');
         //unset($item[0][0]);
         $root = $oXML->xpath('/BOM/BO');
@@ -1144,26 +1144,26 @@ class SAP extends Model
 
             }  
        */
-        $vItem = $vCmp->GetBusinessObject("22");
+       // $vItem = $vCmp->GetBusinessObject("22");
         //$oXML->asXML($pathh);
         //$oXML->asXML($pathh2);
-        $vItem->Browser->ReadXml($oXML->asXML(), 0);
+        //$vItem->Browser->ReadXml($oXML->asXML(), 0);
        
         //$resultadoOperacion = $vItem->UpdateFromXML($pathh);
         //$resultadoOperacion = $vItem->Update;
-        if ($resultadoOperacion <> 0) {
+       /* if ($resultadoOperacion <> 0) {
             //throw new \Exception( $vCmp->GetLastErrorDescription(), 1);
-            return ['id' => $oc_docEntry,'Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$vCmp->GetLastErrorDescription()];
+            return ['result' => $resultadoOperacion, 'id' => $oc_docEntry, 'Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$vCmp->GetLastErrorDescription()];
         }else {
-            return ['id' => $oc_docEntry , 'Status' => 'Valido', 'respuesta' => 'success'];
-        }
-        $vCmp->Disconnect;
+            return ['result' => $resultadoOperacion, 'id' => $oc_docEntry , 'Status' => 'Valido', 'respuesta' => 'success'];
+        }*/
+      /*$vCmp->Disconnect;
         $vCmp = null;
         $vItem = null;
         $xmlString = null;
         $oXML = null;
         $item = null;
-        $resultadoOperacion = null;
+        $resultadoOperacion = null;*/
     }
     public static function actualizaOC_old($datos)
     {
