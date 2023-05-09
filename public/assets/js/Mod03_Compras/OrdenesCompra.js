@@ -90,9 +90,9 @@ function js_iniciador() {
     });
 
   function InicializaComboBox()  {
-        // $('#cboMoneda').selectpicker({
-        //     noneSelectedText: 'Selecciona una opción',
-        // });
+        $('#cboMoneda').selectpicker({
+            noneSelectedText: 'Selecciona una opción',
+        });
         $('.selectpicker').selectpicker({
             noneSelectedText: 'Selecciona una opción',
             container: "body"
@@ -100,7 +100,7 @@ function js_iniciador() {
         
         
         var options = [];
-        var opciones = [ //la llave es el Id que hay en la tabla ItekniaDB.ArticulosTipos
+        var opciones = [ 
             { 'llave': 'MXP', 'valor': 'MXP' },
             { 'llave': 'USD', 'valor': 'USD' },
             { 'llave': 'EUR', 'valor': 'EUR' },
@@ -110,6 +110,7 @@ function js_iniciador() {
         }
         $('#cboMoneda').append(options);
         $('#cboMoneda').selectpicker('refresh');
+        
         $('#cboTPM').selectpicker('refresh');
         $('#sel-tipo-oc').val(0);
         $('#sel-tipo-oc').selectpicker('refresh');
@@ -512,6 +513,7 @@ $(document).keyup(function(event) {
         return s.join(dec);
     } 
     $("#cboMoneda").on("changed.bs.select", function(e, clickedIndex, newValue, oldValue) {
+        e.preventDefault();
         $.blockUI({
                 message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
                 css: {
@@ -622,7 +624,6 @@ $(document).keyup(function(event) {
                 }
             });
         var proveedor_moneda = $('option:selected', this).attr("data-moneda");
-        var proveedorId = $('option:selected', this).val();
         if (proveedor_moneda != $("#cboMoneda").val()) {
             $("#cboMoneda").val(proveedor_moneda);
             $('#cboMoneda').selectpicker('refresh');
@@ -633,6 +634,7 @@ $(document).keyup(function(event) {
             //$('#tblArticulosMiscelaneosNueva').DataTable().clear().draw();
             //insertarFila();   
         }
+        var proveedorId = $('option:selected', this).val();
         carga_info_proveedor(proveedorId);
         
         setTimeout($.unblockUI, 2000);   

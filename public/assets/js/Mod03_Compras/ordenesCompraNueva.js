@@ -856,13 +856,13 @@ function InicializaComponentesOC() {
 
     $('#ordenesCompraOC #nombreProveedor').text('');
     $('#ordenesCompraOC #direccionProveedor').text('');
-    $("#ordenesCompraOC #codigoPostalProveedor").text('');
+    $("#ordenesCompraOC #emailProveedor").text('');
     $('#ordenesCompraOC #localizacionProveedor').text('');
     $('#ordenesCompraOC #telefonicosProveedor').text('');
     $('#ordenesCompraOC #contactoProveedor').text('');
     $('#ordenesCompraOC #rfcProveedor').text('');
 
-    $("#cboMoneda").val('');
+    $("#cboMoneda").val('MXP');
     $("#cboMoneda").selectpicker('refresh');
 
     $("#ordenesCompraOC #input_tc").val(1);
@@ -2344,12 +2344,16 @@ function CargaComponentesOC(resumen) {
 
     $("#cboMoneda").val(resumen.OC_MONEDA);
     $("#cboMoneda").selectpicker('refresh');
+    console.log(resumen.OC_MONEDA)
+    console.log($("#cboMoneda").val())
     //verificar cambio de moneda si es necesario
 
     $("#ordenesCompraOC #input_tc").val(resumen.OC_RATE);
+
     if (resumen.OC_MONEDA == 'MXP') {
         $("#div-tipo-cambio").hide();
         $("#input_tc_anterior").val(1);
+        $('#input_tc').val(1)
     }
 
     $('#ordenesCompraOC #codigoOC').text(resumen.OC_NUM);
@@ -2503,77 +2507,27 @@ function carga_info_proveedor(proveedorId) {
             var codigoCliente = datos['PRO_Codigo'];
             var razonSocial = datos['PRO_Nombre'];
             var Moneda = datos['Moneda'];
-            var Email = datos['PRO_Email'];
-            var domicilio = datos['PRO_Domicilio'];
-            var rfc = datos['PRO_RFC'];
-            var telefono = datos['PRO_Telefono'];
-            var contacto = datos['CON_Contacto'];
+            if (OC_nueva == 0) {
+                Moneda = $('#cboMoneda').val();
+            }  
 
-            ProveedorSeleccionadoOC(codigoCliente, razonSocial, Moneda, Email,
-                domicilio, rfc, telefono, contacto);
+            var domicilio = (datos['PRO_Domicilio'] === null || datos['PRO_Domicilio'] === undefined) ? '-' : datos['PRO_Domicilio'];
+            var Email = (datos['PRO_Email'] === null || datos['PRO_Email'] === undefined) ? '-' : datos['PRO_Email'];
+            var rfc = (datos['PRO_RFC'] === null || datos['PRO_RFC'] === undefined) ? '-' : datos['PRO_RFC'];
+            var telefono = (datos['PRO_Telefono'] === null || datos['PRO_Telefono'] === undefined) ? '-' : datos['PRO_Telefono'];
+            var contacto = (datos['CON_Contacto'] === null || datos['CON_Contacto'] === undefined) ? '-' : datos['CON_Contacto'];
+            
+            document.getElementById('nombreProveedor').innerText = codigoCliente + ' ' + razonSocial;
+            document.getElementById('direccionProveedor').innerHTML = '<i class="fa fa-map-marker" aria-hidden="true"></i> ' + domicilio;
+            document.getElementById('emailProveedor').innerHTML = '<i class="fa fa-envelope" aria-hidden="true"></i> ' + Email;            
+            document.getElementById('rfcProveedor').innerHTML = '<i class="fa fa-building" aria-hidden="true"></i> ' + rfc;
+            document.getElementById('telefonicosProveedor').innerHTML = '<i class="fa fa-phone" aria-hidden="true"></i> ' + telefono;
+            document.getElementById('contactoProveedor').innerHTML = '<i class="fa fa-address-book" aria-hidden="true"></i> ' + contacto;
         }
     });
 
 }
-function ProveedorSeleccionadoOC(codigo, razonSocial, Moneda, Email, domicilio, rfc, telefono, contacto) {
-    var editaProveedor = 0;
-    if (editaProveedor == 0) {
-        //P1765	XINOVA SA DE CV	
-        //XIN100304FV5	
-        //juancarlos.verduzco@gmail.com	
-        //(442) 2175452	
-        //MXP	
-        //NULL	
-        //PINO SUAREZ, SANTA CLARA, MEXICO, MEX, MX. CP:50090   
-        $('#btnBuscarProveedores').text(codigo + ' - ' + razonSocial);
-        //MonId = MonedaId;
-        //document.getElementById('cboMoneda').value = MonedaId;
-        document.getElementById('nombreProveedor').innerText = codigo + ' ' + razonSocial;
-        document.getElementById('direccionProveedor').innerText = domicilio;
-        document.getElementById('codigoPostalProveedor').innerHTML = '<i class="fa fa-envelope" aria-hidden="true"></i> ' + ((Email == null) ? '-' : Email);
-        document.getElementById('rfcProveedor').innerText = 'RFC: ' + rfc;
-        document.getElementById('telefonicosProveedor').innerHTML = '<i class="fa fa-phone" aria-hidden="true"></i> ' + ((telefono == null) ? '-' : telefono);
-        document.getElementById('contactoProveedor').innerHTML = '<i class="fa fa-vcard" aria-hidden="true"></i> ' + ((contacto == null) ? '-' : contacto);
 
-        // $("#ordenesCompraOC #cboSucursal").removeAttr('disabled');
-        // $("#ordenesCompraOC #cboSucursal").selectpicker('refresh');
-        // $("#cboMoneda").removeAttr('disabled');
-        // $("#cboMoneda").selectpicker('refresh');
-        // $("#ordenesCompraOC #cboTipoOC").removeAttr('disabled');
-        // $("#ordenesCompraOC #cboTipoOC").selectpicker('refresh');
-        // $("#ordenesCompraOC #cboAlmacen").removeAttr('disabled');
-        // $("#ordenesCompraOC #cboAlmacen").selectpicker('refresh');
-        // //$("#ordenesCompraOC #boton-datos-adicionales").removeAttr('disabled');
-        // $("#ordenesCompraOC #cboAgente").removeAttr('disabled');
-        // $("#ordenesCompraOC #cboAgente").selectpicker('refresh');
-        // $("#ordenesCompraOC #cboSucursalAgente").removeAttr('disabled');
-        // $("#ordenesCompraOC #cboSucursalAgente").selectpicker('refresh');
-
-        /*if(MonedaId != '748BE9C9-B56D-4FD2-A77F-EE4C6CD226A1'){//PESOS
-
-         $("#ordenesCompraOC #cboAgente").removeAttr('disabled');
-         $("#ordenesCompraOC #cboAgente").selectpicker('refresh');
-         $("#ordenesCompraOC #agenteAduanal").show();
-
-         }
-         else{
-
-         $("#ordenesCompraOC #cboAgente").val('');
-         $("#ordenesCompraOC #cboAgente").selectpicker('refresh');
-         $("#ordenesCompraOC #cboAgente").attr('disabled','disabled');
-         $("#ordenesCompraOC #agenteAduanal").hide();
-
-         }*/
-
-    }
-
-    // $('#' + nombreInputId).val(id);
-    // $('#' + nombreInputId).change();
-
-    // $('#cboMoneda').change();
-    // $('#modalBuscadorProveedores').modal('hide');
-    //$('#modalBuscadorProveedores').on('show.bs.modal', function () { }).modal("show");
-}
 function carga_tipo_cambio(moneda) {
     if (moneda == 'MXP') {
         $("#div-tipo-cambio").hide();
@@ -2700,9 +2654,15 @@ function mostrarOC(NumOC) {
             $('#ordenesCompraOC').show();
             $('#btnBuscadorOC').hide();
             MuestraComponentesOC()
+            console.log('1 ==> ' + $("#cboMoneda").val())
             CargaComponentesOC(data.resumen);
+            console.log('2 ==> ' + $("#cboMoneda").val())
             agregaPartidasOCDetalle(data.detalle, (data.resumen).OC_TIPO);
+            console.log('3 ==> ' + $("#cboMoneda").val())
+            $("#cboMoneda").val((data.resumen).OC_MONEDA);
+            $("#cboMoneda").selectpicker('refresh');
             calculaTotalOrdenCompra();
+            console.log('4 ==> ' + $("#cboMoneda").val())
         },
         error: function (xhr, ajaxOptions, thrownError) {
             $.unblockUI();
@@ -2808,59 +2768,6 @@ function getTblArtMisc(){
         return tblAM;
     }
     else{return tblAM;}
-
-}
-
-function agregarDatosOC(datos,datos2){
-
-   
-    document.getElementById('nombreProveedor').innerText = datos[0]['PRO_Nombre'];
-    document.getElementById('direccionProveedor').innerText = datos[0]['PRO_Domicilio'];
-    document.getElementById('codigoPostalProveedor').innerText = datos[0]['PRO_CodigoPostal'];
-    document.getElementById('rfcProveedor').innerText = datos[0]['PRO_RFC'];
-    document.getElementById('telefonicosProveedor').innerText = datos[0]['PRO_Telefono'];
-    document.getElementById('contactoProveedor').innerText = datos[0]['PRO_Contacto'];
-
-    document.getElementById('nombreSucursal').innerText = datos[0]['PDOC_Nombre'];
-    document.getElementById('domicilioSucursal').innerText = datos[0]['PDOC_Domicilio'];
-    document.getElementById('telefonicosSucursal').innerText = datos[0]['PDOC_Telefono'];
-    document.getElementById('emailSucursal').innerText = datos[0]['PDOC_Email'];
-    document.getElementById('codigopostalSucursal').innerText = datos[0]['PDOC_CodigoPostal'];
-    document.getElementById('ciudadSucursal').innerText = datos[0]['PDOC_Ciudad'];
-
-    document.getElementById('codigoOC').innerText = datos[0]['OC_CodigoOC'];
-    document.getElementById('estadoOC').innerText = datos[0]['CMM_EstatusOC'];
-
-}
-
-function agregaPartidasOCDetalle_old(datos){
-
-    $("#tblArticulosExistentesNueva").DataTable().clear().draw();
-    $("#tblArticulosMiscelaneosNueva").DataTable().clear().draw();
-    var contador1 = 0;
-    var contador2 = 0;
-    for(var x = 0; x < datos.length; x++){
-
-        if(datos[x]['OCD_ART_ArticuloId'] != null){
-
-            agregaArtExis(datos[x],contador1);
-            actualizaLineaPartidaAE();
-            PartidaResumenAE();
-            contador1++;
-
-        }
-        else{
-
-            agregaArtMisc(datos[x],contador2);
-            actualizaLineaPartidaAM();
-            PartidaResumenAM();
-            contador2++;
-
-        }
-
-    }
-    calculaTotalOrdenCompra();
-    ////calculaTipoCambio();
 
 }
 

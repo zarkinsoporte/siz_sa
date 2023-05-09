@@ -489,14 +489,14 @@ Route::get('/sap', function (Request $request) {
 	$vCmp->DbUserName = env('SAP_DbUserName');
 	$vCmp->DbPassword = env('SAP_DbPassword');
 
-	$lRetCode = $vCmp->Connect;
-	$id = '1';
-	$vCmp->XmlExportType = '3';
-	$vItem = $vCmp->GetBusinessObject("22");
+	//$lRetCode = $vCmp->Connect;
+	//$id = '1';
+	//$vCmp->XmlExportType = '3';
+	//$vItem = $vCmp->GetBusinessObject("22");
 
-	$vItem->GetByKey('6354'); //5269
-	$pathh = public_path('assets/xml/sap/2023ART_6302.xml');
-	$vItem->SaveXML($pathh); //Guardar en archivo
+	//$vItem->GetByKey('6354'); //5269
+	//$pathh = public_path('assets/xml/sap/2023ART_6302.xml');
+	//$vItem->SaveXML($pathh); //Guardar en archivo
 /*
 	$vItem->DocDate = (new \DateTime('now'))->format('Y-m-d H:i:s');
 	$vItem->FromWarehouse = 'AMP-ST'; //origen
@@ -560,13 +560,13 @@ Route::get('/sap', function (Request $request) {
 		// $vItem->UpdateFromXML($pathh);
 		$resultadoOperacion = $vItem->Update;
 
-	
+	*/
 	if ($vCmp->Connect <> 0) {
 	   Session::flash('error', $vCmp->GetLastErrorDescription());
 	} else {
 		Session::flash('info',' - conexión con SAP DI API exitosa!!'. $vCmp->language. ' ultimo err:'. $vCmp->GetLastErrorDescription());
 	} 
-	*/
+	
 	$vCmp->Disconnect;
 	$vCmp = null;
 	$vItem = null;

@@ -71,9 +71,8 @@
                             <label><strong>
                                     <font size="2">Moneda</font>
                                 </strong></label>
-                            {!! Form::select('MON_MonedaId', (["" => "Selecciona una opción"] ), null, ['id' =>
-                            'cboMoneda', 'class' => 'form-control selectpicker', "data-size" => "8",
-                            "data-style"=>"btn-success", "data-live-search"=>"true"]) !!}
+                            <select class="form-control selectpicker" id="cboMoneda" name="cboMoneda" data-size="8" data-style="btn-success">                               
+                            </select>
                         </div>
                         <div class="col-md-2 mt7" id="div-tipo-cambio">
                             <label><strong>
@@ -102,7 +101,7 @@
                             <address class="m-t-5 m-b-5">
                                 <strong><span id="nombreProveedor"></span></strong></br>
                                 <span id="direccionProveedor"></span></br>
-                                <span id="codigoPostalProveedor"></span></br>
+                                <span id="emailProveedor"></span></br>
                                 <span id="rfcProveedor"></span></br>
                                 <span id="telefonicosProveedor"></span></br>
                                 <span id="contactoProveedor"></span>
