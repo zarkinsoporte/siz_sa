@@ -1066,7 +1066,8 @@ class SAP extends Model
         //Ref
         //https://answers.sap.com/questions/1448088/using-xml-to-update-objects-in-diapi.html
         //https://answers.sap.com/questions/232431/add-invoices-from-di-api-using-xml.html¡
-        
+        ini_set('memory_limit', '-1');
+        set_time_limit(0);
         $oc_comentarios = $datos["oc_comentarios"];
         $oc_moneda = $datos["oc_moneda"];        
         $fecha_entrega = $datos["oc_fecha_entrega"];
@@ -1099,15 +1100,15 @@ class SAP extends Model
         $vItem = $vCmp->GetBusinessObject("22"); //
         $vItem->GetByKey($oc_docEntry); //LDM Docentry
         $pathh = public_path('assets/xml/sap/ordenesCompra/oc.xml');
-        $pathh2 = public_path('assets/xml/sap/ordenesCompra/oc2'.$oc_docEntry.'.xml');
-        $vItem->SaveXML($pathh); //Guardar en archivo
-        /*$xmlString = $vItem->GetAsXML(); //Guardar XML en buffer
+        $pathh2 = public_path('assets/xml/sap/ordenesCompra/oc'.$oc_docEntry.'.xml');
+        //$vItem->SaveXML($pathh); //Guardar en archivo
+        $xmlString = $vItem->GetAsXML(); //Guardar XML en buffer
         //retiramos Utf16 del XML obtenido
         $xmlString = preg_replace('/(<\?xml[^?]+?)utf-16/i', '$1utf-8', $xmlString);
         //Leemos XML(string) y creamos Object SimpleXML 
         $oXML = simplexml_load_string($xmlString);
         //$library = simplexml_load_file($pathh); //Crear Object SimpleXML de un archivo
-       
+        $oXML->asXML($pathh2);
       
         $root_oc_header = $oXML->xpath('/BOM/BO/Documents/row');
 
@@ -1115,10 +1116,10 @@ class SAP extends Model
         $root_oc_header[0]->DocDueDate = "".$fecha_entrega;
         //$root_oc_header[0]->DocCurrency = $oc_moneda;
         $root_oc_header[0]->Comments = strtoupper($oc_comentarios);
-         *
+         
         $item = $oXML->xpath('/BOM/BO/Document_Lines');
-        //unset($item[0][0]);
-        $root = $oXML->xpath('/BOM/BO');
+        ////unset($item[0][0]);
+       /* $root = $oXML->xpath('/BOM/BO');
         $root[0]->addChild('Document_Lines');
         $root_items = $oXML->xpath('/BOM/BO/Document_Lines');
 
@@ -1144,19 +1145,18 @@ class SAP extends Model
 
             }  
        */
-       // $vItem = $vCmp->GetBusinessObject("22");
-        //$oXML->asXML($pathh);
-        //$oXML->asXML($pathh2);
+       
+        $oXML->asXML($pathh);
         //$vItem->Browser->ReadXml($oXML->asXML(), 0);
        
-        //$resultadoOperacion = $vItem->UpdateFromXML($pathh);
+        $resultadoOperacion = $vItem->UpdateFromXML($pathh);
         //$resultadoOperacion = $vItem->Update;
-       /* if ($resultadoOperacion <> 0) {
+        if ($resultadoOperacion <> 0) {
             //throw new \Exception( $vCmp->GetLastErrorDescription(), 1);
             return ['result' => $resultadoOperacion, 'id' => $oc_docEntry, 'Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$vCmp->GetLastErrorDescription()];
         }else {
             return ['result' => $resultadoOperacion, 'id' => $oc_docEntry , 'Status' => 'Valido', 'respuesta' => 'success'];
-        }*/
+        }
       /*$vCmp->Disconnect;
         $vCmp = null;
         $vItem = null;
