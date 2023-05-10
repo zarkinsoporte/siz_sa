@@ -1061,6 +1061,23 @@ class SAP extends Model
         $item = null;
         $resultadoOperacion = null;
     }
+    public static function actualizaOC2($datos){
+        (self::$vCmp == false) ? self::Connect() : '';
+        //self::$vCmp->XmlExportType("xet_ExportImportMode");
+        //OITM ARTICULOS ES EL OBJETO 4
+        $vItem = self::$vCmp->GetBusinessObject("4"); 
+        //ENTRE PARENTESIS VA EL CODIGO DEL ARTICULO A ACTUALIZAR
+        $RetVal = $vItem->GetByKey("".$codigo); 
+        
+        //Seleccionar 
+        $vItem->User_Text = "".$comentario;
+        $retCode = $vItem->Update;
+        if ($retCode != 0) {
+            return self::$vCmp->GetLastErrorDescription();
+        } else {
+            return 'ok';
+        }
+    }
     public static function actualizaOC($datos)
     {
         //Ref
@@ -1099,7 +1116,7 @@ class SAP extends Model
         $vCmp->XmlExportType = '3'; //BoXmlExportTypes.xet_ExportImportMode; /solo los campos modificables
         $vItem = $vCmp->GetBusinessObject("22"); //
         $vItem->GetByKey($oc_docEntry); //LDM Docentry
-        $pathh = public_path('assets/xml/sap/ordenesCompra/oc.xml');
+        $pathh = public_path('assets/xml/sap/ordenesCompra/oc1.xml');
         $pathh2 = public_path('assets/xml/sap/ordenesCompra/oc'.$oc_docEntry.'.xml');
         //$vItem->SaveXML($pathh); //Guardar en archivo
         $xmlString = $vItem->GetAsXML(); //Guardar XML en buffer
@@ -1116,8 +1133,16 @@ class SAP extends Model
         $root_oc_header[0]->DocDueDate = "".$fecha_entrega;
         //$root_oc_header[0]->DocCurrency = $oc_moneda;
         $root_oc_header[0]->Comments = strtoupper($oc_comentarios);
-         
-        $item = $oXML->xpath('/BOM/BO/Document_Lines');
+        
+        $item = $oXML->xpath('/BOM/BO/Document_Lines/row[LineNum="0"]');
+
+        if (count($item) >= 1) {
+            foreach ($item as $i) {
+                //$i->Quantity = '7';
+                $i->LineStatus = 'bost_Close';
+            }
+        }
+        //$item = $oXML->xpath('/BOM/BO/Document_Lines');
         ////unset($item[0][0]);
        /* $root = $oXML->xpath('/BOM/BO');
         $root[0]->addChild('Document_Lines');
@@ -1147,10 +1172,10 @@ class SAP extends Model
        */
        
         $oXML->asXML($pathh);
-        //$vItem->Browser->ReadXml($oXML->asXML(), 0);
+        $vItem->Browser->ReadXml($oXML->asXML(), 0);
        
-        $resultadoOperacion = $vItem->UpdateFromXML($pathh);
-        //$resultadoOperacion = $vItem->Update;
+        //$resultadoOperacion = $vItem->UpdateFromXML($pathh);
+        $resultadoOperacion = $vItem->Update;
         if ($resultadoOperacion <> 0) {
             //throw new \Exception( $vCmp->GetLastErrorDescription(), 1);
             return ['result' => $resultadoOperacion, 'id' => $oc_docEntry, 'Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$vCmp->GetLastErrorDescription()];
