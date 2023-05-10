@@ -863,9 +863,10 @@ class Mod03_ComprasController extends Controller
                 , ZipCodeF CP_ENTREGA
                 from ADM1
                 inner join OADM on OADM.Code = ADM1.Code");
+           // return compact('NumOC', 'rs1', 'rs2', 'detalle');
             $resumen = $rs1[0];
             $comp = $rs2[0]; 
-            return compact('comp', 'resumen', 'detalle');
+            return compact('NumOC', 'comp', 'resumen', 'detalle');
         } catch (\Exception $e){
 
             header('HTTP/1.1 500 Internal Server Error');

@@ -1099,7 +1099,7 @@ function recargaTablaArticulos(datos){
 }
 
 function insertarFila(){
-    console.log('insertar fila: ' + BanderaOC)
+    console.log('insertar fila: (0->TBL_ART_EXIST, 1->TBL_ART_MISC) BanderaOC =' + BanderaOC)
      if (BanderaOC == 0){
         TBL_ART_EXIST.row.add(
             {
@@ -2280,8 +2280,8 @@ function registraOC(){
                 //$('#ordenesCompraOC').hide();
                 //$('#btnBuscadorOC').show();
                 //reloadBuscadorOC();
-                mostrarOC(datos.id);
                 $.unblockUI();
+                mostrarOC(datos["id"]);
                 swal("", "OC guardada", "success", {
                     buttons: false,
                     timer: 2000,
@@ -2442,7 +2442,7 @@ function agregaArtExis(datos, pos) {
             , "BTN_ELIMINAR": null
 
             , "ID_IVA": datos['TaxCode']
-            , "ID_PARTIDA": ""
+            , "ID_PARTIDA": datos['LIN_NUMERO']
             , "ESTATUS_PARTIDA": datos['LineStatus']
         }
     ).draw();

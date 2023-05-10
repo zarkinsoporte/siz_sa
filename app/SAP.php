@@ -1134,31 +1134,18 @@ class SAP extends Model
         //$root_oc_header[0]->DocCurrency = $oc_moneda;
         $root_oc_header[0]->Comments = strtoupper($oc_comentarios);
         
-        $item = $oXML->xpath('/BOM/BO/Document_Lines/row[LineNum="0"]');
 
-        if (count($item) >= 1) {
-            foreach ($item as $i) {
-                //$i->Quantity = '7';
-                $i->LineStatus = 'bost_Close';
-            }
-        }
-        //$item = $oXML->xpath('/BOM/BO/Document_Lines');
-        ////unset($item[0][0]);
-       /* $root = $oXML->xpath('/BOM/BO');
-        $root[0]->addChild('Document_Lines');
-        $root_items = $oXML->xpath('/BOM/BO/Document_Lines');
-
-            for($x = 0; $x < count($oc_items); $x ++){
+        
+        for($x = 0; $x < count($oc_items); $x ++){
+            if ($oc_items[$x]['ID_PARTIDA'] == '') {
+                $root_items = $oXML->xpath('/BOM/BO/Document_Lines');
                 $xml_item = $root_items[0]->addChild('row');
-                
                 if ($oc_tipo == 0) {
                     $xml_item->addChild('ItemCode', $oc_items[$x]['CODIGO_ARTICULO']);
                     $xml_item->addChild('AccountCode', '_SYS00000000022');
-                    
                 } else {
                     $xml_item->addChild('ItemDescription', $oc_items[$x]['NOMBRE_ARTICULO']);
-                    $xml_item->addChild('AccountCode', $oc_items[$x]['CTA_MAYOR']);
-                    
+                    $xml_item->addChild('AccountCode', $oc_items[$x]['CTA_MAYOR']);                    
                 }
                 $xml_item->addChild('Quantity', $oc_items[$x]['CANTIDAD']);
                 $xml_item->addChild('Price', $oc_items[$x]['PRECIO']);
@@ -1168,9 +1155,24 @@ class SAP extends Model
                 $xml_item->addChild('ShipDate', $oc_items[$x]['FECHA_ENTREGA']);
                 $xml_item->addChild('LineStatus', $oc_items[$x]['PARTIDA_CERRADA']);
 
-            }  
-       */
-       
+            } else {
+                //actualizar partida                
+                $item = $oXML->xpath('/BOM/BO/Document_Lines/row[LineNum="'.$oc_items[$x]['ID_PARTIDA'].'"]');
+                if (count($item) >= 1) {
+                    foreach ($item as $i) {
+                        $i->Quantity = $oc_items[$x]['CANTIDAD'];
+                        $i->Price = $oc_items[$x]['PRECIO'];
+                        $i->DiscountPercent = $oc_items[$x]['DESCUENTO'];
+                        //$i->WarehouseCode', "AMP-CC";
+                        $i->TaxCode = $oc_items[$x]['ID_IVA'];
+                        if ($oc_items[$x]['PARTIDA_CERRADA'] == 'bost_Open') {                            
+                            $i->ShipDate = $oc_items[$x]['FECHA_ENTREGA']; //este campo no es modificable
+                        }
+                        $i->LineStatus = $oc_items[$x]['PARTIDA_CERRADA'];
+                    }
+                }
+            }
+        }  
         $oXML->asXML($pathh);
         $vItem->Browser->ReadXml($oXML->asXML(), 0);
        
@@ -1293,6 +1295,7 @@ class SAP extends Model
         $item = null;
         $resultadoOperacion = null;
     }
+
 }
 /*
     Thanks a lot for this post.

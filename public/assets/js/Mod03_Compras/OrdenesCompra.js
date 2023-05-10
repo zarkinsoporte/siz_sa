@@ -658,7 +658,6 @@ $(document).keyup(function(event) {
 });
 $('#tblArticulosExistentesNueva').on('click', 'a#boton-eliminarAE', function (e) {
     e.preventDefault();
-
     var tabla = $('#tblArticulosExistentesNueva').DataTable();
     var fila = $(this).closest('tr');
     //var datos = tabla.row(fila).data();
@@ -1231,12 +1230,9 @@ $('#tblArticulosMiscelaneosNueva').on('click', 'button#boton-eliminarAM', functi
     var datos = tabla.row(fila).data();
     var index = tabla.row(fila).index();
     var id = datos['ID_PARTIDA'];
-    if(id == ""){
+    
         tabla.row(fila).remove().draw(false);
-    }
-    else{
-       
-    }
+    
     calculaTotalOrdenCompra();
     actualizaLineaPartidaAM();
 });
