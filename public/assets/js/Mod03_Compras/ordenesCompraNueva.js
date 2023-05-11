@@ -2220,21 +2220,7 @@ function registraOC(){
     
     paridad = $("#input_tc").val();
     console.log('registrando OC')
-    $.blockUI({
-        message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
-        css: {
-            border: 'none',
-            padding: '16px',
-            width: '50%',
-            top: '40%',
-            left: '30%',
-            backgroundColor: '#fefefe',
-            '-webkit-border-radius': '10px',
-            '-moz-border-radius': '10px',
-            opacity: .7,
-            color: '#000000'
-        }
-    });
+   
     $.ajax({
          headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -2270,10 +2256,10 @@ function registraOC(){
             //"editaProveedor": editaProveedor
         },
         type: "POST",
-        async:false,
+        async:true,
         success: function (datos, x, z) {
             console.log(datos)
-            $.unblockUI();
+            //$.unblockUI();
             if(datos["Status"] == "Error"){
                 bootbox.dialog({
                     title: "Mensaje",
@@ -2313,7 +2299,7 @@ function registraOC(){
         error: function (x, e) {
             var errorMessage = 'Error \n' + x.responseText;
            // mostrarOC(datos["id"]);
-            $.unblockUI();
+            //$.unblockUI();
              bootbox.dialog({
                 title: "Mensaje",
                 message: "<div class='alert alert-danger m-b-0'>"+errorMessage+"</div>",
@@ -2327,7 +2313,7 @@ function registraOC(){
             
         }
     });
-    $.unblockUI();
+   
 }
 function MuestraComponentesOC() {
 

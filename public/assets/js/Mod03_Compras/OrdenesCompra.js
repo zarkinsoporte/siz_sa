@@ -922,21 +922,24 @@ $('#guardar').off().on('click', function(e) {
 
     }
     else{
+        
         swal({
             title: '¿Guardar Orden de Compra?.',
             text: "",
-            icon: "warning",
-            buttons: true,
+            type: "info",
+            showCancelButton: true,
+            closeOnConfirm: false,
+            confirmButtonText: " Guardar",
+            cancelButtonText: " Cancelar",  
             showLoaderOnConfirm: true,
-            closeModal: false
-        }).then(function (result) {
-            if (result) {
+        },
+            function () {
+                $(".sweet-alert p").html('<i class="fa fa-spinner fa-lg fa-spin fa-fw"></i> Espera un momento..')
                 validarCampos();
                 if (bandera == 0) { //validado, campos correctos entonces
                     registraOC();
                 }
-            }
-        });
+            });
     }
 
 });

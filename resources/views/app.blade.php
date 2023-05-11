@@ -58,13 +58,14 @@
     <script src="{{ URL::asset('assets/DataTables/js/dataTables.tableTools.js')}}"></script>
     {!! Html::script('assets/js/dataTables.editor.min.js') !!}
     <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.10.15/features/scrollResize/dataTables.scrollResize.js"></script>
-   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.6.9/sweetalert2.min.css">Copy
-<script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.6.9/sweetalert2.min.js"></script>
-   
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-sweetalert/1.0.1/sweetalert.min.js"></script>
+    
+  
     
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
         <script src=" https://cdn.datatables.net/buttons/1.5.2/js/buttons.bootstrap.min.js"></script>
             <script src=" https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
 https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css
@@ -88,6 +89,8 @@ https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css
 {!! Html::script('assets/datepicker/js/locales/bootstrap-datepicker.es.min.js') !!}
 {!! Html::style('assets/datepicker/js/css/bootstrap-datepicker.min.css') !!}
 {!! Html::style('plugins/bootstrap-daterangepicker/daterangepicker-bs3.css') !!}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-sweetalert/1.0.1/sweetalert.min.css" type="text/css">
 
 <style>
 .zrk-gris{
