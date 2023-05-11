@@ -889,6 +889,16 @@ var InicializaDatepicker = function() {
         autoclose: true
     }).datepicker("setDate", new Date());
 
+    var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth() + 1; //January is 0!
+
+    var yyyy = today.getFullYear();
+    if (dd < 10) { dd = '0' + dd }
+    if (mm < 10) { mm = '0' + mm }
+    today = yyyy + '-' + mm + '-' + dd;
+    console.log(today)
+    $('#input-fecha-entrega').val(today);
 };
 
 function changeProveedor(){ //??
@@ -2371,13 +2381,8 @@ function CargaComponentesOC(resumen) {
         todayHighlight: true,
         autoclose: true
     }).datepicker("setDate", resumen.OC_DATE);
-    $('#input-fecha-entrega').datepicker({ //fechaDOC
-        language: 'es',
-        format: 'yyyy-mm-dd',
-        todayHighlight: true,
-        autoclose: true
-    }).datepicker("setDate", resumen.OC_FECHA_ENTREGA);
-
+    
+    $('#input-fecha-entrega').val(resumen.OC_FECHA_ENTREGA);
     $("#input-comentarios").val(resumen.OC_COMENTARIO);
 
 };

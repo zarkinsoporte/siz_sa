@@ -977,7 +977,7 @@ class SAP extends Model
             // <DocRate>1.000000</DocRate>
             // <DocObjectCode>22</DocObjectCode>
             // <JournalMemo>Pedidos - P0293</JournalMemo> 
-        if($status == 0){
+        if($status == 1){
             $pathh = public_path('assets/xml/sap/ordenesCompra/new_oc_p1.xml');
             $oXML = simplexml_load_file($pathh); //Crear Object SimpleXML de un archivo 
             $root_items = $oXML->xpath('/BOM/BO/Document_Lines');
