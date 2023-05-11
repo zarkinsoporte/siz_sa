@@ -1047,11 +1047,12 @@ class SAP extends Model
         $vItem->Browser->ReadXml($oXML->asXML(), 0);
         // $vItem->UpdateFromXML($pathh);
         $resultadoOperacion = $vItem->Add();
+        $id = $vCmp->GetNewObjectKey();
         if ($resultadoOperacion <> 0) {
             //throw new \Exception( $vCmp->GetLastErrorDescription(), 1);
-            return ['Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$vCmp->GetLastErrorDescription()];
+            return ['result' => $resultadoOperacion, 'id' => $oc_docEntry, 'Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$vCmp->GetLastErrorDescription()];
         }else {
-            return ['Status' => 'Valido', 'respuesta' => 'success'];
+            return ['result' => $resultadoOperacion, 'id' => $oc_docEntry, 'Status' => 'Valido', 'respuesta' => 'success'];
         }
         $vCmp->Disconnect;
         $vCmp = null;
@@ -1090,6 +1091,7 @@ class SAP extends Model
         $fecha_entrega = $datos["oc_fecha_entrega"];
         $oc_tipo = $datos["oc_tipo"];
         $oc_docEntry = $datos["oc_docEntry"];
+        $oc_docNum = $datos["oc_docNum"];
         if ($oc_tipo == 0) {
             $oc_items = isset($datos["TablaArticulosExistentes"]) ? json_decode($datos["TablaArticulosExistentes"], true) : array();
         } else {
@@ -1154,7 +1156,7 @@ class SAP extends Model
                 $xml_item->addChild('TaxCode', $oc_items[$x]['ID_IVA']);
                 $xml_item->addChild('ShipDate', $oc_items[$x]['FECHA_ENTREGA']);
                 $xml_item->addChild('LineStatus', $oc_items[$x]['PARTIDA_CERRADA']);
-
+                $xml_item->addChild('Currency', $oc_moneda);
             } else {
                 //actualizar partida                
                 $item = $oXML->xpath('/BOM/BO/Document_Lines/row[LineNum="'.$oc_items[$x]['ID_PARTIDA'].'"]');
@@ -1169,6 +1171,7 @@ class SAP extends Model
                             $i->ShipDate = $oc_items[$x]['FECHA_ENTREGA']; //este campo no es modificable
                         }
                         $i->LineStatus = $oc_items[$x]['PARTIDA_CERRADA'];
+                        $i->Currency = $oc_moneda;
                     }
                 }
             }
@@ -1180,9 +1183,9 @@ class SAP extends Model
         $resultadoOperacion = $vItem->Update;
         if ($resultadoOperacion <> 0) {
             //throw new \Exception( $vCmp->GetLastErrorDescription(), 1);
-            return ['result' => $resultadoOperacion, 'id' => $oc_docEntry, 'Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$vCmp->GetLastErrorDescription()];
+            return ['result' => $resultadoOperacion, 'id' => $oc_docNum, 'Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$vCmp->GetLastErrorDescription()];
         }else {
-            return ['result' => $resultadoOperacion, 'id' => $oc_docEntry , 'Status' => 'Valido', 'respuesta' => 'success'];
+            return ['result' => $resultadoOperacion, 'id' => $oc_docNum , 'Status' => 'Valido', 'respuesta' => 'success'];
         }
       /*$vCmp->Disconnect;
         $vCmp = null;

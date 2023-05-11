@@ -852,8 +852,9 @@ class Mod03_ComprasController extends Controller
     public function buscaOC(Request $request){
         try{
             $NumOC = $request->get('NumOC');
-            $rs1 = DB::select('exec SIZ_SP_OC_RESUMEN ?', [$NumOC]);
-            $detalle = DB::select('exec SIZ_SP_OC_DETALLE ?', [$NumOC]);
+            //return [$NumOC];
+            $rs1 = DB::select("exec SIZ_SP_OC_RESUMEN ". $NumOC);
+            $detalle = DB::select("exec SIZ_SP_OC_DETALLE ". $NumOC);
             $rs2 = DB::select("SELECT 
                 CompnyName RAZON_SOCIAL
                 , TaxIdNum RFC
@@ -863,7 +864,7 @@ class Mod03_ComprasController extends Controller
                 , ZipCodeF CP_ENTREGA
                 from ADM1
                 inner join OADM on OADM.Code = ADM1.Code");
-           // return compact('NumOC', 'rs1', 'rs2', 'detalle');
+            //return compact('NumOC', 'rs1', 'rs2', 'detalle');
             $resumen = $rs1[0];
             $comp = $rs2[0]; 
             return compact('NumOC', 'comp', 'resumen', 'detalle');

@@ -935,10 +935,8 @@ $('#guardar').off().on('click', function(e) {
         }).then(function (result) {
             if (result) {
                 validarCampos();
-                if (bandera == 0) {
-                    var numOC = registraOC();
-                    InicializaComponentesOC();
-                    mostrarOC(numOC);
+                if (bandera == 0) { //validado, campos correctos entonces
+                    registraOC();
                 }
             }
         });

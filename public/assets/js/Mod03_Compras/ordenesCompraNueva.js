@@ -2233,6 +2233,7 @@ function registraOC(){
         data: {
             "status": OC_nueva,
             "oc_docEntry": $("#docEntryOC").text(),
+            "oc_docNum": $('#ordenesCompraOC #codigoOC').text(),
             "oc_proveedor": $("#sel-proveedor option:selected").val(),
             //"OC_PDOC_DireccionOCId": $("#cboSucursal").val(),
             //"OC_CMM_TipoOCId": $("#cboTipoOC").val(),
@@ -2261,7 +2262,8 @@ function registraOC(){
         type: "POST",
         async:false,
         success: function (datos, x, z) {
-            //console.log(datos)
+            console.log(datos)
+            $.unblockUI();
             if(datos["Status"] == "Error"){
                 bootbox.dialog({
                     title: "Mensaje",
@@ -2280,24 +2282,27 @@ function registraOC(){
                 //$('#ordenesCompraOC').hide();
                 //$('#btnBuscadorOC').show();
                 //reloadBuscadorOC();
-                $.unblockUI();
-                mostrarOC(datos["id"]);
+                
                 swal("", "OC guardada", "success", {
                     buttons: false,
                     timer: 2000,
                 });
-
+                
             }
             InicializaComponentesOC();
             $("#tblArticulosExistentesNueva").DataTable().clear().draw();
             $("#tblArticulosMiscelaneosNueva").DataTable().clear().draw();
+            console.log("id: " + datos["id"])
+            console.log("id2: " + datos.id)
+            mostrarOC(datos["id"]);
             // $("#tblArticulosExistentesResumenNueva").DataTable().clear().draw();
             // $("#tblArticulosMiscelaneosResumenNueva").DataTable().clear().draw();
-            calculaTotalOrdenCompra();
+           // calculaTotalOrdenCompra();
             ////calculaTipoCambio();
         },
         error: function (x, e) {
             var errorMessage = 'Error \n' + x.responseText;
+           // mostrarOC(datos["id"]);
             $.unblockUI();
              bootbox.dialog({
                 title: "Mensaje",
