@@ -925,13 +925,10 @@ $('#guardar').off().on('click', function(e) {
         swal({
             title: '¿Guardar Orden de Compra?.',
             text: "",
-            type: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'OK',
-            cancelButtonText: 'Cancelar',
-            reverseButtons: true,
             icon: "warning",
-            buttons: true
+            buttons: true,
+            showLoaderOnConfirm: true,
+            closeModal: false
         }).then(function (result) {
             if (result) {
                 validarCampos();
