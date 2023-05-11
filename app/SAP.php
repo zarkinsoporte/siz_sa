@@ -1047,12 +1047,13 @@ class SAP extends Model
         $vItem->Browser->ReadXml($oXML->asXML(), 0);
         // $vItem->UpdateFromXML($pathh);
         $resultadoOperacion = $vItem->Add();
-        $id = $vCmp->GetNewObjectKey();
+        $id_doc = $vCmp->GetNewObjectKey();
+        $id = DB::table('OPOR')->select('DocNum')->where('DocEntry', $id_doc)->value('DocNum');
         if ($resultadoOperacion <> 0) {
             //throw new \Exception( $vCmp->GetLastErrorDescription(), 1);
-            return ['result' => $resultadoOperacion, 'id' => $oc_docEntry, 'Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$vCmp->GetLastErrorDescription()];
+            return ['result' => $resultadoOperacion, 'id' => $id, 'Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$vCmp->GetLastErrorDescription()];
         }else {
-            return ['result' => $resultadoOperacion, 'id' => $oc_docEntry, 'Status' => 'Valido', 'respuesta' => 'success'];
+            return ['result' => $resultadoOperacion, 'id' => $id, 'Status' => 'Valido', 'respuesta' => 'success'];
         }
         $vCmp->Disconnect;
         $vCmp = null;
@@ -1062,23 +1063,7 @@ class SAP extends Model
         $item = null;
         $resultadoOperacion = null;
     }
-    public static function actualizaOC2($datos){
-        (self::$vCmp == false) ? self::Connect() : '';
-        //self::$vCmp->XmlExportType("xet_ExportImportMode");
-        //OITM ARTICULOS ES EL OBJETO 4
-        $vItem = self::$vCmp->GetBusinessObject("4"); 
-        //ENTRE PARENTESIS VA EL CODIGO DEL ARTICULO A ACTUALIZAR
-        $RetVal = $vItem->GetByKey("".$codigo); 
-        
-        //Seleccionar 
-        $vItem->User_Text = "".$comentario;
-        $retCode = $vItem->Update;
-        if ($retCode != 0) {
-            return self::$vCmp->GetLastErrorDescription();
-        } else {
-            return 'ok';
-        }
-    }
+   
     public static function actualizaOC($datos)
     {
         //Ref
@@ -1113,13 +1098,60 @@ class SAP extends Model
         $vCmp->XMLAsString = true; //The default value is False - XML as files.
         //$vCmp->language = "6";
         $vCmp->Connect; //conectar a Sociedad SAP
-
+        
         //Obtener XML de un LDM 
         $vCmp->XmlExportType = '3'; //BoXmlExportTypes.xet_ExportImportMode; /solo los campos modificables
+        $dvItem = $vCmp->GetBusinessObject("22"); //
+        $dvItem->GetByKey($oc_docEntry); //LDM Docentry
+
+        $table_ids = array_pluck($oc_items, 'ID_PARTIDA');
+        // select ROW_NUMBER() OVER(ORDER BY LineNum ASC) - 1 AS fila, LineNum from POR1 where DocEntry = '6352'
+        $db_ids = DB::select("select ROW_NUMBER() OVER(ORDER BY LineNum ASC) - 1 AS fila, LineNum from POR1 where DocEntry = ?", [$oc_docEntry]);
+
+        $db_ids_o = array_pluck($db_ids, 'LineNum');
+        $ids = array_diff($db_ids_o, $table_ids);
+        rsort($ids); //ordenamos para borrar primero las partidas con el LineNum mas alto
+        foreach ($ids as $id) {
+            //$item = $oXML->xpath('/BOM/BO/Document_Lines/row[LineNum="'.$id.'"]');
+            //unset($item[0][0]);
+
+            //Documents oDoc = Utils.oCompany.GetBusinessObject(BoObjectTypes.oOrders);
+            //oDoc.GetByKey(123);
+            
+            $key = array_search($id, $db_ids_o);//buscamos el index con el valor de LineNum
+            //return ['id' => $db_ids[$key], 'Status' => $id.' Error', 'Mensaje' => $key .' Ocurrió un error al realizar el proceso. Error: ' .$vCmp->GetLastErrorDescription()."  "];
+            $dvItem->Lines->SetCurrentLine($db_ids[$key]->fila.""); //buscamos la fila con el index ($key)
+            $dvItem->Lines->Delete();
+
+        }
+        $lret = $dvItem->Update;
+        //$lret = 1;
+        if ($lret != 0)
+        {
+                return ['id' => $oc_docNum, 'Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$vCmp->GetLastErrorDescription()];
+        }
+
+        $vCmp->Disconnect;
+        $vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
+        $vCmp->DbServerType = "10";
+        $vCmp->server = "".env('SAP_server');
+        $vCmp->LicenseServer = "".env('SAP_LicenseServer');
+        $vCmp->CompanyDB = "".env('SAP_CompanyDB');
+        $vCmp->username = "".env('SAP_username');
+        $vCmp->password = "".env('SAP_password');
+        $vCmp->DbUserName = "".env('SAP_DbUserName');
+        $vCmp->DbPassword = "".env('SAP_DbPassword');
+        $vCmp->UseTrusted = false;
+        //la siguiente linea permite leer XML como string y no como archivo en "Browser->ReadXml"
+        $vCmp->XMLAsString = true; //The default value is False - XML as files.
+        //$vCmp->language = "6";
+        $vCmp->Connect; //conectar a Sociedad SAP        
+        //Obtener XML de un LDM 
+        $vCmp->XmlExportType = '3'; //BoXmlExportTypes.xet_ExportImportMode; /solo los campos modificables        
         $vItem = $vCmp->GetBusinessObject("22"); //
-        $vItem->GetByKey($oc_docEntry); //LDM Docentry
-        $pathh = public_path('assets/xml/sap/ordenesCompra/oc1.xml');
-        $pathh2 = public_path('assets/xml/sap/ordenesCompra/oc'.$oc_docEntry.'.xml');
+        $vItem->GetByKey($oc_docEntry);
+        //$pathh = public_path('assets/xml/sap/ordenesCompra/oc1.xml');
+        //$pathh2 = public_path('assets/xml/sap/ordenesCompra/oc'.$oc_docEntry.'.xml');
         //$vItem->SaveXML($pathh); //Guardar en archivo
         $xmlString = $vItem->GetAsXML(); //Guardar XML en buffer
         //retiramos Utf16 del XML obtenido
@@ -1127,7 +1159,7 @@ class SAP extends Model
         //Leemos XML(string) y creamos Object SimpleXML 
         $oXML = simplexml_load_string($xmlString);
         //$library = simplexml_load_file($pathh); //Crear Object SimpleXML de un archivo
-        $oXML->asXML($pathh2);
+        //$oXML->asXML($pathh2);
       
         $root_oc_header = $oXML->xpath('/BOM/BO/Documents/row');
 
@@ -1135,9 +1167,7 @@ class SAP extends Model
         $root_oc_header[0]->DocDueDate = "".$fecha_entrega;
         //$root_oc_header[0]->DocCurrency = $oc_moneda;
         $root_oc_header[0]->Comments = strtoupper($oc_comentarios);
-        
 
-        
         for($x = 0; $x < count($oc_items); $x ++){
             if ($oc_items[$x]['ID_PARTIDA'] == '') {
                 $root_items = $oXML->xpath('/BOM/BO/Document_Lines');
@@ -1175,17 +1205,18 @@ class SAP extends Model
                     }
                 }
             }
-        }  
-        $oXML->asXML($pathh);
+        }
+
+        //$oXML->asXML($pathh);
         $vItem->Browser->ReadXml($oXML->asXML(), 0);
        
         //$resultadoOperacion = $vItem->UpdateFromXML($pathh);
         $resultadoOperacion = $vItem->Update;
         if ($resultadoOperacion <> 0) {
             //throw new \Exception( $vCmp->GetLastErrorDescription(), 1);
-            return ['result' => $resultadoOperacion, 'id' => $oc_docNum, 'Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$vCmp->GetLastErrorDescription()];
+            return ['Eliminados' => $ids, 'result' => $resultadoOperacion, 'id' => $oc_docNum, 'Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$vCmp->GetLastErrorDescription()];
         }else {
-            return ['result' => $resultadoOperacion, 'id' => $oc_docNum , 'Status' => 'Valido', 'respuesta' => 'success'];
+            return ['Eliminados' => $ids, 'result' => $resultadoOperacion, 'id' => $oc_docNum , 'Status' => 'Valido', 'respuesta' => 'success'];
         }
       /*$vCmp->Disconnect;
         $vCmp = null;
