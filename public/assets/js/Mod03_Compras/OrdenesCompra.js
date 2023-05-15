@@ -181,8 +181,10 @@ var tableOC = $("#tableOC").DataTable({
                     'className': "dt-body-center",
                     "render": function ( data, type, row ) {
                         if(row['Estatus'] == 'CERRADA')  
-                            return '<button type="button" class="btn btn-sm btn-danger btn-outline-danger" style="margin-left:5px" id="boton-pdf"> <i class="fa fa-file-pdf-o" aria-hidden="true"></i></button>';
-                        else  return '<button type="button" class="btn btn-sm btn-primary" id="btnEditar"> <span class="glyphicon glyphicon-pencil"></span> </button>'
+                            return '<button type="button" class="btn btn-sm btn-primary" id="btnEditar"> <span class="glyphicon glyphicon-pencil"></span> </button>'
+                            +'<button type="button" class="btn btn-sm btn-danger btn-outline-danger" style="margin-left:5px" id="boton-pdf"> <i class="fa fa-file-pdf-o" aria-hidden="true"></i></button>';
+                        else  
+                        return '<button type="button" class="btn btn-sm btn-primary" id="btnEditar"> <span class="glyphicon glyphicon-pencil"></span> </button>'
                             + '<button type="button" class="btn btn-sm btn-danger" style="margin-left:5px" id="btnEliminar"> <span class="glyphicon glyphicon-trash"></span></button>'
                             + '<button type="button" class="btn btn-sm btn-danger btn-outline-danger" style="margin-left:5px" id="boton-pdf"> <i class="fa fa-file-pdf-o" aria-hidden="true"></i></button>';
                        
@@ -310,7 +312,7 @@ $('#tableOC').on('click', 'button#btnEliminar', function (e) {
                         if (data.Status == 'Valido') {
                             //console.log(data)                                  
                             datos['Estatus'] = 'CERRADA';
-                            tblOC.row(fila).data(datos).invalidate();
+                            tblOC.row(fila).data(datos);
                         }
 
                     },
@@ -1239,7 +1241,8 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
         var docentry = fila.attr('data-id')
         var datos = tblOC.row(fila).data();
         var NumOC = datos['NumOC'];
-        if (datos['Estatus'] == 'ABIERTA') {
+        if (true) {
+        //if (datos['Estatus'] == 'ABIERTA') {
 
             mostrarOC(NumOC)
            

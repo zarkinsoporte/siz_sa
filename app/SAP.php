@@ -934,7 +934,7 @@ class SAP extends Model
         //dd($num_object,$docEntry);
         $RetVal = $vItem->GetByKey($docEntry."");
         $vItem->CreateCancellationDocument();
-        $RetCode = $vItem->Add();
+        //$RetCode = $vItem->Add();
         $RetCode = $vItem->Cancel;
 
         if ($RetCode != 0) {
