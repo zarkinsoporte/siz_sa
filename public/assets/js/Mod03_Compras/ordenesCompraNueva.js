@@ -142,7 +142,7 @@ var InicializaComponentes = function () {
     InicializaBuscadorOtReq();
     
     InicializaTablas();
-    insertarFila()
+    insertarFila(0)
 };
 
 var handleDatepicker = function() {
@@ -271,7 +271,7 @@ function InicializaTablas(){
                 text: '<i class="fa fa-plus"></i> Fila',
                 className: "btn-success",
                 action: function (e, dt, node, config) {
-                    insertarFila(); 
+                    insertarFila(0); 
                 }
             }
         ],
@@ -436,7 +436,8 @@ function InicializaTablas(){
 
     $('#tblArticulosExistentesNueva').dataTable().fnAdjustColumnSizing( false );
     ARTICULO_BUSCADOR_INDEX = $('#tblArticulosExistentesNueva').DataTable().row('.selected').index() == undefined ? '' : $('#tblArticulosExistentesNueva').DataTable().row('.selected').index();
-   
+    
+    set_columns_index(1)
     TBL_ART_MISC = $('#tblArticulosMiscelaneosNueva').DataTable({
         language:{
             "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
@@ -458,7 +459,7 @@ function InicializaTablas(){
                 text: '<i class="fa fa-plus"></i> Fila',
                 className: "btn-success",
                 action: function (e, dt, node, config) {
-                    insertarFila();
+                    insertarFila(1);
                 }
             }
         ],
@@ -478,7 +479,7 @@ function InicializaTablas(){
             {data: "MONTO_IVA"},
             {data: "TOTAL"},
             {data: "FECHA_ENTREGA", orderable: false },
-            
+            { data: "CANT_PENDIENTE" },
             {data: "PARTIDA_CERRADA"},
             {data: "BTN_ELIMINAR", orderable: false},
             {data: "ID_IVA", orderable:false, visible:false},
@@ -494,7 +495,7 @@ function InicializaTablas(){
                 targets: 0,
             },
             {
-                "targets": [1],
+                "targets": [COL_NOMBRE_ART_MISC],
                 "orderable" : false,
                 "render": function (data,type,row) {
                     return '<input id= "input-nombreART-miselaneos"  class="form-control input-sm" type="text">'
@@ -502,7 +503,7 @@ function InicializaTablas(){
             },
             
             {
-                "targets": [2],
+                "targets": [COL_CTA_MAYOR],
                 "orderable" : false,
                 "render": function (data,type,row) {
                     var id = row[1];
@@ -521,36 +522,36 @@ function InicializaTablas(){
                 }
              },
             {
-                "targets": [3],
+                "targets": [COL_CANTIDAD],
                 "orderable" : false,
                 "render": function ( data, type, row ) {
                     return '<input id="input-cantidadAM"  class="form-control input-sm cantidad" type="number" value="' + parseFloat(row['CANTIDAD']).toFixed(DECIMALES) + '">';
                 }
             },
             {
-                "targets": [4],
+                "targets": [COL_PRECIO],
                 "orderable" : false,
                 "render": function (data,type,row) {
-                    return '<input id= "input-precioAM"  class="form-control input-sm precio" value="' + parseFloat(row['PRECIO']).toFixed(DECIMALES) + '" type="number">'
+                    return '<input id= "input-precioAM" style="width: 100px" class="form-control input-sm precio" value="' + parseFloat(row['PRECIO']).toFixed(DECIMALES) + '" type="number">'
                 }
             },
             {
-                "targets": [5],
+                "targets": [COL_SUBTOTAL],
                 "orderable" : false
             },
             {
-                "targets": [6],
+                "targets": [COL_DESCUENTO],
                 "orderable" : false,
                 "render": function (data,type,row) {
                     return '<input id= "input-descuentoAM"  class="form-control input-sm" value="' + parseFloat(DESCUENTO_GENERAL).toFixed(DECIMALES) + '" type="number">'
                 }
             },
             {
-                "targets": [7],
+                "targets": [COL_MONTO_DESCUENTO],
                 "orderable" : false
             },
             {
-                "targets": [8],
+                "targets": [COL_IVA],
                 "orderable" : false,
                 "render": function (data,type,row) {
                     var id = row[1];
@@ -569,15 +570,15 @@ function InicializaTablas(){
                 }
             },
             {
-                "targets": [9], //monto IVA
+                "targets": [COL_MONTO_IVA], //monto IVA
                 "orderable" : false
             },
             {
-                "targets": [10], //total
+                "targets": [COL_TOTAL], //total
                 "orderable" : false
             },
             {
-                "targets": [11],
+                "targets": [COL_FECHA_ENTREGA_COMPRA],
                 "orderable": false,
                 "render": function (data, type, row) {
                     var fecha_entrega = $('#input-fecha-entrega').val();
@@ -588,7 +589,7 @@ function InicializaTablas(){
             //articulos[i]["OVD_DetalleId"] == '' ? id nuevo : articulos[i]["OVD_DetalleId"];
 
             {
-                "targets": [12],
+                "targets": [COL_PARTIDA_CERRADA],
                 "searchable": false,
                 "orderable": false,
                 'className': "dt-body-center",
@@ -600,14 +601,14 @@ function InicializaTablas(){
             },
             
             {
-                "targets": [13],
+                "targets": [COL_BTN_ELIMINAR_COMPRA],
                 "className": "dt-body-center",
                 "render": function ( data, type, row ) {
                     return '<button type="button" class="btn btn-danger btn-sm" id="boton-eliminarAM"> <span class="fa fa-trash"></span> </button>';
                 }
             },
             {
-                "targets": [14],
+                "targets": [COL_ID_PARTIDA],
                 "orderable" : false
             },          
         ]
@@ -615,7 +616,7 @@ function InicializaTablas(){
 
     $('#tblArticulosMiscelaneosNueva').dataTable().fnAdjustColumnSizing( false );
     //ARTICULO_BUSCADOR_INDEX = $('#tblArticulosMiscelaneosNueva').DataTable().row('.selected').index() == undefined ? '' : $('#tblArticulosMiscelaneosNueva').DataTable().row('.selected').index();
-
+    set_columns_index(0)
 }
 
 function InicializaBuscadorArticulos(){
@@ -871,10 +872,16 @@ function InicializaComponentesOC() {
     $('#ordenesCompraOC #contactoProveedor').text('');
     $('#ordenesCompraOC #rfcProveedor').text('');
 
+    $('#input-comentarios').text('');
+    $('#input-comentarios').val('');
     $("#cboMoneda").val('MXP');
     $("#cboMoneda").selectpicker('refresh');
 
     $("#ordenesCompraOC #input_tc").val(1);
+    
+        $("#div-tipo-cambio").hide();
+        $("#input_tc_anterior").val(1);
+        $('#input_tc').val(1)
     
     $("#sel-tipo-oc").val(0);
     $("#sel-tipo-oc").selectpicker('refresh');
@@ -884,7 +891,7 @@ function InicializaComponentesOC() {
 
     $('#tblArticulosExistentesNueva').DataTable().clear().draw();
     $('#tblArticulosMiscelaneosNueva').DataTable().clear().draw();
-    insertarFila();   
+    insertarFila(0);   
     InicializaDatepicker();
 
 };
@@ -934,7 +941,7 @@ function changeProveedor(){ //??
                 llenaDatosProvedor(respuesta.data);
                 llenaDatosIvaMetodoEmbarqueLibreABordo(respuesta.data3);
                 recargaTablaArticulos(respuesta.data2);
-                insertarFila();
+                //insertarFila();
 
             }
             else{
@@ -1117,7 +1124,7 @@ function recargaTablaArticulos(datos){
 
 }
 
-function insertarFila(){
+function insertarFila(BanderaOC){
     console.log('insertar fila: (0->TBL_ART_EXIST, 1->TBL_ART_MISC) BanderaOC =' + BanderaOC)
      if (BanderaOC == 0){
         TBL_ART_EXIST.row.add(
@@ -1172,10 +1179,11 @@ function insertarFila(){
                 , "TOTAL": "0.00"
                 , "FECHA_ENTREGA": ""
 
+                , "CANT_PENDIENTE": ""
                 , "PARTIDA_CERRADA": 0
                 , "BTN_ELIMINAR": null
-                , "ID_IVA":"W3"
 
+                , "ID_IVA":"W3"
                 , "ID_PARTIDA": ""
                 , "ESTATUS_PARTIDA":""//17
             }
@@ -2051,7 +2059,7 @@ $(document).on('keyup', function (e) {
     e.preventDefault();
 
     if(e.shiftKey && e.keyCode == 13){
-        insertarFila();
+       // insertarFila();
     }
 
 });
@@ -2619,13 +2627,13 @@ function set_columns_index(BanderaOC) {
         COL_MONTO_IVA = 9;
         COL_TOTAL = 10;
         COL_FECHA_ENTREGA_COMPRA = 11;
+        COL_CANT_PENDIENTE = 12;
+        COL_PARTIDA_CERRADA = 13;
+        COL_BTN_ELIMINAR_COMPRA = 14;
+        COL_ID_IVA = 15;
 
-        COL_PARTIDA_CERRADA = 12;
-        COL_BTN_ELIMINAR_COMPRA = 13;
-        COL_ID_IVA = 14;
-
-        COL_ID_PARTIDA = 15;
-        COL_ESTATUS_PARTIDA = 16;
+        COL_ID_PARTIDA = 16;
+        COL_ESTATUS_PARTIDA = 17;
     }
 }
 function mostrarOC(NumOC) {

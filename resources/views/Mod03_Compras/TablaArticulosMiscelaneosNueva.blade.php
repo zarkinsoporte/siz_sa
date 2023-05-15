@@ -16,11 +16,14 @@
 
             <th style="text-align: right;">Monto I.V.A.</th>
             <th style="text-align: right;">Total</th>
-            <th style="text-align: center;">Cerrada</th>
+            <th style="text-align: center;">Fecha Entrega</th>
 
+            <th style="text-align: center;">Cant. Pendiente</th>
+            <th style="text-align: center;">Cerrada</th>
             <th style="text-align: center;">Eliminar</th>
             <th>ivaID</th>
             <th>partidaID</th>
+            <th>estatusPartida</th>
         </tr>
         </thead>
         <tbody></tbody>

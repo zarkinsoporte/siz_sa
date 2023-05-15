@@ -267,11 +267,10 @@ $('#tableOC').on('click', 'button#btnEliminar', function (e) {
             showCancelButton: true,
             confirmButtonText: 'OK',
             cancelButtonText: 'Cancelar',
-            reverseButtons: true,
-            icon: "warning",
-            buttons: true
-        }).then(function (result) {
-            if (result) {
+            closeOnConfirm: false,
+            showLoaderOnConfirm: false,
+        }, function () {
+            
                 $.ajax({
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -330,7 +329,7 @@ $('#tableOC').on('click', 'button#btnEliminar', function (e) {
                     }
                 });
 
-            } 
+             
         });
     } else {
         swal("", "La OC no esta Abierta", "error", {
@@ -473,6 +472,11 @@ $('#boton-nuevo').on('click', function(e) {
     $('#ordenesCompraOC').show();
     $('#btnBuscadorOC').hide();
     InicializaComponentesOC();
+
+    $("#articulosOC").show();
+    $("#miscelaneosOC").hide();
+    BanderaOC = 0;
+    set_columns_index(0);
 });
 $('#boton-mostrar-oc').on('click', function(e) {
     get_oc();
@@ -686,8 +690,7 @@ $('#guardar').off().on('click', function(e) {
             confirmButtonText: " Guardar",
             cancelButtonText: " Cancelar",  
             showLoaderOnConfirm: true,
-        },
-            function () {
+        }, function () {
                 $(".sweet-alert p").html('<i class="fa fa-spinner fa-lg fa-spin fa-fw"></i> Espera un momento..')
                 validarCampos();
                 if (bandera == 0) { //validado, campos correctos entonces
@@ -733,6 +736,7 @@ $("#sel-tipo-oc").on("changed.bs.select", function(e, clickedIndex, newValue, ol
             BanderaOC = 1;
             set_columns_index(1);
         }
+        insertarFila(BanderaOC)
         //console.log('sel-tipo-oc: '+BanderaOC)
         setTimeout($.unblockUI, 2000);
     });
@@ -1163,8 +1167,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
 
     $('#tblArticulosExistentesNueva').on('click', 'a#boton-eliminarAE', function (e) {
         e.preventDefault();
-        var tabla = $('#tblArticulosExistentesNueva').DataTable();
-        var fila = $(this).closest('tr');
+        
         //var datos = tabla.row(fila).data();
         //console.log(datos['CODIGO_ARTICULO'])
         swal({
@@ -1173,13 +1176,12 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
             type: 'warning',
             showCancelButton: true,
             confirmButtonText: 'OK',
-            cancelButtonText: 'Cancelar',
-            reverseButtons: true,
-            icon: "warning",
-            buttons: true
-        }).then(function (result) {
-            if (result) {
-
+            cancelButtonText: 'Cancelar',            
+            closeOnConfirm: false,
+            showLoaderOnConfirm: false,
+        }, function () {
+            var tabla = $('#tblArticulosExistentesNueva').DataTable();
+            var fila = $(this).closest('tr');
                 //var index = tabla.row(fila).index();  
                 if (tabla.rows().count() == 1) {
                     swal("", "La OC debe contener al menos una partida.", "error", {
@@ -1192,11 +1194,6 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                     calculaTotalOrdenCompra();
                     actualizaLineaPartidaAE();
                 }
-
-
-            } else {
-
-            }
         });
         //calculaTipoCambio();
         //PartidaResumenAE();
@@ -1205,8 +1202,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
     $('#tblArticulosMiscelaneosNueva').on('click', 'button#boton-eliminarAM', function (e) {
         e.preventDefault();
 
-        var tabla = $('#tblArticulosMiscelaneosNueva').DataTable();
-        var fila = $(this).closest('tr');
+       
         //var datos = tabla.row(fila).data();
         swal({
             title: '¿Eliminar partida?',
@@ -1215,11 +1211,11 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
             showCancelButton: true,
             confirmButtonText: 'OK',
             cancelButtonText: 'Cancelar',
-            reverseButtons: true,
-            icon: "warning",
-            buttons: true
-        }).then(function (result) {
-            if (result) {
+            closeOnConfirm: false,
+            showLoaderOnConfirm: false,
+        }, function () {
+            var tabla = $('#tblArticulosMiscelaneosNueva').DataTable();
+            var fila = $(this).closest('tr');
                 //var index = tabla.row(fila).index();  
                 if (tabla.rows().count() == 1) {
                     swal("", "La OC debe contener al menos una partida.", "error", {
@@ -1232,9 +1228,6 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                     calculaTotalOrdenCompra();
                     actualizaLineaPartidaAM();
                 }
-            } else {
-
-            }
         });
     });
 
