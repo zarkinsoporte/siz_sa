@@ -452,7 +452,16 @@ function InicializaTablas(){
         aaSorting: [],
         deferRender: true,
         paging: false,
-        dom: 'T<"clear">lfrtip',
+        dom: 'TB<"clear">lfrtip',
+        buttons: [
+            {
+                text: '<i class="fa fa-plus"></i> Fila',
+                className: "btn-success",
+                action: function (e, dt, node, config) {
+                    insertarFila();
+                }
+            }
+        ],
         columns: [          
             {data: "PARTIDA"},
             {data: "NOMBRE_ARTICULO"},
