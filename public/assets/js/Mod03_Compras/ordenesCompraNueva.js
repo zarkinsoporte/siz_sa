@@ -1187,7 +1187,7 @@ function insertarFila(BanderaOC){
                 , "ID_PARTIDA": ""
                 , "ESTATUS_PARTIDA":""//17
             }
-        ).draw( true );
+         ).draw(false);
         actualizaLineaPartidaAM(); 
         }
 }

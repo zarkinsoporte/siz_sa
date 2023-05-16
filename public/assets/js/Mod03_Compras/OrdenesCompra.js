@@ -1259,55 +1259,128 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
         var fila = $(this).closest('tr');
         var index = tabla.row(fila).index();
         var datos = tabla.row(fila).data();
-        var referenciaId = datos['ID_AUX'];
-        datos['OCFR_PartidaCerrada'] = 1;
-        var partidaCerrada = datos['OCFR_PartidaCerrada'];
+        if (OC_nueva == 0) {
+            $.blockUI({
+                css: {
+                    border: 'none',
+                    padding: '15px',
+                    backgroundColor: '#000',
+                    '-webkit-border-radius': '10px',
+                    '-moz-border-radius': '10px',
+                    opacity: .5,
+                    color: '#fff'
+                }
+            });
 
-        bootbox.dialog({
-            message: "¿Estas seguro de cerrar la partida?.",
-            title: "Ordenes de Compra",
-            buttons: {
-                success: {
-                    label: "Si",
-                    className: "btn-success",
-                    callback: function () {
-                        $.ajax({
-                            type: "POST",
-                            async: false,
-                            data: {
-                                detalleId: referenciaId
-                                ,partidaCerrada: partidaCerrada
-                            },
-                            dataType: "json",
-                            url: "compras/editarPartidaCerrada",
-                            success: function () {
-                                tabla.row(fila).nodes(fila, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').attr("disabled","disabled");
-                            },
-                            error: function (xhr, ajaxOptions, thrownError) {
-                                $.unblockUI();
-                                var error = JSON.parse(xhr.responseText);
-                                bootbox.alert({
-                                    size: "large",
-                                    title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
-                                    message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
-                                    ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
-                                    ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
-                                    ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
-                                });
-                            }
-                        });
+            bootbox.dialog({
+                message: "¿Estas seguro de cerrar la partida?.",
+                title: "Ordenes de Compra",
+                buttons: {
+                    success: {
+                        label: "Si",
+                        className: "btn-success",
+                        callback: function () {
 
-                    }
-                },
-                default: {
-                    label: "No",
-                    className: "btn-default m-r-5 m-b-5",
-                    callback: function () {
-                        tabla.row(fila).nodes(fila,COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').prop("checked",false);
+                            $.ajax({
+                                headers: {
+                                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                                },
+                                url: routeapp + "cerrar_partida",
+                                data: {
+
+                                    "oc_docEntry": $("#docEntryOC").text(),
+                                    "oc_docNum": $('#ordenesCompraOC #codigoOC').text(),
+                                    "line_num": datos['ID_PARTIDA']
+
+                                },
+                                type: "POST",
+                                async: true,
+                                success: function (datos, x, z) {
+                                    console.log(datos)
+                                    //$.unblockUI();
+                                    if (datos["Status"] == "Error") {
+                                        bootbox.dialog({
+                                            title: "Mensaje",
+                                            message: "<div class='alert alert-danger m-b-0'>" + datos["Mensaje"] + "</div>",
+                                            buttons: {
+                                                success: {
+                                                    label: "Ok",
+                                                    className: "btn-success m-r-5 m-b-5"
+                                                }
+                                            }
+                                        }).find('.modal-content').css({ 'font-size': '14px' });
+
+                                    }
+                                    else {
+                                        swal("", "partida cerrada", "success", {
+                                            buttons: false,
+                                            timer: 2000,
+                                        });
+
+                                    }
+                                    InicializaComponentesOC();
+                                    $("#tblArticulosExistentesNueva").DataTable().clear().draw();
+                                    $("#tblArticulosMiscelaneosNueva").DataTable().clear().draw();
+                                    console.log("id: " + datos["id"])
+                                    
+                                    mostrarOC(datos["id"]);
+                                    $.unblockUI();
+                                },
+                                error: function (x, e) {
+                                    var errorMessage = 'Error \n' + x.responseText;
+                                    // mostrarOC(datos["id"]);
+                                    $.unblockUI();
+                                    bootbox.dialog({
+                                        title: "Mensaje",
+                                        message: "<div class='alert alert-danger m-b-0'>" + errorMessage + "</div>",
+                                        buttons: {
+                                            success: {
+                                                label: "Ok",
+                                                className: "btn-success m-r-5 m-b-5"
+                                            }
+                                        }
+                                    }).find('.modal-content').css({ 'font-size': '14px' });
+
+                                }
+                            });
+
+                            // datos['CANT_PENDIENTE']="0.00";
+                            // datos['PARTIDA_CERRADA']=1;
+                            // tbl.row(fila).data(datos);
+                            // tbl.row(fila).nodes(fila, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').prop("checked", true);
+                            // tbl.row(fila).nodes(fila, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').attr("disabled","disabled");
+
+                            // tbl.row(fila).nodes(fila, COL_CODIGO_ART).to$().find('input#input-articulo-codigoAE').attr("disabled", "disabled");
+                            // tbl.row(fila).nodes(fila, COL_CODIGO_ART).to$().find('a#boton-articuloAE').attr("disabled", "disabled");
+                            // tbl.row(fila).nodes(fila, COL_CODIGO_ART).to$().find('a#boton-articuloAE').attr("id", "disabled");
+
+
+                            // tbl.row(fila).nodes(fila, COL_CANTIDAD).to$().find('input#input-cantidadAE').attr("disabled", "disabled");
+                            // tbl.row(fila).nodes(fila, COL_PRECIO).to$().find('input#input-precioAE').attr("disabled", "disabled");
+                            // tbl.row(fila).nodes(fila, COL_DESCUENTO).to$().find('input#input-descuentoAE').attr("disabled", "disabled");
+                            // tbl.row(fila).nodes(fila, COL_IVA).to$().find('select#cboIVAAE').attr("disabled", "disabled");
+                            // //tbl.row(fila).nodes(fila, COL_FECHA_ENTREGA_COMPRA).to$().find('input#boton-detalleAE').attr("disabled","disabled");
+                            // // tbl.row(fila).nodes(fila, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("disabled", "disabled");
+                            // //tbl.row(fila).nodes(fila, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("id", "disabled");
+
+                            // tbl.row(fila).nodes(fila, COL_FECHA_ENTREGA_COMPRA).to$().find('input#input-fecha-entrega-linea').attr("disabled", "disabled");
+
+                            // tbl.row(fila).nodes(fila, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("disabled", "disabled");
+                            // tbl.row(fila).nodes(fila, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("id", "disabled");
+                            // console.log(fila)
+
+                        }
+                    },
+                    default: {
+                        label: "No",
+                        className: "btn-default m-r-5 m-b-5",
+                        callback: function () {
+                            tbl.row(fila).nodes(fila, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').prop("checked", false);
+                        }
                     }
                 }
-            }
-        });
+            });
+        }//if OC_nueva
 
     });
 
@@ -1380,7 +1453,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                                 $("#tblArticulosExistentesNueva").DataTable().clear().draw();
                                 $("#tblArticulosMiscelaneosNueva").DataTable().clear().draw();
                                 console.log("id: " + datos["id"])
-                                console.log("id2: " + datos.id)
+                                
                                 mostrarOC(datos["id"]);
                                 $.unblockUI();
                             },
