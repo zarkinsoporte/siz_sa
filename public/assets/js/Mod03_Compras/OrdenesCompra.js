@@ -1172,6 +1172,8 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
         
         //var datos = tabla.row(fila).data();
         //console.log(datos['CODIGO_ARTICULO'])
+        var tabla = $('#tblArticulosExistentesNueva').DataTable();
+        var fila = $(this).closest('tr');
         swal({
             title: '¿Eliminar partida?',
             text: "",
@@ -1179,11 +1181,9 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
             showCancelButton: true,
             confirmButtonText: 'OK',
             cancelButtonText: 'Cancelar',            
-            closeOnConfirm: false,
+            closeOnConfirm: true,
             showLoaderOnConfirm: false,
         }, function () {
-            var tabla = $('#tblArticulosExistentesNueva').DataTable();
-            var fila = $(this).closest('tr');
                 //var index = tabla.row(fila).index();  
                 if (tabla.rows().count() == 1) {
                     swal("", "La OC debe contener al menos una partida.", "error", {
@@ -1192,7 +1192,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                     });
 
                 } else {
-                    tabla.row(fila).remove().draw();
+                    tabla.row(fila).remove().draw(false);
                     calculaTotalOrdenCompra();
                     actualizaLineaPartidaAE();
                 }
@@ -1202,10 +1202,10 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
     });
 
     $('#tblArticulosMiscelaneosNueva').on('click', 'button#boton-eliminarAM', function (e) {
-        e.preventDefault();
-
-       
+        e.preventDefault();       
         //var datos = tabla.row(fila).data();
+        var tabla = $('#tblArticulosMiscelaneosNueva').DataTable();
+        var fila = $(this).closest('tr');
         swal({
             title: '¿Eliminar partida?',
             text: "",
@@ -1216,8 +1216,6 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
             closeOnConfirm: false,
             showLoaderOnConfirm: false,
         }, function () {
-            var tabla = $('#tblArticulosMiscelaneosNueva').DataTable();
-            var fila = $(this).closest('tr');
                 //var index = tabla.row(fila).index();  
                 if (tabla.rows().count() == 1) {
                     swal("", "La OC debe contener al menos una partida.", "error", {
@@ -1319,7 +1317,19 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
         var fila = $(this).closest('tr');
         var index = tbl.row(fila).index();
         var datos = tbl.row(fila).data();    
-
+        if (OC_nueva == 0) {
+            $.blockUI({
+                css: {
+                    border: 'none',
+                    padding: '15px',
+                    backgroundColor: '#000',
+                    '-webkit-border-radius': '10px',
+                    '-moz-border-radius': '10px',
+                    opacity: .5,
+                    color: '#fff'
+                }
+            });    
+        
         bootbox.dialog({
             message: "¿Estas seguro de cerrar la partida?.",
             title: "Ordenes de Compra",
@@ -1328,31 +1338,94 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                     label: "Si",
                     className: "btn-success",
                     callback: function () {
+
+                        $.ajax({
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            url: routeapp + "cerrar_partida",
+                            data: {
+                               
+                                "oc_docEntry": $("#docEntryOC").text(),
+                                "oc_docNum": $('#ordenesCompraOC #codigoOC').text(),
+                                "line_num": datos['ID_PARTIDA']
+                                
+                            },
+                            type: "POST",
+                            async: true,
+                            success: function (datos, x, z) {
+                                console.log(datos)
+                                //$.unblockUI();
+                                if (datos["Status"] == "Error") {
+                                    bootbox.dialog({
+                                        title: "Mensaje",
+                                        message: "<div class='alert alert-danger m-b-0'>" + datos["Mensaje"] + "</div>",
+                                        buttons: {
+                                            success: {
+                                                label: "Ok",
+                                                className: "btn-success m-r-5 m-b-5"
+                                            }
+                                        }
+                                    }).find('.modal-content').css({ 'font-size': '14px' });
+
+                                }
+                                else {
+                                    swal("", "partida cerrada", "success", {
+                                        buttons: false,
+                                        timer: 2000,
+                                    });
+
+                                }
+                                InicializaComponentesOC();
+                                $("#tblArticulosExistentesNueva").DataTable().clear().draw();
+                                $("#tblArticulosMiscelaneosNueva").DataTable().clear().draw();
+                                console.log("id: " + datos["id"])
+                                console.log("id2: " + datos.id)
+                                mostrarOC(datos["id"]);
+                                $.unblockUI();
+                            },
+                            error: function (x, e) {
+                                var errorMessage = 'Error \n' + x.responseText;
+                                // mostrarOC(datos["id"]);
+                                $.unblockUI();
+                                bootbox.dialog({
+                                    title: "Mensaje",
+                                    message: "<div class='alert alert-danger m-b-0'>" + errorMessage + "</div>",
+                                    buttons: {
+                                        success: {
+                                            label: "Ok",
+                                            className: "btn-success m-r-5 m-b-5"
+                                        }
+                                    }
+                                }).find('.modal-content').css({ 'font-size': '14px' });
+
+                            }
+                        });
+
+                        // datos['CANT_PENDIENTE']="0.00";
+                        // datos['PARTIDA_CERRADA']=1;
+                        // tbl.row(fila).data(datos);
+                        // tbl.row(fila).nodes(fila, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').prop("checked", true);
+                        // tbl.row(fila).nodes(fila, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').attr("disabled","disabled");
                         
-                        datos['CANT_PENDIENTE']="0.00";
-                        datos['PARTIDA_CERRADA']=1;
-                        tbl.row(fila).data(datos);
-                        
-                        tbl.row(fila).nodes(fila, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').attr("disabled","disabled");
-                        
-                        tbl.row(fila).nodes(fila, COL_CODIGO_ART).to$().find('input#input-articulo-codigoAE').attr("disabled", "disabled");
-                        tbl.row(fila).nodes(fila, COL_CODIGO_ART).to$().find('a#boton-articuloAE').attr("disabled", "disabled");
-                        tbl.row(fila).nodes(fila, COL_CODIGO_ART).to$().find('a#boton-articuloAE').attr("id", "disabled");
+                        // tbl.row(fila).nodes(fila, COL_CODIGO_ART).to$().find('input#input-articulo-codigoAE').attr("disabled", "disabled");
+                        // tbl.row(fila).nodes(fila, COL_CODIGO_ART).to$().find('a#boton-articuloAE').attr("disabled", "disabled");
+                        // tbl.row(fila).nodes(fila, COL_CODIGO_ART).to$().find('a#boton-articuloAE').attr("id", "disabled");
                         
 
-                        tbl.row(fila).nodes(fila, COL_CANTIDAD).to$().find('input#input-cantidadAE').attr("disabled", "disabled");
-                        tbl.row(fila).nodes(fila, COL_PRECIO).to$().find('input#input-precioAE').attr("disabled", "disabled");
-                        tbl.row(fila).nodes(fila, COL_DESCUENTO).to$().find('input#input-descuentoAE').attr("disabled", "disabled");
-                        tbl.row(fila).nodes(fila, COL_IVA).to$().find('select#cboIVAAE').attr("disabled", "disabled");
-                        //tbl.row(fila).nodes(fila, COL_FECHA_ENTREGA_COMPRA).to$().find('input#boton-detalleAE').attr("disabled","disabled");
+                        // tbl.row(fila).nodes(fila, COL_CANTIDAD).to$().find('input#input-cantidadAE').attr("disabled", "disabled");
+                        // tbl.row(fila).nodes(fila, COL_PRECIO).to$().find('input#input-precioAE').attr("disabled", "disabled");
+                        // tbl.row(fila).nodes(fila, COL_DESCUENTO).to$().find('input#input-descuentoAE').attr("disabled", "disabled");
+                        // tbl.row(fila).nodes(fila, COL_IVA).to$().find('select#cboIVAAE').attr("disabled", "disabled");
+                        // //tbl.row(fila).nodes(fila, COL_FECHA_ENTREGA_COMPRA).to$().find('input#boton-detalleAE').attr("disabled","disabled");
+                        // // tbl.row(fila).nodes(fila, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("disabled", "disabled");
+                        // //tbl.row(fila).nodes(fila, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("id", "disabled");
+
+                        // tbl.row(fila).nodes(fila, COL_FECHA_ENTREGA_COMPRA).to$().find('input#input-fecha-entrega-linea').attr("disabled", "disabled");
+
                         // tbl.row(fila).nodes(fila, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("disabled", "disabled");
-                        //tbl.row(fila).nodes(fila, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("id", "disabled");
-
-                        tbl.row(fila).nodes(fila, COL_FECHA_ENTREGA_COMPRA).to$().find('input#input-fecha-entrega-linea').attr("disabled", "disabled");
-
-                        tbl.row(fila).nodes(fila, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("disabled", "disabled");
-                        tbl.row(fila).nodes(fila, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("id", "disabled");
-                        console.log(fila)
+                        // tbl.row(fila).nodes(fila, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("id", "disabled");
+                        // console.log(fila)
 
                     } 
                 },
@@ -1365,7 +1438,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                 }
             }
         });
-
+        }//if OC_nueva
     });
 }  //fin js_iniciador       
                    

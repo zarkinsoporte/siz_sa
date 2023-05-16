@@ -725,3 +725,4 @@ Route::any('cancelOC', 'Mod03_ComprasController@CancelDoc');
 Route::any('compras/buscaOC', 'Mod03_ComprasController@buscaOC');
 Route::any('cancelOC-test/{docEntry}', 'Mod03_ComprasController@CancelDoc2');
 Route::any('getPartida', 'Mod03_ComprasController@getPartida');
+Route::any('cerrar_partida', 'Mod03_ComprasController@cerrar_partida');

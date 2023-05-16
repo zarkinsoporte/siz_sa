@@ -819,6 +819,18 @@ class Mod03_ComprasController extends Controller
         }
 
     }
+    public function cerrar_partida(Request $request){
+        ini_set('memory_limit', '-1');
+        set_time_limit(0);
+        try{
+            return SAP::cerrar_partida($request->all());
+            //return ['Status' => 'Valido', 'respuesta' => 'success'];   
+        }
+        catch (\Exception $e){
+            return ['Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$e->getMessage()];
+        }
+
+    }
     public function getPartida(Request $request){
         ini_set('memory_limit', '-1');
         set_time_limit(0);
