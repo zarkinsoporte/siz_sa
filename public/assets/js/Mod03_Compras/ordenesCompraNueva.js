@@ -702,7 +702,7 @@ function InicializaBuscadorArticulos(){
             if (BanderaOC == 0){
                 var tabla_artExist = $('#tblArticulosExistentesNueva').DataTable();
                 var dataAE = tabla_artExist.row(fila).data();
-
+                
                 var banderaExiste = false;
                 var count = $('#tblArticulosExistentesNueva tbody tr').length;
                 for (var i = 0; i < count; i++) {
@@ -768,6 +768,7 @@ function InicializaBuscadorArticulos(){
         e.preventDefault();
 
         var fila = $('#modal-articulo #input-fila').val();
+        console.log("fila:" + fila)
         if (BanderaOC == 0){
 
             var tabla_artExist = $('#tblArticulosExistentesNueva').DataTable();
@@ -891,6 +892,7 @@ function InicializaComponentesOC() {
 
     $('#tblArticulosExistentesNueva').DataTable().clear().draw();
     $('#tblArticulosMiscelaneosNueva').DataTable().clear().draw();
+        
     insertarFila(0);   
     InicializaDatepicker();
 
@@ -906,7 +908,7 @@ var InicializaDatepicker = function() {
     }).datepicker("setDate", new Date());
 
     var today = new Date();
-    var dd = today.getDate();
+    var dd = today.getDate() + 1;
     var mm = today.getMonth() + 1; //January is 0!
 
     var yyyy = today.getFullYear();
@@ -1126,7 +1128,7 @@ function recargaTablaArticulos(datos){
 
 function insertarFila(BanderaOC){
     console.log('insertar fila: (0->TBL_ART_EXIST, 1->TBL_ART_MISC) BanderaOC =' + BanderaOC)
-     if (BanderaOC == 0){
+    if (BanderaOC == 0){
         TBL_ART_EXIST.row.add(
             {
                 "PARTIDA": ""
@@ -1158,10 +1160,11 @@ function insertarFila(BanderaOC){
                 , "ESTATUS_PARTIDA":""//20
             }
         ).draw( false );
+         
         actualizaLineaPartidaAE();
-        } else {
+    } else {
 
-         TBL_ART_MISC.row.add(
+        TBL_ART_MISC.row.add(
             {
                 "PARTIDA": ""
                 , "NOMBRE_ARTICULO": ""
@@ -1187,9 +1190,14 @@ function insertarFila(BanderaOC){
                 , "ID_PARTIDA": ""
                 , "ESTATUS_PARTIDA":""//17
             }
-         ).draw(false);
+        ).draw(false);
+        var fila = TBL_ART_MISC.rows().count() - 1;
+        console.log("fila: " + fila + " col_cta_mayor: " + COL_CTA_MAYOR)
+        //vamos a poner la paqueteria por default PAQUETERIA Y MANIOBRAS S/RET LERMA
+        TBL_ART_MISC.row(fila).nodes(fila, COL_CTA_MAYOR).to$().find("select#cboTPM").val("_SYS00000000144");
+        TBL_ART_MISC.row(fila).nodes(fila, COL_CTA_MAYOR).to$().find("select#cboTPM").selectpicker('refresh');
         actualizaLineaPartidaAM(); 
-        }
+    }
 }
 
 function generateGuid() {
@@ -2288,7 +2296,10 @@ function registraOC(){
                     }
                     }
                 }).find('.modal-content').css({'font-size': '14px'} );
-                
+                swal("", "OC Error", "danger", {
+                    buttons: false,
+                    timer: 1000,
+                });
             }
             else{
 
@@ -2307,7 +2318,7 @@ function registraOC(){
             $("#tblArticulosMiscelaneosNueva").DataTable().clear().draw();
             console.log("id: " + datos["id"])
             console.log("id2: " + datos.id)
-            mostrarOC(datos["id"]);
+            mostrarOC(datos["id"], 0); //0 indica que no es una OC nueva, por que ya se registro
             // $("#tblArticulosExistentesResumenNueva").DataTable().clear().draw();
             // $("#tblArticulosMiscelaneosResumenNueva").DataTable().clear().draw();
            // calculaTotalOrdenCompra();
@@ -2332,7 +2343,7 @@ function registraOC(){
     });
    
 }
-function MuestraComponentesOC() {
+function MuestraComponentesOC(OC_nueva) {
 
     if (OC_nueva == 1) { //nueva OC
         $('.nuevaOC').show()
@@ -2357,7 +2368,25 @@ function CargaComponentesOC(resumen) {
     let opt = (resumen.OC_TIPO == 'ARTICULOS') ? 0 : 1;
     $("#sel-tipo-oc").val(opt);
     $("#sel-tipo-oc").selectpicker('refresh');
+    $("#articulosOC").show();
+    $("#miscelaneosOC").hide();
 
+    if (opt == 0) {
+        $("#articulosOC").show();
+        $("#miscelaneosOC").hide();
+        BanderaOC = 0;
+        set_columns_index(0);        
+    } else {
+        $("#articulosOC").hide();
+        $("#miscelaneosOC").show();
+        BanderaOC = 1;
+        set_columns_index(1);
+        // //TBL_ART_MISC
+        // var tabla_artExist = $("#tblArticulosMiscelaneosNueva").DataTable();
+        // tabla_artExist.row(0).nodes(0, COL_IVA).to$().find("select#cboIVAAM").val("W3");
+        // tabla_artExist.row(0).nodes(0, COL_ID_IVA).to$().find("select#cboIVAAM").val("W3");
+        // tabla_artExist.row(0).nodes(0, COL_ID_IVA).to$().find("select#cboIVAAM").selectpicker('refresh');
+    }
     carga_info_proveedor(resumen.CardCode);
 
     $("#cboMoneda").val(resumen.OC_MONEDA);
@@ -2453,8 +2482,8 @@ function agregaArtExis(datos, pos) {
 
             , "CANT_PENDIENTE": datos['CANTIDAD_PENDIENTE']
             , "BTN_ELIMINAR": null
-
             , "ID_IVA": datos['TaxCode']
+
             , "ID_PARTIDA": datos['LIN_NUMERO']
             , "ESTATUS_PARTIDA": datos['LineStatus']
         }
@@ -2636,7 +2665,7 @@ function set_columns_index(BanderaOC) {
         COL_ESTATUS_PARTIDA = 17;
     }
 }
-function mostrarOC(NumOC) {
+function mostrarOC(NumOC, OCnueva) {
     $.blockUI({
         css: {
             border: 'none',
@@ -2663,10 +2692,10 @@ function mostrarOC(NumOC) {
         success: function (data) {
             setTimeout($.unblockUI, 2000);
 
-            OC_nueva = 0;
+            OC_nueva = OCnueva;
             $('#ordenesCompraOC').show();
             $('#btnBuscadorOC').hide();
-            MuestraComponentesOC()
+            MuestraComponentesOC(OC_nueva)
             console.log('1 ==> ' + $("#cboMoneda").val())
             CargaComponentesOC(data.resumen);
             console.log('2 ==> ' + $("#cboMoneda").val())
@@ -2726,9 +2755,9 @@ function getTblArtExis(){
                 "ID_UMI": datos_Tabla[i]["ID_UMI"],
                 "ID_UMC": datos_Tabla[i]["ID_UMC"],
                 "ID_IVA": datos_Tabla[i]["ID_IVA"],
-                "ESTATUS_PARTIDA": datos_Tabla[i]["ESTATUS_PARTIDA"],
-                "CODIGO_OT" : datos_Tabla[i]["CODIGO_OT"],
-                "ID_OT" : datos_Tabla[i]["ID_OT"]
+                "ESTATUS_PARTIDA": datos_Tabla[i]["ESTATUS_PARTIDA"]
+                //"CODIGO_OT" : datos_Tabla[i]["CODIGO_OT"],
+                //"ID_OT" : datos_Tabla[i]["ID_OT"]
             }
         };
         return tblAE;
@@ -2750,12 +2779,12 @@ function getTblArtMisc(){
             tblAM[i]={
 
                 "PARTIDA" : datos_Tabla[i]["PARTIDA"],
-                "CODIGO_ARTICULO" : datos_Tabla[i]["CODIGO_ARTICULO"],
+                //"CODIGO_ARTICULO" : datos_Tabla[i]["CODIGO_ARTICULO"],
                 "NOMBRE_ARTICULO" : datos_Tabla[i]["NOMBRE_ARTICULO"],
                 //"UNIDAD_MEDIDA_INV" : datos_Tabla[i]["UNIDAD_MEDIDA_INV"],
                 //"FACTOR_CONVERSION" : datos_Tabla[i]["FACTOR_CONVERSION"],
                 //"UNIDAD_MEDIDA_COMPRAS" : datos_Tabla[i]["UNIDAD_MEDIDA_COMPRAS"],
-                "CTA_MAYOR": datos_Tabla[i]["CTA_MAYOR"],
+                "CTA_MAYOR": $('select#cboTPM', tabla.row(i).node()).val(),
                 "CANTIDAD" : datos_Tabla[i]["CANTIDAD"],
                 "PRECIO" : datos_Tabla[i]["PRECIO"],
                 "SUBTOTAL" : datos_Tabla[i]["SUBTOTAL"],
@@ -2772,10 +2801,10 @@ function getTblArtMisc(){
                 "ID_AUX": datos_Tabla[i]["ID_AUX"],
                 // "ID_UMI": datos_Tabla[i]["ID_UMI"],
                 // "ID_UMC": datos_Tabla[i]["ID_UMC"],
-                // "ID_IVA": datos_Tabla[i]["ID_IVA"],
+                "ID_IVA": datos_Tabla[i]["ID_IVA"]
                 // "ESTATUS_PARTIDA": datos_Tabla[i]["ESTATUS_PARTIDA"],
                 // "CODIGO_OT" : datos_Tabla[i]["CODIGO_OT"],
-                "ID_OT" : datos_Tabla[i]["ID_OT"]
+                //"ID_OT" : datos_Tabla[i]["ID_OT"]
             }
         };
         return tblAM;
@@ -2852,67 +2881,76 @@ function agregaArtExis_old(datos,pos){
 function agregaArtMisc(datos,pos){
 
     var tbl = $('#tblArticulosMiscelaneosNueva').DataTable();
-    if(datos['OCFR_PartidaCerrada'] == null)datos['OCFR_PartidaCerrada'] = 0;
+    //if(datos['OCFR_PartidaCerrada'] == null)datos['OCFR_PartidaCerrada'] = 0;
     TBL_ART_MISC.row.add(
         {
-            "PARTIDA": datos['OCD_NumeroLinea']
-            , "CODIGO_ARTICULO": datos['CMM_TipoPartidaMisc']
-            , "NOMBRE_ARTICULO": datos['OCD_DescripcionArticulo']
-            , "UNIDAD_MEDIDA_INV": datos['OCD_CMUM_UMInventario']
-            , "FACTOR_CONVERSION": datos['OCD_AFC_FactorConversion']
-            , "UNIDAD_MEDIDA_COMPRAS": datos['OCD_CMUM_UMCompras']
-            , "CANTIDAD": datos['OCD_CantidadRequerida']
-            , "PRECIO": datos['OCD_PrecioUnitario']
-            , "SUBTOTAL": parseFloat(datos['OCD_Subtotal']).toFixed(DECIMALES)
-            , "DESCUENTO": datos['OCFR_PorcentajeDescuento']
-            , "MONTO_DESCUENTO": parseFloat(datos['OCD_Descuento']).toFixed(DECIMALES)
-            , "IVA": datos['OCD_CMIVA_PorcentajeIVA']
-            , "MONTO_IVA": parseFloat(datos['OCD_Iva']).toFixed(DECIMALES)
-            , "TOTAL": parseFloat(datos['OCD_Total']).toFixed(DECIMALES)
-            , "PARTIDA_CERRADA": datos['OCFR_PartidaCerrada']
-            , "BTN_ELIMINAR": null
-            , "ID_ARTICULO": datos['OCD_ART_ArticuloId']
-            , "ID_PARTIDA": datos['OCD_PartidaId']
-            , "ID_AUX" : datos['OCD_PartidaId']
-            , "ID_UMI": datos['OCD_CMUM_UMInventarioId']
-            , "ID_UMC": datos['OCD_CMUM_UMComprasId']
-            , "ID_IVA": datos['OCD_CMIVA_IVAId']
-            , "ESTATUS_PARTIDA": datos['OCFR_CMM_EstadoFechaRequerida']
-            , "CODIGO_OT": datos['OT_Codigo']
-            , "ID_OT": datos['OCD_OT_OrdenTrabajoId']
+            "PARTIDA": datos['LIN_NUMERO']
+            , "CODIGO_ARTICULO": ""
+            , "NOMBRE_ARTICULO": datos['LIN_UM']
 
+            , "UNIDAD_MEDIDA_INV": datos['LIN_UM']
+            , "FACTOR_CONVERSION": datos['LIN_FACTOR']
+            , "UNIDAD_MEDIDA_COMPRAS": datos['BuyUnitMsr']
+
+            , "CANTIDAD": datos['LIN_CANTIDAD']
+            , "PRECIO": datos['LIN_PRECIO']
+            , "SUBTOTAL": parseFloat(datos['LIN_TOTAL']).toFixed(DECIMALES)
+            
+            , "DESCUENTO": datos['LIN_PORCENTAJEDESCUENTO']
+            , "MONTO_DESCUENTO": parseFloat(datos['LIN_DISC']).toFixed(DECIMALES)
+            , "IVA": datos['LIN_PORCENTAJEIVA']
+            
+            , "MONTO_IVA": parseFloat(datos['LIN_IVA']).toFixed(DECIMALES)
+            , "TOTAL": parseFloat(datos['LIN_GTOTAL']).toFixed(DECIMALES)
+            , "FECHA_ENTREGA": datos['ShipDate']
+            
+            , "CANT_PENDIENTE": datos['CANTIDAD_PENDIENTE'] 
+            , "BTN_ELIMINAR": null
+            , "ID_IVA": datos['TaxCode']
+            
+            , "ID_PARTIDA": datos['LIN_NUMERO']
+            , "ESTATUS_PARTIDA": datos['LineStatus']
+            
         }
     ).draw();
-    tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('select#cboTPM').val(datos['OCD_CMM_TipoPartidaMiscelaneaId']);
-    tbl.row(pos).nodes(pos, COL_NOMBRE_ART_MISC).to$().find('input#input-nombreART-miselaneos').val(datos['OCD_DescripcionArticulo']);
-    tbl.row(pos).nodes(pos, COL_UNIDAD_MEDIDA_COMPRAS).to$().find('select#cboUMAM').val(datos['OCD_CMUM_UMComprasId']);
-    tbl.row(pos).nodes(pos, COL_DESCUENTO).to$().find('input#input-descuentoAM').val(parseFloat(datos['OCFR_PorcentajeDescuento']).toFixed(DECIMALES));
-    tbl.row(pos).nodes(pos, COL_IVA).to$().find('select#cboIVAAM').val(datos['OCD_CMIVA_IVAId']);
+    // tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('select#cboTPM').val(datos['OCD_CMM_TipoPartidaMiscelaneaId']);
+    // tbl.row(pos).nodes(pos, COL_NOMBRE_ART_MISC).to$().find('input#input-nombreART-miselaneos').val(datos['OCD_DescripcionArticulo']);
+    // tbl.row(pos).nodes(pos, COL_UNIDAD_MEDIDA_COMPRAS).to$().find('select#cboUMAM').val(datos['OCD_CMUM_UMComprasId']);
+    // tbl.row(pos).nodes(pos, COL_DESCUENTO).to$().find('input#input-descuentoAM').val(parseFloat(datos['OCFR_PorcentajeDescuento']).toFixed(DECIMALES));
+    // tbl.row(pos).nodes(pos, COL_IVA).to$().find('select#cboIVAAM').val(datos['OCD_CMIVA_IVAId']);
 
-    if(datos['OCFR_PartidaCerrada'] == 0){
+    if (datos['LineStatus'] == 'O') {
 
-        tbl.row(pos).nodes(pos, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').prop("checked",false);
+        tbl.row(pos).nodes(pos, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').prop("checked", false);
         tbl.row(pos).nodes(pos, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').removeAttr("disabled");
 
     }
-    else{
+    else {
 
-        tbl.row(pos).nodes(pos, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').prop("checked",true);
-        tbl.row(pos).nodes(pos, COL_PARTIDA_CERRADA).to$().find('checkbox#cerrarPartidaCheck').attr("disabled","disabled");
+        tbl.row(pos).nodes(pos, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').prop("checked", true);
+        tbl.row(pos).nodes(pos, COL_PARTIDA_CERRADA).to$().find('checkbox#cerrarPartidaCheck').attr("disabled", "disabled");
 
     }
 
-    if(datos['OCFR_CMM_EstadoFechaRequerida'] != 'Abierta'){//ABIERTA
+    // tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('input#input-articulo-codigoAE').attr("disabled", "disabled");
+    // tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('a#boton-articuloAE').attr("disabled", "disabled");
+    // tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('a#boton-articuloAE').attr("id", "disabled");
+     if (datos['LineStatus'] != 'O' || datos['EDO_CANTIDAD_PENDIENTE'] != 'SIN SURTIR') {//SI ESTA CERRADA
 
-        tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('select#cboTPM').attr("disabled","disabled");
-        tbl.row(pos).nodes(pos, COL_NOMBRE_ART_MISC).to$().find('input#input-nombreART-miselaneos').attr("disabled","disabled");
-        tbl.row(pos).nodes(pos, COL_UNIDAD_MEDIDA_COMPRAS).to$().find('select#cboUMAM').attr("disabled","disabled");
-        tbl.row(pos).nodes(pos, COL_CANTIDAD).to$().find('input#input-cantidadAM').attr("disabled","disabled");
-        tbl.row(pos).nodes(pos, COL_PRECIO).to$().find('input#input-precioAM').attr("disabled","disabled");
-        tbl.row(pos).nodes(pos, COL_DESCUENTO).to$().find('input#input-descuentoAM').attr("disabled","disabled");
-        tbl.row(pos).nodes(pos, COL_IVA).to$().find('select#cboIVAAM').attr("disabled","disabled");
-        tbl.row(pos).nodes(pos, COL_BTN_ELIMINAR_COMPRA).to$().find('button#boton-eliminarAM').attr("disabled","disabled");
+        tbl.row(pos).nodes(pos, COL_CANTIDAD).to$().find('input#input-cantidadAE').attr("disabled", "disabled");
+        tbl.row(pos).nodes(pos, COL_PRECIO).to$().find('input#input-precioAE').attr("disabled", "disabled");
+        tbl.row(pos).nodes(pos, COL_DESCUENTO).to$().find('input#input-descuentoAE').attr("disabled", "disabled");
+        tbl.row(pos).nodes(pos, COL_IVA).to$().find('select#cboIVAAE').attr("disabled", "disabled");
+        //tbl.row(pos).nodes(pos, COL_FECHA_ENTREGA_COMPRA).to$().find('input#boton-detalleAE').attr("disabled","disabled");
+        // tbl.row(pos).nodes(pos, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("disabled", "disabled");
+        //tbl.row(pos).nodes(pos, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("id", "disabled");
 
+        tbl.row(pos).nodes(pos, COL_FECHA_ENTREGA_COMPRA).to$().find('input#input-fecha-entrega-linea').attr("disabled", "disabled");
+
+    }
+    if (datos['EDO_CANTIDAD_PENDIENTE'] != 'SIN SURTIR') {
+        tbl.row(pos).nodes(pos, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("disabled", "disabled");
+        tbl.row(pos).nodes(pos, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("id", "disabled");
     }
 
 }

@@ -37,7 +37,7 @@ function js_iniciador() {
     $('#input-fecha').datepicker('setDate', new Date());
     
     var today = new Date();
-    var dd = today.getDate();
+    var dd = today.getDate()+1;
     var mm = today.getMonth() + 1; //January is 0!
 
     var yyyy = today.getFullYear();
@@ -470,11 +470,11 @@ $('#boton-cerrar').off().on('click', function(e) {
 });
 $('#boton-nuevo').on('click', function(e) {
     OC_nueva = 1;
-    MuestraComponentesOC()
+    MuestraComponentesOC(OC_nueva)
     $('#ordenesCompraOC').show();
     $('#btnBuscadorOC').hide();
     InicializaComponentesOC();
-
+    
     $("#articulosOC").show();
     $("#miscelaneosOC").hide();
     BanderaOC = 0;
@@ -732,13 +732,21 @@ $("#sel-tipo-oc").on("changed.bs.select", function(e, clickedIndex, newValue, ol
             $("#miscelaneosOC").hide();
             BanderaOC = 0;
             set_columns_index(0);
+            insertarFila(BanderaOC);
         } else {
             $("#articulosOC").hide();
             $("#miscelaneosOC").show();
             BanderaOC = 1;
             set_columns_index(1);
+            insertarFila(BanderaOC);
+            //TBL_ART_MISC
+            var tabla_artExist = $("#tblArticulosMiscelaneosNueva").DataTable();
+            tabla_artExist.row(0).nodes(0, COL_IVA).to$().find("select#cboIVAAM").val("W3");
+            tabla_artExist.row(0).nodes(0, COL_ID_IVA).to$().find("select#cboIVAAM").val("W3");
+            tabla_artExist.row(0).nodes(0, COL_ID_IVA).to$().find("select#cboIVAAM").selectpicker('refresh');
         }
-        insertarFila(BanderaOC)
+        
+         //dataAE["ID_IVA"] = ivaIDOC;
         //console.log('sel-tipo-oc: '+BanderaOC)
         setTimeout($.unblockUI, 2000);
     });
@@ -1242,7 +1250,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
         if (true) {
         //if (datos['Estatus'] == 'ABIERTA') {
 
-            mostrarOC(NumOC)
+            mostrarOC(NumOC, 0) //0 indica que no es una OC nueva, por que se entro a editar
            
         } else {
             swal("", "La OC no esta Abierta", "error", {
@@ -1323,7 +1331,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                                     $("#tblArticulosMiscelaneosNueva").DataTable().clear().draw();
                                     console.log("id: " + datos["id"])
                                     
-                                    mostrarOC(datos["id"]);
+                                    mostrarOC(datos["id"], 0);//0 indica que no es una OC nueva, solo se recargaOC
                                     $.unblockUI();
                                 },
                                 error: function (x, e) {
@@ -1454,7 +1462,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                                 $("#tblArticulosMiscelaneosNueva").DataTable().clear().draw();
                                 console.log("id: " + datos["id"])
                                 
-                                mostrarOC(datos["id"]);
+                                mostrarOC(datos["id"], 0);//0 indica que no es una OC nueva, solo es recargaOC
                                 $.unblockUI();
                             },
                             error: function (x, e) {
