@@ -271,7 +271,10 @@ function InicializaTablas(){
                 text: '<i class="fa fa-plus"></i> Fila',
                 className: "btn-success",
                 action: function (e, dt, node, config) {
-                    insertarFila(0); 
+                    var estadoOC = $('#estadoOC').text();
+                    if (estadoOC != 'CERRADA') {
+                        insertarFila(0);                         
+                    }
                 }
             }
         ],
@@ -459,7 +462,10 @@ function InicializaTablas(){
                 text: '<i class="fa fa-plus"></i> Fila',
                 className: "btn-success",
                 action: function (e, dt, node, config) {
-                    insertarFila(1);
+                    var estadoOC = $('#estadoOC').text();
+                    if (estadoOC != 'CERRADA') {
+                        insertarFila(1);                        
+                    }
                 }
             }
         ],
@@ -603,8 +609,8 @@ function InicializaTablas(){
             {
                 "targets": [COL_BTN_ELIMINAR_COMPRA],
                 "className": "dt-body-center",
-                "render": function ( data, type, row ) {
-                    return '<button type="button" class="btn btn-danger btn-sm" id="boton-eliminarAM"> <span class="fa fa-trash"></span> </button>';
+                "render": function ( data, type, row ) {                    
+                    return '<a class="btn btn-danger btn-sm" id="boton-eliminarAM"> <span class="fa fa-trash"></span> </a>';
                 }
             },
             {
@@ -2488,9 +2494,9 @@ function agregaArtExis(datos, pos) {
             , "ESTATUS_PARTIDA": datos['LineStatus']
         }
     ).draw();
-    tbl.row(pos).nodes(pos, COL_DESCUENTO).to$().find('input#input-descuentoAE').val(parseFloat(datos['LIN_PORCENTAJEDESCUENTO']).toFixed(DECIMALES));
-    tbl.row(pos).nodes(pos, COL_IVA).to$().find('select#cboIVAAE').val(datos['TaxCode']);
-
+    TBL_ART_EXIST.row(pos).nodes(pos, COL_DESCUENTO).to$().find('input#input-descuentoAE').val(parseFloat(datos['LIN_PORCENTAJEDESCUENTO']).toFixed(DECIMALES));
+    TBL_ART_EXIST.row(pos).nodes(pos, COL_IVA).to$().find('select#cboIVAAE').val(datos['TaxCode']);
+    TBL_ART_EXIST.row(pos).nodes(pos, COL_FECHA_ENTREGA_COMPRA).to$().find('input#input-fecha-entrega-linea').val(datos['ShipDate']);    
     if (datos['LineStatus'] == 'O') {
 
         tbl.row(pos).nodes(pos, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').prop("checked", false);
@@ -2519,8 +2525,6 @@ function agregaArtExis(datos, pos) {
 
         tbl.row(pos).nodes(pos, COL_FECHA_ENTREGA_COMPRA).to$().find('input#input-fecha-entrega-linea').attr("disabled", "disabled");
 
-    }
-    if (datos['EDO_CANTIDAD_PENDIENTE'] != 'SIN SURTIR') {
         tbl.row(pos).nodes(pos, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("disabled", "disabled");
         tbl.row(pos).nodes(pos, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("id", "disabled");
     }
@@ -2813,71 +2817,6 @@ function getTblArtMisc(){
 
 }
 
-function agregaArtExis_old(datos,pos){
-
-    var tbl = $('#tblArticulosExistentesNueva').DataTable();
-    if(datos['OCFR_PartidaCerrada'] == null)datos['OCFR_PartidaCerrada'] = 0;
-    TBL_ART_EXIST.row.add(
-        {
-            "PARTIDA": datos['OCD_NumeroLinea']
-            , "CODIGO_ARTICULO": datos['ART_CodigoArticulo']
-            , "NOMBRE_ARTICULO": datos['OCD_DescripcionArticulo']
-            , "UNIDAD_MEDIDA_INV": datos['OCD_CMUM_UMInventario']
-            , "FACTOR_CONVERSION": datos['OCD_AFC_FactorConversion']
-            , "UNIDAD_MEDIDA_COMPRAS": datos['OCD_CMUM_UMCompras']
-            , "CANTIDAD": datos['OCD_CantidadRequerida']
-            , "PRECIO": datos['OCD_PrecioUnitario']
-            , "SUBTOTAL": parseFloat(datos['OCD_Subtotal']).toFixed(DECIMALES)
-            , "DESCUENTO": datos['OCFR_PorcentajeDescuento']
-            , "MONTO_DESCUENTO": parseFloat(datos['OCD_Descuento']).toFixed(DECIMALES)
-            , "IVA": datos['OCD_CMIVA_PorcentajeIVA']
-            , "MONTO_IVA": parseFloat(datos['OCD_Iva']).toFixed(DECIMALES)
-            , "TOTAL": parseFloat(datos['OCD_Total']).toFixed(DECIMALES)
-            , "PARTIDA_CERRADA": datos['OCFR_PartidaCerrada']
-            , "BTN_ELIMINAR": null
-            , "ID_ARTICULO": datos['OCD_ART_ArticuloId']
-            , "ID_PARTIDA": datos['OCD_PartidaId']
-            , "ID_AUX" : datos['OCD_PartidaId']
-            , "ID_UMI": datos['OCD_CMUM_UMInventarioId']
-            , "ID_UMC": datos['OCD_CMUM_UMComprasId']
-            , "ID_IVA": datos['OCD_CMIVA_IVAId']
-            , "ESTATUS_PARTIDA": datos['OCFR_CMM_EstadoFechaRequerida']
-            , "CODIGO_OT": datos['OT_Codigo']
-            , "ID_OT": datos['OCD_OT_OrdenTrabajoId']
-
-        }
-    ).draw();
-    tbl.row(pos).nodes(pos, COL_DESCUENTO).to$().find('input#input-descuentoAE').val(parseFloat(datos['OCFR_PorcentajeDescuento']).toFixed(DECIMALES));
-    tbl.row(pos).nodes(pos, COL_IVA).to$().find('select#cboIVAAE').val(datos['OCD_CMIVA_IVAId']);
-
-    if(datos['OCFR_PartidaCerrada'] == 0){
-
-        tbl.row(pos).nodes(pos, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').prop("checked",false);
-        tbl.row(pos).nodes(pos, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').removeAttr("disabled");
-
-    }
-    else{
-
-        tbl.row(pos).nodes(pos, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').prop("checked",true);
-        tbl.row(pos).nodes(pos, COL_PARTIDA_CERRADA).to$().find('checkbox#cerrarPartidaCheck').attr("disabled","disabled");
-
-    }
-
-    if(datos['OCFR_CMM_EstadoFechaRequerida'] != 'Abierta'){//ABIERTA
-
-        tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('input#input-articulo-codigoAE').attr("disabled","disabled");
-        //tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('input#boton-articuloAE').attr("disabled","disabled");
-        tbl.row(pos).nodes(pos, COL_CANTIDAD).to$().find('input#input-cantidadAE').attr("disabled","disabled");
-        tbl.row(pos).nodes(pos, COL_PRECIO).to$().find('input#input-precioAE').attr("disabled","disabled");
-        tbl.row(pos).nodes(pos, COL_DESCUENTO).to$().find('input#input-descuentoAE').attr("disabled","disabled");
-        tbl.row(pos).nodes(pos, COL_IVA).to$().find('select#cboIVAAE').attr("disabled","disabled");
-        //tbl.row(pos).nodes(pos, COL_FECHA_ENTREGA_COMPRA).to$().find('input#boton-detalleAE').attr("disabled","disabled");
-        tbl.row(pos).nodes(pos, COL_BTN_ELIMINAR_COMPRA).to$().find('button#boton-eliminarAE').attr("disabled","disabled");
-
-    }
-
-}
-
 function agregaArtMisc(datos,pos){
 
     var tbl = $('#tblArticulosMiscelaneosNueva').DataTable();
@@ -2886,7 +2825,7 @@ function agregaArtMisc(datos,pos){
         {
             "PARTIDA": datos['LIN_NUMERO']
             , "CODIGO_ARTICULO": ""
-            , "NOMBRE_ARTICULO": datos['LIN_UM']
+            , "NOMBRE_ARTICULO": datos['LIN_DESCRIPCION']
 
             , "UNIDAD_MEDIDA_INV": datos['LIN_UM']
             , "FACTOR_CONVERSION": datos['LIN_FACTOR']
@@ -2910,16 +2849,25 @@ function agregaArtMisc(datos,pos){
             
             , "ID_PARTIDA": datos['LIN_NUMERO']
             , "ESTATUS_PARTIDA": datos['LineStatus']
+            , "CTA_MAYOR": datos['AcctCode']
             
         }
     ).draw();
-    // tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('select#cboTPM').val(datos['OCD_CMM_TipoPartidaMiscelaneaId']);
-    // tbl.row(pos).nodes(pos, COL_NOMBRE_ART_MISC).to$().find('input#input-nombreART-miselaneos').val(datos['OCD_DescripcionArticulo']);
-    // tbl.row(pos).nodes(pos, COL_UNIDAD_MEDIDA_COMPRAS).to$().find('select#cboUMAM').val(datos['OCD_CMUM_UMComprasId']);
-    // tbl.row(pos).nodes(pos, COL_DESCUENTO).to$().find('input#input-descuentoAM').val(parseFloat(datos['OCFR_PorcentajeDescuento']).toFixed(DECIMALES));
-    // tbl.row(pos).nodes(pos, COL_IVA).to$().find('select#cboIVAAM').val(datos['OCD_CMIVA_IVAId']);
 
-    if (datos['LineStatus'] == 'O') {
+    TBL_ART_MISC.row(pos).nodes(pos, COL_NOMBRE_ART_MISC).to$().find('input#input-nombreART-miselaneos').val(datos['LIN_DESCRIPCION']);
+    // tbl.row(pos).nodes(pos, COL_UNIDAD_MEDIDA_COMPRAS).to$().find('select#cboUMAM').val(datos['OCD_CMUM_UMComprasId']);
+    TBL_ART_MISC.row(pos).nodes(pos, COL_DESCUENTO).to$().find('input#input-descuentoAM').val(parseFloat(datos['LIN_PORCENTAJEDESCUENTO']).toFixed(DECIMALES));
+    
+    TBL_ART_MISC.row(pos).nodes(pos, COL_FECHA_ENTREGA_COMPRA).to$().find('input#input-fecha-entrega-linea').val(datos['ShipDate']);
+   
+    TBL_ART_MISC.row(pos).nodes(pos, COL_IVA).to$().find('select#cboIVAAM').val(datos['TaxCode']);
+    TBL_ART_MISC.row(pos).nodes(pos, COL_ID_IVA).to$().find("select#cboIVAAM").val(datos['TaxCode']);
+    TBL_ART_MISC.row(pos).nodes(pos, COL_ID_IVA).to$().find("select#cboIVAAM").selectpicker('refresh');
+
+    TBL_ART_MISC.row(pos).nodes(pos, COL_CTA_MAYOR).to$().find("select#cboTPM").val(datos['AcctCode']);
+    TBL_ART_MISC.row(pos).nodes(pos, COL_CTA_MAYOR).to$().find("select#cboTPM").selectpicker('refresh');
+
+    if (datos['LineStatus'] == 'O') { //Abierta
 
         tbl.row(pos).nodes(pos, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').prop("checked", false);
         tbl.row(pos).nodes(pos, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').removeAttr("disabled");
@@ -2932,29 +2880,24 @@ function agregaArtMisc(datos,pos){
 
     }
 
-    // tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('input#input-articulo-codigoAE').attr("disabled", "disabled");
-    // tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('a#boton-articuloAE').attr("disabled", "disabled");
-    // tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('a#boton-articuloAE').attr("id", "disabled");
      if (datos['LineStatus'] != 'O' || datos['EDO_CANTIDAD_PENDIENTE'] != 'SIN SURTIR') {//SI ESTA CERRADA
 
-        tbl.row(pos).nodes(pos, COL_CANTIDAD).to$().find('input#input-cantidadAE').attr("disabled", "disabled");
-        tbl.row(pos).nodes(pos, COL_PRECIO).to$().find('input#input-precioAE').attr("disabled", "disabled");
-        tbl.row(pos).nodes(pos, COL_DESCUENTO).to$().find('input#input-descuentoAE').attr("disabled", "disabled");
-        tbl.row(pos).nodes(pos, COL_IVA).to$().find('select#cboIVAAE').attr("disabled", "disabled");
-        //tbl.row(pos).nodes(pos, COL_FECHA_ENTREGA_COMPRA).to$().find('input#boton-detalleAE').attr("disabled","disabled");
-        // tbl.row(pos).nodes(pos, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("disabled", "disabled");
-        //tbl.row(pos).nodes(pos, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("id", "disabled");
-
+        tbl.row(pos).nodes(pos, COL_CANTIDAD).to$().find('input#input-cantidadAM').attr("disabled", "disabled");
+        tbl.row(pos).nodes(pos, COL_PRECIO).to$().find('input#input-precioAM').attr("disabled", "disabled");
+        tbl.row(pos).nodes(pos, COL_DESCUENTO).to$().find('input#input-descuentoAM').attr("disabled", "disabled");
+        tbl.row(pos).nodes(pos, COL_IVA).to$().find('select#cboIVAAM').attr("disabled", "disabled");
         tbl.row(pos).nodes(pos, COL_FECHA_ENTREGA_COMPRA).to$().find('input#input-fecha-entrega-linea').attr("disabled", "disabled");
+         TBL_ART_MISC.row(pos).nodes(pos, COL_CTA_MAYOR).to$().find("select#cboTPM").attr("disabled", "disabled");
+         TBL_ART_MISC.row(pos).nodes(pos, COL_NOMBRE_ART_MISC).to$().find('input#input-nombreART-miselaneos').attr("disabled", "disabled");
+         TBL_ART_MISC.row(pos).nodes(pos, COL_ID_IVA).to$().find("select#cboIVAAM").attr("disabled", "disabled");
 
-    }
-    if (datos['EDO_CANTIDAD_PENDIENTE'] != 'SIN SURTIR') {
-        tbl.row(pos).nodes(pos, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("disabled", "disabled");
-        tbl.row(pos).nodes(pos, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("id", "disabled");
+        
+        TBL_ART_MISC.row(pos).nodes(pos, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAM').attr("disabled", "disabled");
+        TBL_ART_MISC.row(pos).nodes(pos, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAM').attr("id", "disabled");
+
     }
 
 }
-
 
 function eliminarPartidaArtExis(fila){
     PARTIDA_ART_EXIS_ELIMINADA.push($(document.getElementById('tblArticulosExistentesNueva').getElementsByTagName('tbody')[0]).children()[fila]);

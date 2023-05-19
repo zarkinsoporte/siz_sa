@@ -474,7 +474,7 @@ $('#boton-nuevo').on('click', function(e) {
     $('#ordenesCompraOC').show();
     $('#btnBuscadorOC').hide();
     InicializaComponentesOC();
-    
+
     $("#articulosOC").show();
     $("#miscelaneosOC").hide();
     BanderaOC = 0;
@@ -1209,7 +1209,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
         //PartidaResumenAE();
     });
 
-    $('#tblArticulosMiscelaneosNueva').on('click', 'button#boton-eliminarAM', function (e) {
+    $('#tblArticulosMiscelaneosNueva').on('click', 'a#boton-eliminarAM', function (e) {
         e.preventDefault();       
         //var datos = tabla.row(fila).data();
         var tabla = $('#tblArticulosMiscelaneosNueva').DataTable();
