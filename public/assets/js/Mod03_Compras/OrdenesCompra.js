@@ -535,13 +535,17 @@ $(document).keyup(function(event) {
                     color: '#000000'
                 }
             });
-        var tipo_cambio_anterior = $('#input_tc').val();
+        var tipo_cambio_anterior = $('#input_tc_anterior').val();
         console.log('cambiando moneda: ')
         var moneda_anterior = oldValue;
         var moneda = $('option:selected', this).val();
-        console.log('cboMoneda: '+ oldValue + ' > '+ moneda + ' tc:'+tipo_cambio_anterior)
+        console.log('cboMoneda: '+ oldValue + ' > '+ moneda + ' tc_ant:'+tipo_cambio_anterior)
         carga_tipo_cambio(moneda);
+        
+        console.log('cboMoneda: ' + moneda_anterior + ' > '+ moneda + ' tc_ant:'+tipo_cambio_anterior)
         calculaNuevaMoneda(moneda_anterior, moneda, tipo_cambio_anterior);
+       
+        $("#input_tc_anterior").val($("#input_tc").val());
         recargaTablaArticulos('');
         cargaTablaArticulos();
         setTimeout($.unblockUI, 2000);
@@ -565,9 +569,14 @@ $(document).keyup(function(event) {
         var moneda = $('#cboMoneda').val();       
         var tipo_cambio_anterior = $('#input_tc_anterior').val(); 
         calculaNuevaTipoCambio(moneda, tipo_cambio_anterior);
+
         recargaTablaArticulos('');
         cargaTablaArticulos();
         setTimeout($.unblockUI, 2000);
+        swal("", "Tipo Cambio Aplicado...", "success", {
+            buttons: false,
+            timer: 2000,
+        });
     });
     $('#input-fecha-entrega').change(function (e){
         $.blockUI({

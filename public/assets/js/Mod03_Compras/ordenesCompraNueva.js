@@ -1648,35 +1648,34 @@ function calculaNuevaMoneda(moneda_anterior, moneda, tipo_cambio_anterior){
         var descuento = 'input-descuentoAE';
         var Precio_anterior = 0;
         //var Precio = 0;
-        var lengthAE = $('#tblArticulosExistentesNueva #boton-articuloAE').closest('tr');
+        //var lengthAE = $('#tblArticulosExistentesNueva #boton-articuloAE').closest('tr');
         
         if (BanderaOC == 1) {
-        ttabla = 'tblArticulosMiscelaneosNueva';
+       // ttabla = 'tblArticulosMiscelaneosNueva';
 
         tabla = $('#tblArticulosMiscelaneosNueva').DataTable();
         precio = 'input-precioAM';
         cantidad = 'input-cantidadAM';
         descuento = 'input-descuentoAM';
-        lengthAE = $('#tblArticulosMiscelaneosNueva #boton-articuloAM').closest('tr');
         } 
-        
-        var count = lengthAE.length; //+ lengthAM.length;
-        if (count > 0){
 
-            for (var i = 0; i < count; i++) {
+        var lengthAE = tabla.rows().count();
+        console.log('banderaOC: '+ BanderaOC + " COL_PRECIO: "+ COL_PRECIO + " rows: " + lengthAE)
+        
+        //var count = lengthAE.length; //+ lengthAM.length;
+        if (lengthAE > 0){
+            console.log('calculaNuevaMoneda....... ')
+
+            for (var i = 0; i < lengthAE; i++) {
                 datos = tabla.row( i ).data();
                 Precio_anterior = datos['PRECIO'];
-                console.log('calculaNuevaMoneda....... ')
                 console.log('precio_anterior: '+ Precio_anterior)
                 console.log('moneda: '+ moneda)
                 console.log('tipo_cambio_anterior: '+ tipo_cambio_anterior)
                 miprecio = getNuevoPrecio(Precio_anterior, moneda_anterior, moneda, tipo_cambio_anterior);
-                  if (BanderaOC == 1) {
-                    tabla.row(i).nodes(i, 4).to$().find('input#' + precio).val(miprecio);
-                    
-                } else {                    
-                    tabla.row(i).nodes(i, COL_PRECIO).to$().find('input#' + precio).val(miprecio);
-                }
+                
+                tabla.row(i).nodes(i, COL_PRECIO).to$().find('input#' + precio).val(miprecio);
+                
                 //tabla.row(i).nodes(i, COL_PRECIO).to$().find('input#' + precio).val(miprecio);
                 
                 datos['PRECIO'] = miprecio;
@@ -1697,34 +1696,31 @@ function calculaNuevaTipoCambio(moneda, tipo_cambio){
     var cantidad = 'input-cantidadAE';
     var descuento = 'input-descuentoAE';
     var Precio_anterior = 0;
-    var lengthAE = $('#tblArticulosExistentesNueva #boton-articuloAE').closest('tr');
     
     if (BanderaOC == 1) {
         ttabla = 'tblArticulosMiscelaneosNueva';
-
+        
         tabla = $('#tblArticulosMiscelaneosNueva').DataTable();
         precio = 'input-precioAM';
         cantidad = 'input-cantidadAM';
         descuento = 'input-descuentoAM';
         Precio_anterior = 0;
-        lengthAE = $('#tblArticulosMiscelaneosNueva #boton-articuloAM').closest('tr');
+        
     } 
-    var count = lengthAE.length; //+ lengthAM.length;
+    var lengthAE = tabla.rows().count();
+    //var count = lengthAE.length; //+ lengthAM.length;
 
-        if (count > 0){
+    if (lengthAE > 0){
 
-            for (var i = 0; i < count; i++) {
+        for (var i = 0; i < lengthAE; i++) {
                 datos = tabla.row( i ).data();
                 Precio_anterior = datos['PRECIO'];
                 console.log('calculaNuevoTipoCambio....... ')
                 console.log('precio_anterior: '+ Precio_anterior)
                 miprecio = getNuevoPrecioTC(Precio_anterior, tipo_cambio);
-                if (BanderaOC == 1) {
-                    tabla.row(i).nodes(i, 4).to$().find('input#' + precio).val(miprecio);
-                    
-                } else {                    
-                    tabla.row(i).nodes(i, COL_PRECIO).to$().find('input#' + precio).val(miprecio);
-                }
+
+                //miprecio = getNuevoPrecio(Precio_anterior, moneda_anterior, moneda, tipo_cambio_anterior);
+                tabla.row(i).nodes(i, COL_PRECIO).to$().find('input#' + precio).val(miprecio);
                 datos['PRECIO'] = miprecio;
                 console.log('precio_nuevo: '+ miprecio)
                 RealizaCalculos(i, tabla, precio, cantidad, descuento);
@@ -2392,12 +2388,16 @@ function CargaComponentesOC(resumen) {
     console.log($("#cboMoneda").val())
     //verificar cambio de moneda si es necesario
 
-    $("#ordenesCompraOC #input_tc").val(resumen.OC_RATE);
+    //$("#ordenesCompraOC #input_tc").val(resumen.OC_RATE);
 
     if (resumen.OC_MONEDA == 'MXP') {
         $("#div-tipo-cambio").hide();
         $("#input_tc_anterior").val(1);
         $('#input_tc').val(1)
+    } else {
+        $("#div-tipo-cambio").show();
+        $("#input_tc_anterior").val(resumen.OC_RATE);
+        $('#input_tc').val(resumen.OC_RATE)
     }
 
     $('#ordenesCompraOC #codigoOC').text(resumen.OC_NUM);
@@ -2569,7 +2569,6 @@ function carga_tipo_cambio(moneda) {
     if (moneda == 'MXP') {
         $("#div-tipo-cambio").hide();
         $("#input_tc").val(1);
-        $("#input_tc_anterior").val(1);
     } else {
         $.ajax({
             type: 'GET',
@@ -2591,12 +2590,10 @@ function carga_tipo_cambio(moneda) {
                 if (data.rates.length > 0) {
                     $("#div-tipo-cambio").show();
                     $("#input_tc").val(data.rates[0].Rate);
-                    $("#input_tc_anterior").val(data.rates[0].Rate);
 
                 } else {
                     $("#div-tipo-cambio").hide();
                     $("#input_tc").val(1);
-                    $("#input_tc_anterior").val(1);
                 }
             }
         });
