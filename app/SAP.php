@@ -2,13 +2,14 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
 use DB;
 use \COM;
 use Session;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
 use App\ROLLITEM;
+use Carbon\Carbon;
+//use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Model;
 
 class SAP extends Model
 {
@@ -989,7 +990,7 @@ class SAP extends Model
             $root_oc_header[0]->DocDueDate = "".$fecha_entrega;
             $root_oc_header[0]->CardCode = $oc_proveedor;
             $root_oc_header[0]->DocCurrency = $oc_moneda;
-            //$root_oc_header[0]->DocRate = $oc_tipo_cambio;
+            $root_oc_header[0]->DocRate = $oc_tipo_cambio;
             $root_oc_header[0]->DocObjectCode = "22";
             $root_oc_header[0]->U_SIZ_CreadoPor = "".session('userID');
             $root_oc_header[0]->Comments = "ELABORO: ".session('userNombre').', '. strtoupper($oc_comentarios);
@@ -1004,10 +1005,10 @@ class SAP extends Model
                 } else {
                     $xml_item->addChild('ItemDescription', $oc_items[$x]['NOMBRE_ARTICULO']);
                     $xml_item->addChild('AccountCode', $oc_items[$x]['CTA_MAYOR']);
-                    
+                    $xml_item->addChild('UnitPrice', $oc_items[$x]['PRECIO']);                    
                 }
-                $xml_item->addChild('Quantity', $oc_items[$x]['CANTIDAD']);
                 $xml_item->addChild('Price', $oc_items[$x]['PRECIO']);
+                $xml_item->addChild('Quantity', $oc_items[$x]['CANTIDAD']);
                 $xml_item->addChild('DiscountPercent', $oc_items[$x]['DESCUENTO']);
                 $xml_item->addChild('WarehouseCode', "AMP-CC");
                 $xml_item->addChild('TaxCode', $oc_items[$x]['ID_IVA']);
@@ -1044,6 +1045,8 @@ class SAP extends Model
        
         //To use ReadXML method, set the XmlExportType to xet_ExportImportMode (3).
         $vItem = $vCmp->GetBusinessObject("22");
+        //$pathh2 = public_path('assets/xml/sap/ordenesCompra/oc_prueba.xml');
+        //$oXML->asXML($pathh2);
         $vItem->Browser->ReadXml($oXML->asXML(), 0);
         // $vItem->UpdateFromXML($pathh);
         $resultadoOperacion = $vItem->Add();
@@ -1077,6 +1080,7 @@ class SAP extends Model
         $oc_tipo = $datos["oc_tipo"];
         $oc_docEntry = $datos["oc_docEntry"];
         $oc_docNum = $datos["oc_docNum"];
+        $oc_tipo_cambio = $datos["oc_tipo_cambio"];
         if ($oc_tipo == 0) {
             $oc_items = isset($datos["TablaArticulosExistentes"]) ? json_decode($datos["TablaArticulosExistentes"], true) : array();
         } else {
@@ -1151,7 +1155,7 @@ class SAP extends Model
         $vItem = $vCmp->GetBusinessObject("22"); //
         $vItem->GetByKey($oc_docEntry);
         //$pathh = public_path('assets/xml/sap/ordenesCompra/oc1.xml');
-        //$pathh2 = public_path('assets/xml/sap/ordenesCompra/oc'.$oc_docEntry.'.xml');
+        $pathh2 = public_path('assets/xml/sap/ordenesCompra/oc_prueba.xml');
         //$vItem->SaveXML($pathh); //Guardar en archivo
         $xmlString = $vItem->GetAsXML(); //Guardar XML en buffer
         //retiramos Utf16 del XML obtenido
@@ -1165,11 +1169,17 @@ class SAP extends Model
 
         //Modificar los campos en el XML
         $root_oc_header[0]->DocDueDate = "".$fecha_entrega;
-        //$root_oc_header[0]->DocCurrency = $oc_moneda;
+        $root_oc_header[0]->DocCurrency = $oc_moneda;
+        //DocRate
+        $root_oc_header[0]->DocRate = $oc_tipo_cambio;
         $root_oc_header[0]->Comments = strtoupper($oc_comentarios);
+        $act = 1;
 
+        //Log::info('for.....', [count($oc_items)]);
         for($x = 0; $x < count($oc_items); $x ++){
+            //Log::info('into for.....', [$oc_items[$x]['ID_PARTIDA']]);
             if ($oc_items[$x]['ID_PARTIDA'] == '') {
+                //Log::info('for.....add',[]);
                 $root_items = $oXML->xpath('/BOM/BO/Document_Lines');
                 $xml_item = $root_items[0]->addChild('row');
                 if ($oc_tipo == 0) {
@@ -1178,6 +1188,7 @@ class SAP extends Model
                 } else {
                     $xml_item->addChild('ItemDescription', $oc_items[$x]['NOMBRE_ARTICULO']);
                     $xml_item->addChild('AccountCode', $oc_items[$x]['CTA_MAYOR']);                    
+                    $xml_item->addChild('UnitPrice', $oc_items[$x]['PRECIO']);
                 }
                 $xml_item->addChild('Quantity', $oc_items[$x]['CANTIDAD']);
                 $xml_item->addChild('Price', $oc_items[$x]['PRECIO']);
@@ -1185,29 +1196,37 @@ class SAP extends Model
                 $xml_item->addChild('WarehouseCode', "AMP-CC");
                 $xml_item->addChild('TaxCode', $oc_items[$x]['ID_IVA']);
                 $xml_item->addChild('ShipDate', $oc_items[$x]['FECHA_ENTREGA']);
-                $xml_item->addChild('LineStatus', $oc_items[$x]['PARTIDA_CERRADA']);
+                //$xml_item->addChild('LineStatus', $oc_items[$x]['']);
                 $xml_item->addChild('Currency', $oc_moneda);
             } else {
                 //actualizar partida                
+                //Log::info('for.....update',[]);
                 $item = $oXML->xpath('/BOM/BO/Document_Lines/row[LineNum="'.$oc_items[$x]['ID_PARTIDA'].'"]');
+                //$act = count($item);
+                
                 if (count($item) >= 1) {
                     foreach ($item as $i) {
-                        if ($oc_items[$x]['PARTIDA_CERRADA'] == 'bost_Open') {                            
+                        //$act = $oc_items[$x]['PARTIDA_CERRADA'];
+
+                        if ($oc_items[$x]['PARTIDA_CERRADA'] == 'bost_Open' || $oc_items[$x]['PARTIDA_CERRADA'] == false) {                            
+                            //$act = true;
+                            $i->Currency = $oc_moneda;
                             $i->Quantity = $oc_items[$x]['CANTIDAD'];
-                            $i->Price = $oc_items[$x]['PRECIO'];
+                            //$i->Price = $oc_items[$x]['PRECIO'];
+                            $i->UnitPrice = $oc_items[$x]['PRECIO'];
+                            $i->LineTotal = $oc_items[$x]['TOTAL'];
                             $i->DiscountPercent = $oc_items[$x]['DESCUENTO'];
                             //$i->WarehouseCode', "AMP-CC";
                             $i->TaxCode = $oc_items[$x]['ID_IVA'];
                             $i->ShipDate = $oc_items[$x]['FECHA_ENTREGA']; //este campo no es modificable
                             //$i->LineStatus = $oc_items[$x]['PARTIDA_CERRADA'];
-                            $i->Currency = $oc_moneda;
                         }
                     }
                 }
             }
         }
 
-        //$oXML->asXML($pathh);
+        $oXML->asXML($pathh2);
         $vItem->Browser->ReadXml($oXML->asXML(), 0);
        
         //$resultadoOperacion = $vItem->UpdateFromXML($pathh);
@@ -1216,7 +1235,7 @@ class SAP extends Model
             //throw new \Exception( $vCmp->GetLastErrorDescription(), 1);
             return ['Eliminados' => $ids, 'result' => $resultadoOperacion, 'id' => $oc_docNum, 'Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$vCmp->GetLastErrorDescription()];
         }else {
-            return ['Eliminados' => $ids, 'result' => $resultadoOperacion, 'id' => $oc_docNum , 'Status' => 'Valido', 'respuesta' => 'success'];
+            return ['Eliminados' => $ids, 'result' => $resultadoOperacion, 'id' => $oc_docNum , 'Status' => 'Valido', 'respuesta' => 'success', 'actualiza' => $oc_items[0]['ID_PARTIDA']];
         }
       /*$vCmp->Disconnect;
         $vCmp = null;

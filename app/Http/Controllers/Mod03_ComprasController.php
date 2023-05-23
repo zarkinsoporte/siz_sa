@@ -484,7 +484,7 @@ class Mod03_ComprasController extends Controller
             , OPOR.CardCode + ' - ' +OPOR.CardName as Proveedor
             --, OSLP.SlpName as Elaboro 
             , CASE WHEN docstatus = 'C' THEN 'CERRADA' ELSE 'ABIERTA' END Estatus
-            , FORMAT(DocTotal, '##.##') Total
+            , FORMAT((DocTotal / DocRate), '##.##') Total 
             , OPOR.DocCur Moneda
             , OPOR.Comments Comentario
             FROM OPOR 
@@ -493,7 +493,7 @@ class Mod03_ComprasController extends Controller
             WHERE 
             --DocType = 'I' AND
             OPOR.DocDate BETWEEN '" . $request->get('fi') . "' and '" . $request->get('ff') ."' 
-            GROUP BY Comments, OPOR.DocEntry, DocNum, OPOR.DocDate, CardCode, SlpName, CardName, docstatus, DocCur, DocTotal                 
+            GROUP BY Comments, OPOR.DocEntry, DocNum, OPOR.DocDate, CardCode, SlpName, CardName, docstatus, DocCur, DocTotal, DocRate             
         ";
         //dd($query);
         $result = DB::select($query);
@@ -514,7 +514,7 @@ class Mod03_ComprasController extends Controller
             , OPOR.CardCode + ' - ' +OPOR.CardName as Proveedor
             --, OSLP.SlpName as Elaboro 
             , CASE WHEN docstatus = 'C' THEN 'CERRADA' ELSE 'ABIERTA' END Estatus
-            , FORMAT(DocTotal, '##.##') Total
+            , FORMAT((DocTotal / DocRate), '##.##') Total 
             , OPOR.DocCur Moneda
             , OPOR.Comments Comentario
             FROM OPOR 
@@ -523,7 +523,7 @@ class Mod03_ComprasController extends Controller
             WHERE 
             --DocType = 'I' AND
             OPOR.DocNum = ?
-            GROUP BY Comments, DocNum, OPOR.DocEntry, OPOR.DocDate, CardCode, SlpName, CardName, docstatus, DocCur, DocTotal
+            GROUP BY Comments, DocNum, OPOR.DocEntry, OPOR.DocDate, CardCode, SlpName, CardName, docstatus, DocCur, DocTotal, DocRate
         ", [$request->get('oc')]);
         $data=[];
         if (count($result) > 0) {

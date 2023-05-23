@@ -690,8 +690,7 @@ $('#guardar').off().on('click', function(e) {
             showCancelButton: true,
             closeOnConfirm: false,
             confirmButtonText: " Guardar",
-            cancelButtonText: " Cancelar",  
-            showLoaderOnConfirm: true,
+            cancelButtonText: " Cancelar",
         }, function () {
                 $(".sweet-alert p").html('<i class="fa fa-spinner fa-lg fa-spin fa-fw"></i> Espera un momento..')
                 validarCampos();

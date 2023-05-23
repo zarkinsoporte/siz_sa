@@ -2292,18 +2292,9 @@ function registraOC(){
             console.log(datos)
             //$.unblockUI();
             if(datos["Status"] == "Error"){
-                bootbox.dialog({
-                    title: "Mensaje",
-                    message: "<div class='alert alert-danger m-b-0'>"+datos["Mensaje"]+"</div>",
-                    buttons: {
-                    success: {
-                    label: "Ok",
-                    className: "btn-success m-r-5 m-b-5"
-                    }
-                    }
-                }).find('.modal-content').css({'font-size': '14px'} );
-                swal("", "OC Error", "danger", {
-                    buttons: false,
+               
+                swal("OC Error", datos["Mensaje"] ,"danger", {
+                    buttons: true,
                     timer: 1000,
                 });
             }
