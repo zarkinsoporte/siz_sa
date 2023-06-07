@@ -45,24 +45,34 @@
                             </div>
                             <div class="row" style="margin-bottom: 40px">
                                 <div class="form-group">
-                                    <div class="col-md-1 col-xs-12 col-sm-6">
+                                    <div class="col-md-3 col-xs-12 col-sm-4">
+                                       <label><strong>
+                                            <font size="2">Estado</font>
+                                        </strong></label>
+                                        <div class="">
+                                            <select class="form-control selectpicker" id="sel-tipo-oc" name="sel-tipo-oc" data-size="8"
+                                                data-style="btn-success">
+                                                <option value="0">Abiertas</option>
+                                                <option value="1">Cerradas</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-xs-12 col-sm-4">
+                                        <label><strong>
+                                                <font size="2">Buscar por OC</font>
+                                            </strong></label>
                                         <div class="input-group">
-                                            <button type="button" class="form-control btn btn-primary m-r-5 m-b-5" id="boton-nuevo">
-                                                <i class="fa fa-plus"></i>
-                                                Nuevo</button>
+                                            <input type="text" class="form-control" placeholder="Ingresa OC" id="input_oc">
+                                            <span class="input-group-btn">
+                                                <button class="btn btn-success" id="boton-mostrar-oc" type="button"><i
+                                                class="fa fa-search"></i></button>
+                                            </span>
                                         </div><!-- /input-group -->
                                     </div>
-                                    
-                                    <div class="col-md-3 col-xs-12 col-sm-6">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" placeholder="Ingresa OC" id="input_oc">
-                                        <span class="input-group-btn">
-                                            <button class="btn btn-success" id="boton-mostrar-oc" type="button"><i
-                                            class="fa fa-search"></i></button>
-                                        </span>
-                                        </div><!-- /input-group -->
-                                    </div>
-                                    <div class="col-md-3 col-xs-12 col-sm-6" style="">
+                                    <div class="col-md-3 col-xs-12 col-sm-4" style="">
+                                        <label><strong>
+                                                <font size="2">Buscar por Rango Fecha</font>
+                                            </strong></label>
                                     <div class="input-group">
                                         <input type="text" class="form-control" autocomplete="off" id="input_date">
                                         <span class="input-group-btn">

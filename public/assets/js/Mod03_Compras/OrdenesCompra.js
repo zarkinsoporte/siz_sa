@@ -150,11 +150,11 @@ var tableOC = $("#tableOC").DataTable({
                 language:{
                      "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
                 }, 
-                dom: 'rit',
-                order: [[1, 'asc']],
+                dom: 'TBlrti',
+                order: [[1, 'desc']],
                 buttons: [],
                 scrollX: true,
-                scrollY: "430px",
+                scrollY: "450px",
                 scrollCollapse: true,
                 deferRender: true,        
                 pageLength:-1,
@@ -163,6 +163,25 @@ var tableOC = $("#tableOC").DataTable({
                     //console.log(data)
                     $(row).attr('data-id', data.DocEntry);
                 },
+                buttons:[
+                    //boton-nuevo
+                    {
+                        text: '<i class="fa fa-plus"></i> Nuevo',
+                        className: "btn-primary",
+                        action: function (e, dt, node, config) {
+                            OC_nueva = 1;
+                            MuestraComponentesOC(OC_nueva)
+                            $('#ordenesCompraOC').show();
+                            $('#btnBuscadorOC').hide();
+                            InicializaComponentesOC();
+
+                            $("#articulosOC").show();
+                            $("#miscelaneosOC").hide();
+                            BanderaOC = 0;
+                            set_columns_index(0);
+                        }
+                    }
+                ],
                 columns: [                   
                     {data: "BTN_EDITAR"},    
                     {data: "NumOC"},
@@ -342,11 +361,50 @@ $('#tableOC').on('click', 'button#btnEliminar', function (e) {
     
 });
  function reloadBuscadorOC(){
-     var end = moment();
-    var start = moment().subtract(15, "days");;
-    reloadOrdenes(start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'));
+    // var end = moment();
+    // var start = moment().subtract(15, "days");;
+    // reloadOrdenes(start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'));
+     $("#tableOC").DataTable().clear().draw();
+     $.ajax({
+         type: 'GET',
+         async: true,
+         headers: {
+             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+         },
+         url: routeapp + "get_oc_xestado",
+         data: {
+             "estado": $('#sel-tipo-oc').val()
+         },
+         beforeSend: function () {
+             $.blockUI({
+                 message: '<h1>Solicitando OC</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                 css: {
+                     border: 'none',
+                     padding: '16px',
+                     width: '50%',
+                     top: '40%',
+                     left: '30%',
+                     backgroundColor: '#fefefe',
+                     '-webkit-border-radius': '10px',
+                     '-moz-border-radius': '10px',
+                     opacity: .7,
+                     color: '#000000'
+                 }
+             });
+         },
+         complete: function () {
+             setTimeout($.unblockUI, 500);
+         },
+         success: function (data) {
+
+             if (data.data.length > 0) {
+                 $("#tableOC").dataTable().fnAddData(data.data);
+             } else {
+
+             }
+         }
+     });
  }
-//reloadOrdenes();
 function reloadOrdenes(fi, ff){
     
     $("#tableOC").DataTable().clear().draw();
@@ -469,16 +527,7 @@ $('#boton-cerrar').off().on('click', function(e) {
     //calculaTipoCambio();
 });
 $('#boton-nuevo').on('click', function(e) {
-    OC_nueva = 1;
-    MuestraComponentesOC(OC_nueva)
-    $('#ordenesCompraOC').show();
-    $('#btnBuscadorOC').hide();
-    InicializaComponentesOC();
-
-    $("#articulosOC").show();
-    $("#miscelaneosOC").hide();
-    BanderaOC = 0;
-    set_columns_index(0);
+   
 });
 $('#boton-mostrar-oc').on('click', function(e) {
     get_oc();

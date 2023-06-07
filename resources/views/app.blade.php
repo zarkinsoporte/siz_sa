@@ -276,13 +276,14 @@ li.dt-button.active a::before{
 
 {!! Html::script('plugins/datetime-moment.js') !!}
 {!! Html::script('assets/js/shortcut.js') !!}
+
 <!-- Include Date Range Picker -->
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/css/bootstrap-select.min.css">
 
 
 <!-- Latest compiled and minified JavaScript -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/js/bootstrap-select.min.js"></script>
+{!! Html::script('plugins/bootstrap-select.js') !!}
 <script src="{{ URL::asset('plugins/bootstrap-daterangepicker/daterangepicker.js')}}"></script>
 <script>
     let routeapp = "{{url().'/'}}";
