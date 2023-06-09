@@ -506,6 +506,38 @@ class Mod03_ComprasController extends Controller
         }
         return compact('respuesta', 'data');
     }
+     public function get_oc_xestado(Request $request){
+        
+     $query = "SELECT 
+            OPOR.DocNum as NumOC
+            , OPOR.DocEntry
+            , CONVERT(varchar, OPOR.DocDate, 23) as FechaOC
+            , OPOR.CardCode + ' - ' +OPOR.CardName as Proveedor
+            --, OSLP.SlpName as Elaboro 
+            , CASE WHEN docstatus = 'C' THEN 'CERRADA' ELSE 'ABIERTA' END Estatus
+            , FORMAT((DocTotal / DocRate), '##.##') Total 
+            , OPOR.DocCur Moneda
+            , OPOR.Comments Comentario
+            FROM OPOR 
+            INNER JOIN POR1 ON OPOR.DocEntry = POR1.DocEntry
+            LEFT JOIN OSLP on OSLP.SlpCode= POR1.SlpCode 
+            WHERE docstatus = '" . $request->get('estado') . "'
+            --DocType = 'I' AND
+            --OPOR.DocDate BETWEEN '" . $request->get('fi') . "' and '" . $request->get('ff') ."' 
+            GROUP BY Comments, OPOR.DocEntry, DocNum, OPOR.DocDate, CardCode, SlpName, CardName, docstatus, DocCur, DocTotal, DocRate
+			ORDER BY NumOC desc             
+        ";
+        //dd($query);
+        $result = DB::select($query);
+        $data=[];
+        if (count($result) > 0) {
+            $respuesta = 'ok';
+            $data = $result;
+        } else {
+            $respuesta = 'Error, La OC no existe';
+        }
+        return compact('respuesta', 'data');
+    }
     public function get_oc(Request $request){
         $result = DB::select("SELECT 
             OPOR.DocNum as NumOC
@@ -668,7 +700,7 @@ class Mod03_ComprasController extends Controller
 
                     WHERE OITM.ItemCode IS NOT NULL 
                     AND OITM.PrchseItem = 'Y' AND OITM.InvntItem = 'Y'
-                    AND OITM.frozenFor = 'N' AND  OITM.U_TipoMat IN ('HB', 'MP', 'SP', 'RF') 
+                    AND OITM.frozenFor = 'N' AND  OITM.U_TipoMat IN ('MP', 'SP', 'RF') 
                     ORDER BY OITM.ItemName, OITM.ItemCode";
                     // if ($request->get('moneda') == 'MXP'){
                     //     $sql = $sql . " AND  ITM1.Currency = 'MXP' ";

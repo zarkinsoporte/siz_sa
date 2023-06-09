@@ -50,10 +50,10 @@
                                             <font size="2">Estado</font>
                                         </strong></label>
                                         <div class="">
-                                            <select class="form-control selectpicker" id="sel-tipo-oc" name="sel-tipo-oc" data-size="8"
+                                            <select class="form-control selectpicker" id="sel-estatus-oc" name="sel-estatus-oc" data-size="8"
                                                 data-style="btn-success">
-                                                <option value="0">Abiertas</option>
-                                                <option value="1">Cerradas</option>
+                                                <option value="O">Abiertas</option>
+                                                <option value="C">Cerradas</option>
                                             </select>
                                         </div>
                                     </div>

@@ -373,7 +373,7 @@ $('#tableOC').on('click', 'button#btnEliminar', function (e) {
          },
          url: routeapp + "get_oc_xestado",
          data: {
-             "estado": $('#sel-tipo-oc').val()
+             "estado": $('#sel-estatus-oc').val()
          },
          beforeSend: function () {
              $.blockUI({
@@ -702,6 +702,9 @@ $(document).keyup(function(event) {
         carga_info_proveedor(proveedorId);
         
         setTimeout($.unblockUI, 2000);   
+    });
+    $("#sel-estatus-oc").on("changed.bs.select", function(e, clickedIndex, newValue, oldValue) {
+        reloadBuscadorOC(); 
     });
 
     $('#tblArticulosExistentesNueva').on('click', 'a#boton-articuloAE', function (e) {

@@ -718,6 +718,7 @@ Route::any('consultaIvasYUnidadesMedida', 'Mod03_ComprasController@consultaIvasY
 Route::any('cargaTablaArticulos', 'Mod03_ComprasController@cargaTablaArticulos')->name('cargaTablaArticulos');
 Route::any('getProveedorOC', 'Mod03_ComprasController@getProveedorOC')->name('getProveedorOC');
 Route::any('get_oc_xfecha', 'Mod03_ComprasController@get_oc_xfecha')->name('get_oc_xfecha');
+Route::any('get_oc_xestado', 'Mod03_ComprasController@get_oc_xestado')->name('get_oc_xestado');
 Route::any('orden_compra_pdf/{NumOC}', 'Mod03_ComprasController@orden_compra_pdf')->name('orden_compra_pdf');
 Route::any('registraOC', 'Mod03_ComprasController@registraOC')->name('registraOC');
 Route::get('/crear-ordenoc', 'Mod03_ComprasController@registraOC');

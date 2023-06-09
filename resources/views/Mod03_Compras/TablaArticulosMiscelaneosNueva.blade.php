@@ -3,6 +3,8 @@
         <thead>
         <tr>
             <th style="text-align: right;">#</th>
+            <th style="text-align: center;">Eliminar</th>
+            <th style="text-align: center;">Cerrada</th>
             <th>Descripción</th>
             <th>CTA Mayor</th>    
 
@@ -19,8 +21,6 @@
             <th style="text-align: center;">Fecha Entrega</th>
 
             <th style="text-align: center;">Cant. Pendiente</th>
-            <th style="text-align: center;">Cerrada</th>
-            <th style="text-align: center;">Eliminar</th>
             <th>ivaID</th>
             <th>partidaID</th>
             <th>estatusPartida</th>
