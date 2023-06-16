@@ -877,7 +877,9 @@ class SAP extends Model
         //$vItem->SaveXML($pathh); //Guardar en archivo
         $xmlString = $vItem->GetAsXML(); //Guardar XML en buffer
         //retiramos Utf16 del XML obtenido
-        $xmlString = preg_replace('/(<\?xml[^?]+?)utf-16/i', '$1utf-8', $xmlString);
+        $xmlString = utf8_encode($xmlString);
+        $xmlString = str_replace("UTF-16", "UTF-8", $xmlString);
+        //$xmlString = preg_replace('/(<\?xml[^?]+?)utf-16/i', '$1utf-8', $xmlString);
         //Leemos XML(string) y creamos Object SimpleXML 
         $oXML = simplexml_load_string($xmlString);
         //$library = simplexml_load_file($pathh); //Crear Object SimpleXML de un archivo
@@ -898,7 +900,8 @@ class SAP extends Model
         //$library->asXML($pathh); //Elaborar y Escribir el XML
 
         //To use ReadXML method, set the XmlExportType to xet_ExportImportMode (3).
-        $vItem->Browser->ReadXml($oXML->asXML(), 0);
+        $xmlString = utf8_decode($oXML->asXML());
+        $vItem->Browser->ReadXml($xmlString, 0);
         // $vItem->UpdateFromXML($pathh);
         $resultadoOperacion = $vItem->Update;
         if ($resultadoOperacion <> 0) {
@@ -937,6 +940,40 @@ class SAP extends Model
         $vItem->CreateCancellationDocument();
         //$RetCode = $vItem->Add();
         $RetCode = $vItem->Cancel;
+
+        if ($RetCode != 0) {
+          //throw new \Exception( $vCmp->GetLastErrorDescription(), 1);
+            return ['Status' => 'Error', 
+            'Mensaje' => 'Ocurrio un error al realizar el proceso. Error: ' .$vCmp->GetLastErrorDescription()];
+        }else {
+            return ['Status' => 'Valido', 'respuesta' => 'success'];
+        }
+    }
+    public static function CloseDoc($num_object, $docEntry)
+    {
+       
+        $vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
+        $vCmp->DbServerType = "10";
+        $vCmp->server = "".env('SAP_server');
+        $vCmp->LicenseServer = "".env('SAP_LicenseServer');
+        $vCmp->CompanyDB = "".env('SAP_CompanyDB');
+        $vCmp->username = "".env('SAP_username');
+        $vCmp->password = "".env('SAP_password');
+        $vCmp->DbUserName = "".env('SAP_DbUserName');
+        $vCmp->DbPassword = "".env('SAP_DbPassword');
+        $vCmp->UseTrusted = false;
+        //la siguiente linea permite leer XML como string y no como archivo en "Browser->ReadXml"
+        $vCmp->XMLAsString = true; //The default value is False - XML as files.
+
+        //$vCmp->language = "6";
+        $vCmp->Connect; //conectar a Sociedad SAP
+
+        $vItem = $vCmp->GetBusinessObject($num_object.'');
+        //dd($num_object,$docEntry);
+        $RetVal = $vItem->GetByKey($docEntry."");
+        //$vItem->CreateCancellationDocument();
+        //$RetCode = $vItem->Add();
+        $RetCode = $vItem->Close;
 
         if ($RetCode != 0) {
           //throw new \Exception( $vCmp->GetLastErrorDescription(), 1);
@@ -1159,7 +1196,9 @@ class SAP extends Model
         //$vItem->SaveXML($pathh); //Guardar en archivo
         $xmlString = $vItem->GetAsXML(); //Guardar XML en buffer
         //retiramos Utf16 del XML obtenido
-        $xmlString = preg_replace('/(<\?xml[^?]+?)utf-16/i', '$1utf-8', $xmlString);
+        $xmlString = utf8_encode($xmlString);
+        $xmlString = str_replace("UTF-16", "UTF-8", $xmlString);
+        //$xmlString = preg_replace('/(<\?xml[^?]+?)utf-16/i', '$1utf-8', $xmlString);
         //Leemos XML(string) y creamos Object SimpleXML 
         $oXML = simplexml_load_string($xmlString);
         //$library = simplexml_load_file($pathh); //Crear Object SimpleXML de un archivo
@@ -1226,8 +1265,9 @@ class SAP extends Model
             }
         }
 
-        $oXML->asXML($pathh2);
-        $vItem->Browser->ReadXml($oXML->asXML(), 0);
+        //$oXML->asXML($pathh2);
+        $xmlString = utf8_decode($oXML->asXML());
+        $vItem->Browser->ReadXml($xmlString, 0);
        
         //$resultadoOperacion = $vItem->UpdateFromXML($pathh);
         $resultadoOperacion = $vItem->Update;
@@ -1250,63 +1290,75 @@ class SAP extends Model
         //Ref
         //https://answers.sap.com/questions/1448088/using-xml-to-update-objects-in-diapi.html
         //https://answers.sap.com/questions/232431/add-invoices-from-di-api-using-xml.html¡
-        
-        $line_num = $datos["line_num"];
-        $oc_docEntry = $datos["oc_docEntry"];
-        $oc_docNum = $datos["oc_docNum"];
-        
-        $vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
-        $vCmp->DbServerType = "10";
-        $vCmp->server = "".env('SAP_server');
-        $vCmp->LicenseServer = "".env('SAP_LicenseServer');
-        $vCmp->CompanyDB = "".env('SAP_CompanyDB');
-        $vCmp->username = "".env('SAP_username');
-        $vCmp->password = "".env('SAP_password');
-        $vCmp->DbUserName = "".env('SAP_DbUserName');
-        $vCmp->DbPassword = "".env('SAP_DbPassword');
-        $vCmp->UseTrusted = false;
-        //la siguiente linea permite leer XML como string y no como archivo en "Browser->ReadXml"
-        $vCmp->XMLAsString = true; //The default value is False - XML as files.
-        //$vCmp->language = "6";
-        $vCmp->Connect; //conectar a Sociedad SAP        
-        //Obtener XML de un LDM 
-        $vCmp->XmlExportType = '3'; //BoXmlExportTypes.xet_ExportImportMode; /solo los campos modificables        
-        $vItem = $vCmp->GetBusinessObject("22"); //
-        $vItem->GetByKey($oc_docEntry);
-        //$pathh = public_path('assets/xml/sap/ordenesCompra/oc1.xml');
-        //$pathh2 = public_path('assets/xml/sap/ordenesCompra/oc'.$oc_docEntry.'.xml');
-        //$vItem->SaveXML($pathh); //Guardar en archivo
-        $xmlString = $vItem->GetAsXML(); //Guardar XML en buffer
-        //retiramos Utf16 del XML obtenido
-        $xmlString = preg_replace('/(<\?xml[^?]+?)utf-16/i', '$1utf-8', $xmlString);
-        //Leemos XML(string) y creamos Object SimpleXML 
-        $oXML = simplexml_load_string($xmlString);
-        //$library = simplexml_load_file($pathh); //Crear Object SimpleXML de un archivo
-        //$oXML->asXML($pathh2);
-        
-           
-                //actualizar partida                
-                $item = $oXML->xpath('/BOM/BO/Document_Lines/row[LineNum="'.$line_num.'"]');
-                if (count($item) >= 1) {
-                    foreach ($item as $i) {
-                        
-                        $i->LineStatus = 'bost_Close';
-                    }
-                }
-            
-        
-
-        //$oXML->asXML($pathh);
-        $vItem->Browser->ReadXml($oXML->asXML(), 0);
        
-        //$resultadoOperacion = $vItem->UpdateFromXML($pathh);
-        $resultadoOperacion = $vItem->Update;
-        if ($resultadoOperacion <> 0) {
-            //throw new \Exception( $vCmp->GetLastErrorDescription(), 1);
-            return ['id' => $oc_docNum, 'Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$vCmp->GetLastErrorDescription()];
-        }else {
-            return ['id' => $oc_docNum , 'Status' => 'Valido', 'respuesta' => 'success'];
+            $line_num = $datos["line_num"];
+            $oc_docEntry = $datos["oc_docEntry"];
+            $oc_docNum = $datos["oc_docNum"];
+        try {    
+            $vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
+            $vCmp->DbServerType = "10";
+            $vCmp->server = "".env('SAP_server');
+            $vCmp->LicenseServer = "".env('SAP_LicenseServer');
+            $vCmp->CompanyDB = "".env('SAP_CompanyDB');
+            $vCmp->username = "".env('SAP_username');
+            $vCmp->password = "".env('SAP_password');
+            $vCmp->DbUserName = "".env('SAP_DbUserName');
+            $vCmp->DbPassword = "".env('SAP_DbPassword');
+            $vCmp->UseTrusted = false;
+            //la siguiente linea permite leer XML como string y no como archivo en "Browser->ReadXml"
+            $vCmp->XMLAsString = true; //The default value is False - XML as files.
+            //$vCmp->language = "6";
+            $vCmp->Connect; //conectar a Sociedad SAP        
+            //Obtener XML de un LDM 
+            $vCmp->XmlExportType = '3'; //BoXmlExportTypes.xet_ExportImportMode; /solo los campos modificables        
+            $vItem = $vCmp->GetBusinessObject("22"); //
+            $vItem->GetByKey($oc_docEntry);
+            $pathh = public_path('assets/xml/sap/ordenesCompra/oc_test.xml');
+            $pathh2 = public_path('assets/xml/sap/ordenesCompra/oc'.$oc_docEntry.'.xml');
+            //$vItem->SaveXML($pathh); //Guardar en archivo
+            
+            $xmlString = $vItem->GetAsXML(); //Guardar XML en buffer
+           //retiramos Utf16 del XML obtenido
+           //file_put_contents($pathh, $xmlString);
+            //$xmlString = preg_replace('/(<\?xml[^?]+?)utf-16/i', '$1utf-8', $xmlString);
+            $xmlString = utf8_encode($xmlString);
+            $xmlString = str_replace("UTF-16", "UTF-8", $xmlString);
+            //
+             //Leemos XML(string) y creamos Object SimpleXML
+            $oXML = simplexml_load_string($xmlString);
+            //$library = simplexml_load_file($pathh); //Crear Object SimpleXML de un archivo
+            //$oXML->asXML($pathh2);
+            
+            
+                    //actualizar partida                
+                    $item = $oXML->xpath('/BOM/BO/Document_Lines/row[LineNum="'.$line_num.'"]');
+                    if (count($item) >= 1) {
+                        foreach ($item as $i) {
+                            
+                            $i->LineStatus = 'bost_Close';
+                        }
+                    }
+                
+            
+
+            //$oXML->asXML($pathh);
+            $xmlString = utf8_decode($oXML->asXML());
+            //file_put_contents($pathh2, $xmlString);
+            $vItem->Browser->ReadXml($xmlString, 0);
+        
+            //$resultadoOperacion = $vItem->UpdateFromXML($pathh);
+            $resultadoOperacion = $vItem->Update;
+            //$resultadoOperacion = 1;
+            if ($resultadoOperacion <> 0) {
+                //throw new \Exception( $vCmp->GetLastErrorDescription(), 1);
+                return ['id' => $oc_docNum, 'Status' => 'Error', 'Mensaje' => 'Ocurrió un error al realizar el proceso. Error: ' .$vCmp->GetLastErrorDescription()];
+            }else {
+                return ['id' => $oc_docNum , 'Status' => 'Valido', 'respuesta' => 'success'];
+            }   
+        } catch (\Exception $e) {
+            return ['id' => $oc_docNum, 'Status' => 'Error', 'Mensaje' => ' Error: ' .$e->getMessage()];
         }
+        
     }
 
 }

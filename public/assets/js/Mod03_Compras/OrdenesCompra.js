@@ -18,7 +18,20 @@ function js_iniciador() {
     var COL_BTN_EDITAR = 0;
     var COL_BTN_ELIMINAR = 1;
     var COL_BTN_PDF = 2;
-
+    var estado_text = 'Cerrar';
+    var estado_text2 = 'CERRADA';
+    var NumOC_elimina = '';
+    var datos_elimina = [];
+    var fila_elimina = null;
+    $(document).on('click', '#boton-cerrarOC', function (e) {
+        e.preventDefault();
+        btn_eliminar_OC(0);
+    });
+    $(document).on('click', '#boton-cancelarOC', function (e) {
+        e.preventDefault();
+        btn_eliminar_OC(1);
+    });
+    
     consultaDatos();
     InicializaComboBox();
     $('#ordenesCompraOC').hide();
@@ -88,7 +101,86 @@ function js_iniciador() {
         //alert("A new date range was chosen: " + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
         reloadOrdenes(start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'));
     });
+    function btn_eliminar_OC(cancelar_OC){
+        var tblOC = $('#tableOC').DataTable();
+        if (cancelar_OC == 1) {
+                estado_text = 'Cancelar';
+                estado_text2 = 'CANCELADA';
+            } else {
+                estado_text = 'Cerrar';
+                estado_text2 = 'CERRADA';
+            }
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                type: "POST",
+                async: false,
+                data: {
+                    docNum: NumOC_elimina,
+                    cancelar: cancelar_OC
+                },
+                dataType: "json",
+                url: routeapp + "cancelOC",
+                beforeSend: function () {
+                    $.blockUI({
+                        message: '<h2>Procesando</h2><h3>espere...<i class="fa fa-spin fa-spinner"></i></h3>',
+                        css: {
+                            border: 'none',
+                            padding: '16px',
+                            width: '50%',
+                            top: '40%',
+                            left: '30%',
+                            backgroundColor: '#fefefe',
+                            '-webkit-border-radius': '10px',
+                            '-moz-border-radius': '10px',
+                            opacity: .7,
+                            color: '#000000'
+                        }
+                    });
+                },
+                success: function (data) {
+                    //reloadBuscadorOC();
+                    //console.log(data)
+                    $.unblockUI();
 
+                    if (data.Status == 'Valido') {
+                        //console.log(data)  
+                        
+                        datos_elimina['Estatus'] = estado_text2;
+                        tblOC.row(fila_elimina).data(datos_elimina);
+                        
+                        bootbox.alert({
+                            size: "large",
+                            title: "<h4><i class='fa fa-info-circle'></i> Ordenes de Compra</h4>",
+                            message: "<div class='alert alert-success m-b-0'> " + "OC" + NumOC + ' ' + estado_text2 +" </div> "
+                        });
+                    } else {
+                        bootbox.alert({
+                            size: "large",
+                            title: "<h4><i class='fa fa-info-circle'></i> Ordenes de Compra</h4>",
+                            message: "<div class='alert alert-danger m-b-0'> " + data.Mensaje + " </div> "
+                        });
+                        
+                    }
+
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    $.unblockUI();
+                    //console.log(xhr.responseText)
+                    var error = [];
+                    bootbox.alert({
+                        size: "large",
+                        title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
+                        message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
+                            (error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '') +
+                            (error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '') +
+                            (error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '') + '</div>'
+                    });
+                }
+            });
+        
+    }
   function InicializaComboBox()  {
         $('#cboMoneda').selectpicker({
             noneSelectedText: 'Selecciona una opción',
@@ -199,7 +291,7 @@ var tableOC = $("#tableOC").DataTable({
                     "orderable": false,
                     'className': "dt-body-center",
                     "render": function ( data, type, row ) {
-                        if(row['Estatus'] == 'CERRADA')  
+                        if(row['Estatus'] !== 'ABIERTA')  
                             return '<button type="button" class="btn btn-sm btn-primary" id="btnEditar"> <span class="glyphicon glyphicon-pencil"></span> </button>'
                             +'<button type="button" class="btn btn-sm btn-danger btn-outline-danger" style="margin-left:5px" id="boton-pdf"> <i class="fa fa-file-pdf-o" aria-hidden="true"></i></button>';
                         else  
@@ -272,88 +364,46 @@ $('#tableOC').on( 'click', 'button#boton-pdf', function (e) {
     
     $.unblockUI();
 });
+    
 $('#tableOC').on('click', 'button#btnEliminar', function (e) {
     e.preventDefault();
     var tblOC = $('#tableOC').DataTable();
     var fila = $(this).closest('tr');
+    fila_elimina = $(this).closest('tr');
     var docentry = fila.attr('data-id')
     var datos = tblOC.row(fila).data();
-    var NumOC = datos['NumOC'];
+    datos_elimina = tblOC.row(fila).data();
+    NumOC_elimina = docentry;
+    NumOC = datos['NumOC'];
     
-    if (datos['Estatus'] == 'ABIERTA') {
-        swal({
-            title: '¿Estas seguro de Cancelar la Orden de Compra?.',
-            text: "",
-            type: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'OK',
-            cancelButtonText: 'Cancelar',
-            closeOnConfirm: false,
-            showLoaderOnConfirm: false,
-        }, function () {
-            
-                $.ajax({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    type: "POST",
-                    async: false,
-                    data: {
-                        docNum: docentry
-                    },
-                    dataType: "json",
-                    url: routeapp + "cancelOC",
-                    beforeSend: function () {
-                        $.blockUI({
-                            message: '<h2>Procesando</h2><h3>espere...<i class="fa fa-spin fa-spinner"></i></h3>',
-                            css: {
-                                border: 'none',
-                                padding: '16px',
-                                width: '50%',
-                                top: '40%',
-                                left: '30%',
-                                backgroundColor: '#fefefe',
-                                '-webkit-border-radius': '10px',
-                                '-moz-border-radius': '10px',
-                                opacity: .7,
-                                color: '#000000'
-                            }
-                        });
-                    },
-                    success: function (data) {
-                        //reloadBuscadorOC();
-                        //console.log(data)
-                        $.unblockUI();
-                        swal("", "OC" + NumOC + " Cancelada", "success", {
-                            buttons: false,
-                            timer: 2000,
-                        });
-                        if (data.Status == 'Valido') {
-                            //console.log(data)                                  
-                            datos['Estatus'] = 'CERRADA';
-                            tblOC.row(fila).data(datos);
-                        }
+    if (datos['Estatus'] !== 'CANCELADA') {//datos['Estatus'] == 'ABIERTA'
 
-                    },
-                    error: function (xhr, ajaxOptions, thrownError) {
-                        $.unblockUI();
-                        //console.log(xhr.responseText)
-                        var error = [];
-                        bootbox.alert({
-                            size: "large",
-                            title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
-                            message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
-                                (error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '') +
-                                (error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '') +
-                                (error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '') + '</div>'
-                        });
-                    }
-                });
+        swal({
+            title: '¿Selecciona acción para la Orden de Compra?.',
+            html: true,
+            text: '<p></p> <div><button class="btn btn-secondary">Cancelar</button> <button class="btn btn-danger" id="boton-cancelarOC">Cancelar OC</button> <button class="btn btn-primary" id="boton-cerrarOC">Cerrar OC</button>  </div>',
+            type: "warning",
+            showConfirmButton: false,
+            showCancelButton: false
+        });
+
+        // swal({
+        //     title: '¿Estas seguro de '+ estado_text +' la Orden de Compra?.',
+        //     text: "",
+        //     type: 'warning',
+        //     showCancelButton: true,
+        //     confirmButtonText: 'OK',
+        //     cancelButtonText: 'Cancelar',
+        //     closeOnConfirm: false,
+        //     showLoaderOnConfirm: false,
+        // }, function () {
+            
+              
 
              
-        });
+       // });
     } else {
-        swal("", "La OC no esta Abierta", "error", {
+        swal("", "La OC esta Cancelada", "error", {
             buttons: false,
             timer: 2000,
         });   
@@ -513,6 +563,7 @@ function get_oc() {
 
     });
 }
+    
 $('#boton-cerrar').off().on('click', function(e) {
 
     $('#ordenesCompraOC').hide();
@@ -1391,12 +1442,17 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                                     $("#tblArticulosMiscelaneosNueva").DataTable().clear().draw();
                                     console.log("id: " + datos["id"])
                                     
-                                    mostrarOC(datos["id"], 0);//0 indica que no es una OC nueva, solo se recargaOC
+                                    if(datos["id"] == ''){
+                                        mostrarOC($('#ordenesCompraOC #codigoOC').text(), 0)
+                                    } else {
+                                        mostrarOC(datos["id"], 0);//0 indica que no es una OC nueva, solo se recargaOC
+                                    }
+                                    
                                     $.unblockUI();
                                 },
                                 error: function (x, e) {
                                     var errorMessage = 'Error \n' + x.responseText;
-                                    // mostrarOC(datos["id"]);
+                                    mostrarOC($('#ordenesCompraOC #codigoOC').text(), 0)
                                     $.unblockUI();
                                     bootbox.dialog({
                                         title: "Mensaje",

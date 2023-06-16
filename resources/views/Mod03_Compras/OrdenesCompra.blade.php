@@ -54,6 +54,7 @@
                                                 data-style="btn-success">
                                                 <option value="O">Abiertas</option>
                                                 <option value="C">Cerradas</option>
+                                                <option value="CC">Canceladas</option>
                                             </select>
                                         </div>
                                     </div>

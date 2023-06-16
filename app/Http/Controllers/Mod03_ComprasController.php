@@ -483,7 +483,9 @@ class Mod03_ComprasController extends Controller
             , CONVERT(varchar, OPOR.DocDate, 23) as FechaOC
             , OPOR.CardCode + ' - ' +OPOR.CardName as Proveedor
             --, OSLP.SlpName as Elaboro 
-            , CASE WHEN docstatus = 'C' THEN 'CERRADA' ELSE 'ABIERTA' END Estatus
+            ,CASE WHEN docstatus = 'C' AND OPOR.CANCELED = 'N' THEN 'CERRADA' 
+            WHEN docstatus = 'C' AND OPOR.CANCELED = 'Y' THEN 'CANCELADA'
+             ELSE 'ABIERTA' END Estatus
             , FORMAT((DocTotal / DocRate), '##.##') Total 
             , OPOR.DocCur Moneda
             , OPOR.Comments Comentario
@@ -493,7 +495,7 @@ class Mod03_ComprasController extends Controller
             WHERE 
             --DocType = 'I' AND
             OPOR.DocDate BETWEEN '" . $request->get('fi') . "' and '" . $request->get('ff') ."' 
-            GROUP BY Comments, OPOR.DocEntry, DocNum, OPOR.DocDate, CardCode, SlpName, CardName, docstatus, DocCur, DocTotal, DocRate             
+            GROUP BY OPOR.CANCELED, Comments, OPOR.DocEntry, DocNum, OPOR.DocDate, CardCode, SlpName, CardName, docstatus, DocCur, DocTotal, DocRate             
         ";
         //dd($query);
         $result = DB::select($query);
@@ -507,24 +509,30 @@ class Mod03_ComprasController extends Controller
         return compact('respuesta', 'data');
     }
      public function get_oc_xestado(Request $request){
-        
-     $query = "SELECT 
+        $filtro = " WHERE OPOR.CANCELED = 'N' AND docstatus = '" . $request->get('estado') . "' ";
+        if ($request->get('estado') == 'CC') {
+            $filtro = " WHERE OPOR.CANCELED = 'Y' ";
+        }
+
+        $query = "SELECT 
             OPOR.DocNum as NumOC
             , OPOR.DocEntry
             , CONVERT(varchar, OPOR.DocDate, 23) as FechaOC
             , OPOR.CardCode + ' - ' +OPOR.CardName as Proveedor
             --, OSLP.SlpName as Elaboro 
-            , CASE WHEN docstatus = 'C' THEN 'CERRADA' ELSE 'ABIERTA' END Estatus
+            , CASE WHEN docstatus = 'C' AND OPOR.CANCELED = 'N' THEN 'CERRADA' 
+            WHEN docstatus = 'C' AND OPOR.CANCELED = 'Y' THEN 'CANCELADA'
+            ELSE 'ABIERTA' END Estatus
             , FORMAT((DocTotal / DocRate), '##.##') Total 
             , OPOR.DocCur Moneda
             , OPOR.Comments Comentario
             FROM OPOR 
             INNER JOIN POR1 ON OPOR.DocEntry = POR1.DocEntry
             LEFT JOIN OSLP on OSLP.SlpCode= POR1.SlpCode 
-            WHERE docstatus = '" . $request->get('estado') . "'
+            ".$filtro."
             --DocType = 'I' AND
             --OPOR.DocDate BETWEEN '" . $request->get('fi') . "' and '" . $request->get('ff') ."' 
-            GROUP BY Comments, OPOR.DocEntry, DocNum, OPOR.DocDate, CardCode, SlpName, CardName, docstatus, DocCur, DocTotal, DocRate
+            GROUP BY OPOR.CANCELED, Comments, OPOR.DocEntry, DocNum, OPOR.DocDate, CardCode, SlpName, CardName, docstatus, DocCur, DocTotal, DocRate
 			ORDER BY NumOC desc             
         ";
         //dd($query);
@@ -545,7 +553,9 @@ class Mod03_ComprasController extends Controller
             , CONVERT(varchar, OPOR.DocDate, 23) as FechaOC
             , OPOR.CardCode + ' - ' +OPOR.CardName as Proveedor
             --, OSLP.SlpName as Elaboro 
-            , CASE WHEN docstatus = 'C' THEN 'CERRADA' ELSE 'ABIERTA' END Estatus
+            , CASE WHEN docstatus = 'C' AND OPOR.CANCELED = 'N' THEN 'CERRADA' 
+            WHEN docstatus = 'C' AND OPOR.CANCELED = 'Y' THEN 'CANCELADA'
+            ELSE 'ABIERTA' END Estatus
             , FORMAT((DocTotal / DocRate), '##.##') Total 
             , OPOR.DocCur Moneda
             , OPOR.Comments Comentario
@@ -555,7 +565,7 @@ class Mod03_ComprasController extends Controller
             WHERE 
             --DocType = 'I' AND
             OPOR.DocNum = ?
-            GROUP BY Comments, DocNum, OPOR.DocEntry, OPOR.DocDate, CardCode, SlpName, CardName, docstatus, DocCur, DocTotal, DocRate
+            GROUP BY OPOR.CANCELED, Comments, DocNum, OPOR.DocEntry, OPOR.DocDate, CardCode, SlpName, CardName, docstatus, DocCur, DocTotal, DocRate
         ", [$request->get('oc')]);
         $data=[];
         if (count($result) > 0) {
@@ -842,8 +852,19 @@ class Mod03_ComprasController extends Controller
         ini_set('memory_limit', '-1');
         set_time_limit(0);
         $docNum = $request->get('docNum');
+        $cancel = $request->get('cancelar');
         try{
-            return SAP::CancelDoc("22", $docNum);
+            // $docStatus = DB::table('OPOR')
+            // ->where('OPOR.DocEntry', trim($docNum))
+            // ->select('OPOR.DocStatus', 'OPOR.CANCELED')->value('DocStatus');
+           // return compact('docStatus');
+            if ($cancel == 1 ) {
+                return SAP::CancelDoc("22", $docNum);
+                
+            } else {
+                return SAP::CloseDoc("22", $docNum);
+                
+            }            
             //return ['Status' => 'Valido', 'respuesta' => 'success'];   
         }
         catch (\Exception $e){
