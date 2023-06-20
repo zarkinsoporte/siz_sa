@@ -1159,9 +1159,13 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
         }, function () {
                 //var index = tabla.row(fila).index();  
                 if (tabla.rows().count() == 1) {
-                    swal("", "La OC debe contener al menos una partida.", "error", {
-                        buttons: false,
-                        timer: 2000,
+                    // swal("", "La OC debe contener al menos una partida.", "error", {
+                    //     buttons: true,
+                    // });
+                    bootbox.alert({
+                        size: "large",
+                        title: "<h4><i class='fa fa-info-circle'></i> Ordenes de Compra</h4>",
+                        message: "<div class='alert alert-danger m-b-0'> La OC debe contener al menos una partida.</div> "
                     });
 
                 } else {
@@ -1354,6 +1358,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                         className: "btn-default m-r-5 m-b-5",
                         callback: function () {
                             tbl.row(fila).nodes(fila, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').prop("checked", false);
+                            $.unblockUI();
                         }
                     }
                 }
@@ -1485,6 +1490,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                     className: "btn-default m-r-5 m-b-5",
                     callback: function () {
                         tbl.row(fila).nodes(fila,COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').prop("checked",false);
+                        $.unblockUI();
                     }
                 }
             }
