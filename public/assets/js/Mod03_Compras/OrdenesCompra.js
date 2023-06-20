@@ -271,6 +271,10 @@ var tableOC = $("#tableOC").DataTable({
                             $("#miscelaneosOC").hide();
                             BanderaOC = 0;
                             set_columns_index(0);
+                            $('#guardar2').attr("id", "guardar");
+                            $('#guardar2').removeAttr("disabled");
+                            $('#guardar').attr("id", "guardar");
+                            $('#guardar').removeAttr("disabled");
                         }
                     }
                 ],
@@ -378,10 +382,11 @@ $('#tableOC').on('click', 'button#btnEliminar', function (e) {
     
     if (datos['Estatus'] !== 'CANCELADA') {//datos['Estatus'] == 'ABIERTA'
 
+        //text: '<p></p> <div><button class="btn btn-secondary">Cancelar</button> <button class="btn btn-danger" id="boton-cancelarOC">Cancelar OC</button> <button class="btn btn-primary" id="boton-cerrarOC">Cerrar OC</button>  </div>',
         swal({
-            title: '¿Selecciona acción para la Orden de Compra?.',
+            title: '¿Cancelar Orden de Compra?.',
             html: true,
-            text: '<p></p> <div><button class="btn btn-secondary">Cancelar</button> <button class="btn btn-danger" id="boton-cancelarOC">Cancelar OC</button> <button class="btn btn-primary" id="boton-cerrarOC">Cerrar OC</button>  </div>',
+            text: '<p></p> <div><button class="btn btn-secondary">No</button> <button class="btn btn-danger" id="boton-cerrarOC">Cancelar OC</button>  </div>',
             type: "warning",
             showConfirmButton: false,
             showCancelButton: false
@@ -410,159 +415,7 @@ $('#tableOC').on('click', 'button#btnEliminar', function (e) {
     }
     
 });
- function reloadBuscadorOC(){
-    // var end = moment();
-    // var start = moment().subtract(15, "days");;
-    // reloadOrdenes(start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'));
-     $("#tableOC").DataTable().clear().draw();
-     $.ajax({
-         type: 'GET',
-         async: true,
-         headers: {
-             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-         },
-         url: routeapp + "get_oc_xestado",
-         data: {
-             "estado": $('#sel-estatus-oc').val()
-         },
-         beforeSend: function () {
-             $.blockUI({
-                 message: '<h1>Solicitando OC</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
-                 css: {
-                     border: 'none',
-                     padding: '16px',
-                     width: '50%',
-                     top: '40%',
-                     left: '30%',
-                     backgroundColor: '#fefefe',
-                     '-webkit-border-radius': '10px',
-                     '-moz-border-radius': '10px',
-                     opacity: .7,
-                     color: '#000000'
-                 }
-             });
-         },
-         complete: function () {
-             setTimeout($.unblockUI, 500);
-         },
-         success: function (data) {
-
-             if (data.data.length > 0) {
-                 $("#tableOC").dataTable().fnAddData(data.data);
-             } else {
-
-             }
-         }
-     });
- }
-function reloadOrdenes(fi, ff){
-    
-    $("#tableOC").DataTable().clear().draw();
-    $.ajax({
-        type: 'GET',
-        async: true,       
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        },
-        url: routeapp + "get_oc_xfecha",
-        data: {           
-            "fi": fi,
-            "ff": ff
-        },
-        beforeSend: function() {
-             $.blockUI({
-                message: '<h1>Solicitando OC</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
-                css: {
-                    border: 'none',
-                    padding: '16px',
-                    width: '50%',
-                    top: '40%',
-                    left: '30%',
-                    backgroundColor: '#fefefe',
-                    '-webkit-border-radius': '10px',
-                    '-moz-border-radius': '10px',
-                    opacity: .7,
-                    color: '#000000'
-                }
-            });
-        },
-        complete: function() {
-          setTimeout($.unblockUI, 500); 
-        },
-        success: function(data){
-
-            if(data.data.length > 0){
-                $("#tableOC").dataTable().fnAddData(data.data);           
-            }else{ 
-
-            }        
-        }
-    });
-}
-
-//FIN IMPRESION
-function get_oc() {
-    $.ajax({
-
-        type: 'GET',
-        async: true,
-        //url: '{!! route('get_oc') !!}',
-        url: routeapp + "get_oc",
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        },
-        data:{
-            "oc": $('#input_oc').val()
-        },
-        beforeSend: function() {
-            $.blockUI({
-                message: '<h1>Solicitando.</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
-                css: {
-                    border: 'none',
-                    padding: '16px',
-                    width: '50%',
-                    top: '40%',
-                    left: '30%',
-                    backgroundColor: '#fefefe',
-                    '-webkit-border-radius': '10px',
-                    '-moz-border-radius': '10px',
-                    opacity: .7,
-                    color: '#000000'
-                }
-            });
-        },
-        complete: function() {
-            $("#input_oc").val('');
-                     
-        },
-        success: function(data){
-            setTimeout($.unblockUI, 500);  
-
-            if (data.respuesta != 'ok') {
-                swal("", "La OC no existe", "error",  {
-                        buttons: false,
-                        timer: 2000,
-                    });
-            } else {
-                $("#tableOC").DataTable().clear().draw();
-                $("#tableOC").dataTable().fnAddData((data.data));
-                
-                swal("", "OC encontrada", "success",  {
-                    buttons: false,
-                    timer: 2000,
-                });
-            }
-        },
-        error: function (xhr, ajaxOptions, thrownError) {          
-            $.unblockUI();
-            swal("", "Error agregando OC", "error",  {
-                        buttons: false,
-                        timer: 2000,
-                    });    
-        }
-
-    });
-}
+ 
     
 $('#boton-cerrar').off().on('click', function(e) {
 
@@ -777,7 +630,7 @@ $(document).keyup(function(event) {
 
     
     window.onload = function () { 
-        tableOC.columns.adjust().draw();     
+        //tableOC.columns.adjust().draw();     
     }
     
 
@@ -808,6 +661,7 @@ $('#guardar').off().on('click', function(e) {
                 validarCampos();
                 if (bandera == 0) { //validado, campos correctos entonces
                     registraOC();
+                    $('button.confirm').attr("disabled", "disabled");
                 }
             });
     }

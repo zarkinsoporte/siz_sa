@@ -273,7 +273,8 @@ function InicializaTablas(){
                 action: function (e, dt, node, config) {
                     var estadoOC = $('#estadoOC').text();
                     if (estadoOC != 'CERRADA') {
-                        insertarFila(0);                         
+                        insertarFila(0);
+                                                 
                     }
                 }
             }
@@ -2234,7 +2235,12 @@ function validarCampos(){
 
 
 }
-
+function registraOC2() {
+    swal("", "OC guardada", "success", {
+        buttons: false,
+        timer: 2000,
+    });
+}
 function registraOC(){
 
     var datosTablaArtExis;
@@ -3110,6 +3116,116 @@ function reloadBuscadorOC_old(){
     var start = moment().subtract(2, "days");;
     reloadOrdenes(start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'));
  }
+function reloadBuscadorOC() {
+    // var end = moment();
+    // var start = moment().subtract(15, "days");;
+    // reloadOrdenes(start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'));
+    $("#tableOC").DataTable().clear().draw();
+    $.ajax({
+        type: 'GET',
+        async: true,
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        url: routeapp + "get_oc_xestado",
+        data: {
+            "estado": $('#sel-estatus-oc').val()
+        },
+        beforeSend: function () {
+            $.blockUI({
+                message: '<h1>Solicitando OC</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                css: {
+                    border: 'none',
+                    padding: '16px',
+                    width: '50%',
+                    top: '40%',
+                    left: '30%',
+                    backgroundColor: '#fefefe',
+                    '-webkit-border-radius': '10px',
+                    '-moz-border-radius': '10px',
+                    opacity: .7,
+                    color: '#000000'
+                }
+            });
+        },
+        complete: function () {
+            setTimeout($.unblockUI, 500);
+        },
+        success: function (data) {
+
+            if (data.data.length > 0) {
+                $("#tableOC").dataTable().fnAddData(data.data);
+                //tableOC.columns.adjust().draw();
+            } else {
+
+            }
+        }
+    });
+}
+
+//FIN IMPRESION
+function get_oc() {
+    $.ajax({
+
+        type: 'GET',
+        async: true,
+        //url: '{!! route('get_oc') !!}',
+        url: routeapp + "get_oc",
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        data: {
+            "oc": $('#input_oc').val()
+        },
+        beforeSend: function () {
+            $.blockUI({
+                message: '<h1>Solicitando.</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                css: {
+                    border: 'none',
+                    padding: '16px',
+                    width: '50%',
+                    top: '40%',
+                    left: '30%',
+                    backgroundColor: '#fefefe',
+                    '-webkit-border-radius': '10px',
+                    '-moz-border-radius': '10px',
+                    opacity: .7,
+                    color: '#000000'
+                }
+            });
+        },
+        complete: function () {
+            $("#input_oc").val('');
+
+        },
+        success: function (data) {
+            setTimeout($.unblockUI, 500);
+
+            if (data.respuesta != 'ok') {
+                swal("", "La OC no existe", "error", {
+                    buttons: false,
+                    timer: 2000,
+                });
+            } else {
+                $("#tableOC").DataTable().clear().draw();
+                $("#tableOC").dataTable().fnAddData((data.data));
+
+                swal("", "OC encontrada", "success", {
+                    buttons: false,
+                    timer: 2000,
+                });
+            }
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            $.unblockUI();
+            swal("", "Error agregando OC", "error", {
+                buttons: false,
+                timer: 2000,
+            });
+        }
+
+    });
+}
  function reloadOrdenes(fi, ff){
     
     $("#tableOC").DataTable().clear().draw();
