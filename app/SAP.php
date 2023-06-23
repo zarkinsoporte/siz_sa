@@ -10,7 +10,8 @@ use Carbon\Carbon;
 //use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
-
+ini_set('memory_limit', '-1');
+set_time_limit(0);
 class SAP extends Model
 {
     private static $vCmp = false;

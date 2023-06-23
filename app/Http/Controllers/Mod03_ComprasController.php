@@ -22,6 +22,8 @@ use Mail;
 use Session;
 use Maatwebsite\Excel\Facades\Excel;
 use App\SAP;
+ini_set('memory_limit', '-1');
+set_time_limit(0);
 class Mod03_ComprasController extends Controller
 {
     public function cpp_combobox_articulos(Request $request){
