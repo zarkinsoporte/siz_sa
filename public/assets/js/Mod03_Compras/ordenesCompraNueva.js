@@ -2710,7 +2710,7 @@ function mostrarOC(NumOC, OCnueva) {
         data: {
             NumOC: NumOC
         },
-        dataType: "json",
+       
         url: routeapp + "compras/buscaOC",
         success: function (data) {
             setTimeout($.unblockUI, 2000);
@@ -2731,7 +2731,8 @@ function mostrarOC(NumOC, OCnueva) {
         },
         error: function (xhr, ajaxOptions, thrownError) {
             $.unblockUI();
-            var error = JSON.parse(xhr.responseText);
+            console.log(xhr.responseText);
+            var error = (xhr.responseText);
             bootbox.alert({
                 size: "large",
                 title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",

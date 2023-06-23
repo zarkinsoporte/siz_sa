@@ -915,7 +915,7 @@ class Mod03_ComprasController extends Controller
 
     }
     public function buscaOC(Request $request){
-        try{
+        
             $NumOC = $request->get('NumOC');
             //return [$NumOC];
             $rs1 = DB::select("exec SIZ_SP_OC_RESUMEN ". $NumOC);
@@ -933,15 +933,6 @@ class Mod03_ComprasController extends Controller
             $resumen = $rs1[0];
             $comp = $rs2[0]; 
             return compact('NumOC', 'comp', 'resumen', 'detalle');
-        } catch (\Exception $e){
-
-            header('HTTP/1.1 500 Internal Server Error');
-            header('Content-Type: application/json; charset=UTF-8');
-            die(json_encode(array("mensaje" => $e->getMessage(),
-                "codigo" => $e->getCode(),
-                "clase" => $e->getFile(),
-                "linea" => $e->getLine())));
-
-        }
+        
     }
 }
