@@ -3048,6 +3048,9 @@ function eliminarPartidaArtMisc(fila){
 
                     if(detalleId != ''){
                         $.ajax({
+                             headers: {
+                                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                                },
                             type: "POST",
                             async: false,
                             data: {
