@@ -668,7 +668,76 @@ class Mod03_ComprasController extends Controller
         $proveedor = $proveedor[0];
         return compact('proveedor');
     }
+public function cargaArticulo(Request $request){
+       
+        $tc_sys = DB::table('ORTT')        
+        ->where('RateDate', date('Y-m-d'))->get();
+        $tipos_cambio = [];
+        $sql = "CAPTURA TIPOS DE CAMBIO";
+        foreach ($tc_sys as $value) {
+            $tipos_cambio [$value->Currency] = $value->Rate.'';
+        }
+        if(count($tipos_cambio) > 0){
+        
+        $sql = "SELECT
+                        OITM.ItemCode ART_CodigoArticulo,
+                        OITM.ItemName ART_Nombre,
+                        OITM.U_TipoMat ATP_Descripcion,
+                        Cast(CONVERT(DECIMAL(10,2), OITM.PurPackUn) as nvarchar) PurPackUn, 
+                        OITM.PurPackMsr UMC,   
+                        Cast(CONVERT(DECIMAL(10,2), OITM.NumInBuy) as nvarchar) AFC_FactorConversion, 
+                        OITM.BuyUnitMsr UMI,
+                        Cast(CONVERT(DECIMAL(10,4), ITM1.Price) as nvarchar) AS LIS_COMPRA,                        
+                        ((ITM1.Price * OITM.NumInBuy * 
+                        CASE WHEN ITM1.Currency = 'MXP' THEN 1
+                        WHEN ITM1.Currency = 'USD' THEN CONVERT(DECIMAL(10,4),'".$tipos_cambio ['USD']."')
+                        WHEN ITM1.Currency = 'EUR' THEN CONVERT(DECIMAL(10,4),'".$tipos_cambio ['EUR']."')
+                        END
+                        ) / '".$request->get('tipo_cambio')."') AS 
+                        Precio_Tipo_Cambio,
+                        Cast(CONVERT(DECIMAL(10,4), ITM1.Price * OITM.NumInBuy 
+                        ) as nvarchar) Precio,
+                        ITM1.Currency AS M_L
+                                    
+                    FROM OITM
+                    LEFT JOIN ITM1 ON OITM.ItemCode = ITM1.ItemCode
+                    AND ITM1.PriceList= 9
 
+                    WHERE OITM.ItemCode ='".$request->get('codigo_articulo') ."'
+                    AND OITM.PrchseItem = 'Y' AND OITM.InvntItem = 'Y'
+                    AND OITM.frozenFor = 'N' AND  OITM.U_TipoMat IN ('MP', 'SP', 'RF', 'GF') 
+                    
+                    ORDER BY OITM.ItemName, OITM.ItemCode";
+        }
+        try{
+
+            $consulta2 = [];
+            if ($request->get('moneda') != ''){
+                $consulta2 = \DB::select(
+                \DB::raw( //cambiar consulta para SAP
+                    $sql
+                    )
+                );
+            }
+                
+            $ajaxData = array();
+            $ajaxData['data2'] = $consulta2[0];
+            $ajaxData['codigo'] = 200;
+
+            return $ajaxData;
+
+        } catch (\Exception $e){
+
+            header('HTTP/1.1 500 Internal Server Error');
+            header('Content-Type: application/json; charset=UTF-8');
+            die(json_encode(array("mensaje" => $e->getMessage(),
+                "codigo" => $e->getCode(),
+                "clase" => $e->getFile(),
+                "linea" => $e->getLine())));
+
+        }
+
+    }
      public function cargaTablaArticulos(Request $request){
         //$tc_sys = 1;
         if (false) {
@@ -712,7 +781,7 @@ class Mod03_ComprasController extends Controller
 
                     WHERE OITM.ItemCode IS NOT NULL 
                     AND OITM.PrchseItem = 'Y' AND OITM.InvntItem = 'Y'
-                    AND OITM.frozenFor = 'N' AND  OITM.U_TipoMat IN ('MP', 'SP', 'RF') 
+                    AND OITM.frozenFor = 'N' AND  OITM.U_TipoMat IN ('MP', 'SP', 'RF', 'GF') 
                     ORDER BY OITM.ItemName, OITM.ItemCode";
                     // if ($request->get('moneda') == 'MXP'){
                     //     $sql = $sql . " AND  ITM1.Currency = 'MXP' ";
