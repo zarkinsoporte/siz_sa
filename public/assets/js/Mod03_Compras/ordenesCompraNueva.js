@@ -1898,7 +1898,7 @@ function RealizaCalculos(fila, tabla, input_precio, input_cantidad, input_descue
     console.log('iva ' +iva);
     //console.log('iva2 ' + selected);
     //console.log('iva3 ' + selected * .01);
-    var total = subtotal + iva;
+    var total = subtotal_desc + iva;
 
     //tbl.row(row).nodes(row, COL_PRECIO).to$().find('input#' + input_precio).val(precio.toFixed(DECIMALES));
     tbl.row(row).nodes(row, COL_SUBTOTAL).to$().find("td:eq('" + COL_SUBTOTAL + "')").text(subtotal.toFixed(DECIMALES));
