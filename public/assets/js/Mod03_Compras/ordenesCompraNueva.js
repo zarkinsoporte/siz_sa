@@ -1086,9 +1086,9 @@ function cargaArticulo(articulo, pos){
                     dataAE["FACTOR_CONVERSION"] = art.AFC_FactorConversion;
 
                     dataAE["UNIDAD_MEDIDA_COMPRAS"] = art.UMC;
-                    dataAE["PRECIO"] = art.Precio_Tipo_Cambio;                   
+                    dataAE["PRECIO"] = parseFloat(art.Precio_Tipo_Cambio).toFixed(DECIMALES);                   
                     dataAE["DESCUENTO"] = 0;
-
+                    dataAE['CODIGO_ARTICULO'] = art.ART_CodigoArticulo;
                     //tabla_artExist.row(fila).nodes(fila, COL_ID_ARTICULO).to$().find("td:eq('" + COL_ID_ARTICULO + "')").text(ARTICULO_BUSCADOR_ID);
                     tbl.row(fila).nodes(fila, COL_CODIGO_ART).to$().find('input#input-articulo-codigoAE').val(art.ART_CodigoArticulo);
                     tbl.row(fila).nodes(fila, COL_NOMBRE_ART).to$().find("td:eq('" + COL_NOMBRE_ART + "')").text(art.ART_Nombre);
@@ -1691,10 +1691,10 @@ function calculaTotalOrdenCompra(){
     if (count > 0){
 
         for (var i = 0; i < count; i++) {
-            subtotal = Number($($("#tblArticulosExistentesNueva tbody tr")[i]).find("td:eq(" + COL_SUBTOTAL +")").text()) + Number($($("#tblArticulosMiscelaneosNueva tbody tr")[i]).find("td:eq(7)").text());
+            subtotal = Number($($("#tblArticulosExistentesNueva tbody tr")[i]).find("td:eq(10)").text()) + Number($($("#tblArticulosMiscelaneosNueva tbody tr")[i]).find("td:eq(7)").text());
             descuento = Number($($("#tblArticulosExistentesNueva tbody tr")[i]).find("td:eq(12)").text()) + Number($($("#tblArticulosMiscelaneosNueva tbody tr")[i]).find("td:eq(9)").text());
             iva = Number($($("#tblArticulosExistentesNueva tbody tr")[i]).find("td:eq(14)").text()) + Number($($("#tblArticulosMiscelaneosNueva tbody tr")[i]).find("td:eq(11)").text());
-            total = Number($($("#tblArticulosExistentesNueva tbody tr")[i]).find("td:eq(15)").text()) + Number($($("#tblArticulosMiscelaneosNueva tbody tr")[i]).find("td:eq(12)").text());
+            //total = Number($($("#tblArticulosExistentesNueva tbody tr")[i]).find("td:eq(15)").text()) + Number($($("#tblArticulosMiscelaneosNueva tbody tr")[i]).find("td:eq(12)").text());
             
             //subtotal = Number($($("#tblArticulosExistentesNueva tbody tr")[i]).find("td:eq(8)").text());
             //descuento = Number($($("#tblArticulosExistentesNueva tbody tr")[i]).find("td:eq(10)").text());
@@ -1709,12 +1709,11 @@ function calculaTotalOrdenCompra(){
             console.log('descuento ' + descuento)
             console.log('iva ' + iva)
             console.log('total '+ total)
-            Ttotal = Ttotal + total;
-            TSubtotal  = TSubtotal  + subtotal;
-            Tiva = Tiva + iva;
-            Tdescuento = Tdescuento + descuento;
-
-           
+            TSubtotal = TSubtotal + parseFloat(subtotal);
+            Tiva = Tiva + parseFloat(iva);
+            Tdescuento = Tdescuento + parseFloat(descuento);
+            
+            Ttotal += parseFloat(subtotal) + parseFloat(iva) - parseFloat(descuento)
         }
         $('#ordenCompra-subtotal').text(
             Intl.NumberFormat("es-MX", {
@@ -1882,20 +1881,26 @@ function RealizaCalculos(fila, tabla, input_precio, input_cantidad, input_descue
     var row = fila;
     var dataT = tabla.row(fila).data();
     var precio  = tbl.row(row).nodes(row, COL_PRECIO).to$().find('input#' + input_precio).val();
+    console.log('precio Ant: ' + precio)
     var cantidad = tbl.row(row).nodes(row,COL_CANTIDAD).to$().find('input#' + input_cantidad).val();
+    var descuento = cantidad * precio * ((tbl.row(row).nodes(row, COL_DESCUENTO).to$().find('input#' + input_descuento).val())) * .01;
+    var precio_desc = precio - (descuento/cantidad);
     var subtotal = precio * cantidad;
-        console.log('subtotal ' + subtotal)
-        console.log('precio ' + precio)
-        console.log('cantidad ' + cantidad)
-        var descuento = subtotal * ((tbl.row(row).nodes(row,COL_DESCUENTO).to$().find('input#' + input_descuento).val()) / 100);
-        console.log('descue '+ descuento)
+    var subtotal_desc = precio_desc * cantidad;
+    console.log('precio Desc: ' + precio_desc)
+    console.log('cantidad: ' + cantidad)
+    console.log('descue: '+ descuento)
+    console.log('subtotal: ' + subtotal)
     //console.log('dataT ' + dataT['IVA']);
     if(dataT['IVA'] == '')dataT['IVA'] = "0";
     var selected = dataT['IVA'];
-    var iva = (subtotal - descuento) * (selected * .01);
+    var iva = (subtotal_desc) * (selected * .01);
     console.log('iva ' +iva);
-    var total = subtotal-descuento + iva;
+    //console.log('iva2 ' + selected);
+    //console.log('iva3 ' + selected * .01);
+    var total = subtotal + iva;
 
+    //tbl.row(row).nodes(row, COL_PRECIO).to$().find('input#' + input_precio).val(precio.toFixed(DECIMALES));
     tbl.row(row).nodes(row, COL_SUBTOTAL).to$().find("td:eq('" + COL_SUBTOTAL + "')").text(subtotal.toFixed(DECIMALES));
     tbl.row(row).nodes(row, COL_MONTO_DESCUENTO).to$().find("td:eq('" + COL_MONTO_DESCUENTO + "')").text(descuento.toFixed(DECIMALES));
     tbl.row(row).nodes(row, COL_MONTO_IVA).to$().find("td:eq('" + COL_MONTO_IVA + "')").text(iva.toFixed(DECIMALES));
@@ -1913,7 +1918,7 @@ function RealizaCalculos(fila, tabla, input_precio, input_cantidad, input_descue
         dataT["NOMBRE_ARTICULO"] = tbl.row(row).nodes(row, COL_NOMBRE_ART).to$().find("input#input-nombreART-miselaneos").val();
         //dataT["UNIDAD_MEDIDA_COMPRAS"] = selectedUV;
         dataT["CANTIDAD"] = tbl.row(row).nodes(row,COL_CANTIDAD).to$().find('input#' + input_cantidad).val();
-        dataT["PRECIO"] = tbl.row(row).nodes(row, COL_PRECIO).to$().find('input#' + input_precio).val();
+        //dataT["PRECIO"] = tbl.row(row).nodes(row, COL_PRECIO).to$().find('input#' + input_precio).val();
         dataT["SUBTOTAL"] = tbl.row(row).nodes(row, COL_SUBTOTAL).to$().find("td:eq('" + COL_SUBTOTAL + "')").text();
         dataT["DESCUENTO"] = tbl.row(row).nodes(row, COL_DESCUENTO).to$().find('input#' + input_descuento).val();
         dataT["MONTO_DESCUENTO"] = tbl.row(row).nodes(row, COL_MONTO_DESCUENTO).to$().find("td:eq('" + COL_MONTO_DESCUENTO + "')").text();
@@ -1927,7 +1932,7 @@ function RealizaCalculos(fila, tabla, input_precio, input_cantidad, input_descue
     else{
         //TABLA DE VENTAS
         dataT["CANTIDAD"] = tbl.row(row).nodes(row,COL_CANTIDAD).to$().find('input#' + input_cantidad).val();
-        dataT["PRECIO"] = tbl.row(row).nodes(row, COL_PRECIO).to$().find('input#' + input_precio).val();
+        //dataT["PRECIO"] = tbl.row(row).nodes(row, COL_PRECIO).to$().find('input#' + input_precio).val();
         dataT["SUBTOTAL"] = tbl.row(row).nodes(row, COL_SUBTOTAL).to$().find("td:eq('" + COL_SUBTOTAL + "')").text();
         dataT["DESCUENTO"] = tbl.row(row).nodes(row, COL_DESCUENTO).to$().find('input#' + input_descuento).val();
         dataT["MONTO_DESCUENTO"] = tbl.row(row).nodes(row, COL_MONTO_DESCUENTO).to$().find("td:eq('" + COL_MONTO_DESCUENTO + "')").text();
@@ -2585,7 +2590,7 @@ function agregaPartidasOCDetalle(datos, tipo) {
 function agregaArtExis(datos, pos) {
 
     var tbl = $('#tblArticulosExistentesNueva').DataTable();
-
+    console.log('precio: ' + datos['LIN_PRECIO'])
     TBL_ART_EXIST.row.add(
         {
             "PARTIDA": datos['LIN_NUMERO']
@@ -2599,7 +2604,7 @@ function agregaArtExis(datos, pos) {
 
             , "CANTIDAD": datos['LIN_CANTIDAD']
             , "PRECIO": datos['LIN_PRECIO']
-            , "SUBTOTAL": parseFloat(datos['LIN_TOTAL']).toFixed(DECIMALES)
+            , "SUBTOTAL": parseFloat(datos['LIN_CANTIDAD'] * datos['LIN_PRECIO']).toFixed(DECIMALES)
 
             , "DESCUENTO": datos['LIN_PORCENTAJEDESCUENTO']
             , "MONTO_DESCUENTO": parseFloat(datos['LIN_DISC']).toFixed(DECIMALES)
@@ -2669,7 +2674,7 @@ function agregaArtExis2(datos, pos) {
 
             , "CANTIDAD": datos['LIN_CANTIDAD']
             , "PRECIO": datos['LIN_PRECIO']
-            , "SUBTOTAL": parseFloat(datos['LIN_TOTAL']).toFixed(DECIMALES)
+            , "SUBTOTAL": parseFloat(datos['LIN_CANTIDAD'] * datos['LIN_PRECIO']).toFixed(DECIMALES)
 
             , "DESCUENTO": datos['LIN_PORCENTAJEDESCUENTO']
             , "MONTO_DESCUENTO": parseFloat(datos['LIN_DISC']).toFixed(DECIMALES)
@@ -3026,7 +3031,7 @@ function agregaArtMisc(datos,pos){
 
             , "CANTIDAD": datos['LIN_CANTIDAD']
             , "PRECIO": datos['LIN_PRECIO']
-            , "SUBTOTAL": parseFloat(datos['LIN_TOTAL']).toFixed(DECIMALES)
+            , "SUBTOTAL": parseFloat(datos['LIN_CANTIDAD'] * datos['LIN_PRECIO']).toFixed(DECIMALES)
             
             , "DESCUENTO": datos['LIN_PORCENTAJEDESCUENTO']
             , "MONTO_DESCUENTO": parseFloat(datos['LIN_DISC']).toFixed(DECIMALES)

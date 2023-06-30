@@ -488,7 +488,7 @@ class Mod03_ComprasController extends Controller
             ,CASE WHEN docstatus = 'C' AND OPOR.CANCELED = 'N' THEN 'CERRADA' 
             WHEN docstatus = 'C' AND OPOR.CANCELED = 'Y' THEN 'CANCELADA'
              ELSE 'ABIERTA' END Estatus
-            , FORMAT((DocTotal / DocRate), '##.##') Total 
+            , FORMAT((DocTotal / DocRate), '##.####') Total 
             , OPOR.DocCur Moneda
             , OPOR.Comments Comentario
             FROM OPOR 
@@ -525,7 +525,7 @@ class Mod03_ComprasController extends Controller
             , CASE WHEN docstatus = 'C' AND OPOR.CANCELED = 'N' THEN 'CERRADA' 
             WHEN docstatus = 'C' AND OPOR.CANCELED = 'Y' THEN 'CANCELADA'
             ELSE 'ABIERTA' END Estatus
-            , FORMAT((DocTotal / DocRate), '##.##') Total 
+            , FORMAT((DocTotal / DocRate), '##.####') Total 
             , OPOR.DocCur Moneda
             , OPOR.Comments Comentario
             FROM OPOR 
@@ -558,7 +558,7 @@ class Mod03_ComprasController extends Controller
             , CASE WHEN docstatus = 'C' AND OPOR.CANCELED = 'N' THEN 'CERRADA' 
             WHEN docstatus = 'C' AND OPOR.CANCELED = 'Y' THEN 'CANCELADA'
             ELSE 'ABIERTA' END Estatus
-            , FORMAT((DocTotal / DocRate), '##.##') Total 
+            , FORMAT((DocTotal / DocRate), '##.####') Total 
             , OPOR.DocCur Moneda
             , OPOR.Comments Comentario
             FROM OPOR 
@@ -688,12 +688,12 @@ public function cargaArticulo(Request $request){
                         Cast(CONVERT(DECIMAL(10,2), OITM.NumInBuy) as nvarchar) AFC_FactorConversion, 
                         OITM.BuyUnitMsr UMI,
                         Cast(CONVERT(DECIMAL(10,4), ITM1.Price) as nvarchar) AS LIS_COMPRA,                        
-                        ((ITM1.Price * OITM.NumInBuy * 
+                        CONVERT(DECIMAL(10,4), ((ITM1.Price * OITM.NumInBuy * 
                         CASE WHEN ITM1.Currency = 'MXP' THEN 1
                         WHEN ITM1.Currency = 'USD' THEN CONVERT(DECIMAL(10,4),'".$tipos_cambio ['USD']."')
                         WHEN ITM1.Currency = 'EUR' THEN CONVERT(DECIMAL(10,4),'".$tipos_cambio ['EUR']."')
                         END
-                        ) / '".$request->get('tipo_cambio')."') AS 
+                        ) / '".$request->get('tipo_cambio')."')) AS 
                         Precio_Tipo_Cambio,
                         Cast(CONVERT(DECIMAL(10,4), ITM1.Price * OITM.NumInBuy 
                         ) as nvarchar) Precio,

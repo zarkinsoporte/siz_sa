@@ -1010,6 +1010,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
             datos['DESCUENTO'] = $(this).val();
 
             if (datos['ID_ARTICULO'] != "") {
+                console.log("cambiando descuento ................")
                 RealizaCalculos(fila, tabla, precio, cantidad, descuento);
                 calculaTotalOrdenCompra();
                 // calculaTipoCambio();
