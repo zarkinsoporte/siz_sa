@@ -39,7 +39,6 @@ public function reporteMRP()
         $fechauser = Input::get('text_selUno');
         $tipo = Input::get('text_selDos');
        
-        
         // if ($accion == 'Actualizar') {//se ejecuta la actualizacion de la tabla
         //     DB::update("exec SIZ_MRP");
         // }

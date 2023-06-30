@@ -463,14 +463,15 @@
         //count_rollout();
        if(!proceso_rollout_activo){
             swal({
-                title: "¿Deseas Continuar?",
-                text: "Ejecución RollOut",
-                buttons: true,
-                //dangerMode: true,
-                })
-                .then((opt) => {
-                if (opt) {
-                   $.ajax({
+            title: "¿Deseas Continuar?",
+            text: "Ejecución RollOut",
+            type: "info",
+            showCancelButton: true,
+            closeOnConfirm: false,
+            confirmButtonText: " Continuar",
+            cancelButtonText: " Cancelar",
+        }, function () {
+               $.ajax({
                             type: 'GET',
                             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
                             data: {
@@ -548,11 +549,9 @@
                             
                             }
                     });
-                    
-                } else {
-                    //swal("");
-                }
             });
+
+           
        }else{
             swal("", "Ya existe un ROLLOUT en curso...", "error",  {
                         buttons: false,
