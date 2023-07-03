@@ -704,7 +704,7 @@ public function cargaArticulo(Request $request){
                     AND ITM1.PriceList= 9
 
                     WHERE OITM.ItemCode ='".$request->get('codigo_articulo') ."'
-                    AND OITM.PrchseItem = 'Y' AND OITM.InvntItem = 'Y'
+                    AND OITM.PrchseItem = 'Y'
                     AND OITM.frozenFor = 'N' AND  OITM.U_TipoMat IN ('MP', 'SP', 'RF', 'GF') 
                     
                     ORDER BY OITM.ItemName, OITM.ItemCode";
@@ -780,7 +780,7 @@ public function cargaArticulo(Request $request){
                     AND ITM1.PriceList= 9
 
                     WHERE OITM.ItemCode IS NOT NULL 
-                    AND OITM.PrchseItem = 'Y' AND OITM.InvntItem = 'Y'
+                    AND OITM.PrchseItem = 'Y'
                     AND OITM.frozenFor = 'N' AND  OITM.U_TipoMat IN ('MP', 'SP', 'RF', 'GF') 
                     ORDER BY OITM.ItemName, OITM.ItemCode";
                     // if ($request->get('moneda') == 'MXP'){
