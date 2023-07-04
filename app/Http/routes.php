@@ -716,6 +716,7 @@ Route::any('get-rates', 'Mod03_ComprasController@get_rates')->name('get-rates');
 Route::any('get_detalleProveedor', 'Mod03_ComprasController@get_detalleProveedor')->name('get_detalleProveedor');
 Route::any('consultaIvasYUnidadesMedida', 'Mod03_ComprasController@consultaIvasYUnidadesMedida')->name('consultaIvasYUnidadesMedida');
 Route::any('cargaTablaArticulos', 'Mod03_ComprasController@cargaTablaArticulos')->name('cargaTablaArticulos');
+Route::any('cargaArticulo', 'Mod03_ComprasController@cargaArticulo')->name('cargaArticulo');
 Route::any('getProveedorOC', 'Mod03_ComprasController@getProveedorOC')->name('getProveedorOC');
 Route::any('get_oc_xfecha', 'Mod03_ComprasController@get_oc_xfecha')->name('get_oc_xfecha');
 Route::any('get_oc_xestado', 'Mod03_ComprasController@get_oc_xestado')->name('get_oc_xestado');

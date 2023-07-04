@@ -314,7 +314,7 @@ var tableOC = $("#tableOC").DataTable({
                     "orderable": false,
                     "render": function ( data, type, row ) {
 
-                            return number_format(row['Total'],2,'.',',');
+                            return number_format(row['Total'],3,'.',',');
 
                     }
 
@@ -747,10 +747,10 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
     $('#tblArticulosExistentesNueva').on('change', 'input#input-cantidadAE', function (e) {
         e.preventDefault();
         if ($(this).val() == '' || $(this).val() < 0) {
-            $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
+            $(this).val(parseFloat('0.00').toFixed(DECIMALES));
         }
 
-        $(this).val(parseFloat(this.value).toFixed(CANTIDAD_DECIMALES));
+        $(this).val(parseFloat(this.value).toFixed(DECIMALES));
 
         if ($("#sel-proveedor").val() != "") {
             var tabla = $('#tblArticulosExistentesNueva').DataTable();
@@ -785,7 +785,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                     buttons: false,
                     timer: 2000,
                 });
-                $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
+                $(this).val(parseFloat('0.00').toFixed(DECIMALES));
             }
 
         } else {
@@ -800,10 +800,10 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
     $('#tblArticulosMiscelaneosNueva').on('change','input#input-cantidadAM',function (e) {
         e.preventDefault();
         if($(this).val() == '' || $(this).val() < 0){
-            $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
+            $(this).val(parseFloat('0.00').toFixed(DECIMALES));
         }
 
-        $(this).val(parseFloat(this.value).toFixed(CANTIDAD_DECIMALES));
+        $(this).val(parseFloat(this.value).toFixed(DECIMALES));
 
         if ($("#sel-proveedor").val() != ""){
             var tabla = $('#tblArticulosMiscelaneosNueva').DataTable();
@@ -836,7 +836,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                         buttons: false,
                         timer: 2000,
                     });
-                    $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
+                    $(this).val(parseFloat('0.00').toFixed(DECIMALES));
                 }
 
         }else{
@@ -851,10 +851,10 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
     $('#tblArticulosExistentesNueva').on('change', 'input#input-precioAE', function (e) {
         e.preventDefault();
         if ($(this).val() == '' || $(this).val() < 0) {
-            $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
+            $(this).val(parseFloat('0.00').toFixed(DECIMALES));
         }
 
-        $(this).val(parseFloat(this.value).toFixed(CANTIDAD_DECIMALES));
+        $(this).val(parseFloat(this.value).toFixed(DECIMALES));
         if ($("#sel-proveedor").val() != "") {
             var tabla = $('#tblArticulosExistentesNueva').DataTable();
             var fila = $(this).closest('tr');
@@ -888,7 +888,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                     buttons: false,
                     timer: 2000,
                 });
-                $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
+                $(this).val(parseFloat('0.00').toFixed(DECIMALES));
             }
 
 
@@ -906,10 +906,10 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
     $('#tblArticulosMiscelaneosNueva').on('change','input#input-precioAM',function (e) {
         e.preventDefault();
         if($(this).val() == '' || $(this).val() < 0){
-            $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
+            $(this).val(parseFloat('0.00').toFixed(DECIMALES));
         }
 
-        $(this).val(parseFloat(this.value).toFixed(CANTIDAD_DECIMALES));
+        $(this).val(parseFloat(this.value).toFixed(DECIMALES));
         if ($("#sel-proveedor").val() != ""){
 
             var tabla = $('#tblArticulosMiscelaneosNueva').DataTable();
@@ -941,7 +941,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                         buttons: false,
                         timer: 2000,
                     });
-                    $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
+                    $(this).val(parseFloat('0.00').toFixed(DECIMALES));
                 }
 
         }
@@ -954,17 +954,42 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
         }
     });
 
+    $('#tblArticulosExistentesNueva').on('change', 'input#input-articulo-codigoAE', function (e) {
+
+        if ($(this).val() !== '' ){
+           
+
+        
+        if ($("#sel-proveedor").val() != "") {
+            var tbl = $('#tblArticulosExistentesNueva').DataTable();
+            var fila = $(this).closest('tr');
+            var index = tbl.row(fila).index();
+            var dataAE = tbl.row(fila).data();
+
+            console.log($(this).val());   
+            cargaArticulo($(this).val(), index) 
+           
+        }
+        else {
+            swal("", "No se ha elegido un proveedor, elige uno por favor para continuar.", "error", {
+                buttons: false,
+                timer: 2000,
+            });
+            $(this).val("");
+        }
+    }
+    });
     $('#tblArticulosExistentesNueva').on('change', 'input#input-descuentoAE', function (e) {
 
         if ($(this).val() == '' || $(this).val() < 0) {
-            $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
+            $(this).val(parseFloat('0.00').toFixed(DECIMALES));
         }
 
         if ($(this).val() >= 100) {
-            $(this).val(parseFloat('100.00').toFixed(CANTIDAD_DECIMALES));
+            $(this).val(parseFloat('100.00').toFixed(DECIMALES));
         }
 
-        $(this).val(parseFloat(this.value).toFixed(CANTIDAD_DECIMALES));
+        $(this).val(parseFloat(this.value).toFixed(DECIMALES));
         if ($("#sel-proveedor").val() != "") {
             var tabla = $('#tblArticulosExistentesNueva').DataTable();
             var fila = $(this).closest('tr');
@@ -985,6 +1010,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
             datos['DESCUENTO'] = $(this).val();
 
             if (datos['ID_ARTICULO'] != "") {
+                console.log("cambiando descuento ................")
                 RealizaCalculos(fila, tabla, precio, cantidad, descuento);
                 calculaTotalOrdenCompra();
                 // calculaTipoCambio();
@@ -997,7 +1023,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                     buttons: false,
                     timer: 2000,
                 });
-                $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
+                $(this).val(parseFloat('0.00').toFixed(DECIMALES));
             }
 
         }
@@ -1013,14 +1039,14 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
     $('#tblArticulosMiscelaneosNueva').on('change','input#input-descuentoAM',function (e) {
 
         if($(this).val() == '' || $(this).val() < 0){
-            $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
+            $(this).val(parseFloat('0.00').toFixed(DECIMALES));
         }
 
         if ($(this).val() >= 100){
-            $(this).val(parseFloat('100.00').toFixed(CANTIDAD_DECIMALES));
+            $(this).val(parseFloat('100.00').toFixed(DECIMALES));
         }
 
-        $(this).val(parseFloat(this.value).toFixed(CANTIDAD_DECIMALES));
+        $(this).val(parseFloat(this.value).toFixed(DECIMALES));
         if ($("#sel-proveedor").val() != ""){
 
             var tabla = $('#tblArticulosMiscelaneosNueva').DataTable();
@@ -1050,7 +1076,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                         buttons: false,
                         timer: 2000,
                     });
-                    $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
+                    $(this).val(parseFloat('0.00').toFixed(DECIMALES));
                 }
         }
         else{
@@ -1102,7 +1128,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                     buttons: false,
                     timer: 2000,
                 });
-                $(this).val(parseFloat('0.00').toFixed(CANTIDAD_DECIMALES));
+                $(this).val(parseFloat('0.00').toFixed(DECIMALES));
             }
 
 

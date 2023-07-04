@@ -2,10 +2,11 @@
  * Created by mgl_l on 15/08/2019.
  */
 
-var DECIMALES = 2;
-var CANTIDAD_DECIMALES = 2;
-var PRECIOS_DECIMALES = 2;
-var TC_DECIMALES = 4;
+var DECIMALES = 4;
+var DECIMALES_2 = 2;
+var DECIMALES_3 = 3;
+var TOTAL_DECIMALES = 3;
+var TC_DECIMALES = 3;
 var PORCENTAJE_DECIMALES = 2;
 
 //buscador
@@ -118,10 +119,10 @@ var InicializaFunciones = function () {
 
         init: function (cantidad_decimales, precios_decimales, porcentaje_decimales, tc_decimales) {
 
-            CANTIDAD_DECIMALES = cantidad_decimales;
-            PRECIOS_DECIMALES = precios_decimales;
-            PORCENTAJE_DECIMALES = porcentaje_decimales;
-            TC_DECIMALES = tc_decimales;
+            // DECIMALES = cantidad_decimales;
+            // DECIMALES = precios_decimales;
+            // PORCENTAJE_DECIMALES = porcentaje_decimales;
+            // TC_DECIMALES = tc_decimales;
 
             $("#ordenesCompraOC").hide();
             InicializaComponentes();
@@ -376,7 +377,7 @@ function InicializaTablas(){
                 "targets": [COL_CANTIDAD],
                 "orderable" : false,
                 "render": function ( data, type, row ) {
-                    return '<input id="input-cantidadAE" style="" class="form-control input-sm cantidad" type="number" value="' + parseFloat(row['CANTIDAD']).toFixed(DECIMALES) + '">';
+                    return '<input id="input-cantidadAE" style="" class="form-control input-sm cantidad" type="number" value="' + parseFloat(row['CANTIDAD']).toFixed(DECIMALES_2) + '">';
                 }
             },
             {
@@ -394,7 +395,7 @@ function InicializaTablas(){
                 "targets": [COL_DESCUENTO],
                 "orderable" : false,
                 "render": function (data,type,row) {
-                    return '<input id= "input-descuentoAE" style="width: 100px" class="form-control input-sm" value="' + parseFloat(DESCUENTO_GENERAL).toFixed(DECIMALES) + '" type="number">'
+                    return '<input id= "input-descuentoAE" style="width: 100px" class="form-control input-sm" value="' + parseFloat(DESCUENTO_GENERAL).toFixed(DECIMALES_3) + '" type="number">'
                 }
             },
             {
@@ -550,7 +551,7 @@ function InicializaTablas(){
                 "targets": [COL_CANTIDAD],
                 "orderable" : false,
                 "render": function ( data, type, row ) {
-                    return '<input id="input-cantidadAM"  class="form-control input-sm cantidad" type="number" value="' + parseFloat(row['CANTIDAD']).toFixed(DECIMALES) + '">';
+                    return '<input id="input-cantidadAM"  class="form-control input-sm cantidad" type="number" value="' + parseFloat(row['CANTIDAD']).toFixed(DECIMALES_2) + '">';
                 }
             },
             {
@@ -568,7 +569,8 @@ function InicializaTablas(){
                 "targets": [COL_DESCUENTO],
                 "orderable" : false,
                 "render": function (data,type,row) {
-                    return '<input id= "input-descuentoAM"  class="form-control input-sm" value="' + parseFloat(DESCUENTO_GENERAL).toFixed(DECIMALES) + '" type="number">'
+                    return '<input id= "input-descuentoAM"  class="form-control input-sm" value="' + parseFloat(DESCUENTO_GENERAL).toFixed(DECIMALES_3
+                        ) + '" type="number">'
                 }
             },
             {
@@ -723,7 +725,7 @@ function InicializaBuscadorArticulos(){
                 if(banderaExiste){
                     bootbox.dialog({
                             title: "Mensaje",
-                            message: "<div class='alert alert-danger m-b-0'>El Artículo ya existe en la Orden de Compra</div>",
+                            message: "<div class='alert alert-info m-b-0'>Se agregó un articulo que ya se encontraba...</div>",
                             buttons: {
                             success: {
                             label: "Ok",
@@ -733,7 +735,6 @@ function InicializaBuscadorArticulos(){
                             }).find('.modal-content').css({'font-size': '14px'} );
                     
                 }
-                else{
 
                     //dataAE['ID_ARTICULO'] = ARTICULO_BUSCADOR_ID;
                     dataAE["CODIGO_ARTICULO"] = ARTICULO_BUSCADOR_CODIGO;
@@ -762,7 +763,7 @@ function InicializaBuscadorArticulos(){
                     tabla_artExist.row(fila).nodes(fila, COL_ID_UMI).to$().find("td:eq('" + COL_ID_UMI + "')").text(ARTICULO_BUSCADOR_UMI_ID);
                     tabla_artExist.row(fila).nodes(fila, COL_ID_UMC).to$().find("td:eq('" + COL_ID_UMC + "')").text(ARTICULO_BUSCADOR_UMC_ID);
 
-                }
+                
 
             }
             tabla.rows( '.selected' ).nodes().to$().removeClass( 'selected' );
@@ -805,7 +806,7 @@ function InicializaBuscadorArticulos(){
                 }).find('.modal-content').css({'font-size': '14px'} );
 
             }
-            else{
+            
 
                 //dataAE['ID_ARTICULO'] = ARTICULO_BUSCADOR_ID;
                 dataAE["CODIGO_ARTICULO"] = ARTICULO_BUSCADOR_CODIGO;
@@ -833,7 +834,7 @@ function InicializaBuscadorArticulos(){
                 // tabla_artExist.row(fila).nodes(fila, COL_ID_UMI).to$().find("td:eq('" + COL_ID_UMI + "')").text(ARTICULO_BUSCADOR_UMI_ID);
                 // tabla_artExist.row(fila).nodes(fila, COL_ID_UMC).to$().find("td:eq('" + COL_ID_UMC + "')").text(ARTICULO_BUSCADOR_UMC_ID);
 
-            }
+            
 
         }
         tabla.rows( '.selected' ).nodes().to$().removeClass( 'selected' );
@@ -1014,6 +1015,98 @@ function cargaTablaArticulos(){
                     recargaTablaArticulos(respuesta.data2);
                 }
                 //console.log(respuesta.sql)
+            }
+            else{
+
+                bootbox.dialog({
+                    message: respuesta.mensaje,
+                    title: "Orden de Compra",
+                    buttons: {
+                        success: {
+                            label: "Si",
+                            className: "btn-success"
+                        }
+                    }
+                });
+
+            }
+
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+
+            $.unblockUI();
+            var error = JSON.parse(xhr.responseText);
+            bootbox.alert({
+
+                size: "large",
+                title: "<h4><i class='fa fa-info-circle'></i> Alerta</h4>",
+                message: "<div class='alert alert-danger m-b-0'> Mensaje : " + error['mensaje'] + "<br>" +
+                ( error['codigo'] != '' ? "Código : " + error['codigo'] + "<br>" : '' ) +
+                ( error['clase'] != '' ? "Clase : " + error['clase'] + "<br>" : '' ) +
+                ( error['linea'] != '' ? "Línea : " + error['linea'] + "<br>" : '' ) + '</div>'
+
+            });
+
+        }
+
+    });
+
+}
+
+function cargaArticulo(articulo, pos){
+    console.log('------------- carga Articulo')
+    $.ajax({
+        headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+        cache: false,
+        async: false,
+        url: routeapp + "cargaArticulo",
+        data: {
+            tipo_cambio: $('#input_tc').val(),
+            moneda:  $('#cboMoneda').val(),
+            codigo_articulo: articulo
+        },
+        type: "POST",
+        success: function( datos ) {
+
+            var respuesta = JSON.parse(JSON.stringify(datos));
+            
+            if(respuesta.codigo == 200){
+                if (true){
+                    console.log(pos +' ---- ' + respuesta.data2[0])
+                    console.log(pos +' ---- ' + respuesta.data2)
+                    var tbl = $('#tblArticulosExistentesNueva').DataTable();
+                    var art = respuesta.data2;
+                    var dataAE = tbl.row(pos).data();
+                    var fila = pos
+                    console.log(art);
+                    dataAE["NOMBRE_ARTICULO"] = art.ART_Nombre;
+                    dataAE["UNIDAD_MEDIDA_INV"] = art.UMI;
+                    dataAE["FACTOR_CONVERSION"] = art.AFC_FactorConversion;
+
+                    dataAE["UNIDAD_MEDIDA_COMPRAS"] = art.UMC;
+                    dataAE["PRECIO"] = parseFloat(art.Precio_Tipo_Cambio).toFixed(DECIMALES);                   
+                    dataAE["DESCUENTO"] = 0;
+                    dataAE['CODIGO_ARTICULO'] = art.ART_CodigoArticulo;
+                    //tabla_artExist.row(fila).nodes(fila, COL_ID_ARTICULO).to$().find("td:eq('" + COL_ID_ARTICULO + "')").text(ARTICULO_BUSCADOR_ID);
+                    tbl.row(fila).nodes(fila, COL_CODIGO_ART).to$().find('input#input-articulo-codigoAE').val(art.ART_CodigoArticulo);
+                    tbl.row(fila).nodes(fila, COL_NOMBRE_ART).to$().find("td:eq('" + COL_NOMBRE_ART + "')").text(art.ART_Nombre);
+                    tbl.row(fila).nodes(fila, COL_UNIDAD_MEDIDA_INV).to$().find("td:eq('" + COL_UNIDAD_MEDIDA_INV + "')").text(art.UMI);
+                    tbl.row(fila).nodes(fila, COL_FACTOR_CONVERSION).to$().find("td:eq('" + COL_FACTOR_CONVERSION + "')").text(art.AFC_FactorConversion);
+                    tbl.row(fila).nodes(fila, COL_UNIDAD_MEDIDA_COMPRAS).to$().find("td:eq('" + COL_UNIDAD_MEDIDA_COMPRAS + "')").text(art.UMC);
+                    tbl.row(fila).nodes(fila, COL_PRECIO).to$().find("input#input-precioAE").val(art.Precio_Tipo_Cambio);
+                    tbl.row(fila).nodes(fila, COL_DESCUENTO).to$().find("input#input-descuentoAE").val(parseFloat(dataAE["DESCUENTO"]).toFixed(DECIMALES));
+                    tbl.row(fila).nodes(fila, COL_IVA).to$().find("select#cboIVAAE").val(dataAE["ID_IVA"]);
+                    tbl.row(fila).nodes(fila, COL_ID_IVA).to$().find("select#cboIVAAE").val(dataAE["ID_IVA"]);
+
+                } else {
+                    swal("", "Artículo Inválido.", "error", {
+                        buttons: false,
+                        timer: 2000,
+                    });
+
+                }
             }
             else{
 
@@ -1598,10 +1691,10 @@ function calculaTotalOrdenCompra(){
     if (count > 0){
 
         for (var i = 0; i < count; i++) {
-            subtotal = Number($($("#tblArticulosExistentesNueva tbody tr")[i]).find("td:eq(" + COL_SUBTOTAL +")").text()) + Number($($("#tblArticulosMiscelaneosNueva tbody tr")[i]).find("td:eq(7)").text());
+            subtotal = Number($($("#tblArticulosExistentesNueva tbody tr")[i]).find("td:eq(10)").text()) + Number($($("#tblArticulosMiscelaneosNueva tbody tr")[i]).find("td:eq(7)").text());
             descuento = Number($($("#tblArticulosExistentesNueva tbody tr")[i]).find("td:eq(12)").text()) + Number($($("#tblArticulosMiscelaneosNueva tbody tr")[i]).find("td:eq(9)").text());
             iva = Number($($("#tblArticulosExistentesNueva tbody tr")[i]).find("td:eq(14)").text()) + Number($($("#tblArticulosMiscelaneosNueva tbody tr")[i]).find("td:eq(11)").text());
-            total = Number($($("#tblArticulosExistentesNueva tbody tr")[i]).find("td:eq(15)").text()) + Number($($("#tblArticulosMiscelaneosNueva tbody tr")[i]).find("td:eq(12)").text());
+            //total = Number($($("#tblArticulosExistentesNueva tbody tr")[i]).find("td:eq(15)").text()) + Number($($("#tblArticulosMiscelaneosNueva tbody tr")[i]).find("td:eq(12)").text());
             
             //subtotal = Number($($("#tblArticulosExistentesNueva tbody tr")[i]).find("td:eq(8)").text());
             //descuento = Number($($("#tblArticulosExistentesNueva tbody tr")[i]).find("td:eq(10)").text());
@@ -1616,17 +1709,25 @@ function calculaTotalOrdenCompra(){
             console.log('descuento ' + descuento)
             console.log('iva ' + iva)
             console.log('total '+ total)
-            Ttotal = Ttotal + total;
-            TSubtotal  = TSubtotal  + subtotal;
-            Tiva = Tiva + iva;
-            Tdescuento = Tdescuento + descuento;
-
-            $('#ordenCompra-subtotal').text(TSubtotal.toLocaleString('es-MX'));
-            $('#ordenCompra-descuento').text(Tdescuento.toLocaleString('es-MX'));
-            $('#ordenCompra-iva').text(Tiva.toLocaleString('es-MX'));
-            $('#ordenCompra-total').text(SIMBOLO_MONEDA + ' ' + Ttotal.toLocaleString('es-MX'));
+            TSubtotal = TSubtotal + parseFloat(subtotal);
+            Tiva = Tiva + parseFloat(iva);
+            Tdescuento = Tdescuento + parseFloat(descuento);
+            
+            Ttotal += parseFloat(subtotal) + parseFloat(iva) - parseFloat(descuento)
         }
-
+        $('#ordenCompra-subtotal').text(
+            Intl.NumberFormat("es-MX", {
+                minimumFractionDigits: TOTAL_DECIMALES
+            }).format(TSubtotal));
+        $('#ordenCompra-descuento').text(Intl.NumberFormat("es-MX", {
+            minimumFractionDigits: TOTAL_DECIMALES
+        }).format(Tdescuento));
+        $('#ordenCompra-iva').text(Intl.NumberFormat("es-MX", {
+            minimumFractionDigits: TOTAL_DECIMALES
+        }).format(Tiva));
+        $('#ordenCompra-total').text(SIMBOLO_MONEDA + ' ' + Intl.NumberFormat("es-MX", {
+            minimumFractionDigits: TOTAL_DECIMALES
+        }).format(Ttotal));
         for (var i = 0; i < dataAM.length; i++){
             if (dataAM[i]["NOMBRE_ARTICULO"] == ""){
             }
@@ -1780,24 +1881,30 @@ function RealizaCalculos(fila, tabla, input_precio, input_cantidad, input_descue
     var row = fila;
     var dataT = tabla.row(fila).data();
     var precio  = tbl.row(row).nodes(row, COL_PRECIO).to$().find('input#' + input_precio).val();
+    console.log('precio Ant: ' + precio)
     var cantidad = tbl.row(row).nodes(row,COL_CANTIDAD).to$().find('input#' + input_cantidad).val();
+    var descuento = cantidad * precio * ((tbl.row(row).nodes(row, COL_DESCUENTO).to$().find('input#' + input_descuento).val())) * .01;
+    var precio_desc = precio - (descuento/cantidad);
     var subtotal = precio * cantidad;
-        console.log('subtotal ' + subtotal)
-        console.log('precio ' + precio)
-        console.log('cantidad ' + cantidad)
-        var descuento = subtotal * ((tbl.row(row).nodes(row,COL_DESCUENTO).to$().find('input#' + input_descuento).val()) / 100);
-        console.log('descue '+ descuento)
+    var subtotal_desc = precio_desc * cantidad;
+    console.log('precio Desc: ' + precio_desc)
+    console.log('cantidad: ' + cantidad)
+    console.log('descue: '+ descuento)
+    console.log('subtotal: ' + subtotal)
     //console.log('dataT ' + dataT['IVA']);
     if(dataT['IVA'] == '')dataT['IVA'] = "0";
     var selected = dataT['IVA'];
-    var iva = (subtotal - descuento) * (selected * .01);
+    var iva = (subtotal_desc) * (selected * .01);
     console.log('iva ' +iva);
-    var total = subtotal-descuento + iva;
+    //console.log('iva2 ' + selected);
+    //console.log('iva3 ' + selected * .01);
+    var total = subtotal_desc + iva;
 
-    tbl.row(row).nodes(row, COL_SUBTOTAL).to$().find("td:eq('" + COL_SUBTOTAL + "')").text(subtotal.toFixed(CANTIDAD_DECIMALES));
-    tbl.row(row).nodes(row, COL_MONTO_DESCUENTO).to$().find("td:eq('" + COL_MONTO_DESCUENTO + "')").text(descuento.toFixed(CANTIDAD_DECIMALES));
-    tbl.row(row).nodes(row, COL_MONTO_IVA).to$().find("td:eq('" + COL_MONTO_IVA + "')").text(iva.toFixed(CANTIDAD_DECIMALES));
-    tbl.row(row).nodes(row, COL_TOTAL).to$().find("td:eq('" + COL_TOTAL + "')").text(total.toFixed(CANTIDAD_DECIMALES));
+    //tbl.row(row).nodes(row, COL_PRECIO).to$().find('input#' + input_precio).val(precio.toFixed(DECIMALES));
+    tbl.row(row).nodes(row, COL_SUBTOTAL).to$().find("td:eq('" + COL_SUBTOTAL + "')").text(subtotal.toFixed(DECIMALES));
+    tbl.row(row).nodes(row, COL_MONTO_DESCUENTO).to$().find("td:eq('" + COL_MONTO_DESCUENTO + "')").text(descuento.toFixed(DECIMALES));
+    tbl.row(row).nodes(row, COL_MONTO_IVA).to$().find("td:eq('" + COL_MONTO_IVA + "')").text(iva.toFixed(DECIMALES));
+    tbl.row(row).nodes(row, COL_TOTAL).to$().find("td:eq('" + COL_TOTAL + "')").text(total.toFixed(DECIMALES));
 
     if (BanderaOC == 1){
         // TABLA DE MISCELANEOS
@@ -1811,7 +1918,7 @@ function RealizaCalculos(fila, tabla, input_precio, input_cantidad, input_descue
         dataT["NOMBRE_ARTICULO"] = tbl.row(row).nodes(row, COL_NOMBRE_ART).to$().find("input#input-nombreART-miselaneos").val();
         //dataT["UNIDAD_MEDIDA_COMPRAS"] = selectedUV;
         dataT["CANTIDAD"] = tbl.row(row).nodes(row,COL_CANTIDAD).to$().find('input#' + input_cantidad).val();
-        dataT["PRECIO"] = tbl.row(row).nodes(row, COL_PRECIO).to$().find('input#' + input_precio).val();
+        //dataT["PRECIO"] = tbl.row(row).nodes(row, COL_PRECIO).to$().find('input#' + input_precio).val();
         dataT["SUBTOTAL"] = tbl.row(row).nodes(row, COL_SUBTOTAL).to$().find("td:eq('" + COL_SUBTOTAL + "')").text();
         dataT["DESCUENTO"] = tbl.row(row).nodes(row, COL_DESCUENTO).to$().find('input#' + input_descuento).val();
         dataT["MONTO_DESCUENTO"] = tbl.row(row).nodes(row, COL_MONTO_DESCUENTO).to$().find("td:eq('" + COL_MONTO_DESCUENTO + "')").text();
@@ -1825,7 +1932,7 @@ function RealizaCalculos(fila, tabla, input_precio, input_cantidad, input_descue
     else{
         //TABLA DE VENTAS
         dataT["CANTIDAD"] = tbl.row(row).nodes(row,COL_CANTIDAD).to$().find('input#' + input_cantidad).val();
-        dataT["PRECIO"] = tbl.row(row).nodes(row, COL_PRECIO).to$().find('input#' + input_precio).val();
+        //dataT["PRECIO"] = tbl.row(row).nodes(row, COL_PRECIO).to$().find('input#' + input_precio).val();
         dataT["SUBTOTAL"] = tbl.row(row).nodes(row, COL_SUBTOTAL).to$().find("td:eq('" + COL_SUBTOTAL + "')").text();
         dataT["DESCUENTO"] = tbl.row(row).nodes(row, COL_DESCUENTO).to$().find('input#' + input_descuento).val();
         dataT["MONTO_DESCUENTO"] = tbl.row(row).nodes(row, COL_MONTO_DESCUENTO).to$().find("td:eq('" + COL_MONTO_DESCUENTO + "')").text();
@@ -2039,12 +2146,12 @@ $('#tabla-detalles').on('change', 'input#input-cantidad-detalle', function(e) {
         $(this).val('0.00');
     }
 
-    $(this).val(parseFloat(this.value).toFixed(CANTIDAD_DECIMALES));
+    $(this).val(parseFloat(this.value).toFixed(DECIMALES));
 
     var tabla = $('#tabla-detalles').DataTable();
     var fila = $(this).closest('tr');
     var datos = tabla.row(fila).data();
-    datos[COL_DETALLE_CANTIDAD] = parseFloat(this.value).toFixed(CANTIDAD_DECIMALES);
+    datos[COL_DETALLE_CANTIDAD] = parseFloat(this.value).toFixed(DECIMALES);
 });
 //??
 $('#tabla-detalles').on('change', 'input#input-fecha-req', function(e) {
@@ -2483,6 +2590,76 @@ function agregaPartidasOCDetalle(datos, tipo) {
 function agregaArtExis(datos, pos) {
 
     var tbl = $('#tblArticulosExistentesNueva').DataTable();
+    console.log('precio: ' + datos['LIN_PRECIO'])
+    TBL_ART_EXIST.row.add(
+        {
+            "PARTIDA": datos['LIN_NUMERO']
+            , "BTN_ELIMINAR": null
+            , "CODIGO_ARTICULO": datos['LIN_CODIGO']
+            , "NOMBRE_ARTICULO": datos['LIN_DESCRIPCION']
+
+            , "UNIDAD_MEDIDA_INV": datos['LIN_UM']
+            , "FACTOR_CONVERSION": datos['LIN_FACTOR']
+            , "UNIDAD_MEDIDA_COMPRAS": datos['BuyUnitMsr']
+
+            , "CANTIDAD": datos['LIN_CANTIDAD']
+            , "PRECIO": datos['LIN_PRECIO']
+            , "SUBTOTAL": parseFloat(datos['LIN_CANTIDAD'] * datos['LIN_PRECIO']).toFixed(DECIMALES)
+
+            , "DESCUENTO": datos['LIN_PORCENTAJEDESCUENTO']
+            , "MONTO_DESCUENTO": parseFloat(datos['LIN_DISC']).toFixed(DECIMALES)
+            , "IVA": datos['LIN_PORCENTAJEIVA']
+
+            , "MONTO_IVA": parseFloat(datos['LIN_IVA']).toFixed(DECIMALES)
+            , "TOTAL": parseFloat(datos['LIN_GTOTAL']).toFixed(DECIMALES)
+            , "FECHA_ENTREGA": datos['ShipDate']
+
+            , "CANT_PENDIENTE": datos['CANTIDAD_PENDIENTE']
+            , "ID_IVA": datos['TaxCode']
+
+            , "ID_PARTIDA": datos['LIN_NUMERO']
+            , "ESTATUS_PARTIDA": datos['LineStatus']
+        }
+    ).draw();
+    TBL_ART_EXIST.row(pos).nodes(pos, COL_DESCUENTO).to$().find('input#input-descuentoAE').val(parseFloat(datos['LIN_PORCENTAJEDESCUENTO']).toFixed(DECIMALES));
+    TBL_ART_EXIST.row(pos).nodes(pos, COL_IVA).to$().find('select#cboIVAAE').val(datos['TaxCode']);
+    TBL_ART_EXIST.row(pos).nodes(pos, COL_FECHA_ENTREGA_COMPRA).to$().find('input#input-fecha-entrega-linea').val(datos['ShipDate']);    
+    if (datos['LineStatus'] == 'O') {
+
+        tbl.row(pos).nodes(pos, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').prop("checked", false);
+        tbl.row(pos).nodes(pos, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').removeAttr("disabled");
+
+    }
+    else {
+
+        tbl.row(pos).nodes(pos, COL_PARTIDA_CERRADA).to$().find('#cerrarPartidaCheck').prop("checked", true);
+        tbl.row(pos).nodes(pos, COL_PARTIDA_CERRADA).to$().find('checkbox#cerrarPartidaCheck').attr("disabled", "disabled");
+
+    }
+
+    tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('input#input-articulo-codigoAE').attr("disabled", "disabled");
+    tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('a#boton-articuloAE').attr("disabled", "disabled");
+    tbl.row(pos).nodes(pos, COL_CODIGO_ART).to$().find('a#boton-articuloAE').attr("id", "disabled");
+    if (datos['LineStatus'] != 'O' || datos['EDO_CANTIDAD_PENDIENTE'] != 'SIN SURTIR') {//SI ESTA CERRADA
+
+        tbl.row(pos).nodes(pos, COL_CANTIDAD).to$().find('input#input-cantidadAE').attr("disabled", "disabled");
+        tbl.row(pos).nodes(pos, COL_PRECIO).to$().find('input#input-precioAE').attr("disabled", "disabled");
+        tbl.row(pos).nodes(pos, COL_DESCUENTO).to$().find('input#input-descuentoAE').attr("disabled", "disabled");
+        tbl.row(pos).nodes(pos, COL_IVA).to$().find('select#cboIVAAE').attr("disabled", "disabled");
+        //tbl.row(pos).nodes(pos, COL_FECHA_ENTREGA_COMPRA).to$().find('input#boton-detalleAE').attr("disabled","disabled");
+        // tbl.row(pos).nodes(pos, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("disabled", "disabled");
+        //tbl.row(pos).nodes(pos, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("id", "disabled");
+
+        tbl.row(pos).nodes(pos, COL_FECHA_ENTREGA_COMPRA).to$().find('input#input-fecha-entrega-linea').attr("disabled", "disabled");
+
+        tbl.row(pos).nodes(pos, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("disabled", "disabled");
+        tbl.row(pos).nodes(pos, COL_BTN_ELIMINAR_COMPRA).to$().find('a#boton-eliminarAE').attr("id", "disabled");
+    }
+
+}
+function agregaArtExis2(datos, pos) {
+
+    var tbl = $('#tblArticulosExistentesNueva').DataTable();
 
     TBL_ART_EXIST.row.add(
         {
@@ -2497,7 +2674,7 @@ function agregaArtExis(datos, pos) {
 
             , "CANTIDAD": datos['LIN_CANTIDAD']
             , "PRECIO": datos['LIN_PRECIO']
-            , "SUBTOTAL": parseFloat(datos['LIN_TOTAL']).toFixed(DECIMALES)
+            , "SUBTOTAL": parseFloat(datos['LIN_CANTIDAD'] * datos['LIN_PRECIO']).toFixed(DECIMALES)
 
             , "DESCUENTO": datos['LIN_PORCENTAJEDESCUENTO']
             , "MONTO_DESCUENTO": parseFloat(datos['LIN_DISC']).toFixed(DECIMALES)
@@ -2854,7 +3031,7 @@ function agregaArtMisc(datos,pos){
 
             , "CANTIDAD": datos['LIN_CANTIDAD']
             , "PRECIO": datos['LIN_PRECIO']
-            , "SUBTOTAL": parseFloat(datos['LIN_TOTAL']).toFixed(DECIMALES)
+            , "SUBTOTAL": parseFloat(datos['LIN_CANTIDAD'] * datos['LIN_PRECIO']).toFixed(DECIMALES)
             
             , "DESCUENTO": datos['LIN_PORCENTAJEDESCUENTO']
             , "MONTO_DESCUENTO": parseFloat(datos['LIN_DISC']).toFixed(DECIMALES)

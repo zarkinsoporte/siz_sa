@@ -1228,10 +1228,10 @@ class SAP extends Model
                 } else {
                     $xml_item->addChild('ItemDescription', $oc_items[$x]['NOMBRE_ARTICULO']);
                     $xml_item->addChild('AccountCode', $oc_items[$x]['CTA_MAYOR']);                    
-                    $xml_item->addChild('UnitPrice', $oc_items[$x]['PRECIO']);
+                    $xml_item->addChild('UnitPrice', ''.$oc_items[$x]['PRECIO']);
                 }
                 $xml_item->addChild('Quantity', $oc_items[$x]['CANTIDAD']);
-                $xml_item->addChild('Price', $oc_items[$x]['PRECIO']);
+                //$xml_item->addChild('Price', $oc_items[$x]['PRECIO']);
                 $xml_item->addChild('DiscountPercent', $oc_items[$x]['DESCUENTO']);
                 $xml_item->addChild('WarehouseCode', "AMP-CC");
                 $xml_item->addChild('TaxCode', $oc_items[$x]['ID_IVA']);
@@ -1253,8 +1253,8 @@ class SAP extends Model
                             $i->Currency = $oc_moneda;
                             $i->Quantity = $oc_items[$x]['CANTIDAD'];
                             //$i->Price = $oc_items[$x]['PRECIO'];
-                            $i->UnitPrice = $oc_items[$x]['PRECIO'];
-                            $i->LineTotal = $oc_items[$x]['TOTAL'];
+                            $i->UnitPrice = ''.$oc_items[$x]['PRECIO'];
+                            //$i->LineTotal = $oc_items[$x]['TOTAL'];
                             $i->DiscountPercent = $oc_items[$x]['DESCUENTO'];
                             //$i->WarehouseCode', "AMP-CC";
                             $i->TaxCode = $oc_items[$x]['ID_IVA'];
