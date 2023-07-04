@@ -613,14 +613,16 @@ $(document).keyup(function(event) {
 
     $('#tblArticulosExistentesNueva').on('click', 'a#boton-articuloAE', function (e) {
         e.preventDefault();
-        if ($("#sel-proveedor").val() != ""){
+        console.log('moneda_val: ' + $("#cboMoneda").val())
+        var moneda_a = $("#cboMoneda").val()
+        if ($("#sel-proveedor").val() != "" && moneda_a) {
             var tabla = $('#tblArticulosExistentesNueva').DataTable();
             var fila = $(this).closest('tr');
             fila = tabla.row(fila).index();
             $('#modal-articulo #input-fila').val(fila);
             $('#modal-articulo').modal('show');
         } else {
-            swal("", "No se ha elegido un proveedor, elige uno por favor para continuar.", "error", {
+            swal("", "No se ha elegido Proveedor o Moneda.", "error", {
                 buttons: false,
                 timer: 2000,
             });
@@ -720,9 +722,10 @@ $('#tblArticulosMiscelaneosNueva').on('change','input#input-nombreART-miselaneos
 
     e.preventDefault();
 
-    if ($("#sel-proveedor").val() == ""){
+    var moneda_a = $("#cboMoneda").val()
+    if ($("#sel-proveedor").val() != "" && moneda_a) {
 
-        swal("", "No se ha elegido un proveedor, elige uno por favor para continuar.", "error", {
+        swal("", "No se ha elegido un Proveedor o Moneda.", "error", {
             buttons: false,
             timer: 2000,
         });
@@ -958,9 +961,9 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
 
         if ($(this).val() !== '' ){
            
-
-        
-        if ($("#sel-proveedor").val() != "") {
+            console.log('moneda_val: ' + $("#cboMoneda").val())
+            var moneda_a = $("#cboMoneda").val()
+            if ($("#sel-proveedor").val() != "" && moneda_a) {
             var tbl = $('#tblArticulosExistentesNueva').DataTable();
             var fila = $(this).closest('tr');
             var index = tbl.row(fila).index();
@@ -971,7 +974,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
            
         }
         else {
-            swal("", "No se ha elegido un proveedor, elige uno por favor para continuar.", "error", {
+            swal("", "No se ha elegido Proveedor o Moneda.", "error", {
                 buttons: false,
                 timer: 2000,
             });

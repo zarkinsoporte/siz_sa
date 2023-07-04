@@ -1640,8 +1640,9 @@ function cambiarFechasRequeridasTablas(){
 //boton-articuloAE
 $('#tblArticulosExistentesNueva').on('click', 'span', function (e) {
     e.preventDefault();
-    //console.log("ssssssssssssssssssss")
-    if ($("#sel-proveedor").val() != ""){
+    console.log( 'moneda_val: '+$("#cboMoneda").val())
+    var moneda_a = $("#cboMoneda").val()
+    if ($("#sel-proveedor").val() != "" && moneda_a) {
         var tabla = $('#tblArticulosExistentesNueva').DataTable();
         var fila = $(this).closest('tr');
         fila = tabla.row(fila).index();
@@ -1649,7 +1650,7 @@ $('#tblArticulosExistentesNueva').on('click', 'span', function (e) {
         $('#modal-articulo').modal('show');
     } else {
         bootbox.dialog({
-            message: "No se ha elegido un proveedor, elige uno por favor para continuar.",
+            message: "No se ha elegido Proveedor o Moneda.",
             title: "Ordenes de Compra",
             buttons: {
                 success: {

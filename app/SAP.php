@@ -1043,9 +1043,9 @@ class SAP extends Model
                 } else {
                     $xml_item->addChild('ItemDescription', $oc_items[$x]['NOMBRE_ARTICULO']);
                     $xml_item->addChild('AccountCode', $oc_items[$x]['CTA_MAYOR']);
-                    $xml_item->addChild('UnitPrice', $oc_items[$x]['PRECIO']);                    
                 }
-                $xml_item->addChild('Price', $oc_items[$x]['PRECIO']);
+                $xml_item->addChild('UnitPrice', $oc_items[$x]['PRECIO']);                    
+                //$xml_item->addChild('Price', $oc_items[$x]['PRECIO']);
                 $xml_item->addChild('Quantity', $oc_items[$x]['CANTIDAD']);
                 $xml_item->addChild('DiscountPercent', $oc_items[$x]['DESCUENTO']);
                 $xml_item->addChild('WarehouseCode', "AMP-CC");
@@ -1228,8 +1228,8 @@ class SAP extends Model
                 } else {
                     $xml_item->addChild('ItemDescription', $oc_items[$x]['NOMBRE_ARTICULO']);
                     $xml_item->addChild('AccountCode', $oc_items[$x]['CTA_MAYOR']);                    
-                    $xml_item->addChild('UnitPrice', ''.$oc_items[$x]['PRECIO']);
                 }
+                $xml_item->addChild('UnitPrice', ''.$oc_items[$x]['PRECIO']);
                 $xml_item->addChild('Quantity', $oc_items[$x]['CANTIDAD']);
                 //$xml_item->addChild('Price', $oc_items[$x]['PRECIO']);
                 $xml_item->addChild('DiscountPercent', $oc_items[$x]['DESCUENTO']);
