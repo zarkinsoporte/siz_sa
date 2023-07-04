@@ -617,7 +617,7 @@ class Mod03_ComprasController extends Controller
         $pdf->setOption('margin-right', '5mm');
         $pdf->setOption('page-size', 'Letter');
 
-        return $pdf->inline();
+        return $pdf->inline($NumOC.'_'.date("Y-m-d h:i:s").'.pdf');
 
     }
     public function getProveedorOC(Request $request){
