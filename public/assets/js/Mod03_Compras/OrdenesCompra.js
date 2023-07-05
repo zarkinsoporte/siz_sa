@@ -721,9 +721,9 @@ $("#sel-tipo-oc").on("changed.bs.select", function(e, clickedIndex, newValue, ol
 $('#tblArticulosMiscelaneosNueva').on('change','input#input-nombreART-miselaneos',function (e) {
 
     e.preventDefault();
-
     var moneda_a = $("#cboMoneda").val()
-    if ($("#sel-proveedor").val() != "" && moneda_a) {
+    console.log($("#cboMoneda").val()+ $("#sel-proveedor").val())
+    if ($("#sel-proveedor").val() == "" || moneda_a == null) {
 
         swal("", "No se ha elegido un Proveedor o Moneda.", "error", {
             buttons: false,
