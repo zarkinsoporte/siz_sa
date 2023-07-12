@@ -153,7 +153,7 @@
                             <!-- Fin Artiulos Miscelaneos -->
 
                             <!-- Inicio Resumen -->
-                            <div class="tab-pane fade" id="resumen">
+                            <div class="tab-pane fade" id="resumen" style="display: none">
                                 <div data-scrollbar="true" style="height: 400px">
                                     @include('Mod03_Compras.TablaResumenNueva')
                                 </div>

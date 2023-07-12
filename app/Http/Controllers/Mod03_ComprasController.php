@@ -668,7 +668,7 @@ class Mod03_ComprasController extends Controller
         $proveedor = $proveedor[0];
         return compact('proveedor');
     }
-public function cargaArticulo(Request $request){
+    public function cargaArticulo(Request $request){
        
         $tc_sys = DB::table('ORTT')        
         ->where('RateDate', date('Y-m-d'))->get();
@@ -738,7 +738,7 @@ public function cargaArticulo(Request $request){
         }
 
     }
-     public function cargaTablaArticulos(Request $request){
+    public function cargaTablaArticulos(Request $request){
         //$tc_sys = 1;
         if (false) {
         //if ($request->get('moneda') != 'MXP') {
