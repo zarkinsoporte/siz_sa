@@ -7,11 +7,14 @@
             <th style="text-align: center;">Cerrada</th>
             <th>Código Artículo</th>
             <th>Descripción</th>
-            <th>UMI</th>
-            <th>Factor Conversión</th>
             <th>UMC</th>
             <th style="text-align: right;">Cantidad Compra</th>
-            <th style="text-align: right;">Precio</th>
+            <th style="text-align: right;">Precio por UC</th>
+            <th>Moneda</th>
+            <th>Artículos por Unidad</th>
+            <th>Ctd.(UM inventario)</th>
+            <th>UMI</th>
+            <th style="text-align: right;">Precio por UI</th>
             <th style="text-align: right;">Subtotal</th>
             <th style="text-align: right;">(%)Descuento</th>
             <th style="text-align: right;">Monto Descuento</th>

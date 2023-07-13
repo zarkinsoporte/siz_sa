@@ -51,11 +51,14 @@ var COL_PARTIDA_CERRADA = 2;
 var COL_CODIGO_ART = 3;
 var COL_NOMBRE_ART = 4;
 var COL_NOMBRE_ART_MISC = 3;
+var COL_UNIDAD_MEDIDA_COMPRAS = 5;
+var COL_CANTIDAD = 6;
 var COL_UNIDAD_MEDIDA_INV = 5;
+var COL_PRECIO_UI = 5;
 var COL_FACTOR_CONVERSION = 6;
-var COL_UNIDAD_MEDIDA_COMPRAS = 7;
-var COL_CANTIDAD = 8;
 var COL_PRECIO = 9;
+var COL_CTD = 9;
+var COL_MONEDA = 9;
 var COL_SUBTOTAL = 10;
 var COL_DESCUENTO = 11;
 var COL_MONTO_DESCUENTO = 12;
@@ -141,7 +144,7 @@ var InicializaComponentes = function () {
     InicializaBuscadorProveedores();
     InicializaBuscadorArticulos();
     InicializaBuscadorOtReq();
-    
+    set_columns_index(0);
     InicializaTablas();
     insertarFila(0)
 };
@@ -287,14 +290,17 @@ function InicializaTablas(){
             {data: "CODIGO_ARTICULO"},
             {data: "NOMBRE_ARTICULO"},
 
-            {data: "UNIDAD_MEDIDA_INV"},
-            {data: "FACTOR_CONVERSION"},
             {data: "UNIDAD_MEDIDA_COMPRAS"},
-
             {data: "CANTIDAD"},
             {data: "PRECIO"},
+            {data: "MONEDA"},
+            {data: "FACTOR_CONVERSION"},
+            
+            {data: "CTD"},
+            {data: "UNIDAD_MEDIDA_INV"},
+            {data: "PRECIO_UI"},
             {data: "SUBTOTAL"},
-
+            
             {data: "DESCUENTO"},
             {data: "MONTO_DESCUENTO"},
             {data: "IVA"},
@@ -685,93 +691,6 @@ function InicializaBuscadorArticulos(){
         }
     });
 
-    $('#tabla-articulo_SSSSSSSSSS tbody').on( 'dblclick', 'tr', function () {
-        var row = $(this);
-        var datos = tabla.row(row).data();
-
-        if(datos != undefined) {
-            tabla.$('tr.selected').removeClass('selected');
-            $(this).addClass('selected');
-
-            //ARTICULO_BUSCADOR_ID = datos['DT_RowId'];
-            ARTICULO_BUSCADOR_CODIGO = datos['ART_CodigoArticulo'];
-            ARTICULO_BUSCADOR_NOMBRE = datos['ART_Nombre'];
-            ARTICULO_BUSCADOR_TIPO = datos['ATP_Descripcion'];
-            ARTICULO_BUSCADOR_UMI = datos['UMI'];
-            ARTICULO_BUSCADOR_FACTOR_CONVERSION = datos['AFC_FactorConversion'];
-            ARTICULO_BUSCADOR_UMC = datos['UMC'];
-            ARTICULO_BUSCADOR_PRECIO_COMPRA = datos['Precio_Tipo_Cambio'];
-            ARTICULO_BUSCADOR_ML = datos['M_L'];
-            ARTICULO_BUSCADOR_PRECIO_MON = datos['Precio'];
-            //ARTICULO_BUSCADOR_UMI_ID = datos['UMI_CMUM_UMInventarioId'];
-            //ARTICULO_BUSCADOR_UMC_ID = datos['UMC_CMUM_UMCompraId'];
-
-            var fila = $('#modal-articulo #input-fila').val();
-
-            if (BanderaOC == 0){
-                var tabla_artExist = $('#tblArticulosExistentesNueva').DataTable();
-                var dataAE = tabla_artExist.row(fila).data();
-                
-                var banderaExiste = false;
-                var count = $('#tblArticulosExistentesNueva tbody tr').length;
-                for (var i = 0; i < count; i++) {
-                    var data_artExit = tabla_artExist.row(i).data();
-                    if(data_artExit['CODIGO_ARTICULO'] == ARTICULO_BUSCADOR_CODIGO){
-                        banderaExiste = true;
-                        break;
-                    }
-                }
-
-                if(banderaExiste){
-                    bootbox.dialog({
-                            title: "Mensaje",
-                            message: "<div class='alert alert-info m-b-0'>Se agregó un articulo que ya se encontraba...</div>",
-                            buttons: {
-                            success: {
-                            label: "Ok",
-                            className: "btn-success m-r-5 m-b-5"
-                            }
-                            }
-                            }).find('.modal-content').css({'font-size': '14px'} );
-                    
-                }
-
-                    //dataAE['ID_ARTICULO'] = ARTICULO_BUSCADOR_ID;
-                    dataAE["CODIGO_ARTICULO"] = ARTICULO_BUSCADOR_CODIGO;
-                    dataAE["NOMBRE_ARTICULO"] = ARTICULO_BUSCADOR_NOMBRE;
-                    dataAE["UNIDAD_MEDIDA_INV"] = ARTICULO_BUSCADOR_UMI;
-                    dataAE["FACTOR_CONVERSION"] = ARTICULO_BUSCADOR_FACTOR_CONVERSION;
-                    dataAE["UNIDAD_MEDIDA_COMPRAS"] = ARTICULO_BUSCADOR_UMC;
-                    dataAE["ID_UMI"] = ARTICULO_BUSCADOR_UMI_ID;
-                    dataAE["ID_UMC"] = ARTICULO_BUSCADOR_UMC_ID;
-                    dataAE["PRECIO"] = ARTICULO_BUSCADOR_PRECIO_COMPRA;
-                    dataAE["IVA"] = ivaOC;
-                    dataAE["ID_IVA"] = ivaIDOC;
-                    dataAE["DESCUENTO"] = descuentoOC;
-
-                    var COL_ESTATUS_PARTIDA = 20;
-                    //tabla_artExist.row(fila).nodes(fila, COL_ID_ARTICULO).to$().find("td:eq('" + COL_ID_ARTICULO + "')").text(ARTICULO_BUSCADOR_ID);
-                    tabla_artExist.row(fila).nodes(fila, COL_CODIGO_ART).to$().find('input#input-articulo-codigoAE').val(ARTICULO_BUSCADOR_CODIGO);
-                    tabla_artExist.row(fila).nodes(fila, COL_NOMBRE_ART).to$().find("td:eq('" + COL_NOMBRE_ART + "')").text(ARTICULO_BUSCADOR_NOMBRE);
-                    tabla_artExist.row(fila).nodes(fila, COL_UNIDAD_MEDIDA_INV).to$().find("td:eq('" + COL_UNIDAD_MEDIDA_INV + "')").text(ARTICULO_BUSCADOR_UMI);
-                    tabla_artExist.row(fila).nodes(fila, COL_FACTOR_CONVERSION).to$().find("td:eq('" + COL_FACTOR_CONVERSION + "')").text(ARTICULO_BUSCADOR_FACTOR_CONVERSION);
-                    tabla_artExist.row(fila).nodes(fila, COL_UNIDAD_MEDIDA_COMPRAS).to$().find("td:eq('" + COL_UNIDAD_MEDIDA_COMPRAS + "')").text(ARTICULO_BUSCADOR_UMC);
-                    tabla_artExist.row(fila).nodes(fila, COL_PRECIO).to$().find("input#input-precioAE").val(ARTICULO_BUSCADOR_PRECIO_COMPRA);
-                    tabla_artExist.row(fila).nodes(fila, COL_DESCUENTO).to$().find("input#input-descuentoAE").val(parseFloat(dataAE["DESCUENTO"]).toFixed(DECIMALES));
-                    tabla_artExist.row(fila).nodes(fila, COL_IVA).to$().find("select#cboIVAAE").val(dataAE["ID_IVA"]);
-                    tabla_artExist.row(fila).nodes(fila, COL_ID_IVA).to$().find("select#cboIVAAE").val(dataAE["ID_IVA"]);
-                    tabla_artExist.row(fila).nodes(fila, COL_ID_UMI).to$().find("td:eq('" + COL_ID_UMI + "')").text(ARTICULO_BUSCADOR_UMI_ID);
-                    tabla_artExist.row(fila).nodes(fila, COL_ID_UMC).to$().find("td:eq('" + COL_ID_UMC + "')").text(ARTICULO_BUSCADOR_UMC_ID);
-
-                
-
-            }
-            tabla.rows( '.selected' ).nodes().to$().removeClass( 'selected' );
-            calculaTotalOrdenCompra();
-            $('#modal-articulo').modal('hide');
-        }
-    });
-
     $('#modal-articulo #boton-aceptar').on('click', function (e) {
         e.preventDefault();
 
@@ -792,7 +711,7 @@ function InicializaBuscadorArticulos(){
                 }
             }
 
-            if(banderaExiste){
+            if(false){//banderaExiste){
 
                bootbox.dialog({
                     title: "Mensaje",
@@ -807,7 +726,7 @@ function InicializaBuscadorArticulos(){
 
             }
             
-
+                //AQUI
                 //dataAE['ID_ARTICULO'] = ARTICULO_BUSCADOR_ID;
                 dataAE["CODIGO_ARTICULO"] = ARTICULO_BUSCADOR_CODIGO;
                 dataAE["NOMBRE_ARTICULO"] = ARTICULO_BUSCADOR_NOMBRE;
@@ -1084,7 +1003,7 @@ function cargaArticulo(articulo, pos){
                     dataAE["NOMBRE_ARTICULO"] = art.ART_Nombre;
                     dataAE["UNIDAD_MEDIDA_INV"] = art.UMI;
                     dataAE["FACTOR_CONVERSION"] = art.AFC_FactorConversion;
-
+                    //AQUI
                     dataAE["UNIDAD_MEDIDA_COMPRAS"] = art.UMC;
                     dataAE["PRECIO"] = parseFloat(art.Precio_Tipo_Cambio).toFixed(DECIMALES);                   
                     dataAE["DESCUENTO"] = 0;
@@ -1237,12 +1156,16 @@ function insertarFila(BanderaOC){
                 , "CODIGO_ARTICULO": ""
                 , "NOMBRE_ARTICULO": ""
 
-                , "UNIDAD_MEDIDA_INV": ""
-                , "FACTOR_CONVERSION": ""
                 , "UNIDAD_MEDIDA_COMPRAS": ""
-
                 , "CANTIDAD": "0.00"
+                , "UNIDAD_MEDIDA_INV": ""
                 , "PRECIO": "0.00"
+                , "MONEDA": "0.00"
+                , "FACTOR_CONVERSION": ""
+
+                , "CTD": "0.00"
+                , "UNIDAD_MEDIDA_INV": "0.00"
+                , "PRECIO_UI": "0.00"
                 , "SUBTOTAL": "0.00"
 
                 , "DESCUENTO": "0.00"
@@ -1692,9 +1615,9 @@ function calculaTotalOrdenCompra(){
     if (count > 0){
 
         for (var i = 0; i < count; i++) {
-            subtotal = Number($($("#tblArticulosExistentesNueva tbody tr")[i]).find("td:eq(10)").text()) + Number($($("#tblArticulosMiscelaneosNueva tbody tr")[i]).find("td:eq(7)").text());
-            descuento = Number($($("#tblArticulosExistentesNueva tbody tr")[i]).find("td:eq(12)").text()) + Number($($("#tblArticulosMiscelaneosNueva tbody tr")[i]).find("td:eq(9)").text());
-            iva = Number($($("#tblArticulosExistentesNueva tbody tr")[i]).find("td:eq(14)").text()) + Number($($("#tblArticulosMiscelaneosNueva tbody tr")[i]).find("td:eq(11)").text());
+            subtotal = Number($($("#tblArticulosExistentesNueva tbody tr")[i]).find("td:eq(13)").text()) + Number($($("#tblArticulosMiscelaneosNueva tbody tr")[i]).find("td:eq(7)").text());
+            descuento = Number($($("#tblArticulosExistentesNueva tbody tr")[i]).find("td:eq(15)").text()) + Number($($("#tblArticulosMiscelaneosNueva tbody tr")[i]).find("td:eq(9)").text());
+            iva = Number($($("#tblArticulosExistentesNueva tbody tr")[i]).find("td:eq(17)").text()) + Number($($("#tblArticulosMiscelaneosNueva tbody tr")[i]).find("td:eq(11)").text());
             //total = Number($($("#tblArticulosExistentesNueva tbody tr")[i]).find("td:eq(15)").text()) + Number($($("#tblArticulosMiscelaneosNueva tbody tr")[i]).find("td:eq(12)").text());
             
             //subtotal = Number($($("#tblArticulosExistentesNueva tbody tr")[i]).find("td:eq(8)").text());
@@ -1931,6 +1854,7 @@ function RealizaCalculos(fila, tabla, input_precio, input_cantidad, input_descue
         //dataT["ID_IVA"] = tbl.row(row).nodes(row, COL_ID_IVA).to$().find('select#cboIVAAM').val();
     }
     else{
+        //AQUI
         //TABLA DE VENTAS
         dataT["CANTIDAD"] = tbl.row(row).nodes(row,COL_CANTIDAD).to$().find('input#' + input_cantidad).val();
         //dataT["PRECIO"] = tbl.row(row).nodes(row, COL_PRECIO).to$().find('input#' + input_precio).val();
@@ -2598,13 +2522,15 @@ function agregaArtExis(datos, pos) {
             , "BTN_ELIMINAR": null
             , "CODIGO_ARTICULO": datos['LIN_CODIGO']
             , "NOMBRE_ARTICULO": datos['LIN_DESCRIPCION']
-
-            , "UNIDAD_MEDIDA_INV": datos['LIN_UM']
-            , "FACTOR_CONVERSION": datos['LIN_FACTOR']
             , "UNIDAD_MEDIDA_COMPRAS": datos['BuyUnitMsr']
-
             , "CANTIDAD": datos['LIN_CANTIDAD']
             , "PRECIO": datos['LIN_PRECIO']
+            , "MONEDA": datos['LIN_MONEDA']
+            , "FACTOR_CONVERSION": datos['LIN_FACTOR']
+
+            , "CTD": datos['LIN_CTD']
+            , "UNIDAD_MEDIDA_INV": datos['LIN_UMI']
+            , "PRECIO_UI": datos['LIN_PERCIO_UI']
             , "SUBTOTAL": parseFloat(datos['LIN_CANTIDAD'] * datos['LIN_PRECIO']).toFixed(DECIMALES)
 
             , "DESCUENTO": datos['LIN_PORCENTAJEDESCUENTO']
@@ -2814,29 +2740,29 @@ function set_columns_index(BanderaOC) {
         COL_BTN_ELIMINAR_COMPRA = 2;
         COL_CODIGO_ART = 3;
         COL_NOMBRE_ART = 4;
+        
+        COL_UNIDAD_MEDIDA_COMPRAS = 5;
+        COL_CANTIDAD = 6; //Cant Compras
+        COL_PRECIO = 7; //COL_PRECIO_UC = 7;
+        COL_MONEDA = 8;
+        COL_FACTOR_CONVERSION = 9; //COL_ARTICULOS_POR_UNIDAD = 5;
+   
+        COL_CTD = 10;
+        COL_UNIDAD_MEDIDA_INV = 11;
+        COL_PRECIO_UI = 12;
+        COL_SUBTOTAL = 13;
+        COL_DESCUENTO = 14;
 
-        COL_UNIDAD_MEDIDA_INV = 5;
-        COL_FACTOR_CONVERSION = 6;
-        COL_UNIDAD_MEDIDA_COMPRAS = 7;
+        COL_MONTO_DESCUENTO = 15;
+        COL_IVA = 16;
+        COL_MONTO_IVA = 17;
+        COL_TOTAL = 18;
+        COL_FECHA_ENTREGA_COMPRA = 19;
 
-        COL_CANTIDAD = 8;
-        COL_PRECIO = 9;
-        COL_SUBTOTAL = 10;
-
-        COL_DESCUENTO = 11;
-        COL_MONTO_DESCUENTO = 12;
-        COL_IVA = 13;
-
-        COL_MONTO_IVA = 14;
-        COL_TOTAL = 15;
-        COL_FECHA_ENTREGA_COMPRA = 16;
-
-        COL_CANT_PENDIENTE = 17;
-
-        COL_ID_IVA = 18;
-
-        COL_ID_PARTIDA = 19;
-        COL_ESTATUS_PARTIDA = 20;
+        COL_CANT_PENDIENTE = 20;
+        COL_ID_IVA = 21;
+        COL_ID_PARTIDA = 22;
+        COL_ESTATUS_PARTIDA = 23;
 
     } else {
         //tabla Miscelaneos
