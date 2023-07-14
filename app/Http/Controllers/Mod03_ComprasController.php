@@ -683,12 +683,12 @@ class Mod03_ComprasController extends Controller
                         OITM.ItemCode ART_CodigoArticulo,
                         OITM.ItemName ART_Nombre,
                         OITM.U_TipoMat ATP_Descripcion,
-                        Cast(CONVERT(DECIMAL(10,2), OITM.PurPackUn) as nvarchar) PurPackUn, 
-                        OITM.PurPackMsr UMC,   
-                        Cast(CONVERT(DECIMAL(10,2), OITM.NumInBuy) as nvarchar) AFC_FactorConversion, 
+                        Cast(CONVERT(DECIMAL(10,3), OITM.PurPackUn) as nvarchar) PurPackUn, 
+                        OITM.PurPackMsr UMC,  
+                        Cast(CONVERT(DECIMAL(10,3), OITM.NumInBuy) as nvarchar) AFC_FactorConversion, 
                         OITM.BuyUnitMsr UMI,
                         Cast(CONVERT(DECIMAL(10,4), ITM1.Price) as nvarchar) AS LIS_COMPRA,                        
-                        CONVERT(DECIMAL(10,4), ((ITM1.Price * OITM.NumInBuy * 
+                        CONVERT(DECIMAL(10,4), (ITM1.Price * OITM.NumInBuy * (
                         CASE WHEN ITM1.Currency = 'MXP' THEN 1
                         WHEN ITM1.Currency = 'USD' THEN CONVERT(DECIMAL(10,4),'".$tipos_cambio ['USD']."')
                         WHEN ITM1.Currency = 'EUR' THEN CONVERT(DECIMAL(10,4),'".$tipos_cambio ['EUR']."')
@@ -697,6 +697,9 @@ class Mod03_ComprasController extends Controller
                         Precio_Tipo_Cambio,
                         Cast(CONVERT(DECIMAL(10,4), ITM1.Price * OITM.NumInBuy 
                         ) as nvarchar) Precio,
+                        Cast(CONVERT(DECIMAL(10,4), ITM1.Price) as nvarchar) 
+	                    AS PRECIO_UI,
+                        '".$request->get('moneda')."' AS M_L_TC,
                         ITM1.Currency AS M_L
                                     
                     FROM OITM
@@ -759,18 +762,21 @@ class Mod03_ComprasController extends Controller
                         OITM.ItemCode ART_CodigoArticulo,
                         OITM.ItemName ART_Nombre,
                         OITM.U_TipoMat ATP_Descripcion,
-                        Cast(CONVERT(DECIMAL(10,2), OITM.PurPackUn) as nvarchar) PurPackUn, 
+                        Cast(CONVERT(DECIMAL(10,3), OITM.PurPackUn) as nvarchar) PurPackUn, 
                         OITM.PurPackMsr UMC,   
-                        Cast(CONVERT(DECIMAL(10,2), OITM.NumInBuy) as nvarchar) AFC_FactorConversion, 
+                        Cast(CONVERT(DECIMAL(10,3), OITM.NumInBuy) as nvarchar) AFC_FactorConversion, 
                         OITM.BuyUnitMsr UMI,
                         Cast(CONVERT(DECIMAL(10,4), ITM1.Price) as nvarchar) AS LIS_COMPRA,                        
-                        ((ITM1.Price * OITM.NumInBuy * 
+                        (ITM1.Price * OITM.NumInBuy * (
                         CASE WHEN ITM1.Currency = 'MXP' THEN 1
                         WHEN ITM1.Currency = 'USD' THEN CONVERT(DECIMAL(10,4),'".$tipos_cambio ['USD']."')
                         WHEN ITM1.Currency = 'EUR' THEN CONVERT(DECIMAL(10,4),'".$tipos_cambio ['EUR']."')
                         END
                         ) / '".$request->get('tipo_cambio')."') AS 
                         Precio_Tipo_Cambio,
+                        Cast(CONVERT(DECIMAL(10,4), ITM1.Price) as nvarchar) 
+	                    AS PRECIO_UI,
+                        '".$request->get('moneda')."' AS M_L_TC,
                         Cast(CONVERT(DECIMAL(10,4), ITM1.Price * OITM.NumInBuy 
                         ) as nvarchar) Precio,
                         ITM1.Currency AS M_L
@@ -779,7 +785,7 @@ class Mod03_ComprasController extends Controller
                     LEFT JOIN ITM1 ON OITM.ItemCode = ITM1.ItemCode
                     AND ITM1.PriceList= 9
 
-                    WHERE OITM.ItemCode IS NOT NULL 
+                    WHERE OITM.ItemCode IS NOT NULL
                     AND OITM.PrchseItem = 'Y'
                     AND OITM.frozenFor = 'N' AND  OITM.U_TipoMat IN ('MP', 'SP', 'RF', 'GF') 
                     ORDER BY OITM.ItemName, OITM.ItemCode";

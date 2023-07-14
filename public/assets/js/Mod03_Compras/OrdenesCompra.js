@@ -14,7 +14,8 @@ function js_iniciador() {
     $("#sidebar").toggleClass("active"); 
     $("#page-wrapper").toggleClass("content"); 
     $(this).toggleClass("active"); 
-   
+    
+    
     var COL_BTN_EDITAR = 0;
     var COL_BTN_ELIMINAR = 1;
     var COL_BTN_PDF = 2;
@@ -31,13 +32,14 @@ function js_iniciador() {
         e.preventDefault();
         btn_eliminar_OC(1);
     });
-    
+    set_columns_index(0);
     consultaDatos();
     InicializaComboBox();
     $('#ordenesCompraOC').hide();
     $('#btnBuscadorOC').show();
     InicializaBuscadorArticulos()
     cargaTablaArticulos();
+
     InicializaTablas();
     
      $("#input-fecha").datepicker({
@@ -314,7 +316,7 @@ var tableOC = $("#tableOC").DataTable({
                     "orderable": false,
                     "render": function ( data, type, row ) {
 
-                            return number_format(row['Total'],3,'.',',');
+                            return number_format(row['Total'],DECIMALES_4,'.',',');
 
                     }
 
@@ -750,10 +752,10 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
     $('#tblArticulosExistentesNueva').on('change', 'input#input-cantidadAE', function (e) {
         e.preventDefault();
         if ($(this).val() == '' || $(this).val() < 0) {
-            $(this).val(parseFloat('0.00').toFixed(DECIMALES));
+            $(this).val(parseFloat('0.00').toFixed(DECIMALES_3));
         }
 
-        $(this).val(parseFloat(this.value).toFixed(DECIMALES));
+        $(this).val(parseFloat(this.value).toFixed(DECIMALES_3));
 
         if ($("#sel-proveedor").val() != "") {
             var tabla = $('#tblArticulosExistentesNueva').DataTable();
@@ -788,7 +790,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                     buttons: false,
                     timer: 2000,
                 });
-                $(this).val(parseFloat('0.00').toFixed(DECIMALES));
+                $(this).val(parseFloat('0.00').toFixed(DECIMALES_3));
             }
 
         } else {
@@ -796,17 +798,17 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                 buttons: false,
                 timer: 2000,
             });
-            $(this).val("");
+            $(this).val(parseFloat('0.00').toFixed(DECIMALES_3));
         }
     });
 
     $('#tblArticulosMiscelaneosNueva').on('change','input#input-cantidadAM',function (e) {
         e.preventDefault();
         if($(this).val() == '' || $(this).val() < 0){
-            $(this).val(parseFloat('0.00').toFixed(DECIMALES));
+            $(this).val(parseFloat('0.00').toFixed(DECIMALES_3));
         }
 
-        $(this).val(parseFloat(this.value).toFixed(DECIMALES));
+        $(this).val(parseFloat(this.value).toFixed(DECIMALES_3));
 
         if ($("#sel-proveedor").val() != ""){
             var tabla = $('#tblArticulosMiscelaneosNueva').DataTable();
@@ -839,7 +841,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                         buttons: false,
                         timer: 2000,
                     });
-                    $(this).val(parseFloat('0.00').toFixed(DECIMALES));
+                    $(this).val(parseFloat('0.00').toFixed(DECIMALES_3));
                 }
 
         }else{
@@ -847,17 +849,17 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                 buttons: false,
                 timer: 2000,
             });
-            $(this).val("");
+            $(this).val(parseFloat('0.00').toFixed(DECIMALES_3));
         }
     });
 
     $('#tblArticulosExistentesNueva').on('change', 'input#input-precioAE', function (e) {
         e.preventDefault();
         if ($(this).val() == '' || $(this).val() < 0) {
-            $(this).val(parseFloat('0.00').toFixed(DECIMALES));
+            $(this).val(parseFloat('0.00').toFixed(DECIMALES_4));
         }
 
-        $(this).val(parseFloat(this.value).toFixed(DECIMALES));
+        $(this).val(parseFloat(this.value).toFixed(DECIMALES_4));
         if ($("#sel-proveedor").val() != "") {
             var tabla = $('#tblArticulosExistentesNueva').DataTable();
             var fila = $(this).closest('tr');
@@ -891,7 +893,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                     buttons: false,
                     timer: 2000,
                 });
-                $(this).val(parseFloat('0.00').toFixed(DECIMALES));
+                $(this).val(parseFloat('0.00').toFixed(DECIMALES_4));
             }
 
 
@@ -909,10 +911,10 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
     $('#tblArticulosMiscelaneosNueva').on('change','input#input-precioAM',function (e) {
         e.preventDefault();
         if($(this).val() == '' || $(this).val() < 0){
-            $(this).val(parseFloat('0.00').toFixed(DECIMALES));
+            $(this).val(parseFloat('0.00').toFixed(DECIMALES_4));
         }
 
-        $(this).val(parseFloat(this.value).toFixed(DECIMALES));
+        $(this).val(parseFloat(this.value).toFixed(DECIMALES_4));
         if ($("#sel-proveedor").val() != ""){
 
             var tabla = $('#tblArticulosMiscelaneosNueva').DataTable();
@@ -944,7 +946,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                         buttons: false,
                         timer: 2000,
                     });
-                    $(this).val(parseFloat('0.00').toFixed(DECIMALES));
+                    $(this).val(parseFloat('0.00').toFixed(DECIMALES_4));
                 }
 
         }
@@ -985,14 +987,14 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
     $('#tblArticulosExistentesNueva').on('change', 'input#input-descuentoAE', function (e) {
 
         if ($(this).val() == '' || $(this).val() < 0) {
-            $(this).val(parseFloat('0.00').toFixed(DECIMALES));
+            $(this).val(parseFloat('0.00').toFixed(DECIMALES_2));
         }
 
         if ($(this).val() >= 100) {
-            $(this).val(parseFloat('100.00').toFixed(DECIMALES));
+            $(this).val(parseFloat('100.00').toFixed(DECIMALES_2));
         }
 
-        $(this).val(parseFloat(this.value).toFixed(DECIMALES));
+        $(this).val(parseFloat(this.value).toFixed(DECIMALES_2));
         if ($("#sel-proveedor").val() != "") {
             var tabla = $('#tblArticulosExistentesNueva').DataTable();
             var fila = $(this).closest('tr');
@@ -1010,8 +1012,8 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
             // var ID_IVA_anterior = datos['ID_IVA'];
             // var descuentoNuevo = $(this).val();
 
-            datos['DESCUENTO'] = $(this).val();
-
+            //datos['DESCUENTO'] = $(this).val();
+            //tbl.row(row).nodes(row, COL_DESCUENTO).to$().find('input#' + input_descuento).val()
             if (datos['ID_ARTICULO'] != "") {
                 console.log("cambiando descuento ................")
                 RealizaCalculos(fila, tabla, precio, cantidad, descuento);
@@ -1026,7 +1028,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                     buttons: false,
                     timer: 2000,
                 });
-                $(this).val(parseFloat('0.00').toFixed(DECIMALES));
+                $(this).val(parseFloat('0.00').toFixed(DECIMALES_2));
             }
 
         }
@@ -1035,21 +1037,21 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                 buttons: false,
                 timer: 2000,
             });
-            $(this).val("");
+            $(this).val(parseFloat('0.00').toFixed(DECIMALES_2));
         }
     });
 
     $('#tblArticulosMiscelaneosNueva').on('change','input#input-descuentoAM',function (e) {
 
         if($(this).val() == '' || $(this).val() < 0){
-            $(this).val(parseFloat('0.00').toFixed(DECIMALES));
+            $(this).val(parseFloat('0.00').toFixed(DECIMALES_2));
         }
 
         if ($(this).val() >= 100){
-            $(this).val(parseFloat('100.00').toFixed(DECIMALES));
+            $(this).val(parseFloat('100.00').toFixed(DECIMALES_2));
         }
 
-        $(this).val(parseFloat(this.value).toFixed(DECIMALES));
+        $(this).val(parseFloat(this.value).toFixed(DECIMALES_2));
         if ($("#sel-proveedor").val() != ""){
 
             var tabla = $('#tblArticulosMiscelaneosNueva').DataTable();
@@ -1079,7 +1081,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                         buttons: false,
                         timer: 2000,
                     });
-                    $(this).val(parseFloat('0.00').toFixed(DECIMALES));
+                    $(this).val(parseFloat('0.00').toFixed(DECIMALES_2));
                 }
         }
         else{
@@ -1131,7 +1133,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
                     buttons: false,
                     timer: 2000,
                 });
-                $(this).val(parseFloat('0.00').toFixed(DECIMALES));
+                $(this).val(parseFloat('0.00').toFixed(DECIMALES_4));
             }
 
 

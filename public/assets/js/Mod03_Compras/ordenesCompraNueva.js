@@ -2,7 +2,7 @@
  * Created by mgl_l on 15/08/2019.
  */
 
-var DECIMALES = 4;
+var DECIMALES_4 = 4;
 var DECIMALES_2 = 2;
 var DECIMALES_3 = 3;
 var TOTAL_DECIMALES = 3;
@@ -89,10 +89,12 @@ var ARTICULO_BUSCADOR_UMI = '';
 var ARTICULO_BUSCADOR_FACTOR_CONVERSION = '';
 var ARTICULO_BUSCADOR_UMC = '';
 var ARTICULO_BUSCADOR_PRECIO_COMPRA = '';
+var ARTICULO_BUSCADOR_PRECIO_INV = '';
 var ARTICULO_BUSCADOR_UMI_ID = '';
 var ARTICULO_BUSCADOR_UMC_ID = '';
 var ARTICULO_BUSCADOR_INDEX = '';
 var ARTICULO_BUSCADOR_ML = '';
+var ARTICULO_BUSCADOR_ML_TC = '';
 var ARTICULO_BUSCADOR_PRECIO_MON = '';
 
 // Mapeo columnas tabla detalles
@@ -115,6 +117,7 @@ var COL_BTN_EDITAR_PEDIMENTO = 8;
 var COL_ID_PEDIMENTO = 9;
 var COL_ID_OCFR = 10;
 
+
 var InicializaFunciones = function () {
 
     "use strict";
@@ -122,11 +125,12 @@ var InicializaFunciones = function () {
 
         init: function (cantidad_decimales, precios_decimales, porcentaje_decimales, tc_decimales) {
 
-            // DECIMALES = cantidad_decimales;
-            // DECIMALES = precios_decimales;
+            // DECIMALES_4 = cantidad_decimales;
+            // DECIMALES_4 = precios_decimales;
             // PORCENTAJE_DECIMALES = porcentaje_decimales;
             // TC_DECIMALES = tc_decimales;
 
+            set_columns_index(0);
             $("#ordenesCompraOC").hide();
             InicializaComponentes();
 
@@ -137,14 +141,13 @@ var InicializaFunciones = function () {
 }();
 
 var InicializaComponentes = function () {
-
+    
     handleDatepicker();
     InicializaButton();
     consultaDatos();
     InicializaBuscadorProveedores();
     InicializaBuscadorArticulos();
     InicializaBuscadorOtReq();
-    set_columns_index(0);
     InicializaTablas();
     insertarFila(0)
 };
@@ -383,14 +386,14 @@ function InicializaTablas(){
                 "targets": [COL_CANTIDAD],
                 "orderable" : false,
                 "render": function ( data, type, row ) {
-                    return '<input id="input-cantidadAE" style="" class="form-control input-sm cantidad" type="number" value="' + parseFloat(row['CANTIDAD']).toFixed(DECIMALES_2) + '">';
+                    return '<input id="input-cantidadAE" style="" class="form-control input-sm cantidad" type="number" value="' + parseFloat(row['CANTIDAD']).toFixed(DECIMALES_3) + '">';
                 }
             },
             {
                 "targets": [COL_PRECIO],
                 "orderable" : false,
                 "render": function (data,type,row) {
-                    return '<input id= "input-precioAE" style="width: 100px" class="form-control input-sm precio" value="' + parseFloat(row['PRECIO']).toFixed(DECIMALES) + '" type="number">'
+                    return '<input id= "input-precioAE" style="width: 100px" class="form-control input-sm precio" value="' + parseFloat(row['PRECIO']).toFixed(DECIMALES_4) + '" type="number">'
                 }
             },
             {
@@ -401,7 +404,7 @@ function InicializaTablas(){
                 "targets": [COL_DESCUENTO],
                 "orderable" : false,
                 "render": function (data,type,row) {
-                    return '<input id= "input-descuentoAE" style="width: 100px" class="form-control input-sm" value="' + parseFloat(DESCUENTO_GENERAL).toFixed(DECIMALES_3) + '" type="number">'
+                    return '<input step="0.01" id= "input-descuentoAE" style="width: 100px" class="form-control input-sm" value="' + parseFloat(DESCUENTO_GENERAL).toFixed(DECIMALES_3) + '" type="number">'
                 }
             },
             {
@@ -557,14 +560,14 @@ function InicializaTablas(){
                 "targets": [COL_CANTIDAD],
                 "orderable" : false,
                 "render": function ( data, type, row ) {
-                    return '<input id="input-cantidadAM"  class="form-control input-sm cantidad" type="number" value="' + parseFloat(row['CANTIDAD']).toFixed(DECIMALES_2) + '">';
+                    return '<input id="input-cantidadAM"  class="form-control input-sm cantidad" type="number" value="' + parseFloat(row['CANTIDAD']).toFixed(DECIMALES_3) + '">';
                 }
             },
             {
                 "targets": [COL_PRECIO],
                 "orderable" : false,
                 "render": function (data,type,row) {
-                    return '<input id= "input-precioAM" style="width: 100px" class="form-control input-sm precio" value="' + parseFloat(row['PRECIO']).toFixed(DECIMALES) + '" type="number">'
+                    return '<input id= "input-precioAM" style="width: 100px" class="form-control input-sm precio" value="' + parseFloat(row['PRECIO']).toFixed(DECIMALES_4) + '" type="number">'
                 }
             },
             {
@@ -575,7 +578,7 @@ function InicializaTablas(){
                 "targets": [COL_DESCUENTO],
                 "orderable" : false,
                 "render": function (data,type,row) {
-                    return '<input id= "input-descuentoAM"  class="form-control input-sm" value="' + parseFloat(DESCUENTO_GENERAL).toFixed(DECIMALES_3
+                    return '<input step="0.01" id= "input-descuentoAM"  class="form-control input-sm" value="' + parseFloat(DESCUENTO_GENERAL).toFixed(DECIMALES_3
                         ) + '" type="number">'
                 }
             },
@@ -653,11 +656,13 @@ function InicializaBuscadorArticulos(){
             {data: "ART_Nombre"},
             {data: "ATP_Descripcion"},
             {data: "UMI"},
+            {data: "PRECIO_UI"},
             {data: "AFC_FactorConversion"},
             {data: "UMC"},
             {data: "Precio"},
             {data: "M_L"},
-            {data: "Precio_Tipo_Cambio"}
+            {data: "Precio_Tipo_Cambio"},
+            {data: "M_L_TC"}
 
         ],
         fixedColumns: false,
@@ -682,9 +687,10 @@ function InicializaBuscadorArticulos(){
                 ARTICULO_BUSCADOR_UMC = datos['UMC'];
                 ARTICULO_BUSCADOR_PRECIO_COMPRA = datos['Precio_Tipo_Cambio'];
                 ARTICULO_BUSCADOR_ML = datos['M_L'];
-                ARTICULO_BUSCADOR_PRECIO_MON = datos['Precio'];
-                //ARTICULO_BUSCADOR_UMI_ID = datos['UMI_CMUM_UMInventarioId'];
-                //ARTICULO_BUSCADOR_UMC_ID = datos['UMC_CMUM_UMCompraId'];
+                ARTICULO_BUSCADOR_ML_TC = datos['M_L_TC'];
+                ARTICULO_BUSCADOR_PRECIO_INV = datos['PRECIO_UI'];
+                ARTICULO_BUSCADOR_PRECIO_MON = datos['Precio'];//precio de listaCompras
+                
                 tabla.$('tr.selected').removeClass('selected');
                 $(this).addClass('selected');
             }
@@ -693,7 +699,6 @@ function InicializaBuscadorArticulos(){
 
     $('#modal-articulo #boton-aceptar').on('click', function (e) {
         e.preventDefault();
-
         var fila = $('#modal-articulo #input-fila').val();
         console.log("fila:" + fila)
         if (BanderaOC == 0){
@@ -736,6 +741,9 @@ function InicializaBuscadorArticulos(){
                 dataAE["ID_UMI"] = ARTICULO_BUSCADOR_UMI_ID;
                 dataAE["ID_UMC"] = ARTICULO_BUSCADOR_UMC_ID;
                 dataAE["PRECIO"] = ARTICULO_BUSCADOR_PRECIO_COMPRA;
+                dataAE["PRECIO_UI"] = ARTICULO_BUSCADOR_PRECIO_INV;
+                dataAE["MONEDA"] = ARTICULO_BUSCADOR_ML_TC;
+               /// console.log(ARTICULO_BUSCADOR_ML_TC)
                 dataAE["IVA"] = ivaOC;
                 dataAE["ID_IVA"] = ivaIDOC;
                 dataAE["DESCUENTO"] = descuentoOC;
@@ -747,12 +755,12 @@ function InicializaBuscadorArticulos(){
                 tabla_artExist.row(fila).nodes(fila, COL_FACTOR_CONVERSION).to$().find("td:eq('" + COL_FACTOR_CONVERSION + "')").text(ARTICULO_BUSCADOR_FACTOR_CONVERSION);
                 tabla_artExist.row(fila).nodes(fila, COL_UNIDAD_MEDIDA_COMPRAS).to$().find("td:eq('" + COL_UNIDAD_MEDIDA_COMPRAS + "')").text(ARTICULO_BUSCADOR_UMC);
                 tabla_artExist.row(fila).nodes(fila, COL_PRECIO).to$().find("input#input-precioAE").val(ARTICULO_BUSCADOR_PRECIO_COMPRA);
-                tabla_artExist.row(fila).nodes(fila, COL_DESCUENTO).to$().find("input#input-descuentoAE").val(parseFloat(dataAE["DESCUENTO"]).toFixed(DECIMALES));
+                tabla_artExist.row(fila).nodes(fila, COL_DESCUENTO).to$().find("input#input-descuentoAE").val(parseFloat(dataAE["DESCUENTO"]).toFixed(DECIMALES_4));
                 tabla_artExist.row(fila).nodes(fila, COL_IVA).to$().find("select#cboIVAAE").val(dataAE["ID_IVA"]);
                 tabla_artExist.row(fila).nodes(fila, COL_ID_IVA).to$().find("select#cboIVAAE").val(dataAE["ID_IVA"]);
                 // tabla_artExist.row(fila).nodes(fila, COL_ID_UMI).to$().find("td:eq('" + COL_ID_UMI + "')").text(ARTICULO_BUSCADOR_UMI_ID);
                 // tabla_artExist.row(fila).nodes(fila, COL_ID_UMC).to$().find("td:eq('" + COL_ID_UMC + "')").text(ARTICULO_BUSCADOR_UMC_ID);
-
+                tabla_artExist.row(fila).data(dataAE);
             
 
         }
@@ -993,29 +1001,32 @@ function cargaArticulo(articulo, pos){
             
             if(respuesta.codigo == 200){
                 if (true){
-                    console.log(pos +' ---- ' + respuesta.data2[0])
-                    console.log(pos +' ---- ' + respuesta.data2)
                     var tbl = $('#tblArticulosExistentesNueva').DataTable();
                     var art = respuesta.data2;
                     var dataAE = tbl.row(pos).data();
                     var fila = pos
+                    console.log('------------- Articulo posicion: ' + pos)
                     console.log(art);
-                    dataAE["NOMBRE_ARTICULO"] = art.ART_Nombre;
-                    dataAE["UNIDAD_MEDIDA_INV"] = art.UMI;
-                    dataAE["FACTOR_CONVERSION"] = art.AFC_FactorConversion;
-                    //AQUI
-                    dataAE["UNIDAD_MEDIDA_COMPRAS"] = art.UMC;
-                    dataAE["PRECIO"] = parseFloat(art.Precio_Tipo_Cambio).toFixed(DECIMALES);                   
-                    dataAE["DESCUENTO"] = 0;
                     dataAE['CODIGO_ARTICULO'] = art.ART_CodigoArticulo;
+                    dataAE["NOMBRE_ARTICULO"] = art.ART_Nombre;
+                    dataAE["UNIDAD_MEDIDA_COMPRAS"] = art.UMC;
+                    dataAE["PRECIO"] = parseFloat(art.Precio_Tipo_Cambio).toFixed(DECIMALES_4);                   
+                    dataAE["PRECIO_UI"] = parseFloat(art.PRECIO_UI).toFixed(DECIMALES_4);                   
+                    dataAE["MONEDA"] = (art.M_L);                   
+                    dataAE["FACTOR_CONVERSION"] = art.AFC_FactorConversion;
+                    //.dataAE["CTD"] = parseFloat(art.).toFixed(DECIMALES_4);;
+                    dataAE["UNIDAD_MEDIDA_INV"] = art.UMI;
+                    dataAE["DESCUENTO"] = 0;
                     //tabla_artExist.row(fila).nodes(fila, COL_ID_ARTICULO).to$().find("td:eq('" + COL_ID_ARTICULO + "')").text(ARTICULO_BUSCADOR_ID);
                     tbl.row(fila).nodes(fila, COL_CODIGO_ART).to$().find('input#input-articulo-codigoAE').val(art.ART_CodigoArticulo);
                     tbl.row(fila).nodes(fila, COL_NOMBRE_ART).to$().find("td:eq('" + COL_NOMBRE_ART + "')").text(art.ART_Nombre);
+                    tbl.row(fila).nodes(fila, COL_PRECIO_UI).to$().find("td:eq('" + COL_PRECIO_UI + "')").text(art.PRECIO_UI);
+                    tbl.row(fila).nodes(fila, COL_MONEDA).to$().find("td:eq('" + COL_MONEDA + "')").text(art.M_L_TC);
                     tbl.row(fila).nodes(fila, COL_UNIDAD_MEDIDA_INV).to$().find("td:eq('" + COL_UNIDAD_MEDIDA_INV + "')").text(art.UMI);
                     tbl.row(fila).nodes(fila, COL_FACTOR_CONVERSION).to$().find("td:eq('" + COL_FACTOR_CONVERSION + "')").text(art.AFC_FactorConversion);
                     tbl.row(fila).nodes(fila, COL_UNIDAD_MEDIDA_COMPRAS).to$().find("td:eq('" + COL_UNIDAD_MEDIDA_COMPRAS + "')").text(art.UMC);
                     tbl.row(fila).nodes(fila, COL_PRECIO).to$().find("input#input-precioAE").val(art.Precio_Tipo_Cambio);
-                    tbl.row(fila).nodes(fila, COL_DESCUENTO).to$().find("input#input-descuentoAE").val(parseFloat(dataAE["DESCUENTO"]).toFixed(DECIMALES));
+                    tbl.row(fila).nodes(fila, COL_DESCUENTO).to$().find("input#input-descuentoAE").val(parseFloat(dataAE["DESCUENTO"]).toFixed(DECIMALES_2));
                     tbl.row(fila).nodes(fila, COL_IVA).to$().find("select#cboIVAAE").val(dataAE["ID_IVA"]);
                     tbl.row(fila).nodes(fila, COL_ID_IVA).to$().find("select#cboIVAAE").val(dataAE["ID_IVA"]);
 
@@ -1158,7 +1169,6 @@ function insertarFila(BanderaOC){
 
                 , "UNIDAD_MEDIDA_COMPRAS": ""
                 , "CANTIDAD": "0.00"
-                , "UNIDAD_MEDIDA_INV": ""
                 , "PRECIO": "0.00"
                 , "MONEDA": "0.00"
                 , "FACTOR_CONVERSION": ""
@@ -1176,7 +1186,7 @@ function insertarFila(BanderaOC){
                 , "TOTAL": "0.00"
                 , "FECHA_ENTREGA":""
 
-                , "CANT_PENDIENTE":""
+                , "CANT_PENDIENTE":"0.00"
                 
                 , "ID_IVA":"W3"                
                 , "ID_PARTIDA": ""
@@ -1203,11 +1213,11 @@ function insertarFila(BanderaOC){
                 , "MONTO_DESCUENTO": ""
                 , "IVA": "16"
 
-                , "MONTO_IVA": ""
+                , "MONTO_IVA": "0.00"
                 , "TOTAL": "0.00"
                 , "FECHA_ENTREGA": ""
 
-                , "CANT_PENDIENTE": ""
+                , "CANT_PENDIENTE": "0.00"
 
                 , "ID_IVA":"W3"
                 , "ID_PARTIDA": ""
@@ -1700,9 +1710,7 @@ function calculaNuevaMoneda(moneda_anterior, moneda, tipo_cambio_anterior){
                 console.log('tipo_cambio_anterior: '+ tipo_cambio_anterior)
                 miprecio = getNuevoPrecio(Precio_anterior, moneda_anterior, moneda, tipo_cambio_anterior);
                 
-                tabla.row(i).nodes(i, COL_PRECIO).to$().find('input#' + precio).val(miprecio);
-                
-                //tabla.row(i).nodes(i, COL_PRECIO).to$().find('input#' + precio).val(miprecio);
+                tabla.row(i).nodes(i, COL_PRECIO).to$().find('input#' + precio).val(parseFloat(miprecio).toFixed(DECIMALES_4));
                 
                 datos['PRECIO'] = miprecio;
                 console.log('precio_nuevo: '+ miprecio)
@@ -1745,8 +1753,8 @@ function calculaNuevaTipoCambio(moneda, tipo_cambio){
                 console.log('precio_anterior: '+ Precio_anterior)
                 miprecio = getNuevoPrecioTC(Precio_anterior, tipo_cambio);
 
-                //miprecio = getNuevoPrecio(Precio_anterior, moneda_anterior, moneda, tipo_cambio_anterior);
-                tabla.row(i).nodes(i, COL_PRECIO).to$().find('input#' + precio).val(miprecio);
+               
+                tabla.row(i).nodes(i, COL_PRECIO).to$().find('input#' + precio).val(parseFloat(miprecio).toFixed(DECIMALES_4));
                 datos['PRECIO'] = miprecio;
                 console.log('precio_nuevo: '+ miprecio)
                 RealizaCalculos(i, tabla, precio, cantidad, descuento);
@@ -1811,12 +1819,13 @@ function RealizaCalculos(fila, tabla, input_precio, input_cantidad, input_descue
     var precio_desc = precio - (descuento/cantidad);
     var subtotal = precio * cantidad;
     var subtotal_desc = precio_desc * cantidad;
+    var ctd = cantidad * dataT['FACTOR_CONVERSION'];
     console.log('precio Desc: ' + precio_desc)
     console.log('cantidad: ' + cantidad)
     console.log('descue: '+ descuento)
     console.log('subtotal: ' + subtotal)
     //console.log('dataT ' + dataT['IVA']);
-    if(dataT['IVA'] == '')dataT['IVA'] = "0";
+    if(dataT['IVA'] == '') dataT['IVA'] = "0";
     var selected = dataT['IVA'];
     var iva = (subtotal_desc) * (selected * .01);
     console.log('iva ' +iva);
@@ -1824,12 +1833,12 @@ function RealizaCalculos(fila, tabla, input_precio, input_cantidad, input_descue
     //console.log('iva3 ' + selected * .01);
     var total = subtotal_desc + iva;
 
-    //tbl.row(row).nodes(row, COL_PRECIO).to$().find('input#' + input_precio).val(precio.toFixed(DECIMALES));
-    tbl.row(row).nodes(row, COL_SUBTOTAL).to$().find("td:eq('" + COL_SUBTOTAL + "')").text(subtotal.toFixed(DECIMALES));
-    tbl.row(row).nodes(row, COL_MONTO_DESCUENTO).to$().find("td:eq('" + COL_MONTO_DESCUENTO + "')").text(descuento.toFixed(DECIMALES));
-    tbl.row(row).nodes(row, COL_MONTO_IVA).to$().find("td:eq('" + COL_MONTO_IVA + "')").text(iva.toFixed(DECIMALES));
-    tbl.row(row).nodes(row, COL_TOTAL).to$().find("td:eq('" + COL_TOTAL + "')").text(total.toFixed(DECIMALES));
-
+    //tbl.row(row).nodes(row, COL_PRECIO).to$().find('input#' + input_precio).val(precio.toFixed(DECIMALES_4));
+    tbl.row(row).nodes(row, COL_SUBTOTAL).to$().find("td:eq('" + COL_SUBTOTAL + "')").text(subtotal.toFixed(DECIMALES_4));
+    tbl.row(row).nodes(row, COL_MONTO_DESCUENTO).to$().find("td:eq('" + COL_MONTO_DESCUENTO + "')").text(descuento.toFixed(DECIMALES_4));
+    tbl.row(row).nodes(row, COL_MONTO_IVA).to$().find("td:eq('" + COL_MONTO_IVA + "')").text(iva.toFixed(DECIMALES_4));
+    tbl.row(row).nodes(row, COL_TOTAL).to$().find("td:eq('" + COL_TOTAL + "')").text(total.toFixed(DECIMALES_4));
+    tbl.row(row).nodes(row, COL_DESCUENTO).to$().find('input#' + input_descuento).val(parseFloat((tbl.row(row).nodes(row, COL_DESCUENTO).to$().find('input#' + input_descuento).val())).toFixed(DECIMALES_2));
     if (BanderaOC == 1){
         // TABLA DE MISCELANEOS
         //var comboUM = document.getElementById("cboUMAM");
@@ -1856,15 +1865,19 @@ function RealizaCalculos(fila, tabla, input_precio, input_cantidad, input_descue
     else{
         //AQUI
         //TABLA DE VENTAS
+        dataT["CTD"] = ctd;
+        tbl.row(row).nodes(row, COL_CTD).to$().find("td:eq('" + COL_CTD + "')").text(ctd.toFixed(DECIMALES_4));
+        
         dataT["CANTIDAD"] = tbl.row(row).nodes(row,COL_CANTIDAD).to$().find('input#' + input_cantidad).val();
-        //dataT["PRECIO"] = tbl.row(row).nodes(row, COL_PRECIO).to$().find('input#' + input_precio).val();
+        //tbl.row(row).nodes(row, COL_PRECIO).to$().find('input#' + input_precio).val();
         dataT["SUBTOTAL"] = tbl.row(row).nodes(row, COL_SUBTOTAL).to$().find("td:eq('" + COL_SUBTOTAL + "')").text();
-        dataT["DESCUENTO"] = tbl.row(row).nodes(row, COL_DESCUENTO).to$().find('input#' + input_descuento).val();
+        //dataT["DESCUENTO"] = tbl.row(row).nodes(row, COL_DESCUENTO).to$().find('input#' + input_descuento).val();
         dataT["MONTO_DESCUENTO"] = tbl.row(row).nodes(row, COL_MONTO_DESCUENTO).to$().find("td:eq('" + COL_MONTO_DESCUENTO + "')").text();
-        //dataT["IVA"] = selected;
         //dataT["ID_IVA"] = tbl.row(row).nodes(row, COL_ID_IVA).to$().find('select#cboIVAAE').val();
         dataT["MONTO_IVA"] = tbl.row(row).nodes(row, COL_MONTO_IVA).to$().find("td:eq('" + COL_MONTO_IVA + "')").text();
         dataT["TOTAL"] = tbl.row(row).nodes(row, COL_TOTAL).to$().find("td:eq('" + COL_TOTAL + "')").text();
+        
+        
     }
 }
 
@@ -1875,10 +1888,10 @@ function calculaTipoCambio(){
     var iva = parseFloat($('#ordenCompra-iva').text().replace(/[^0-9\.]/g, ''));
     var total = parseFloat($('#ordenCompra-total').text().replace(/[^0-9\.]/g, ''));
 
-    $('#ordenCompra-subtotal').text(SIMBOLO_MONEDA + ' ' + subtotal.toFixed(DECIMALES));
-    $('#ordenCompra-descuento').text(SIMBOLO_MONEDA + ' ' + descuento.toFixed(DECIMALES));
-    $('#ordenCompra-iva').text(SIMBOLO_MONEDA + ' ' + iva.toFixed(DECIMALES));
-    $('#ordenCompra-total').text(SIMBOLO_MONEDA + ' ' + total.toFixed(DECIMALES));
+    $('#ordenCompra-subtotal').text(SIMBOLO_MONEDA + ' ' + subtotal.toFixed(DECIMALES_4));
+    $('#ordenCompra-descuento').text(SIMBOLO_MONEDA + ' ' + descuento.toFixed(DECIMALES_4));
+    $('#ordenCompra-iva').text(SIMBOLO_MONEDA + ' ' + iva.toFixed(DECIMALES_4));
+    $('#ordenCompra-total').text(SIMBOLO_MONEDA + ' ' + total.toFixed(DECIMALES_4));
 
     /*$('#lbl-tc-subtotal').text('( ' + SIMBOLO_MONEDA_PREDETERMINADA + ' ' + number_format(parseFloat(parseFloat($('#orden-venta-subtotal').text().replace(/[^0-9\.]/g, '')) * parseFloat(TIPO_CAMBIO)), 2, '.', ', ') + ' )');
     $('#lbl-tc-descuento').text('( ' + SIMBOLO_MONEDA_PREDETERMINADA + ' ' + number_format(parseFloat(parseFloat($('#orden-venta-descuento').text().replace(/[^0-9\.]/g, '')) * parseFloat(TIPO_CAMBIO)), 2, '.', ', ') + ' )');
@@ -1915,14 +1928,14 @@ function Old_PartidaResumenAE() {
                     , "UNIDAD_MEDIDA_INV": datos_venta[i]["UNIDAD_MEDIDA_INV"]
                     , "FACTOR_CONVERSION": datos_venta[i]["FACTOR_CONVERSION"]
                     , "UNIDAD_MEDIDA_COMPRAS": datos_venta[i]["UNIDAD_MEDIDA_COMPRAS"]
-                    , "CANTIDAD": parseFloat(datos_venta[i]["CANTIDAD"]).toFixed(DECIMALES)
-                    , "PRECIO": parseFloat(datos_venta[i]["PRECIO"].replace(/[^0-9\.]/g, '')).toFixed(DECIMALES)
-                    , "SUBTOTAL": parseFloat(datos_venta[i]["SUBTOTAL"].replace(/[^0-9\.]/g, '')).toFixed(DECIMALES)
+                    , "CANTIDAD": parseFloat(datos_venta[i]["CANTIDAD"]).toFixed(DECIMALES_4)
+                    , "PRECIO": parseFloat(datos_venta[i]["PRECIO"].replace(/[^0-9\.]/g, '')).toFixed(DECIMALES_4)
+                    , "SUBTOTAL": parseFloat(datos_venta[i]["SUBTOTAL"].replace(/[^0-9\.]/g, '')).toFixed(DECIMALES_4)
                     , "DESCUENTO": datos_venta[i]["DESCUENTO"]
-                    , "MONTO_DESCUENTO": parseFloat(datos_venta[i]["MONTO_DESCUENTO"].replace(/[^0-9\.]/g, '')).toFixed(DECIMALES)
+                    , "MONTO_DESCUENTO": parseFloat(datos_venta[i]["MONTO_DESCUENTO"].replace(/[^0-9\.]/g, '')).toFixed(DECIMALES_4)
                     , "IVA": datos_venta[i]["IVA"]
-                    , "MONTO_IVA": parseFloat(datos_venta[i]["MONTO_IVA"].replace(/[^0-9\.]/g, '')).toFixed(DECIMALES)
-                    , "TOTAL": parseFloat(datos_venta[i]["TOTAL"].replace(/[^0-9\.]/g, '')).toFixed(DECIMALES)
+                    , "MONTO_IVA": parseFloat(datos_venta[i]["MONTO_IVA"].replace(/[^0-9\.]/g, '')).toFixed(DECIMALES_4)
+                    , "TOTAL": parseFloat(datos_venta[i]["TOTAL"].replace(/[^0-9\.]/g, '')).toFixed(DECIMALES_4)
                 }
             ).draw();
         }
@@ -2071,12 +2084,12 @@ $('#tabla-detalles').on('change', 'input#input-cantidad-detalle', function(e) {
         $(this).val('0.00');
     }
 
-    $(this).val(parseFloat(this.value).toFixed(DECIMALES));
+    $(this).val(parseFloat(this.value).toFixed(DECIMALES_4));
 
     var tabla = $('#tabla-detalles').DataTable();
     var fila = $(this).closest('tr');
     var datos = tabla.row(fila).data();
-    datos[COL_DETALLE_CANTIDAD] = parseFloat(this.value).toFixed(DECIMALES);
+    datos[COL_DETALLE_CANTIDAD] = parseFloat(this.value).toFixed(DECIMALES_4);
 });
 //??
 $('#tabla-detalles').on('change', 'input#input-fecha-req', function(e) {
@@ -2130,14 +2143,14 @@ function PartidaResumenAM() {
                     , "UNIDAD_MEDIDA_INV": datos_miselaneos[i]["UNIDAD_MEDIDA_INV"]
                     , "FACTOR_CONVERSION": datos_miselaneos[i]["FACTOR_CONVERSION"]
                     , "UNIDAD_MEDIDA_COMPRAS": datos_miselaneos[i]["UNIDAD_MEDIDA_COMPRAS"]
-                    , "CANTIDAD": parseFloat(datos_miselaneos[i]["CANTIDAD"]).toFixed(DECIMALES)
-                    , "PRECIO": parseFloat(datos_miselaneos[i]["PRECIO"].replace(/[^0-9\.]/g, '')).toFixed(DECIMALES)
-                    , "SUBTOTAL": parseFloat(datos_miselaneos[i]["SUBTOTAL"].replace(/[^0-9\.]/g, '')).toFixed(DECIMALES)
+                    , "CANTIDAD": parseFloat(datos_miselaneos[i]["CANTIDAD"]).toFixed(DECIMALES_4)
+                    , "PRECIO": parseFloat(datos_miselaneos[i]["PRECIO"].replace(/[^0-9\.]/g, '')).toFixed(DECIMALES_4)
+                    , "SUBTOTAL": parseFloat(datos_miselaneos[i]["SUBTOTAL"].replace(/[^0-9\.]/g, '')).toFixed(DECIMALES_4)
                     , "DESCUENTO": datos_miselaneos[i]["DESCUENTO"]
-                    , "MONTO_DESCUENTO": parseFloat(datos_miselaneos[i]["MONTO_DESCUENTO"].replace(/[^0-9\.]/g, '')).toFixed(DECIMALES)
+                    , "MONTO_DESCUENTO": parseFloat(datos_miselaneos[i]["MONTO_DESCUENTO"].replace(/[^0-9\.]/g, '')).toFixed(DECIMALES_4)
                     , "IVA": datos_miselaneos[i]["IVA"]
-                    , "MONTO_IVA": parseFloat(datos_miselaneos[i]["MONTO_IVA"].replace(/[^0-9\.]/g, '')).toFixed(DECIMALES)
-                    , "TOTAL": parseFloat(datos_miselaneos[i]["TOTAL"].replace(/[^0-9\.]/g, '')).toFixed(DECIMALES)
+                    , "MONTO_IVA": parseFloat(datos_miselaneos[i]["MONTO_IVA"].replace(/[^0-9\.]/g, '')).toFixed(DECIMALES_4)
+                    , "TOTAL": parseFloat(datos_miselaneos[i]["TOTAL"].replace(/[^0-9\.]/g, '')).toFixed(DECIMALES_4)
                 }
             ).draw();
         }
@@ -2529,16 +2542,16 @@ function agregaArtExis(datos, pos) {
             , "FACTOR_CONVERSION": datos['LIN_FACTOR']
 
             , "CTD": datos['LIN_CTD']
-            , "UNIDAD_MEDIDA_INV": datos['LIN_UMI']
-            , "PRECIO_UI": datos['LIN_PERCIO_UI']
-            , "SUBTOTAL": parseFloat(datos['LIN_CANTIDAD'] * datos['LIN_PRECIO']).toFixed(DECIMALES)
+            , "UNIDAD_MEDIDA_INV": datos['LIN_UM']
+            , "PRECIO_UI": datos['LIN_PRECIO_UI']
+            , "SUBTOTAL": parseFloat(datos['LIN_CANTIDAD'] * datos['LIN_PRECIO']).toFixed(DECIMALES_4)
 
-            , "DESCUENTO": datos['LIN_PORCENTAJEDESCUENTO']
-            , "MONTO_DESCUENTO": parseFloat(datos['LIN_DISC']).toFixed(DECIMALES)
+            , "DESCUENTO": parseFloat(datos['LIN_PORCENTAJEDESCUENTO']).toFixed(DECIMALES_2)
+            , "MONTO_DESCUENTO": parseFloat(datos['LIN_DISC']).toFixed(DECIMALES_4)
             , "IVA": datos['LIN_PORCENTAJEIVA']
 
-            , "MONTO_IVA": parseFloat(datos['LIN_IVA']).toFixed(DECIMALES)
-            , "TOTAL": parseFloat(datos['LIN_GTOTAL']).toFixed(DECIMALES)
+            , "MONTO_IVA": parseFloat(datos['LIN_IVA']).toFixed(DECIMALES_4)
+            , "TOTAL": parseFloat(datos['LIN_GTOTAL']).toFixed(DECIMALES_4)
             , "FECHA_ENTREGA": datos['ShipDate']
 
             , "CANT_PENDIENTE": datos['CANTIDAD_PENDIENTE']
@@ -2548,7 +2561,7 @@ function agregaArtExis(datos, pos) {
             , "ESTATUS_PARTIDA": datos['LineStatus']
         }
     ).draw();
-    TBL_ART_EXIST.row(pos).nodes(pos, COL_DESCUENTO).to$().find('input#input-descuentoAE').val(parseFloat(datos['LIN_PORCENTAJEDESCUENTO']).toFixed(DECIMALES));
+    TBL_ART_EXIST.row(pos).nodes(pos, COL_DESCUENTO).to$().find('input#input-descuentoAE').val(parseFloat(datos['LIN_PORCENTAJEDESCUENTO']).toFixed(DECIMALES_2));
     TBL_ART_EXIST.row(pos).nodes(pos, COL_IVA).to$().find('select#cboIVAAE').val(datos['TaxCode']);
     TBL_ART_EXIST.row(pos).nodes(pos, COL_FECHA_ENTREGA_COMPRA).to$().find('input#input-fecha-entrega-linea').val(datos['ShipDate']);    
     if (datos['LineStatus'] == 'O') {
@@ -2601,14 +2614,14 @@ function agregaArtExis2(datos, pos) {
 
             , "CANTIDAD": datos['LIN_CANTIDAD']
             , "PRECIO": datos['LIN_PRECIO']
-            , "SUBTOTAL": parseFloat(datos['LIN_CANTIDAD'] * datos['LIN_PRECIO']).toFixed(DECIMALES)
+            , "SUBTOTAL": parseFloat(datos['LIN_CANTIDAD'] * datos['LIN_PRECIO']).toFixed(DECIMALES_4)
 
-            , "DESCUENTO": datos['LIN_PORCENTAJEDESCUENTO']
-            , "MONTO_DESCUENTO": parseFloat(datos['LIN_DISC']).toFixed(DECIMALES)
+            , "DESCUENTO": parseFloat(datos['LIN_PORCENTAJEDESCUENTO']).toFixed(DECIMALES_2)
+            , "MONTO_DESCUENTO": parseFloat(datos['LIN_DISC']).toFixed(DECIMALES_4)
             , "IVA": datos['LIN_PORCENTAJEIVA']
 
-            , "MONTO_IVA": parseFloat(datos['LIN_IVA']).toFixed(DECIMALES)
-            , "TOTAL": parseFloat(datos['LIN_GTOTAL']).toFixed(DECIMALES)
+            , "MONTO_IVA": parseFloat(datos['LIN_IVA']).toFixed(DECIMALES_4)
+            , "TOTAL": parseFloat(datos['LIN_GTOTAL']).toFixed(DECIMALES_4)
             , "FECHA_ENTREGA": datos['ShipDate']
 
             , "CANT_PENDIENTE": datos['CANTIDAD_PENDIENTE']
@@ -2618,7 +2631,7 @@ function agregaArtExis2(datos, pos) {
             , "ESTATUS_PARTIDA": datos['LineStatus']
         }
     ).draw();
-    TBL_ART_EXIST.row(pos).nodes(pos, COL_DESCUENTO).to$().find('input#input-descuentoAE').val(parseFloat(datos['LIN_PORCENTAJEDESCUENTO']).toFixed(DECIMALES));
+    TBL_ART_EXIST.row(pos).nodes(pos, COL_DESCUENTO).to$().find('input#input-descuentoAE').val(parseFloat(datos['LIN_PORCENTAJEDESCUENTO']).toFixed(DECIMALES_2));
     TBL_ART_EXIST.row(pos).nodes(pos, COL_IVA).to$().find('select#cboIVAAE').val(datos['TaxCode']);
     TBL_ART_EXIST.row(pos).nodes(pos, COL_FECHA_ENTREGA_COMPRA).to$().find('input#input-fecha-entrega-linea').val(datos['ShipDate']);    
     if (datos['LineStatus'] == 'O') {
@@ -2958,14 +2971,14 @@ function agregaArtMisc(datos,pos){
 
             , "CANTIDAD": datos['LIN_CANTIDAD']
             , "PRECIO": datos['LIN_PRECIO']
-            , "SUBTOTAL": parseFloat(datos['LIN_CANTIDAD'] * datos['LIN_PRECIO']).toFixed(DECIMALES)
+            , "SUBTOTAL": parseFloat(datos['LIN_CANTIDAD'] * datos['LIN_PRECIO']).toFixed(DECIMALES_4)
             
-            , "DESCUENTO": datos['LIN_PORCENTAJEDESCUENTO']
-            , "MONTO_DESCUENTO": parseFloat(datos['LIN_DISC']).toFixed(DECIMALES)
+            , "DESCUENTO": parseFloat(datos['LIN_PORCENTAJEDESCUENTO']).toFixed(DECIMALES_2)
+            , "MONTO_DESCUENTO": parseFloat(datos['LIN_DISC']).toFixed(DECIMALES_4)
             , "IVA": datos['LIN_PORCENTAJEIVA']
             
-            , "MONTO_IVA": parseFloat(datos['LIN_IVA']).toFixed(DECIMALES)
-            , "TOTAL": parseFloat(datos['LIN_GTOTAL']).toFixed(DECIMALES)
+            , "MONTO_IVA": parseFloat(datos['LIN_IVA']).toFixed(DECIMALES_4)
+            , "TOTAL": parseFloat(datos['LIN_GTOTAL']).toFixed(DECIMALES_4)
             , "FECHA_ENTREGA": datos['ShipDate']
             
             , "CANT_PENDIENTE": datos['CANTIDAD_PENDIENTE'] 
@@ -2980,7 +2993,7 @@ function agregaArtMisc(datos,pos){
 
     TBL_ART_MISC.row(pos).nodes(pos, COL_NOMBRE_ART_MISC).to$().find('input#input-nombreART-miselaneos').val(datos['LIN_DESCRIPCION']);
     // tbl.row(pos).nodes(pos, COL_UNIDAD_MEDIDA_COMPRAS).to$().find('select#cboUMAM').val(datos['OCD_CMUM_UMComprasId']);
-    TBL_ART_MISC.row(pos).nodes(pos, COL_DESCUENTO).to$().find('input#input-descuentoAM').val(parseFloat(datos['LIN_PORCENTAJEDESCUENTO']).toFixed(DECIMALES));
+    TBL_ART_MISC.row(pos).nodes(pos, COL_DESCUENTO).to$().find('input#input-descuentoAM').val(parseFloat(datos['LIN_PORCENTAJEDESCUENTO']).toFixed(DECIMALES_2));
     
     TBL_ART_MISC.row(pos).nodes(pos, COL_FECHA_ENTREGA_COMPRA).to$().find('input#input-fecha-entrega-linea').val(datos['ShipDate']);
    

@@ -23,9 +23,10 @@
                                 <th>UMI</th>
                                 <th>Factor Coversión</th>
                                 <th>UMC</th>
-                                <th>Precio</th>
-                                <th>Moneda</th>
+                                <th>Precio Lista</th>
+                                <th>Moneda Lista</th>
                                 <th>Precio Tipo Cambio</th>
+                                <th>Moneda Tipo Cambio</th>
                             </thead>
                         </table>
                     </div>
