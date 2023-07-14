@@ -1210,7 +1210,7 @@ function insertarFila(BanderaOC){
                 , "SUBTOTAL": "0.00"
 
                 , "DESCUENTO": "0.00"
-                , "MONTO_DESCUENTO": ""
+                , "MONTO_DESCUENTO": "0.00"
                 , "IVA": "16"
 
                 , "MONTO_IVA": "0.00"

@@ -1012,7 +1012,7 @@ $('#tblArticulosMiscelaneosNueva').on('change','select#cboUMAM',function (e) {
             // var ID_IVA_anterior = datos['ID_IVA'];
             // var descuentoNuevo = $(this).val();
 
-            //datos['DESCUENTO'] = $(this).val();
+            datos['DESCUENTO'] = $(this).val();
             //tbl.row(row).nodes(row, COL_DESCUENTO).to$().find('input#' + input_descuento).val()
             if (datos['ID_ARTICULO'] != "") {
                 console.log("cambiando descuento ................")
