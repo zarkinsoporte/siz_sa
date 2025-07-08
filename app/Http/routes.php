@@ -10,16 +10,47 @@
 |
  */
 
+use App\OP;
+use App\SAP;
+use App\User;
 use App\Grupo;
 use App\Modelos\MOD01\LOGOF;
-use App\Modelos\MOD01\MODULOS_GRUPO_SIZ;
-use App\Modelos\MOD01\TAREA_MENU;
-use App\OP;
-use Illuminate\Support\Facades\DB;
-use App\User;
-use Illuminate\Support\Facades\Mail;
-use App\SAP;
 use Illuminate\Http\Request;
+use App\Modelos\MOD01\TAREA_MENU;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use App\Modelos\MOD01\MODULOS_GRUPO_SIZ;
+Route::any('auth-api', function () {
+	$empID = Input::get('empID');
+	$pass = Input::get('password');
+	//dd($empID, $pass);
+	$usuario = User::where('U_EmpGiro', $empID)->first();
+
+	//dd($usuario);
+	//dd(Hash::check($pass, $usuario->U_CP_Password));
+	if ($usuario && Hash::check($pass, $usuario->U_CP_Password)) {
+		$nombre = $usuario->GetName();
+		$departamento = $usuario->GetDepto();
+		//return response()->json(['status' => 'success', 'data' => $usuario]);
+		return response()->json([
+			'status' => 'success',
+			'data' => [
+				'name' => $nombre,
+				'departamento' => $departamento,
+			]
+		]);			
+	} else {
+		return response()->json([
+			'status' => 'error',
+			'message' => 'Usuario o contraseña incorrectos'
+		], 401);
+	}
+	return response()->json([
+		'status' => 'success',
+		'data' => $usuario
+	]);
+})->middleware('guest');
 
 Route::get('/', 'HomeController@index');
 Route::get(
@@ -29,6 +60,7 @@ Route::get(
 		'uses' => 'HomeController@index',
 	]
 );
+
 route::get('admin-password', function (){
 	/*
 		esta funcion es para establecer la contraseña de Admin en un inicio
@@ -52,6 +84,7 @@ route::get('admin-password', function (){
 | Administrator Routes
 |--------------------------------------------------------------------------
  */
+
 /*
 |--------------------------------------------------------------------------
 | Authentication Routes
