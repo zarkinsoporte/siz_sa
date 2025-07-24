@@ -478,7 +478,6 @@ Route::get('/sap', function (Request $request) {
 	//https://answers.sap.com/questions/1448088/using-xml-to-update-objects-in-diapi.html
 	//https://biuan.com/ProductTrees/
 	
-
 	$vCmp = new COM ('SAPbobsCOM.company') or die ("Sin conexión");
 	$vCmp->DbServerType="10"; 
 	$vCmp->server = env('SAP_server');
