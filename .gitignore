@@ -79,3 +79,15 @@ init.vbs
 ldm.bat
 .vscode/settings.json
 public/pdf_ordenes_empaque/
+public/assets/plantillas_excel/
+public/assets/plantillas_excel/Mod_01/SIZ_bo.xlsx
+public/assets/plantillas_excel/Mod_01/SIZ_bo.xlsx
+public/assets/plantillas_excel/Mod_01/SIZ_entradas.xlsx
+public/assets/plantillas_excel/Mod_01/SIZ_resumenxareas.xlsx
+public/assets/plantillas_excel/Mod_02/mrp.xlsx
+public/assets/plantillas_excel/Mod_03/SIZ_compras_proveedor.xlsx
+public/assets/plantillas_excel/Mod_03/SIZ_ultimos_precios.xlsx
+public/assets/plantillas_excel/Mod_04/SIZ_entradas_salidas.xlsx
+public/assets/plantillas_excel/Mod_05/SIZ_codibarr.xlsx
+public/assets/plantillas_excel/Mod_07/calidad_estadistico.xlsx
+public/assets/plantillas_excel/Mod_09/SIZ_simulador.xlsx
