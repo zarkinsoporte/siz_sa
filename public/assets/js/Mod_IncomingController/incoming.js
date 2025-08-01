@@ -49,7 +49,7 @@ function js_iniciador() {
                     type: 'info',
                     confirmButtonText: 'Aceptar'
                 });
-                $('#cabecera_nota').hide();
+                //$('#cabecera_nota').hide();
                 $('#materiales_container').hide();
                 $('#inspeccion_container').hide();
             }
@@ -96,7 +96,7 @@ function js_iniciador() {
         
         var tbody = '';
         materiales.forEach(function(mat, idx){
-            var porRevisar = mat.CANTIDAD - (mat.CAN_INSPECCIONADA||0) - (mat.CAN_RECHAZADA||0);
+            var porRevisar = (parseFloat(mat.CANTIDAD) || 0) - (parseFloat(mat.CAN_INSPECCIONADA) || 0) - (parseFloat(mat.CAN_RECHAZADA) || 0);
             var acciones = '';
             
             // Botón de piel si es grupo 113
@@ -112,7 +112,8 @@ function js_iniciador() {
                 '<td>'+mat.CODIGO_ARTICULO+'</td>'+
                 '<td>'+mat.MATERIAL+'</td>'+
                 '<td>'+mat.UDM+'</td>'+
-                '<td>'+(mat.CANTIDAD).toFixed(2)+'</td>'+
+                //cantidad a 2 decimales
+                '<td>'+(parseFloat(mat.CANTIDAD) || 0).toFixed(2)+'</td>'+
                 '<td>'+(mat.CAN_INSPECCIONADA||0)+'</td>'+
                 '<td>'+(mat.CAN_RECHAZADA||0)+'</td>'+
                 '<td>'+porRevisar+'</td>'+
@@ -140,8 +141,8 @@ function js_iniciador() {
     // Guardar clases de piel
     $('#guardarPiel').click(function(){
         var total = parseFloat($('#claseA').val()||0)+parseFloat($('#claseB').val()||0)+parseFloat($('#claseC').val()||0)+parseFloat($('#claseD').val()||0);
-        if(total != parseFloat(materialSeleccionado.CANTIDAD)){
-            $('#alertPiel').show().text('La suma de clases debe ser igual a la cantidad recibida ('+materialSeleccionado.CANTIDAD+')');
+        if(total != (parseFloat(materialSeleccionado.CANTIDAD) || 0)){
+            $('#alertPiel').show().text('La suma de clases debe ser igual a la cantidad recibida ('+(parseFloat(materialSeleccionado.CANTIDAD) || 0)+')');
             return;
         }
         pielData[materialSeleccionado.COD_ARTICULO] = {
@@ -166,7 +167,7 @@ function js_iniciador() {
     $('#tabla_materiales').on('click', '.btnChecklist', function(){
         var idx = $(this).closest('tr').data('idx');
         materialSeleccionado = materiales[idx];
-        cantidadRecibida = materialSeleccionado.CANTIDAD;
+        cantidadRecibida = parseFloat(materialSeleccionado.CANTIDAD) || 0;
         $.getJSON(routeapp+'/home/INSPECCION/checklist', {inc_id: materialSeleccionado.COD_ARTICULO}, function(data){
             checklist = data.checklist;
             respuestas = {};
@@ -196,9 +197,9 @@ function js_iniciador() {
             html += '<tr data-chk="'+item.CHK_id+'">'+
                 '<td><button type="button" class="btn btn-primary btn-sm btnEvidencia" title="Adjuntar Evidencia"><span class="glyphicon glyphicon-camera"></span></button><input type="file" name="img_'+item.CHK_id+'" accept=".jpg,.jpeg,.png" style="display:none;" class="inputEvidencia"></td>'+
                 '<td>'+item.CHK_descripcion+'</td>'+
-                '<td style="text-align:center"><input type="radio" name="estado_'+item.CHK_id+'" value="C" '+(r.IND_estado=='C'?'checked':'')+'></td>'+
-                '<td style="text-align:center"><input type="radio" name="estado_'+item.CHK_id+'" value="N" '+(r.IND_estado=='N'?'checked':'')+'></td>'+
-                '<td style="text-align:center"><input type="radio" name="estado_'+item.CHK_id+'" value="A" '+(r.IND_estado=='A'?'checked':'')+'></td>'+
+                '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="C" '+(r.IND_estado=='C'?'checked':'')+'></td>'+
+                '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="N" '+(r.IND_estado=='N'?'checked':'')+'></td>'+
+                '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="A" '+(r.IND_estado=='A'?'checked':'')+'></td>'+
                 '<td><textarea class="form-control textareaObservacion" name="obs_'+item.CHK_id+'" rows="2" style="resize:none; text-transform:uppercase;">'+(r.IND_observacion||'')+'</textarea></td>'+
             '</tr>';
         });
