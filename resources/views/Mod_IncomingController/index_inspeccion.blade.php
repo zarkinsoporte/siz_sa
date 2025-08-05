@@ -33,7 +33,61 @@
         display: inline-block;
         float: right;
     }
+    /* Contenedor principal con fondo oscuro */
+    .data-summary-block {
+    background: #2d353c;
+    color: #fff;
+    padding: 20px 15px;
+    border-radius: 8px; /* Bordes redondeados */
+    }
     
+    /* Estilo para cada bloque de dato individual */
+    .data-summary-item {
+    text-align: right; /* Alinea todo a la derecha */
+    margin-bottom: 15px; /* Espacio para móviles */
+    }
+    
+    /* Estilo para la etiqueta pequeña (título) */
+    .data-summary-item small {
+    display: block; /* Para que ocupe toda la línea */
+    font-weight: bold;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-bottom: 5px;
+    font-size: 12px;
+    }
+    
+    /* Estilo para los inputs dentro del bloque oscuro */
+    .data-summary-item .form-control {
+    background: transparent !important; /* Fondo transparente */
+    border: none !important; /* Sin bordes */
+    border-bottom: 1px solid #555 !important; /* Línea inferior sutil */
+    color: #fff !important; /* Texto blanco */
+    font-size: 26px; /* Letra grande para el valor */
+    font-weight: 300; /* Letra más delgada */
+    text-align: right;
+    padding: 0;
+    height: auto;
+    box-shadow: none !important; /* Sin sombras de focus */
+    border-radius: 0;
+    }
+    
+    /* Estilo específico para los inputs que son de solo lectura */
+    .data-summary-item .form-control[readonly] {
+    border-bottom: none !important; /* Quita la línea inferior si no es editable */
+    }
+    
+    /* Oculta las flechas de los input type="number" en navegadores WebKit */
+    .data-summary-item input::-webkit-outer-spin-button,
+    .data-summary-item input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+    }
+    
+    /* Oculta las flechas en Firefox */
+    .data-summary-item input[type=number] {
+    -moz-appearance: textfield;
+    }
 </style>
 
 <div class="container">
@@ -70,7 +124,12 @@
                             <div class="date m-t-5">
                                 <p><strong>Fecha:</strong> <span id="fecha_recepcion"></span></p>
                                 <p><strong>Factura:</strong> <span id="numero_factura"></span></p>
+                               
                             </div>
+                        </div>
+                        <div class="invoice-date">
+                            <small>INSPECCIÓN</small>
+                            <p><span id="id_inspeccion"></span></p>
                         </div>
                     </div>
                 </div>
@@ -105,9 +164,7 @@
                 </div>
             
               </div>
-              <div class="text-end">
-              <button id="guardar_inspeccion" class="btn btn-success mt-3 btn-lg pull-right">Guardar Inspección</button>
-              </div>
+              
             </div>
         </div>
     </div>
