@@ -5,6 +5,11 @@
 
 {!! Html::style('assets/css/customdt2.css') !!}
 
+<script>
+    // Variable global para el nombre del inspector
+    var currentUser = '{{ Auth::user()->firstName." ".Auth::user()->lastName }}';
+</script>
+
 <style>
     .mt7{
         margin-top: 7px

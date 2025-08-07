@@ -788,4 +788,5 @@ Route::any('cerrar_partida', 'Mod03_ComprasController@cerrar_partida');
 Route::get('home/INSPECCION', 'Mod_IncomingController@index_inspeccion')->middleware('routelog');
 Route::get('home/INSPECCION/buscar', 'Mod_IncomingController@buscarMateriales');
 Route::get('home/INSPECCION/checklist', 'Mod_IncomingController@getChecklist');
+Route::get('home/INSPECCION/ver-inspeccion', 'Mod_IncomingController@verInspeccion');
 Route::post('home/INSPECCION/guardar', 'Mod_IncomingController@guardarInspeccion');

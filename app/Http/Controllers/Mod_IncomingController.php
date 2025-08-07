@@ -50,12 +50,23 @@ class Mod_IncomingController extends Controller
                 $materialSAP->CAN_RECHAZADA = $inspeccion->CAN_RECHAZADA;
                 $materialSAP->POR_REVISAR = $inspeccion->POR_REVISAR;
                 $materialSAP->ID_INSPECCION = $inspeccion->ID_INSPECCION;
+                
+                // Obtener todas las inspecciones previas para este material
+                $inspeccionesPrevias = \App\Modelos\Siz_Incoming::on('siz')
+                    ->where('INC_docNum', $numeroEntrada)
+                    ->where('INC_codMaterial', $materialSAP->CODIGO_ARTICULO)
+                    ->where('INC_borrado', 'N')
+                    ->orderBy('INC_id', 'desc')
+                    ->get();
+                
+                $materialSAP->inspecciones = $inspeccionesPrevias->toArray();
             } else {
                 // Si no hay inspecciones, inicializar en 0
                 $materialSAP->CAN_INSPECCIONADA = 0;
                 $materialSAP->CAN_RECHAZADA = 0;
                 $materialSAP->POR_REVISAR = $materialSAP->CANTIDAD;
                 $materialSAP->ID_INSPECCION = 0;
+                $materialSAP->inspecciones = [];
             }
             
             $materialesCombinados[] = $materialSAP;
@@ -80,6 +91,42 @@ class Mod_IncomingController extends Controller
             'checklist' => $checklist, 
             'respuestas' => $respuestas,
             'id_inspeccion' => 0 // Siempre 0 para nueva inspección
+        ]);
+    }
+
+    // AJAX: Ver inspección previa (solo lectura)
+    public function verInspeccion(Request $request)
+    {
+        $inc_id = $request->input('inc_id');
+        
+        // Obtener datos de la inspección
+        $inspeccion = \App\Modelos\Siz_Incoming::on('siz')->where('INC_id', $inc_id)->first();
+        
+        if (!$inspeccion) {
+            return response()->json(['error' => 'Inspección no encontrada'], 404);
+        }
+        
+        // Obtener checklist y respuestas
+        $checklist = \App\Modelos\Siz_Checklist::on('siz')->where('CHK_activo', 'S')->orderBy('CHK_orden')->get();
+        $respuestas = \App\Modelos\Siz_IncomDetalle::on('siz')->where('IND_incId', $inc_id)->get();
+        
+        // Preparar datos de la inspección para el frontend
+        $inspeccionData = [
+            'INC_id' => $inspeccion->INC_id,
+            'CODIGO_ARTICULO' => $inspeccion->INC_codMaterial,
+            'MATERIAL' => $inspeccion->INC_nomMaterial,
+            'CAN_INSPECCIONADA' => $inspeccion->INC_cantAceptada,
+            'CAN_RECHAZADA' => $inspeccion->INC_cantRechazada,
+            'POR_REVISAR' => $inspeccion->INC_cantRecibida - $inspeccion->INC_cantAceptada - $inspeccion->INC_cantRechazada,
+            'OBSERVACIONES_GENERALES' => $inspeccion->INC_notas,
+            'INC_fechaInspeccion' => $inspeccion->INC_fechaInspeccion,
+            'INC_nomInspector' => $inspeccion->INC_nomInspector
+        ];
+        
+        return response()->json([
+            'inspeccion' => $inspeccionData,
+            'checklist' => $checklist,
+            'respuestas' => $respuestas
         ]);
     }
 
@@ -158,24 +205,49 @@ class Mod_IncomingController extends Controller
                     mkdir($directorioBase, 0777, true);
                 }
                 
-                foreach ($imagenes as $chk_id => $img) {
-                    if ($img) {
-                        $extension = $img->getClientOriginalExtension();
-                        $nombre = $incoming->INC_id . '_' . $chk_id . '_' . date('YmdHis') . '.' . $extension;
-                        $rutaCompleta = $directorioBase . '\\' . $nombre;
-                        
-                        // Guardar archivo
-                        $img->move($directorioBase, $nombre);
-                        
-                        $imagen = new \App\Modelos\Siz_IncomImagen();
-                        $imagen->setConnection('siz');
-                        $imagen->IMG_incId = $incoming->INC_id;
-                        $imagen->IMG_ruta = $rutaCompleta;
-                        $imagen->IMG_descripcion = $chk_id;
-                        $imagen->IMG_cargadoPor = auth()->check() ? auth()->user()->name : 'sistema';
-                        $imagen->IMG_cargadoEn = date("Y-m-d H:i:s");
-                        $imagen->IMG_borrado = 'N';
-                        $imagen->save();
+                foreach ($imagenes as $chk_id => $archivos) {
+                    if ($archivos) {
+                        // Si es un array de archivos (múltiples imágenes)
+                        if (is_array($archivos)) {
+                            foreach ($archivos as $img) {
+                                if ($img) {
+                                    $extension = $img->getClientOriginalExtension();
+                                    $nombre = $incoming->INC_id . '_' . $chk_id . '_' . date('YmdHis') . '_' . uniqid() . '.' . $extension;
+                                    $rutaCompleta = $directorioBase . '\\' . $nombre;
+                                    
+                                    // Guardar archivo
+                                    $img->move($directorioBase, $nombre);
+                                    
+                                    $imagen = new \App\Modelos\Siz_IncomImagen();
+                                    $imagen->setConnection('siz');
+                                    $imagen->IMG_incId = $incoming->INC_id;
+                                    $imagen->IMG_ruta = $rutaCompleta;
+                                    $imagen->IMG_descripcion = $chk_id;
+                                    $imagen->IMG_cargadoPor = auth()->check() ? auth()->user()->name : 'sistema';
+                                    $imagen->IMG_cargadoEn = date("Y-m-d H:i:s");
+                                    $imagen->IMG_borrado = 'N';
+                                    $imagen->save();
+                                }
+                            }
+                        } else {
+                            // Si es un solo archivo (compatibilidad)
+                            $extension = $archivos->getClientOriginalExtension();
+                            $nombre = $incoming->INC_id . '_' . $chk_id . '_' . date('YmdHis') . '.' . $extension;
+                            $rutaCompleta = $directorioBase . '\\' . $nombre;
+                            
+                            // Guardar archivo
+                            $archivos->move($directorioBase, $nombre);
+                            
+                            $imagen = new \App\Modelos\Siz_IncomImagen();
+                            $imagen->setConnection('siz');
+                            $imagen->IMG_incId = $incoming->INC_id;
+                            $imagen->IMG_ruta = $rutaCompleta;
+                            $imagen->IMG_descripcion = $chk_id;
+                            $imagen->IMG_cargadoPor = auth()->check() ? auth()->user()->name : 'sistema';
+                            $imagen->IMG_cargadoEn = date("Y-m-d H:i:s");
+                            $imagen->IMG_borrado = 'N';
+                            $imagen->save();
+                        }
                     }
                 }
             }
@@ -202,11 +274,22 @@ class Mod_IncomingController extends Controller
                     $materialSAP->CAN_RECHAZADA = $inspeccion->CAN_RECHAZADA;
                     $materialSAP->POR_REVISAR = $inspeccion->POR_REVISAR;
                     $materialSAP->ID_INSPECCION = $inspeccion->ID_INSPECCION;
+                    
+                    // Obtener todas las inspecciones previas para este material
+                    $inspeccionesPrevias = \App\Modelos\Siz_Incoming::on('siz')
+                        ->where('INC_docNum', $material['NOTA_ENTRADA'])
+                        ->where('INC_codMaterial', $materialSAP->CODIGO_ARTICULO)
+                        ->where('INC_borrado', 'N')
+                        ->orderBy('INC_id', 'desc')
+                        ->get();
+                    
+                    $materialSAP->inspecciones = $inspeccionesPrevias->toArray();
                 } else {
                     $materialSAP->CAN_INSPECCIONADA = 0;
                     $materialSAP->CAN_RECHAZADA = 0;
                     $materialSAP->POR_REVISAR = $materialSAP->CANTIDAD;
                     $materialSAP->ID_INSPECCION = 0;
+                    $materialSAP->inspecciones = [];
                 }
                 
                 $materialesActualizados[] = $materialSAP;

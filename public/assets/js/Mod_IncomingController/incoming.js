@@ -105,6 +105,15 @@ function js_iniciador() {
                 acciones += '<button class="btn btn-warning btn-xs btnPiel" title="Capturar Clases de Piel"><i class="fa fa-tags"></i></button> ';
             }
             
+            // Botones de inspecciones previas si existen
+            if(mat.inspecciones && Array.isArray(mat.inspecciones) && mat.inspecciones.length > 0) {
+                mat.inspecciones.forEach(function(inspeccion) {
+                    if(inspeccion && inspeccion.INC_id) {
+                        acciones += '<button class="btn btn-success btn-xs btnVerInspeccion" data-inspeccion-id="'+inspeccion.INC_id+'" title="Ver Inspección ID: '+inspeccion.INC_id+'"><i class="fa fa-eye"></i> '+inspeccion.INC_id+'</button> ';
+                    }
+                });
+            }
+            
             // Ícono de checklist - deshabilitar si por revisar es 0
             if(porRevisar > 0) {
                 acciones += '<button class="btn btn-primary btn-sm btnChecklist" title="Abrir Checklist"><span class="glyphicon glyphicon-check"></span></button>';
@@ -127,6 +136,7 @@ function js_iniciador() {
         
         // Inicializar nueva DataTable
         dataTable = $('#tabla_materiales').DataTable({
+            order: [[1, 'desc']],
             language: {
                 "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
             }
@@ -202,17 +212,48 @@ function js_iniciador() {
         });
     });
     
+    // Evento para ver inspección previa
+    $('#tabla_materiales').on('click', '.btnVerInspeccion', function(){
+        var inspeccionId = $(this).data('inspeccion-id');
+        var idx = $(this).closest('tr').data('idx');
+        materialSeleccionado = materiales[idx];
+        
+        // Cargar datos de la inspección existente
+        $.getJSON(routeapp+'/home/INSPECCION/ver-inspeccion', {
+            inc_id: inspeccionId
+        }, function(data){
+            checklist = data.checklist;
+            respuestas = data.respuestas || {};
+            idInspeccion = inspeccionId;
+            
+            renderChecklistSoloLectura();
+            renderResumenSoloLectura(data.inspeccion);
+            $('#inspeccion_container').show();
+        }).fail(function() {
+            swal({
+                title: 'Error',
+                text: 'Error al cargar la inspección',
+                type: 'error',
+                confirmButtonText: 'Aceptar'
+            });
+        });
+    });
+    
     // Renderizar checklist
     function renderChecklist(){
         var html = '<table class="table table-bordered" style="width:100%"><thead><tr><th style="width:10%"></th><th style="width:20%">Punto</th><th style="width:8%; text-align:center">Cumple</th><th style="width:8%; text-align:center">No Cumple</th><th style="width:8%; text-align:center">No Aplica</th><th style="width:50%">Observación</th></tr></thead><tbody>';
         checklist.forEach(function(item){
             var r = respuestas[item.CHK_id]||{};
             html += '<tr data-chk="'+item.CHK_id+'">'+
-                '<td><button type="button" class="btn btn-primary btn-sm btnEvidencia" title="Adjuntar Evidencia"><span class="glyphicon glyphicon-camera"></span></button><input type="file" name="img_'+item.CHK_id+'" accept=".jpg,.jpeg,.png" style="display:none;" class="inputEvidencia"></td>'+
+                '<td>'+
+                    '<button type="button" class="btn btn-primary btn-sm btnEvidencia" title="Adjuntar Evidencia"><span class="glyphicon glyphicon-camera"></span></button>'+
+                    '<input type="file" name="img_'+item.CHK_id+'" accept=".jpg,.jpeg,.png" style="display:none;" class="inputEvidencia" multiple>'+
+                    '<div class="imagenes-previas" id="imagenes_'+item.CHK_id+'" style="margin-top: 5px;"></div>'+
+                '</td>'+
                 '<td style="font-size: 14px;">'+item.CHK_descripcion+'</td>'+
                 '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="C" '+(r.IND_estado=='C'?'checked':'')+'></td>'+
                 '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="N" '+(r.IND_estado=='N'?'checked':'')+'></td>'+
-                '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="A" '+(r.IND_estado=='A'?'checked':'')+'></td>'+
+                '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="A" '+(r.IND_estado=='A'?'checked':(!r.IND_estado?'checked':''))+'></td>'+
                 '<td><textarea class="form-control textareaObservacion" name="obs_'+item.CHK_id+'" rows="2" style="resize:none; text-transform:uppercase;">'+(r.IND_observacion||'')+'</textarea></td>'+
             '</tr>';
         });
@@ -224,41 +265,62 @@ function js_iniciador() {
             $(this).siblings('.inputEvidencia').click();
         });
         
-        // Evento para cuando se selecciona un archivo
+        // Evento para cuando se seleccionan archivos
         $('.inputEvidencia').change(function(){
-            var file = this.files[0];
-            if(file) {
-                // Validar tipo de archivo
-                var allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-                if(allowedTypes.indexOf(file.type) === -1) {
-                    swal({
-                        title: 'Tipo de archivo no válido',
-                        text: 'Solo se permiten archivos JPG y PNG',
-                        type: 'error',
-                        confirmButtonText: 'Aceptar'
-                    });
-                    this.value = '';
-                    return;
+            var files = this.files;
+            var chkId = $(this).attr('name').replace('img_', '');
+            var contenedorImagenes = $('#imagenes_' + chkId);
+            
+            if(files.length > 0) {
+                // Limpiar contenedor de imágenes previas
+                contenedorImagenes.empty();
+                
+                for(var i = 0; i < files.length; i++) {
+                    var file = files[i];
+                    
+                    // Validar tipo de archivo
+                    var allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+                    if(allowedTypes.indexOf(file.type) === -1) {
+                        swal({
+                            title: 'Tipo de archivo no válido',
+                            text: 'Solo se permiten archivos JPG y PNG',
+                            type: 'error',
+                            confirmButtonText: 'Aceptar'
+                        });
+                        this.value = '';
+                        return;
+                    }
+                    
+                    // Validar tamaño (máximo 5MB por archivo)
+                    if(file.size > 5 * 1024 * 1024) {
+                        swal({
+                            title: 'Archivo demasiado grande',
+                            text: 'El archivo no debe superar 5MB',
+                            type: 'error',
+                            confirmButtonText: 'Aceptar'
+                        });
+                        this.value = '';
+                        return;
+                    }
+                    
+                    // Agregar preview de la imagen
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var imgPreview = '<div style="display: inline-block; margin: 2px;">' +
+                            '<img src="' + e.target.result + '" style="width: 50px; height: 50px; object-fit: cover; border: 1px solid #ccc;" title="' + file.name + '">' +
+                            '<div style="font-size: 10px; text-align: center;">' + file.name + '</div>' +
+                            '</div>';
+                        contenedorImagenes.append(imgPreview);
+                    };
+                    reader.readAsDataURL(file);
                 }
                 
-                // Validar tamaño (máximo 5MB)
-                if(file.size > 5 * 1024 * 1024) {
-                    swal({
-                        title: 'Archivo demasiado grande',
-                        text: 'El archivo no debe superar 5MB',
-                        type: 'error',
-                        confirmButtonText: 'Aceptar'
-                    });
-                    this.value = '';
-                    return;
-                }
-                
-                // Cambiar el ícono del botón para indicar que hay archivo
+                // Cambiar el ícono del botón para indicar que hay archivos
                 $(this).siblings('.btnEvidencia').html('<span class="glyphicon glyphicon-ok text-white"></span>');
                 
                 swal({
-                    title: 'Archivo adjuntado',
-                    text: 'Archivo cargado correctamente: ' + file.name,
+                    title: 'Archivos adjuntados',
+                    text: 'Se han cargado ' + files.length + ' archivo(s) correctamente',
                     type: 'success',
                     timer: 2000,
                     showConfirmButton: false
@@ -270,6 +332,28 @@ function js_iniciador() {
         $('.textareaObservacion').on('input', function(){
             this.value = this.value.toUpperCase();
         });
+    }
+    
+    // Renderizar checklist en modo solo lectura
+    function renderChecklistSoloLectura(){
+        var html = '<table class="table table-bordered" style="width:100%"><thead><tr><th style="width:10%"></th><th style="width:20%">Punto</th><th style="width:8%; text-align:center">Cumple</th><th style="width:8%; text-align:center">No Cumple</th><th style="width:8%; text-align:center">No Aplica</th><th style="width:50%">Observación</th></tr></thead><tbody>';
+        checklist.forEach(function(item){
+            var r = respuestas[item.CHK_id]||{};
+            html += '<tr data-chk="'+item.CHK_id+'">'+
+                '<td>'+
+                    '<button type="button" class="btn btn-primary btn-sm btnEvidencia" title="Adjuntar Evidencia" disabled><span class="glyphicon glyphicon-camera"></span></button>'+ // deshabilitado
+                    '<input type="file" name="img_'+item.CHK_id+'" accept=".jpg,.jpeg,.png" style="display:none;" class="inputEvidencia" multiple disabled>'+ // deshabilitado
+                    '<div class="imagenes-previas" id="imagenes_'+item.CHK_id+'" style="margin-top: 5px;"></div>'+ // solo visualización
+                '</td>'+
+                '<td style="font-size: 14px;">'+item.CHK_descripcion+'</td>'+ // solo visualización
+                '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="C" '+(r.IND_estado=='C'?'checked':'')+' disabled></td>'+ // deshabilitado
+                '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="N" '+(r.IND_estado=='N'?'checked':'')+' disabled></td>'+ // deshabilitado
+                '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="A" '+(r.IND_estado=='A'?'checked':(!r.IND_estado?'checked':''))+' disabled></td>'+ // deshabilitado
+                '<td><textarea class="form-control textareaObservacion" name="obs_'+item.CHK_id+'" rows="2" style="resize:none; text-transform:uppercase;" readonly>'+(r.IND_observacion||'')+'</textarea></td>'+ // readonly
+            '</tr>';
+        });
+        html += '</tbody></table>';
+        $('#checklist_container').html(html);
     }
     
     // Renderizar resumen lateral
@@ -291,6 +375,9 @@ function js_iniciador() {
         // Mostrar ID de inspección o "Por definir" si es nueva
         var idInspeccionMostrar = idInspeccion > 0 ? idInspeccion : 'Por definir';
         
+        // Obtener nombre del inspector (usuario actual para nuevas inspecciones)
+        var nomInspector = typeof currentUser !== 'undefined' ? currentUser : 'Usuario Actual';
+        
         var html = '<div class="card">'+
             '<div class="card-body">'+
                 '<h4 style="font-weight: bold; margin-bottom: 16px;">RESUMEN</h4>'+
@@ -310,7 +397,14 @@ function js_iniciador() {
                         '</div>'+
                     '</div>'+
                 '</div>'+
-                
+                '<div class="row">'+
+                    '<div class="col-sm-6 col-md-6">'+
+                        '<div style="margin-top: 20px;">'+
+                            '<label style="font-weight: bold; margin-bottom: 10px;">Inspector:</label>'+
+                            '<input type="text" id="nomInspector" class="form-control" value="'+nomInspector+'" readonly style="margin-top: 5px;">'+
+                        '</div>'+
+                    '</div>'+
+                '</div>'+
                 '<div class="data-summary-block" style="margin-top: 10px; margin-bottom: 20px;">'+
                     '<div class="row">'+
                         '<div class="col-sm-6 col-md-3">'+
@@ -366,8 +460,111 @@ function js_iniciador() {
             this.select();
         });
         
+        // Evento para seleccionar todo el texto al hacer clic en cantidad aceptada
+        $('#cantidad_aceptada').on('click', function(){
+            this.select();
+        });
+        
         // Solo bloquear si realmente no hay por revisar (después de guardar)
         // No bloquear automáticamente al cargar el resumen
+    }
+    
+    // Renderizar resumen en modo solo lectura
+    function renderResumenSoloLectura(inspeccionData) {
+        var revisada = parseFloat(inspeccionData.CAN_INSPECCIONADA) + parseFloat(inspeccionData.CAN_RECHAZADA);
+        var aceptadas = parseFloat(inspeccionData.CAN_INSPECCIONADA);
+        var rechazadas = parseFloat(inspeccionData.CAN_RECHAZADA);
+        var porcentaje = revisada > 0 ? (aceptadas / revisada * 100) : 0;
+        
+        // Obtener fecha de la inspección
+        var fechaInspeccion = inspeccionData.INC_fechaInspeccion || new Date();
+        var fechaFormateada = '';
+        if (typeof fechaInspeccion === 'string') {
+            // Si es string, formatear
+            var fecha = new Date(fechaInspeccion);
+            fechaFormateada = fecha.getDate().toString().padStart(2, '0') + '/' + 
+                             (fecha.getMonth() + 1).toString().padStart(2, '0') + '/' + 
+                             fecha.getFullYear();
+        } else {
+            // Si es Date object
+            fechaFormateada = fechaInspeccion.getDate().toString().padStart(2, '0') + '/' + 
+                             (fechaInspeccion.getMonth() + 1).toString().padStart(2, '0') + '/' + 
+                             fechaInspeccion.getFullYear();
+        }
+        
+        // Mostrar ID de inspección
+        var idInspeccionMostrar = inspeccionData.INC_id || 'Por definir';
+        
+        // Obtener nombre del inspector desde los datos de la inspección
+        var nomInspector = inspeccionData.INC_nomInspector || 'N/A';
+        
+        var html = '<div class="card">'+
+            '<div class="card-body">'+
+                '<h4 style="font-weight: bold; margin-bottom: 16px;">RESUMEN - CONSULTA</h4>'+
+            '<h4 style="margin-bottom: 10px;">' + inspeccionData.CODIGO_ARTICULO + ' - ' + inspeccionData.MATERIAL + '</h4>'+
+                
+                '<div class="row">'+
+                    '<div class="col-sm-6 col-md-6">'+
+                        '<div style="margin-top: 20px;">'+
+                            '<label style="font-weight: bold; margin-bottom: 10px;">ID de Inspección:</label>'+
+                            '<input type="text" id="id_inspeccion_consulta" class="form-control" value="'+idInspeccionMostrar+'" readonly style="margin-top: 5px;">'+
+                        '</div>'+
+                    '</div>'+
+                    '<div class="col-sm-6 col-md-6">'+
+                        '<div style="margin-top: 20px;">'+
+                            '<label style="font-weight: bold; margin-bottom: 10px;">Fecha de Inspección:</label>'+
+                            '<input type="text" id="fecha_inspeccion_consulta" class="form-control" value="'+fechaFormateada+'" readonly style="margin-top: 5px;">'+
+                        '</div>'+
+                    '</div>'+
+                '</div>'+
+                '<div class="row">'+
+                    '<div class="col-sm-6 col-md-6">'+
+                        '<div style="margin-top: 20px;">'+
+                            '<label style="font-weight: bold; margin-bottom: 10px;">Inspector:</label>'+
+                            '<input type="text" id="nomInspector_consulta" class="form-control" value="'+nomInspector+'" readonly style="margin-top: 5px;">'+
+                        '</div>'+
+                    '</div>'+
+                '</div>'+
+                
+                '<div class="data-summary-block" style="margin-top: 10px; margin-bottom: 20px;">'+
+                    '<div class="row">'+
+                        '<div class="col-sm-6 col-md-3">'+
+                            '<div class="data-summary-item">'+
+                                '<small>REVISADA</small>'+
+                                '<input type="number" id="cantidad_revisada_consulta" class="form-control user-error" value="'+revisada.toFixed(2)+'" readonly style="margin-top: 5px;">'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="col-sm-6 col-md-3">'+
+                            '<div class="data-summary-item">'+
+                                '<small>ACEPTADA</small>'+
+                                '<input type="number" id="cantidad_aceptada_consulta" class="form-control user-success" value="'+aceptadas.toFixed(2)+'" readonly style="margin-top: 5px;">'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="col-sm-6 col-md-3">'+
+                            '<div class="data-summary-item">'+
+                                '<small>RECHAZADA</small>'+
+                                '<input type="number" id="cantidad_rechazada_consulta" class="form-control" value="'+rechazadas.toFixed(2)+'" readonly style="margin-top: 5px;">'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="col-sm-6 col-md-3">'+
+                            '<div class="data-summary-item">'+
+                                '<small>% ACEPTADO</small>'+
+                                '<input type="text" id="porcentaje_aceptado_consulta" class="form-control" value="'+porcentaje.toFixed(2)+'%" readonly style="margin-top: 5px;">'+
+                            '</div>'+
+                        '</div>'+
+                    '</div>'+
+                '</div>'+
+                
+                '<div style="margin-top: 20px;">'+
+                    '<label style="font-weight: bold; margin-bottom: 10px;">Observaciones Generales:</label>'+
+                    '<textarea class="form-control textareaObservacionesGenerales" name="observaciones_generales" rows="5" style="resize:none; text-transform:uppercase; margin-top: 5px;" placeholder="INGRESE OBSERVACIONES GENERALES..." readonly>'+inspeccionData.OBSERVACIONES_GENERALES+'</textarea>'+
+                '</div>'+
+                '<div style="margin-top: 20px; margin-bottom: 20px;">'+
+                    '<button id="guardar_inspeccion" class="btn btn-success btn-lg btn-block" disabled>Guardar Inspección</button>'+
+                '</div>'+
+            '</div>'+
+        '</div>';
+        $('#resumen_material').html(html);
     }
     
     // Función para calcular cantidades automáticamente
@@ -459,8 +656,12 @@ function js_iniciador() {
             var obs = $('textarea[name="obs_'+item.CHK_id+'"]').val()||'';
             datos.append('checklist['+item.CHK_id+'][estado]', estado);
             datos.append('checklist['+item.CHK_id+'][obs]', obs);
-            var file = $('input[name="img_'+item.CHK_id+'"]')[0].files[0];
-            if(file) datos.append('imagenes['+item.CHK_id+']', file);
+            var files = $('input[name="img_'+item.CHK_id+'"][type="file"]')[0].files;
+            if(files.length > 0) {
+                for(var i = 0; i < files.length; i++) {
+                    datos.append('imagenes['+item.CHK_id+'][]', files[i]);
+                }
+            }
         });
         
         $.ajax({
