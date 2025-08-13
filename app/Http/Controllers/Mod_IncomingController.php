@@ -69,6 +69,19 @@ class Mod_IncomingController extends Controller
                 $materialSAP->inspecciones = [];
             }
             
+            // 4. Obtener lote para materiales de piel (grupo 113)
+            if ($materialSAP->GRUPO == 113) {
+                try {
+                    $lote = DB::select('SELECT TOP (1) OIBT.BatchNum FROM OIBT WHERE OIBT.ItemCode = ? AND OIBT.BaseEntry = ?', 
+                        [$materialSAP->CODIGO_ARTICULO, $materialSAP->NOTA_ENTRADA]);
+                    $materialSAP->LOTE = $lote ? $lote[0]->BatchNum : 'N/A';
+                } catch (\Exception $e) {
+                    $materialSAP->LOTE = 'N/A';
+                }
+            } else {
+                $materialSAP->LOTE = 'N/A';
+            }
+            
             $materialesCombinados[] = $materialSAP;
         }
         

@@ -37,6 +37,24 @@ function js_iniciador() {
             return;
         }
         
+        // Mostrar blockUI
+        $.blockUI({
+            message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+            css: {
+                border: 'none',
+                padding: '16px',
+                width: '50%',
+                top: '40%',
+                left: '30%',
+                backgroundColor: '#fefefe',
+                '-webkit-border-radius': '10px',
+                '-moz-border-radius': '10px',
+                opacity: .7,
+                color: '#000000',
+                baseZ: 2000
+            }
+        });
+        
         $.getJSON(routeapp+'/home/INSPECCION/buscar', {numero_entrada: numero}, function(data){
             materiales = data;
             if(materiales.length > 0) {
@@ -53,7 +71,11 @@ function js_iniciador() {
                 $('#materiales_container').hide();
                 $('#inspeccion_container').hide();
             }
+            // Ocultar blockUI
+            $.unblockUI();
         }).fail(function() {
+            // Ocultar blockUI en caso de error
+            $.unblockUI();
             swal({
                 title: 'Error',
                 text: 'Error en la búsqueda. Intente nuevamente.',
@@ -99,11 +121,6 @@ function js_iniciador() {
         materiales.forEach(function(mat, idx){
             var porRevisar = (parseFloat(mat.POR_REVISAR) || 0);
             var acciones = '';
-            
-            // Botón de piel si es grupo 113
-            if(mat.GRUPO == 113) {
-                acciones += '<button class="btn btn-warning btn-xs btnPiel" title="Capturar Clases de Piel"><i class="fa fa-tags"></i></button> ';
-            }
             
             // Botones de inspecciones previas si existen
             if(mat.inspecciones && Array.isArray(mat.inspecciones) && mat.inspecciones.length > 0) {
@@ -155,10 +172,13 @@ function js_iniciador() {
     // Guardar clases de piel
     $('#guardarPiel').click(function(){
         var total = parseFloat($('#claseA').val()||0)+parseFloat($('#claseB').val()||0)+parseFloat($('#claseC').val()||0)+parseFloat($('#claseD').val()||0);
-        if(total != (parseFloat(materialSeleccionado.CANTIDAD) || 0)){
-            $('#alertPiel').show().text('La suma de clases debe ser igual a la cantidad recibida ('+(parseFloat(materialSeleccionado.CANTIDAD) || 0)+')');
+        var cantidadPorRevisar = parseFloat(materialSeleccionado.POR_REVISAR) || 0;
+        
+        if(total != cantidadPorRevisar){
+            $('#alertPiel').show().text('La suma de clases debe ser igual a la cantidad por revisar ('+cantidadPorRevisar.toFixed(2)+')');
             return;
         }
+        
         pielData[materialSeleccionado.CODIGO_ARTICULO] = {
             claseA: $('#claseA').val(),
             claseB: $('#claseB').val(),
@@ -177,11 +197,69 @@ function js_iniciador() {
         });
     });
     
+    // Calcular porcentajes automáticamente en el modal de piel
+    $(document).on('input', '.clase-piel', function(){
+        calcularPorcentajesPiel();
+    });
+    
+    // Función para calcular porcentajes de piel
+    function calcularPorcentajesPiel() {
+        var claseA = parseFloat($('#claseA').val()) || 0;
+        var claseB = parseFloat($('#claseB').val()) || 0;
+        var claseC = parseFloat($('#claseC').val()) || 0;
+        var claseD = parseFloat($('#claseD').val()) || 0;
+        
+        var total = claseA + claseB + claseC + claseD;
+        var cantidadPorRevisar = parseFloat(materialSeleccionado.POR_REVISAR) || 0;
+        
+        // Calcular porcentajes
+        var porcentajeA = cantidadPorRevisar > 0 ? (claseA / cantidadPorRevisar * 100) : 0;
+        var porcentajeB = cantidadPorRevisar > 0 ? (claseB / cantidadPorRevisar * 100) : 0;
+        var porcentajeC = cantidadPorRevisar > 0 ? (claseC / cantidadPorRevisar * 100) : 0;
+        var porcentajeD = cantidadPorRevisar > 0 ? (claseD / cantidadPorRevisar * 100) : 0;
+        
+        // Actualizar porcentajes
+        $('#porcentajeA').text(porcentajeA.toFixed(2) + '%');
+        $('#porcentajeB').text(porcentajeB.toFixed(2) + '%');
+        $('#porcentajeC').text(porcentajeC.toFixed(2) + '%');
+        $('#porcentajeD').text(porcentajeD.toFixed(2) + '%');
+        
+        // Actualizar totales
+        $('#totalClases').text(total.toFixed(2));
+        $('#totalPorcentaje').text((porcentajeA + porcentajeB + porcentajeC + porcentajeD).toFixed(2) + '%');
+        
+        // Validar si la suma es correcta
+        if(Math.abs(total - cantidadPorRevisar) < 0.01) {
+            $('#alertPiel').hide();
+            $('.clase-piel').removeClass('is-invalid').addClass('is-valid');
+        } else {
+            $('.clase-piel').removeClass('is-valid').addClass('is-invalid');
+        }
+    }
+    
     // Evento para mostrar checklist
     $('#tabla_materiales').on('click', '.btnChecklist', function(){
         var idx = $(this).closest('tr').data('idx');
         materialSeleccionado = materiales[idx];
         cantidadRecibida = parseFloat(materialSeleccionado.CANTIDAD) || 0;
+        
+        // Mostrar blockUI
+        $.blockUI({
+            message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+            css: {
+                border: 'none',
+                padding: '16px',
+                width: '50%',
+                top: '40%',
+                left: '30%',
+                backgroundColor: '#fefefe',
+                '-webkit-border-radius': '10px',
+                '-moz-border-radius': '10px',
+                opacity: .7,
+                color: '#000000',
+                baseZ: 2000
+            }
+        });
         
         $.getJSON(routeapp+'/home/INSPECCION/checklist', {
             inc_id: materialSeleccionado.ID_INSPECCION || 0,
@@ -202,7 +280,11 @@ function js_iniciador() {
             renderChecklist();
             renderResumen();
             $('#inspeccion_container').show();
+            // Ocultar blockUI
+            $.unblockUI();
         }).fail(function() {
+            // Ocultar blockUI en caso de error
+            $.unblockUI();
             swal({
                 title: 'Error',
                 text: 'Error al cargar el checklist',
@@ -218,18 +300,46 @@ function js_iniciador() {
         var idx = $(this).closest('tr').data('idx');
         materialSeleccionado = materiales[idx];
         
+        // Mostrar blockUI
+        $.blockUI({
+            message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+            css: {
+                border: 'none',
+                padding: '16px',
+                width: '50%',
+                top: '40%',
+                left: '30%',
+                backgroundColor: '#fefefe',
+                '-webkit-border-radius': '10px',
+                '-moz-border-radius': '10px',
+                opacity: .7,
+                color: '#000000',
+                baseZ: 2000
+            }
+        });
+        
         // Cargar datos de la inspección existente
         $.getJSON(routeapp+'/home/INSPECCION/ver-inspeccion', {
             inc_id: inspeccionId
         }, function(data){
             checklist = data.checklist;
-            respuestas = data.respuestas || {};
+            // Convertir array de respuestas en objeto indexado por IND_chkId
+            respuestas = {};
+            if(data.respuestas && Array.isArray(data.respuestas)) {
+                data.respuestas.forEach(function(r) {
+                    respuestas[r.IND_chkId] = r;
+                });
+            }
             idInspeccion = inspeccionId;
             
             renderChecklistSoloLectura();
             renderResumenSoloLectura(data.inspeccion);
             $('#inspeccion_container').show();
+            // Ocultar blockUI
+            $.unblockUI();
         }).fail(function() {
+            // Ocultar blockUI en caso de error
+            $.unblockUI();
             swal({
                 title: 'Error',
                 text: 'Error al cargar la inspección',
@@ -438,6 +548,14 @@ function js_iniciador() {
                     '<label style="font-weight: bold; margin-bottom: 10px;">Observaciones Generales:</label>'+
                     '<textarea class="form-control textareaObservacionesGenerales" name="observaciones_generales" rows="5" style="resize:none; text-transform:uppercase; margin-top: 5px;" placeholder="INGRESE OBSERVACIONES GENERALES..."></textarea>'+
                 '</div>'+
+                
+                // Botón de piel solo para materiales de piel (grupo 113)
+                (materialSeleccionado.GRUPO == 113 ? 
+                    '<div style="margin-top: 20px; margin-bottom: 20px;">'+
+                        '<button id="btn_capturar_piel" class="btn btn-warning btn-lg btn-block" style="display:none;"><i class="fa fa-tags"></i> Capturar Clases de Piel</button>'+
+                    '</div>' : ''
+                )+
+                
                 '<div style="margin-top: 20px; margin-bottom: 20px;">'+
                     '<button id="guardar_inspeccion" class="btn btn-success btn-lg btn-block">Guardar Inspección</button>'+
                 '</div>'+
@@ -453,6 +571,16 @@ function js_iniciador() {
         // Eventos para cálculos automáticos
         $('#cantidad_por_revisar, #cantidad_aceptada').on('input', function(){
             calcularCantidades();
+            
+            // Mostrar/ocultar botón de piel para materiales de piel
+            if(materialSeleccionado.GRUPO == 113) {
+                var porRevisar = parseFloat($('#cantidad_por_revisar').val()) || 0;
+                if(porRevisar > 0) {
+                    $('#btn_capturar_piel').show();
+                } else {
+                    $('#btn_capturar_piel').hide();
+                }
+            }
         });
         
         // Evento para seleccionar todo el texto al hacer clic en cantidad por revisar
@@ -467,7 +595,38 @@ function js_iniciador() {
         
         // Solo bloquear si realmente no hay por revisar (después de guardar)
         // No bloquear automáticamente al cargar el resumen
+        
+        // Evento para el botón de piel
+        $(document).on('click', '#btn_capturar_piel', function(){
+            abrirModalPiel();
+        });
     }
+    
+    // Función para abrir modal de piel
+    function abrirModalPiel() {
+        var porRevisar = parseFloat($('#cantidad_por_revisar').val()) || 0;
+        
+        // Llenar información del modal
+        $('#piel_articulo_info').text(materialSeleccionado.CODIGO_ARTICULO + ' - ' + materialSeleccionado.MATERIAL);
+        $('#piel_lote_info').text(materialSeleccionado.LOTE || 'N/A');
+        $('#piel_cantidad_total').text(porRevisar.toFixed(2));
+        
+        // Limpiar campos y porcentajes
+        $('#claseA, #claseB, #claseC, #claseD').val('');
+        $('.porcentaje-clase').text('0.00%');
+        $('#totalClases').text('0.00');
+        $('#totalPorcentaje').text('0.00%');
+        
+        // Mostrar modal
+        $('#modalPiel').modal('show');
+    }
+    
+    // Evento para abrir modal de piel (mantener compatibilidad)
+    $('#tabla_materiales').on('click', '.btnPiel', function(){
+        var idx = $(this).closest('tr').data('idx');
+        materialSeleccionado = materiales[idx];
+        $('#modalPiel').modal('show');
+    });
     
     // Renderizar resumen en modo solo lectura
     function renderResumenSoloLectura(inspeccionData) {
@@ -664,6 +823,24 @@ function js_iniciador() {
             }
         });
         
+        // Mostrar blockUI
+        $.blockUI({
+            message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+            css: {
+                border: 'none',
+                padding: '16px',
+                width: '50%',
+                top: '40%',
+                left: '30%',
+                backgroundColor: '#fefefe',
+                '-webkit-border-radius': '10px',
+                '-moz-border-radius': '10px',
+                opacity: .7,
+                color: '#000000',
+                baseZ: 2000
+            }
+        });
+        
         $.ajax({
             url: routeapp+'/home/INSPECCION/guardar',
             type: 'POST',
@@ -672,6 +849,9 @@ function js_iniciador() {
             contentType: false,
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
             success: function(resp){
+                // Ocultar blockUI
+                $.unblockUI();
+                
                 if(resp.success) {
                     // Actualizar materiales con los datos recargados
                     if(resp.materiales) {
@@ -722,6 +902,8 @@ function js_iniciador() {
                 }
             },
             error: function() {
+                // Ocultar blockUI en caso de error
+                $.unblockUI();
                 swal({
                     title: 'Error',
                     text: 'Error al guardar la inspección',

@@ -93,6 +93,36 @@
     .data-summary-item input[type=number] {
     -moz-appearance: textfield;
     }
+    
+    /* Estilos para el modal de piel */
+    .clase-piel.is-valid {
+        border-color: #28a745 !important;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
+    }
+    
+    .clase-piel.is-invalid {
+        border-color: #dc3545 !important;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+    }
+    
+    .porcentaje-clase {
+        font-weight: bold;
+        color: #495057;
+    }
+    
+    .table-info {
+        background-color: #d1ecf1 !important;
+    }
+    
+    .form-control-static {
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        font-weight: 500;
+        color: #495057;
+        background-color: #e9ecef;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+    }
 </style>
 
 <div class="container">
@@ -178,7 +208,7 @@
 
     <!-- Modal para clases de piel -->
     <div class="modal fade" id="modalPiel" tabindex="-1" role="dialog" aria-labelledby="modalPielLabel">
-      <div class="modal-dialog" role="document">
+      <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h4 class="modal-title" id="modalPielLabel">Captura de Clases de Piel</h4>
@@ -186,23 +216,79 @@
                 aria-hidden="true">&times;</span></button>
           </div>
           <div class="modal-body">
+            <!-- Información del material -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="font-weight-bold">ARTÍCULO ACTIVO:</label>
+                  <div class="form-control-static" id="piel_articulo_info"></div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="font-weight-bold">LOTE:</label>
+                  <div class="form-control-static" id="piel_lote_info"></div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="row mb-3">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label class="font-weight-bold">CANTIDAD POR REVISAR:</label>
+                  <div class="form-control-static" id="piel_cantidad_total"></div>
+                </div>
+              </div>
+            </div>
+            
             <form id="formPiel">
-              <div class="form-group">
-                <label>Clase A</label>
-                <input type="number" min="0" step="any" class="form-control" id="claseA" name="claseA">
+              <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                  <thead class="thead-dark">
+                    <tr>
+                      <th>CLASE</th>
+                      <th>CANTIDAD</th>
+                      <th>%</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>CLASE A</strong></td>
+                      <td>
+                        <input type="number" min="0" step="0.01" class="form-control clase-piel" id="claseA" name="claseA" data-clase="A">
+                      </td>
+                      <td><span id="porcentajeA" class="porcentaje-clase">0.00%</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>CLASE B</strong></td>
+                      <td>
+                        <input type="number" min="0" step="0.01" class="form-control clase-piel" id="claseB" name="claseB" data-clase="B">
+                      </td>
+                      <td><span id="porcentajeB" class="porcentaje-clase">0.00%</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>CLASE C</strong></td>
+                      <td>
+                        <input type="number" min="0" step="0.01" class="form-control clase-piel" id="claseC" name="claseC" data-clase="C">
+                      </td>
+                      <td><span id="porcentajeC" class="porcentaje-clase">0.00%</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>CLASE *</strong></td>
+                      <td>
+                        <input type="number" min="0" step="0.01" class="form-control clase-piel" id="claseD" name="claseD" data-clase="D">
+                      </td>
+                      <td><span id="porcentajeD" class="porcentaje-clase">0.00%</span></td>
+                    </tr>
+                    <tr class="table-info">
+                      <td><strong>TOTAL</strong></td>
+                      <td><span id="totalClases" class="font-weight-bold">0.00</span></td>
+                      <td><span id="totalPorcentaje" class="font-weight-bold">0.00%</span></td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
-              <div class="form-group">
-                <label>Clase B</label>
-                <input type="number" min="0" step="any" class="form-control" id="claseB" name="claseB">
-              </div>
-              <div class="form-group">
-                <label>Clase C</label>
-                <input type="number" min="0" step="any" class="form-control" id="claseC" name="claseC">
-              </div>
-              <div class="form-group">
-                <label>Clase D</label>
-                <input type="number" min="0" step="any" class="form-control" id="claseD" name="claseD">
-              </div>
+              
               <div class="alert alert-info" id="alertPiel" style="display:none"></div>
             </form>
           </div>
