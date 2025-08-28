@@ -71,13 +71,16 @@ class Mod_IncomingController extends Controller
             
             // 4. Obtener lote para materiales de piel (grupo 113)
             if ($materialSAP->GRUPO == 113) {
-                try {
+                //try {
+                    
                     $lote = DB::select('SELECT TOP (1) OIBT.BatchNum FROM OIBT WHERE OIBT.ItemCode = ? AND OIBT.BaseEntry = ?', 
-                        [$materialSAP->CODIGO_ARTICULO, $materialSAP->NOTA_ENTRADA]);
+                        [$materialSAP->CODIGO_ARTICULO, $materialSAP->BASE_ENTRY]);
+
+                        //dd($lote, $materialSAP);
                     $materialSAP->LOTE = $lote ? $lote[0]->BatchNum : 'N/A';
-                } catch (\Exception $e) {
-                    $materialSAP->LOTE = 'N/A';
-                }
+                //} catch (\Exception $e) {
+                //    $materialSAP->LOTE = 'N/A';
+                //}
             } else {
                 $materialSAP->LOTE = 'N/A';
             }
@@ -136,10 +139,24 @@ class Mod_IncomingController extends Controller
             'INC_nomInspector' => $inspeccion->INC_nomInspector
         ];
         
-        return response()->json([
+                    // Obtener imágenes agrupadas por CHK_id
+            $imagenes = \App\Modelos\Siz_IncomImagen::on('siz')->where('IMG_incId', $inc_id)->where('IMG_borrado','N')->get();
+            $imagenesPorChk = [];
+            foreach ($imagenes as $img) {
+                $chkId = $img->IMG_descripcion; // En este campo guardamos el CHK_id
+                if (!isset($imagenesPorChk[$chkId])) { $imagenesPorChk[$chkId] = []; }
+                $imagenesPorChk[$chkId][] = [
+                    'ruta' => $img->IMG_ruta,
+                    'id' => $img->IMG_id,
+                    'archivo' => basename($img->IMG_ruta)
+                ];
+            }
+
+            return response()->json([
             'inspeccion' => $inspeccionData,
             'checklist' => $checklist,
-            'respuestas' => $respuestas
+            'respuestas' => $respuestas,
+            'imagenes' => $imagenesPorChk
         ]);
     }
 
@@ -170,7 +187,14 @@ class Mod_IncomingController extends Controller
             $incoming->INC_cantRecibida = $material['CANTIDAD'];
             $incoming->INC_cantAceptada = $cantidadAceptada;
             $incoming->INC_cantRechazada = $cantidadPorRevisar - $cantidadAceptada;
-            $incoming->INC_fechaInspeccion = date("Y-m-d H:i:s");
+            // Obtener fecha de inspección del formulario o usar fecha actual
+            $fechaInspeccion = $request->get('fecha_inspeccion');
+            if ($fechaInspeccion) {
+                // Convertir fecha YYYY-MM-DD a YYYY-MM-DD HH:MM:SS
+                $incoming->INC_fechaInspeccion = $fechaInspeccion . ' ' . date('H:i:s');
+            } else {
+                $incoming->INC_fechaInspeccion = date("Y-m-d H:i:s");
+            }
             $incoming->INC_notas = $observacionesGenerales;
             $incoming->INC_esPiel = ($material['GRUPO'] == 113) ? 'S' : 'N';
             $incoming->INC_borrado = 'N';
@@ -201,10 +225,10 @@ class Mod_IncomingController extends Controller
                 $pielClases = new \App\Modelos\Siz_PielClases();
                 $pielClases->setConnection('siz');
                 $pielClases->PLC_incId = $incoming->INC_id;
-                $pielClases->PLC_claseA = isset($piel['claseA']) ? $piel['claseA'] : 0;
-                $pielClases->PLC_claseB = isset($piel['claseB']) ? $piel['claseB'] : 0;
-                $pielClases->PLC_claseC = isset($piel['claseC']) ? $piel['claseC'] : 0;
-                $pielClases->PLC_claseD = isset($piel['claseD']) ? $piel['claseD'] : 0;
+                $pielClases->PLC_claseA = isset($piel['claseA']) ? ($piel['claseA'] == '' ? 0 : $piel['claseA']) : 0;
+                $pielClases->PLC_claseB = isset($piel['claseB']) ? ($piel['claseB'] == '' ? 0 : $piel['claseB']) : 0;
+                $pielClases->PLC_claseC = isset($piel['claseC']) ? ($piel['claseC'] == '' ? 0 : $piel['claseC']) : 0;
+                $pielClases->PLC_claseD = isset($piel['claseD']) ? ($piel['claseD'] == '' ? 0 : $piel['claseD']) : 0;
                 $pielClases->PLC_borrado = 'N';
                 $pielClases->PLC_creadoEn = date("Y-m-d H:i:s");
                 $pielClases->PLC_actualizadoEn = date("Y-m-d H:i:s");
@@ -225,7 +249,10 @@ class Mod_IncomingController extends Controller
                             foreach ($archivos as $img) {
                                 if ($img) {
                                     $extension = $img->getClientOriginalExtension();
-                                    $nombre = $incoming->INC_id . '_' . $chk_id . '_' . date('YmdHis') . '_' . uniqid() . '.' . $extension;
+                                    // Obtener nombre del checklist por CHK_id
+                                    $chk = \App\Modelos\Siz_Checklist::on('siz')->where('CHK_id', $chk_id)->first();
+                                    $chkNombre = $chk ? preg_replace('/[^A-Za-z0-9_-]+/', '', str_replace(' ', '_', $chk->CHK_descripcion)) : ('CHK_'.$chk_id);
+                                    $nombre = $incoming->INC_id . '_' . $chkNombre . '_' . uniqid() . '.' . $extension;
                                     $rutaCompleta = $directorioBase . '\\' . $nombre;
                                     
                                     // Guardar archivo
@@ -245,7 +272,10 @@ class Mod_IncomingController extends Controller
                         } else {
                             // Si es un solo archivo (compatibilidad)
                             $extension = $archivos->getClientOriginalExtension();
-                            $nombre = $incoming->INC_id . '_' . $chk_id . '_' . date('YmdHis') . '.' . $extension;
+                            // Obtener nombre del checklist por CHK_id
+                            $chk = \App\Modelos\Siz_Checklist::on('siz')->where('CHK_id', $chk_id)->first();
+                            $chkNombre = $chk ? preg_replace('/[^A-Za-z0-9_-]+/', '', str_replace(' ', '_', $chk->CHK_descripcion)) : ('CHK_'.$chk_id);
+                            $nombre = $incoming->INC_id . '_' . $chkNombre . '.' . $extension;
                             $rutaCompleta = $directorioBase . '\\' . $nombre;
                             
                             // Guardar archivo
@@ -318,5 +348,77 @@ class Mod_IncomingController extends Controller
             DB::connection('siz')->rollBack();
             return response()->json(['success' => false, 'msg' => 'Error al guardar: '.$e->getMessage()]);
         }
+    }
+    
+    /**
+     * Obtener datos de piel para una inspección específica
+     */
+    public function verPiel(Request $request)
+    {
+        try {
+            $incId = $request->get('inc_id');
+            
+            if (!$incId) {
+                return response()->json([
+                    'success' => false,
+                    'msg' => 'ID de inspección requerido'
+                ]);
+            }
+            
+            // Buscar clases de piel para esta inspección
+            $piel = Siz_PielClases::on('siz')
+                ->where('PLC_incId', $incId)
+                ->where('PLC_borrado', 'N')
+                ->first();
+            
+            if ($piel) {
+                return response()->json([
+                    'success' => true,
+                    'piel' => [
+                        'claseA' => $piel->PLC_claseA,
+                        'claseB' => $piel->PLC_claseB,
+                        'claseC' => $piel->PLC_claseC,
+                        'claseD' => $piel->PLC_claseD
+                    ]
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'msg' => 'No se encontraron clases de piel para esta inspección'
+                ]);
+            }
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'msg' => 'Error al obtener datos de piel: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Descargar/ver imagen de evidencia de forma segura por ID
+     */
+    public function verImagen($id)
+    {
+        $img = \App\Modelos\Siz_IncomImagen::on('siz')->where('IMG_id', $id)->where('IMG_borrado','N')->first();
+        if (!$img || !file_exists($img->IMG_ruta)) {
+            abort(404);
+        }
+        $path = $img->IMG_ruta;
+        $filename = basename($path);
+        // Detectar MIME de forma compatible
+        $mime = function_exists('mime_content_type') ? mime_content_type($path) : 'application/octet-stream';
+        if ($mime === 'application/octet-stream' && function_exists('finfo_open')) {
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $detected = finfo_file($finfo, $path);
+            if ($detected) { $mime = $detected; }
+            finfo_close($finfo);
+        }
+        $headers = [
+            'Content-Type' => $mime,
+            'Content-Disposition' => 'inline; filename="'.$filename.'"'
+        ];
+        return response()->make(file_get_contents($path), 200, $headers);
     }
 } 

@@ -123,6 +123,23 @@
         border: 1px solid #ced4da;
         border-radius: 0.25rem;
     }
+    
+    /* Estilos para el campo de fecha editable */
+    #fecha_inspeccion[readonly] {
+        background-color: #e9ecef !important;
+        cursor: default;
+    }
+    
+    #fecha_inspeccion:not([readonly]) {
+        background-color: #fff !important;
+        cursor: text;
+        border-color: #007bff !important;
+    }
+    
+    /* Indicador visual de que el campo es editable */
+    #fecha_inspeccion:hover {
+        border-color: #007bff !important;
+    }
 </style>
 
 <div class="container">
@@ -221,13 +238,13 @@
               <div class="col-md-6">
                 <div class="form-group">
                   <label class="font-weight-bold">ARTÍCULO ACTIVO:</label>
-                  <div class="form-control-static" id="piel_articulo_info"></div>
+                  <div class="form-control-static" style="font-size: 16px;" id="piel_articulo_info"></div>
                 </div>
               </div>
               <div class="col-md-6">
                 <div class="form-group">
                   <label class="font-weight-bold">LOTE:</label>
-                  <div class="form-control-static" id="piel_lote_info"></div>
+                  <div class="form-control-static" style="font-size: 16px;" id="piel_lote_info"></div>
                 </div>
               </div>
             </div>
@@ -236,7 +253,7 @@
               <div class="col-md-12">
                 <div class="form-group">
                   <label class="font-weight-bold">CANTIDAD POR REVISAR:</label>
-                  <div class="form-control-static" id="piel_cantidad_total"></div>
+                  <div class="form-control-static" style="font-size: 16px;" id="piel_cantidad_total"></div>
                 </div>
               </div>
             </div>

@@ -172,18 +172,23 @@ function js_iniciador() {
     // Guardar clases de piel
     $('#guardarPiel').click(function(){
         var total = parseFloat($('#claseA').val()||0)+parseFloat($('#claseB').val()||0)+parseFloat($('#claseC').val()||0)+parseFloat($('#claseD').val()||0);
-        var cantidadPorRevisar = parseFloat(materialSeleccionado.POR_REVISAR) || 0;
+        var cantidadPorRevisar = parseFloat($('#cantidad_por_revisar').val()) || 0;
         
         if(total != cantidadPorRevisar){
-            $('#alertPiel').show().text('La suma de clases debe ser igual a la cantidad por revisar ('+cantidadPorRevisar.toFixed(2)+')');
+            swal({
+                title: 'Clases de piel incompletas',
+                text: 'La suma de clases debe ser igual a la cantidad por revisar ('+cantidadPorRevisar.toFixed(2)+')',
+                type: 'warning',
+                confirmButtonText: 'Aceptar'
+            });
             return;
         }
         
         pielData[materialSeleccionado.CODIGO_ARTICULO] = {
-            claseA: $('#claseA').val(),
-            claseB: $('#claseB').val(),
-            claseC: $('#claseC').val(),
-            claseD: $('#claseD').val()
+            claseA: ($('#claseA').val() == '' ? 0 : $('#claseA').val()),
+            claseB: ($('#claseB').val() == '' ? 0 : $('#claseB').val()),
+            claseC: ($('#claseC').val() == '' ? 0 : $('#claseC').val()),
+            claseD: ($('#claseD').val() == '' ? 0 : $('#claseD').val())
         };
         $('#modalPiel').modal('hide');
         $('#alertPiel').hide();
@@ -210,7 +215,7 @@ function js_iniciador() {
         var claseD = parseFloat($('#claseD').val()) || 0;
         
         var total = claseA + claseB + claseC + claseD;
-        var cantidadPorRevisar = parseFloat(materialSeleccionado.POR_REVISAR) || 0;
+        var cantidadPorRevisar = parseFloat($('#cantidad_por_revisar').val()) || 0;
         
         // Calcular porcentajes
         var porcentajeA = cantidadPorRevisar > 0 ? (claseA / cantidadPorRevisar * 100) : 0;
@@ -332,6 +337,8 @@ function js_iniciador() {
             }
             idInspeccion = inspeccionId;
             
+            // Pasar imágenes por CHK_id para mostrarlas en modo consulta
+            window._imagenesPorChk = data.imagenes || {};
             renderChecklistSoloLectura();
             renderResumenSoloLectura(data.inspeccion);
             $('#inspeccion_container').show();
@@ -449,11 +456,19 @@ function js_iniciador() {
         var html = '<table class="table table-bordered" style="width:100%"><thead><tr><th style="width:10%"></th><th style="width:20%">Punto</th><th style="width:8%; text-align:center">Cumple</th><th style="width:8%; text-align:center">No Cumple</th><th style="width:8%; text-align:center">No Aplica</th><th style="width:50%">Observación</th></tr></thead><tbody>';
         checklist.forEach(function(item){
             var r = respuestas[item.CHK_id]||{};
+            var imgs = (window._imagenesPorChk && window._imagenesPorChk[item.CHK_id]) ? window._imagenesPorChk[item.CHK_id] : [];
+            var imgsHtml = '';
+            if (imgs.length > 0) {
+                imgs.forEach(function(it){
+                    var url = routeapp + 'home/INSPECCION/imagen/' + it.id;
+                    imgsHtml += '<div style="font-size:11px; margin-top:3px;"><i class="fa fa-paperclip"></i> <a href="'+url+'" target="_blank">'+ it.archivo +'</a></div>';
+                });
+            }
             html += '<tr data-chk="'+item.CHK_id+'">'+
                 '<td>'+
                     '<button type="button" class="btn btn-primary btn-sm btnEvidencia" title="Adjuntar Evidencia" disabled><span class="glyphicon glyphicon-camera"></span></button>'+ // deshabilitado
                     '<input type="file" name="img_'+item.CHK_id+'" accept=".jpg,.jpeg,.png" style="display:none;" class="inputEvidencia" multiple disabled>'+ // deshabilitado
-                    '<div class="imagenes-previas" id="imagenes_'+item.CHK_id+'" style="margin-top: 5px;"></div>'+ // solo visualización
+                    '<div class="imagenes-previas" id="imagenes_'+item.CHK_id+'" style="margin-top: 5px;">'+imgsHtml+'</div>'+ // solo visualización
                 '</td>'+
                 '<td style="font-size: 14px;">'+item.CHK_descripcion+'</td>'+ // solo visualización
                 '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="C" '+(r.IND_estado=='C'?'checked':'')+' disabled></td>'+ // deshabilitado
@@ -476,11 +491,11 @@ function js_iniciador() {
         // Para nuevas inspecciones, cantidad aceptada por defecto = cantidad por revisar
         var cantidadAceptadaDefault = porRevisar;
         
-        // Obtener fecha actual para la inspección
+        // Obtener fecha actual para la inspección en formato YYYY-MM-DD para input type="date"
         var fechaActual = new Date();
-        var fechaFormateada = fechaActual.getDate().toString().padStart(2, '0') + '/' + 
-                             (fechaActual.getMonth() + 1).toString().padStart(2, '0') + '/' + 
-                             fechaActual.getFullYear();
+        var fechaFormateada = fechaActual.getFullYear() + '-' + 
+                             (fechaActual.getMonth() + 1).toString().padStart(2, '0') + '-' + 
+                             fechaActual.getDate().toString().padStart(2, '0');
         
         // Mostrar ID de inspección o "Por definir" si es nueva
         var idInspeccionMostrar = idInspeccion > 0 ? idInspeccion : 'Por definir';
@@ -503,7 +518,7 @@ function js_iniciador() {
                     '<div class="col-sm-6 col-md-6">'+
                         '<div style="margin-top: 20px;">'+
                             '<label style="font-weight: bold; margin-bottom: 10px;">Fecha de Inspección:</label>'+
-                            '<input type="text" id="fecha_inspeccion" class="form-control" value="'+fechaFormateada+'" readonly style="margin-top: 5px;">'+
+                            '<input type="date" id="fecha_inspeccion" class="form-control" value="'+fechaFormateada+'" readonly style="margin-top: 5px;">'+
                         '</div>'+
                     '</div>'+
                 '</div>'+
@@ -552,7 +567,7 @@ function js_iniciador() {
                 // Botón de piel solo para materiales de piel (grupo 113)
                 (materialSeleccionado.GRUPO == 113 ? 
                     '<div style="margin-top: 20px; margin-bottom: 20px;">'+
-                        '<button id="btn_capturar_piel" class="btn btn-warning btn-lg btn-block" style="display:none;"><i class="fa fa-tags"></i> Capturar Clases de Piel</button>'+
+                        '<button id="btn_capturar_piel" class="btn btn-warning btn-lg btn-block"><i class="fa fa-tags"></i> Capturar Clases de Piel</button>'+
                     '</div>' : ''
                 )+
                 
@@ -572,14 +587,20 @@ function js_iniciador() {
         $('#cantidad_por_revisar, #cantidad_aceptada').on('input', function(){
             calcularCantidades();
             
-            // Mostrar/ocultar botón de piel para materiales de piel
-            if(materialSeleccionado.GRUPO == 113) {
-                var porRevisar = parseFloat($('#cantidad_por_revisar').val()) || 0;
-                if(porRevisar > 0) {
-                    $('#btn_capturar_piel').show();
-                } else {
-                    $('#btn_capturar_piel').hide();
+            // Si es material de piel y cambia la cantidad por revisar, limpiar clases de piel
+            if(materialSeleccionado.GRUPO == 113 && $(this).attr('id') == 'cantidad_por_revisar') {
+                // Limpiar datos de piel en memoria
+                if(pielData[materialSeleccionado.CODIGO_ARTICULO]) {
+                    delete pielData[materialSeleccionado.CODIGO_ARTICULO];
                 }
+                
+                // // Mostrar alerta al usuario
+                // swal({
+                //     title: 'Cantidad por revisar cambiada',
+                //     text: 'Se han limpiado las clases de piel capturadas anteriormente. Debe volver a capturar las clases de piel.',
+                //     type: 'warning',
+                //     confirmButtonText: 'Entendido'
+                // });
             }
         });
         
@@ -591,6 +612,17 @@ function js_iniciador() {
         // Evento para seleccionar todo el texto al hacer clic en cantidad aceptada
         $('#cantidad_aceptada').on('click', function(){
             this.select();
+        });
+        
+        // Evento para hacer editable el campo de fecha con doble clic
+        $('#fecha_inspeccion').on('dblclick', function(){
+            $(this).prop('readonly', false);
+            $(this).focus();
+        });
+        
+        // Evento para hacer readonly el campo de fecha cuando pierde el foco
+        $('#fecha_inspeccion').on('blur', function(){
+            $(this).prop('readonly', true);
         });
         
         // Solo bloquear si realmente no hay por revisar (después de guardar)
@@ -617,8 +649,15 @@ function js_iniciador() {
         $('#totalClases').text('0.00');
         $('#totalPorcentaje').text('0.00%');
         
+        // Limpiar alertas previas
+        $('#alertPiel').hide();
+        
         // Mostrar modal
         $('#modalPiel').modal('show');
+        
+        // Habilitar campos para modo edición
+        $('#claseA, #claseB, #claseC, #claseD').prop('disabled', false);
+        $('#guardarPiel').prop('disabled', false);
     }
     
     // Evento para abrir modal de piel (mantener compatibilidad)
@@ -718,12 +757,68 @@ function js_iniciador() {
                     '<label style="font-weight: bold; margin-bottom: 10px;">Observaciones Generales:</label>'+
                     '<textarea class="form-control textareaObservacionesGenerales" name="observaciones_generales" rows="5" style="resize:none; text-transform:uppercase; margin-top: 5px;" placeholder="INGRESE OBSERVACIONES GENERALES..." readonly>'+inspeccionData.OBSERVACIONES_GENERALES+'</textarea>'+
                 '</div>'+
+                // Botón de piel solo para materiales de piel (grupo 113) - modo consulta
+                (inspeccionData.CODIGO_ARTICULO && materialSeleccionado && materialSeleccionado.GRUPO == 113 ? 
+                    '<div style="margin-top: 20px; margin-bottom: 20px;">'+
+                        '<button id="btn_ver_piel_consulta" class="btn btn-warning btn-lg btn-block"><i class="fa fa-tags"></i> Ver Clases de Piel</button>'+
+                    '</div>' : ''
+                )+
                 '<div style="margin-top: 20px; margin-bottom: 20px;">'+
                     '<button id="guardar_inspeccion" class="btn btn-success btn-lg btn-block" disabled>Guardar Inspección</button>'+
                 '</div>'+
             '</div>'+
         '</div>';
         $('#resumen_material').html(html);
+        
+        // Evento para el botón de ver piel en modo consulta
+        $(document).on('click', '#btn_ver_piel_consulta', function(){
+            abrirModalPielConsulta(inspeccionData);
+        });
+    }
+    
+    // Función para abrir modal de piel en modo consulta
+    function abrirModalPielConsulta(inspeccionData) {
+        // Cargar datos de piel desde la base de datos
+        $.getJSON(routeapp+'/home/INSPECCION/ver-piel', {
+            inc_id: inspeccionData.INC_id
+        }, function(data){
+            if(data.success && data.piel) {
+                // Llenar información del modal
+                $('#piel_articulo_info').text(inspeccionData.CODIGO_ARTICULO + ' - ' + inspeccionData.MATERIAL);
+                $('#piel_lote_info').text(materialSeleccionado.LOTE || 'N/A');
+                $('#piel_cantidad_total').text(inspeccionData.CAN_INSPECCIONADA + inspeccionData.CAN_RECHAZADA);
+                
+                // Llenar campos con datos de la base de datos
+                $('#claseA').val(data.piel.claseA || 0);
+                $('#claseB').val(data.piel.claseB || 0);
+                $('#claseC').val(data.piel.claseC || 0);
+                $('#claseD').val(data.piel.claseD || 0);
+                
+                // Calcular porcentajes
+                calcularPorcentajesPiel();
+                
+                // Deshabilitar todos los campos para modo consulta
+                $('#claseA, #claseB, #claseC, #claseD').prop('disabled', true);
+                $('#guardarPiel').prop('disabled', true);
+                
+                // Mostrar modal
+                $('#modalPiel').modal('show');
+            } else {
+                swal({
+                    title: 'Sin datos de piel',
+                    text: 'No se encontraron clases de piel para esta inspección.',
+                    type: 'info',
+                    confirmButtonText: 'Aceptar'
+                });
+            }
+        }).fail(function() {
+            swal({
+                title: 'Error',
+                text: 'Error al cargar los datos de piel.',
+                type: 'error',
+                confirmButtonText: 'Aceptar'
+            });
+        });
     }
     
     // Función para calcular cantidades automáticamente
@@ -803,11 +898,40 @@ function js_iniciador() {
             return;
         }
         
+        // Validar clases de piel para materiales de tipo piel (grupo 113)
+        if(materialSeleccionado.GRUPO == 113) {
+            var pielCapturada = pielData[materialSeleccionado.CODIGO_ARTICULO];
+            if(!pielCapturada) {
+                swal({
+                    title: 'Clases de piel no capturadas',
+                    text: 'Debe capturar las clases de piel antes de guardar la inspección.',
+                    type: 'warning',
+                    confirmButtonText: 'Aceptar'
+                });
+                return;
+            }
+            
+            var totalPiel = parseFloat(pielCapturada.claseA || 0) + parseFloat(pielCapturada.claseB || 0) + 
+                           parseFloat(pielCapturada.claseC || 0) + parseFloat(pielCapturada.claseD || 0);
+            var cantidadPorRevisar = parseFloat($('#cantidad_por_revisar').val()) || 0;
+            
+            if(Math.abs(totalPiel - cantidadPorRevisar) > 0.01) {
+                swal({
+                    title: 'Clases de piel incompletas',
+                    text: 'La suma de las clases de piel (' + totalPiel.toFixed(2) + ') debe coincidir con la cantidad por revisar (' + cantidadPorRevisar.toFixed(2) + ').',
+                    type: 'warning',
+                    confirmButtonText: 'Aceptar'
+                });
+                return;
+            }
+        }
+        
         var datos = new FormData();
         datos.append('material', JSON.stringify(materialSeleccionado));
         datos.append('piel', JSON.stringify(pielData[materialSeleccionado.CODIGO_ARTICULO]||{}));
         datos.append('cantidad_por_revisar', $('#cantidad_por_revisar').val());
         datos.append('cantidad_aceptada', $('#cantidad_aceptada').val());
+        datos.append('fecha_inspeccion', $('#fecha_inspeccion').val());
         datos.append('observaciones_generales', $('.textareaObservacionesGenerales').val());
         
         checklist.forEach(function(item){

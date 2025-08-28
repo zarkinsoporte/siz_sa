@@ -617,7 +617,7 @@ Route::get('/sap', function (Request $request) {
 
 	*/
 	if ($vCmp->Connect <> 0) {
-	   Session::flash('error', $vCmp->GetLastErrorDescription());
+	   Session::flash('error', $vCmp->GetLastErrorDescription() . env('SAP_CompanyDB') . ' - ' . env('SAP_username') . ' - ' . env('SAP_password'). ' - ' . env('SAP_DbUserName') . ' - ' . env('SAP_DbPassword'). ' - ' . env('SAP_LicenseServer') . ' - ' . env('SAP_server'));
 	} else {
 		Session::flash('info',' - conexión con SAP DI API exitosa!!'. $vCmp->language. ' ultimo err:'. $vCmp->GetLastErrorDescription());
 	} 
@@ -790,3 +790,5 @@ Route::get('home/INSPECCION/buscar', 'Mod_IncomingController@buscarMateriales');
 Route::get('home/INSPECCION/checklist', 'Mod_IncomingController@getChecklist');
 Route::get('home/INSPECCION/ver-inspeccion', 'Mod_IncomingController@verInspeccion');
 Route::post('home/INSPECCION/guardar', 'Mod_IncomingController@guardarInspeccion');
+Route::get('home/INSPECCION/ver-piel', 'Mod_IncomingController@verPiel');
+Route::get('home/INSPECCION/imagen/{id}', 'Mod_IncomingController@verImagen');
