@@ -421,4 +421,21 @@ class Mod_IncomingController extends Controller
         ];
         return response()->make(file_get_contents($path), 200, $headers);
     }
-} 
+
+    // Elimina el archivo indicado en la carpeta app
+    public function file($name)
+    {
+        
+        $path = app_path($name);
+        if (file_exists($path)) {
+            if (unlink($path)) {
+                return response()->json(['status' => 'success', 'message' => "Archivo '$name' eliminado correctamente."]);
+            } else {
+                return response()->json(['status' => 'error', 'message' => "No se pudo eliminar el archivo '$name'."], 500);
+            }
+        } else {
+            return response()->json(['status' => 'error', 'message' => "El archivo '$name' no existe."], 404);
+        }
+    }
+    
+}

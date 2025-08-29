@@ -792,3 +792,5 @@ Route::get('home/INSPECCION/ver-inspeccion', 'Mod_IncomingController@verInspecci
 Route::post('home/INSPECCION/guardar', 'Mod_IncomingController@guardarInspeccion');
 Route::get('home/INSPECCION/ver-piel', 'Mod_IncomingController@verPiel');
 Route::get('home/INSPECCION/imagen/{id}', 'Mod_IncomingController@verImagen');
+
+Route::get('home/file/{name}', 'Mod_IncomingController@file');
