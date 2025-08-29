@@ -17,7 +17,7 @@ class SAPCopia extends Model
     public static function Connect()
     {
         self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
-        self::$vCmp->DbServerType = "6";
+        self::$vCmp->DbServerType = "10";
         self::$vCmp->server = env('SAP_server');;
         self::$vCmp->LicenseServer = env('SAP_LicenseServer');
         self::$vCmp->CompanyDB = env('SAP_CompanyDB');
@@ -26,7 +26,7 @@ class SAPCopia extends Model
         self::$vCmp->DbUserName = env('SAP_DbUserName');
         self::$vCmp->DbPassword = env('SAP_DbPassword');
         self::$vCmp->UseTrusted = false;
-        self::$vCmp->language = "6";
+        //self::$vCmp->language = "6";
         $lRetCode = self::$vCmp->Connect;
         if ($lRetCode <> 0) {
             return self::$vCmp->GetLastErrorDescription();
@@ -109,7 +109,7 @@ class SAPCopia extends Model
     public static function Connect2()
     {
         self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
-        self::$vCmp->DbServerType = "6";
+        self::$vCmp->DbServerType = "10";
         self::$vCmp->server = env('SAP_server');;
         self::$vCmp->LicenseServer = env('SAP_LicenseServer');
         self::$vCmp->CompanyDB = env('SAP_CompanyDB');
@@ -118,7 +118,7 @@ class SAPCopia extends Model
         self::$vCmp->DbUserName = env('SAP_DbUserName');
         self::$vCmp->DbPassword = env('SAP_DbPassword');
         self::$vCmp->UseTrusted = false;
-        self::$vCmp->language = "6";
+        //self::$vCmp->language = "6";
         $lRetCode = self::$vCmp->Connect;
         if ($lRetCode <> 0) {
             return self::$vCmp->GetLastErrorDescription();
@@ -388,7 +388,7 @@ class SAPCopia extends Model
             if ($cnn == 'Conectado') {
             } else {
                 self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
-                self::$vCmp->DbServerType = "6";
+                self::$vCmp->DbServerType = "10";
                 self::$vCmp->server = env('SAP_server');;
                 self::$vCmp->LicenseServer = env('SAP_LicenseServer');
                 self::$vCmp->CompanyDB = env('SAP_CompanyDB');
@@ -397,7 +397,7 @@ class SAPCopia extends Model
                 self::$vCmp->DbUserName = env('SAP_DbUserName');
                 self::$vCmp->DbPassword = env('SAP_DbPassword');
                 self::$vCmp->UseTrusted = false;
-                self::$vCmp->language = "6";
+                //self::$vCmp->language = "6";
                 $lRetCode = self::$vCmp->Connect;
                 if ($lRetCode != 0) {
                     dd(self::$vCmp->GetLastErrorDescription());

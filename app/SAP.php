@@ -174,14 +174,19 @@ class SAP extends Model
         //--R -> 1 OP271 liberado
         //--L -> 2 OP4 cerrado
         //--C -> 3 OP1 cancelado
-        (self::$vCmp == false) ? self::Connect() : '';
+        //(self::$vCmp == false) ? self::Connect() : '';
+
         $vItem = self::$vCmp->GetBusinessObject("202");
         $RetVal = $vItem->GetByKey("".$orden);
         $vItem->ProductionOrderStatus = "".$status;
         $vItem->Update;
         if ($vItem->ProductionOrderStatus <> $status) {
+            //disconnect();
+            //return 'Error, no se pudo cambiar el status de la orden';
+            self::$vCmp->Disconnect();
             return false;
         } else {
+            self::$vCmp->Disconnect();
             return true;
         }
     }
