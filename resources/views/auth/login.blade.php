@@ -31,31 +31,20 @@ input[type=number]::-webkit-inner-spin-button{
 }
 
 </style>
-<body class="container-fluid" style=" background-image: url({{ URL::asset('images/fondo1.jpg') }});
-        background-repeat:no-repeat;
-        background-size:cover;
-        background-position:center;">
 
-<div class="" id="page"><!-- group -->
-    <div style="margin-top: 0px;" id="slideshowu216"><!-- none box -->
-        
-    </div>
-    <div class="row" ><!-- column -->
-        <p align="center"  ><!-- svg -->
-            <img class="svg hidden-xs" id="u196" src={{ URL::asset('images/svg-pegado-150982x45.svg') }} alt="" data-mu-svgfallback="/siz/public/images/svg%20pegado%20150982x45_poster_.png?crc=4279418901" width="200" height="200"
-           />
-            <img class="svg visible-xs" id="u196" src={{ URL::asset('images/svg-pegado-150982x45.svg') }}  alt="" data-mu-svgfallback="/siz/public/images/svg%20pegado%20150982x45_poster_.png?crc=4279418901" width="200" height="200"
-            style="margin-top: -30%"/>
+<body class="container-fluid" style="background-image: url({{ URL::asset('images/fondo_siz.jpg') }}); background-repeat:no-repeat; background-size:cover; background-position:center; min-height:100vh; display:flex; align-items:center; justify-content:center;">
 
-        <p  align="center"><!-- none box -->
-            &nbsp;          
-            <img class="hidden-xs"  alt="Bienvenido" src={{ URL::asset('images/u343-4.png') }} style="height: 7%"/><!-- rasterized frame -->
-        </p>
-        <div >
-            <div >
-                <div class="col-md-4 col-xs-8 col-xs-offset-2 col-md-offset-4">
-
-
+<div class="container" style="display:flex; align-items:center; justify-content:center; min-height:100vh;">
+    <div class="row" style="width:100%; display:flex; justify-content:center;">
+        <div class="col-md-10 col-sm-10 col-xs-12" style="float:none; margin:0 auto;">
+            <!-- Card Start -->
+            <div class="panel panel-default" style="background: rgba(34,34,34,0.85); border-radius:18px; box-shadow:0 4px 24px rgba(0,0,0,0.25); margin-top:30px;">
+                <div class="panel-body" style="padding:40px 40px 35px 40px;">
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 20px;">
+                        <img class="svg" id="u196" src="{{ URL::asset('images/svg-pegado-150982x45.svg') }}" alt="Logo SIZ" width="180" height="180" style="display:block; margin:0 auto;" />
+                        <img class="hidden-xs" alt="Bienvenido" src="{{ URL::asset('images/u343-4.png') }}" style="height: 7%; width: 90%; margin-top: 10px; display:block; margin-left:auto; margin-right:auto;"/>
+                    </div>
+                    <!-- Formulario -->
                     @if (count($errors) > 0)
                         <div class="alert alert-danger text-center" style="opacity: .6; border-radius: 15px; color: white" role="alert">
                             @foreach($errors->getMessages() as $this_error)
@@ -67,47 +56,36 @@ input[type=number]::-webkit-inner-spin-button{
                             {{ Session::get('mensaje') }}
                         </div>
                     @endif
-                 
-
-                    <div >
-
-
-                        <form class="form-horizontal"  role="form" method="post" action="{{url('/auth/login')}}">
-                            {{ csrf_field() }}
-
-
-                            <div class="form-group label-floating">
-                                <label class="control-label" for="id">No. Nómina:</label>
-                                <div class="input-group">
-                                    <input type="number" min="0" id="id" name="id" class="form-control" style="color: white" value="{{old('id')}}" required autofocus autocomplete="off">
-                                    <span class="input-group-btn">
-
-                                      </span>
-                                </div>
+                    <form class="form-horizontal"  role="form" method="post" action="{{url('/auth/login')}}">
+                        {{ csrf_field() }}
+                        <div class="form-group label-floating">
+                            <label class="control-label" for="id" style="color:#fff;">No. Nómina:</label>
+                            <div class="input-group">
+                                <input type="number" min="0" id="id" name="id" class="form-control" style="color: white" value="{{old('id')}}" required autofocus autocomplete="off">
+                                <span class="input-group-btn">
+                                </span>
                             </div>
-
-                            <div class="form-group label-floating">
-                                <label class="control-label" for="password">Contraseña:</label>
-                                <div class="input-group">
-                                    <input type="password" id="password" class="form-control"  style="color: white" name="password" required>
-                                    <span class="input-group-btn">
-                                        <button type="submit" class="btn btn-fab btn-fab-mini">
-                                          <i class="material-icons">send</i>
-                                        </button>
-                                      </span>
-                                </div>
+                        </div>
+                        <div class="form-group label-floating">
+                            <label class="control-label" for="password" style="color:#fff;">Contraseña:</label>
+                            <div class="input-group">
+                                <input type="password" id="password" class="form-control"  style="color: white" name="password" required>
+                                <span class="input-group-btn">
+                                    <button type="submit" class="btn btn-fab btn-fab-mini">
+                                      <i class="material-icons">send</i>
+                                    </button>
+                                  </span>
                             </div>
-
-
-                        </form>
-                    </div>
-
-
+                        </div>
+                    </form>
                 </div>
             </div>
+            <!-- Card End -->
         </div>
-        </p>
     </div>
+</div>
+                   
+                    <!-- Eliminado formulario y alertas duplicados -->
 
 </div>
 <!-- Other scripts -->
