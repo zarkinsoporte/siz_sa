@@ -266,36 +266,43 @@ function js_iniciador() {
             }
         });
         
-        $.getJSON(routeapp+'/home/INSPECCION/checklist', {
-            inc_id: materialSeleccionado.ID_INSPECCION || 0,
-            material: materialSeleccionado
-        }, function(data){
-            checklist = data.checklist;
-            respuestas = {};
-            if(data.respuestas){
-                data.respuestas.forEach(function(r){
-                    respuestas[r.IND_chkId] = r;
+        $.ajax({
+            url: routeapp+'home/INSPECCION/checklist',
+            type: 'POST',
+            data: {
+                inc_id: materialSeleccionado.ID_INSPECCION || 0,
+                material: materialSeleccionado
+            },
+            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+            success: function(data){
+                checklist = data.checklist;
+                respuestas = {};
+                if(data.respuestas){
+                    data.respuestas.forEach(function(r){
+                        respuestas[r.IND_chkId] = r;
+                    });
+                }
+                idInspeccion = data.id_inspeccion || 0;
+                
+                // Para nuevas inspecciones, idInspeccion será 0 hasta que se guarde
+                // No actualizar el material en el array hasta que se guarde
+                
+                renderChecklist();
+                renderResumen();
+                $('#inspeccion_container').show();
+                // Ocultar blockUI
+                $.unblockUI();
+            },
+            error: function() {
+                // Ocultar blockUI en caso de error
+                $.unblockUI();
+                swal({
+                    title: 'Error',
+                    text: 'Error al cargar el checklist',
+                    type: 'error',
+                    confirmButtonText: 'Aceptar'
                 });
             }
-            idInspeccion = data.id_inspeccion || 0;
-            
-            // Para nuevas inspecciones, idInspeccion será 0 hasta que se guarde
-            // No actualizar el material en el array hasta que se guarde
-            
-            renderChecklist();
-            renderResumen();
-            $('#inspeccion_container').show();
-            // Ocultar blockUI
-            $.unblockUI();
-        }).fail(function() {
-            // Ocultar blockUI en caso de error
-            $.unblockUI();
-            swal({
-                title: 'Error',
-                text: 'Error al cargar el checklist',
-                type: 'error',
-                confirmButtonText: 'Aceptar'
-            });
         });
     });
     
@@ -821,7 +828,7 @@ function js_iniciador() {
                 $('#claseB').val(data.piel.claseB || 0);
                 $('#claseC').val(data.piel.claseC || 0);
                 $('#claseD').val(data.piel.claseD || 0);
-                
+
                 // Calcular porcentajes
                 calcularPorcentajesPiel();
                 
