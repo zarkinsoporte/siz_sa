@@ -155,7 +155,7 @@ function js_iniciador() {
         dataTable = $('#tabla_materiales').DataTable({
             order: [[1, 'desc']],
             language: {
-                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                "url": assetapp + "assets/lang/Spanish.json"
             }
         });
         
@@ -370,9 +370,10 @@ function js_iniciador() {
                 '<td style="font-size: 14px;">'+item.CHK_descripcion+'</td>'+
                 '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="C" '+(r.IND_estado=='C'?'checked':'')+'></td>'+
                 '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="N" '+(r.IND_estado=='N'?'checked':'')+'></td>'+
-                '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="A" '+(r.IND_estado=='A'?'checked':(!r.IND_estado?'checked':''))+'></td>'+
+                '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="A" '+(r.IND_estado=='A'?'checked':'')+'></td>'+
                 '<td><textarea class="form-control textareaObservacion" name="obs_'+item.CHK_id+'" rows="2" style="resize:none; text-transform:uppercase;">'+(r.IND_observacion||'')+'</textarea></td>'+
-            '</tr>';
+                '</tr>';
+                //'<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="A" '+(r.IND_estado=='A'?'checked':(!r.IND_estado?'checked':''))+'></td>'+
         });
         html += '</tbody></table>';
         $('#checklist_container').html(html);
@@ -511,7 +512,7 @@ function js_iniciador() {
                 '<div class="row">'+
                     '<div class="col-sm-6 col-md-6">'+
                         '<div style="margin-top: 20px;">'+
-                            '<label style="font-weight: bold; margin-bottom: 10px;">ID de Inspección:</label>'+
+                            '<label style="font-weight: bold; margin-bottom: 10px;">Reporte de Inspección N°:</label>'+
                             '<input type="text" id="id_inspeccion_resumen" class="form-control" value="'+idInspeccionMostrar+'" readonly style="margin-top: 5px;">'+
                         '</div>'+
                     '</div>'+
@@ -525,7 +526,7 @@ function js_iniciador() {
                 '<div class="row">'+
                     '<div class="col-sm-6 col-md-6">'+
                         '<div style="margin-top: 20px;">'+
-                            '<label style="font-weight: bold; margin-bottom: 10px;">Inspector:</label>'+
+                            '<label style="font-weight: bold; margin-bottom: 10px;">Nombre del Inspector:</label>'+
                             '<input type="text" id="nomInspector" class="form-control" value="'+nomInspector+'" readonly style="margin-top: 5px;">'+
                         '</div>'+
                     '</div>'+
