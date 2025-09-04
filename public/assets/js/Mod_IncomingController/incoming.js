@@ -667,6 +667,24 @@ function js_iniciador() {
         materialSeleccionado = materiales[idx];
         $('#modalPiel').modal('show');
     });
+
+    // Limpiar modal cuando se cierre para evitar datos persistentes
+    $('#modalPiel').on('hidden.bs.modal', function () {
+        // Limpiar todos los campos del modal
+        $('#piel_articulo_info').text('');
+        $('#piel_lote_info').text('');
+        $('#piel_cantidad_total').text('');
+        $('#claseA, #claseB, #claseC, #claseD').val('');
+        $('.porcentaje-clase').text('0.00%');
+        $('#totalClases').text('0.00');
+        $('#totalPorcentaje').text('0.00%');
+        $('#alertPiel').hide();
+        $('.clase-piel').removeClass('is-valid is-invalid');
+        
+        // Habilitar campos para modo edición (por si se abre en modo nueva inspección)
+        $('#claseA, #claseB, #claseC, #claseD').prop('disabled', false);
+        $('#guardarPiel').prop('disabled', false);
+    });
     
     // Renderizar resumen en modo solo lectura
     function renderResumenSoloLectura(inspeccionData) {
@@ -779,17 +797,26 @@ function js_iniciador() {
     
     // Función para abrir modal de piel en modo consulta
     function abrirModalPielConsulta(inspeccionData) {
-        // Cargar datos de piel desde la base de datos
+        // Limpiar modal antes de cargar nueva información
+        $('#piel_articulo_info').text('');
+        $('#piel_lote_info').text('');
+        $('#piel_cantidad_total').text('');
+        $('#claseA, #claseB, #claseC, #claseD').val('');
+        $('.porcentaje-clase').text('0.00%');
+        $('#totalClases').text('0.00');
+        $('#totalPorcentaje').text('0.00%');
+        
+        // Cargar datos de piel desde la base de datos usando el ID específico de la inspección
         $.getJSON(routeapp+'/home/INSPECCION/ver-piel', {
             inc_id: inspeccionData.INC_id
         }, function(data){
             if(data.success && data.piel) {
-                // Llenar información del modal
+                // Llenar información del modal con datos específicos de esta inspección
                 $('#piel_articulo_info').text(inspeccionData.CODIGO_ARTICULO + ' - ' + inspeccionData.MATERIAL);
                 $('#piel_lote_info').text(materialSeleccionado.LOTE || 'N/A');
-                $('#piel_cantidad_total').text(inspeccionData.CAN_INSPECCIONADA + inspeccionData.CAN_RECHAZADA);
+                $('#piel_cantidad_total').text((parseFloat(inspeccionData.CAN_INSPECCIONADA) + parseFloat(inspeccionData.CAN_RECHAZADA)).toFixed(2));
                 
-                // Llenar campos con datos de la base de datos
+                // Llenar campos con datos específicos de la base de datos
                 $('#claseA').val(data.piel.claseA || 0);
                 $('#claseB').val(data.piel.claseB || 0);
                 $('#claseC').val(data.piel.claseC || 0);
