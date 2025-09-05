@@ -21,7 +21,7 @@ class Mod_IncomingController extends Controller
         $ultimo = count($actividades);
         return view('Mod_IncomingController.index_rechazos', compact('actividades', 'ultimo'));
     }
-    
+
     // Muestra la vista principal de inspección
     public function index_inspeccion()
     {
@@ -144,7 +144,8 @@ class Mod_IncomingController extends Controller
             'POR_REVISAR' => $inspeccion->INC_cantRecibida - $inspeccion->INC_cantAceptada - $inspeccion->INC_cantRechazada,
             'OBSERVACIONES_GENERALES' => $inspeccion->INC_notas,
             'INC_fechaInspeccion' => $inspeccion->INC_fechaInspeccion,
-            'INC_nomInspector' => $inspeccion->INC_nomInspector
+            'INC_nomInspector' => $inspeccion->INC_nomInspector,
+            'LOTE' => $inspeccion->INC_lote
         ];
         
                     // Obtener imágenes agrupadas por CHK_id
@@ -180,6 +181,7 @@ class Mod_IncomingController extends Controller
             $cantidadPorRevisar = $request->input('cantidad_por_revisar');
             $cantidadAceptada = $request->input('cantidad_aceptada');
             $observacionesGenerales = $request->input('observaciones_generales');
+            $lote = $request->input('lote');
 
             // Crear nueva inspección parcial (no actualizar existente)
             $incoming = new \App\Modelos\Siz_Incoming();
@@ -210,6 +212,7 @@ class Mod_IncomingController extends Controller
             $incoming->INC_actualizadoEn = date("Y-m-d H:i:s");
             $incoming->INC_codInspector = Auth::user()->U_EmpGiro;
             $incoming->INC_nomInspector = Auth::user()->getName();
+            $incoming->INC_lote = $lote;
             $incoming->save();
 
             // Guardar checklist
@@ -341,6 +344,19 @@ class Mod_IncomingController extends Controller
                     $materialSAP->POR_REVISAR = $materialSAP->CANTIDAD;
                     $materialSAP->ID_INSPECCION = 0;
                     $materialSAP->inspecciones = [];
+                }
+                
+                // Obtener lote para materiales de piel (grupo 113)
+                if ($materialSAP->GRUPO == 113) {
+                    try {
+                        $lote = DB::select('SELECT TOP (1) OIBT.BatchNum FROM OIBT WHERE OIBT.ItemCode = ? AND OIBT.BaseEntry = ?', 
+                            [$materialSAP->CODIGO_ARTICULO, $materialSAP->BASE_ENTRY]);
+                        $materialSAP->LOTE = $lote ? $lote[0]->BatchNum : 'N/A';
+                    } catch (\Exception $e) {
+                        $materialSAP->LOTE = 'N/A';
+                    }
+                } else {
+                    $materialSAP->LOTE = 'N/A';
                 }
                 
                 $materialesActualizados[] = $materialSAP;

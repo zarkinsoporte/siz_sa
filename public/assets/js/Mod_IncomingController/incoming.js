@@ -23,6 +23,7 @@ function js_iniciador() {
     var cantidadRecibida = 0;
     var dataTable = null; // Variable para almacenar la instancia de DataTable
     var idInspeccion = 0;
+    var inspeccionConsultaData = null; // Variable global para el modo consulta
     
     // Función para buscar materiales
     function buscarMateriales() {
@@ -377,7 +378,8 @@ function js_iniciador() {
                 '<td style="font-size: 14px;">'+item.CHK_descripcion+'</td>'+
                 '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="C" '+(r.IND_estado=='C'?'checked':'')+'></td>'+
                 '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="N" '+(r.IND_estado=='N'?'checked':'')+'></td>'+
-                '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="A" '+(r.IND_estado=='A'?'checked':'')+'></td>'+
+                //'<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="A" '+(r.IND_estado=='A'?'checked':'')+'></td>'+
+                '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="A" '+(r.IND_estado=='A'?'checked':(!r.IND_estado?'checked':''))+'></td>'+
                 '<td><textarea class="form-control textareaObservacion" name="obs_'+item.CHK_id+'" rows="2" style="resize:none; text-transform:uppercase;">'+(r.IND_observacion||'')+'</textarea></td>'+
                 '</tr>';
                 //'<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="A" '+(r.IND_estado=='A'?'checked':(!r.IND_estado?'checked':''))+'></td>'+
@@ -648,6 +650,7 @@ function js_iniciador() {
         
         // Llenar información del modal
         $('#piel_articulo_info').text(materialSeleccionado.CODIGO_ARTICULO + ' - ' + materialSeleccionado.MATERIAL);
+        //console.log(materialSeleccionado);
         $('#piel_lote_info').text(materialSeleccionado.LOTE || 'N/A');
         $('#piel_cantidad_total').text(porRevisar.toFixed(2));
         
@@ -695,6 +698,9 @@ function js_iniciador() {
     
     // Renderizar resumen en modo solo lectura
     function renderResumenSoloLectura(inspeccionData) {
+        // Almacenar datos de la inspección en variable global
+        inspeccionConsultaData = inspeccionData;
+
         var revisada = parseFloat(inspeccionData.CAN_INSPECCIONADA) + parseFloat(inspeccionData.CAN_RECHAZADA);
         var aceptadas = parseFloat(inspeccionData.CAN_INSPECCIONADA);
         var rechazadas = parseFloat(inspeccionData.CAN_RECHAZADA);
@@ -798,13 +804,37 @@ function js_iniciador() {
         
         // Evento para el botón de ver piel en modo consulta
         $(document).on('click', '#btn_ver_piel_consulta', function(){
-            abrirModalPielConsulta(inspeccionData);
+            abrirModalPielConsulta();
         });
     }
     
     // Función para abrir modal de piel en modo consulta
-    function abrirModalPielConsulta(inspeccionData) {
-        // Limpiar modal antes de cargar nueva información
+    function abrirModalPielConsulta() {
+        // Obtener el ID de inspección del campo del formulario
+        var incId = $('#id_inspeccion_consulta').val();
+
+        if (!incId || incId === 'Por definir') {
+            swal({
+                title: 'Error',
+                text: 'No se puede obtener el ID de inspección.',
+                type: 'error',
+                confirmButtonText: 'Aceptar'
+            });
+            return;
+        }
+
+        // Verificar que tenemos los datos de la inspección
+        if (!inspeccionConsultaData) {
+            swal({
+                title: 'Error',
+                text: 'No se encontraron los datos de la inspección.',
+                type: 'error',
+                confirmButtonText: 'Aceptar'
+            });
+            return;
+        }
+
+        // Limpiar modal completamente antes de cargar nueva información
         $('#piel_articulo_info').text('');
         $('#piel_lote_info').text('');
         $('#piel_cantidad_total').text('');
@@ -812,17 +842,38 @@ function js_iniciador() {
         $('.porcentaje-clase').text('0.00%');
         $('#totalClases').text('0.00');
         $('#totalPorcentaje').text('0.00%');
-        
+        $('.clase-piel').removeClass('is-valid is-invalid');
+
+        // Mostrar blockUI mientras se cargan los datos
+        $.blockUI({
+            message: '<h1>Su petición esta siendo procesada,</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+            css: {
+                border: 'none',
+                padding: '16px',
+                width: '50%',
+                top: '40%',
+                left: '30%',
+                backgroundColor: '#fefefe',
+                '-webkit-border-radius': '10px',
+                '-moz-border-radius': '10px',
+                opacity: .7,
+                color: '#000000',
+                baseZ: 2000
+            }
+        });
+
         // Cargar datos de piel desde la base de datos usando el ID específico de la inspección
         $.getJSON(routeapp+'/home/INSPECCION/ver-piel', {
-            inc_id: inspeccionData.INC_id
+            inc_id: incId
         }, function(data){
+            $.unblockUI();
+
             if(data.success && data.piel) {
                 // Llenar información del modal con datos específicos de esta inspección
-                $('#piel_articulo_info').text(inspeccionData.CODIGO_ARTICULO + ' - ' + inspeccionData.MATERIAL);
-                $('#piel_lote_info').text(materialSeleccionado.LOTE || 'N/A');
-                $('#piel_cantidad_total').text((parseFloat(inspeccionData.CAN_INSPECCIONADA) + parseFloat(inspeccionData.CAN_RECHAZADA)).toFixed(2));
-                
+                $('#piel_articulo_info').text(inspeccionConsultaData.CODIGO_ARTICULO + ' - ' + inspeccionConsultaData.MATERIAL);
+                $('#piel_lote_info').text(inspeccionConsultaData.LOTE || 'N/A');
+                $('#piel_cantidad_total').text((parseFloat(inspeccionConsultaData.CAN_INSPECCIONADA) + parseFloat(inspeccionConsultaData.CAN_RECHAZADA)).toFixed(2));
+
                 // Llenar campos con datos específicos de la base de datos
                 $('#claseA').val(data.piel.claseA || 0);
                 $('#claseB').val(data.piel.claseB || 0);
@@ -831,11 +882,11 @@ function js_iniciador() {
 
                 // Calcular porcentajes
                 calcularPorcentajesPiel();
-                
+
                 // Deshabilitar todos los campos para modo consulta
                 $('#claseA, #claseB, #claseC, #claseD').prop('disabled', true);
                 $('#guardarPiel').prop('disabled', true);
-                
+
                 // Mostrar modal
                 $('#modalPiel').modal('show');
             } else {
@@ -847,6 +898,7 @@ function js_iniciador() {
                 });
             }
         }).fail(function() {
+            $.unblockUI();
             swal({
                 title: 'Error',
                 text: 'Error al cargar los datos de piel.',
@@ -969,6 +1021,10 @@ function js_iniciador() {
         datos.append('fecha_inspeccion', $('#fecha_inspeccion').val());
         datos.append('observaciones_generales', $('.textareaObservacionesGenerales').val());
         
+        // Enviar lote correcto - usar el lote del material seleccionado
+        var loteEnviar = materialSeleccionado.LOTE || 'N/A';
+        datos.append('lote', loteEnviar);
+
         checklist.forEach(function(item){
             var estado = $('input[name="estado_'+item.CHK_id+'"]:checked').val()||'';
             var obs = $('textarea[name="obs_'+item.CHK_id+'"]').val()||'';
