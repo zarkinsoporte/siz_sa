@@ -21,6 +21,7 @@ class Mod_IncomingController extends Controller
         $ultimo = count($actividades);
         return view('Mod_IncomingController.index_rechazos', compact('actividades', 'ultimo'));
     }
+    
     // Muestra la vista principal de inspección
     public function index_inspeccion()
     {
