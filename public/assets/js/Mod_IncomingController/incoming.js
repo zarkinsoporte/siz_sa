@@ -730,7 +730,7 @@ function js_iniciador() {
                 '<div class="row">'+
                     '<div class="col-sm-6 col-md-6">'+
                         '<div style="margin-top: 20px;">'+
-                            '<label style="font-weight: bold; margin-bottom: 10px;">ID de Inspección:</label>'+
+                            '<label style="font-weight: bold; margin-bottom: 10px;">Reporte de Inspección N°:</label>'+
                             '<input type="text" id="id_inspeccion_consulta" class="form-control" value="'+idInspeccionMostrar+'" readonly style="margin-top: 5px;">'+
                         '</div>'+
                     '</div>'+

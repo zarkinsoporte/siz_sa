@@ -13,6 +13,14 @@ use Illuminate\Support\Facades\Auth;
 
 class Mod_IncomingController extends Controller
 {
+    
+    // Muestra la vista principal de RECHAZOS
+    public function index_rechazos()
+    {
+        $actividades = session('userActividades');
+        $ultimo = count($actividades);
+        return view('Mod_IncomingController.index_rechazos', compact('actividades', 'ultimo'));
+    }
     // Muestra la vista principal de inspección
     public function index_inspeccion()
     {
@@ -20,7 +28,6 @@ class Mod_IncomingController extends Controller
         $ultimo = count($actividades);
         return view('Mod_IncomingController.index_inspeccion', compact('actividades', 'ultimo'));
     }
-
     // AJAX: Buscar materiales por número de entrada
     public function buscarMateriales(Request $request)
     {
