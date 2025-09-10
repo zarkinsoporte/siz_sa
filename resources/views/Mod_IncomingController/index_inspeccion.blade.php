@@ -252,7 +252,7 @@
             <div class="row mb-3">
               <div class="col-md-12">
                 <div class="form-group">
-                  <label class="font-weight-bold">CANTIDAD POR REVISAR:</label>
+                  <label class="font-weight-bold">CANTIDAD ACEPTADA:</label>
                   <div class="form-control-static" style="font-size: 16px;" id="piel_cantidad_total"></div>
                 </div>
               </div>

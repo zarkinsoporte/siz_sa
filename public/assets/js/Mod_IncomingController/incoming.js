@@ -173,12 +173,12 @@ function js_iniciador() {
     // Guardar clases de piel
     $('#guardarPiel').click(function(){
         var total = parseFloat($('#claseA').val()||0)+parseFloat($('#claseB').val()||0)+parseFloat($('#claseC').val()||0)+parseFloat($('#claseD').val()||0);
-        var cantidadPorRevisar = parseFloat($('#cantidad_por_revisar').val()) || 0;
+        var cantidadAceptada = parseFloat($('#cantidad_aceptada').val()) || 0;
         
-        if(total != cantidadPorRevisar){
+        if(total != cantidadAceptada){
             swal({
                 title: 'Clases de piel incompletas',
-                text: 'La suma de clases debe ser igual a la cantidad por revisar ('+cantidadPorRevisar.toFixed(2)+')',
+                text: 'La suma de clases debe ser igual a la cantidad aceptada ('+cantidadAceptada.toFixed(2)+')',
                 type: 'warning',
                 confirmButtonText: 'Aceptar'
             });
@@ -216,13 +216,13 @@ function js_iniciador() {
         var claseD = parseFloat($('#claseD').val()) || 0;
         
         var total = claseA + claseB + claseC + claseD;
-        var cantidadPorRevisar = parseFloat($('#cantidad_por_revisar').val()) || 0;
+        var cantidadAceptada = parseFloat($('#cantidad_aceptada').val()) || 0;
         
         // Calcular porcentajes
-        var porcentajeA = cantidadPorRevisar > 0 ? (claseA / cantidadPorRevisar * 100) : 0;
-        var porcentajeB = cantidadPorRevisar > 0 ? (claseB / cantidadPorRevisar * 100) : 0;
-        var porcentajeC = cantidadPorRevisar > 0 ? (claseC / cantidadPorRevisar * 100) : 0;
-        var porcentajeD = cantidadPorRevisar > 0 ? (claseD / cantidadPorRevisar * 100) : 0;
+        var porcentajeA = cantidadAceptada > 0 ? (claseA / cantidadAceptada * 100) : 0;
+        var porcentajeB = cantidadAceptada > 0 ? (claseB / cantidadAceptada * 100) : 0;
+        var porcentajeC = cantidadAceptada > 0 ? (claseC / cantidadAceptada * 100) : 0;
+        var porcentajeD = cantidadAceptada > 0 ? (claseD / cantidadAceptada * 100) : 0;
         
         // Actualizar porcentajes
         $('#porcentajeA').text(porcentajeA.toFixed(2) + '%');
@@ -235,7 +235,7 @@ function js_iniciador() {
         $('#totalPorcentaje').text((porcentajeA + porcentajeB + porcentajeC + porcentajeD).toFixed(2) + '%');
         
         // Validar si la suma es correcta
-        if(Math.abs(total - cantidadPorRevisar) < 0.01) {
+        if(Math.abs(total - cantidadAceptada) < 0.01) {
             $('#alertPiel').hide();
             $('.clase-piel').removeClass('is-invalid').addClass('is-valid');
         } else {
@@ -378,8 +378,8 @@ function js_iniciador() {
                 '<td style="font-size: 14px;">'+item.CHK_descripcion+'</td>'+
                 '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="C" '+(r.IND_estado=='C'?'checked':'')+'></td>'+
                 '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="N" '+(r.IND_estado=='N'?'checked':'')+'></td>'+
-                //'<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="A" '+(r.IND_estado=='A'?'checked':'')+'></td>'+
-                '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="A" '+(r.IND_estado=='A'?'checked':(!r.IND_estado?'checked':''))+'></td>'+
+                '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="A" '+(r.IND_estado=='A'?'checked':'')+'></td>'+
+                //'<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="A" '+(r.IND_estado=='A'?'checked':(!r.IND_estado?'checked':''))+'></td>'+
                 '<td><textarea class="form-control textareaObservacion" name="obs_'+item.CHK_id+'" rows="2" style="resize:none; text-transform:uppercase;">'+(r.IND_observacion||'')+'</textarea></td>'+
                 '</tr>';
                 //'<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="A" '+(r.IND_estado=='A'?'checked':(!r.IND_estado?'checked':''))+'></td>'+
@@ -646,13 +646,13 @@ function js_iniciador() {
     
     // Función para abrir modal de piel
     function abrirModalPiel() {
-        var porRevisar = parseFloat($('#cantidad_por_revisar').val()) || 0;
+        var cantidadAceptada = parseFloat($('#cantidad_aceptada').val()) || 0;
         
         // Llenar información del modal
         $('#piel_articulo_info').text(materialSeleccionado.CODIGO_ARTICULO + ' - ' + materialSeleccionado.MATERIAL);
         //console.log(materialSeleccionado);
         $('#piel_lote_info').text(materialSeleccionado.LOTE || 'N/A');
-        $('#piel_cantidad_total').text(porRevisar.toFixed(2));
+        $('#piel_cantidad_total').text(cantidadAceptada.toFixed(2));
         
         // Limpiar campos y porcentajes
         $('#claseA, #claseB, #claseC, #claseD').val('');
@@ -872,7 +872,7 @@ function js_iniciador() {
                 // Llenar información del modal con datos específicos de esta inspección
                 $('#piel_articulo_info').text(inspeccionConsultaData.CODIGO_ARTICULO + ' - ' + inspeccionConsultaData.MATERIAL);
                 $('#piel_lote_info').text(inspeccionConsultaData.LOTE || 'N/A');
-                $('#piel_cantidad_total').text((parseFloat(inspeccionConsultaData.CAN_INSPECCIONADA) + parseFloat(inspeccionConsultaData.CAN_RECHAZADA)).toFixed(2));
+                $('#piel_cantidad_total').text((parseFloat(inspeccionConsultaData.CAN_INSPECCIONADA)).toFixed(2));
 
                 // Llenar campos con datos específicos de la base de datos
                 $('#claseA').val(data.piel.claseA || 0);
@@ -1000,12 +1000,12 @@ function js_iniciador() {
             
             var totalPiel = parseFloat(pielCapturada.claseA || 0) + parseFloat(pielCapturada.claseB || 0) + 
                            parseFloat(pielCapturada.claseC || 0) + parseFloat(pielCapturada.claseD || 0);
-            var cantidadPorRevisar = parseFloat($('#cantidad_por_revisar').val()) || 0;
+            var cantidadAceptada = parseFloat($('#cantidad_aceptada').val()) || 0;
             
-            if(Math.abs(totalPiel - cantidadPorRevisar) > 0.01) {
+            if(Math.abs(totalPiel - cantidadAceptada) > 0.01) {
                 swal({
                     title: 'Clases de piel incompletas',
-                    text: 'La suma de las clases de piel (' + totalPiel.toFixed(2) + ') debe coincidir con la cantidad por revisar (' + cantidadPorRevisar.toFixed(2) + ').',
+                    text: 'La suma de las clases de piel (' + totalPiel.toFixed(2) + ') debe coincidir con la cantidad aceptada (' + cantidadAceptada.toFixed(2) + ').',
                     type: 'warning',
                     confirmButtonText: 'Aceptar'
                 });
