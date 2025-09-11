@@ -156,7 +156,7 @@ function js_iniciador() {
         
         // Inicializar nueva DataTable
         dataTable = $('#tabla_materiales').DataTable({
-            order: [[1, 'desc']],
+            order: [[0, 'desc']],
             language: {
                 "url": assetapp + "assets/lang/Spanish.json"
             }
