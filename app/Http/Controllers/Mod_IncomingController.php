@@ -39,15 +39,16 @@ class Mod_IncomingController extends Controller
         
         // 2. Obtener cantidades de inspección desde BD siz
         $inspecciones = DB::connection('siz')->select('EXEC SIZ_Calidad_InspeccionMaterial @NumeroEntrada = ?', [$numeroEntrada]);
-        
+        //dd("inspecciones",$inspecciones);
         // 3. Combinar los resultados
         $materialesCombinados = [];
         foreach ($materialesSAP as $materialSAP) {
             // Buscar si existe inspección para este material
             $inspeccion = null;
             foreach ($inspecciones as $ins) {
-                if ($ins->CODIGO_ARTICULO == $materialSAP->CODIGO_ARTICULO) {
+                if ($ins->CODIGO_ARTICULO == $materialSAP->CODIGO_ARTICULO && intval($ins->LINE_NUM) == intval($materialSAP->LineNum)) {
                     $inspeccion = $ins;
+                    //dd("inspeccion",$inspeccion);
                     break;
                 }
             }
@@ -63,6 +64,7 @@ class Mod_IncomingController extends Controller
                 $inspeccionesPrevias = \App\Modelos\Siz_Incoming::on('siz')
                     ->where('INC_docNum', $numeroEntrada)
                     ->where('INC_codMaterial', $materialSAP->CODIGO_ARTICULO)
+                    ->where('INC_lineNum', $materialSAP->LineNum)
                     ->where('INC_borrado', 'N')
                     ->orderBy('INC_id', 'desc')
                     ->get();
@@ -125,7 +127,7 @@ class Mod_IncomingController extends Controller
         
         // Obtener datos de la inspección
         $inspeccion = \App\Modelos\Siz_Incoming::on('siz')->where('INC_id', $inc_id)->first();
-        
+        //dd($inspeccion);
         if (!$inspeccion) {
             return response()->json(['error' => 'Inspección no encontrada'], 404);
         }
@@ -136,6 +138,7 @@ class Mod_IncomingController extends Controller
         
         // Preparar datos de la inspección para el frontend
         $inspeccionData = [
+            'LINE_NUM' => $inspeccion->INC_lineNum,
             'INC_id' => $inspeccion->INC_id,
             'CODIGO_ARTICULO' => $inspeccion->INC_codMaterial,
             'MATERIAL' => $inspeccion->INC_nomMaterial,
@@ -182,7 +185,7 @@ class Mod_IncomingController extends Controller
             $cantidadAceptada = $request->input('cantidad_aceptada');
             $observacionesGenerales = $request->input('observaciones_generales');
             $lote = $request->input('lote');
-
+            $lineNum = intval($request->input('line_num'));
             // Crear nueva inspección parcial (no actualizar existente)
             $incoming = new \App\Modelos\Siz_Incoming();
             $incoming->setConnection('siz');
@@ -197,6 +200,7 @@ class Mod_IncomingController extends Controller
             $incoming->INC_cantRecibida = $material['CANTIDAD'];
             $incoming->INC_cantAceptada = $cantidadAceptada;
             $incoming->INC_cantRechazada = $cantidadPorRevisar - $cantidadAceptada;
+            $incoming->INC_lineNum = $lineNum;
             // Obtener fecha de inspección del formulario o usar fecha actual
             $fechaInspeccion = $request->get('fecha_inspeccion');
             if ($fechaInspeccion) {
@@ -317,7 +321,7 @@ class Mod_IncomingController extends Controller
             foreach ($materialesSAP as $materialSAP) {
                 $inspeccion = null;
                 foreach ($inspecciones as $ins) {
-                    if ($ins->CODIGO_ARTICULO == $materialSAP->CODIGO_ARTICULO) {
+                    if ($ins->CODIGO_ARTICULO == $materialSAP->CODIGO_ARTICULO && intval($ins->LINE_NUM) == intval($materialSAP->LineNum)) {
                         $inspeccion = $ins;
                         break;
                     }
@@ -333,6 +337,7 @@ class Mod_IncomingController extends Controller
                     $inspeccionesPrevias = \App\Modelos\Siz_Incoming::on('siz')
                         ->where('INC_docNum', $material['NOTA_ENTRADA'])
                         ->where('INC_codMaterial', $materialSAP->CODIGO_ARTICULO)
+                        ->where('INC_lineNum', $materialSAP->LineNum)
                         ->where('INC_borrado', 'N')
                         ->orderBy('INC_id', 'desc')
                         ->get();

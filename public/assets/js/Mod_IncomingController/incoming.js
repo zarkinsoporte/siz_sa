@@ -119,6 +119,7 @@ function js_iniciador() {
         }
         
         var tbody = '';
+        console.log(materiales);
         materiales.forEach(function(mat, idx){
             var porRevisar = (parseFloat(mat.POR_REVISAR) || 0);
             var acciones = '';
@@ -140,6 +141,7 @@ function js_iniciador() {
             }
             
             tbody += '<tr data-idx="'+idx+'">'+
+                '<td>'+(mat.LineNum || 'N/A')+'</td>'+
                 '<td>'+acciones+'</td>'+
                 '<td>'+mat.CODIGO_ARTICULO+'</td>'+
                 '<td>'+mat.MATERIAL+'</td>'+
@@ -378,8 +380,8 @@ function js_iniciador() {
                 '<td style="font-size: 14px;">'+item.CHK_descripcion+'</td>'+
                 '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="C" '+(r.IND_estado=='C'?'checked':'')+'></td>'+
                 '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="N" '+(r.IND_estado=='N'?'checked':'')+'></td>'+
-                '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="A" '+(r.IND_estado=='A'?'checked':'')+'></td>'+
-                //'<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="A" '+(r.IND_estado=='A'?'checked':(!r.IND_estado?'checked':''))+'></td>'+
+                //'<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="A" '+(r.IND_estado=='A'?'checked':'')+'></td>'+
+                '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="A" '+(r.IND_estado=='A'?'checked':(!r.IND_estado?'checked':''))+'></td>'+
                 '<td><textarea class="form-control textareaObservacion" name="obs_'+item.CHK_id+'" rows="2" style="resize:none; text-transform:uppercase;">'+(r.IND_observacion||'')+'</textarea></td>'+
                 '</tr>';
                 //'<td style="text-align:center"><input style="accent-color:black;" type="radio" name="estado_'+item.CHK_id+'" value="A" '+(r.IND_estado=='A'?'checked':(!r.IND_estado?'checked':''))+'></td>'+
@@ -515,7 +517,7 @@ function js_iniciador() {
         
         var html = '<div class="card">'+
             '<div class="card-body">'+
-                '<h4 style="font-weight: bold; margin-bottom: 16px;">RESUMEN</h4>'+
+                '<h4 style="font-weight: bold; margin-bottom: 16px;">RESUMEN #'+materialSeleccionado.LineNum+'</h4>'+
             '<h4 style="margin-bottom: 10px;">' + materialSeleccionado.CODIGO_ARTICULO + ' - ' + materialSeleccionado.MATERIAL + '</h4>'+
                 
                 '<div class="row">'+
@@ -730,7 +732,7 @@ function js_iniciador() {
         
         var html = '<div class="card">'+
             '<div class="card-body">'+
-                '<h4 style="font-weight: bold; margin-bottom: 16px;">RESUMEN - CONSULTA</h4>'+
+                '<h4 style="font-weight: bold; margin-bottom: 16px;">RESUMEN #'+inspeccionData.LINE_NUM+' - CONSULTA</h4>'+
             '<h4 style="margin-bottom: 10px;">' + inspeccionData.CODIGO_ARTICULO + ' - ' + inspeccionData.MATERIAL + '</h4>'+
                 
                 '<div class="row">'+
@@ -1024,6 +1026,9 @@ function js_iniciador() {
         // Enviar lote correcto - usar el lote del material seleccionado
         var loteEnviar = materialSeleccionado.LOTE || 'N/A';
         datos.append('lote', loteEnviar);
+        
+        // Enviar número de línea del material
+        datos.append('line_num', parseInt(materialSeleccionado.LineNum || 0));
 
         checklist.forEach(function(item){
             var estado = $('input[name="estado_'+item.CHK_id+'"]:checked').val()||'';
@@ -1057,7 +1062,7 @@ function js_iniciador() {
         });
         
         $.ajax({
-            url: routeapp+'/home/INSPECCION/guardar',
+            url: routeapp + '/home/INSPECCION/guardar',
             type: 'POST',
             data: datos,
             processData: false,

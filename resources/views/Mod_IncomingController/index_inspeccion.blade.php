@@ -191,6 +191,7 @@
               <table id="tabla_materiales" class="table table-striped table-bordered" style="width:100%">
                 <thead>
                   <tr>
+                    <th>#</th>
                     <th>Acciones</th>
                     <th>Código</th>
                     <th>Material</th>
