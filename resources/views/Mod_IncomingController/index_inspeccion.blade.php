@@ -11,6 +11,12 @@
 </script>
 
 <style>
+input[type="radio"], input[type="checkbox"] {
+    margin: 4px 0 0;
+    margin-top: 1px \9;
+    accent-color: #007bff;
+    line-height: normal;
+}
     .mt7{
         margin-top: 7px
     }
@@ -140,6 +146,28 @@
     #fecha_inspeccion:hover {
         border-color: #007bff !important;
     }
+
+    /* Estilos para campos obligatorios */
+    .required-field {
+        border-left: 4px solid #dc3545 !important;
+        background-color: #fff5f5 !important;
+    }
+    
+    .required-evidence {
+        background-color: #dc3545 !important;
+        border-color: #dc3545 !important;
+        color: white !important;
+    }
+    
+    .required-evidence:hover {
+        background-color: #c82333 !important;
+        border-color: #bd2130 !important;
+    }
+    
+    .required-field::placeholder {
+        color: #dc3545 !important;
+        font-weight: bold;
+    }
 </style>
 
 <div class="container">
@@ -214,10 +242,24 @@
                 </div>
                 <div class="col-md-8" id="checklist_container">
                   <!-- Checklist dinámico -->
+                  <table class="table table-striped table-bordered" id="tabla_checklist">
+                    <thead>
+                      <tr>
+                        <th>Evidencias</th>
+                        <th>Punto Checklist</th>
+                        <th>Cumple</th>
+                        <th>No Cumple</th>
+                        <th>No Aplica</th>
+                        <th>Cantidad No Cumple</th>
+                        <th>Observaciones</th>
+                      </tr>
+                    </thead>
+                    <tbody id="checklist_body">
+                      <!-- Las filas se generarán dinámicamente -->
+                    </tbody>
+                  </table>
                 </div>
-            
               </div>
-              
             </div>
         </div>
     </div>

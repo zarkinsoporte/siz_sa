@@ -792,13 +792,13 @@ Route::post('home/INSPECCION/guardar', 'Mod_IncomingController@guardarInspeccion
 Route::get('home/INSPECCION/ver-piel', 'Mod_IncomingController@verPiel');
 Route::get('home/INSPECCION/imagen/{id}', 'Mod_IncomingController@verImagen');
 Route::get('home/file/{name}', 'Mod_IncomingController@file');
+Route::get('/incoming/imagen/{id}', 'Mod_IncomingController@verImagen');
 
 //CALIDAD RECHAZOS
-Route::get('home/RECHAZOS', 'Mod_IncomingController@index_rechazos')->middleware('routelog');
-Route::get('home/RECHAZOS/buscar', 'Mod_IncomingController@buscarMateriales');
-Route::any('home/RECHAZOS/checklist', 'Mod_IncomingController@getChecklist');
-Route::get('home/RECHAZOS/ver-inspeccion', 'Mod_IncomingController@verInspeccion');
-Route::post('home/RECHAZOS/guardar', 'Mod_IncomingController@guardarInspeccion');
-Route::get('home/RECHAZOS/ver-piel', 'Mod_IncomingController@verPiel');
-Route::get('home/RECHAZOS/imagen/{id}', 'Mod_IncomingController@verImagen');
-Route::get('home/RECHAZOS/file/{name}', 'Mod_IncomingController@file');
+Route::get('home/RECHAZOS', 'Mod_RechazosController@index_rechazos')->middleware('routelog');
+Route::get('home/RECHAZOS/buscar', 'Mod_RechazosController@buscarRechazos');
+Route::post('home/RECHAZOS/generar', 'Mod_RechazosController@generarRechazo');
+Route::get('home/RECHAZOS/ver-inspeccion', 'Mod_RechazosController@verInspeccion');
+Route::get('home/RECHAZOS/ver-piel', 'Mod_RechazosController@verPiel');
+Route::get('home/RECHAZOS/imagen/{id}', 'Mod_RechazosController@verImagen');
+Route::get('home/RECHAZOS/file/{name}', 'Mod_RechazosController@file');

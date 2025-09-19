@@ -127,15 +127,52 @@ class Mod_IncomingController extends Controller
         
         // Obtener datos de la inspección
         $inspeccion = \App\Modelos\Siz_Incoming::on('siz')->where('INC_id', $inc_id)->first();
-        //dd($inspeccion);
+        
         if (!$inspeccion) {
             return response()->json(['error' => 'Inspección no encontrada'], 404);
         }
         
-        // Obtener checklist y respuestas
-        $checklist = \App\Modelos\Siz_Checklist::on('siz')->where('CHK_activo', 'S')->orderBy('CHK_orden')->get();
-        $respuestas = \App\Modelos\Siz_IncomDetalle::on('siz')->where('IND_incId', $inc_id)->get();
+        // Obtener respuestas del checklist (solo las que están guardadas)
+        $respuestas = \App\Modelos\Siz_IncomDetalle::on('siz')
+            ->where('IND_incId', $inc_id)
+            ->get()
+            ->keyBy('IND_chkId');
         
+        // Obtener todos los checklist activos
+        $checklist = \App\Modelos\Siz_Checklist::on('siz')
+            ->where('CHK_activo', 'S')
+            ->orderBy('CHK_orden')
+            ->get();
+        
+        // Preparar respuestas para el frontend
+        $respuestasFormateadas = [];
+        foreach ($checklist as $item) {
+            if (isset($respuestas[$item->CHK_id])) {
+                // Convertir carácter a respuesta completa
+                $estado = $respuestas[$item->CHK_id]->IND_estado;
+                if ($estado === 'C') {
+                    $respuestasFormateadas[$item->CHK_id] = 'Cumple';
+                } elseif ($estado === 'N') {
+                    $respuestasFormateadas[$item->CHK_id] = 'No Cumple';
+                } else {
+                    $respuestasFormateadas[$item->CHK_id] = 'No Aplica';
+                }
+                
+                // Agregar observación si existe
+                if ($respuestas[$item->CHK_id]->IND_observacion) {
+                    $respuestasFormateadas[$item->CHK_id . '_observacion'] = $respuestas[$item->CHK_id]->IND_observacion;
+                }
+                
+                // Agregar cantidad si existe
+                if ($respuestas[$item->CHK_id]->IND_cantidad) {
+                    $respuestasFormateadas[$item->CHK_id . '_cantidad'] = $respuestas[$item->CHK_id]->IND_cantidad;
+                }
+            } else {
+                // Si no existe el registro, significa que es "No Aplica" por defecto
+                $respuestasFormateadas[$item->CHK_id] = 'No Aplica';
+            }
+        }
+
         // Preparar datos de la inspección para el frontend
         $inspeccionData = [
             'LINE_NUM' => $inspeccion->INC_lineNum,
@@ -151,23 +188,30 @@ class Mod_IncomingController extends Controller
             'LOTE' => $inspeccion->INC_lote
         ];
         
-                    // Obtener imágenes agrupadas por CHK_id
-            $imagenes = \App\Modelos\Siz_IncomImagen::on('siz')->where('IMG_incId', $inc_id)->where('IMG_borrado','N')->get();
-            $imagenesPorChk = [];
-            foreach ($imagenes as $img) {
-                $chkId = $img->IMG_descripcion; // En este campo guardamos el CHK_id
-                if (!isset($imagenesPorChk[$chkId])) { $imagenesPorChk[$chkId] = []; }
-                $imagenesPorChk[$chkId][] = [
-                    'ruta' => $img->IMG_ruta,
-                    'id' => $img->IMG_id,
-                    'archivo' => basename($img->IMG_ruta)
-                ];
+        // Obtener imágenes agrupadas por CHK_id
+        $imagenes = \App\Modelos\Siz_IncomImagen::on('siz')
+            ->where('IMG_incId', $inc_id)
+            ->where('IMG_borrado','N')
+            ->get();
+        
+        $imagenesPorChk = [];
+        foreach ($imagenes as $img) {
+            $chkId = $img->IMG_descripcion; // En este campo guardamos el CHK_id
+            if (!isset($imagenesPorChk[$chkId])) { 
+                $imagenesPorChk[$chkId] = []; 
             }
+            $imagenesPorChk[$chkId][] = [
+                'ruta' => $img->IMG_ruta,
+                'id' => $img->IMG_id,
+                'archivo' => basename($img->IMG_ruta)
+            ];
+        }
 
-            return response()->json([
+        return response()->json([
+            'success' => true,
             'inspeccion' => $inspeccionData,
             'checklist' => $checklist,
-            'respuestas' => $respuestas,
+            'respuestas' => $respuestasFormateadas,
             'imagenes' => $imagenesPorChk
         ]);
     }
@@ -219,19 +263,38 @@ class Mod_IncomingController extends Controller
             $incoming->INC_lote = $lote;
             $incoming->save();
 
-            // Guardar checklist
-            if ($checklist) {
-                foreach ($checklist as $chk_id => $item) {
-                    $detalle = new \App\Modelos\Siz_IncomDetalle();
-                    $detalle->setConnection('siz');
-                    $detalle->IND_incId = $incoming->INC_id;
-                    $detalle->IND_chkId = $chk_id;
-                    $detalle->IND_estado = isset($item['estado']) ? $item['estado'] : 'A';
-                    $detalle->IND_observacion = isset($item['obs']) ? $item['obs'] : null;
-                    $detalle->IND_borrado = 'N';
-                    $detalle->IND_creadoEn = date("Y-m-d H:i:s");
-                    $detalle->IND_actualizadoEn = date("Y-m-d H:i:s");
+            // Guardar respuestas del checklist (solo las que no son "No Aplica")
+            if ($request->has('checklist')) {
+                foreach ($request->input('checklist') as $chkId => $respuesta) {
+                    if ($respuesta && $respuesta !== 'No Aplica') {
+                        $detalle = new \App\Modelos\Siz_IncomDetalle();
+                        $detalle->IND_incId = $incoming->INC_id;
+                        $detalle->IND_chkId = $chkId;
+                        
+                        // Convertir respuesta completa a carácter
+                        if ($respuesta === 'Cumple') {
+                            $detalle->IND_estado = 'C';
+                        } elseif ($respuesta === 'No Cumple') {
+                            $detalle->IND_estado = 'N';
+                        } else {
+                            $detalle->IND_estado = 'A';
+                        }
+                        
+                        // Agregar observación si existe
+                        if ($request->has('checklist_observacion.' . $chkId)) {
+                            $detalle->IND_observacion = $request->input('checklist_observacion.' . $chkId);
+                        }
+                        
+                        // Si es "No Cumple", guardar la cantidad
+                        if ($respuesta === 'No Cumple' && $request->has('checklist_cantidad.' . $chkId)) {
+                            $detalle->IND_cantidad = $request->input('checklist_cantidad.' . $chkId);
+                        }
+                        
+                        $detalle->IND_borrado = 'N';
+                        $detalle->IND_creadoEn = date("Y-m-d H:i:s");
+                        $detalle->IND_actualizadoEn = date("Y-m-d H:i:s");
                     $detalle->save();
+                    }
                 }
             }
 
@@ -249,21 +312,117 @@ class Mod_IncomingController extends Controller
                 $pielClases->PLC_actualizadoEn = date("Y-m-d H:i:s");
                 $pielClases->save();
             }
-
+            //dd($request->file('checklist_evidencias'));
             // Guardar imágenes de evidencia
-            if ($imagenes) {
-                $directorioBase = 'D:\\INCOMING\\' . $material['NOTA_ENTRADA'];
+            $archivosEncontrados = false;
+            $archivosEvidencia = [];
+            
+            // Buscar archivos de evidencia en el request
+            foreach ($request->all() as $key => $value) {
+                if (strpos($key, 'checklist_evidencias') !== false) {
+                    if ($request->hasFile($key)) {
+                        $archivosEncontrados = true;
+                        $archivosEvidencia[$key] = $request->file($key);
+                    }
+                }
+            }
+            
+            // También verificar si hay archivos en el formato de array
+            if ($request->hasFile('checklist_evidencias')) {
+                $archivosEncontrados = true;
+                $archivosEvidencia['checklist_evidencias'] = $request->file('checklist_evidencias');
+            }
+            
+            // Verificar si hay archivos en el formato específico que está llegando
+            if (isset($request->file()['checklist_evidencias']) && is_array($request->file()['checklist_evidencias'])) {
+                $archivosEncontrados = true;
+                $archivosEvidencia['checklist_evidencias'] = $request->file()['checklist_evidencias'];
+            }
+            
+            //dd('Archivos encontrados:', $archivosEncontrados, 'Archivos:', $archivosEvidencia, 'Request files:', $request->file());
+            
+            if ($archivosEncontrados) {
+                $so = env('DB_DATABASE');
+                if($so == 'SBO_Pruebas') {
+                    $directorioBase = 'D:\\QAS\\INCOMING\\' . $material['NOTA_ENTRADA'];
+                } else {
+                    $directorioBase = 'D:\\INCOMING\\' . $material['NOTA_ENTRADA'];
+                }
+                
                 if (!file_exists($directorioBase)) {
                     mkdir($directorioBase, 0777, true);
                 }
                 
-                foreach ($imagenes as $chk_id => $archivos) {
+                // Procesar archivos encontrados
+                foreach ($archivosEvidencia as $key => $archivos) {
                     if ($archivos) {
-                        // Si es un array de archivos (múltiples imágenes)
-                        if (is_array($archivos)) {
-                            foreach ($archivos as $img) {
-                                if ($img) {
-                                    $extension = $img->getClientOriginalExtension();
+                        //dd($archivos);
+
+                        // El key es "checklist_evidencias" y los archivos están en formato array
+                        // Necesitamos iterar sobre el array para obtener cada CHK_id
+                        if ($key === 'checklist_evidencias' && is_array($archivos)) {
+                            foreach ($archivos as $chk_id => $archivosChk) {
+                                if ($archivosChk && is_array($archivosChk)) {
+                                    // Procesar cada archivo del CHK_id
+                                    foreach ($archivosChk as $img) {
+                                        if ($img) {
+                                            $extension = $img->getClientOriginalExtension();
+                                            // Obtener nombre del checklist por CHK_id
+                                            $chk = \App\Modelos\Siz_Checklist::on('siz')->where('CHK_id', $chk_id)->first();
+                                            $chkNombre = $chk ? preg_replace('/[^A-Za-z0-9_-]+/', '', str_replace(' ', '_', $chk->CHK_descripcion)) : ('CHK_'.$chk_id);
+                                            $nombre = $incoming->INC_id . '_' . $chkNombre . '_' . uniqid() . '.' . $extension;
+                                            $rutaCompleta = $directorioBase . '\\' . $nombre;
+                                            
+                                            // Guardar archivo
+                                            $img->move($directorioBase, $nombre);
+                                            
+                                            $imagen = new \App\Modelos\Siz_IncomImagen();
+                                            $imagen->setConnection('siz');
+                                            $imagen->IMG_incId = $incoming->INC_id;
+                                            $imagen->IMG_ruta = $rutaCompleta;
+                                            $imagen->IMG_descripcion = $chk_id;
+                                            $imagen->IMG_cargadoPor = auth()->check() ? auth()->user()->name : 'sistema';
+                                            $imagen->IMG_cargadoEn = date("Y-m-d H:i:s");
+                                            $imagen->IMG_borrado = 'N';
+                                            $imagen->save();
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            // Formato alternativo (compatibilidad)
+                            preg_match('/checklist_evidencias\[(\d+)\]/', $key, $matches);
+                            $chk_id = isset($matches[1]) ? $matches[1] : null;
+                            
+                            if ($chk_id) {
+                                // Si es un array de archivos (múltiples imágenes)
+                                if (is_array($archivos)) {
+                                    foreach ($archivos as $img) {
+                                        if ($img) {
+                                            $extension = $img->getClientOriginalExtension();
+                                            // Obtener nombre del checklist por CHK_id
+                                            $chk = \App\Modelos\Siz_Checklist::on('siz')->where('CHK_id', $chk_id)->first();
+                                            $chkNombre = $chk ? preg_replace('/[^A-Za-z0-9_-]+/', '', str_replace(' ', '_', $chk->CHK_descripcion)) : ('CHK_'.$chk_id);
+                                            $nombre = $incoming->INC_id . '_' . $chkNombre . '_' . uniqid() . '.' . $extension;
+                                            $rutaCompleta = $directorioBase . '\\' . $nombre;
+                                            
+                                            // Guardar archivo
+                                            $img->move($directorioBase, $nombre);
+                                            
+                                            $imagen = new \App\Modelos\Siz_IncomImagen();
+                                            $imagen->setConnection('siz');
+                                            $imagen->IMG_incId = $incoming->INC_id;
+                                            $imagen->IMG_ruta = $rutaCompleta;
+                                            $imagen->IMG_descripcion = $chk_id;
+                                            $imagen->IMG_cargadoPor = auth()->check() ? auth()->user()->name : 'sistema';
+                                            $imagen->IMG_cargadoEn = date("Y-m-d H:i:s");
+                                            $imagen->IMG_borrado = 'N';
+                                            $imagen->save();
+                                        }
+                                    }
+                                } else {
+                                    // Si es un solo archivo (compatibilidad)
+                                    $extension = $archivos->getClientOriginalExtension();
                                     // Obtener nombre del checklist por CHK_id
                                     $chk = \App\Modelos\Siz_Checklist::on('siz')->where('CHK_id', $chk_id)->first();
                                     $chkNombre = $chk ? preg_replace('/[^A-Za-z0-9_-]+/', '', str_replace(' ', '_', $chk->CHK_descripcion)) : ('CHK_'.$chk_id);
@@ -271,7 +430,7 @@ class Mod_IncomingController extends Controller
                                     $rutaCompleta = $directorioBase . '\\' . $nombre;
                                     
                                     // Guardar archivo
-                                    $img->move($directorioBase, $nombre);
+                                    $archivos->move($directorioBase, $nombre);
                                     
                                     $imagen = new \App\Modelos\Siz_IncomImagen();
                                     $imagen->setConnection('siz');
@@ -284,31 +443,12 @@ class Mod_IncomingController extends Controller
                                     $imagen->save();
                                 }
                             }
-                        } else {
-                            // Si es un solo archivo (compatibilidad)
-                            $extension = $archivos->getClientOriginalExtension();
-                            // Obtener nombre del checklist por CHK_id
-                            $chk = \App\Modelos\Siz_Checklist::on('siz')->where('CHK_id', $chk_id)->first();
-                            $chkNombre = $chk ? preg_replace('/[^A-Za-z0-9_-]+/', '', str_replace(' ', '_', $chk->CHK_descripcion)) : ('CHK_'.$chk_id);
-                            $nombre = $incoming->INC_id . '_' . $chkNombre . '.' . $extension;
-                            $rutaCompleta = $directorioBase . '\\' . $nombre;
-                            
-                            // Guardar archivo
-                            $archivos->move($directorioBase, $nombre);
-                            
-                            $imagen = new \App\Modelos\Siz_IncomImagen();
-                            $imagen->setConnection('siz');
-                            $imagen->IMG_incId = $incoming->INC_id;
-                            $imagen->IMG_ruta = $rutaCompleta;
-                            $imagen->IMG_descripcion = $chk_id;
-                            $imagen->IMG_cargadoPor = auth()->check() ? auth()->user()->name : 'sistema';
-                            $imagen->IMG_cargadoEn = date("Y-m-d H:i:s");
-                            $imagen->IMG_borrado = 'N';
-                            $imagen->save();
                         }
                     }
                 }
+                //dd('fin');
             }
+            //dd('fi2');
 
             DB::connection('siz')->commit();
             
@@ -430,25 +570,42 @@ class Mod_IncomingController extends Controller
      */
     public function verImagen($id)
     {
-        $img = \App\Modelos\Siz_IncomImagen::on('siz')->where('IMG_id', $id)->where('IMG_borrado','N')->first();
-        if (!$img || !file_exists($img->IMG_ruta)) {
-            abort(404);
+        try {
+            $img = \App\Modelos\Siz_IncomImagen::on('siz')->where('IMG_id', $id)->where('IMG_borrado','N')->first();
+            
+            if (!$img) {
+                abort(404, 'Imagen no encontrada');
+            }
+            
+            if (!file_exists($img->IMG_ruta)) {
+                abort(404, 'Archivo de imagen no encontrado');
+            }
+            
+            $path = $img->IMG_ruta;
+            $filename = basename($path);
+            
+            // Detectar MIME de forma compatible
+            $mime = function_exists('mime_content_type') ? mime_content_type($path) : 'application/octet-stream';
+            if ($mime === 'application/octet-stream' && function_exists('finfo_open')) {
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                $detected = finfo_file($finfo, $path);
+                if ($detected) { 
+                    $mime = $detected; 
+                }
+                finfo_close($finfo);
+            }
+            
+            $headers = [
+                'Content-Type' => $mime,
+                'Content-Disposition' => 'inline; filename="'.$filename.'"',
+                'Cache-Control' => 'public, max-age=3600'
+            ];
+            
+            return response()->make(file_get_contents($path), 200, $headers);
+            
+        } catch (\Exception $e) {
+            abort(404, 'Error al cargar la imagen: ' . $e->getMessage());
         }
-        $path = $img->IMG_ruta;
-        $filename = basename($path);
-        // Detectar MIME de forma compatible
-        $mime = function_exists('mime_content_type') ? mime_content_type($path) : 'application/octet-stream';
-        if ($mime === 'application/octet-stream' && function_exists('finfo_open')) {
-            $finfo = finfo_open(FILEINFO_MIME_TYPE);
-            $detected = finfo_file($finfo, $path);
-            if ($detected) { $mime = $detected; }
-            finfo_close($finfo);
-        }
-        $headers = [
-            'Content-Type' => $mime,
-            'Content-Disposition' => 'inline; filename="'.$filename.'"'
-        ];
-        return response()->make(file_get_contents($path), 200, $headers);
     }
 
     // Elimina el archivo indicado en la carpeta app

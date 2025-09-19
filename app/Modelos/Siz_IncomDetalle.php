@@ -9,6 +9,6 @@ class Siz_IncomDetalle extends Model
     protected $primaryKey = 'IND_id';
     public $timestamps = false;
     protected $fillable = [
-        'IND_incId', 'IND_chkId', 'IND_estado', 'IND_observacion', 'IND_borrado', 'IND_creadoEn', 'IND_actualizadoEn'
+        'IND_incId', 'IND_chkId', 'IND_estado', 'IND_observacion', 'IND_borrado', 'IND_creadoEn', 'IND_actualizadoEn', 'IND_cantidad'
     ];
 } 

@@ -13,6 +13,6 @@ class Siz_Incoming extends Model
         'INC_numFactura', 'INC_codMaterial', 'INC_nomMaterial', 'INC_unidadMedida',
         'INC_cantRecibida', 'INC_cantAceptada', 'INC_cantRechazada', 'INC_fechaInspeccion',
         'INC_codInspector', 'INC_nomInspector', 'INC_notas', 'INC_esPiel', 'INC_borrado',
-        'INC_quienBorro', 'INC_creadoEn', 'INC_actualizadoEn', 'INC_lote', 'INC_lineNum'
+        'INC_quienBorro', 'INC_creadoEn', 'INC_actualizadoEn', 'INC_lote', 'INC_lineNum', 'INC_reporteRechazo'
     ];
 } 
