@@ -92,6 +92,82 @@ class Mod_RechazosController extends Controller
             
             DB::connection("siz")->commit();
             
+            // Obtener datos adicionales para el email
+            $proveedor = DB::connection("siz")->select("
+                SELECT TOP 1 
+                    CARDNAME as nombre_proveedor,
+                    CARDCODE as codigo_proveedor
+                FROM OCRD 
+                WHERE CARDCODE = ?
+            ", [$inspeccion->INC_proveedor]);
+            
+            $proveedor_nombre = !empty($proveedor) ? $proveedor[0]->nombre_proveedor : 'Proveedor no encontrado';
+            $proveedor_codigo = !empty($proveedor) ? $proveedor[0]->codigo_proveedor : $inspeccion->INC_proveedor;
+            
+            // Obtener datos del inspector
+            $inspector = DB::connection("siz")->select("
+                SELECT TOP 1 
+                    firstName + ' ' + lastName as nombre_inspector,
+                    U_EmpGiro as codigo_inspector,
+                    email as correo_inspector
+                FROM OHEM 
+                WHERE U_EmpGiro = ?
+            ", [Auth::user()->U_EmpGiro]);
+            
+            $inspector_nombre = !empty($inspector) ? $inspector[0]->nombre_inspector : Auth::user()->firstName . ' ' . Auth::user()->lastName;
+            $inspector_codigo = !empty($inspector) ? $inspector[0]->codigo_inspector : Auth::user()->U_EmpGiro;
+            $inspector_correo = !empty($inspector) ? $inspector[0]->correo_inspector : Auth::user()->email;
+            
+            // Obtener datos de la orden de compra
+            $orden_compra = DB::connection("siz")->select("
+                SELECT TOP 1 
+                    DocNum as numero_oc,
+                    DocDate as fecha_oc,
+                    Comments as comentarios_oc
+                FROM OPOR 
+                WHERE DocEntry = ?
+            ", [$inspeccion->INC_ordenCompra]);
+            
+            $numero_oc = !empty($orden_compra) ? $orden_compra[0]->numero_oc : 'N/A';
+            $fecha_oc = !empty($orden_compra) ? date('d/m/Y', strtotime($orden_compra[0]->fecha_oc)) : 'N/A';
+            //crear pdf
+            
+            // Envío de correo
+            $correos_db = DB::connection("siz")->select("
+                SELECT 
+                CASE WHEN email like '%@%' THEN email ELSE email + cast('@zarkin.com' as varchar) END AS correo
+                FROM OHEM
+                INNER JOIN Siz_Email AS se ON se.No_Nomina = OHEM.U_EmpGiro
+                WHERE se.Rechazos = 1 AND OHEM.status = 1 AND email IS NOT NULL
+                GROUP BY email
+            ");
+            $correos = array_pluck($correos_db, 'correo');
+            
+            if (count($correos) > 0) {
+                Mail::send('Emails.Rechazos', [
+                    'id_rechazo' => $rechazo->IR_id,
+                    'fecha_rechazo' => date('d/m/Y H:i:s', strtotime($rechazo->IR_FechaReporte)),
+                    'nota_entrada' => $inspeccion->INC_notaEntrada,
+                    'proveedor_nombre' => $proveedor_nombre,
+                    'proveedor_codigo' => $proveedor_codigo,
+                    'numero_oc' => $numero_oc,
+                    'fecha_oc' => $fecha_oc,
+                    'codigo_material' => $inspeccion->INC_codMaterial,
+                    'nombre_material' => $inspeccion->INC_nomMaterial,
+                    'cantidad_rechazada' => number_format($inspeccion->INC_cantRechazada, 2),
+                    'udm' => $inspeccion->INC_udm,
+                    'lote' => $inspeccion->INC_lote,
+                    'notas_generales' => $notasGenerales,
+                    'inspector_nombre' => $inspector_nombre,
+                    'inspector_codigo' => $inspector_codigo,
+                    'inspector_correo' => $inspector_correo
+                ], function ($msj) use ($correos, $rechazo) {
+                    $msj->subject('Notificación de Rechazo #' . $rechazo->IR_id . ' - ' . date('d/m/Y'));
+                    $msj->to($correos);
+                });
+            }
+            
+            
             return response()->json([
                 "success" => true,
                 "msg" => "Rechazo generado correctamente",

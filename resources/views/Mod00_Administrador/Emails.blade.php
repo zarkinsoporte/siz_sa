@@ -27,10 +27,10 @@
             </div>
             @include('partials.alertas')
 
-            <div class="row">
                     {!! Form::open(['url' => 'admin/save/email', 'method' => 'POST']) !!}
+            <div class="row">
                 
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <label>Usuario</label>
                         <select class="form-control" name="nomina" id="nomina" required>
                             <option value="">Seleccione</option>
@@ -40,6 +40,8 @@
                         </select>
                        
                     </div>
+            </div>
+            <div class="row" style="margin-top: 20px;">
                     <div class="col-md-2">   
                         <label>Reprocesos</label>
                         <select class="form-control" name="reprocesos" id="reprocesos">
@@ -77,14 +79,22 @@
                         </select>
                        
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">                        
+                        <label>Rechazos</label>
+                        <select class="form-control" name="rechazos" id="rechazos">
+                            <option value="1">Activado</option>
+                            <option value="0">Desactivado</option>
+                        </select>
                        
-                                <button class="btn btn-primary" style="margin-top:25px" type="submit">Guardar</button>
+                    </div>
+                    <div class="col-md-12">
+                       
+                                <button class="btn btn-primary " style="margin-top:25px" type="submit">Guardar</button>
     
                     </div>
 
-                            {!! Form::close() !!}
                 </div><!-- /.row -->
+                            {!! Form::close() !!}
 <br>
             <table id="usuarios" class="table table-striped table-bordered table-condensed">
                                     <thead>
@@ -97,6 +107,7 @@
                                             <th>Solicitudes MP</th>
                                             <th>Error Existencias</th>
                                             <th>Traslados</th>
+                                            <th>Rechazos</th>
                                             <th>Acciones</th>
                                     </tr>
                                     </thead>
@@ -131,6 +142,7 @@
                             -
                             @endif     
                         </td>                 
+                        <td>{{ $campo->Rechazos==1?'Activado':'-' }}</td>
                         <td>
                             <a class="btn btn-warning" id="btneditar-{{ $campo->id}}" onclick="getItem({{ $campo->id}})" 
                                 data-id="{{ $campo->id}}" 
@@ -154,17 +166,19 @@
 <script>
 function getItem(btn) {
 
-var nomina = $("#btneditar-"+btn).data("nomina");
-var reprocesos = $("#btneditar-"+btn).data("reproceso");
-var solicitudmp = $("#btneditar-"+btn).data("solicitudmp");
-var errorexistencia_04 = $("#btneditar-"+btn).data("errorexistencia_04");
-var traslados_04 = $("#btneditar-"+btn).data("traslados_04");
+    var nomina = $("#btneditar-"+btn).data("nomina");
+    var reprocesos = $("#btneditar-"+btn).data("reproceso");
+    var solicitudmp = $("#btneditar-"+btn).data("solicitudmp");
+    var errorexistencia_04 = $("#btneditar-"+btn).data("errorexistencia_04");
+    var traslados_04 = $("#btneditar-"+btn).data("traslados_04");
+    var rechazos = $("#btneditar-"+btn).data("rechazos");
 
-$('#nomina').val(nomina);
-$('#reprocesos').val(reprocesos);
-$('#solicitudmp').val(solicitudmp);
-$('#errorexistencia_04').val(errorexistencia_04);
-$('#traslados_04').val(traslados_04);
+    $('#nomina').val(nomina);
+    $('#reprocesos').val(reprocesos);
+    $('#solicitudmp').val(solicitudmp);
+    $('#errorexistencia_04').val(errorexistencia_04);
+    $('#traslados_04').val(traslados_04);
+    $('#rechazos').val(rechazos);
 }
 </script>
 @section('script')

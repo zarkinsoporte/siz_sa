@@ -105,18 +105,13 @@
                 <table id="tabla_rechazos" class="table table-striped table-bordered table-rechazos" style="width:100%">
                     <thead>
                         <tr>
+                            <th>ID INSPECCIÓN</th>
                             <th>NOTA ENTRADA</th>
-                            <th>CÓDIGO ARTÍCULO</th>
                             <th>MATERIAL</th>
                             <th>UDM</th>
                             <th>CANTIDAD</th>
                             <th>INSPECCIONADA</th>
                             <th>RECHAZADA</th>
-                           
-                            <th>ID INSPECCIÓN</th>
-                            <th>LÍNEA</th>
-                            <th>ES PIEL</th>
-                            <th>REPORTE RECHAZO</th>
                             <th>ACCIONES</th>
                         </tr>
                     </thead>

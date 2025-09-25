@@ -1163,7 +1163,8 @@ public function Noticia()
              'Reprocesos' => $request->input('reprocesos'),
              'SolicitudesMP' => $request->input('solicitudmp'),
              'SolicitudesErrExistencias' => $request->input('errorexistencia_04'),
-             'Traslados' => $request->input('traslados_04')
+             'Traslados' => $request->input('traslados_04'),
+             'Rechazos' => $request->input('rechazos')
             ]
         );
         }else{
@@ -1173,7 +1174,8 @@ public function Noticia()
              'Reprocesos' => $request->input('reprocesos'),
              'SolicitudesMP' => $request->input('solicitudmp'),
              'SolicitudesErrExistencias' => $request->input('errorexistencia_04'),
-             'Traslados' => $request->input('traslados_04')
+             'Traslados' => $request->input('traslados_04'),
+             'Rechazos' => $request->input('rechazos')
             ]);
         }                
         Session::flash('mensaje', 'Cambios guardados');
