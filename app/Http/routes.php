@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use App\Modelos\MOD01\MODULOS_GRUPO_SIZ;
+use App\Http\Controllers\ImageController;
 
 Route::get('api/entrada_material_inspeccion/{id}', function () {
 	return response()->json([
@@ -802,3 +803,8 @@ Route::get('home/RECHAZOS/ver-inspeccion', 'Mod_RechazosController@verInspeccion
 Route::get('home/RECHAZOS/ver-piel', 'Mod_RechazosController@verPiel');
 Route::get('home/RECHAZOS/imagen/{id}', 'Mod_RechazosController@verImagen');
 Route::get('home/RECHAZOS/file/{name}', 'Mod_RechazosController@file');
+Route::get('/test-pdf-rechazo/{inc_id}', 'Mod_RechazosController@testPdfRechazo');
+Route::get('/test-simple/{inc_id}', 'Mod_RechazosController@testSimple');
+
+
+Route::get('/imagenes-locales/{nombreArchivo}', 'Mod_RechazosController@mostrarImagen')->name('imagen.local');

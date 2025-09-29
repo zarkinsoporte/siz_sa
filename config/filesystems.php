@@ -52,6 +52,11 @@ return [
             'root'   => 'C:\\xampp\\htdocs\\siz_sa\\images\\siz_articulos'
             
         ],
+        'images_incoming' => [
+            'driver' => 'local',
+            'root'   => 'D:\\INCOMING'
+            
+        ],
         'ftp' => [
             'driver'   => 'ftp',
             'host'     => '187.189.177.39',

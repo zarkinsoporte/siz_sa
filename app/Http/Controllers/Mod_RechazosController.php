@@ -11,6 +11,7 @@ use App\Modelos\Siz_IncomDetalle;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Mail;
 
 class Mod_RechazosController extends Controller
 {
@@ -63,13 +64,6 @@ class Mod_RechazosController extends Controller
                 ]);
             }
             
-            // Verificar que no se haya generado ya un rechazo para esta inspección
-            if ($inspeccion->INC_reporteRechazo == 1) {
-                return response()->json([
-                    "success" => false,
-                    "msg" => "Ya se ha generado un rechazo para esta inspección"
-                ]);
-            }
             
             // Crear registro en Siz_IncomRechazos
             $rechazo = new Siz_IncomRechazo();
@@ -82,7 +76,7 @@ class Mod_RechazosController extends Controller
             $rechazo->IR_notasGenerales = $notasGenerales;
             $rechazo->IR_GeneroDevolucion = "N"; // Por defecto no
             $rechazo->IR_NumDevolucion = null;
-            $rechazo->IR_Eliminado = "N";
+            $rechazo->IR_Eliminado = "0";
             $rechazo->save();
             
             // Actualizar Siz_Incoming para marcar que se generó el rechazo
@@ -99,7 +93,7 @@ class Mod_RechazosController extends Controller
                     CARDCODE as codigo_proveedor
                 FROM OCRD 
                 WHERE CARDCODE = ?
-            ", [$inspeccion->INC_proveedor]);
+            ", [$inspeccion->INC_codProveedor]);
             
             $proveedor_nombre = !empty($proveedor) ? $proveedor[0]->nombre_proveedor : 'Proveedor no encontrado';
             $proveedor_codigo = !empty($proveedor) ? $proveedor[0]->codigo_proveedor : $inspeccion->INC_proveedor;
@@ -130,9 +124,54 @@ class Mod_RechazosController extends Controller
             
             $numero_oc = !empty($orden_compra) ? $orden_compra[0]->numero_oc : 'N/A';
             $fecha_oc = !empty($orden_compra) ? date('d/m/Y', strtotime($orden_compra[0]->fecha_oc)) : 'N/A';
-            //crear pdf
             
-            // Envío de correo
+            // Obtener datos del checklist que no cumple
+            $checklistNoCumple = [];
+            $respuestas = Siz_IncomDetalle::on("siz")
+                ->where("IND_incId", $inc_id)
+                ->where("IND_estado", "N") // Solo los que no cumplen
+                ->get()
+                ->keyBy("IND_chkId");
+            
+            $checklist = Siz_Checklist::on("siz")
+                ->where("CHK_activo", "S")
+                ->whereIn("CHK_id", $respuestas->keys())
+                ->orderBy("CHK_orden")
+                ->get();
+            
+            // Obtener imágenes agrupadas por CHK_id
+            $imagenes = Siz_IncomImagen::on("siz")
+                ->where("IMG_incId", $inc_id)
+                ->where("IMG_borrado", "N")
+                ->get();
+            
+            $imagenesPorChk = [];
+            foreach ($imagenes as $img) {
+                $chkId = $img->IMG_descripcion;
+                if (!isset($imagenesPorChk[$chkId])) { 
+                    $imagenesPorChk[$chkId] = []; 
+                }
+                $imagenesPorChk[$chkId][] = [
+                    "ruta" => $img->IMG_ruta,
+                    "id" => $img->IMG_id,
+                    "archivo" => basename($img->IMG_ruta)
+                ];
+            }
+            
+            // Preparar datos del checklist que no cumple
+            foreach ($checklist as $item) {
+                if (isset($respuestas[$item->CHK_id])) {
+                    $respuesta = $respuestas[$item->CHK_id];
+                    $checklistNoCumple[] = [
+                        "descripcion" => $item->CHK_descripcion,
+                        "observacion" => $respuesta->IND_observacion,
+                        "cantidad" => $respuesta->IND_cantidad,
+                        "imagenes" => isset($imagenesPorChk[$item->CHK_id]) ? $imagenesPorChk[$item->CHK_id] : []
+                    ];
+                }
+            }
+            
+            // Obtener destinatarios del email
             $correos_db = DB::connection("siz")->select("
                 SELECT 
                 CASE WHEN email like '%@%' THEN email ELSE email + cast('@zarkin.com' as varchar) END AS correo
@@ -141,13 +180,57 @@ class Mod_RechazosController extends Controller
                 WHERE se.Rechazos = 1 AND OHEM.status = 1 AND email IS NOT NULL
                 GROUP BY email
             ");
-            $correos = array_pluck($correos_db, 'correo');
+            $correos = array_pluck($correos_db, "correo");
             
+            // Si no hay destinatarios, usar el correo del inspector
+            if (count($correos) == 0 && !empty($inspector_correo)) {
+                $correos = [$inspector_correo];
+            }
+            
+            // Preparar lista de destinatarios para el PDF
+            $destinatarios = $correos;
+
+            //crear pdf
+            $fechaImpresion = date("d-m-Y H:i:s");
+            $headerHtml = view()->make(
+                'Mod_RechazosController.pdfheader',
+                [
+                    'titulo' => 'Rechazo de Material',
+                    'fechaImpresion' => 'Fecha de Impresión: ' . $fechaImpresion,
+                    'item' => ''
+                ]
+            )->render();
+
+            
+            $pdf = \SPDF::loadView("Mod_RechazosController.rechazoPDF", compact(
+                "rechazo", 
+                "inspeccion", 
+                "proveedor_nombre", 
+                "proveedor_codigo", 
+                "numero_oc", 
+                "fecha_oc", 
+                "checklistNoCumple", 
+                "destinatarios"
+            ));
+        
+            $pdf->setOption('header-html', $headerHtml);
+            $pdf->setOption('footer-center', 'Pagina [page] de [toPage]');
+            $pdf->setOption('footer-left', 'SIZ');
+            $pdf->setOption('margin-top', '33mm');
+            $pdf->setOption('margin-left', '5mm');
+            $pdf->setOption('margin-right', '5mm');
+            $pdf->setOption('page-size', 'Letter');
+
+        
+
+            // Envío de correo
             if (count($correos) > 0) {
+                //adjuntar pdf
+                
                 Mail::send('Emails.Rechazos', [
                     'id_rechazo' => $rechazo->IR_id,
                     'fecha_rechazo' => date('d/m/Y H:i:s', strtotime($rechazo->IR_FechaReporte)),
-                    'nota_entrada' => $inspeccion->INC_notaEntrada,
+                    'nota_entrada' => $inspeccion->INC_docNum,
                     'proveedor_nombre' => $proveedor_nombre,
                     'proveedor_codigo' => $proveedor_codigo,
                     'numero_oc' => $numero_oc,
@@ -155,15 +238,16 @@ class Mod_RechazosController extends Controller
                     'codigo_material' => $inspeccion->INC_codMaterial,
                     'nombre_material' => $inspeccion->INC_nomMaterial,
                     'cantidad_rechazada' => number_format($inspeccion->INC_cantRechazada, 2),
-                    'udm' => $inspeccion->INC_udm,
+                    'udm' => $inspeccion->INC_unidadMedida,
                     'lote' => $inspeccion->INC_lote,
                     'notas_generales' => $notasGenerales,
                     'inspector_nombre' => $inspector_nombre,
                     'inspector_codigo' => $inspector_codigo,
                     'inspector_correo' => $inspector_correo
-                ], function ($msj) use ($correos, $rechazo) {
-                    $msj->subject('Notificación de Rechazo #' . $rechazo->IR_id . ' - ' . date('d/m/Y'));
+                ], function ($msj) use ($correos, $rechazo, $pdf, $inspeccion) {
+                    $msj->subject('Notificación de Rechazo #' . $rechazo->IR_id . ' - Inspección #' . $inspeccion->INC_id);
                     $msj->to($correos);
+                    $msj->attachData($pdf->output(), 'rechazo_' . $rechazo->IR_id . '.pdf');
                 });
             }
             
@@ -321,6 +405,177 @@ class Mod_RechazosController extends Controller
             return response()->json(["status" => "error", "message" => "El archivo \"" . $name . "\" no existe."], 404);
         }
     }
-    
+        /**
+     * Método de prueba para visualizar PDF de rechazo
+     */
+    public function testPdfRechazo($inc_id)
+    {
+        try {
+            // Obtener datos de la inspección
+            $inspeccion = Siz_Incoming::on("siz")->where("INC_id", $inc_id)->first();
+            
+            if (!$inspeccion) {
+                return "Inspección no encontrada con ID: " . $inc_id;
+            }
+            
+            // Obtener datos adicionales para el email
+            $proveedor = DB::connection("siz")->select("
+                SELECT TOP 1 
+                    CARDNAME as nombre_proveedor,
+                    CARDCODE as codigo_proveedor
+                FROM OCRD 
+                WHERE CARDCODE = ?
+            ", [$inspeccion->INC_codProveedor]);
+            
+            $proveedor_nombre = !empty($proveedor) ? $proveedor[0]->nombre_proveedor : "Proveedor no encontrado";
+            $proveedor_codigo = !empty($proveedor) ? $proveedor[0]->codigo_proveedor : $inspeccion->INC_codProveedor;
+            
+            // Obtener datos del inspector
+            $inspector = DB::connection("siz")->select("
+                SELECT TOP 1 
+                    firstName + ' ' + lastName as nombre_inspector,
+                    U_EmpGiro as codigo_inspector,
+                    email as correo_inspector
+                FROM OHEM 
+                WHERE U_EmpGiro = ?
+            ", [Auth::user()->U_EmpGiro]);
+            
+            $inspector_nombre = !empty($inspector) ? $inspector[0]->nombre_inspector : Auth::user()->firstName . " " . Auth::user()->lastName;
+            $inspector_codigo = !empty($inspector) ? $inspector[0]->codigo_inspector : Auth::user()->U_EmpGiro;
+            $inspector_correo = !empty($inspector) ? $inspector[0]->correo_inspector : Auth::user()->email;
+            
+            // Obtener datos de la orden de compra
+            $orden_compra = DB::connection("siz")->select("
+                SELECT TOP 1 
+                    DocNum as numero_oc,
+                    DocDate as fecha_oc,
+                    Comments as comentarios_oc
+                FROM OPOR 
+                WHERE DocEntry = ?
+            ", [$inspeccion->INC_ordenCompra]);
+            
+            $numero_oc = !empty($orden_compra) ? $orden_compra[0]->numero_oc : "N/A";
+            $fecha_oc = !empty($orden_compra) ? date("d/m/Y", strtotime($orden_compra[0]->fecha_oc)) : "N/A";
+            
+            // Obtener datos del checklist que no cumple
+            $checklistNoCumple = [];
+            $respuestas = Siz_IncomDetalle::on("siz")
+                ->where("IND_incId", $inc_id)
+                ->where("IND_estado", "N") // Solo los que no cumplen
+                ->get()
+                ->keyBy("IND_chkId");
+            
+            $checklist = Siz_Checklist::on("siz")
+                ->where("CHK_activo", "S")
+                ->whereIn("CHK_id", $respuestas->keys())
+                ->orderBy("CHK_orden")
+                ->get();
+            
+            // Obtener imágenes agrupadas por CHK_id
+            $imagenes = Siz_IncomImagen::on("siz")
+                ->where("IMG_incId", $inc_id)
+                ->where("IMG_borrado", "N")
+                ->get();
+            
+            $imagenesPorChk = [];
+            foreach ($imagenes as $img) {
+                $chkId = $img->IMG_descripcion;
+                if (!isset($imagenesPorChk[$chkId])) { 
+                    $imagenesPorChk[$chkId] = []; 
+                }
+                $imagenesPorChk[$chkId][] = [
+                    "ruta" => $img->IMG_ruta,
+                    "id" => $img->IMG_id,
+                    "archivo" => basename($img->IMG_ruta)
+                ];
+            }
+            //dd($imagenesPorChk, $numero_oc);
+            
+            // Preparar datos del checklist que no cumple
+            foreach ($checklist as $item) {
+                if (isset($respuestas[$item->CHK_id])) {
+                    $respuesta = $respuestas[$item->CHK_id];
+                    $checklistNoCumple[] = [
+                        "descripcion" => $item->CHK_descripcion,
+                        "observacion" => $respuesta->IND_observacion,
+                        "cantidad" => $respuesta->IND_cantidad,
+                        "imagenes" => isset($imagenesPorChk[$item->CHK_id]) ? $imagenesPorChk[$item->CHK_id] : []
+                    ];
+                }
+            }
+            
+            // Crear un rechazo de prueba
+            $rechazo = new \stdClass();
+            $rechazo->IR_id = 999;
+            $rechazo->IR_notasGenerales = "Notas de prueba para visualización";
+            
+            // Preparar lista de destinatarios para el PDF
+            $destinatarios = ["test@ejemplo.com", "admin@ejemplo.com"];
+            
+            // Verificar que las variables estén definidas
+            if (!isset($proveedor_nombre)) $proveedor_nombre = "N/A";
+            if (!isset($proveedor_codigo)) $proveedor_codigo = "N/A";
+            if (!isset($numero_oc)) $numero_oc = "N/A";
+            if (!isset($fecha_oc)) $fecha_oc = "N/A";
+            if (!isset($checklistNoCumple)) $checklistNoCumple = [];
+            if (!isset($destinatarios)) $destinatarios = [];
+            
+            // Debug detallado
+           
+            //dd($proveedor_nombre);
+
+            // Retornar la vista directamente (sin PDF)
+            return view("Mod_RechazosController.rechazo_pdf", [
+                "rechazo" => $rechazo,
+                "inspeccion" => $inspeccion,
+                "proveedor_nombre" => $proveedor_nombre,
+                "proveedor_codigo" => $proveedor_codigo,
+                "numero_oc" => $numero_oc,
+                "fecha_oc" => $fecha_oc,
+                "checklistNoCumple" => $checklistNoCumple,
+                "destinatarios" => $destinatarios
+            ]);
+            
+        } catch (\Exception $e) {
+            return "Error: " . $e->getMessage();
+        }
+    }
+
+    /**
+     * Método de prueba simple para verificar Blade
+     */
+    public function testSimple($inc_id)
+    {
+        $inspeccion = Siz_Incoming::on("siz")->where("INC_id", $inc_id)->first();
+        
+        if (!$inspeccion) {
+            return "Inspección no encontrada";
+        }
+        
+        return view("Mod_RechazosController.rechazo_pdf", [
+            "proveedor_nombre" => "Proveedor de Prueba",
+            "proveedor_codigo" => "PROV001",
+            "numero_oc" => "OC123456",
+            "fecha_oc" => "01/01/2024",
+            "inspeccion" => $inspeccion
+        ]);
+    }
+    public function mostrarImagen($id)
+    {
+        // Usamos el disco que definimos en el paso 1: 'disco_local'
+        $disco = Storage::disk('images_incoming');
+
+        // Verificamos si el archivo existe en esa ubicación
+        if (!$disco->exists($nombreArchivo)) {
+            abort(404, 'Imagen no encontrada.');
+        }
+
+        // Obtenemos la ruta completa al archivo
+        $rutaAlArchivo = $disco->path($nombreArchivo);
+
+        // Devolvemos el archivo como una respuesta.
+        // Laravel se encargará de establecer los encabezados correctos (Content-Type).
+        return response()->file($rutaAlArchivo);
+    }
 }
 
