@@ -15,7 +15,7 @@
         }
         
         .header {
-            background-color: #dc3545;
+            background-color:rgb(53, 50, 50);
             color: white;
             padding: 20px;
             text-align: center;
@@ -38,11 +38,11 @@
             padding: 15px;
             margin: 10px 0;
             border-radius: 5px;
-            border-left: 4px solid #dc3545;
+            border-left: 4px solid rgb(226, 220, 221);
         }
         
         .info-section h3 {
-            color: #dc3545;
+            color:rgb(29, 24, 24);
             margin-top: 0;
             font-size: 16px;
         }
@@ -102,6 +102,38 @@
             border-radius: 5px;
             margin: 10px 0;
         }
+          .info-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .info-block h3 {
+            font-weight: bold;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .info-item {
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #6b7280;
+            display: inline-block;
+            width: 5rem;
+        }
+        
+        .info-value {
+            color: #374151;
+        }
+        
     </style>
 </head>
 <body>
@@ -111,45 +143,47 @@
     </div>
     
     <div class="content">
-        <div class="info-section">
-            <h3>📋 Información del Rechazo</h3>
-            <table class="info-table">
-                <tr>
-                    <th>Número de Rechazo:</th>
-                    <td class="urgent">#{{ $id_rechazo }}</td>
-                </tr>
-                <tr>
-                    <th>Fecha de Rechazo:</th>
-                    <td>{{ $fecha_rechazo }}</td>
-                </tr>
-                <tr>
-                    <th>Nota de Entrada:</th>
-                    <td>{{ $nota_entrada }}</td>
-                </tr>
-            </table>
-        </div>
-        
-        <div class="info-section">
-            <h3>🏢 Información del Proveedor</h3>
-            <table class="info-table">
-                <tr>
-                    <th>Proveedor:</th>
-                    <td>{{ $proveedor_nombre }}</td>
-                </tr>
-                <tr>
-                    <th>Código:</th>
-                    <td>{{ $proveedor_codigo }}</td>
-                </tr>
-                <tr>
-                    <th>Orden de Compra:</th>
-                    <td>{{ $numero_oc }}</td>
-                </tr>
-                <tr>
-                    <th>Fecha de OC:</th>
-                    <td>{{ $fecha_oc }}</td>
-                </tr>
-            </table>
-        </div>
+       <section class="info-section">
+            <div class="info-block">
+                <h3>Datos del Proveedor:</h3>
+                <div class="info-item">
+                    <span class="info-label">Nombre:</span>
+                    <span class="info-value">{{ $proveedor_nombre ?? "N/A" }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Código:</span>
+                    <span class="info-value">{{ $proveedor_codigo ?? "N/A" }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Entrada:</span>
+                    <span class="info-value">{{ $numero_entrada ?? "N/A" }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Fecha Ingreso:</span>
+                    <span class="info-value">{{ $fecha_entrada ?? "N/A" }}</span>
+                </div>
+            </div>
+            <div class="info-block info-right">
+                <div class="info-item">
+                    <span class="info-label">Fecha Inspección:</span>
+                    <span class="info-value">{{ $inspeccion->INC_fechaInspeccion ? date("d/m/Y", strtotime($inspeccion->INC_fechaInspeccion)) : "N/A" }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Número de Rechazo:</span>
+                    <span class="info-value urgent">#{{ $id_rechazo ?? "N/A" }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Inspector:</span>
+                    <span class="info-value">{{ $inspector_nombre ?? "N/A" }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Lote:</span>
+                    <span class="info-value">{{ $lote ?? "N/A" }}</span>
+                </div>
+            </div>
+        </section>
+
+       
         
         <div class="material-info">
             <h3> Material Rechazado</h3>
@@ -184,26 +218,21 @@
         
         <div class="highlight">
             <h3>⚠️ Acción Requerida</h3>
-            <p><strong>ATENCIÓN COMPRAS:</strong> Favor de notificar al proveedor <strong>{{ $proveedor_nombre }}</strong> para que se presente al almacén con previa cita para recoger los productos rechazados.</p>
-            <p>El material rechazado se encuentra disponible en el almacén y debe ser retirado en un plazo máximo de 30 días.</p>
+            <p><strong>COMPRAS:</strong> Favor de notificar al proveedor <strong>{{ $proveedor_nombre }}</strong> para que se presente al almacén con previa cita para recoger los productos rechazados.</p>
+            <p>El material rechazado se encuentra disponible en el almacén y debe ser retirado en un plazo máximo de 3 días.</p>
         </div>
         
         <div class="info-section">
             <h3>👤 Inspector Responsable</h3>
-            <table class="info-table">
-                <tr>
-                    <th>Nombre:</th>
-                    <td>{{ $inspector_nombre }}</td>
-                </tr>
-                <tr>
-                    <th>Número de Nómina:</th>
-                    <td>{{ $inspector_codigo }}</td>
-                </tr>
-                <tr>
-                    <th>Correo:</th>
-                    <td>{{ $inspector_correo }}</td>
-                </tr>
-            </table>
+            <br>
+            <div class="info-item">
+                <span class="info-label">Nombre:</span>
+                <span class="info-value">{{ $inspector_nombre ?? "N/A" }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Correo:</span>
+                <span class="info-value">{{ $inspector_correo ? $inspector_correo."@zarkin.com" : "N/A" }}</span>
+            </div>
         </div>
     </div>
     

@@ -42,6 +42,30 @@
         opacity: 0.65;
     }
     
+    /* Estilos para el estado de procesamiento */
+    #confirmarGenerarRechazo.procesando {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        cursor: not-allowed;
+    }
+
+    #confirmarGenerarRechazo.procesando i {
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    #procesando_rechazo {
+        margin-top: 15px;
+    }
+
+    #procesando_rechazo i {
+        margin-right: 8px;
+    }
+    
     /* Estilos para la tabla de rechazos */
     .table-rechazos th {
         background-color: #f8f9fa;
@@ -178,11 +202,17 @@
                                   placeholder="Ingrese las notas generales del rechazo..." 
                                   style="text-transform: uppercase;"></textarea>
                     </div>
+                    
+                    <!-- Estado de procesamiento -->
+                    <div id="procesando_rechazo" class="alert alert-info" style="display: none;">
+                        <i class="fa fa-spinner fa-spin"></i>
+                        <strong>Procesando rechazo...</strong> Por favor espere, no cierre esta ventana.
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-default" id="btn_cancelar_rechazo" data-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-danger" id="confirmarGenerarRechazo">
-                        <i class="fa fa-times"></i> Generar Rechazo
+                        <i class="fa fa-times"></i> <span id="btn_text">Generar Rechazo</span>
                     </button>
                 </div>
             </div>
