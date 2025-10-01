@@ -23,21 +23,41 @@ class Mod_RechazosController extends Controller
         $ultimo = count($actividades);
         return view("Mod_RechazosController.index_rechazos", compact("actividades", "ultimo"));
     }
-
+    
     // AJAX: Obtener lista de rechazos desde el procedimiento almacenado
-    public function buscarRechazos()
-    {
-        try {
-            // Ejecutar el procedimiento almacenado SIZ_Calidad_RechazosMaterial
-            $rechazos = DB::select("EXEC SIZ_Calidad_RechazosMaterial");
-            
-            return response()->json($rechazos);
-        } catch (\Exception $e) {
-            return response()->json([
-                "error" => "Error al obtener los datos de rechazos: " . $e->getMessage()
-            ], 500);
+public function buscarRechazos(Request $request)
+{
+    try {
+        $estado = $request->input('estado', ''); // '' = todos, '0' = pendientes, '1' = generados
+        $fechaDesde = $request->input('fecha_desde', '');
+        $fechaHasta = $request->input('fecha_hasta', '');
+        
+        // Si no se envían fechas, usar los últimos 3 meses
+        if (empty($fechaDesde)) {
+            $fechaDesde = date('Y-m-d', strtotime('-3 months'));
         }
+        
+        if (empty($fechaHasta)) {
+            $fechaHasta = date('Y-m-d');
+        }
+        
+        // Convertir estado vacío a NULL para el procedimiento
+        $estadoParam = ($estado === '') ? null : (int)$estado;
+        
+        // Ejecutar el procedimiento almacenado con parámetros
+        $rechazos = DB::select("EXEC SIZ_Calidad_RechazosMaterial ?, ?, ?", [
+            $estadoParam,
+            $fechaDesde,
+            $fechaHasta
+        ]);
+        
+        return response()->json($rechazos);
+    } catch (\Exception $e) {
+        return response()->json([
+            "error" => "Error al obtener los datos de rechazos: " . $e->getMessage()
+        ], 500);
     }
+}
 
     // AJAX: Generar rechazo y actualizar tablas
     public function generarRechazo(Request $request)
