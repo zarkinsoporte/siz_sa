@@ -784,7 +784,7 @@ Route::any('cancelOC-test/{docEntry}', 'Mod03_ComprasController@CancelDoc2');
 Route::any('getPartida', 'Mod03_ComprasController@getPartida');
 Route::any('cerrar_partida', 'Mod03_ComprasController@cerrar_partida');
 
-//CALIDAD INCOMING
+//CALIDAD INSPECCION
 Route::get('home/INSPECCION', 'Mod_IncomingController@index_inspeccion')->middleware('routelog');
 Route::get('home/INSPECCION/buscar', 'Mod_IncomingController@buscarMateriales');
 Route::any('home/INSPECCION/checklist', 'Mod_IncomingController@getChecklist');
@@ -806,5 +806,9 @@ Route::get('home/RECHAZOS/file/{name}', 'Mod_RechazosController@file');
 Route::get('/test-pdf-rechazo/{inc_id}', 'Mod_RechazosController@testPdfRechazo');
 Route::get('/test-simple/{inc_id}', 'Mod_RechazosController@testSimple');
 
-
 Route::get('/imagenes-locales/{nombreArchivo}', 'Mod_RechazosController@mostrarImagen')->name('imagen.local');
+Route::get('/home/RECHAZOS/pdf/{inc_id}', 'Mod_RechazosController@verPdfRechazo');
+
+//CALIDAD RESUMEN CONCENTRADO DE INCOMING
+Route::get('home/INCOMING', 'Mod_IncomingController@index_incoming')->middleware('routelog');
+Route::get('home/INCOMING/buscar-inspecciones', 'Mod_IncomingController@buscarInspecciones');

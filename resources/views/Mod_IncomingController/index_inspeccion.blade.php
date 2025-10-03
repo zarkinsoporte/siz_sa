@@ -1,7 +1,7 @@
 @extends('home')
 @section('homecontent')
 
-{!! Html::script('assets/js/Mod_IncomingController/incoming.js?v='.time()) !!}
+{!! Html::script('assets/js/Mod_IncomingController/index_inspeccion.js?v='.time()) !!}
 
 {!! Html::style('assets/css/customdt2.css') !!}
 

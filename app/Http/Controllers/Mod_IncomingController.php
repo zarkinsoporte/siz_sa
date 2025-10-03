@@ -13,7 +13,45 @@ use Illuminate\Support\Facades\Auth;
 
 class Mod_IncomingController extends Controller
 {
+    // index_incoming
+    public function index_incoming()
+    {
+        $actividades = session('userActividades');
+        $ultimo = count($actividades);
+        return view('Mod_IncomingController.index_incoming', compact('actividades', 'ultimo'));
+    }
     
+    // AJAX: Buscar inspecciones con filtros de fecha
+    public function buscarInspecciones(Request $request)
+    {
+        try {
+            $fechaDesde = $request->input('fecha_desde', '');
+            $fechaHasta = $request->input('fecha_hasta', '');
+            
+            // Si no se envían fechas, usar los últimos 3 meses
+            if (empty($fechaDesde)) {
+                $fechaDesde = date('Y-m-d', strtotime('-3 months'));
+            }
+            
+            if (empty($fechaHasta)) {
+                $fechaHasta = date('Y-m-d');
+            }
+            
+            // Consultar inspecciones con filtro de fechas
+            $inspecciones = Siz_Incoming::on('siz')
+                ->where('INC_borrado', 'N')
+                ->whereDate('INC_fechaInspeccion', '>=', $fechaDesde)
+                ->whereDate('INC_fechaInspeccion', '<=', $fechaHasta)
+                ->orderBy('INC_fechaInspeccion', 'desc')
+                ->get();
+            
+            return response()->json($inspecciones);
+        } catch (\Exception $e) {
+            return response()->json([
+                "error" => "Error al obtener las inspecciones: " . $e->getMessage()
+            ], 500);
+        }
+    }
     // Muestra la vista principal de RECHAZOS
     public function index_rechazos()
     {
