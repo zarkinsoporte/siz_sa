@@ -218,7 +218,9 @@ function js_iniciador() {
     $('#guardarPiel').click(function(){
         var total = parseFloat($('#claseA').val()||0)+parseFloat($('#claseB').val()||0)+parseFloat($('#claseC').val()||0)+parseFloat($('#claseD').val()||0);
         var cantidadAceptada = parseFloat($('#cantidad_aceptada').val()) || 0;
-        
+        //to fixed 2 decimales
+        total = parseFloat(total.toFixed(2));
+        cantidadAceptada = parseFloat(cantidadAceptada.toFixed(2));
         if(total != cantidadAceptada){
             swal({
                 title: 'Clases de piel incompletas',
