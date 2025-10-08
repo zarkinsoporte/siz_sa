@@ -263,7 +263,7 @@ public function buscarRechazos(Request $request)
             $numero_entrada = $inspeccion->INC_docNum;
             $codigo_material = $inspeccion->INC_codMaterial;
             $nombre_material = $inspeccion->INC_nomMaterial;
-            $cantidad_rechazada = number_format($inspeccion->INC_cantRechazada, 2);
+            $cantidad_rechazada = number_format($inspeccion->INC_cantRechazada, 3);
             $udm = $inspeccion->INC_unidadMedida;
             $lote = $inspeccion->INC_lote;
             $notas_generales = $notasGenerales;
@@ -486,7 +486,7 @@ public function buscarRechazos(Request $request)
             $numero_entrada = $inspeccion->INC_docNum;
             $codigo_material = $inspeccion->INC_codMaterial;
             $nombre_material = $inspeccion->INC_nomMaterial;
-            $cantidad_rechazada = number_format($inspeccion->INC_cantRechazada, 2);
+            $cantidad_rechazada = number_format($inspeccion->INC_cantRechazada, 3);
             $udm = $inspeccion->INC_unidadMedida;
             $lote = $inspeccion->INC_lote;
             $notas_generales = $rechazo->IR_notasGenerales;
@@ -801,7 +801,7 @@ public function buscarRechazos(Request $request)
             $fecha_entrada = date('d/m/Y', strtotime($inspeccion->INC_fechaRecepcion));
             $codigo_material = $inspeccion->INC_codMaterial;
             $nombre_material = $inspeccion->INC_nomMaterial;
-            $cantidad_rechazada = number_format($inspeccion->INC_cantRechazada, 2);
+            $cantidad_rechazada = number_format($inspeccion->INC_cantRechazada, 3);
             $udm = $inspeccion->INC_unidadMedida;
             $lote = $inspeccion->INC_lote;
             $notas_generales = $rechazo->IR_notasGenerales;

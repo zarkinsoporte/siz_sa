@@ -315,34 +315,34 @@ input[type="radio"], input[type="checkbox"] {
                     <tr>
                       <td><strong>CLASE A</strong></td>
                       <td>
-                        <input type="number" min="0" step="0.01" class="form-control clase-piel" id="claseA" name="claseA" data-clase="A">
+                        <input type="number" min="0" step="0.001" class="form-control clase-piel" id="claseA" name="claseA" data-clase="A">
                       </td>
                       <td><span id="porcentajeA" class="porcentaje-clase">0.00%</span></td>
                     </tr>
                     <tr>
                       <td><strong>CLASE B</strong></td>
                       <td>
-                        <input type="number" min="0" step="0.01" class="form-control clase-piel" id="claseB" name="claseB" data-clase="B">
+                        <input type="number" min="0" step="0.001" class="form-control clase-piel" id="claseB" name="claseB" data-clase="B">
                       </td>
                       <td><span id="porcentajeB" class="porcentaje-clase">0.00%</span></td>
                     </tr>
                     <tr>
                       <td><strong>CLASE C</strong></td>
                       <td>
-                        <input type="number" min="0" step="0.01" class="form-control clase-piel" id="claseC" name="claseC" data-clase="C">
+                        <input type="number" min="0" step="0.001" class="form-control clase-piel" id="claseC" name="claseC" data-clase="C">
                       </td>
                       <td><span id="porcentajeC" class="porcentaje-clase">0.00%</span></td>
                     </tr>
                     <tr>
                       <td><strong>CLASE *</strong></td>
                       <td>
-                        <input type="number" min="0" step="0.01" class="form-control clase-piel" id="claseD" name="claseD" data-clase="D">
+                        <input type="number" min="0" step="0.001" class="form-control clase-piel" id="claseD" name="claseD" data-clase="D">
                       </td>
                       <td><span id="porcentajeD" class="porcentaje-clase">0.00%</span></td>
                     </tr>
                     <tr class="table-info">
                       <td><strong>TOTAL</strong></td>
-                      <td><span id="totalClases" class="font-weight-bold">0.00</span></td>
+                      <td><span id="totalClases" class="font-weight-bold">0.000</span></td>
                       <td><span id="totalPorcentaje" class="font-weight-bold">0.00%</span></td>
                     </tr>
                   </tbody>

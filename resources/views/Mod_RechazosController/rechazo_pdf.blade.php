@@ -420,9 +420,9 @@
                             <td>{{ $codigo_material ?? "N/A" }}</td>
                             <td>{{ $nombre_material ?? "N/A" }}</td>
                             <td>{{ $udm ?? "N/A" }}</td>
-                            <td>{{ number_format($inspeccion->INC_cantRecibida ?? 0, 2) }}</td>
-                            <td>{{ number_format($inspeccion->INC_cantAceptada ?? 0, 2) }}</td>
-                            <td class="urgent">{{ $cantidad_rechazada ?? "0.00" }}</td>
+                            <td>{{ number_format($inspeccion->INC_cantRecibida ?? 0, 3) }}</td>
+                            <td>{{ number_format($inspeccion->INC_cantAceptada ?? 0, 3) }}</td>
+                            <td class="urgent">{{ $cantidad_rechazada ?? "0.000" }}</td>
                             <td>Ver notas abajo</td>
                         </tr>
                     </tbody>

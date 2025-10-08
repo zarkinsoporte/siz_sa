@@ -188,10 +188,10 @@ function js_iniciador() {
                 '<td>'+mat.CODIGO_ARTICULO+'</td>'+
                 '<td>'+mat.MATERIAL+'</td>'+
                 '<td>'+mat.UDM+'</td>'+
-                '<td>'+(parseFloat(mat.CANTIDAD) || 0).toFixed(2)+'</td>'+
-                '<td>' + (parseFloat(mat.CAN_INSPECCIONADA) || 0).toFixed(2)+'</td>'+
-                '<td>' + (parseFloat(mat.CAN_RECHAZADA) || 0).toFixed(2)+'</td>'+
-                '<td>'+porRevisar.toFixed(2)+'</td>'+
+                '<td>'+(parseFloat(mat.CANTIDAD) || 0).toFixed(3)+'</td>'+
+                '<td>' + (parseFloat(mat.CAN_INSPECCIONADA) || 0).toFixed(3)+'</td>'+
+                '<td>' + (parseFloat(mat.CAN_RECHAZADA) || 0).toFixed(3)+'</td>'+
+                '<td>'+porRevisar.toFixed(3)+'</td>'+
             '</tr>';
         });
         $('#tabla_materiales tbody').html(tbody);
@@ -218,13 +218,13 @@ function js_iniciador() {
     $('#guardarPiel').click(function(){
         var total = parseFloat($('#claseA').val()||0)+parseFloat($('#claseB').val()||0)+parseFloat($('#claseC').val()||0)+parseFloat($('#claseD').val()||0);
         var cantidadAceptada = parseFloat($('#cantidad_aceptada').val()) || 0;
-        //to fixed 2 decimales
-        total = parseFloat(total.toFixed(2));
-        cantidadAceptada = parseFloat(cantidadAceptada.toFixed(2));
+        //to fixed 3 decimales
+        total = parseFloat(total.toFixed(3));
+        cantidadAceptada = parseFloat(cantidadAceptada.toFixed(3));
         if(total != cantidadAceptada){
             swal({
                 title: 'Clases de piel incompletas',
-                text: 'La suma de clases debe ser igual a la cantidad aceptada ('+cantidadAceptada.toFixed(2)+')',
+                text: 'La suma de clases debe ser igual a la cantidad aceptada ('+cantidadAceptada.toFixed(3)+')',
                 type: 'warning',
                 confirmButtonText: 'Aceptar'
             });
@@ -277,11 +277,11 @@ function js_iniciador() {
         $('#porcentajeD').text(porcentajeD.toFixed(2) + '%');
         
         // Actualizar totales
-        $('#totalClases').text(total.toFixed(2));
+        $('#totalClases').text(total.toFixed(3));
         $('#totalPorcentaje').text((porcentajeA + porcentajeB + porcentajeC + porcentajeD).toFixed(2) + '%');
         
-        // Validar si la suma es correcta
-        if(Math.abs(total - cantidadAceptada) < 0.01) {
+        // Validar si la suma es correcta (tolerancia de 0.001 para 3 decimales)
+        if(Math.abs(total - cantidadAceptada) < 0.001) {
             $('#alertPiel').hide();
             $('.clase-piel').removeClass('is-invalid').addClass('is-valid');
         } else {
@@ -432,7 +432,7 @@ function js_iniciador() {
                 '<td><input type="radio" name="checklist_'+item.CHK_id+'" value="Cumple" '+(respuesta === 'Cumple' ? 'checked' : '')+' onchange="manejarChecklist('+item.CHK_id+', this.value)"></td>'+
                 '<td><input type="radio" name="checklist_'+item.CHK_id+'" value="No Cumple" '+(respuesta === 'No Cumple' ? 'checked' : '')+' onchange="manejarChecklist('+item.CHK_id+', this.value)"></td>'+
                 '<td><input type="radio" name="checklist_'+item.CHK_id+'" value="No Aplica" '+(respuesta === 'No Aplica' ? 'checked' : '')+' onchange="manejarChecklist('+item.CHK_id+', this.value)"></td>'+
-                '<td><input type="number" id="cantidad_'+item.CHK_id+'" class="form-control cantidad-no-cumple" value="'+cantidadNoCumple+'" step="0.01" min="0" max="999999.99" onblur="if(this.value) this.value = parseFloat(this.value).toFixed(2)" disabled></td>'+
+                '<td><input type="number" id="cantidad_'+item.CHK_id+'" class="form-control cantidad-no-cumple" value="'+cantidadNoCumple+'" step="0.001" min="0" max="999999.999" onblur="if(this.value) this.value = parseFloat(this.value).toFixed(3)" disabled></td>'+
                 '<td><textarea class="form-control textareaObservacion" name="obs_'+item.CHK_id+'" rows="2" style="resize:none; text-transform:uppercase;">'+observacion+'</textarea></td>'+
             '</tr>';
         });
@@ -553,9 +553,9 @@ function js_iniciador() {
             var cantidad = respuestas[item.CHK_id + '_cantidad'] || '';
             var observacion = respuestas[item.CHK_id + '_observacion'] || '';
             
-            // Formatear cantidad con 2 decimales si existe
+            // Formatear cantidad con 3 decimales si existe
             if (cantidad && !isNaN(parseFloat(cantidad))) {
-                cantidad = parseFloat(cantidad).toFixed(2);
+                cantidad = parseFloat(cantidad).toFixed(3);
             }
             
             console.log('Item:', item.CHK_id, 'Estado:', estadoSeleccionado, 'Cantidad:', cantidad, 'Observacion:', observacion);
@@ -570,7 +570,7 @@ function js_iniciador() {
                 '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="checklist_'+item.CHK_id+'" value="Cumple" '+(estadoSeleccionado === 'Cumple' ? 'checked' : '')+' disabled></td>'+
                 '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="checklist_'+item.CHK_id+'" value="No Cumple" '+(estadoSeleccionado === 'No Cumple' ? 'checked' : '')+' disabled></td>'+
                 '<td style="text-align:center"><input style="accent-color:black;" type="radio" name="checklist_'+item.CHK_id+'" value="No Aplica" '+(estadoSeleccionado === 'No Aplica' ? 'checked' : '')+' disabled></td>'+
-                '<td style="text-align:center"><input type="number" id="cantidad_'+item.CHK_id+'" class="form-control cantidad-no-cumple" value="'+cantidad+'" step="0.01" min="0" max="999999.99" onblur="if(this.value) this.value = parseFloat(this.value).toFixed(2)" disabled></td>'+
+                '<td style="text-align:center"><input type="number" id="cantidad_'+item.CHK_id+'" class="form-control cantidad-no-cumple" value="'+cantidad+'" step="0.001" min="0" max="999999.999" onblur="if(this.value) this.value = parseFloat(this.value).toFixed(3)" disabled></td>'+
                 '<td><textarea class="form-control textareaObservacion" name="obs_'+item.CHK_id+'" rows="2" style="resize:none; text-transform:uppercase;" readonly>'+observacion+'</textarea></td>'+
             '</tr>';
         });
@@ -636,10 +636,10 @@ function js_iniciador() {
                     $('#piel_cantidad_total').text(inspeccionConsultaData.CAN_INSPECCIONADA);
                     
                     // Llenar las clases de piel
-                    $('#claseA').val(parseFloat(response.piel.claseA || 0).toFixed(2));
-                    $('#claseB').val(parseFloat(response.piel.claseB || 0).toFixed(2));
-                    $('#claseC').val(parseFloat(response.piel.claseC || 0).toFixed(2));
-                    $('#claseD').val(parseFloat(response.piel.claseD || 0).toFixed(2));
+                    $('#claseA').val(parseFloat(response.piel.claseA || 0).toFixed(3));
+                    $('#claseB').val(parseFloat(response.piel.claseB || 0).toFixed(3));
+                    $('#claseC').val(parseFloat(response.piel.claseC || 0).toFixed(3));
+                    $('#claseD').val(parseFloat(response.piel.claseD || 0).toFixed(3));
                     
                     // Limpiar clases de validación
                     console.log('Limpiar clases de validación');
@@ -721,7 +721,7 @@ function js_iniciador() {
         if (totalNoCumple !== cantidadRechazada) {
             swal({
                 title: 'Cantidades no coinciden',
-                text: 'La suma de cantidades "No Cumple" ('+totalNoCumple.toFixed(2)+') debe ser igual a la cantidad rechazada ('+cantidadRechazada.toFixed(2)+')',
+                text: 'La suma de cantidades "No Cumple" ('+totalNoCumple.toFixed(3)+') debe ser igual a la cantidad rechazada ('+cantidadRechazada.toFixed(3)+')',
                 type: 'warning',
                 confirmButtonText: 'Aceptar'
             });
@@ -868,19 +868,19 @@ function js_iniciador() {
                         '<div class="col-sm-6 col-md-3">'+
                             '<div class="data-summary-item">'+
                                 '<small>POR REVISAR</small>'+
-                                '<input type="number" id="cantidad_por_revisar" class="form-control user-error" value="'+porRevisar.toFixed(2)+'" min="0" max="'+porRevisar+'" step="0.01">'+
+                                '<input type="number" id="cantidad_por_revisar" class="form-control user-error" value="'+porRevisar.toFixed(3)+'" min="0" max="'+porRevisar+'" step="0.001">'+
                             '</div>'+
                         '</div>'+
                         '<div class="col-sm-6 col-md-3">'+
                             '<div class="data-summary-item">'+
                                 '<small>ACEPTADA</small>'+
-                                '<input type="number" id="cantidad_aceptada" class="form-control user-success" value="'+cantidadAceptadaDefault.toFixed(2)+'" min="0" max="'+porRevisar+'" step="0.01">'+
+                                '<input type="number" id="cantidad_aceptada" class="form-control user-success" value="'+cantidadAceptadaDefault.toFixed(3)+'" min="0" max="'+porRevisar+'" step="0.001">'+
                             '</div>'+
                         '</div>'+
                         '<div class="col-sm-6 col-md-3">'+
                             '<div class="data-summary-item">'+
                                 '<small>RECHAZADA</small>'+
-                                '<input type="number" id="cantidad_rechazada" class="form-control" value="0.00" readonly="">'+
+                                '<input type="number" id="cantidad_rechazada" class="form-control" value="0.000" readonly="">'+
                             '</div>'+
                         '</div>'+
                         '<div class="col-sm-6 col-md-3">'+
@@ -975,12 +975,12 @@ function js_iniciador() {
         $('#piel_articulo_info').text(materialSeleccionado.CODIGO_ARTICULO + ' - ' + materialSeleccionado.MATERIAL);
         //console.log(materialSeleccionado);
         $('#piel_lote_info').text(materialSeleccionado.LOTE || 'N/A');
-        $('#piel_cantidad_total').text(cantidadAceptada.toFixed(2));
+        $('#piel_cantidad_total').text(cantidadAceptada.toFixed(3));
         
         // Limpiar campos y porcentajes
         $('#claseA, #claseB, #claseC, #claseD').val('');
         $('.porcentaje-clase').text('0.00%');
-        $('#totalClases').text('0.00');
+        $('#totalClases').text('0.000');
         $('#totalPorcentaje').text('0.00%');
         
         // Limpiar alertas previas
@@ -1009,7 +1009,7 @@ function js_iniciador() {
         $('#piel_cantidad_total').text('');
         $('#claseA, #claseB, #claseC, #claseD').val('');
         $('.porcentaje-clase').text('0.00%');
-        $('#totalClases').text('0.00');
+        $('#totalClases').text('0.000');
         $('#totalPorcentaje').text('0.00%');
         $('#alertPiel').hide();
         $('.clase-piel').removeClass('is-valid is-invalid');
@@ -1085,19 +1085,19 @@ function js_iniciador() {
                         '<div class="col-sm-6 col-md-3">'+
                             '<div class="data-summary-item">'+
                                 '<small>REVISADA</small>'+
-                                '<input type="number" id="cantidad_revisada_consulta" class="form-control user-error" value="'+revisada.toFixed(2)+'" readonly style="margin-top: 5px;">'+
+                                '<input type="number" id="cantidad_revisada_consulta" class="form-control user-error" value="'+revisada.toFixed(3)+'" readonly style="margin-top: 5px;">'+
                             '</div>'+
                         '</div>'+
                         '<div class="col-sm-6 col-md-3">'+
                             '<div class="data-summary-item">'+
                                 '<small>ACEPTADA</small>'+
-                                '<input type="number" id="cantidad_aceptada_consulta" class="form-control user-success" value="'+aceptadas.toFixed(2)+'" readonly style="margin-top: 5px;">'+
+                                '<input type="number" id="cantidad_aceptada_consulta" class="form-control user-success" value="'+aceptadas.toFixed(3)+'" readonly style="margin-top: 5px;">'+
                             '</div>'+
                         '</div>'+
                         '<div class="col-sm-6 col-md-3">'+
                             '<div class="data-summary-item">'+
                                 '<small>RECHAZADA</small>'+
-                                '<input type="number" id="cantidad_rechazada_consulta" class="form-control" value="'+rechazadas.toFixed(2)+'" readonly style="margin-top: 5px;">'+
+                                '<input type="number" id="cantidad_rechazada_consulta" class="form-control" value="'+rechazadas.toFixed(3)+'" readonly style="margin-top: 5px;">'+
                             '</div>'+
                         '</div>'+
                         '<div class="col-sm-6 col-md-3">'+
@@ -1229,7 +1229,7 @@ function js_iniciador() {
         var rechazada = porRevisar - aceptada;
         var porcentaje = porRevisar > 0 ? (aceptada / porRevisar * 100) : 0;
         
-        $('#cantidad_rechazada').val(rechazada.toFixed(2));
+        $('#cantidad_rechazada').val(rechazada.toFixed(3));
         $('#porcentaje_aceptado').val(porcentaje.toFixed(2) + '%');
         
         // Solo bloquear si por revisar es 0 DESPUÉS de guardar (no durante la edición)
@@ -1315,11 +1315,13 @@ function js_iniciador() {
             var totalPiel = parseFloat(pielCapturada.claseA) + parseFloat(pielCapturada.claseB) + 
                            parseFloat(pielCapturada.claseC) + parseFloat(pielCapturada.claseD);
             var cantidadAceptada = parseFloat($('#cantidad_aceptada').val()) || 0;
-            
+            //to fixed 3 decimales
+            totalPiel = parseFloat(totalPiel.toFixed(3));
+            cantidadAceptada = parseFloat(cantidadAceptada.toFixed(3)); 
             if(totalPiel !== cantidadAceptada){
                 swal({
                     title: 'Clases de piel incompletas',
-                    text: 'La suma de clases debe ser igual a la cantidad aceptada ('+cantidadAceptada.toFixed(2)+')',
+                    text: 'La suma de clases debe ser igual a la cantidad aceptada ('+cantidadAceptada.toFixed(3)+')',
                     type: 'warning',
                     confirmButtonText: 'Aceptar'
                 });
