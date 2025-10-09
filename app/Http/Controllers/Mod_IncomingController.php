@@ -21,7 +21,7 @@ class Mod_IncomingController extends Controller
         return view('Mod_IncomingController.index_incoming', compact('actividades', 'ultimo'));
     }
     
-    // AJAX: Buscar inspecciones con filtros de fecha
+    // AJAX: Buscar inspecciones con filtros de fecha (agrupadas)
     public function buscarInspecciones(Request $request)
     {
         try {
@@ -37,27 +37,160 @@ class Mod_IncomingController extends Controller
                 $fechaHasta = date('Y-m-d');
             }
             
-            // Consultar inspecciones con filtro de fechas
-            $inspecciones = Siz_Incoming::on('siz')
-                ->where('INC_borrado', 'N')
-                ->whereDate('INC_fechaInspeccion', '>=', $fechaDesde)
-                ->whereDate('INC_fechaInspeccion', '<=', $fechaHasta)
-                ->orderBy('INC_fechaInspeccion', 'desc')
-                ->get();
+            // Consultar inspecciones agrupadas
+            $inspeccionesAgrupadas = DB::connection('siz')->select("
+                SELECT 
+                    INC_docNum,
+                    INC_lineNum,
+                    INC_codMaterial,
+                    INC_nomMaterial,
+                    INC_nomProveedor,
+                    INC_unidadMedida,
+                    MAX(INC_cantRecibida) as CANT_RECIBIDA,
+                    SUM(INC_cantAceptada) as CANT_ACEPTADA,
+                    SUM(INC_cantRechazada) as CANT_RECHAZADA,
+                    COUNT(*) as NUM_INSPECCIONES,
+                    MIN(INC_fechaInspeccion) as PRIMERA_INSPECCION,
+                    MAX(INC_fechaInspeccion) as ULTIMA_INSPECCION
+                FROM Siz_Incoming
+                WHERE INC_borrado = 'N'
+                    AND CAST(INC_fechaInspeccion AS DATE) >= ?
+                    AND CAST(INC_fechaInspeccion AS DATE) <= ?
+                GROUP BY 
+                    INC_docNum,
+                    INC_lineNum,
+                    INC_codMaterial,
+                    INC_nomMaterial,
+                    INC_nomProveedor,
+                    INC_unidadMedida
+                ORDER BY 
+                    MAX(INC_fechaInspeccion) DESC
+            ", [$fechaDesde, $fechaHasta]);
             
-            return response()->json($inspecciones);
+            return response()->json($inspeccionesAgrupadas);
         } catch (\Exception $e) {
             return response()->json([
                 "error" => "Error al obtener las inspecciones: " . $e->getMessage()
             ], 500);
         }
     }
-    // Muestra la vista principal de RECHAZOS
-    public function index_rechazos()
+    
+    // AJAX: Obtener detalle de inspecciones agrupadas
+    public function detalleInspeccionesAgrupadas(Request $request)
     {
-        $actividades = session('userActividades');
-        $ultimo = count($actividades);
-        return view('Mod_IncomingController.index_rechazos', compact('actividades', 'ultimo'));
+        try {
+            $docNum = $request->input('doc_num');
+            $lineNum = $request->input('line_num');
+            $codMaterial = $request->input('cod_material');
+            
+            // Obtener todas las inspecciones del grupo
+            $inspecciones = Siz_Incoming::on('siz')
+                ->where('INC_docNum', $docNum)
+                ->where('INC_lineNum', $lineNum)
+                ->where('INC_codMaterial', $codMaterial)
+                ->where('INC_borrado', 'N')
+                ->orderBy('INC_fechaInspeccion', 'desc')
+                ->get();
+            
+            if ($inspecciones->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'msg' => 'No se encontraron inspecciones'
+                ]);
+            }
+            
+            // Obtener checklist
+            $checklist = Siz_Checklist::on('siz')
+                ->where('CHK_activo', 'S')
+                ->orderBy('CHK_orden')
+                ->get();
+            
+            // Recopilar todas las respuestas de todas las inspecciones
+            $respuestasConsolidadas = [];
+            $imagenesConsolidadas = [];
+            
+            foreach ($inspecciones as $inspeccion) {
+                // Obtener respuestas del checklist
+                $respuestas = Siz_IncomDetalle::on('siz')
+                    ->where('IND_incId', $inspeccion->INC_id)
+                    ->get();
+                
+                foreach ($respuestas as $respuesta) {
+                    $chkId = $respuesta->IND_chkId;
+                    
+                    // Solo agregar si es Cumple o No Cumple (ignorar No Aplica)
+                    if ($respuesta->IND_estado === 'C' || $respuesta->IND_estado === 'N') {
+                        if (!isset($respuestasConsolidadas[$chkId])) {
+                            $respuestasConsolidadas[$chkId] = [
+                                'estado' => $respuesta->IND_estado,
+                                'observaciones' => [],
+                                'cantidades' => [],
+                                'fecha_inspeccion' => $inspeccion->INC_fechaInspeccion,
+                                'inspector' => $inspeccion->INC_nomInspector
+                            ];
+                        }
+                        
+                        if ($respuesta->IND_observacion) {
+                            $respuestasConsolidadas[$chkId]['observaciones'][] = [
+                                'texto' => $respuesta->IND_observacion,
+                                'fecha' => $inspeccion->INC_fechaInspeccion,
+                                'inspector' => $inspeccion->INC_nomInspector
+                            ];
+                        }
+                        
+                        if ($respuesta->IND_cantidad) {
+                            $respuestasConsolidadas[$chkId]['cantidades'][] = [
+                                'cantidad' => $respuesta->IND_cantidad,
+                                'fecha' => $inspeccion->INC_fechaInspeccion
+                            ];
+                        }
+                    }
+                }
+                
+                // Obtener imágenes
+                $imagenes = Siz_IncomImagen::on('siz')
+                    ->where('IMG_incId', $inspeccion->INC_id)
+                    ->where('IMG_borrado', 'N')
+                    ->get();
+                
+                foreach ($imagenes as $img) {
+                    $chkId = $img->IMG_descripcion;
+                    if (!isset($imagenesConsolidadas[$chkId])) {
+                        $imagenesConsolidadas[$chkId] = [];
+                    }
+                    $imagenesConsolidadas[$chkId][] = [
+                        'id' => $img->IMG_id,
+                        'ruta' => $img->IMG_ruta,
+                        'archivo' => basename($img->IMG_ruta),
+                        'fecha' => $inspeccion->INC_fechaInspeccion
+                    ];
+                }
+            }
+            
+            return response()->json([
+                'success' => true,
+                'inspecciones' => $inspecciones,
+                'checklist' => $checklist,
+                'respuestas' => $respuestasConsolidadas,
+                'imagenes' => $imagenesConsolidadas,
+                'resumen' => [
+                    'doc_num' => $docNum,
+                    'material' => $inspecciones[0]->INC_nomMaterial,
+                    'codigo_material' => $codMaterial,
+                    'proveedor' => $inspecciones[0]->INC_nomProveedor,
+                    'cant_recibida' => $inspecciones[0]->INC_cantRecibida,
+                    'cant_aceptada' => $inspecciones->sum('INC_cantAceptada'),
+                    'cant_rechazada' => $inspecciones->sum('INC_cantRechazada'),
+                    'num_inspecciones' => $inspecciones->count()
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'msg' => 'Error al obtener el detalle: ' . $e->getMessage()
+            ]);
+        }
     }
 
     // Muestra la vista principal de inspección
@@ -77,7 +210,7 @@ class Mod_IncomingController extends Controller
         
         // 2. Obtener cantidades de inspección desde BD siz
         $inspecciones = DB::connection('siz')->select('EXEC SIZ_Calidad_InspeccionMaterial @NumeroEntrada = ?', [$numeroEntrada]);
-        //dd("inspecciones",$inspecciones);
+        
         // 3. Combinar los resultados
         $materialesCombinados = [];
         foreach ($materialesSAP as $materialSAP) {
@@ -86,7 +219,6 @@ class Mod_IncomingController extends Controller
             foreach ($inspecciones as $ins) {
                 if ($ins->CODIGO_ARTICULO == $materialSAP->CODIGO_ARTICULO && intval($ins->LINE_NUM) == intval($materialSAP->LineNum)) {
                     $inspeccion = $ins;
-                    //dd("inspeccion",$inspeccion);
                     break;
                 }
             }
@@ -99,7 +231,7 @@ class Mod_IncomingController extends Controller
                 $materialSAP->ID_INSPECCION = $inspeccion->ID_INSPECCION;
                 
                 // Obtener todas las inspecciones previas para este material
-                $inspeccionesPrevias = \App\Modelos\Siz_Incoming::on('siz')
+                $inspeccionesPrevias = Siz_Incoming::on('siz')
                     ->where('INC_docNum', $numeroEntrada)
                     ->where('INC_codMaterial', $materialSAP->CODIGO_ARTICULO)
                     ->where('INC_lineNum', $materialSAP->LineNum)
@@ -119,16 +251,9 @@ class Mod_IncomingController extends Controller
             
             // 4. Obtener lote para materiales de piel (grupo 113)
             if ($materialSAP->GRUPO == 113) {
-                //try {
-                    
-                    $lote = DB::select('SELECT TOP (1) OIBT.BatchNum FROM OIBT WHERE OIBT.ItemCode = ? AND OIBT.BaseEntry = ?', 
-                        [$materialSAP->CODIGO_ARTICULO, $materialSAP->BASE_ENTRY]);
-
-                        //dd($lote, $materialSAP);
-                    $materialSAP->LOTE = $lote ? $lote[0]->BatchNum : 'N/A';
-                //} catch (\Exception $e) {
-                //    $materialSAP->LOTE = 'N/A';
-                //}
+                $lote = DB::select('SELECT TOP (1) OIBT.BatchNum FROM OIBT WHERE OIBT.ItemCode = ? AND OIBT.BaseEntry = ?', 
+                    [$materialSAP->CODIGO_ARTICULO, $materialSAP->BASE_ENTRY]);
+                $materialSAP->LOTE = $lote ? $lote[0]->BatchNum : 'N/A';
             } else {
                 $materialSAP->LOTE = 'N/A';
             }
@@ -148,7 +273,7 @@ class Mod_IncomingController extends Controller
         // NO crear registro aquí, solo obtener checklist
         // El registro se creará en guardarInspeccion() cuando realmente se guarde
         
-        $checklist = \App\Modelos\Siz_Checklist::on('siz')->where('CHK_activo', 'S')->orderBy('CHK_orden')->get();
+        $checklist = Siz_Checklist::on('siz')->where('CHK_activo', 'S')->orderBy('CHK_orden')->get();
         $respuestas = []; // No hay respuestas previas si es nueva inspección
         
         return response()->json([
@@ -164,20 +289,20 @@ class Mod_IncomingController extends Controller
         $inc_id = $request->input('inc_id');
         
         // Obtener datos de la inspección
-        $inspeccion = \App\Modelos\Siz_Incoming::on('siz')->where('INC_id', $inc_id)->first();
+        $inspeccion = Siz_Incoming::on('siz')->where('INC_id', $inc_id)->first();
         
         if (!$inspeccion) {
             return response()->json(['error' => 'Inspección no encontrada'], 404);
         }
         
         // Obtener respuestas del checklist (solo las que están guardadas)
-        $respuestas = \App\Modelos\Siz_IncomDetalle::on('siz')
+        $respuestas = Siz_IncomDetalle::on('siz')
             ->where('IND_incId', $inc_id)
             ->get()
             ->keyBy('IND_chkId');
         
         // Obtener todos los checklist activos
-        $checklist = \App\Modelos\Siz_Checklist::on('siz')
+        $checklist = Siz_Checklist::on('siz')
             ->where('CHK_activo', 'S')
             ->orderBy('CHK_orden')
             ->get();
@@ -227,7 +352,7 @@ class Mod_IncomingController extends Controller
         ];
         
         // Obtener imágenes agrupadas por CHK_id
-        $imagenes = \App\Modelos\Siz_IncomImagen::on('siz')
+        $imagenes = Siz_IncomImagen::on('siz')
             ->where('IMG_incId', $inc_id)
             ->where('IMG_borrado','N')
             ->get();
@@ -269,7 +394,7 @@ class Mod_IncomingController extends Controller
             $lote = $request->input('lote');
             $lineNum = intval($request->input('line_num'));
             // Crear nueva inspección parcial (no actualizar existente)
-            $incoming = new \App\Modelos\Siz_Incoming();
+            $incoming = new Siz_Incoming();
             $incoming->setConnection('siz');
             $incoming->INC_docNum = $material['NOTA_ENTRADA'];
             $incoming->INC_codMaterial = $material['CODIGO_ARTICULO'];
@@ -305,7 +430,7 @@ class Mod_IncomingController extends Controller
             if ($request->has('checklist')) {
                 foreach ($request->input('checklist') as $chkId => $respuesta) {
                     if ($respuesta && $respuesta !== 'No Aplica') {
-                        $detalle = new \App\Modelos\Siz_IncomDetalle();
+                        $detalle = new Siz_IncomDetalle();
                         $detalle->IND_incId = $incoming->INC_id;
                         $detalle->IND_chkId = $chkId;
                         
@@ -338,7 +463,7 @@ class Mod_IncomingController extends Controller
 
             // Guardar clases de piel si aplica
             if ($incoming->INC_esPiel == 'S' && $piel) {
-                $pielClases = new \App\Modelos\Siz_PielClases();
+                $pielClases = new Siz_PielClases();
                 $pielClases->setConnection('siz');
                 $pielClases->PLC_incId = $incoming->INC_id;
                 $pielClases->PLC_claseA = isset($piel['claseA']) ? ($piel['claseA'] == '' ? 0 : $piel['claseA']) : 0;
@@ -350,7 +475,7 @@ class Mod_IncomingController extends Controller
                 $pielClases->PLC_actualizadoEn = date("Y-m-d H:i:s");
                 $pielClases->save();
             }
-            //dd($request->file('checklist_evidencias'));
+            
             // Guardar imágenes de evidencia
             $archivosEncontrados = false;
             $archivosEvidencia = [];
@@ -377,8 +502,6 @@ class Mod_IncomingController extends Controller
                 $archivosEvidencia['checklist_evidencias'] = $request->file()['checklist_evidencias'];
             }
             
-            //dd('Archivos encontrados:', $archivosEncontrados, 'Archivos:', $archivosEvidencia, 'Request files:', $request->file());
-            
             if ($archivosEncontrados) {
                 $so = env('DB_DATABASE');
                 if($so == 'SBO_Pruebas') {
@@ -394,8 +517,6 @@ class Mod_IncomingController extends Controller
                 // Procesar archivos encontrados
                 foreach ($archivosEvidencia as $key => $archivos) {
                     if ($archivos) {
-                        //dd($archivos);
-
                         // El key es "checklist_evidencias" y los archivos están en formato array
                         // Necesitamos iterar sobre el array para obtener cada CHK_id
                         if ($key === 'checklist_evidencias' && is_array($archivos)) {
@@ -406,7 +527,7 @@ class Mod_IncomingController extends Controller
                                         if ($img) {
                                             $extension = $img->getClientOriginalExtension();
                                             // Obtener nombre del checklist por CHK_id
-                                            $chk = \App\Modelos\Siz_Checklist::on('siz')->where('CHK_id', $chk_id)->first();
+                                            $chk = Siz_Checklist::on('siz')->where('CHK_id', $chk_id)->first();
                                             $chkNombre = $chk ? preg_replace('/[^A-Za-z0-9_-]+/', '', str_replace(' ', '_', $chk->CHK_descripcion)) : ('CHK_'.$chk_id);
                                             $nombre = $incoming->INC_id . '_' . $chkNombre . '_' . uniqid() . '.' . $extension;
                                             $rutaCompleta = $directorioBase . '\\' . $nombre;
@@ -414,7 +535,7 @@ class Mod_IncomingController extends Controller
                                             // Guardar archivo
                                             $img->move($directorioBase, $nombre);
                                             
-                                            $imagen = new \App\Modelos\Siz_IncomImagen();
+                                            $imagen = new Siz_IncomImagen();
                                             $imagen->setConnection('siz');
                                             $imagen->IMG_incId = $incoming->INC_id;
                                             $imagen->IMG_ruta = $rutaCompleta;
@@ -439,7 +560,7 @@ class Mod_IncomingController extends Controller
                                         if ($img) {
                                             $extension = $img->getClientOriginalExtension();
                                             // Obtener nombre del checklist por CHK_id
-                                            $chk = \App\Modelos\Siz_Checklist::on('siz')->where('CHK_id', $chk_id)->first();
+                                            $chk = Siz_Checklist::on('siz')->where('CHK_id', $chk_id)->first();
                                             $chkNombre = $chk ? preg_replace('/[^A-Za-z0-9_-]+/', '', str_replace(' ', '_', $chk->CHK_descripcion)) : ('CHK_'.$chk_id);
                                             $nombre = $incoming->INC_id . '_' . $chkNombre . '_' . uniqid() . '.' . $extension;
                                             $rutaCompleta = $directorioBase . '\\' . $nombre;
@@ -447,7 +568,7 @@ class Mod_IncomingController extends Controller
                                             // Guardar archivo
                                             $img->move($directorioBase, $nombre);
                                             
-                                            $imagen = new \App\Modelos\Siz_IncomImagen();
+                                            $imagen = new Siz_IncomImagen();
                                             $imagen->setConnection('siz');
                                             $imagen->IMG_incId = $incoming->INC_id;
                                             $imagen->IMG_ruta = $rutaCompleta;
@@ -462,7 +583,7 @@ class Mod_IncomingController extends Controller
                                     // Si es un solo archivo (compatibilidad)
                                     $extension = $archivos->getClientOriginalExtension();
                                     // Obtener nombre del checklist por CHK_id
-                                    $chk = \App\Modelos\Siz_Checklist::on('siz')->where('CHK_id', $chk_id)->first();
+                                    $chk = Siz_Checklist::on('siz')->where('CHK_id', $chk_id)->first();
                                     $chkNombre = $chk ? preg_replace('/[^A-Za-z0-9_-]+/', '', str_replace(' ', '_', $chk->CHK_descripcion)) : ('CHK_'.$chk_id);
                                     $nombre = $incoming->INC_id . '_' . $chkNombre . '_' . uniqid() . '.' . $extension;
                                     $rutaCompleta = $directorioBase . '\\' . $nombre;
@@ -470,7 +591,7 @@ class Mod_IncomingController extends Controller
                                     // Guardar archivo
                                     $archivos->move($directorioBase, $nombre);
                                     
-                                    $imagen = new \App\Modelos\Siz_IncomImagen();
+                                    $imagen = new Siz_IncomImagen();
                                     $imagen->setConnection('siz');
                                     $imagen->IMG_incId = $incoming->INC_id;
                                     $imagen->IMG_ruta = $rutaCompleta;
@@ -484,9 +605,7 @@ class Mod_IncomingController extends Controller
                         }
                     }
                 }
-                //dd('fin');
             }
-            //dd('fi2');
 
             DB::connection('siz')->commit();
             
@@ -512,7 +631,7 @@ class Mod_IncomingController extends Controller
                     $materialSAP->ID_INSPECCION = $inspeccion->ID_INSPECCION;
                     
                     // Obtener todas las inspecciones previas para este material
-                    $inspeccionesPrevias = \App\Modelos\Siz_Incoming::on('siz')
+                    $inspeccionesPrevias = Siz_Incoming::on('siz')
                         ->where('INC_docNum', $material['NOTA_ENTRADA'])
                         ->where('INC_codMaterial', $materialSAP->CODIGO_ARTICULO)
                         ->where('INC_lineNum', $materialSAP->LineNum)
@@ -609,7 +728,7 @@ class Mod_IncomingController extends Controller
     public function verImagen($id)
     {
         try {
-            $img = \App\Modelos\Siz_IncomImagen::on('siz')->where('IMG_id', $id)->where('IMG_borrado','N')->first();
+            $img = Siz_IncomImagen::on('siz')->where('IMG_id', $id)->where('IMG_borrado','N')->first();
             
             if (!$img) {
                 abort(404, 'Imagen no encontrada');

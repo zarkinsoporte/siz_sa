@@ -369,6 +369,10 @@
                                 <span class="info-label">Fecha Ingreso:</span>
                                 <span class="info-value">{{ $fecha_entrada ?? "N/A" }}</span>
                             </div>
+                            <div class="info-item">
+                                <span class="info-label">Número de Factura:</span>
+                                <span class="info-value">{{ $numero_factura ?? "N/A" }}</span>
+                            </div>
                         </div>
                     </td>
                     <td style="width: 50%; vertical-align: top; padding-left: 20px;">

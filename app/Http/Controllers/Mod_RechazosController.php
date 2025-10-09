@@ -271,8 +271,10 @@ public function buscarRechazos(Request $request)
             $inspector_codigo = $inspector_codigo;
             $inspector_correo = $inspector_correo;
             $notas_generales = $notas_generales;
-
+            $numero_factura = $inspeccion->INC_numFactura;
+            
             $pdf = \SPDF::loadView("Mod_RechazosController.rechazo_pdf", compact(
+                "numero_factura",
                 "id_rechazo", 
                 "inspeccion", 
                 "proveedor_nombre", 
@@ -352,6 +354,7 @@ public function buscarRechazos(Request $request)
      */
     public function verPdfRechazo($inc_id)
     {
+        ini_set('max_execution_time', -1);
         try {
             // Buscar el rechazo por INC_id
             $rechazo = Siz_IncomRechazo::on("siz")
@@ -490,8 +493,10 @@ public function buscarRechazos(Request $request)
             $udm = $inspeccion->INC_unidadMedida;
             $lote = $inspeccion->INC_lote;
             $notas_generales = $rechazo->IR_notasGenerales;
+            $numero_factura = $inspeccion->INC_numFactura;
 
             $pdf = \SPDF::loadView("Mod_RechazosController.rechazo_pdf", compact(
+                "numero_factura",
                 "id_rechazo", 
                 "inspeccion", 
                 "proveedor_nombre", 
@@ -669,195 +674,7 @@ public function buscarRechazos(Request $request)
         /**
      * Método de prueba para visualizar PDF de rechazo
      */
-    public function testPdfRechazo($inc_id)
-    {
-        try {
-            // Obtener datos de la inspección
-            $inspeccion = Siz_Incoming::on("siz")->where("INC_id", $inc_id)->first();
-            
-            if (!$inspeccion) {
-                return "Inspección no encontrada con ID: " . $inc_id;
-            }
-            
-            // Obtener datos adicionales para el email
-            $proveedor = DB::select("
-                SELECT TOP 1 
-                    CARDNAME as nombre_proveedor,
-                    CARDCODE as codigo_proveedor
-                FROM OCRD 
-                WHERE CARDCODE = ?
-            ", [$inspeccion->INC_codProveedor]);
-            
-            $proveedor_nombre = !empty($proveedor) ? $proveedor[0]->nombre_proveedor : "Proveedor no encontrado";
-            $proveedor_codigo = !empty($proveedor) ? $proveedor[0]->codigo_proveedor : $inspeccion->INC_codProveedor;
-            
-            // Obtener datos del inspector
-            $inspector = DB::select("
-                SELECT TOP 1 
-                    firstName + ' ' + lastName as nombre_inspector,
-                    U_EmpGiro as codigo_inspector,
-                    email as correo_inspector
-                FROM OHEM 
-                WHERE U_EmpGiro = ?
-            ", [Auth::user()->U_EmpGiro]);
-            
-            $inspector_nombre = !empty($inspector) ? $inspector[0]->nombre_inspector : Auth::user()->firstName . " " . Auth::user()->lastName;
-            $inspector_codigo = !empty($inspector) ? $inspector[0]->codigo_inspector : Auth::user()->U_EmpGiro;
-            $inspector_correo = !empty($inspector) ? $inspector[0]->correo_inspector : Auth::user()->email;
-            
-            // Obtener datos de la orden de compra
-            $orden_compra = DB::select("
-                SELECT TOP 1 
-                    DocNum as numero_oc,
-                    DocDate as fecha_oc,
-                    Comments as comentarios_oc
-                FROM OPOR 
-                WHERE DocEntry = ?
-            ", [$inspeccion->INC_ordenCompra]);
-            
-            $numero_oc = !empty($orden_compra) ? $orden_compra[0]->numero_oc : "N/A";
-            $fecha_oc = !empty($orden_compra) ? date("d/m/Y", strtotime($orden_compra[0]->fecha_oc)) : "N/A";
-            
-            // Obtener datos del checklist que no cumple
-            $checklistNoCumple = [];
-            $respuestas = Siz_IncomDetalle::on("siz")
-                ->where("IND_incId", $inc_id)
-                ->where("IND_estado", "N") // Solo los que no cumplen
-                ->get()
-                ->keyBy("IND_chkId");
-            
-            $checklist = Siz_Checklist::on("siz")
-                ->where("CHK_activo", "S")
-                ->whereIn("CHK_id", $respuestas->keys())
-                ->orderBy("CHK_orden")
-                ->get();
-            
-            // Obtener imágenes agrupadas por CHK_id y convertir a base64
-            $imagenes = Siz_IncomImagen::on("siz")
-                ->where("IMG_incId", $inc_id)
-                ->where("IMG_borrado", "N")
-                ->get();
-
-            $imagenesPorChk = [];
-            foreach ($imagenes as $img) {
-                $chkId = $img->IMG_descripcion;
-                if (!isset($imagenesPorChk[$chkId])) { 
-                    $imagenesPorChk[$chkId] = []; 
-                }
-                
-                // Convertir imagen a base64
-                $imagenBase64 = '';
-                if (file_exists($img->IMG_ruta)) {
-                    $imagenData = file_get_contents($img->IMG_ruta);
-                    $mimeType = mime_content_type($img->IMG_ruta);
-                    $imagenBase64 = 'data:' . $mimeType . ';base64,' . base64_encode($imagenData);
-                }
-                
-                $imagenesPorChk[$chkId][] = [
-                    "ruta" => $img->IMG_ruta,
-                    "id" => $img->IMG_id,
-                    "archivo" => basename($img->IMG_ruta),
-                    "base64" => $imagenBase64
-                ];
-            }
-            
-            // Preparar datos del checklist que no cumple
-            foreach ($checklist as $item) {
-                if (isset($respuestas[$item->CHK_id])) {
-                    $respuesta = $respuestas[$item->CHK_id];
-                    $checklistNoCumple[] = [
-                        "descripcion" => $item->CHK_descripcion,
-                        "observacion" => $respuesta->IND_observacion,
-                        "cantidad" => $respuesta->IND_cantidad,
-                        "imagenes" => isset($imagenesPorChk[$item->CHK_id]) ? $imagenesPorChk[$item->CHK_id] : []
-                    ];
-                }
-            }
-            
-            // Crear un rechazo de prueba
-            $rechazo = new \stdClass();
-            $rechazo->IR_id = 999;
-            $rechazo->IR_notasGenerales = "Notas de prueba para visualización";
-            $rechazo->IR_FechaReporte = "2025-09-30 10:00:00";
-            // Preparar lista de destinatarios para el PDF
-            $destinatarios = ["test@ejemplo.com", "admin@ejemplo.com"];
-            
-            // Verificar que las variables estén definidas
-            if (!isset($proveedor_nombre)) $proveedor_nombre = "N/A";
-            if (!isset($proveedor_codigo)) $proveedor_codigo = "N/A";
-            if (!isset($numero_oc)) $numero_oc = "N/A";
-            if (!isset($fecha_oc)) $fecha_oc = "N/A";
-            if (!isset($checklistNoCumple)) $checklistNoCumple = [];
-            if (!isset($destinatarios)) $destinatarios = [];
-            
-            // Debug detallado
-           
-            //dd($proveedor_nombre);
-
-            // Retornar la vista directamente (sin PDF)
-            $id_rechazo = $rechazo->IR_id;
-            $fecha_rechazo = date('d/m/Y H:i', strtotime($rechazo->IR_FechaReporte));
-            $numero_entrada = $inspeccion->INC_docNum;
-            $fecha_entrada = date('d/m/Y', strtotime($inspeccion->INC_fechaRecepcion));
-            $codigo_material = $inspeccion->INC_codMaterial;
-            $nombre_material = $inspeccion->INC_nomMaterial;
-            $cantidad_rechazada = number_format($inspeccion->INC_cantRechazada, 3);
-            $udm = $inspeccion->INC_unidadMedida;
-            $lote = $inspeccion->INC_lote;
-            $notas_generales = $rechazo->IR_notasGenerales;
-            $inspector_nombre = $inspector_nombre;
-            $inspector_codigo = $inspector_codigo;
-            $inspector_correo = $inspector_correo;
-            $notas_generales = $notas_generales;
-            return view("Mod_RechazosController.rechazo_pdf", [
-            //return view("Emails.Rechazos", [
-                "id_rechazo" => $id_rechazo,
-                "rechazo" => $rechazo,
-                "inspeccion" => $inspeccion,
-                "proveedor_nombre" => $proveedor_nombre,
-                "proveedor_codigo" => $proveedor_codigo,
-                "numero_oc" => $numero_oc,
-                "fecha_oc" => $fecha_oc,
-                "checklistNoCumple" => $checklistNoCumple,
-                "destinatarios" => $destinatarios,
-                "fecha_rechazo" => $fecha_rechazo,
-                "numero_entrada" => $numero_entrada,
-                "fecha_entrada" => $fecha_entrada,
-                "codigo_material" => $codigo_material,
-                "nombre_material" => $nombre_material,
-                "cantidad_rechazada" => $cantidad_rechazada,
-                "udm" => $udm,
-                "lote" => $lote,
-                "notas_generales" => $notas_generales,
-                "inspector_nombre" => $inspector_nombre,
-                "inspector_codigo" => $inspector_codigo,
-                "inspector_correo" => $inspector_correo
-            ]);
-            
-        } catch (\Exception $e) {
-            return "Error: " . $e->getMessage();
-        }
-    }
-
-    /**
-     * Método de prueba simple para verificar Blade
-     */
-    public function testSimple($inc_id)
-    {
-        $inspeccion = Siz_Incoming::on("siz")->where("INC_id", $inc_id)->first();
-        
-        if (!$inspeccion) {
-            return "Inspección no encontrada";
-        }
-        
-        return view("Mod_RechazosController.rechazo_pdf", [
-            "proveedor_nombre" => "Proveedor de Prueba",
-            "proveedor_codigo" => "PROV001",
-            "numero_oc" => "OC123456",
-            "fecha_oc" => "01/01/2024",
-            "inspeccion" => $inspeccion
-        ]);
-    }
+    
     public function mostrarImagen($id)
     {
         // Usamos el disco que definimos en el paso 1: 'disco_local'

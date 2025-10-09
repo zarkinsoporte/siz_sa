@@ -32,11 +32,22 @@ function js_iniciador() {
         var fechaDesde = $("#filtro_fecha_desde").val();
         var fechaHasta = $("#filtro_fecha_hasta").val();
         
-        // Validar fechas
-        if (fechaDesde && fechaHasta && new Date(fechaDesde) > new Date(fechaHasta)) {
+        // Validar que ambas fechas estén presentes
+        if (!fechaDesde || !fechaHasta) {
             swal({
                 title: "Error",
-                text: "La fecha desde no puede ser mayor a la fecha hasta",
+                text: "Por favor seleccione ambas fechas",
+                type: "error",
+                confirmButtonText: "Aceptar"
+            });
+            return;
+        }
+        
+        // Validar que fecha desde no sea mayor a fecha hasta
+        if (new Date(fechaDesde) > new Date(fechaHasta)) {
+            swal({
+                title: "Error",
+                text: "La fecha desde no puede ser mayor que la fecha hasta",
                 type: "error",
                 confirmButtonText: "Aceptar"
             });
@@ -85,7 +96,7 @@ function js_iniciador() {
         });
     }
     
-    // Renderizar tabla de inspecciones
+    // Renderizar tabla de inspecciones (agrupadas)
     function renderTablaInspecciones() {
         // Verificar si DataTable ya está inicializado y destruirlo
         if ($.fn.DataTable.isDataTable('#tabla_inspecciones')) {
@@ -96,37 +107,27 @@ function js_iniciador() {
         $("#tabla_inspecciones tbody").empty();
         
         var tbody = "";
-        console.log(inspecciones);
+        console.log("Inspecciones agrupadas:", inspecciones);
         
         inspecciones.forEach(function(inspeccion, idx) {
-            // Formatear fecha yyyy/mm/dd
-            var fechaInspeccion = 'N/A';
-            if (inspeccion.INC_fechaInspeccion) {
-                var fecha = new Date(inspeccion.INC_fechaInspeccion);
-                var año = fecha.getFullYear();
-                var mes = String(fecha.getMonth() + 1).padStart(2, '0');
-                var dia = String(fecha.getDate()).padStart(2, '0');
-                fechaInspeccion = año + '/' + mes + '/' + dia;
-            }
-            
-            var cantRecibida = parseFloat(inspeccion.INC_cantRecibida || 0).toFixed(2);
-            var cantAceptada = parseFloat(inspeccion.INC_cantAceptada || 0).toFixed(2);
-            var cantRechazada = parseFloat(inspeccion.INC_cantRechazada || 0).toFixed(2);
+            var cantRecibida = parseFloat(inspeccion.CANT_RECIBIDA || 0).toFixed(2);
+            var cantAceptada = parseFloat(inspeccion.CANT_ACEPTADA || 0).toFixed(2);
+            var cantRechazada = parseFloat(inspeccion.CANT_RECHAZADA || 0).toFixed(2);
             
             tbody += "<tr data-idx=\"" + idx + "\">" +
-                "<td>" + inspeccion.INC_id + "</td>" +
-                "<td>" + fechaInspeccion + "</td>" +
                 "<td>" + (inspeccion.INC_docNum || 'N/A') + "</td>" +
                 "<td style=\"text-align: left;\">" + (inspeccion.INC_nomProveedor || 'N/A') + "</td>" +
                 "<td style=\"text-align: left;\">" + (inspeccion.INC_codMaterial || '') + " - " + (inspeccion.INC_nomMaterial || '') + "</td>" +
-                "<td>" + (inspeccion.INC_lote || 'N/A') + "</td>" +
-                "<td>" + cantRecibida + "</td>" +
+                "<td>" + cantRecibida + " " + (inspeccion.INC_unidadMedida || '') + "</td>" +
                 "<td class=\"cantidad-aceptada\">" + cantAceptada + "</td>" +
                 "<td class=\"cantidad-rechazada\">" + cantRechazada + "</td>" +
-                "<td>" + (inspeccion.INC_nomInspector || 'N/A') + "</td>" +
                 "<td>" +
-                    "<button class=\"btn btn-ver-detalle btn-sm\" data-inc-id=\"" + inspeccion.INC_id + "\" title=\"Ver Detalle\">" +
-                        "<i class=\"fa fa-eye\"></i> Ver Detalle" +
+                    "<button class=\"btn btn-ver-detalle btn-sm\" " +
+                    "data-doc-num=\"" + inspeccion.INC_docNum + "\" " +
+                    "data-line-num=\"" + inspeccion.INC_lineNum + "\" " +
+                    "data-cod-material=\"" + inspeccion.INC_codMaterial + "\" " +
+                    "title=\"Ver Detalle de " + inspeccion.NUM_INSPECCIONES + " inspección(es)\">" +
+                        "<i class=\"fa fa-eye\"></i> Ver Detalle (" + inspeccion.NUM_INSPECCIONES + ")" +
                     "</button>" +
                 "</td>" +
             "</tr>";
@@ -137,7 +138,7 @@ function js_iniciador() {
         // Inicializar DataTable solo si no está ya inicializado
         if (!$.fn.DataTable.isDataTable('#tabla_inspecciones')) {
             dataTable = $("#tabla_inspecciones").DataTable({
-                order: [[0, "desc"]], // Ordenar por ID descendente
+                order: [[0, "desc"]], // Ordenar por Nota de Entrada descendente
                 language: {
                     "url": assetapp + "assets/lang/Spanish.json"
                 },
@@ -152,108 +153,201 @@ function js_iniciador() {
         cargarInspecciones();
     });
     
-    // Evento para ver detalle de inspección
+    // Evento para ver detalle de inspección agrupada
     $("#tabla_inspecciones").off("click", ".btn-ver-detalle").on("click", ".btn-ver-detalle", function() {
-        var incId = $(this).data("inc-id");
+        var docNum = $(this).data("doc-num");
+        var lineNum = $(this).data("line-num");
+        var codMaterial = $(this).data("cod-material");
         
-        // Mostrar modal
+        // Mostrar modal con loading
         $("#modalDetalleInspeccion").modal("show");
+        $("#detalle_inspeccion_content").html(
+            "<div class=\"text-center\">" +
+            "<i class=\"fa fa-spinner fa-spin fa-3x\"></i>" +
+            "<p>Cargando detalle de inspecciones...</p>" +
+            "</div>"
+        );
         
-        // Cargar detalle de la inspección
+        // Cargar detalle de la inspección agrupada
         $.ajax({
-            url: routeapp + "/home/INSPECCION/ver-inspeccion",
+            url: routeapp + "/home/INCOMING/detalle-inspecciones",
             type: "GET",
-            data: { inc_id: incId },
+            data: { 
+                doc_num: docNum,
+                line_num: lineNum,
+                cod_material: codMaterial
+            },
             success: function(resp) {
                 if (resp.success) {
-                    renderDetalleInspeccion(resp);
+                    renderDetalleInspeccionAgrupada(resp);
                 } else {
                     $("#detalle_inspeccion_content").html(
                         "<div class=\"alert alert-danger\">" +
                         "<i class=\"fa fa-exclamation-triangle\"></i> " +
-                        "No se pudo cargar el detalle de la inspección" +
+                        (resp.msg || "No se pudo cargar el detalle de las inspecciones") +
                         "</div>"
                     );
                 }
             },
-            error: function() {
+            error: function(xhr) {
                 $("#detalle_inspeccion_content").html(
                     "<div class=\"alert alert-danger\">" +
                     "<i class=\"fa fa-exclamation-triangle\"></i> " +
-                    "Error al cargar el detalle de la inspección" +
+                    "Error al cargar el detalle de las inspecciones" +
                     "</div>"
                 );
             }
         });
     });
     
-    // Función para renderizar el detalle de la inspección
-    function renderDetalleInspeccion(data) {
-        var inspeccion = data.inspeccion;
+    // Función para renderizar el detalle de inspecciones agrupadas
+    function renderDetalleInspeccionAgrupada(data) {
+        var resumen = data.resumen;
+        var inspecciones = data.inspecciones;
         var checklist = data.checklist;
         var respuestas = data.respuestas;
         var imagenes = data.imagenes;
         
         var html = "<div class=\"row\">";
         
-        // Información general
+        // Resumen general
         html += "<div class=\"col-md-12\">";
-        html += "<h4><strong>Información General</strong></h4>";
+        html += "<h4><strong>Resumen de Inspecciones</strong></h4>";
+        html += "<div class=\"alert alert-info\">";
+        html += "<strong>Total de inspecciones realizadas:</strong> " + resumen.num_inspecciones;
+        html += "</div>";
         html += "<table class=\"table table-bordered\">";
-        html += "<tr><th width=\"30%\">Código Artículo:</th><td>" + (inspeccion.CODIGO_ARTICULO || 'N/A') + "</td></tr>";
-        html += "<tr><th>Material:</th><td>" + (inspeccion.MATERIAL || 'N/A') + "</td></tr>";
-        html += "<tr><th>Lote:</th><td>" + (inspeccion.LOTE || 'N/A') + "</td></tr>";
-        html += "<tr><th>Cantidad Inspeccionada:</th><td class=\"cantidad-aceptada\">" + 
-                (parseFloat(inspeccion.CAN_INSPECCIONADA || 0).toFixed(2)) + "</td></tr>";
-        html += "<tr><th>Cantidad Rechazada:</th><td class=\"cantidad-rechazada\">" + 
-                (parseFloat(inspeccion.CAN_RECHAZADA || 0).toFixed(2)) + "</td></tr>";
-        html += "<tr><th>Fecha de Inspección:</th><td>" + 
-                (inspeccion.INC_fechaInspeccion || 'N/A') + "</td></tr>";
-        html += "<tr><th>Inspector:</th><td>" + (inspeccion.INC_nomInspector || 'N/A') + "</td></tr>";
-        
-        if (inspeccion.OBSERVACIONES_GENERALES) {
-            html += "<tr><th>Observaciones:</th><td>" + inspeccion.OBSERVACIONES_GENERALES + "</td></tr>";
-        }
-        
+        html += "<tr><th width=\"30%\">Nota de Entrada:</th><td><strong>" + resumen.doc_num + "</strong></td></tr>";
+        html += "<tr><th>Proveedor:</th><td>" + resumen.proveedor + "</td></tr>";
+        html += "<tr><th>Código Material:</th><td>" + resumen.codigo_material + "</td></tr>";
+        html += "<tr><th>Material:</th><td>" + resumen.material + "</td></tr>";
+        html += "<tr><th>Cantidad Recibida:</th><td>" + parseFloat(resumen.cant_recibida || 0).toFixed(2) + "</td></tr>";
+        html += "<tr><th>Total Aceptado:</th><td class=\"cantidad-aceptada\">" + 
+                parseFloat(resumen.cant_aceptada || 0).toFixed(2) + "</td></tr>";
+        html += "<tr><th>Total Rechazado:</th><td class=\"cantidad-rechazada\">" + 
+                parseFloat(resumen.cant_rechazada || 0).toFixed(2) + "</td></tr>";
         html += "</table>";
         html += "</div>";
         
-        // Checklist
-        if (checklist && checklist.length > 0) {
+        // Detalle de cada inspección
+        html += "<div class=\"col-md-12 mt-4\" style=\"margin-top: 20px;\">";
+        html += "<h4><strong>Detalle de Inspecciones</strong></h4>";
+        html += "<div class=\"panel-group\" id=\"accordionInspecciones\">";
+        
+        inspecciones.forEach(function(inspeccion, idx) {
+            var fechaInsp = 'N/A';
+            if (inspeccion.INC_fechaInspeccion) {
+                var fecha = new Date(inspeccion.INC_fechaInspeccion);
+                fechaInsp = fecha.getFullYear() + '/' + 
+                           String(fecha.getMonth() + 1).padStart(2, '0') + '/' + 
+                           String(fecha.getDate()).padStart(2, '0');
+            }
+            
+            html += "<div class=\"panel panel-default\">";
+            html += "<div class=\"panel-heading\" style=\"background-color: #f5f5f5;\">";
+            html += "<h4 class=\"panel-title\">";
+            html += "<a data-toggle=\"collapse\" data-parent=\"#accordionInspecciones\" href=\"#collapse" + idx + "\">";
+            html += "<i class=\"fa fa-chevron-down\"></i> ";
+            html += "Inspección #" + inspeccion.INC_id + " - Fecha: " + fechaInsp + " - Inspector: " + inspeccion.INC_nomInspector;
+            html += " - Aceptada: <span class=\"cantidad-aceptada\">" + parseFloat(inspeccion.INC_cantAceptada || 0).toFixed(2) + "</span>";
+            html += " - Rechazada: <span class=\"cantidad-rechazada\">" + parseFloat(inspeccion.INC_cantRechazada || 0).toFixed(2) + "</span>";
+            html += "</a>";
+            html += "</h4>";
+            html += "</div>";
+            html += "<div id=\"collapse" + idx + "\" class=\"panel-collapse collapse" + (idx === 0 ? " in" : "") + "\">";
+            html += "<div class=\"panel-body\">";
+            
+            if (inspeccion.INC_notas) {
+                html += "<div class=\"alert alert-warning\">";
+                html += "<strong>Observaciones Generales:</strong> " + inspeccion.INC_notas;
+                html += "</div>";
+            }
+            
+            html += "</div>";
+            html += "</div>";
+            html += "</div>";
+        });
+        
+        html += "</div>";
+        html += "</div>";
+        
+        // Checklist consolidado (solo Cumple y No Cumple)
+        if (checklist && checklist.length > 0 && Object.keys(respuestas).length > 0) {
             html += "<div class=\"col-md-12 mt-4\" style=\"margin-top: 20px;\">";
-            html += "<h4><strong>Checklist de Inspección</strong></h4>";
+            html += "<h4><strong>Checklist Consolidado</strong></h4>";
+            html += "<p class=\"text-muted\">Se muestran solo los rubros evaluados como <strong>Cumple</strong> o <strong>No Cumple</strong></p>";
             html += "<table class=\"table table-striped table-bordered\">";
-            html += "<thead><tr><th>Descripción</th><th width=\"15%\">Estado</th><th width=\"25%\">Observación</th><th width=\"10%\">Cantidad</th></tr></thead>";
+            html += "<thead><tr><th>Descripción</th><th width=\"15%\">Estado</th><th>Observaciones</th></tr></thead>";
             html += "<tbody>";
             
+            var hayRespuestas = false;
             checklist.forEach(function(item) {
-                var respuesta = respuestas[item.CHK_id] || 'No Aplica';
-                var observacion = respuestas[item.CHK_id + '_observacion'] || '';
-                var cantidad = respuestas[item.CHK_id + '_cantidad'] || '';
-                
-                var colorClass = '';
-                if (respuesta === 'Cumple') colorClass = 'success';
-                else if (respuesta === 'No Cumple') colorClass = 'danger';
-                
-                html += "<tr class=\"" + colorClass + "\">";
-                html += "<td>" + item.CHK_descripcion + "</td>";
-                html += "<td><strong>" + respuesta + "</strong></td>";
-                html += "<td>" + observacion + "</td>";
-                html += "<td>" + cantidad + "</td>";
-                html += "</tr>";
-                
-                // Mostrar imágenes si existen
-                if (imagenes[item.CHK_id] && imagenes[item.CHK_id].length > 0) {
-                    html += "<tr><td colspan=\"4\">";
-                    html += "<strong>Evidencias:</strong><br>";
-                    imagenes[item.CHK_id].forEach(function(img) {
-                        html += "<a href=\"" + routeapp + "/incoming/imagen/" + img.id + "\" target=\"_blank\">";
-                        html += "<img src=\"" + routeapp + "/incoming/imagen/" + img.id + "\" style=\"max-width: 150px; margin: 5px; border: 1px solid #ddd; cursor: pointer;\">";
-                        html += "</a>";
-                    });
-                    html += "</td></tr>";
+                if (respuestas[item.CHK_id]) {
+                    hayRespuestas = true;
+                    var respuesta = respuestas[item.CHK_id];
+                    var estado = respuesta.estado === 'C' ? 'Cumple' : 'No Cumple';
+                    var colorClass = respuesta.estado === 'C' ? 'success' : 'danger';
+                    
+                    html += "<tr class=\"" + colorClass + "\">";
+                    html += "<td>" + item.CHK_descripcion + "</td>";
+                    html += "<td><strong>" + estado + "</strong></td>";
+                    html += "<td>";
+                    
+                    // Mostrar observaciones de todas las inspecciones
+                    if (respuesta.observaciones && respuesta.observaciones.length > 0) {
+                        respuesta.observaciones.forEach(function(obs) {
+                            var fechaObs = new Date(obs.fecha);
+                            var fechaStr = fechaObs.getFullYear() + '/' + 
+                                         String(fechaObs.getMonth() + 1).padStart(2, '0') + '/' + 
+                                         String(fechaObs.getDate()).padStart(2, '0');
+                            html += "<div style=\"margin-bottom: 5px;\">";
+                            html += "<small class=\"text-muted\">" + fechaStr + " - " + obs.inspector + ":</small><br>";
+                            html += obs.texto;
+                            html += "</div>";
+                        });
+                    }
+                    
+                    // Mostrar cantidades si existen
+                    if (respuesta.cantidades && respuesta.cantidades.length > 0) {
+                        html += "<div style=\"margin-top: 10px;\">";
+                        html += "<strong>Cantidades afectadas:</strong><br>";
+                        respuesta.cantidades.forEach(function(cant) {
+                            var fechaCant = new Date(cant.fecha);
+                            var fechaStr = fechaCant.getFullYear() + '/' + 
+                                         String(fechaCant.getMonth() + 1).padStart(2, '0') + '/' + 
+                                         String(fechaCant.getDate()).padStart(2, '0');
+                            html += "<small>" + fechaStr + ": " + parseFloat(cant.cantidad).toFixed(2) + "</small><br>";
+                        });
+                        html += "</div>";
+                    }
+                    
+                    html += "</td>";
+                    html += "</tr>";
+                    
+                    // Mostrar imágenes consolidadas si existen
+                    if (imagenes[item.CHK_id] && imagenes[item.CHK_id].length > 0) {
+                        html += "<tr><td colspan=\"3\">";
+                        html += "<strong>Evidencias:</strong><br>";
+                        imagenes[item.CHK_id].forEach(function(img) {
+                            var fechaImg = new Date(img.fecha);
+                            var fechaStr = fechaImg.getFullYear() + '/' + 
+                                         String(fechaImg.getMonth() + 1).padStart(2, '0') + '/' + 
+                                         String(fechaImg.getDate()).padStart(2, '0');
+                            html += "<div style=\"display: inline-block; margin: 5px; text-align: center;\">";
+                            html += "<a href=\"" + routeapp + "/incoming/imagen/" + img.id + "\" target=\"_blank\">";
+                            html += "<img src=\"" + routeapp + "/incoming/imagen/" + img.id + "\" style=\"max-width: 150px; border: 1px solid #ddd; cursor: pointer;\">";
+                            html += "</a>";
+                            html += "<br><small class=\"text-muted\">" + fechaStr + "</small>";
+                            html += "</div>";
+                        });
+                        html += "</td></tr>";
+                    }
                 }
             });
+            
+            if (!hayRespuestas) {
+                html += "<tr><td colspan=\"3\" class=\"text-center\">No hay rubros evaluados como Cumple o No Cumple</td></tr>";
+            }
             
             html += "</tbody></table>";
             html += "</div>";
@@ -275,3 +369,4 @@ if (!window.incomingInicializado) {
         js_iniciador();
     });
 }
+

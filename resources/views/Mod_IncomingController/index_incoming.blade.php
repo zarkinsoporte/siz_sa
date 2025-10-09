@@ -122,16 +122,12 @@
                 <table id="tabla_inspecciones" class="table table-striped table-bordered table-inspecciones" style="width:100%">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>FECHA INSPECCIÓN</th>
                             <th>NOTA ENTRADA</th>
                             <th>PROVEEDOR</th>
                             <th>MATERIAL</th>
-                            <th>LOTE</th>
                             <th>CANT. RECIBIDA</th>
                             <th>ACEPTADA</th>
                             <th>RECHAZADA</th>
-                            <th>INSPECTOR</th>
                             <th>ACCIONES</th>
                         </tr>
                     </thead>
@@ -143,15 +139,17 @@
         </div>
     </div>
 
-    <!-- Modal para ver detalle de inspección -->
+    <!-- Modal para ver detalle de inspección (modal-lg) -->
     <div class="modal fade" id="modalDetalleInspeccion" tabindex="-1" role="dialog" aria-labelledby="modalDetalleInspeccionLabel">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="modalDetalleInspeccionLabel">Detalle de Inspección</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
+                    <h4 class="modal-title" id="modalDetalleInspeccionLabel">
+                        <i class="fa fa-list-alt"></i> Detalle de Inspecciones Agrupadas
+                    </h4>
                 </div>
                 <div class="modal-body" id="detalle_inspeccion_content">
                     <div class="text-center">
@@ -160,7 +158,9 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        <i class="fa fa-times"></i> Cerrar
+                    </button>
                 </div>
             </div>
         </div>
