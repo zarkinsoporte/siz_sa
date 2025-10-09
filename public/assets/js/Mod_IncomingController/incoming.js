@@ -114,6 +114,26 @@ function js_iniciador() {
             var cantAceptada = parseFloat(inspeccion.CANT_ACEPTADA || 0).toFixed(2);
             var cantRechazada = parseFloat(inspeccion.CANT_RECHAZADA || 0).toFixed(2);
             
+            // Botones de acciones
+            var acciones = "<button class=\"btn btn-ver-detalle btn-sm\" " +
+                "data-doc-num=\"" + inspeccion.INC_docNum + "\" " +
+                "data-line-num=\"" + inspeccion.INC_lineNum + "\" " +
+                "data-cod-material=\"" + inspeccion.INC_codMaterial + "\" " +
+                "title=\"Ver Detalle de " + inspeccion.NUM_INSPECCIONES + " inspección(es)\">" +
+                    "<i class=\"fa fa-eye\"></i> Ver Detalle (" + inspeccion.NUM_INSPECCIONES + ")" +
+                "</button> ";
+            
+            // Si es piel, agregar botón para ver resumen de clases de piel
+            if (inspeccion.INC_esPiel === 'S') {
+                acciones += "<button class=\"btn btn-warning btn-sm btn-ver-piel\" " +
+                    "data-doc-num=\"" + inspeccion.INC_docNum + "\" " +
+                    "data-line-num=\"" + inspeccion.INC_lineNum + "\" " +
+                    "data-cod-material=\"" + inspeccion.INC_codMaterial + "\" " +
+                    "title=\"Ver Resumen de Clases de Piel\">" +
+                        "<i class=\"fa fa-tags\"></i> Piel" +
+                    "</button>";
+            }
+            
             tbody += "<tr data-idx=\"" + idx + "\">" +
                 "<td>" + (inspeccion.INC_docNum || 'N/A') + "</td>" +
                 "<td style=\"text-align: left;\">" + (inspeccion.INC_nomProveedor || 'N/A') + "</td>" +
@@ -121,15 +141,7 @@ function js_iniciador() {
                 "<td>" + cantRecibida + " " + (inspeccion.INC_unidadMedida || '') + "</td>" +
                 "<td class=\"cantidad-aceptada\">" + cantAceptada + "</td>" +
                 "<td class=\"cantidad-rechazada\">" + cantRechazada + "</td>" +
-                "<td>" +
-                    "<button class=\"btn btn-ver-detalle btn-sm\" " +
-                    "data-doc-num=\"" + inspeccion.INC_docNum + "\" " +
-                    "data-line-num=\"" + inspeccion.INC_lineNum + "\" " +
-                    "data-cod-material=\"" + inspeccion.INC_codMaterial + "\" " +
-                    "title=\"Ver Detalle de " + inspeccion.NUM_INSPECCIONES + " inspección(es)\">" +
-                        "<i class=\"fa fa-eye\"></i> Ver Detalle (" + inspeccion.NUM_INSPECCIONES + ")" +
-                    "</button>" +
-                "</td>" +
+                "<td>" + acciones + "</td>" +
             "</tr>";
         });
         
@@ -194,6 +206,53 @@ function js_iniciador() {
                     "<div class=\"alert alert-danger\">" +
                     "<i class=\"fa fa-exclamation-triangle\"></i> " +
                     "Error al cargar el detalle de las inspecciones" +
+                    "</div>"
+                );
+            }
+        });
+    });
+    
+    // Evento para ver resumen de clases de piel
+    $("#tabla_inspecciones").off("click", ".btn-ver-piel").on("click", ".btn-ver-piel", function() {
+        var docNum = $(this).data("doc-num");
+        var lineNum = $(this).data("line-num");
+        var codMaterial = $(this).data("cod-material");
+        
+        // Mostrar modal con loading
+        $("#modalResumenPiel").modal("show");
+        $("#resumen_piel_content").html(
+            "<div class=\"text-center\">" +
+            "<i class=\"fa fa-spinner fa-spin fa-3x\"></i>" +
+            "<p>Cargando resumen de clases de piel...</p>" +
+            "</div>"
+        );
+        
+        // Cargar resumen de clases de piel
+        $.ajax({
+            url: routeapp + "/home/INCOMING/resumen-piel",
+            type: "GET",
+            data: { 
+                doc_num: docNum,
+                line_num: lineNum,
+                cod_material: codMaterial
+            },
+            success: function(resp) {
+                if (resp.success) {
+                    renderResumenPiel(resp);
+                } else {
+                    $("#resumen_piel_content").html(
+                        "<div class=\"alert alert-danger\">" +
+                        "<i class=\"fa fa-exclamation-triangle\"></i> " +
+                        (resp.msg || "No se pudo cargar el resumen de piel") +
+                        "</div>"
+                    );
+                }
+            },
+            error: function(xhr) {
+                $("#resumen_piel_content").html(
+                    "<div class=\"alert alert-danger\">" +
+                    "<i class=\"fa fa-exclamation-triangle\"></i> " +
+                    "Error al cargar el resumen de piel" +
                     "</div>"
                 );
             }
@@ -356,6 +415,133 @@ function js_iniciador() {
         html += "</div>";
         
         $("#detalle_inspeccion_content").html(html);
+    }
+    
+    // Función para renderizar resumen de clases de piel
+    function renderResumenPiel(data) {
+        var resumen = data.resumen;
+        var totales = data.totales;
+        var porcentajes = data.porcentajes;
+        var detalleInspecciones = data.detalle_inspecciones;
+        
+        var html = "<div class=\"row\">";
+        
+        // Información general
+        html += "<div class=\"col-md-12\">";
+        html += "<h4><strong>Resumen de Clases de Piel</strong></h4>";
+        html += "<table class=\"table table-bordered\">";
+        html += "<tr><th width=\"30%\">Nota de Entrada:</th><td><strong>" + resumen.doc_num + "</strong></td></tr>";
+        html += "<tr><th>Proveedor:</th><td>" + resumen.proveedor + "</td></tr>";
+        html += "<tr><th>Código Material:</th><td>" + resumen.codigo_material + "</td></tr>";
+        html += "<tr><th>Material:</th><td>" + resumen.material + "</td></tr>";
+        html += "<tr><th>Cantidad Recibida:</th><td>" + parseFloat(resumen.cant_recibida || 0).toFixed(3) + "</td></tr>";
+        html += "<tr><th>Total Aceptado:</th><td class=\"cantidad-aceptada\">" + parseFloat(resumen.cant_aceptada || 0).toFixed(3) + "</td></tr>";
+        html += "<tr><th>Total Rechazado:</th><td class=\"cantidad-rechazada\">" + parseFloat(resumen.cant_rechazada || 0).toFixed(3) + "</td></tr>";
+        html += "<tr><th>Por Revisar:</th><td>" + parseFloat(resumen.por_revisar || 0).toFixed(3) + "</td></tr>";
+        html += "</table>";
+        html += "</div>";
+        
+        // Resumen consolidado de clases
+        html += "<div class=\"col-md-12 mt-4\" style=\"margin-top: 20px;\">";
+        html += "<h4><strong>Totales Consolidados</strong></h4>";
+        
+        if (resumen.es_parcial) {
+            html += "<div class=\"alert alert-warning\">";
+            html += "<i class=\"fa fa-exclamation-triangle\"></i> ";
+            html += "<strong>INSPECCIÓN PARCIAL:</strong> La inspección aún no está completa. Quedan <strong>" + parseFloat(resumen.por_revisar || 0).toFixed(3) + "</strong> unidades por revisar.";
+            html += "</div>";
+        }
+        
+        html += "<table class=\"table table-striped table-bordered\">";
+        html += "<thead>";
+        html += "<tr>";
+        html += "<th>Clase</th>";
+        html += "<th>Cantidad</th>";
+        html += "<th>Porcentaje</th>";
+        html += "</tr>";
+        html += "</thead>";
+        html += "<tbody>";
+        html += "<tr class=\"success\">";
+        html += "<td><strong>Clase A</strong></td>";
+        html += "<td>" + parseFloat(totales.clase_a || 0).toFixed(3) + "</td>";
+        html += "<td>" + parseFloat(porcentajes.clase_a || 0).toFixed(2) + "% </td>";
+        html += "</tr>";
+        html += "<tr class=\"info\">";
+        html += "<td><strong>Clase B</strong></td>";
+        html += "<td>" + parseFloat(totales.clase_b || 0).toFixed(3) + "</td>";
+        html += "<td>" + parseFloat(porcentajes.clase_b || 0).toFixed(2) + "% </td>";
+        html += "</tr>";
+        html += "<tr class=\"warning\">";
+        html += "<td><strong>Clase C</strong></td>";
+        html += "<td>" + parseFloat(totales.clase_c || 0).toFixed(3) + "</td>";
+        html += "<td>" + parseFloat(porcentajes.clase_c || 0).toFixed(2) + "% </td>";
+        html += "</tr>";
+        html += "<tr class=\"danger\">";
+        html += "<td><strong>Clase D</strong></td>";
+        html += "<td>" + parseFloat(totales.clase_d || 0).toFixed(3) + "</td>";
+        html += "<td>" + parseFloat(porcentajes.clase_d || 0).toFixed(2) + "% </td>";
+        html += "</tr>";
+        html += "<tr style=\"font-weight: bold; background-color: #f5f5f5;\">";
+        html += "<td><strong>TOTAL</strong></td>";
+        html += "<td>" + parseFloat(totales.total || 0).toFixed(3) + "</td>";
+        
+        // Calcular porcentaje total
+        var porcentajeTotal = parseFloat(porcentajes.clase_a || 0) + 
+                             parseFloat(porcentajes.clase_b || 0) + 
+                             parseFloat(porcentajes.clase_c || 0) + 
+                             parseFloat(porcentajes.clase_d || 0);
+        
+        html += "<td>" + porcentajeTotal.toFixed(2) + "% " + (resumen.es_parcial ? "<span class=\"label label-warning\">PARCIAL</span>" : "") + "</td>";
+        html += "</tr>";
+        html += "</tbody>";
+        html += "</table>";
+        html += "</div>";
+        
+        // Detalle por inspección
+        if (detalleInspecciones && detalleInspecciones.length > 0) {
+            html += "<div class=\"col-md-12 mt-4\" style=\"margin-top: 20px;\">";
+            html += "<h4><strong>Detalle por Inspección</strong></h4>";
+            html += "<table class=\"table table-striped table-bordered\">";
+            html += "<thead>";
+            html += "<tr>";
+            html += "<th>ID Inspección</th>";
+            html += "<th>Fecha</th>";
+            html += "<th>Inspector</th>";
+            html += "<th>Cant. Aceptada</th>";
+            html += "<th>Clase A</th>";
+            html += "<th>Clase B</th>";
+            html += "<th>Clase C</th>";
+            html += "<th>Clase D</th>";
+            html += "</tr>";
+            html += "</thead>";
+            html += "<tbody>";
+            
+            detalleInspecciones.forEach(function(det) {
+                var fechaDet = new Date(det.fecha);
+                var fechaStr = fechaDet.getFullYear() + '/' + 
+                             String(fechaDet.getMonth() + 1).padStart(2, '0') + '/' + 
+                             String(fechaDet.getDate()).padStart(2, '0');
+                
+                html += "<tr>";
+                html += "<td>" + det.inc_id + "</td>";
+                html += "<td>" + fechaStr + "</td>";
+                html += "<td>" + det.inspector + "</td>";
+                html += "<td>" + parseFloat(det.cant_aceptada || 0).toFixed(3) + "</td>";
+                html += "<td>" + parseFloat(det.clase_a || 0).toFixed(3) + "</td>";
+                html += "<td>" + parseFloat(det.clase_b || 0).toFixed(3) + "</td>";
+                html += "<td>" + parseFloat(det.clase_c || 0).toFixed(3) + "</td>";
+                html += "<td>" + parseFloat(det.clase_d || 0).toFixed(3) + "</td>";
+                html += "</tr>";
+            });
+            
+            html += "</tbody>";
+            html += "</table>";
+            html += "</div>";
+        }
+        
+        html += "</div>";
+        
+        $("#resumen_piel_content").html(html);
     }
     
     // Cargar datos al inicializar

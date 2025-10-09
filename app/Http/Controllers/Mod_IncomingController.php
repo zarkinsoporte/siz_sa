@@ -46,6 +46,7 @@ class Mod_IncomingController extends Controller
                     INC_nomMaterial,
                     INC_nomProveedor,
                     INC_unidadMedida,
+                    INC_esPiel,
                     MAX(INC_cantRecibida) as CANT_RECIBIDA,
                     SUM(INC_cantAceptada) as CANT_ACEPTADA,
                     SUM(INC_cantRechazada) as CANT_RECHAZADA,
@@ -62,7 +63,8 @@ class Mod_IncomingController extends Controller
                     INC_codMaterial,
                     INC_nomMaterial,
                     INC_nomProveedor,
-                    INC_unidadMedida
+                    INC_unidadMedida,
+                    INC_esPiel
                 ORDER BY 
                     MAX(INC_fechaInspeccion) DESC
             ", [$fechaDesde, $fechaHasta]);
@@ -189,6 +191,113 @@ class Mod_IncomingController extends Controller
             return response()->json([
                 'success' => false,
                 'msg' => 'Error al obtener el detalle: ' . $e->getMessage()
+            ]);
+        }
+    }
+    
+    // AJAX: Obtener resumen consolidado de clases de piel
+    public function resumenClasesPiel(Request $request)
+    {
+        try {
+            $docNum = $request->input('doc_num');
+            $lineNum = $request->input('line_num');
+            $codMaterial = $request->input('cod_material');
+            
+            // Obtener todas las inspecciones del grupo
+            $inspecciones = Siz_Incoming::on('siz')
+                ->where('INC_docNum', $docNum)
+                ->where('INC_lineNum', $lineNum)
+                ->where('INC_codMaterial', $codMaterial)
+                ->where('INC_borrado', 'N')
+                ->where('INC_esPiel', 'S')
+                ->orderBy('INC_fechaInspeccion', 'desc')
+                ->get();
+            
+            if ($inspecciones->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'msg' => 'No se encontraron inspecciones de piel'
+                ]);
+            }
+            
+            // Consolidar clases de piel
+            $totalClaseA = 0;
+            $totalClaseB = 0;
+            $totalClaseC = 0;
+            $totalClaseD = 0;
+            $detalleInspecciones = [];
+            
+            foreach ($inspecciones as $inspeccion) {
+                $piel = Siz_PielClases::on('siz')
+                    ->where('PLC_incId', $inspeccion->INC_id)
+                    ->where('PLC_borrado', 'N')
+                    ->first();
+                
+                if ($piel) {
+                    $totalClaseA += $piel->PLC_claseA;
+                    $totalClaseB += $piel->PLC_claseB;
+                    $totalClaseC += $piel->PLC_claseC;
+                    $totalClaseD += $piel->PLC_claseD;
+                    
+                    $detalleInspecciones[] = [
+                        'inc_id' => $inspeccion->INC_id,
+                        'fecha' => $inspeccion->INC_fechaInspeccion,
+                        'inspector' => $inspeccion->INC_nomInspector,
+                        'cant_aceptada' => $inspeccion->INC_cantAceptada,
+                        'clase_a' => $piel->PLC_claseA,
+                        'clase_b' => $piel->PLC_claseB,
+                        'clase_c' => $piel->PLC_claseC,
+                        'clase_d' => $piel->PLC_claseD
+                    ];
+                }
+            }
+            
+            // Calcular totales y verificar si está completo
+            $cantRecibida = $inspecciones[0]->INC_cantRecibida;
+            $totalAceptado = $inspecciones->sum('INC_cantAceptada');
+            $totalRechazado = $inspecciones->sum('INC_cantRechazada');
+            $totalClases = $totalClaseA + $totalClaseB + $totalClaseC + $totalClaseD;
+            
+            // Determinar si la inspección está completa
+            $porRevisar = $cantRecibida - $totalAceptado - $totalRechazado;
+            $esParcial = $porRevisar > 0.001; // Tolerancia para decimales
+            
+            // Calcular porcentajes sobre la cantidad RECIBIDA
+            $porcentajes = [
+                'clase_a' => $cantRecibida > 0 ? ($totalClaseA / $cantRecibida * 100) : 0,
+                'clase_b' => $cantRecibida > 0 ? ($totalClaseB / $cantRecibida * 100) : 0,
+                'clase_c' => $cantRecibida > 0 ? ($totalClaseC / $cantRecibida * 100) : 0,
+                'clase_d' => $cantRecibida > 0 ? ($totalClaseD / $cantRecibida * 100) : 0
+            ];
+            
+            return response()->json([
+                'success' => true,
+                'resumen' => [
+                    'doc_num' => $docNum,
+                    'material' => $inspecciones[0]->INC_nomMaterial,
+                    'codigo_material' => $codMaterial,
+                    'proveedor' => $inspecciones[0]->INC_nomProveedor,
+                    'cant_recibida' => $cantRecibida,
+                    'cant_aceptada' => $totalAceptado,
+                    'cant_rechazada' => $totalRechazado,
+                    'por_revisar' => $porRevisar,
+                    'es_parcial' => $esParcial
+                ],
+                'totales' => [
+                    'clase_a' => $totalClaseA,
+                    'clase_b' => $totalClaseB,
+                    'clase_c' => $totalClaseC,
+                    'clase_d' => $totalClaseD,
+                    'total' => $totalClases
+                ],
+                'porcentajes' => $porcentajes,
+                'detalle_inspecciones' => $detalleInspecciones
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'msg' => 'Error al obtener el resumen de piel: ' . $e->getMessage()
             ]);
         }
     }

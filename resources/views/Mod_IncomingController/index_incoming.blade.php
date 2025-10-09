@@ -165,6 +165,33 @@
             </div>
         </div>
     </div>
+    
+    <!-- Modal para ver resumen de clases de piel (modal-lg) -->
+    <div class="modal fade" id="modalResumenPiel" tabindex="-1" role="dialog" aria-labelledby="modalResumenPielLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="modalResumenPielLabel">
+                        <i class="fa fa-tags"></i> Resumen Consolidado de Clases de Piel
+                    </h4>
+                </div>
+                <div class="modal-body" id="resumen_piel_content">
+                    <div class="text-center">
+                        <i class="fa fa-spinner fa-spin fa-3x"></i>
+                        <p>Cargando...</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        <i class="fa fa-times"></i> Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @endsection
