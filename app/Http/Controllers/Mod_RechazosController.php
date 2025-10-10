@@ -63,13 +63,13 @@ public function buscarRechazos(Request $request)
     public function generarRechazo(Request $request)
     {
         //si el usuario no es (usuarios emp_giro != 125, 777 o 790) NO tiene permisos para generar rechazos, se devuelve un error 
-        if(Auth::user()->U_EmpGiro != 125 && Auth::user()->U_EmpGiro != 777 && Auth::user()->U_EmpGiro != 790){
+        // if(Auth::user()->U_EmpGiro != 125 && Auth::user()->U_EmpGiro != 777 && Auth::user()->U_EmpGiro != 790){
      
-            return response()->json([
-                "success" => false,
-                "msg" => "No tienes permisos para generar rechazos"
-            ]);
-        }
+        //     return response()->json([
+        //         "success" => false,
+        //         "msg" => "No tienes permisos para generar rechazos"
+        //     ]);
+        // }
         //set_time_limit(-1);
 
         ini_set('max_execution_time', -1);
