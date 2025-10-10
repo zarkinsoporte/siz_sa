@@ -874,6 +874,156 @@ class Mod_IncomingController extends Controller
         }
     }
 
+    // Eliminar inspección individual (eliminación física)
+    public function eliminarInspeccion(Request $request)
+    {
+        DB::connection('siz')->beginTransaction();
+        try {
+            $incId = $request->input('inc_id');
+            
+            // Verificar que la inspección existe
+            $inspeccion = Siz_Incoming::on('siz')
+                ->where('INC_id', $incId)
+                ->where('INC_borrado', 'N')
+                ->first();
+            
+            if (!$inspeccion) {
+                return response()->json([
+                    'success' => false,
+                    'msg' => 'La inspección no existe o ya fue eliminada'
+                ]);
+            }
+            
+            // 1. Verificar que no tenga rechazos registrados
+            $tieneRechazos = DB::connection('siz')
+                ->table('Siz_IncomRechazos')
+                ->where('IR_INC_incomld', $incId)
+                ->where('IR_Eliminado', '0')
+                ->exists();
+            
+            if ($tieneRechazos) {
+                return response()->json([
+                    'success' => false,
+                    'msg' => 'No se puede eliminar la inspección porque tiene rechazos registrados. Primero debe eliminar los rechazos asociados.'
+                ]);
+            }
+            
+            // 2. Eliminar registros relacionados (ELIMINACIÓN FÍSICA)
+            
+            // 2.1 Eliminar el detalle del checklist
+            Siz_IncomDetalle::on('siz')
+                ->where('IND_incId', $incId)
+                ->delete();
+            
+            // 2.2 Eliminar las imágenes de evidencia
+            Siz_IncomImagen::on('siz')
+                ->where('IMG_incId', $incId)
+                ->delete();
+            
+            // 2.3 Eliminar las clases de piel (si existen)
+            Siz_PielClases::on('siz')
+                ->where('PLC_incId', $incId)
+                ->delete();
+            
+            // 2.4 Eliminar la inspección principal
+            $inspeccion->delete();
+            
+            DB::connection('siz')->commit();
+            
+            return response()->json([
+                'success' => true,
+                'msg' => 'La inspección ha sido eliminada permanentemente de la base de datos'
+            ]);
+            
+        } catch (\Exception $e) {
+            DB::connection('siz')->rollBack();
+            return response()->json([
+                'success' => false,
+                'msg' => 'Error al eliminar la inspección: ' . $e->getMessage()
+            ]);
+        }
+    }
+    
+    // Actualizar eliminación de inspección (eliminación lógica - marca como borrado)
+    public function ActualizarEliminarInspeccion(Request $request)
+    {
+        DB::connection('siz')->beginTransaction();
+        try {
+            $incId = $request->input('inc_id');
+            
+            // Verificar que la inspección existe
+            $inspeccion = Siz_Incoming::on('siz')
+                ->where('INC_id', $incId)
+                ->where('INC_borrado', 'N')
+                ->first();
+            
+            if (!$inspeccion) {
+                return response()->json([
+                    'success' => false,
+                    'msg' => 'La inspección no existe o ya fue eliminada'
+                ]);
+            }
+            
+            // 1. Verificar que no tenga rechazos registrados
+            $tieneRechazos = DB::connection('siz')
+                ->table('Siz_IncomRechazos')
+                ->where('IR_INC_incomld', $incId)
+                ->where('IR_Eliminado', '0')
+                ->exists();
+            
+            if ($tieneRechazos) {
+                return response()->json([
+                    'success' => false,
+                    'msg' => 'No se puede eliminar la inspección porque tiene rechazos registrados. Primero debe eliminar los rechazos asociados.'
+                ]);
+            }
+            
+            // 2. Eliminar registros relacionados
+            
+            // 2.1 Marcar como borrado el detalle del checklist
+            Siz_IncomDetalle::on('siz')
+                ->where('IND_incId', $incId)
+                ->update([
+                    'IND_borrado' => 'S',
+                    'IND_actualizadoEn' => date("Y-m-d H:i:s")
+                ]);
+            
+            // 2.2 Marcar como borrado las imágenes de evidencia
+            Siz_IncomImagen::on('siz')
+                ->where('IMG_incId', $incId)
+                ->update([
+                    'IMG_borrado' => 'S'
+                ]);
+            
+            // 2.3 Marcar como borrado las clases de piel (si existen)
+            Siz_PielClases::on('siz')
+                ->where('PLC_incId', $incId)
+                ->update([
+                    'PLC_borrado' => 'S',
+                    'PLC_actualizadoEn' => date("Y-m-d H:i:s")
+                ]);
+            
+            // 2.4 Marcar como borrado la inspección principal
+            $inspeccion->INC_borrado = 'S';
+            $inspeccion->INC_actualizadoEn = date("Y-m-d H:i:s");
+            $inspeccion->save();
+            
+            DB::connection('siz')->commit();
+            
+            return response()->json([
+                'success' => true,
+                'msg' => 'La inspección ha sido eliminada correctamente'
+            ]);
+            
+        } catch (\Exception $e) {
+            DB::connection('siz')->rollBack();
+            return response()->json([
+                'success' => false,
+                'msg' => 'Error al eliminar la inspección: ' . $e->getMessage()
+            ]);
+        }
+    }
+    
     // Elimina el archivo indicado en la carpeta app
     public function file($name)
     {

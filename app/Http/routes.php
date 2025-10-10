@@ -813,4 +813,5 @@ Route::get('/home/RECHAZOS/pdf/{inc_id}', 'Mod_RechazosController@verPdfRechazo'
 Route::get('home/INCOMING', 'Mod_IncomingController@index_incoming')->middleware('routelog');
 Route::get('home/INCOMING/buscar-inspecciones', 'Mod_IncomingController@buscarInspecciones');
 Route::get('home/INCOMING/detalle-inspecciones', 'Mod_IncomingController@detalleInspeccionesAgrupadas');
+Route::post('home/INCOMING/eliminar-inspeccion', 'Mod_IncomingController@eliminarInspeccion');
 Route::get('home/INCOMING/resumen-piel', 'Mod_IncomingController@resumenClasesPiel');

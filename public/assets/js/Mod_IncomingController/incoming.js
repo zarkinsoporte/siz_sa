@@ -110,9 +110,9 @@ function js_iniciador() {
         console.log("Inspecciones agrupadas:", inspecciones);
         
         inspecciones.forEach(function(inspeccion, idx) {
-            var cantRecibida = parseFloat(inspeccion.CANT_RECIBIDA || 0).toFixed(2);
-            var cantAceptada = parseFloat(inspeccion.CANT_ACEPTADA || 0).toFixed(2);
-            var cantRechazada = parseFloat(inspeccion.CANT_RECHAZADA || 0).toFixed(2);
+            var cantRecibida = parseFloat(inspeccion.CANT_RECIBIDA || 0).toFixed(3);
+            var cantAceptada = parseFloat(inspeccion.CANT_ACEPTADA || 0).toFixed(3);
+            var cantRechazada = parseFloat(inspeccion.CANT_RECHAZADA || 0).toFixed(3);
             
             // Botones de acciones
             var acciones = "<button class=\"btn btn-ver-detalle btn-sm\" " +
@@ -280,11 +280,11 @@ function js_iniciador() {
         html += "<tr><th>Proveedor:</th><td>" + resumen.proveedor + "</td></tr>";
         html += "<tr><th>Código Material:</th><td>" + resumen.codigo_material + "</td></tr>";
         html += "<tr><th>Material:</th><td>" + resumen.material + "</td></tr>";
-        html += "<tr><th>Cantidad Recibida:</th><td>" + parseFloat(resumen.cant_recibida || 0).toFixed(2) + "</td></tr>";
+        html += "<tr><th>Cantidad Recibida:</th><td>" + parseFloat(resumen.cant_recibida || 0).toFixed(3) + "</td></tr>";
         html += "<tr><th>Total Aceptado:</th><td class=\"cantidad-aceptada\">" + 
-                parseFloat(resumen.cant_aceptada || 0).toFixed(2) + "</td></tr>";
+                parseFloat(resumen.cant_aceptada || 0).toFixed(3) + "</td></tr>";
         html += "<tr><th>Total Rechazado:</th><td class=\"cantidad-rechazada\">" + 
-                parseFloat(resumen.cant_rechazada || 0).toFixed(2) + "</td></tr>";
+                parseFloat(resumen.cant_rechazada || 0).toFixed(3) + "</td></tr>";
         html += "</table>";
         html += "</div>";
         
@@ -304,13 +304,20 @@ function js_iniciador() {
             
             html += "<div class=\"panel panel-default\">";
             html += "<div class=\"panel-heading\" style=\"background-color: #f5f5f5;\">";
-            html += "<h4 class=\"panel-title\">";
-            html += "<a data-toggle=\"collapse\" data-parent=\"#accordionInspecciones\" href=\"#collapse" + idx + "\">";
+            html += "<h4 class=\"panel-title\" style=\"display: flex; justify-content: space-between; align-items: center;\">";
+            html += "<a data-toggle=\"collapse\" data-parent=\"#accordionInspecciones\" href=\"#collapse" + idx + "\" style=\"flex: 1;\">";
             html += "<i class=\"fa fa-chevron-down\"></i> ";
             html += "Inspección #" + inspeccion.INC_id + " - Fecha: " + fechaInsp + " - Inspector: " + inspeccion.INC_nomInspector;
-            html += " - Aceptada: <span class=\"cantidad-aceptada\">" + parseFloat(inspeccion.INC_cantAceptada || 0).toFixed(2) + "</span>";
-            html += " - Rechazada: <span class=\"cantidad-rechazada\">" + parseFloat(inspeccion.INC_cantRechazada || 0).toFixed(2) + "</span>";
+            html += " - Aceptada: <span class=\"cantidad-aceptada\">" + parseFloat(inspeccion.INC_cantAceptada || 0).toFixed(3) + "</span>";
+            html += " - Rechazada: <span class=\"cantidad-rechazada\">" + parseFloat(inspeccion.INC_cantRechazada || 0).toFixed(3) + "</span>";
             html += "</a>";
+            html += "<button class=\"btn btn-danger btn-xs btn-eliminar-inspeccion\" data-inc-id=\"" + inspeccion.INC_id + "\" " +
+                    "data-doc-num=\"" + resumen.doc_num + "\" " +
+                    "data-line-num=\"" + inspecciones[0].INC_lineNum + "\" " +
+                    "data-cod-material=\"" + resumen.codigo_material + "\" " +
+                    "title=\"Eliminar Inspección\" style=\"margin-left: 10px;\">" +
+                    "<i class=\"fa fa-trash\"></i> Eliminar" +
+                    "</button>";
             html += "</h4>";
             html += "</div>";
             html += "<div id=\"collapse" + idx + "\" class=\"panel-collapse collapse" + (idx === 0 ? " in" : "") + "\">";
@@ -375,7 +382,7 @@ function js_iniciador() {
                             var fechaStr = fechaCant.getFullYear() + '/' + 
                                          String(fechaCant.getMonth() + 1).padStart(2, '0') + '/' + 
                                          String(fechaCant.getDate()).padStart(2, '0');
-                            html += "<small>" + fechaStr + ": " + parseFloat(cant.cantidad).toFixed(2) + "</small><br>";
+                            html += "<small>" + fechaStr + ": " + parseFloat(cant.cantidad).toFixed(3) + "</small><br>";
                         });
                         html += "</div>";
                     }
@@ -543,6 +550,88 @@ function js_iniciador() {
         
         $("#resumen_piel_content").html(html);
     }
+    
+    // Evento para eliminar inspección individual
+    $(document).on("click", ".btn-eliminar-inspeccion", function() {
+        var incId = $(this).data("inc-id");
+        var docNum = $(this).data("doc-num");
+        var lineNum = $(this).data("line-num");
+        var codMaterial = $(this).data("cod-material");
+        
+        // Confirmar eliminación con SweetAlert
+        swal({
+            title: "¿Está seguro?",
+            text: "Se eliminará la inspección #" + incId + " y todos sus registros relacionados (checklist, imágenes, clases de piel). Esta acción no se puede deshacer.",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Sí, eliminar",
+            cancelButtonText: "Cancelar",
+            closeOnConfirm: false,
+            showLoaderOnConfirm: true
+        }, function() {
+            // Realizar eliminación
+            $.ajax({
+                url: routeapp + "/home/INCOMING/eliminar-inspeccion",
+                type: "POST",
+                data: { 
+                    inc_id: incId,
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(resp) {
+                    if (resp.success) {
+                        swal({
+                            title: "¡Eliminado!",
+                            text: resp.msg,
+                            type: "success",
+                            confirmButtonText: "Aceptar"
+                        }, function() {
+                            // Recargar el detalle del modal
+                            $.ajax({
+                                url: routeapp + "/home/INCOMING/detalle-inspecciones",
+                                type: "GET",
+                                data: { 
+                                    doc_num: docNum,
+                                    line_num: lineNum,
+                                    cod_material: codMaterial
+                                },
+                                success: function(resp) {
+                                    if (resp.success) {
+                                        renderDetalleInspeccionAgrupada(resp);
+                                        // Recargar la tabla principal
+                                        cargarInspecciones();
+                                    } else {
+                                        // Si no quedan inspecciones, cerrar el modal
+                                        $("#modalDetalleInspeccion").modal("hide");
+                                        cargarInspecciones();
+                                    }
+                                },
+                                error: function() {
+                                    $("#modalDetalleInspeccion").modal("hide");
+                                    cargarInspecciones();
+                                }
+                            });
+                        });
+                    } else {
+                        swal({
+                            title: "Error",
+                            text: resp.msg,
+                            type: "error",
+                            confirmButtonText: "Aceptar"
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    swal({
+                        title: "Error",
+                        text: "Error al eliminar la inspección. Intente nuevamente.",
+                        type: "error",
+                        confirmButtonText: "Aceptar"
+                    });
+                }
+            });
+        });
+    });
     
     // Cargar datos al inicializar
     cargarInspecciones();
