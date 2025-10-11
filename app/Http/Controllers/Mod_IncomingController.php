@@ -880,7 +880,14 @@ class Mod_IncomingController extends Controller
         DB::connection('siz')->beginTransaction();
         try {
             $incId = $request->input('inc_id');
-            
+            if(Auth::user()->position == 1){
+     
+                return response()->json([
+                    "success" => false,
+                    "msg" => "No tienes permisos para eliminar inspecciones"
+                ]);
+            }
+                //set_time_limit(-1);
             // Verificar que la inspección existe
             $inspeccion = Siz_Incoming::on('siz')
                 ->where('INC_id', $incId)
