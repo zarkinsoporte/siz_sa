@@ -125,7 +125,7 @@ public function buscarRechazos(Request $request)
             
             // Crear registro en Siz_IncomRechazos
             $rechazo = new Siz_IncomRechazo();
-            $rechazo->setConnection("siz");
+            //$rechazo->setConnection("siz");
             $rechazo->IR_INC_incomld = $inspeccion->INC_id;
             $rechazo->IR_codigoMaterial = $inspeccion->INC_codMaterial;
             $rechazo->IR_cantidadRechazada = $inspeccion->INC_cantRechazada;
