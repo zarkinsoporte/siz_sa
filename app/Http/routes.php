@@ -808,6 +808,7 @@ Route::get('/test-simple/{inc_id}', 'Mod_RechazosController@testSimple');
 
 Route::get('/imagenes-locales/{nombreArchivo}', 'Mod_RechazosController@mostrarImagen')->name('imagen.local');
 Route::get('/home/RECHAZOS/pdf/{inc_id}', 'Mod_RechazosController@verPdfRechazo');
+Route::post('/home/RECHAZOS/enviar-correo/{inc_id}', 'Mod_RechazosController@enviarCorreoRechazo');
 
 //CALIDAD RESUMEN CONCENTRADO DE INCOMING
 Route::get('home/INCOMING', 'Mod_IncomingController@index_incoming')->middleware('routelog');

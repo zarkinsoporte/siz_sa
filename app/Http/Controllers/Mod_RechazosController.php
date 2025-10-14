@@ -632,6 +632,203 @@ public function buscarRechazos(Request $request)
     }
 
     /**
+     * Enviar correo del PDF de rechazo al usuario autenticado
+     */
+    public function enviarCorreoRechazo($inc_id)
+    {
+        ini_set('max_execution_time', -1);
+        try {
+            // Buscar el rechazo por INC_id
+            $rechazo = Siz_IncomRechazo::on("siz")
+                ->where("IR_INC_incomld", $inc_id)
+                ->where("IR_Eliminado", "0")
+                ->first();
+            
+            if (!$rechazo) {
+                return response()->json([
+                    "success" => false,
+                    "msg" => "No se encontró un rechazo para esta inspección"
+                ]);
+            }
+            
+            // Obtener datos de la inspección
+            $inspeccion = Siz_Incoming::on("siz")->where("INC_id", $inc_id)->first();
+            
+            if (!$inspeccion) {
+                return response()->json([
+                    "success" => false,
+                    "msg" => "Inspección no encontrada"
+                ]);
+            }
+            
+            // Obtener datos del proveedor
+            $proveedor = DB::select("
+                SELECT TOP 1 
+                    CARDNAME as nombre_proveedor,
+                    CARDCODE as codigo_proveedor
+                FROM OCRD 
+                WHERE CARDCODE = ?
+            ", [$inspeccion->INC_codProveedor]);
+            
+            $proveedor_nombre = !empty($proveedor) ? $proveedor[0]->nombre_proveedor : 'Proveedor no encontrado';
+            $proveedor_codigo = !empty($proveedor) ? $proveedor[0]->codigo_proveedor : $inspeccion->INC_codProveedor;
+            
+            // Obtener datos del inspector (usuario autenticado actual)
+            $inspector_nombre = Auth::user()->firstName . ' ' . Auth::user()->lastName;
+            $inspector_codigo = Auth::user()->U_EmpGiro;
+            $inspector_correo = Auth::user()->email.'@zarkin.com';
+            
+            // Obtener datos del checklist que no cumple
+            $checklistNoCumple = [];
+            $respuestas = Siz_IncomDetalle::on("siz")
+                ->where("IND_incId", $inc_id)
+                ->where("IND_estado", "N")
+                ->get()
+                ->keyBy("IND_chkId");
+            
+            $checklist = Siz_Checklist::on("siz")
+                ->where("CHK_activo", "S")
+                ->whereIn("CHK_id", $respuestas->keys())
+                ->orderBy("CHK_orden")
+                ->get();
+            
+            // Obtener imágenes agrupadas por CHK_id y convertir a base64
+            $imagenes = Siz_IncomImagen::on("siz")
+                ->where("IMG_incId", $inc_id)
+                ->where("IMG_borrado", "N")
+                ->get();
+
+            $imagenesPorChk = [];
+            foreach ($imagenes as $img) {
+                $chkId = $img->IMG_descripcion;
+                if (!isset($imagenesPorChk[$chkId])) { 
+                    $imagenesPorChk[$chkId] = []; 
+                }
+                
+                // Convertir imagen a base64
+                $imagenBase64 = '';
+                if (file_exists($img->IMG_ruta)) {
+                    $imagenData = file_get_contents($img->IMG_ruta);
+                    $mimeType = mime_content_type($img->IMG_ruta);
+                    $imagenBase64 = 'data:' . $mimeType . ';base64,' . base64_encode($imagenData);
+                }
+                
+                $imagenesPorChk[$chkId][] = [
+                    "ruta" => $img->IMG_ruta,
+                    "id" => $img->IMG_id,
+                    "archivo" => basename($img->IMG_ruta),
+                    "base64" => $imagenBase64
+                ];
+            }
+            
+            // Preparar datos del checklist que no cumple
+            foreach ($checklist as $item) {
+                if (isset($respuestas[$item->CHK_id])) {
+                    $respuesta = $respuestas[$item->CHK_id];
+                    $checklistNoCumple[] = [
+                        "descripcion" => $item->CHK_descripcion,
+                        "observacion" => $respuesta->IND_observacion,
+                        "cantidad" => $respuesta->IND_cantidad,
+                        "imagenes" => isset($imagenesPorChk[$item->CHK_id]) ? $imagenesPorChk[$item->CHK_id] : []
+                    ];
+                }
+            }
+            
+            // Usar solo el correo del usuario autenticado
+            $correos = [$inspector_correo];
+            $destinatarios = $correos;
+            
+            // Crear PDF
+            $fechaImpresion = date("d-m-Y H:i:s");
+            $headerHtml = view()->make(
+                'Mod_RechazosController.pdfheader',
+                [
+                    'titulo' => 'Rechazo de Material',
+                    'fechaImpresion' => 'Fecha de Impresión: ' . $fechaImpresion,
+                    'item' => ''
+                ]
+            )->render();
+
+            $id_rechazo = $rechazo->IR_id;
+            $fecha_rechazo = date('d/m/Y H:i', strtotime($rechazo->IR_FechaReporte));            
+            $fecha_entrada = date('d/m/Y', strtotime($inspeccion->INC_fechaRecepcion));
+            $numero_entrada = $inspeccion->INC_docNum;
+            $codigo_material = $inspeccion->INC_codMaterial;
+            $nombre_material = $inspeccion->INC_nomMaterial;
+            $cantidad_rechazada = number_format($inspeccion->INC_cantRechazada, 3);
+            $udm = $inspeccion->INC_unidadMedida;
+            $lote = $inspeccion->INC_lote;
+            $notas_generales = $rechazo->IR_notasGenerales;
+            $numero_factura = $inspeccion->INC_numFactura;
+
+            $pdf = \SPDF::loadView("Mod_RechazosController.rechazo_pdf", compact(
+                "numero_factura",
+                "id_rechazo", 
+                "inspeccion", 
+                "proveedor_nombre", 
+                "proveedor_codigo", 
+                "fecha_entrada", 
+                "numero_entrada",
+                "checklistNoCumple", 
+                "destinatarios",
+                "fecha_rechazo",
+                "codigo_material",
+                "nombre_material",
+                "cantidad_rechazada",
+                "udm",
+                "lote",
+                "notas_generales",
+                "inspector_nombre",
+                "inspector_codigo",
+                "inspector_correo"
+            ));
+        
+            $pdf->setOption('header-html', $headerHtml);
+            $pdf->setOption('footer-center', 'Pagina [page] de [toPage]');
+            $pdf->setOption('footer-left', 'SIZ');
+            $pdf->setOption('margin-top', '33mm');
+            $pdf->setOption('margin-left', '5mm');
+            $pdf->setOption('margin-right', '5mm');
+            $pdf->setOption('page-size', 'Letter');
+            
+            // Envío de correo
+            Mail::send('Emails.Rechazos', [
+                'inspeccion' => $inspeccion,
+                'id_rechazo' => $id_rechazo,
+                'fecha_rechazo' => $fecha_rechazo,
+                'numero_entrada' => $numero_entrada,
+                'fecha_entrada' => $fecha_entrada,
+                'proveedor_nombre' => $proveedor_nombre,
+                'proveedor_codigo' => $proveedor_codigo,
+                'codigo_material' => $codigo_material,
+                'nombre_material' => $nombre_material,
+                'cantidad_rechazada' => $cantidad_rechazada,
+                'udm' => $udm,
+                'lote' => $lote,
+                'notas_generales' => $notas_generales,
+                'inspector_nombre' => $inspector_nombre,
+                'inspector_codigo' => $inspector_codigo,
+                'inspector_correo' => $inspector_correo
+            ], function ($msj) use ($correos, $rechazo, $pdf, $inspeccion) {
+                $msj->subject('Notificación de Rechazo #' . $rechazo->IR_id . ' - Inspección #' . $inspeccion->INC_id);
+                $msj->to($correos);
+                $msj->attachData($pdf->output(), 'rechazo_' . $rechazo->IR_id . '.pdf');
+            });
+            
+            return response()->json([
+                "success" => true,
+                "msg" => "Correo enviado exitosamente a " . $inspector_correo
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                "success" => false,
+                "msg" => "Error al enviar el correo: " . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
      * Descargar/ver imagen de evidencia de forma segura por ID
      */
     public function verImagen($id)
