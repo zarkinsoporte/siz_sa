@@ -884,7 +884,8 @@ class Mod_IncomingController extends Controller
         DB::connection('siz')->beginTransaction();
         try {
             $incId = $request->input('inc_id');
-            if(Auth::user()->position == 1){
+            //dd(Auth::user()->position, Auth::user()->position !== 1, Auth::user()->position !== "1");
+            if(Auth::user()->position !== 1){
      
                 return response()->json([
                     "success" => false,
