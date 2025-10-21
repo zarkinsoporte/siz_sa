@@ -104,6 +104,7 @@ class Mod_IncomingController extends Controller
             // Obtener checklist
             $checklist = Siz_Checklist::on('siz')
                 ->where('CHK_activo', 'S')
+                ->where('CHK_area', '001')
                 ->orderBy('CHK_orden')
                 ->get();
             
@@ -382,7 +383,9 @@ class Mod_IncomingController extends Controller
         // NO crear registro aquí, solo obtener checklist
         // El registro se creará en guardarInspeccion() cuando realmente se guarde
         
-        $checklist = Siz_Checklist::on('siz')->where('CHK_activo', 'S')->orderBy('CHK_orden')->get();
+        $checklist = Siz_Checklist::on('siz')->where('CHK_activo', 'S')
+        ->where('CHK_area', '001')
+        ->orderBy('CHK_orden')->get();
         $respuestas = []; // No hay respuestas previas si es nueva inspección
         
         return response()->json([
@@ -413,6 +416,7 @@ class Mod_IncomingController extends Controller
         // Obtener todos los checklist activos
         $checklist = Siz_Checklist::on('siz')
             ->where('CHK_activo', 'S')
+            ->where('CHK_area', '001')
             ->orderBy('CHK_orden')
             ->get();
         

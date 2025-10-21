@@ -816,3 +816,7 @@ Route::get('home/INCOMING/buscar-inspecciones', 'Mod_IncomingController@buscarIn
 Route::get('home/INCOMING/detalle-inspecciones', 'Mod_IncomingController@detalleInspeccionesAgrupadas');
 Route::post('home/INCOMING/eliminar-inspeccion', 'Mod_IncomingController@eliminarInspeccion');
 Route::get('home/INCOMING/resumen-piel', 'Mod_IncomingController@resumenClasesPiel');
+
+//CALIDAD INSPECCION EN PROCESO
+Route::get('home/inspeccion-proceso', 'Mod_InspeccionProcesoController@index_inspeccion_en_proceso')->middleware('routelog');
+Route::get('home/inspeccion-proceso/buscar', 'Mod_InspeccionProcesoController@buscarInspeccionesEnProceso');
