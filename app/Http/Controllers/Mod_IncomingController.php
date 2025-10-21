@@ -885,7 +885,7 @@ class Mod_IncomingController extends Controller
         try {
             $incId = $request->input('inc_id');
             //dd(Auth::user()->position, Auth::user()->position !== 1, Auth::user()->position !== "1");
-            if(Auth::user()->position !== 1){
+            if(Auth::user()->position != 1){
      
                 return response()->json([
                     "success" => false,
