@@ -129,32 +129,21 @@
                                 <div class="col-md-6">
                                     <div class="m-t-5 mb-3">
                                         <label><strong>
-                                            <font size="2">Centro de Inspección</font>
+                                            <font size="2">Orden de Producción (OP)</font>
                                         </strong></label>
-                                        <select id="centro_inspeccion" class="form-control boot-select" data-live-search="true">
-                                            <option value="">Seleccione un centro...</option>
-                                            @foreach($centrosInspeccion as $centro)
-                                                <option value="{{ $centro->id }}">{{ $centro->nombre }}</option>
-                                            @endforeach
-                                        </select>
+                                        <input type="text" id="numero_op" class="form-control"
+                                            placeholder="Ingrese el número de OP y presione Enter">
                                     </div>
                                 </div>
-                            </div>
-                            <div class="m-t-5 mb-3">
-                                <label><strong>
-                                    <font size="2">Orden de Producción (OP)</font>
-                                </strong></label>
-                                <input type="text" id="numero_op" class="form-control"
-                                    placeholder="Ingrese el número de OP y presione Enter">
                             </div>
                         </div>
                         <div class="invoice-to">
                             <small>INFORMACIÓN DE LA OP</small>
                             <address class="m-t-5 m-b-5">
                                 <strong><span id="articulo_op" style="font-size: 16px;"></span></strong><br>
-                                <span id="cantidad_op"></span><br>
-                               
+                                <span id="cantidad_op"></span>
                             </address>
+                            <div id="centro_inspeccion_actual" style="margin-top: 10px;"></div>
                         </div>
                         <div class="invoice-date">
                             <small>INSPECCIÓN</small>

@@ -315,11 +315,7 @@ li.dt-button.active a::before{
     $(document).ready(js_iniciador);
     $( document ).ajaxError(function( event, jqxhr, settings, thrownError ) {
         if (jqxhr.status === 403) {
-            bootbox.alert({
-                    title: "Sesión terminada",
-                    message: "<div class='alert alert-danger m-b-0'>Tiene que volver a iniciar Sesión.</div>",
-                    callback: function(){ location.href = '{!! route('auth/login') !!}'; }
-                });     
+                
         }
     });
     function cargando() 
