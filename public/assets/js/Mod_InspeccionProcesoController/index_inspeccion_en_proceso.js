@@ -136,7 +136,7 @@ function js_iniciador() {
     
     // Función para renderizar checklist
     function renderChecklist() {
-        console.log('renderChecklist - checklist:', checklist);
+        //console.log('renderChecklist - checklist:', checklist);
         var tbody = '';
         
         if(!checklist || checklist.length === 0) {
@@ -247,12 +247,17 @@ function js_iniciador() {
         
         // Botones de inspecciones previas
         var htmlInspecciones = '';
+        
         if(inspeccionesPrevias && inspeccionesPrevias.length > 0) {
             htmlInspecciones = '<div style="margin-top: 15px; margin-bottom: 15px;">'+
                 '<small><strong>INSPECCIONES PREVIAS:</strong></small><br>';
             inspeccionesPrevias.forEach(function(insp) {
                 htmlInspecciones += '<button class="btn btn-success btn-xs btnVerInspeccionProceso" data-inspeccion-id="'+insp.IPR_id+'" title="Ver Inspección ID: '+insp.IPR_id+'" style="margin: 2px;"><i class="fa fa-eye"></i> ID '+insp.IPR_id+'</button> ';
             });
+            htmlInspecciones += '</div>';
+        } else {
+            htmlInspecciones = '<div style="margin-top: 15px; margin-bottom: 15px;">'+
+                '<small><strong>NO HAY INSPECCIONES PREVIAS</strong></small><br>';
             htmlInspecciones += '</div>';
         }
         
@@ -296,7 +301,7 @@ function js_iniciador() {
             '<h4 style="margin-bottom: 10px;">' + (opData ? opData.ItemCode : '') + '</h4>'+
                 '<p style="margin: 5px 0;"><strong>OP:</strong> ' + (opData ? opData.OP : '') + '</p>'+
                 '<p style="margin: 5px 0;"><strong>Centro:</strong> ' + (centroInspeccionData ? centroInspeccionData.nombre : '') + '</p>'+
-                '<p style="margin: 5px 0;"><strong>Cantidad en Centro:</strong> <span class="label label-info">' + parseFloat(cantidadDisponible).toFixed(2) + '</span></p>'+
+                '<p style="margin: 5px 0;"><strong>Cantidad en Centro:</strong> <span id="cantidad_disponible">' + parseFloat(cantidadDisponible).toFixed(2) + '</span></p>'+
                 
                 htmlInspecciones +
                 
@@ -327,7 +332,7 @@ function js_iniciador() {
                     '</div>'+
                 '</div>'+
                 
-                '<div class="data-summary-block" style="margin-top: 15px; margin-bottom: 15px;">'+
+                '<div class="data-summary-block" style="margin-top: 15px; margin-bottom: 15px; display: none;">'+
                     '<div class="row">'+
                         '<div class="col-sm-6">'+
                             '<div class="data-summary-item">'+
@@ -352,7 +357,14 @@ function js_iniciador() {
                 '</div>'+
                 
                 '<div style="margin-top: 15px;">'+
-                    '<button id="guardar_inspeccion" class="btn btn-success btn-lg btn-block"><i class="fa fa-save"></i> Guardar Inspección</button>'+
+                   '<div class="row">'+
+                        '<div class="col-sm-6 text-center col-md-6">'+
+                            '<button id="guardar_rechazo" class="btn btn-danger btn-lg btn-block"><i class="fa fa-ban"></i> Rechazado</button>'+
+                        '</div>'+
+                        '<div class="col-sm-6 text-center col-md-6">'+
+                            '<button id="guardar_inspeccion" class="btn btn-success btn-lg btn-block"><i class="fa fa-check"></i> Aceptado</button>'+
+                        '</div>'+
+                    '</div>'+
                 '</div>'+
             '</div>'+
         '</div>';
@@ -390,7 +402,7 @@ function js_iniciador() {
         if(rubrosSinSeleccionar.length > 0) {
             swal({
                 title: 'Checklist incompleto',
-                text: 'Debe seleccionar una opción para los siguientes rubros:\n\n' + rubrosSinSeleccionar.join('\n'),
+                text: 'Debe seleccionar una opción para todos los rubros',
                 type: 'warning',
                 confirmButtonText: 'Aceptar'
             });
@@ -445,12 +457,13 @@ function js_iniciador() {
         datos.append('op', opData.OP);
         datos.append('doc_entry', opData.DocEntry);
         datos.append('cod_articulo', opData.ItemCode);
-        datos.append('nom_articulo', opData.ItemName);
+        datos.append('nom_articulo', '');
         datos.append('cant_planeada', opData.CantidadPlaneada);
-        datos.append('cant_inspeccionada', $('#cantidad_inspeccionada').val());
-        datos.append('cant_rechazada', $('#cantidad_rechazada').val());
+        //datos.append('cant_inspeccionada', $('#cantidad_inspeccionada').val());
+        datos.append('cant_inspeccionada', $('#cantidad_disponible').val());
+        datos.append('cant_rechazada', '0.000');
         datos.append('centro_inspeccion', centroInspeccionData.id);
-        datos.append('nombre_centro', centroInspeccionData.nombre);
+        datos.append('nombre_centro', '');
         datos.append('fecha_inspeccion', $('#fecha_inspeccion').val());
         datos.append('observaciones', $('.textareaObservacionesGenerales').val());
         
