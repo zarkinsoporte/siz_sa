@@ -6,32 +6,28 @@ var respuestas = {};
 var idInspeccion = 0;
 var inspeccionesPrevias = [];
 var historial = [];
+var estacionesCalidadAgregadas = []; // Controla qué estaciones de calidad ya se agregaron sus defectivos
 
 // Función global para manejar cambios en el checklist
 function manejarChecklist(chkId, valor) {
-    var inputCantidad = $('#cantidad_' + chkId);
+    var selectEmpleado = $('#empleado_' + chkId);
     var textareaObservacion = $('textarea[name="obs_' + chkId + '"]');
     var btnEvidencia = $('#imagenes_' + chkId).siblings('.btnEvidencia');
     
     if (valor === 'No Cumple') {
-        inputCantidad.prop('disabled', false);
-        inputCantidad.focus();
         textareaObservacion.prop('required', true);
         textareaObservacion.attr('placeholder', 'OBSERVACIÓN OBLIGATORIA');
         btnEvidencia.attr('title', 'Adjuntar Evidencia (OBLIGATORIO)');
     } else {
-        inputCantidad.prop('disabled', true);
-        inputCantidad.val('');
         textareaObservacion.prop('required', false);
         textareaObservacion.attr('placeholder', '');
         btnEvidencia.attr('title', 'Adjuntar Evidencia');
     }
     
+    // El selectpicker de empleado siempre permanece habilitado y mantiene su valor
+    
     // Actualizar respuestas
     respuestas[chkId] = valor;
-    if (valor !== 'No Cumple') {
-        respuestas[chkId + '_cantidad'] = '';
-    }
 }
 
 function js_iniciador() {
@@ -95,6 +91,7 @@ function js_iniciador() {
                 historial = data.historial;
                 inspeccionesPrevias = data.inspecciones_previas;
                 respuestas = {};
+                estacionesCalidadAgregadas = []; // Resetear estaciones agregadas para nueva OP
                 
                 // Renderizar información
                 renderCabeceraOP();
@@ -144,8 +141,20 @@ function js_iniciador() {
         } else {
             checklist.forEach(function(item) {
                 var respuesta = respuestas[item.CHK_id] || '';
-                var cantidadNoCumple = respuestas[item.CHK_id + '_cantidad'] || '';
                 var observacion = respuestas[item.CHK_id + '_observacion'] || '';
+                
+                // Construir select de empleados (siempre habilitado)
+                var selectEmpleados = '<select id="empleado_'+item.CHK_id+'" name="empleado_'+item.CHK_id+'" class="form-control boot-select selectEmpleado" data-live-search="true">';
+                selectEmpleados += '<option value="">Seleccione empleado...</option>';
+                
+                if(item.empleados_permitidos && item.empleados_permitidos.length > 0) {
+                    item.empleados_permitidos.forEach(function(emp) {
+                        var nombreCompleto = emp.firstName + ' ' + emp.lastName;
+                        var selected = (emp.empID == item.empleado_responsable_default) ? 'selected' : '';
+                        selectEmpleados += '<option value="'+emp.empID+'" '+selected+'>'+nombreCompleto+'</option>';
+                    });
+                }
+                selectEmpleados += '</select>';
                 
                 tbody += '<tr>'+
                     '<td>'+
@@ -157,13 +166,16 @@ function js_iniciador() {
                     '<td><input type="radio" name="checklist_'+item.CHK_id+'" value="Cumple" '+(respuesta === 'Cumple' ? 'checked' : '')+' onchange="manejarChecklist('+item.CHK_id+', this.value)"></td>'+
                     '<td><input type="radio" name="checklist_'+item.CHK_id+'" value="No Cumple" '+(respuesta === 'No Cumple' ? 'checked' : '')+' onchange="manejarChecklist('+item.CHK_id+', this.value)"></td>'+
                     '<td><input type="radio" name="checklist_'+item.CHK_id+'" value="No Aplica" '+(respuesta === 'No Aplica' ? 'checked' : '')+' onchange="manejarChecklist('+item.CHK_id+', this.value)"></td>'+
-                    '<td><input type="number" id="cantidad_'+item.CHK_id+'" class="form-control cantidad-no-cumple" value="'+cantidadNoCumple+'" step="0.001" min="0" max="999999.999" onblur="if(this.value) this.value = parseFloat(this.value).toFixed(3)" disabled></td>'+
+                    '<td>'+selectEmpleados+'</td>'+
                     '<td><textarea class="form-control textareaObservacion" name="obs_'+item.CHK_id+'" rows="2" style="resize:none; text-transform:uppercase;">'+observacion+'</textarea></td>'+
                 '</tr>';
             });
         }
         
         $('#checklist_body').html(tbody);
+        
+        // Inicializar selectpickers
+        $('.selectEmpleado').selectpicker();
         
         // Evento para el botón de evidencia
         $('.btnEvidencia').click(function(){
@@ -235,7 +247,9 @@ function js_iniciador() {
     
     // Renderizar resumen lateral
     function renderResumen() {
-        var cantidadDisponible = centroInspeccionData ? centroInspeccionData.cantidad_disponible : 0;
+        var cantidadDisponible = parseFloat(centroInspeccionData ? centroInspeccionData.cantidad_disponible : 0) || 0;
+        var cantidadEnCentro = parseFloat(centroInspeccionData ? centroInspeccionData.cantidad_en_centro : 0) || 0;
+        var cantidadAceptada = parseFloat(centroInspeccionData ? centroInspeccionData.cantidad_aceptada : 0) || 0;
         
         var fechaActual = new Date();
         var fechaFormateada = fechaActual.getFullYear() + '-' + 
@@ -245,16 +259,24 @@ function js_iniciador() {
         var idInspeccionMostrar = idInspeccion > 0 ? idInspeccion : 'Por definir';
         var nomInspector = typeof currentUser !== 'undefined' ? currentUser : 'Usuario Actual';
         
-        // Botones de inspecciones previas
+        // Botón de inspecciones previas
         var htmlInspecciones = '';
         
         if(inspeccionesPrevias && inspeccionesPrevias.length > 0) {
+            var totalInspecciones = inspeccionesPrevias.length;
+            var totalAceptadas = inspeccionesPrevias.filter(function(i){ return i.IPR_estado === 'ACEPTADO'; }).length;
+            var totalRechazadas = inspeccionesPrevias.filter(function(i){ return i.IPR_estado === 'RECHAZADO'; }).length;
+            
             htmlInspecciones = '<div style="margin-top: 15px; margin-bottom: 15px;">'+
-                '<small><strong>INSPECCIONES PREVIAS:</strong></small><br>';
-            inspeccionesPrevias.forEach(function(insp) {
-                htmlInspecciones += '<button class="btn btn-success btn-xs btnVerInspeccionProceso" data-inspeccion-id="'+insp.IPR_id+'" title="Ver Inspección ID: '+insp.IPR_id+'" style="margin: 2px;"><i class="fa fa-eye"></i> ID '+insp.IPR_id+'</button> ';
-            });
-            htmlInspecciones += '</div>';
+                '<small><strong>INSPECCIONES PREVIAS:</strong></small><br>'+
+                '<button id="btn_ver_historial_inspecciones" class="btn btn-info btn-block" style="margin-top: 5px;">'+
+                    '<i class="fa fa-history"></i> Ver Historial de Inspecciones ('+totalInspecciones+')'+
+                '</button>'+
+                '<div style="font-size: 11px; margin-top: 5px; text-align: center;">'+
+                    '<span class="text-success"><strong>'+totalAceptadas+'</strong> Aceptadas</span> | '+
+                    '<span class="text-danger"><strong>'+totalRechazadas+'</strong> Rechazadas</span>'+
+                '</div>'+
+            '</div>';
         } else {
             htmlInspecciones = '<div style="margin-top: 15px; margin-bottom: 15px;">'+
                 '<small><strong>NO HAY INSPECCIONES PREVIAS</strong></small><br>';
@@ -301,7 +323,7 @@ function js_iniciador() {
             '<h4 style="margin-bottom: 10px;">' + (opData ? opData.ItemCode : '') + '</h4>'+
                 '<p style="margin: 5px 0;"><strong>OP:</strong> ' + (opData ? opData.OP : '') + '</p>'+
                 '<p style="margin: 5px 0;"><strong>Centro:</strong> ' + (centroInspeccionData ? centroInspeccionData.nombre : '') + '</p>'+
-                '<p style="margin: 5px 0;"><strong>Cantidad en Centro:</strong> <span id="cantidad_disponible">' + parseFloat(cantidadDisponible).toFixed(2) + '</span></p>'+
+                '<input type="hidden" id="cantidad_disponible" value="' + cantidadDisponible.toFixed(2) + '">'+
                 
                 htmlInspecciones +
                 
@@ -332,24 +354,33 @@ function js_iniciador() {
                     '</div>'+
                 '</div>'+
                 
-                '<div class="data-summary-block" style="margin-top: 15px; margin-bottom: 15px; display: none;">'+
+                '<div class="data-summary-block" style="margin-top: 15px; margin-bottom: 15px;">'+
                     '<div class="row">'+
-                        '<div class="col-sm-6">'+
+                        '<div class="col-sm-12">'+
                             '<div class="data-summary-item">'+
-                                '<small>INSPECCIONADA</small>'+
-                                '<input type="number" id="cantidad_inspeccionada" class="form-control user-success" value="0.000" min="0" max="'+cantidadDisponible+'" step="0.001">'+
+                                '<small>CANTIDAD A INSPECCIONAR</small>'+
+                                '<input type="number" id="cantidad_inspeccionada" class="form-control user-success" value="'+cantidadDisponible.toFixed(3)+'" min="0" max="'+cantidadDisponible+'" step="0.001">'+
                             '</div>'+
                         '</div>'+
-                        '<div class="col-sm-6">'+
-                            '<div class="data-summary-item">'+
-                                '<small>RECHAZADA</small>'+
-                                '<input type="number" id="cantidad_rechazada" class="form-control user-error" value="0.000" min="0" step="0.001">'+
-                            '</div>'+
-                        '</div>'+
+                        
                     '</div>'+
                 '</div>'+
                 
                 tablaHistorial +
+                
+                // Agregar defectivos de otras estaciones de calidad
+                '<div style="margin-top: 15px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">'+
+                    '<label style="font-weight: bold;"><i class="fa fa-plus-circle"></i> Agregar Defectivos de Otras Estaciones:</label>'+
+                    '<div class="row" style="margin-top: 10px;">'+
+                        '<div class="col-sm-8">'+
+                            '<select id="select_estacion_calidad" class="form-control boot-select" data-live-search="true" title="Seleccione una estación...">'+
+                            '</select>'+
+                        '</div>'+
+                        '<div class="col-sm-4">'+
+                            '<button id="btn_agregar_defectivos" class="btn btn-primary btn-block"><i class="fa fa-plus"></i> Agregar</button>'+
+                        '</div>'+
+                    '</div>'+
+                '</div>'+
                 
                 '<div style="margin-top: 15px;">'+
                     '<label style="font-weight: bold;">Observaciones Generales:</label>'+
@@ -370,6 +401,18 @@ function js_iniciador() {
         '</div>';
         $('#resumen_inspeccion').html(html);
         
+        // Poblar selectpicker con estaciones de calidad del historial
+        var estacionesCalidad = historial.filter(function(item) {
+            return item.EsCalidad === 'S' && item.U_CT !== centroInspeccionData.id;
+        });
+        
+        var optionsHtml = '';
+        estacionesCalidad.forEach(function(estacion) {
+            optionsHtml += '<option value="'+estacion.U_CT+'">'+estacion.NombreEstacion+'</option>';
+        });
+        $('#select_estacion_calidad').html(optionsHtml);
+        $('#select_estacion_calidad').selectpicker('refresh');
+        
         $('.textareaObservacionesGenerales').on('input', function(){
             this.value = this.value.toUpperCase();
         });
@@ -386,10 +429,113 @@ function js_iniciador() {
         $('#cantidad_inspeccionada, #cantidad_rechazada').on('click', function(){
             this.select();
         });
+        
+        // Evento para ver historial de inspecciones
+        $('#btn_ver_historial_inspecciones').on('click', function(){
+            abrirModalHistorialInspecciones();
+        });
+        
+        // Evento para agregar defectivos de otras estaciones
+        $('#btn_agregar_defectivos').on('click', function(){
+            var estacionSeleccionada = $('#select_estacion_calidad').val();
+            
+            if (!estacionSeleccionada) {
+                swal({
+                    title: 'Estación no seleccionada',
+                    text: 'Debe seleccionar una estación de calidad',
+                    type: 'warning',
+                    confirmButtonText: 'Aceptar'
+                });
+                return;
+            }
+            
+            // Verificar si ya se agregaron los defectivos de esta estación
+            if (estacionesCalidadAgregadas.indexOf(estacionSeleccionada) !== -1) {
+                swal({
+                    title: 'Defectivos ya agregados',
+                    text: 'Los defectivos de esta estación ya fueron agregados',
+                    type: 'warning',
+                    confirmButtonText: 'Aceptar'
+                });
+                return;
+            }
+            
+            // Mostrar blockUI
+            $.blockUI({
+                message: '<h1>Cargando defectivos...</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+                css: {
+                    border: 'none',
+                    padding: '16px',
+                    width: '50%',
+                    top: '40%',
+                    left: '30%',
+                    backgroundColor: '#fefefe',
+                    '-webkit-border-radius': '10px',
+                    '-moz-border-radius': '10px',
+                    opacity: .7,
+                    color: '#000000',
+                    baseZ: 2000
+                }
+            });
+            
+            // Obtener defectivos de la estación seleccionada
+            $.ajax({
+                url: routeapp + '/home/inspeccion-proceso/defectivos-estacion',
+                type: 'GET',
+                data: { 
+                    area: estacionSeleccionada,
+                    op: opData.OP
+                },
+                success: function(response){
+                    $.unblockUI();
+                    
+                    if (response.success && response.defectivos && response.defectivos.length > 0) {
+                        // Agregar los defectivos al checklist
+                        response.defectivos.forEach(function(defectivo){
+                            checklist.push(defectivo);
+                        });
+                        
+                        // Marcar la estación como agregada
+                        estacionesCalidadAgregadas.push(estacionSeleccionada);
+                        
+                        // Deshabilitar la opción en el selectpicker
+                        $('#select_estacion_calidad option[value="'+estacionSeleccionada+'"]').prop('disabled', true);
+                        $('#select_estacion_calidad').selectpicker('refresh');
+                        
+                        // Re-renderizar el checklist
+                        renderChecklist();
+                        
+                        swal({
+                            title: 'Defectivos agregados',
+                            text: 'Se agregaron ' + response.defectivos.length + ' defectivos al checklist',
+                            type: 'success',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        swal({
+                            title: 'Sin defectivos',
+                            text: response.msg || 'No se encontraron defectivos para esta estación',
+                            type: 'info',
+                            confirmButtonText: 'Aceptar'
+                        });
+                    }
+                },
+                error: function(){
+                    $.unblockUI();
+                    swal({
+                        title: 'Error',
+                        text: 'Error al cargar los defectivos',
+                        type: 'error',
+                        confirmButtonText: 'Aceptar'
+                    });
+                }
+            });
+        });
     }
     
-    // Guardar inspección
-    $(document).on('click', '#guardar_inspeccion', function(){
+    // Función para guardar inspección (común para aceptado y rechazado)
+    function guardarInspeccion(estado) {
         // Validaciones...
         var rubrosSinSeleccionar = [];
         checklist.forEach(function(item){
@@ -453,28 +599,53 @@ function js_iniciador() {
             return;
         }
         
+        // Validar cantidad a inspeccionar
+        var cantidadInspeccionada = parseFloat($('#cantidad_inspeccionada').val()) || 0;
+        var cantidadDisponible = parseFloat($('#cantidad_disponible').val()) || 0;
+        
+        if (cantidadInspeccionada <= 0) {
+            swal({
+                title: 'Cantidad inválida',
+                text: 'Debe ingresar una cantidad mayor a cero',
+                type: 'warning',
+                confirmButtonText: 'Aceptar'
+            });
+            return;
+        }
+        
+        if (cantidadInspeccionada > cantidadDisponible) {
+            swal({
+                title: 'Cantidad excedida',
+                text: 'La cantidad a inspeccionar (' + cantidadInspeccionada + ') no puede ser mayor a la disponible (' + cantidadDisponible + ')',
+                type: 'warning',
+                confirmButtonText: 'Aceptar'
+            });
+            return;
+        }
+        
         var datos = new FormData();
         datos.append('op', opData.OP);
         datos.append('doc_entry', opData.DocEntry);
         datos.append('cod_articulo', opData.ItemCode);
-        datos.append('nom_articulo', '');
+        datos.append('nom_articulo', opData.ItemName);
         datos.append('cant_planeada', opData.CantidadPlaneada);
-        //datos.append('cant_inspeccionada', $('#cantidad_inspeccionada').val());
-        datos.append('cant_inspeccionada', $('#cantidad_disponible').val());
-        datos.append('cant_rechazada', '0.000');
+        datos.append('cant_inspeccionada', cantidadInspeccionada);
+        datos.append('cant_rechazada', 0); // Ya no se usa este campo separado
         datos.append('centro_inspeccion', centroInspeccionData.id);
-        datos.append('nombre_centro', '');
+        datos.append('nombre_centro', centroInspeccionData.nombre);
         datos.append('fecha_inspeccion', $('#fecha_inspeccion').val());
         datos.append('observaciones', $('.textareaObservacionesGenerales').val());
+        datos.append('estado', estado); // 'ACEPTADO' o 'RECHAZADO'
         
         // Agregar respuestas del checklist
         Object.keys(respuestas).forEach(function(chkId) {
             if (respuestas[chkId] && respuestas[chkId] !== 'No Aplica') {
                 datos.append('checklist[' + chkId + ']', respuestas[chkId]);
                 
-                if (respuestas[chkId] === 'No Cumple') {
-                    var cantidad = $('#cantidad_' + chkId).val() || 0;
-                    datos.append('checklist_cantidad[' + chkId + ']', cantidad);
+                // Agregar empleado responsable
+                var empleadoId = $('#empleado_' + chkId).val();
+                if (empleadoId) {
+                    datos.append('checklist_empleado[' + chkId + ']', empleadoId);
                 }
                 
                 var observacion = $('textarea[name="obs_' + chkId + '"]').val() || '';
@@ -517,8 +688,9 @@ function js_iniciador() {
                 $.unblockUI();
                 
                 if(resp.success) {
+                    var estadoTexto = estado === 'ACEPTADO' ? 'ACEPTADA' : 'RECHAZADA';
                     swal({
-                        title: 'Guardado exitoso',
+                        title: 'Inspección ' + estadoTexto,
                         text: 'La inspección ha sido guardada con ID: ' + resp.id_inspeccion,
                         type: 'success',
                         confirmButtonText: 'Aceptar'
@@ -547,5 +719,175 @@ function js_iniciador() {
                 });
             }
         });
+    }
+    
+    // Evento para guardar como ACEPTADO
+    $(document).on('click', '#guardar_inspeccion', function(){
+        guardarInspeccion('ACEPTADO');
     });
+    
+    // Evento para guardar como RECHAZADO
+    $(document).on('click', '#guardar_rechazo', function(){
+        guardarInspeccion('RECHAZADO');
+    });
+    
+    // Función para abrir modal de historial de inspecciones
+    function abrirModalHistorialInspecciones() {
+        $('#modal_op_numero').text(opData.OP);
+        
+        $.blockUI({
+            message: '<h1>Cargando historial...</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+            css: {
+                border: 'none',
+                padding: '16px',
+                width: '50%',
+                top: '40%',
+                left: '30%',
+                backgroundColor: '#fefefe',
+                '-webkit-border-radius': '10px',
+                '-moz-border-radius': '10px',
+                opacity: .7,
+                color: '#000000',
+                baseZ: 2000
+            }
+        });
+        
+        $.ajax({
+            url: routeapp + '/home/inspeccion-proceso/historial-completo',
+            type: 'GET',
+            data: { 
+                op: opData.OP,
+                centro: centroInspeccionData.id
+            },
+            success: function(response){
+                $.unblockUI();
+                
+                if (response.success && response.inspecciones && response.inspecciones.length > 0) {
+                    renderHistorialInspecciones(response.inspecciones);
+                    $('#modalHistorialInspecciones').modal('show');
+                } else {
+                    swal({
+                        title: 'Sin historial',
+                        text: 'No se encontraron inspecciones previas',
+                        type: 'info',
+                        confirmButtonText: 'Aceptar'
+                    });
+                }
+            },
+            error: function(){
+                $.unblockUI();
+                swal({
+                    title: 'Error',
+                    text: 'Error al cargar el historial de inspecciones',
+                    type: 'error',
+                    confirmButtonText: 'Aceptar'
+                });
+            }
+        });
+    }
+    
+    // Función para renderizar el historial de inspecciones en el modal
+    function renderHistorialInspecciones(inspecciones) {
+        var html = '';
+        
+        inspecciones.forEach(function(insp, index) {
+            var estadoClass = insp.IPR_estado === 'RECHAZADO' ? 'panel-danger' : 'panel-success';
+            var estadoIcono = insp.IPR_estado === 'RECHAZADO' ? 'fa-ban' : 'fa-check-circle';
+            var estadoTexto = insp.IPR_estado === 'RECHAZADO' ? 'RECHAZADA' : 'ACEPTADA';
+            var estadoColor = insp.IPR_estado === 'RECHAZADO' ? '#d9534f' : '#5cb85c';
+            
+            // Formatear fecha
+            var fechaInsp = new Date(insp.IPR_fechaInspeccion);
+            var fechaFormateada = fechaInsp.getDate().toString().padStart(2, '0') + '/' + 
+                                 (fechaInsp.getMonth() + 1).toString().padStart(2, '0') + '/' + 
+                                 fechaInsp.getFullYear() + ' ' +
+                                 fechaInsp.getHours().toString().padStart(2, '0') + ':' +
+                                 fechaInsp.getMinutes().toString().padStart(2, '0');
+            
+            html += '<div class="panel '+estadoClass+'" style="margin-bottom: 20px;">'+
+                '<div class="panel-heading" style="background-color: '+estadoColor+'; color: white;">'+
+                    '<h4 class="panel-title">'+
+                        '<i class="fa '+estadoIcono+'"></i> Inspección #'+insp.IPR_id+' - '+estadoTexto+
+                    '</h4>'+
+                '</div>'+
+                '<div class="panel-body">'+
+                    '<div class="row">'+
+                        '<div class="col-md-3">'+
+                            '<strong>Fecha:</strong><br>'+fechaFormateada+
+                        '</div>'+
+                        '<div class="col-md-3">'+
+                            '<strong>Inspector:</strong><br>'+insp.IPR_nomInspector+
+                        '</div>'+
+                        '<div class="col-md-3">'+
+                            '<strong>Cantidad Inspeccionada:</strong><br>'+parseFloat(insp.IPR_cantInspeccionada).toFixed(2)+
+                        '</div>'+
+                        '<div class="col-md-3">'+
+                            '<strong>Estado:</strong><br><span style="color: '+estadoColor+'; font-weight: bold;">'+estadoTexto+'</span>'+
+                        '</div>'+
+                    '</div>';
+            
+            // Mostrar observaciones si existen
+            if (insp.IPR_observaciones) {
+                html += '<div class="row" style="margin-top: 10px;">'+
+                    '<div class="col-md-12">'+
+                        '<strong>Observaciones Generales:</strong><br>'+
+                        '<div style="background-color: #f5f5f5; padding: 10px; border-radius: 3px;">'+
+                            insp.IPR_observaciones+
+                        '</div>'+
+                    '</div>'+
+                '</div>';
+            }
+            
+            // Tabla de detalles del checklist
+            if (insp.detalles && insp.detalles.length > 0) {
+                html += '<div class="row" style="margin-top: 15px;">'+
+                    '<div class="col-md-12">'+
+                        '<strong>Detalle del Checklist:</strong>'+
+                        '<div style="max-height: 300px; overflow-y: auto; margin-top: 5px;">'+
+                        '<table class="table table-bordered table-condensed" style="font-size: 12px; margin-bottom: 0;">'+
+                            '<thead style="background-color: #f5f5f5;">'+
+                                '<tr>'+
+                                    '<th style="width: 50%;">Punto de Inspección</th>'+
+                                    '<th style="width: 15%; text-align: center;">Estado</th>'+
+                                    '<th style="width: 20%;">Empleado Resp.</th>'+
+                                    '<th style="width: 15%;">Observaciones</th>'+
+                                '</tr>'+
+                            '</thead>'+
+                            '<tbody>';
+                
+                insp.detalles.forEach(function(det) {
+                    var estadoDet = '';
+                    var estadoColor = '';
+                    if (det.IPD_estado === 'C') {
+                        estadoDet = 'Cumple';
+                        estadoColor = 'text-success';
+                    } else if (det.IPD_estado === 'N') {
+                        estadoDet = 'No Cumple';
+                        estadoColor = 'text-danger';
+                    } else {
+                        estadoDet = 'No Aplica';
+                        estadoColor = 'text-muted';
+                    }
+                    
+                    html += '<tr>'+
+                        '<td>'+det.CHK_descripcion+'</td>'+
+                        '<td style="text-align: center;"><strong class="'+estadoColor+'">'+estadoDet+'</strong></td>'+
+                        '<td>'+(det.empleado_nombre || '-')+'</td>'+
+                        '<td>'+(det.IPD_observacion || '-')+'</td>'+
+                    '</tr>';
+                });
+                
+                html += '</tbody>'+
+                    '</table>'+
+                    '</div>'+
+                    '</div>'+
+                '</div>';
+            }
+            
+            html += '</div>'+  // cierre panel-body
+                '</div>';  // cierre panel
+        });
+        
+        $('#contenido_historial_inspecciones').html(html);
+    }
 }

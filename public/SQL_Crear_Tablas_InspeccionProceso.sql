@@ -22,6 +22,7 @@ CREATE TABLE [dbo].[Siz_InspeccionProceso](
     [IPR_codInspector] [nvarchar](50) NULL,
     [IPR_nomInspector] [nvarchar](250) NULL,
     [IPR_observaciones] [nvarchar](max) NULL,
+    [IPR_estado] [nvarchar](20) NULL DEFAULT ('ACEPTADO'),
     [IPR_borrado] [char](1) NULL DEFAULT ('N'),
     [IPR_creadoEn] [datetime] NULL DEFAULT (getdate()),
     [IPR_actualizadoEn] [datetime] NULL DEFAULT (getdate()),
@@ -39,6 +40,7 @@ CREATE TABLE [dbo].[Siz_InspeccionProcesoDetalle](
     [IPD_chkId] [int] NOT NULL,
     [IPD_estado] [char](1) NOT NULL,
     [IPD_cantidad] [decimal](19, 6) NULL DEFAULT ((0)),
+    [IPD_empID] [int] NULL,
     [IPD_observacion] [nvarchar](max) NULL,
     [IPD_borrado] [char](1) NULL DEFAULT ('N'),
     [IPD_creadoEn] [datetime] NULL DEFAULT (getdate()),
@@ -92,5 +94,29 @@ CREATE NONCLUSTERED INDEX [IX_InspeccionProcesoImagen_IPR] ON [dbo].[Siz_Inspecc
 GO
 
 PRINT 'Tablas de Inspección en Proceso creadas exitosamente.'
+GO
+
+-- Agregar campo IPR_estado si no existe (para tablas ya creadas)
+IF NOT EXISTS (SELECT * FROM sys.columns 
+               WHERE object_id = OBJECT_ID(N'[dbo].[Siz_InspeccionProceso]') 
+               AND name = 'IPR_estado')
+BEGIN
+    ALTER TABLE [dbo].[Siz_InspeccionProceso]
+    ADD [IPR_estado] [nvarchar](20) NULL DEFAULT ('ACEPTADO')
+    
+    PRINT 'Campo IPR_estado agregado exitosamente.'
+END
+GO
+
+-- Agregar campo IPD_empID si no existe (para tablas ya creadas)
+IF NOT EXISTS (SELECT * FROM sys.columns 
+               WHERE object_id = OBJECT_ID(N'[dbo].[Siz_InspeccionProcesoDetalle]') 
+               AND name = 'IPD_empID')
+BEGIN
+    ALTER TABLE [dbo].[Siz_InspeccionProcesoDetalle]
+    ADD [IPD_empID] [int] NULL
+    
+    PRINT 'Campo IPD_empID agregado exitosamente.'
+END
 GO
 

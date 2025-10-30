@@ -820,6 +820,8 @@ Route::get('home/INCOMING/resumen-piel', 'Mod_IncomingController@resumenClasesPi
 //CALIDAD INSPECCION EN PROCESO
 Route::get('home/inspeccion-proceso', 'Mod_InspeccionProcesoController@index_inspeccion_en_proceso')->middleware('routelog');
 Route::get('home/inspeccion-proceso/buscar', 'Mod_InspeccionProcesoController@buscarInspeccionesEnProceso');
+Route::get('home/inspeccion-proceso/defectivos-estacion', 'Mod_InspeccionProcesoController@getDefectivosPorEstacion');
+Route::get('home/inspeccion-proceso/historial-completo', 'Mod_InspeccionProcesoController@getHistorialCompleto');
 Route::post('home/inspeccion-proceso/guardar', 'Mod_InspeccionProcesoController@guardarInspeccionProceso');
 Route::get('home/inspeccion-proceso/ver', 'Mod_InspeccionProcesoController@verInspeccionProceso');
 Route::get('home/inspeccion-proceso/imagen/{id}', 'Mod_InspeccionProcesoController@verImagenProceso');

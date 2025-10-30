@@ -141,6 +141,39 @@ class Mod_InspeccionProcesoController extends Controller
                 ->orderBy('CHK_orden')
                 ->get();
             
+            // Para cada ítem del checklist, obtener empleados con permisos en el área inspeccionada
+            // y el empleado responsable del historial
+            foreach ($checklist as $item) {
+                $areaInspeccionada = $item->CHK_area_inspeccionada;
+                
+                // Obtener empleados con permiso en esta área
+                $empleadosConPermiso = DB::table('OHEM')
+                    ->select('empID', 'firstName', 'lastName', 'U_CP_CT')
+                    ->whereRaw("CHARINDEX(?, U_CP_CT) > 0", [$areaInspeccionada])
+                    ->where('Active', 'Y')
+                    ->orderBy('firstName')
+                    ->get();
+                
+                $item->empleados_permitidos = $empleadosConPermiso;
+                
+                // Buscar en el historial el empleado que trabajó en esta área
+                $empleadoResponsable = null;
+                foreach ($historial as $h) {
+                    if ($h->U_CT == $areaInspeccionada) {
+                        // Obtener el empID del empleado
+                        $empleadoHist = DB::table('OHEM')
+                            ->where(DB::raw("firstName + ' ' + lastName"), $h->Empleado)
+                            ->first();
+                        if ($empleadoHist) {
+                            $empleadoResponsable = $empleadoHist->empID;
+                        }
+                        break;
+                    }
+                }
+                
+                $item->empleado_responsable_default = $empleadoResponsable;
+            }
+            
             // 8. Obtener inspecciones previas para esta OP y centro
             $inspeccionesPrevias = Siz_InspeccionProceso::on('siz')
                 ->where('IPR_op', $op)
@@ -149,13 +182,29 @@ class Mod_InspeccionProcesoController extends Controller
                 ->orderBy('IPR_id', 'desc')
                 ->get();
             
+            // 9. Calcular cantidad disponible para inspeccionar
+            // Cantidad Planeada - Suma de inspecciones ACEPTADAS
+            $cantidadAceptada = Siz_InspeccionProceso::on('siz')
+                ->where('IPR_op', $op)
+                ->where('IPR_centroInspeccion', $estacionActual)
+                ->where('IPR_borrado', 'N')
+                ->where('IPR_estado', 'ACEPTADO')
+                ->sum('IPR_cantInspeccionada');
+            
+            // sum() retorna null si no hay registros, convertir a 0
+            $cantidadAceptada = $cantidadAceptada ?? 0;
+            
+            $cantidadDisponible = $ordenProduccion->CantidadPlaneada - $cantidadAceptada;
+            
             return response()->json([
                 'success' => true,
                 'op' => $ordenProduccion,
                 'centro_inspeccion' => [
                     'id' => $estacionActual,
                     'nombre' => $estacionActualInfo->Name,
-                    'cantidad_disponible' => $cantidadEnCentro
+                    'cantidad_disponible' => $cantidadDisponible,
+                    'cantidad_en_centro' => $cantidadEnCentro,
+                    'cantidad_aceptada' => $cantidadAceptada
                 ],
                 'checklist' => $checklist,
                 'historial' => $historial,
@@ -189,6 +238,23 @@ class Mod_InspeccionProcesoController extends Controller
             $nombreCentro = $request->input('nombre_centro');
             $observaciones = $request->input('observaciones');
             $fechaInspeccion = $request->input('fecha_inspeccion');
+            $estado = $request->input('estado'); // 'ACEPTADO' o 'RECHAZADO'
+            
+            // Validar estado
+            if (!in_array($estado, ['ACEPTADO', 'RECHAZADO'])) {
+                return response()->json([
+                    'success' => false,
+                    'msg' => 'Estado de inspección inválido'
+                ], 400);
+            }
+            
+            // Validar cantidad inspeccionada
+            if ($cantInspeccionada <= 0) {
+                return response()->json([
+                    'success' => false,
+                    'msg' => 'La cantidad a inspeccionar debe ser mayor a cero'
+                ], 400);
+            }
             
             // Crear nueva inspección
             $inspeccion = new Siz_InspeccionProceso();
@@ -213,6 +279,7 @@ class Mod_InspeccionProcesoController extends Controller
             
             $inspeccion->IPR_codInspector = Auth::user()->U_EmpGiro;
             $inspeccion->IPR_nomInspector = Auth::user()->getName();
+            $inspeccion->IPR_estado = $estado; // 'ACEPTADO' o 'RECHAZADO'
             $inspeccion->IPR_borrado = 'N';
             $inspeccion->IPR_creadoEn = date("Y-m-d H:i:s");
             $inspeccion->IPR_actualizadoEn = date("Y-m-d H:i:s");
@@ -244,6 +311,11 @@ class Mod_InspeccionProcesoController extends Controller
                         // Si es "No Cumple", guardar la cantidad
                         if ($respuesta === 'No Cumple' && $request->has('checklist_cantidad.' . $chkId)) {
                             $detalle->IPD_cantidad = $request->input('checklist_cantidad.' . $chkId);
+                        }
+                        
+                        // Guardar el empleado responsable del defecto
+                        if ($request->has('checklist_empleado.' . $chkId)) {
+                            $detalle->IPD_empID = $request->input('checklist_empleado.' . $chkId);
                         }
                         
                         $detalle->IPD_borrado = 'N';
@@ -474,6 +546,148 @@ class Mod_InspeccionProcesoController extends Controller
             
         } catch (\Exception $e) {
             abort(404, 'Error al cargar la imagen: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * AJAX: Obtener historial completo de inspecciones con detalles
+     */
+    public function getHistorialCompleto(Request $request)
+    {
+        try {
+            $op = $request->input('op');
+            $centro = $request->input('centro');
+            
+            if (!$op) {
+                return response()->json([
+                    'success' => false,
+                    'msg' => 'Debe proporcionar el número de OP'
+                ], 400);
+            }
+            
+            // Obtener inspecciones previas
+            $inspecciones = Siz_InspeccionProceso::on('siz')
+                ->where('IPR_op', $op)
+                ->where('IPR_centroInspeccion', $centro)
+                ->where('IPR_borrado', 'N')
+                ->orderBy('IPR_fechaInspeccion', 'desc')
+                ->get();
+            
+            // Para cada inspección, obtener sus detalles
+            foreach ($inspecciones as $insp) {
+                // Obtener detalles del checklist
+                $detalles = DB::connection('siz')
+                    ->table('Siz_InspeccionProcesoDetalle')
+                    ->join('Siz_Checklist', 'Siz_InspeccionProcesoDetalle.IPD_chkId', '=', 'Siz_Checklist.CHK_id')
+                    ->leftJoin(DB::raw('dbo.OHEM'), 'Siz_InspeccionProcesoDetalle.IPD_empID', '=', 'OHEM.empID')
+                    ->select(
+                        'Siz_InspeccionProcesoDetalle.*',
+                        'Siz_Checklist.CHK_descripcion',
+                        DB::raw("OHEM.firstName + ' ' + OHEM.lastName as empleado_nombre")
+                    )
+                    ->where('Siz_InspeccionProcesoDetalle.IPD_iprId', $insp->IPR_id)
+                    ->where('Siz_InspeccionProcesoDetalle.IPD_borrado', 'N')
+                    ->orderBy('Siz_Checklist.CHK_orden')
+                    ->get();
+                
+                $insp->detalles = $detalles;
+            }
+            
+            return response()->json([
+                'success' => true,
+                'inspecciones' => $inspecciones
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'msg' => 'Error al cargar el historial: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    /**
+     * AJAX: Obtener defectivos de una estación de calidad específica
+     */
+    public function getDefectivosPorEstacion(Request $request)
+    {
+        try {
+            $area = $request->input('area');
+            $op = $request->input('op');
+            
+            if (!$area) {
+                return response()->json([
+                    'success' => false,
+                    'msg' => 'Debe proporcionar el código del área'
+                ], 400);
+            }
+            
+            // Obtener defectivos de la estación
+            $defectivos = Siz_Checklist::on('siz')
+                ->where('CHK_activo', 'S')
+                ->where('CHK_area', $area)
+                ->orderBy('CHK_orden')
+                ->get();
+            
+            // Obtener historial de la OP para determinar empleados responsables
+            $historial = [];
+            if ($op) {
+                $historial = DB::select("
+                    SELECT 
+                        [@CP_LOGOF].U_CT,
+                        [@PL_RUTAS].Name AS NombreEstacion,
+                        [@PL_RUTAS].U_Calidad AS EsCalidad,
+                        OHEM.empID,
+                        OHEM.firstName + ' ' + OHEM.lastName AS Empleado,
+                        MIN([@CP_LOGOF].U_FechaHora) AS PrimeraFecha,
+                        MAX([@CP_LOGOF].U_FechaHora) AS UltimaFecha,
+                        SUM([@CP_LOGOF].U_Cantidad) AS CantidadElaborada
+                    FROM [@CP_LOGOF]
+                    INNER JOIN [@PL_RUTAS] ON [@CP_LOGOF].U_CT = [@PL_RUTAS].Code
+                    LEFT JOIN OHEM ON [@CP_LOGOF].U_idEmpleado = OHEM.empID
+                    WHERE [@CP_LOGOF].U_DocEntry = ?
+                    GROUP BY [@CP_LOGOF].U_CT, [@PL_RUTAS].Name, [@PL_RUTAS].U_Calidad, OHEM.empID, OHEM.firstName, OHEM.lastName
+                    ORDER BY MIN([@CP_LOGOF].U_FechaHora)
+                ", [$op]);
+            }
+            
+            // Para cada defectivo, obtener empleados con permisos en el área inspeccionada
+            foreach ($defectivos as $item) {
+                $areaInspeccionada = $item->CHK_area_inspeccionada;
+                
+                // Obtener empleados con permiso en esta área
+                $empleadosConPermiso = DB::table('OHEM')
+                    ->select('empID', 'firstName', 'lastName', 'U_CP_CT')
+                    ->whereRaw("CHARINDEX(?, U_CP_CT) > 0", [$areaInspeccionada])
+                    ->where('Active', 'Y')
+                    ->orderBy('firstName')
+                    ->get();
+                
+                $item->empleados_permitidos = $empleadosConPermiso;
+                
+                // Buscar en el historial el empleado que trabajó en esta área
+                $empleadoResponsable = null;
+                foreach ($historial as $h) {
+                    if ($h->U_CT == $areaInspeccionada && $h->empID) {
+                        $empleadoResponsable = $h->empID;
+                        break;
+                    }
+                }
+                
+                $item->empleado_responsable_default = $empleadoResponsable;
+            }
+            
+            return response()->json([
+                'success' => true,
+                'defectivos' => $defectivos,
+                'msg' => 'Defectivos cargados correctamente'
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'msg' => 'Error al cargar los defectivos: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

@@ -9,7 +9,7 @@ class Siz_InspeccionProcesoDetalle extends Model
     protected $primaryKey = 'IPD_id';
     public $timestamps = false;
     protected $fillable = [
-        'IPD_iprId', 'IPD_chkId', 'IPD_estado', 'IPD_cantidad',
+        'IPD_iprId', 'IPD_chkId', 'IPD_estado', 'IPD_cantidad', 'IPD_empID',
         'IPD_observacion', 'IPD_borrado', 'IPD_creadoEn', 'IPD_actualizadoEn'
     ];
 }

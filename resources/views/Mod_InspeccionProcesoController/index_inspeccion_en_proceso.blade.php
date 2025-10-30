@@ -155,10 +155,10 @@
 
             <div id="inspeccion_container" class="mb-3 mt-4" style="overflow-x: auto; display: none;">
                 <div class="row">
-                    <div class="col-md-4" id="resumen_inspeccion">
+                    <div class="col-md-3" id="resumen_inspeccion">
                         <!-- Resumen lateral -->
                     </div>
-                    <div class="col-md-8" id="checklist_container">
+                    <div class="col-md-9" id="checklist_container">
                         <!-- Checklist dinámico -->
                         <table class="table table-striped table-bordered" id="tabla_checklist">
                             <thead>
@@ -168,7 +168,7 @@
                                     <th>Cumple</th>
                                     <th>No Cumple</th>
                                     <th>No Aplica</th>
-                                    <th>Cantidad No Cumple</th>
+                                    <th>Empleado Responsable</th>
                                     <th>Observaciones</th>
                                 </tr>
                             </thead>
@@ -177,6 +177,28 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para ver historial de inspecciones previas -->
+    <div class="modal fade" id="modalHistorialInspecciones" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" style="width: 90%; max-width: 1200px;" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"><i class="fa fa-history"></i> Historial de Inspecciones - OP <span id="modal_op_numero"></span></h4>
+                </div>
+                <div class="modal-body" style="max-height: 600px; overflow-y: auto;">
+                    <div id="contenido_historial_inspecciones">
+                        <!-- Se llenará dinámicamente -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
                 </div>
             </div>
         </div>

@@ -9,6 +9,6 @@ class Siz_Checklist extends Model
     protected $primaryKey = 'CHK_id';
     public $timestamps = false;
     protected $fillable = [
-        'CHK_descripcion', 'CHK_activo', 'CHK_orden', 'CHK_area'
+        'CHK_descripcion', 'CHK_activo', 'CHK_orden', 'CHK_area', 'CHK_area_inspeccionada'
     ];
 } 
