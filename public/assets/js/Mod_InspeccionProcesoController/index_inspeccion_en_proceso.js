@@ -259,27 +259,33 @@ function js_iniciador() {
         var idInspeccionMostrar = idInspeccion > 0 ? idInspeccion : 'Por definir';
         var nomInspector = typeof currentUser !== 'undefined' ? currentUser : 'Usuario Actual';
         
-        // Botón de inspecciones previas
+        // Botón de historial de rechazos
         var htmlInspecciones = '';
         
         if(inspeccionesPrevias && inspeccionesPrevias.length > 0) {
-            var totalInspecciones = inspeccionesPrevias.length;
-            var totalAceptadas = inspeccionesPrevias.filter(function(i){ return i.IPR_estado === 'ACEPTADO'; }).length;
             var totalRechazadas = inspeccionesPrevias.filter(function(i){ return i.IPR_estado === 'RECHAZADO'; }).length;
             
-            htmlInspecciones = '<div style="margin-top: 15px; margin-bottom: 15px;">'+
-                '<small><strong>INSPECCIONES PREVIAS:</strong></small><br>'+
-                '<button id="btn_ver_historial_inspecciones" class="btn btn-info btn-block" style="margin-top: 5px;">'+
-                    '<i class="fa fa-history"></i> Ver Historial de Inspecciones ('+totalInspecciones+')'+
-                '</button>'+
-                '<div style="font-size: 11px; margin-top: 5px; text-align: center;">'+
-                    '<span class="text-success"><strong>'+totalAceptadas+'</strong> Aceptadas</span> | '+
-                    '<span class="text-danger"><strong>'+totalRechazadas+'</strong> Rechazadas</span>'+
-                '</div>'+
-            '</div>';
+            if(totalRechazadas > 0) {
+                htmlInspecciones = '<div style="margin-top: 15px; margin-bottom: 15px;">'+
+                    '<small><strong>HISTORIAL DE RECHAZOS:</strong></small><br>'+
+                    '<button id="btn_ver_historial_rechazos" class="btn btn-danger btn-block" style="margin-top: 5px;">'+
+                        '<i class="fa fa-exclamation-triangle"></i> Ver Historial de Rechazos ('+totalRechazadas+')'+
+                    '</button>'+
+                    '<div style="font-size: 11px; margin-top: 5px; text-align: center; color: #dc3545;">'+
+                        '<strong>⚠️ Revisar puntos que han fallado anteriormente</strong>'+
+                    '</div>'+
+                '</div>';
+            } else {
+                htmlInspecciones = '<div style="margin-top: 15px; margin-bottom: 15px;">'+
+                    '<small><strong>NO HAY RECHAZOS PREVIOS</strong></small><br>'+
+                    '<div style="font-size: 11px; margin-top: 5px; text-align: center; color: #28a745;">'+
+                        '<strong>✓ No se han registrado rechazos en este centro</strong>'+
+                    '</div>'+
+                '</div>';
+            }
         } else {
             htmlInspecciones = '<div style="margin-top: 15px; margin-bottom: 15px;">'+
-                '<small><strong>NO HAY INSPECCIONES PREVIAS</strong></small><br>';
+                '<small><strong>NO HAY RECHAZOS PREVIOS</strong></small><br>';
             htmlInspecciones += '</div>';
         }
         
@@ -401,10 +407,11 @@ function js_iniciador() {
         '</div>';
         $('#resumen_inspeccion').html(html);
         
-        // Poblar selectpicker con estaciones de calidad del historial
+        // Poblar selectpicker con estaciones de calidad del historial o es la U_CT 115
         var estacionesCalidad = historial.filter(function(item) {
-            return item.EsCalidad === 'S' && item.U_CT !== centroInspeccionData.id;
+            return (item.EsCalidad === 'S' && item.U_CT !== centroInspeccionData.id) || item.U_CT === '115';
         });
+        //
         
         var optionsHtml = '';
         estacionesCalidad.forEach(function(estacion) {
@@ -430,9 +437,9 @@ function js_iniciador() {
             this.select();
         });
         
-        // Evento para ver historial de inspecciones
-        $('#btn_ver_historial_inspecciones').on('click', function(){
-            abrirModalHistorialInspecciones();
+        // Evento para ver historial de rechazos
+        $(document).on('click', '#btn_ver_historial_rechazos', function(){
+            abrirModalHistorialRechazos();
         });
         
         // Evento para agregar defectivos de otras estaciones
@@ -695,11 +702,11 @@ function js_iniciador() {
                         type: 'success',
                         confirmButtonText: 'Aceptar'
                     });
-                    
-                    // Limpiar y recargar
-                    $('#inspeccion_container').hide();
-                    $('#numero_op').val('');
-                    $('#cabecera_nota').hide();
+                    //recargar la pagina
+                    location.reload();
+                    // $('#inspeccion_container').hide();
+                    // $('#numero_op').val('');
+                    // $('#cabecera_nota').hide();
                 } else {
                     swal({
                         title: 'Error',
@@ -731,12 +738,12 @@ function js_iniciador() {
         guardarInspeccion('RECHAZADO');
     });
     
-    // Función para abrir modal de historial de inspecciones
-    function abrirModalHistorialInspecciones() {
+    // Función para abrir modal de historial de rechazos
+    function abrirModalHistorialRechazos() {
         $('#modal_op_numero').text(opData.OP);
         
         $.blockUI({
-            message: '<h1>Cargando historial...</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+            message: '<h1>Cargando historial de rechazos...</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
             css: {
                 border: 'none',
                 padding: '16px',
@@ -763,12 +770,12 @@ function js_iniciador() {
                 $.unblockUI();
                 
                 if (response.success && response.inspecciones && response.inspecciones.length > 0) {
-                    renderHistorialInspecciones(response.inspecciones);
-                    $('#modalHistorialInspecciones').modal('show');
+                    renderHistorialRechazos(response.inspecciones);
+                    $('#modalHistorialRechazos').modal('show');
                 } else {
                     swal({
-                        title: 'Sin historial',
-                        text: 'No se encontraron inspecciones previas',
+                        title: 'Sin rechazos',
+                        text: 'No se encontraron rechazos previos para esta OP en este centro de inspección',
                         type: 'info',
                         confirmButtonText: 'Aceptar'
                     });
@@ -778,7 +785,7 @@ function js_iniciador() {
                 $.unblockUI();
                 swal({
                     title: 'Error',
-                    text: 'Error al cargar el historial de inspecciones',
+                    text: 'Error al cargar el historial de rechazos',
                     type: 'error',
                     confirmButtonText: 'Aceptar'
                 });
@@ -786,15 +793,16 @@ function js_iniciador() {
         });
     }
     
-    // Función para renderizar el historial de inspecciones en el modal
-    function renderHistorialInspecciones(inspecciones) {
+    // Función para renderizar el historial de rechazos en el modal
+    function renderHistorialRechazos(inspecciones) {
         var html = '';
         
         inspecciones.forEach(function(insp, index) {
-            var estadoClass = insp.IPR_estado === 'RECHAZADO' ? 'panel-danger' : 'panel-success';
-            var estadoIcono = insp.IPR_estado === 'RECHAZADO' ? 'fa-ban' : 'fa-check-circle';
-            var estadoTexto = insp.IPR_estado === 'RECHAZADO' ? 'RECHAZADA' : 'ACEPTADA';
-            var estadoColor = insp.IPR_estado === 'RECHAZADO' ? '#d9534f' : '#5cb85c';
+            // Todos son rechazos, así que siempre son rojos
+            var estadoClass = 'panel-danger';
+            var estadoIcono = 'fa-exclamation-triangle';
+            var estadoTexto = 'RECHAZADA';
+            var estadoColor = '#dc3545';
             
             // Formatear fecha
             var fechaInsp = new Date(insp.IPR_fechaInspeccion);
@@ -807,7 +815,7 @@ function js_iniciador() {
             html += '<div class="panel '+estadoClass+'" style="margin-bottom: 20px;">'+
                 '<div class="panel-heading" style="background-color: '+estadoColor+'; color: white;">'+
                     '<h4 class="panel-title">'+
-                        '<i class="fa '+estadoIcono+'"></i> Inspección #'+insp.IPR_id+' - '+estadoTexto+
+                        '<i class="fa '+estadoIcono+'"></i> Rechazo #'+insp.IPR_id+' - '+estadoTexto+
                     '</h4>'+
                 '</div>'+
                 '<div class="panel-body">'+
@@ -888,6 +896,6 @@ function js_iniciador() {
                 '</div>';  // cierre panel
         });
         
-        $('#contenido_historial_inspecciones').html(html);
+        $('#contenido_historial_rechazos').html(html);
     }
 }

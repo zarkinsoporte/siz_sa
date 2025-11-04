@@ -182,18 +182,18 @@
         </div>
     </div>
     
-    <!-- Modal para ver historial de inspecciones previas -->
-    <div class="modal fade" id="modalHistorialInspecciones" tabindex="-1" role="dialog">
+    <!-- Modal para ver historial de rechazos -->
+    <div class="modal fade" id="modalHistorialRechazos" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-lg" style="width: 90%; max-width: 1200px;" role="document">
             <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <div class="modal-header" style="background-color: #dc3545; color: white;">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: white;">
                         <span aria-hidden="true">&times;</span>
                     </button>
-                    <h4 class="modal-title"><i class="fa fa-history"></i> Historial de Inspecciones - OP <span id="modal_op_numero"></span></h4>
+                    <h4 class="modal-title"><i class="fa fa-exclamation-triangle"></i> Historial de Rechazos - OP <span id="modal_op_numero"></span></h4>
                 </div>
                 <div class="modal-body" style="max-height: 600px; overflow-y: auto;">
-                    <div id="contenido_historial_inspecciones">
+                    <div id="contenido_historial_rechazos">
                         <!-- Se llenará dinámicamente -->
                     </div>
                 </div>

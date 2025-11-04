@@ -164,21 +164,34 @@
 
 @endsection
 <script>
-function getItem(btn) {
+//js_iniciador
+function js_iniciador() {
+    $(".toggle").bootstrapSwitch();
+    $("[data-toggle=\"tooltip\"]").tooltip();
+    $(".boot-select").selectpicker();
+    $(".dropdown-toggle").dropdown();
+    setTimeout(function() {
+        $("#infoMessage").fadeOut("fast");
+    }, 5000);
+}
+//js_iniciador
 
-    var nomina = $("#btneditar-"+btn).data("nomina");
+
+function getItem(btn) {
+    //si empty or '' entonces 0 que es desactivado
+    var nomina = $("#btneditar-"+btn).data("nomina"); 
     var reprocesos = $("#btneditar-"+btn).data("reproceso");
     var solicitudmp = $("#btneditar-"+btn).data("solicitudmp");
     var errorexistencia_04 = $("#btneditar-"+btn).data("errorexistencia_04");
     var traslados_04 = $("#btneditar-"+btn).data("traslados_04");
     var rechazos = $("#btneditar-"+btn).data("rechazos");
-
+   
     $('#nomina').val(nomina);
-    $('#reprocesos').val(reprocesos);
-    $('#solicitudmp').val(solicitudmp);
-    $('#errorexistencia_04').val(errorexistencia_04);
-    $('#traslados_04').val(traslados_04);
-    $('#rechazos').val(rechazos);
+    $('#reprocesos').val(reprocesos== undefined?'0':reprocesos);
+    $('#solicitudmp').val(solicitudmp== undefined?'0':solicitudmp);
+    $('#errorexistencia_04').val(errorexistencia_04== undefined?'0':errorexistencia_04);
+    $('#traslados_04').val(traslados_04== undefined?'0':traslados_04);
+    $('#rechazos').val( rechazos== undefined?'0':rechazos);
 }
 </script>
 @section('script')

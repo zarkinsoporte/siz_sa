@@ -9,6 +9,8 @@ use App\Modelos\Siz_Checklist;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\User;
 
 class Mod_InspeccionProcesoController extends Controller
 {
@@ -394,6 +396,100 @@ class Mod_InspeccionProcesoController extends Controller
             
             DB::connection('siz')->commit();
             
+            // Si la inspección fue rechazada, enviar correo de notificación
+            if ($estado === 'RECHAZADO') {
+                try {
+                    // 1. Obtener supervisor de la estación de inspección
+                    $supervisor = User::where('position', 4)
+                        ->where('U_CP_CT', 'like', '%' . $centroInspeccion . '%')
+                        ->first();
+                    
+                    $correos = [];
+                    
+                    // Agregar correo del supervisor si existe
+                    if ($supervisor) {
+                        $supervisorEmail = DB::table('OHEM')
+                            ->where('U_EmpGiro', $supervisor->U_EmpGiro)
+                            ->where('status', 1)
+                            ->value('email');
+                        
+                        if ($supervisorEmail) {
+                            $correoSupervisor = $supervisorEmail;
+                            if (strpos($correoSupervisor, '@') === false) {
+                                $correoSupervisor = $correoSupervisor . '@zarkin.com';
+                            }
+                            $correos[] = $correoSupervisor;
+                        }
+                    }
+                    
+                    // 2. Obtener correos de usuarios con Reprocesos = 1
+                    $correos_db = DB::select("
+                        SELECT 
+                        CASE WHEN email like '%@%' THEN email ELSE email + cast('@zarkin.com' as varchar) END AS correo
+                        FROM OHEM
+                        INNER JOIN Siz_Email AS se ON se.No_Nomina = OHEM.U_EmpGiro
+                        WHERE se.Reprocesos = 1 AND OHEM.status = 1 AND email IS NOT NULL
+                        GROUP BY email
+                    ");
+                    
+                    $correosUsuarios = array_pluck($correos_db, 'correo');
+                    $correos = array_merge($correos, $correosUsuarios);
+                    
+                    // Eliminar duplicados
+                    $correos = array_unique($correos);
+                    
+                    // 3. Obtener defectos del checklist (solo los que son "No Cumple")
+                    $defectos = [];
+                    if ($request->has('checklist')) {
+                        foreach ($request->input('checklist') as $chkId => $respuesta) {
+                            if ($respuesta === 'No Cumple') {
+                                $chk = Siz_Checklist::on('siz')->where('CHK_id', $chkId)->first();
+                                $defecto = [
+                                    'punto' => $chk ? $chk->CHK_descripcion : 'Punto ' . $chkId,
+                                    'observacion' => $request->input('checklist_observacion.' . $chkId, ''),
+                                    'empleado' => null
+                                ];
+                                
+                                // Obtener nombre del empleado responsable si existe
+                                if ($request->has('checklist_empleado.' . $chkId)) {
+                                    $empID = $request->input('checklist_empleado.' . $chkId);
+                                    $empleado = DB::table('OHEM')
+                                        ->where('empID', $empID)
+                                        ->first();
+                                    if ($empleado) {
+                                        $defecto['empleado'] = $empleado->firstName . ' ' . $empleado->lastName;
+                                    }
+                                }
+                                
+                                $defectos[] = $defecto;
+                            }
+                        }
+                    }
+                    
+                    // 4. Enviar correo si hay destinatarios
+                    if (count($correos) > 0) {
+                        Mail::send('Emails.RechazoInspeccionProceso', [
+                            'dt' => date('d/M/Y h:m:s'),
+                            'No_Nomina' => Auth::user()->U_EmpGiro,
+                            'Nom_Inspector' => Auth::user()->getName(),
+                            'op' => $op,
+                            'cod_articulo' => $codArticulo,
+                            'nom_articulo' => $nomArticulo,
+                            'cant_inspeccionada' => $cantInspeccionada,
+                            'nombre_centro' => $nombreCentro,
+                            'observaciones' => $observaciones ? $observaciones : 'Sin observaciones',
+                            'defectos' => $defectos
+                        ], function ($msj) use ($correos) {
+                            $msj->subject('Notificación SIZ - Rechazo de Inspección en Proceso');
+                            $msj->to($correos);
+                        });
+                    }
+                } catch (\Exception $e) {
+                    // No fallar el guardado si hay error en el correo, solo loguear
+                    \Log::error('Error al enviar correo de rechazo de inspección: ' . $e->getMessage());
+                }
+            }
+            
             return response()->json([
                 'success' => true,
                 'msg' => 'Inspección guardada correctamente',
@@ -550,7 +646,7 @@ class Mod_InspeccionProcesoController extends Controller
     }
     
     /**
-     * AJAX: Obtener historial completo de inspecciones con detalles
+     * AJAX: Obtener historial completo de rechazos con detalles
      */
     public function getHistorialCompleto(Request $request)
     {
@@ -565,10 +661,11 @@ class Mod_InspeccionProcesoController extends Controller
                 ], 400);
             }
             
-            // Obtener inspecciones previas
+            // Obtener solo inspecciones rechazadas
             $inspecciones = Siz_InspeccionProceso::on('siz')
                 ->where('IPR_op', $op)
                 ->where('IPR_centroInspeccion', $centro)
+                ->where('IPR_estado', 'RECHAZADO')
                 ->where('IPR_borrado', 'N')
                 ->orderBy('IPR_fechaInspeccion', 'desc')
                 ->get();

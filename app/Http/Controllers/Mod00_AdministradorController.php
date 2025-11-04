@@ -1138,12 +1138,21 @@ public function Noticia()
     }
     public function Email(){
         if (Auth::check()) {
-            $emails = DB::table('Siz_Email')->get();
+            //union de las tablas OHEM y Siz_Email
+            $emails = DB::table('Siz_Email')
+            ->join('OHEM', 'Siz_Email.No_Nomina', '=', 'OHEM.U_EmpGiro')
+
+            ->select('Siz_Email.*', 'OHEM.firstName', 'OHEM.lastName', 'OHEM.email')
+            ->where('OHEM.status', 1)
+            ->whereNotNull('OHEM.email')
+            ->get();
+
             $activeUsers = DB::table('OHEM')
                             ->select('firstName', 'lastName', 'U_EmpGiro')
                             ->where('status', 1)
                             ->whereNotNull('email')
                             ->get();
+            
        
             return view('Mod00_Administrador.Emails', compact('emails', 'activeUsers'));
         }else {
