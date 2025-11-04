@@ -399,29 +399,21 @@ class Mod_InspeccionProcesoController extends Controller
             // Si la inspección fue rechazada, enviar correo de notificación
             if ($estado === 'RECHAZADO') {
                 try {
-                    // 1. Obtener supervisor de la estación de inspección
+                    // 1. Obtener supervisores de la estación de inspección
                     $supervisor = User::where('position', 4)
                         ->where('U_CP_CT', 'like', '%' . $centroInspeccion . '%')
-                        ->first();
-                    
+                        ->where('status', 1)
+                        ->whereNotNull('email')
+                        ->where('email', '!=', '')
+                        ->get();
+                    //dd($supervisor);
                     $correos = [];
-                    
-                    // Agregar correo del supervisor si existe
-                    if ($supervisor) {
-                        $supervisorEmail = DB::table('OHEM')
-                            ->where('U_EmpGiro', $supervisor->U_EmpGiro)
-                            ->where('status', 1)
-                            ->value('email');
-                        
-                        if ($supervisorEmail) {
-                            $correoSupervisor = $supervisorEmail;
-                            if (strpos($correoSupervisor, '@') === false) {
-                                $correoSupervisor = $correoSupervisor . '@zarkin.com';
-                            }
-                            $correos[] = $correoSupervisor;
+                    foreach ($supervisor as $s) {
+                        if(!is_null($s->email)) {
+                          $correos[] = $s->email. '@zarkin.com';
                         }
                     }
-                    
+                    //dd($correos);
                     // 2. Obtener correos de usuarios con Reprocesos = 1
                     $correos_db = DB::select("
                         SELECT 
