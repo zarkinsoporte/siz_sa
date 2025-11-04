@@ -368,8 +368,8 @@ class Mod_InspeccionProcesoController extends Controller
                                         if ($img) {
                                             $extension = $img->getClientOriginalExtension();
                                             $chk = Siz_Checklist::on('siz')->where('CHK_id', $chk_id)->first();
-                                            $chkNombre = $chk ? preg_replace('/[^A-Za-z0-9_-]+/', '', str_replace(' ', '_', $chk->CHK_descripcion)) : ('CHK_'.$chk_id);
-                                            $nombre = $inspeccion->IPR_id . '_' . $chkNombre . '_' . uniqid() . '.' . $extension;
+                                            //$chkNombre = $chk ? preg_replace('/[^A-Za-z0-9_-]+/', '', str_replace(' ', '_', $chk->CHK_descripcion)) : ('CHK_'.$chk_id);
+                                            $nombre = $inspeccion->IPR_id . '_' . uniqid() . '.' . $extension;
                                             $rutaCompleta = $directorioBase . '\\' . $nombre;
                                             
                                             $img->move($directorioBase, $nombre);
