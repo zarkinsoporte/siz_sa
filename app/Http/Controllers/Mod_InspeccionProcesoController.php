@@ -258,6 +258,60 @@ class Mod_InspeccionProcesoController extends Controller
                 ], 400);
             }
             
+            // Si el estado es RECHAZADO, validar que la suma de rechazos no supere la cantidad disponible
+            if ($estado === 'RECHAZADO') {
+                // Obtener cantidad planeada de la OP
+                $ordenProduccion = DB::table('OWOR')
+                    ->where('DocNum', $op)
+                    ->value('PlannedQty');
+                
+                if (!$ordenProduccion) {
+                    return response()->json([
+                        'success' => false,
+                        'msg' => 'No se encontró la Orden de Producción'
+                    ], 404);
+                }
+                
+                // Calcular suma de inspecciones ACEPTADAS en esta estación
+                $cantidadAceptada = Siz_InspeccionProceso::on('siz')
+                    ->where('IPR_op', $op)
+                    ->where('IPR_centroInspeccion', $centroInspeccion)
+                    ->where('IPR_borrado', 'N')
+                    ->where('IPR_estado', 'ACEPTADO')
+                    ->sum('IPR_cantInspeccionada');
+                
+                $cantidadAceptada = $cantidadAceptada ?? 0;
+                
+                // Calcular suma de inspecciones RECHAZADAS en esta estación (sin contar la actual si se está editando)
+                $cantidadRechazada = Siz_InspeccionProceso::on('siz')
+                    ->where('IPR_op', $op)
+                    ->where('IPR_centroInspeccion', $centroInspeccion)
+                    ->where('IPR_borrado', 'N')
+                    ->where('IPR_estado', 'RECHAZADO');
+                
+                // Si hay un ID de inspección (edición), excluirla del cálculo
+                $iprId = $request->input('ipr_id');
+                if ($iprId) {
+                    $cantidadRechazada->where('IPR_id', '!=', $iprId);
+                }
+                
+                $cantidadRechazada = $cantidadRechazada->sum('IPR_cantInspeccionada');
+                $cantidadRechazada = $cantidadRechazada ?? 0;
+                
+                // Calcular cantidad disponible
+                $cantidadDisponible = $ordenProduccion - $cantidadAceptada;
+                
+                // Validar que la suma de rechazos no supere la cantidad disponible
+                $totalRechazos = $cantidadRechazada + $cantInspeccionada;
+                
+                if ($totalRechazos > $cantidadDisponible) {
+                    return response()->json([
+                        'success' => false,
+                        'msg' => 'La suma de rechazos (' . number_format($totalRechazos, 2) . ') no puede superar la cantidad disponible (' . number_format($cantidadDisponible, 2) . '). Cantidad Planeada: ' . number_format($ordenProduccion, 2) . ', Cantidad Aceptada: ' . number_format($cantidadAceptada, 2)
+                    ], 400);
+                }
+            }
+            
             // Crear nueva inspección
             $inspeccion = new Siz_InspeccionProceso();
             $inspeccion->setConnection('siz');

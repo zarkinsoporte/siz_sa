@@ -268,12 +268,9 @@ function js_iniciador() {
             if(totalRechazadas > 0) {
                 htmlInspecciones = '<div style="margin-top: 15px; margin-bottom: 15px;">'+
                     '<small><strong>HISTORIAL DE RECHAZOS:</strong></small><br>'+
-                    '<button id="btn_ver_historial_rechazos" class="btn btn-danger btn-block" style="margin-top: 5px;">'+
-                        '<i class="fa fa-exclamation-triangle"></i> Ver Historial de Rechazos ('+totalRechazadas+')'+
+                    '<button id="btn_ver_historial_rechazos" class="btn btn-info btn-block" style="margin-top: 5px;">'+
+                        ' Ver Rechazos / Reprocesos ('+totalRechazadas+')'+
                     '</button>'+
-                    '<div style="font-size: 11px; margin-top: 5px; text-align: center; color: #dc3545;">'+
-                        '<strong>⚠️ Revisar puntos que han fallado anteriormente</strong>'+
-                    '</div>'+
                 '</div>';
             } else {
                 htmlInspecciones = '<div style="margin-top: 15px; margin-bottom: 15px;">'+
@@ -813,23 +810,26 @@ function js_iniciador() {
                                  fechaInsp.getMinutes().toString().padStart(2, '0');
             
             html += '<div class="panel '+estadoClass+'" style="margin-bottom: 20px;">'+
-                '<div class="panel-heading" style="background-color: '+estadoColor+'; color: white;">'+
+                '<div class="panel-heading" >'+
                     '<h4 class="panel-title">'+
-                        '<i class="fa '+estadoIcono+'"></i> Rechazo #'+insp.IPR_id+' - '+estadoTexto+
+                        ' Rechazo #'+insp.IPR_id+' - '+estadoTexto+
                     '</h4>'+
                 '</div>'+
                 '<div class="panel-body">'+
                     '<div class="row">'+
-                        '<div class="col-md-3">'+
+                        '<div class="col-md-2">'+
                             '<strong>Fecha:</strong><br>'+fechaFormateada+
                         '</div>'+
-                        '<div class="col-md-3">'+
+                        '<div class="col-md-2">'+
                             '<strong>Inspector:</strong><br>'+insp.IPR_nomInspector+
                         '</div>'+
-                        '<div class="col-md-3">'+
+                        '<div class="col-md-2">'+
+                            '<strong>Estación:</strong><br>'+insp.IPR_nombreCentro+
+                        '</div>'+
+                        '<div class="col-md-2">'+
                             '<strong>Cantidad Inspeccionada:</strong><br>'+parseFloat(insp.IPR_cantInspeccionada).toFixed(2)+
                         '</div>'+
-                        '<div class="col-md-3">'+
+                        '<div class="col-md-2">'+
                             '<strong>Estado:</strong><br><span style="color: '+estadoColor+'; font-weight: bold;">'+estadoTexto+'</span>'+
                         '</div>'+
                     '</div>';
@@ -898,4 +898,54 @@ function js_iniciador() {
         
         $('#contenido_historial_rechazos').html(html);
     }
+    
+    // Atajo de teclado: Ctrl+Shift+N para marcar todo el checklist como "No Aplica"
+    $(document).on('keydown', function(e) {
+        // Detectar Ctrl+Shift+N
+        if (e.ctrlKey && e.shiftKey && e.keyCode === 81) { // 90 es el código de 'Z'
+            // Verificar que no se esté escribiendo en un campo de texto o textarea
+            var target = e.target;
+            var isTextInput = false;
+            
+            if (target.tagName === 'INPUT') {
+                var inputType = target.type.toLowerCase();
+                // Solo ignorar inputs de texto, number, date, etc., pero permitir radio y checkbox
+                isTextInput = (inputType === 'text' || inputType === 'number' || inputType === 'date' || 
+                               inputType === 'email' || inputType === 'password' || inputType === 'search' ||
+                               inputType === 'tel' || inputType === 'url');
+            } else if (target.tagName === 'TEXTAREA') {
+                isTextInput = true;
+            }
+            
+            // Si no está escribiendo en un campo de texto y el checklist está visible
+            if (!isTextInput && $('#checklist_container').is(':visible') && checklist.length > 0) {
+                e.preventDefault(); // Prevenir comportamiento por defecto
+                
+                // Marcar todos los radio buttons de "No Aplica" como checked
+                checklist.forEach(function(item) {
+                    var radioNoAplica = $('input[name="checklist_' + item.CHK_id + '"][value="No Aplica"]');
+                    radioNoAplica.prop('checked', true);
+                    
+                    // Desmarcar los otros radio buttons
+                    $('input[name="checklist_' + item.CHK_id + '"][value="Cumple"]').prop('checked', false);
+                    $('input[name="checklist_' + item.CHK_id + '"][value="No Cumple"]').prop('checked', false);
+                    
+                    // Llamar a manejarChecklist para actualizar el estado
+                    manejarChecklist(item.CHK_id, 'No Aplica');
+                    
+                    // Actualizar el objeto respuestas
+                    respuestas[item.CHK_id] = 'No Aplica';
+                });
+                
+                // Mostrar mensaje de confirmación
+                swal({
+                    title: 'Checklist actualizado',
+                    text: 'Todos los puntos del checklist han sido marcados como "No Aplica"',
+                    type: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+        }
+    });
 }
