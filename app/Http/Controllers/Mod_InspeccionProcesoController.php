@@ -67,6 +67,13 @@ class Mod_InspeccionProcesoController extends Controller
             $cp_of = DB::table('@CP_OF')
                 ->where('U_DocEntry', $ordenProduccion->DocEntry)
                 ->first();
+
+            if (!$cp_of) {
+                return response()->json([
+                    'success' => false,
+                    'msg' => 'No se encontró la Orden en control de piso'
+                ], 404);
+            }
             // 2. Obtener la estación actual de la OP
             $estacionActual = $cp_of->U_CT;
             $cantidadEnCentro = $cp_of->U_Recibido;
@@ -125,7 +132,7 @@ class Mod_InspeccionProcesoController extends Controller
                 GROUP BY [@CP_LOGOF].U_CT, [@PL_RUTAS].Name, [@PL_RUTAS].U_Calidad, OHEM.firstName, OHEM.lastName
                 ORDER BY MIN([@CP_LOGOF].U_FechaHora)
             ", [$op]);
-            
+            //dd($historial);
             // 6. Validar que haya cantidad en el centro de inspección actual
             //$cantidadEnCentro = $estacionActualInfo->U_Recibido;
            
