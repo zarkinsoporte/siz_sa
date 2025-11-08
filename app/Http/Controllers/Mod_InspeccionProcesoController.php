@@ -297,11 +297,11 @@ class Mod_InspeccionProcesoController extends Controller
                     ->where('IPR_estado', 'RECHAZADO');
                 
                 // Si hay un ID de inspección (edición), excluirla del cálculo
+                //dd($cantidadRechazada->get());
                 $iprId = $request->input('ipr_id');
                 if ($iprId) {
                     $cantidadRechazada->where('IPR_id', '!=', $iprId);
                 }
-                
                 $cantidadRechazada = $cantidadRechazada->sum('IPR_cantInspeccionada');
                 $cantidadRechazada = $cantidadRechazada ?? 0;
                 
@@ -519,7 +519,31 @@ class Mod_InspeccionProcesoController extends Controller
                         }
                     }
                     
-                    // 4. Enviar correo si hay destinatarios
+                    // 4. Obtener imágenes asociadas a la inspección rechazada
+                    $imagenesEvidenciaQuery = DB::connection('siz')
+                        ->table('Siz_InspeccionProcesoImagen as img')
+                        ->leftJoin('Siz_Checklist', 'img.IPI_descripcion', '=', 'Siz_Checklist.CHK_id')
+                        ->select(
+                            'img.IPI_ruta as ruta',
+                            'img.IPI_descripcion as chk_id',
+                            'Siz_Checklist.CHK_descripcion as checklist'
+                        )
+                        ->where('img.IPI_iprId', $inspeccion->IPR_id)
+                        ->where('img.IPI_borrado', 'N')
+                        ->get();
+                    
+                    $imagenesEvidencia = collect($imagenesEvidenciaQuery)
+                        ->map(function ($img) {
+                            return [
+                                'ruta' => $img->ruta,
+                                'checklist' => $img->checklist ?? null,
+                                'chk_id' => $img->chk_id
+                            ];
+                        })
+                        ->values()
+                        ->toArray();
+                    
+                    // 5. Enviar correo si hay destinatarios
                     if (count($correos) > 0) {
                         Mail::send('Emails.RechazoInspeccionProceso', [
                             'dt' => date('d/M/Y h:m:s'),
@@ -531,10 +555,12 @@ class Mod_InspeccionProcesoController extends Controller
                             'cant_inspeccionada' => $cantInspeccionada,
                             'nombre_centro' => $nombreCentro,
                             'observaciones' => $observaciones ? $observaciones : 'Sin observaciones',
-                            'defectos' => $defectos
+                            'defectos' => $defectos,
+                            'imagenes' => $imagenesEvidencia
                         ], function ($msj) use ($correos) {
                             $msj->subject('Notificación SIZ - Rechazo de Inspección en Proceso');
                             $msj->to($correos);
+                            //$msj->to('albert91.me.d@gmail.com');
                         });
                     }
                 } catch (\Exception $e) {

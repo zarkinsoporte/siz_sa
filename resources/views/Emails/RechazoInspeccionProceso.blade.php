@@ -97,6 +97,21 @@ pP{
     @endif
 </table>
 <br>
+@if(isset($imagenes) && count($imagenes) > 0)
+<p>• Evidencias Fotográficas</p>
+@foreach($imagenes as $imagen)
+    <div style="margin-bottom: 15px;">
+        @if(!empty($imagen['checklist']))
+            <strong>{{ $imagen['checklist'] }}</strong><br>
+        @endif
+        <?php
+            $cid = isset($message) ? $message->embed($imagen['ruta']) : $imagen['ruta'];
+        ?>
+        <img src="{{ $cid }}" alt="Evidencia de inspección" style="max-width: 320px; height: auto; border: 1px solid #ccc; padding: 4px; margin-top: 5px;">
+    </div>
+@endforeach
+<br>
+@endif
 <pP>• Se requiere atención inmediata para corregir los defectos detectados en la inspección</pP>
 </body>
 </html>

@@ -825,3 +825,13 @@ Route::get('home/inspeccion-proceso/historial-completo', 'Mod_InspeccionProcesoC
 Route::post('home/inspeccion-proceso/guardar', 'Mod_InspeccionProcesoController@guardarInspeccionProceso');
 Route::get('home/inspeccion-proceso/ver', 'Mod_InspeccionProcesoController@verInspeccionProceso');
 Route::get('home/inspeccion-proceso/imagen/{id}', 'Mod_InspeccionProcesoController@verImagenProceso');
+
+Route::get('pruebaDirectorio', function () {
+	$so = env('DB_DATABASE');
+	if($so == 'SBO_Pruebas') {
+		$directorioBase = 'D:\\QAS\\INSPECCION_PROCESO\\OP_';
+	} else {
+		$directorioBase = 'D:\\INSPECCION_PROCESO\\OP_';
+	}
+	dd($directorioBase, $so);
+});
