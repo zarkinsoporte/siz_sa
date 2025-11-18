@@ -6,6 +6,11 @@ use App\Modelos\Siz_InspeccionProceso;
 use App\Modelos\Siz_InspeccionProcesoDetalle;
 use App\Modelos\Siz_InspeccionProcesoImagen;
 use App\Modelos\Siz_Checklist;
+use App\Modelos\MOD01\LOGOF;
+use App\Modelos\MOD01\LOGOT;
+use App\OP;
+use App\SAP;
+use App\SAPi;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -455,9 +460,224 @@ class Mod_InspeccionProcesoController extends Controller
                 }
             }
             
+            // Si la inspección fue ACEPTADA, avanzar la OP a la siguiente estación
+            // IMPORTANTE: Esto debe estar dentro de la transacción para que si falla, no se guarde la inspección
+            if ($estado === 'ACEPTADO') {
+                    // Obtener el registro de @CP_OF para la estación actual
+                    $cp_of_actual = DB::table('@CP_OF')
+                        ->where('U_DocEntry', $docEntry)
+                        ->where('U_CT', $centroInspeccion)
+                        ->where('U_Reproceso', 'N')
+                        ->first();
+                    
+                    if ($cp_of_actual) {
+                        $Code_actual = OP::find($cp_of_actual->Code);
+                        
+                        if ($Code_actual) {
+                            // Obtener la estación siguiente (formato número)
+                            $U_CT_siguiente = OP::getEstacionSiguiente($Code_actual->Code, 2);
+                            
+                            // Remover comillas simples si las tiene para comparación
+                            $U_CT_siguiente_clean = str_replace("'", "", $U_CT_siguiente);
+                            
+                            // Validar que no sea error en ruta
+                            if ($U_CT_siguiente == "'Error en ruta'") {
+                                throw new \Exception('Error en ruta: La OP no tiene una estación siguiente válida. OP: ' . $op);
+                            }
+                            // Si la siguiente estación es "Terminar OP", generar recibo de producción
+                            else if ($U_CT_siguiente == "'Terminar OP'") {
+                                // Obtener información de la OP
+                                $orden_owor = DB::table('OWOR')
+                                    ->where('DocNum', $op)
+                                    ->first();
+                                
+                                if (!$orden_owor) {
+                                    throw new \Exception('No se encontró la OP ' . $op . ' para terminar desde inspección');
+                                }
+                                
+                                // Verificar tipos de cambio en SAP
+                                $rates = DB::table('ORTT')->where('RateDate', date('Y-m-d'))->get();
+                                
+                                if (count($rates) < 3) {
+                                    throw new \Exception('No están capturados todos los "Tipos de Cambio" en SAP. Se requieren al menos 3 tipos de cambio para el día de hoy.');
+                                }
+                                
+                                // Obtener nombre del usuario que reporta
+                                $apellido = $this->getApellidoPaternoUsuario(explode(' ', Auth::user()->lastName));
+                                $usuario_reporta = explode(' ', Auth::user()->firstName)[0] . ' ' . $apellido;
+                                
+                                // Validar cantidad
+                                if (($orden_owor->PlannedQty) >= (floatval($orden_owor->CmpltQty) + floatval($cantInspeccionada))) {
+                                    // Generar recibo de producción en SAP
+                                    $result = SAPi::ReciboProduccion($op, $orden_owor->Warehouse, $cantInspeccionada, "Reportado por: " . $usuario_reporta, "Recibo de producción - Inspección en Proceso");
+                                } else if (($orden_owor->PlannedQty) == floatval($orden_owor->CmpltQty)) {
+                                    $result = 'Recibo creado SIZ';
+                                } else {
+                                    throw new \Exception('La cantidad Completada no puede ser mayor a la Planeada. OP: ' . $op . ', Planeada: ' . $orden_owor->PlannedQty . ', Completada: ' . floatval($orden_owor->CmpltQty) . ', A inspeccionar: ' . $cantInspeccionada);
+                                }
+                                
+                                // Si el recibo se creó correctamente
+                                if (strpos($result, 'Recibo') !== false) {
+                                            // Crear registro en @CP_LOGOF
+                                            $dt = date('Ymd H:i:s');
+                                            $consecutivologof = DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOF]');
+                                            $log = new LOGOF();
+                                            $log->Code = ((int) $consecutivologof[0]->Code) + 1;
+                                            $log->Name = ((int) $consecutivologof[0]->Code) + 1;
+                                            $log->U_idEmpleado = Auth::user()->empID;
+                                            $log->U_CT = $Code_actual->U_CT;
+                                            $log->U_Status = "T";
+                                            $log->U_FechaHora = $dt;
+                                            $log->U_DocEntry = $docEntry;
+                                            $log->U_Cantidad = $cantInspeccionada;
+                                            $log->U_Reproceso = 'N';
+                                            $log->save();
+                                            
+                                            // Actualizar información de la OP después del recibo
+                                            $orden_owor = DB::table('OWOR')->where('DocNum', $op)->first();
+                                            
+                                            // Si la OP quedó completa, eliminar de control de piso y cerrar en SAP
+                                            if ($orden_owor->PlannedQty == floatval($orden_owor->CmpltQty)) {
+                                                $Code_actual->delete();
+                                                
+                                                // Validar si se puede cerrar la OP en SAP
+                                                $cerrar = DB::select("
+                                                    SELECT T0.[DocNum] as Orden, T0.[ItemCode] as Codigo, T0.[PlannedQty] as Planeado, T0.[CmpltQty] as Terminado ,T0.UpdateDate as Actualizado 
+                                                    FROM OWOR T0 
+                                                    LEFT JOIN (
+                                                        SELECT OWOR.DocNum as OP, sum(WOR1.PlannedQty) as Cantidad 
+                                                        FROM OWOR 
+                                                        inner join WOR1 on WOR1.DocEntry = OWOR.DocEntry 
+                                                        inner join OITM A1 on WOR1.ItemCode = A1.ItemCode 
+                                                        WHERE OWOR.[PlannedQty] <= OWOR.[CmpltQty] 
+                                                        and OWOR.[status] <> 'L' 
+                                                        and WOR1.IssueType = 'M' 
+                                                        and WOR1.IssuedQty < WOR1.PlannedQty 
+                                                        and A1.ItmsGrpCod <> 113 
+                                                        group by OWOR.DocNum
+                                                    ) VAL on T0.DocNum = VAL.OP 
+                                                    WHERE T0.DocNum = ? 
+                                                    and T0.[PlannedQty] <= T0.[CmpltQty] 
+                                                    and T0.[status] <> 'L' 
+                                                    and VAL.Cantidad is null
+                                                ", [$op]);
+                                                
+                                                if (count($cerrar) > 0) {
+                                                    SAP::ProductionOrderStatus($op, 2); // Cerrar Orden en SAP
+                                                }
+                                            } else if ($orden_owor->PlannedQty > floatval($orden_owor->CmpltQty)) {
+                                                // Si aún hay cantidad pendiente, actualizar la estación actual
+                                                $Code_actual->U_Entregado += floatval($cantInspeccionada);
+                                                $Code_actual->U_Procesado += floatval($cantInspeccionada);
+                                                $Code_actual->save();
+                                            }
+                                            
+                                            \Log::info('OP terminada desde inspección: ' . $op . ' - Resultado: ' . $result);
+                                        } else {
+                                            throw new \Exception('Error al generar recibo de producción en SAP: ' . $result);
+                                        }
+                            }
+                            // Si hay estación siguiente normal, avanzar la OP
+                            else if ($U_CT_siguiente != $Code_actual->U_CT) {
+                                // Obtener cantidad planeada de la OP
+                                $CantOrden = DB::table('OWOR')
+                                    ->where('DocEntry', $docEntry)
+                                    ->first();
+                                
+                                if (!$CantOrden) {
+                                    throw new \Exception('No se encontró la OP con DocEntry ' . $docEntry . ' para avanzar desde inspección');
+                                }
+                                
+                                $cantO = (int) $CantOrden->PlannedQty;
+                                
+                                // Buscar si ya existe registro para la estación siguiente
+                                $Code_siguiente = OP::where('U_CT', $U_CT_siguiente_clean)
+                                    ->where('U_DocEntry', $docEntry)
+                                    ->where('U_Reproceso', 'N')
+                                    ->get();
+                                
+                                $dt = date('Ymd H:i');
+                                
+                                if (count($Code_siguiente) == 1) {
+                                    // La estación siguiente ya existe, actualizar cantidad recibida
+                                    $Code_siguiente = OP::where('U_CT', $U_CT_siguiente_clean)
+                                        ->where('U_DocEntry', $docEntry)
+                                        ->where('U_Reproceso', 'N')
+                                        ->first();
+                                    
+                                    if (($cantInspeccionada + $Code_siguiente->U_Recibido) <= $cantO) {
+                                        $Code_siguiente->U_Recibido = $Code_siguiente->U_Recibido + $cantInspeccionada;
+                                        $Code_siguiente->save();
+                                    } else {
+                                        throw new \Exception('La cantidad total recibida no debe ser mayor a la cantidad de la Orden. OP: ' . $op . ', Cantidad Orden: ' . $cantO . ', Recibida actual: ' . $Code_siguiente->U_Recibido . ', A agregar: ' . $cantInspeccionada);
+                                    }
+                                } else if (count($Code_siguiente) == 0) {
+                                    // La estación siguiente no existe, crear nuevo registro
+                                    $consecutivo = DB::select('select max (CONVERT(INT,Code)) as Code from [@CP_Of]');
+                                    $newCode = new OP();
+                                    $newCode->Code = ((int) $consecutivo[0]->Code) + 1;
+                                    $newCode->Name = ((int) $consecutivo[0]->Code) + 1;
+                                    $newCode->U_DocEntry = $docEntry;
+                                    $newCode->U_CT = $U_CT_siguiente_clean;
+                                    $newCode->U_Entregado = 0;
+                                    $newCode->U_Orden = $U_CT_siguiente_clean;
+                                    $newCode->U_Procesado = 0;
+                                    $newCode->U_Recibido = $cantInspeccionada;
+                                    $newCode->U_Reproceso = "N";
+                                    $newCode->U_Defectuoso = 0;
+                                    $newCode->U_Comentarios = "";
+                                    $newCode->U_CTCalidad = 0;
+                                    $newCode->save();
+                                    
+                                    // Crear registro en @CP_LOGOT (log de inicio de estación)
+                                    $consecutivologot = DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOT]');
+                                    $lot = new LOGOT();
+                                    $lot->Code = ((int) $consecutivologot[0]->Code) + 1;
+                                    $lot->Name = ((int) $consecutivologot[0]->Code) + 1;
+                                    $lot->U_idEmpleado = Auth::user()->empID;
+                                    $lot->U_CT = $Code_actual->U_CT;
+                                    $lot->U_Status = "O";
+                                    $lot->U_FechaHora = $dt;
+                                    $lot->U_OP = $docEntry; // U_OP en LOGOT es el DocEntry de OWOR
+                                    $lot->save();
+                                } else {
+                                    // Hay múltiples registros duplicados
+                                    throw new \Exception('Existen registros duplicados en la siguiente estación. OP: ' . $op . ', Estación siguiente: ' . $U_CT_siguiente_clean);
+                                }
+                                
+                                // Actualizar estación actual: incrementar procesado y entregado
+                                $Code_actual->U_Procesado = $Code_actual->U_Procesado + $cantInspeccionada;
+                                $Code_actual->U_Entregado = $Code_actual->U_Entregado + $cantInspeccionada;
+                                $Code_actual->save();
+                                
+                                // Crear registro en @CP_LOGOF (log de finalización de estación)
+                                $consecutivologof = DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOF]');
+                                $log = new LOGOF();
+                                $log->Code = ((int) $consecutivologof[0]->Code) + 1;
+                                $log->Name = ((int) $consecutivologof[0]->Code) + 1;
+                                $log->U_idEmpleado = Auth::user()->empID;
+                                $log->U_CT = $Code_actual->U_CT;
+                                $log->U_Status = "T";
+                                $log->U_FechaHora = $dt;
+                                $log->U_DocEntry = $docEntry;
+                                $log->U_Cantidad = $cantInspeccionada;
+                                $log->U_Reproceso = 'N';
+                                $log->save();
+                                
+                                // Si la estación actual ya procesó todo, eliminarla
+                                if (($Code_actual->U_Recibido > 0 && $cantO == $Code_actual->U_Procesado) ||
+                                    ($Code_actual->U_Recibido == $Code_actual->U_Procesado && $Code_actual->U_Recibido == $Code_actual->U_Entregado)) {
+                                    $Code_actual->delete();
+                                }
+                            }
+                        }
+                    }
+            }
+            
+            // Commit de la transacción de inspección (solo si todo salió bien)
             DB::connection('siz')->commit();
             
-            // Si la inspección fue rechazada, enviar correo de notificación
+            // Si la inspección fue rechazada, enviar correo de notificación (fuera de la transacción)
             if ($estado === 'RECHAZADO') {
                 try {
                     // 1. Obtener supervisores de la estación de inspección
@@ -864,6 +1084,24 @@ class Mod_InspeccionProcesoController extends Controller
                 'success' => false,
                 'msg' => 'Error al cargar los defectivos: ' . $e->getMessage()
             ], 500);
+        }
+    }
+    
+    /**
+     * Método auxiliar para obtener el apellido paterno del usuario
+     * (copiado de Mod01_ProduccionController)
+     */
+    private function getApellidoPaternoUsuario($apellido)
+    {
+        $preposiciones = ["DE", "LA", "LAS", "D", "LOS", "DEL"];
+        if (in_array($apellido[0], $preposiciones) && count($apellido) > 1) {
+            if (in_array($apellido[1], $preposiciones) && count($apellido) > 2) {
+                return $apellido[0] . ' ' . $apellido[1] . ' ' . $apellido[2];
+            } else {
+                return $apellido[0] . ' ' . $apellido[1];
+            }
+        } else {
+            return $apellido[0];
         }
     }
 }

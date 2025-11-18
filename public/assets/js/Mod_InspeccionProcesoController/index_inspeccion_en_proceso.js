@@ -664,8 +664,9 @@ function js_iniciador() {
             }
         });
         
+        // El SweetAlert ya está mostrando el spinner, pero mantenemos blockUI como respaldo
         $.blockUI({
-            message: '<h1>Guardando inspección...</h1>',
+            message: '<h2>Guardando inspección...</h2><p>Por favor espere...</p><i class="fa fa-spinner fa-spin fa-2x" style="margin-top: 10px;"></i>',
             css: {
                 border: 'none',
                 padding: '16px',
@@ -705,21 +706,47 @@ function js_iniciador() {
                     // $('#numero_op').val('');
                     // $('#cabecera_nota').hide();
                 } else {
+                    // Rehabilitar botones en caso de error
+                    $('#guardar_inspeccion, #guardar_rechazo').prop('disabled', false).removeClass('disabled');
+                    
                     swal({
-                        title: 'Error',
-                        text: resp.msg || 'Error al guardar la inspección',
+                        title: 'Error al guardar inspección',
+                        text: resp.msg || 'Error al guardar la inspección. Por favor, intente nuevamente.',
                         type: 'error',
-                        confirmButtonText: 'Aceptar'
+                        confirmButtonText: 'Aceptar',
+                        html: true
                     });
                 }
             },
-            error: function() {
+            error: function(xhr, status, error) {
                 $.unblockUI();
+                
+                // Rehabilitar botones en caso de error
+                $('#guardar_inspeccion, #guardar_rechazo').prop('disabled', false).removeClass('disabled');
+                
+                // Intentar obtener el mensaje de error del servidor
+                var mensajeError = 'Error al guardar la inspección';
+                
+                if (xhr.responseJSON && xhr.responseJSON.msg) {
+                    mensajeError = xhr.responseJSON.msg;
+                } else if (xhr.responseText) {
+                    try {
+                        var respuesta = JSON.parse(xhr.responseText);
+                        if (respuesta.msg) {
+                            mensajeError = respuesta.msg;
+                        }
+                    } catch(e) {
+                        // Si no se puede parsear, usar el texto de respuesta
+                        mensajeError = xhr.responseText || mensajeError;
+                    }
+                }
+                
                 swal({
-                    title: 'Error',
-                    text: 'Error al guardar la inspección',
+                    title: 'Error al guardar inspección',
+                    text: mensajeError,
                     type: 'error',
-                    confirmButtonText: 'Aceptar'
+                    confirmButtonText: 'Aceptar',
+                    html: true
                 });
             }
         });
@@ -727,12 +754,80 @@ function js_iniciador() {
     
     // Evento para guardar como ACEPTADO
     $(document).on('click', '#guardar_inspeccion', function(){
-        guardarInspeccion('ACEPTADO');
+        var cantidadInspeccionada = parseFloat($('#cantidad_inspeccionada').val()) || 0;
+        var cantidadDisponible = parseFloat($('#cantidad_disponible').val()) || 0;
+        
+        swal({
+            title: '¿Está seguro de que desea Aceptar la inspección?',
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Aceptar Inspección',
+            cancelButtonText: 'Cancelar',
+            closeOnConfirm: false,
+            closeOnCancel: true
+        }, function(isConfirm) {
+            if (isConfirm) {
+                // Deshabilitar botones del formulario
+                $('#guardar_inspeccion, #guardar_rechazo').prop('disabled', true).addClass('disabled');
+                
+                // Mostrar spinner en el SweetAlert
+                swal({
+                    title: 'Procesando...',
+                    html: '<p>Guardando inspección y avanzando OP...</p><i class="fa fa-spinner fa-spin fa-3x" style="margin-top: 20px;"></i>',
+                    type: 'info',
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
+                });
+                
+                // Llamar a la función de guardar
+                guardarInspeccion('ACEPTADO');
+            }
+        });
     });
     
     // Evento para guardar como RECHAZADO
     $(document).on('click', '#guardar_rechazo', function(){
-        guardarInspeccion('RECHAZADO');
+        var cantidadInspeccionada = parseFloat($('#cantidad_inspeccionada').val()) || 0;
+        var cantidadDisponible = parseFloat($('#cantidad_disponible').val()) || 0;
+        
+        // Contar cuántos puntos están marcados como "No Cumple"
+        var puntosNoCumple = 0;
+        $('input[type="radio"][value="No Cumple"]:checked').each(function() {
+            puntosNoCumple++;
+        });
+        
+        swal({
+            title: '¿Está seguro de que desea Rechazar la inspección?',
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Rechazar Inspección',
+            cancelButtonText: 'Cancelar',
+            closeOnConfirm: false,
+            closeOnCancel: true
+        }, function(isConfirm) {
+            if (isConfirm) {
+                // Deshabilitar botones del formulario
+                $('#guardar_inspeccion, #guardar_rechazo').prop('disabled', true).addClass('disabled');
+                
+                // Mostrar spinner en el SweetAlert
+                swal({
+                    title: 'Procesando...',
+                    html: '<p>Guardando inspección rechazada y enviando notificaciones...</p><i class="fa fa-spinner fa-spin fa-3x" style="margin-top: 20px;"></i>',
+                    type: 'info',
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
+                });
+                
+                // Llamar a la función de guardar
+                guardarInspeccion('RECHAZADO');
+            }
+        });
     });
     
     // Función para abrir modal de historial de rechazos
