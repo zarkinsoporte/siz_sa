@@ -28,6 +28,25 @@ function manejarChecklist(chkId, valor) {
     
     // Actualizar respuestas
     respuestas[chkId] = valor;
+    
+    // Actualizar visibilidad de botones según si hay "No Cumple"
+    actualizarBotonesInspeccion();
+}
+
+// Función para actualizar la visibilidad de los botones según el estado del checklist
+function actualizarBotonesInspeccion() {
+    // Contar cuántos puntos están marcados como "No Cumple"
+    var hayNoCumple = $('input[type="radio"][value="No Cumple"]:checked').length > 0;
+    
+    if (hayNoCumple) {
+        // Si hay al menos un "No Cumple", mostrar solo el botón RECHAZADO
+        $('#guardar_inspeccion').hide();
+        $('#guardar_rechazo').show();
+    } else {
+        // Si no hay "No Cumple", mostrar solo el botón ACEPTADO
+        $('#guardar_inspeccion').show();
+        $('#guardar_rechazo').hide();
+    }
 }
 
 function js_iniciador() {
@@ -243,6 +262,14 @@ function js_iniciador() {
         $('.textareaObservacion').on('input', function(){
             this.value = this.value.toUpperCase();
         });
+        
+        // Agregar listeners para actualizar botones cuando cambien los radios
+        $('input[type="radio"][name^="checklist_"]').on('change', function(){
+            actualizarBotonesInspeccion();
+        });
+        
+        // Actualizar botones inicialmente
+        actualizarBotonesInspeccion();
     }
     
     // Renderizar resumen lateral
@@ -286,37 +313,13 @@ function js_iniciador() {
             htmlInspecciones += '</div>';
         }
         
-        // Tabla de historial
-        var tablaHistorial = '';
+        // Botón para ver historial de OP en modal
+        var botonHistorialOP = '';
         if(historial && historial.length > 0) {
-            tablaHistorial = '<div style="margin-top: 20px; margin-bottom: 20px;">'+
-                '<h5 style="font-weight: bold; margin-bottom: 10px;"><i class="fa fa-list"></i> HISTORIAL DE LA OP</h5>'+
-                '<div style="max-height: 250px; overflow-y: auto; border: 1px solid #ddd;">'+
-                '<table class="table table-bordered table-striped table-condensed" style="font-size: 11px; margin-bottom: 0;">'+
-                    '<thead style="background-color: #f5f5f5;">'+
-                        '<tr>'+
-                            '<th>Estación</th>'+
-                            '<th>Empleado</th>'+
-                            '<th class="text-right">Cantidad</th>'+
-                        '</tr>'+
-                    '</thead>'+
-                    '<tbody>';
-            
-            historial.forEach(function(item) {
-                var empleado = item.Empleado || 'N/A';
-                var cantidad = item.CantidadElaborada ? parseFloat(item.CantidadElaborada).toFixed(2) : '0.00';
-                var esCalidad = item.EsCalidad === 'S';
-                var rowClass = esCalidad ? 'success' : '';
-                tablaHistorial += '<tr class="'+rowClass+'">'+
-                    '<td><strong>'+item.NombreEstacion+'</strong></td>'+
-                    '<td>'+empleado+'</td>'+
-                    '<td class="text-right">'+cantidad+'</td>'+
-                '</tr>';
-            });
-            
-            tablaHistorial += '</tbody>'+
-                '</table>'+
-                '</div>'+
+            botonHistorialOP = '<div style="margin-top: 15px; margin-bottom: 15px;">'+
+                '<button id="btn_ver_historial_op" class="btn btn-info btn-block">'+
+                    '<i class="fa fa-list"></i> Ver Historial de la OP'+
+                '</button>'+
             '</div>';
         }
         
@@ -369,18 +372,18 @@ function js_iniciador() {
                     '</div>'+
                 '</div>'+
                 
-                tablaHistorial +
+                botonHistorialOP +
                 
                 // Agregar defectivos de otras estaciones de calidad
                 '<div style="margin-top: 15px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">'+
                     '<label style="font-weight: bold;"><i class="fa fa-plus-circle"></i> Agregar Defectivos de Otras Estaciones:</label>'+
                     '<div class="row" style="margin-top: 10px;">'+
-                        '<div class="col-sm-8">'+
+                        '<div class="col-sm-12">'+
                             '<select id="select_estacion_calidad" class="form-control boot-select" data-live-search="true" title="Seleccione una estación...">'+
                             '</select>'+
                         '</div>'+
-                        '<div class="col-sm-4">'+
-                            '<button id="btn_agregar_defectivos" class="btn btn-primary btn-block"><i class="fa fa-plus"></i> Agregar</button>'+
+                        '<div class="col-sm-12" style="margin-top: 5px;">'+
+                            '<button id="btn_agregar_defectivos" class="btn btn-primary btn-block">Agregar</button>'+
                         '</div>'+
                     '</div>'+
                 '</div>'+
@@ -392,10 +395,8 @@ function js_iniciador() {
                 
                 '<div style="margin-top: 15px;">'+
                    '<div class="row">'+
-                        '<div class="col-sm-6 text-center col-md-6">'+
-                            '<button id="guardar_rechazo" class="btn btn-danger btn-lg btn-block"><i class="fa fa-ban"></i> Rechazado</button>'+
-                        '</div>'+
-                        '<div class="col-sm-6 text-center col-md-6">'+
+                        '<div class="col-sm-12 text-center">'+
+                            '<button id="guardar_rechazo" class="btn btn-danger btn-lg btn-block" style="display: none;"><i class="fa fa-ban"></i> Rechazado</button>'+
                             '<button id="guardar_inspeccion" class="btn btn-success btn-lg btn-block"><i class="fa fa-check"></i> Aceptado</button>'+
                         '</div>'+
                     '</div>'+
@@ -434,9 +435,20 @@ function js_iniciador() {
             this.select();
         });
         
+        // Actualizar botones inicialmente después de renderizar el resumen
+        // (se actualizará nuevamente cuando se renderice el checklist)
+        setTimeout(function(){
+            actualizarBotonesInspeccion();
+        }, 100);
+        
         // Evento para ver historial de rechazos
         $(document).on('click', '#btn_ver_historial_rechazos', function(){
             abrirModalHistorialRechazos();
+        });
+        
+        // Evento para ver historial de OP
+        $(document).on('click', '#btn_ver_historial_op', function(){
+            abrirModalHistorialOP();
         });
         
         // Evento para agregar defectivos de otras estaciones
@@ -550,12 +562,20 @@ function js_iniciador() {
         });
         
         if(rubrosSinSeleccionar.length > 0) {
-            swal({
-                title: 'Checklist incompleto',
-                text: 'Debe seleccionar una opción para todos los rubros',
-                type: 'warning',
-                confirmButtonText: 'Aceptar'
-            });
+            // Cerrar el SweetAlert de "Procesando..." si está abierto y mostrar error después
+            swal.close();
+            // Rehabilitar botones
+            $('#guardar_inspeccion, #guardar_rechazo').prop('disabled', false).removeClass('disabled');
+            
+            // Usar setTimeout para asegurar que el SweetAlert anterior se cierre antes de mostrar el nuevo
+            setTimeout(function() {
+                swal({
+                    title: 'Checklist incompleto',
+                    text: 'Debe seleccionar una opción para todos los rubros',
+                    type: 'warning',
+                    confirmButtonText: 'Aceptar'
+                });
+            }, 300);
             return;
         }
         
@@ -594,12 +614,20 @@ function js_iniciador() {
         }
         
         if (errores.length > 0) {
-            swal({
-                title: 'Campos obligatorios faltantes',
-                text: errores.join('\n\n'),
-                type: 'warning',
-                confirmButtonText: 'Aceptar'
-            });
+            // Cerrar el SweetAlert de "Procesando..." si está abierto y mostrar error después
+            swal.close();
+            // Rehabilitar botones
+            $('#guardar_inspeccion, #guardar_rechazo').prop('disabled', false).removeClass('disabled');
+            
+            // Usar setTimeout para asegurar que el SweetAlert anterior se cierre antes de mostrar el nuevo
+            setTimeout(function() {
+                swal({
+                    title: 'Campos obligatorios faltantes',
+                    text: errores.join('\n\n'),
+                    type: 'warning',
+                    confirmButtonText: 'Aceptar'
+                });
+            }, 300);
             return;
         }
         
@@ -608,22 +636,38 @@ function js_iniciador() {
         var cantidadDisponible = parseFloat($('#cantidad_disponible').val()) || 0;
         
         if (cantidadInspeccionada <= 0) {
-            swal({
-                title: 'Cantidad inválida',
-                text: 'Debe ingresar una cantidad mayor a cero',
-                type: 'warning',
-                confirmButtonText: 'Aceptar'
-            });
+            // Cerrar el SweetAlert de "Procesando..." si está abierto y mostrar error después
+            swal.close();
+            // Rehabilitar botones
+            $('#guardar_inspeccion, #guardar_rechazo').prop('disabled', false).removeClass('disabled');
+            
+            // Usar setTimeout para asegurar que el SweetAlert anterior se cierre antes de mostrar el nuevo
+            setTimeout(function() {
+                swal({
+                    title: 'Cantidad inválida',
+                    text: 'Debe ingresar una cantidad mayor a cero',
+                    type: 'warning',
+                    confirmButtonText: 'Aceptar'
+                });
+            }, 300);
             return;
         }
         
         if (cantidadInspeccionada > cantidadDisponible) {
-            swal({
-                title: 'Cantidad excedida',
-                text: 'La cantidad a inspeccionar (' + cantidadInspeccionada + ') no puede ser mayor a la disponible (' + cantidadDisponible + ')',
-                type: 'warning',
-                confirmButtonText: 'Aceptar'
-            });
+            // Cerrar el SweetAlert de "Procesando..." si está abierto y mostrar error después
+            swal.close();
+            // Rehabilitar botones
+            $('#guardar_inspeccion, #guardar_rechazo').prop('disabled', false).removeClass('disabled');
+            
+            // Usar setTimeout para asegurar que el SweetAlert anterior se cierre antes de mostrar el nuevo
+            setTimeout(function() {
+                swal({
+                    title: 'Cantidad excedida',
+                    text: 'La cantidad a inspeccionar (' + cantidadInspeccionada + ') no puede ser mayor a la disponible (' + cantidadDisponible + ')',
+                    type: 'warning',
+                    confirmButtonText: 'Aceptar'
+                });
+            }, 300);
             return;
         }
         
@@ -664,6 +708,9 @@ function js_iniciador() {
             }
         });
         
+        // Deshabilitar botones justo antes de enviar la petición (después de todas las validaciones)
+        $('#guardar_inspeccion, #guardar_rechazo').prop('disabled', true).addClass('disabled');
+        
         // El SweetAlert ya está mostrando el spinner, pero mantenemos blockUI como respaldo
         $.blockUI({
             message: '<h2>Guardando inspección...</h2><p>Por favor espere...</p><i class="fa fa-spinner fa-spin fa-2x" style="margin-top: 10px;"></i>',
@@ -701,7 +748,9 @@ function js_iniciador() {
                         confirmButtonText: 'Aceptar'
                     });
                     //recargar la pagina
-                    location.reload();
+                    setTimeout(function(){
+                        location.reload();
+                    }, 1000);
                     // $('#inspeccion_container').hide();
                     // $('#numero_op').val('');
                     // $('#cabecera_nota').hide();
@@ -769,9 +818,6 @@ function js_iniciador() {
             closeOnCancel: true
         }, function(isConfirm) {
             if (isConfirm) {
-                // Deshabilitar botones del formulario
-                $('#guardar_inspeccion, #guardar_rechazo').prop('disabled', true).addClass('disabled');
-                
                 // Mostrar spinner en el SweetAlert
                 swal({
                     title: 'Procesando...',
@@ -782,7 +828,7 @@ function js_iniciador() {
                     allowEscapeKey: false
                 });
                 
-                // Llamar a la función de guardar
+                // Llamar a la función de guardar (los botones se deshabilitarán después de las validaciones)
                 guardarInspeccion('ACEPTADO');
             }
         });
@@ -811,9 +857,6 @@ function js_iniciador() {
             closeOnCancel: true
         }, function(isConfirm) {
             if (isConfirm) {
-                // Deshabilitar botones del formulario
-                $('#guardar_inspeccion, #guardar_rechazo').prop('disabled', true).addClass('disabled');
-                
                 // Mostrar spinner en el SweetAlert
                 swal({
                     title: 'Procesando...',
@@ -824,7 +867,7 @@ function js_iniciador() {
                     allowEscapeKey: false
                 });
                 
-                // Llamar a la función de guardar
+                // Llamar a la función de guardar (los botones se deshabilitarán después de las validaciones)
                 guardarInspeccion('RECHAZADO');
             }
         });
@@ -883,6 +926,66 @@ function js_iniciador() {
                 });
             }
         });
+    }
+    
+    // Función para abrir modal de historial de OP
+    function abrirModalHistorialOP() {
+        if (!opData || !historial) {
+            swal({
+                title: 'Error',
+                text: 'No hay información de la OP o historial disponible',
+                type: 'error',
+                confirmButtonText: 'Aceptar'
+            });
+            return;
+        }
+        
+        $('#modal_historial_op_numero').text(opData.OP);
+        renderHistorialOP(historial);
+        $('#modalHistorialOP').modal('show');
+    }
+    
+    // Función para renderizar el historial de OP en el modal
+    function renderHistorialOP(historialData) {
+        if (!historialData || historialData.length === 0) {
+            $('#contenido_historial_op').html(
+                '<div class="alert alert-info">' +
+                '<i class="fa fa-info-circle"></i> No hay historial disponible para esta OP.' +
+                '</div>'
+            );
+            return;
+        }
+        
+        var html = '<div style="margin-bottom: 15px;">' +
+            '<table class="table table-bordered table-striped table-condensed" style="font-size: 12px;">' +
+                '<thead style="background-color: #f5f5f5;">' +
+                    '<tr>' +
+                        '<th style="width: 40%;">Estación</th>' +
+                        '<th style="width: 35%;">Empleado</th>' +
+                        '<th style="width: 25%; text-align: right;">Cantidad Elaborada</th>' +
+                    '</tr>' +
+                '</thead>' +
+                '<tbody>';
+        
+        historialData.forEach(function(item) {
+            var empleado = item.Empleado || 'N/A';
+            var cantidad = item.CantidadElaborada ? parseFloat(item.CantidadElaborada).toFixed(2) : '0.00';
+            var esCalidad = item.EsCalidad === 'S';
+            var rowClass = esCalidad ? 'success' : '';
+            var calidadBadge = esCalidad ? '<span class="label label-success" style="margin-left: 5px;">Calidad</span>' : '';
+            
+            html += '<tr class="' + rowClass + '">' +
+                '<td><strong>' + item.NombreEstacion + '</strong>' + calidadBadge + '</td>' +
+                '<td>' + empleado + '</td>' +
+                '<td class="text-right">' + cantidad + '</td>' +
+            '</tr>';
+        });
+        
+        html += '</tbody>' +
+            '</table>' +
+        '</div>';
+        
+        $('#contenido_historial_op').html(html);
     }
     
     // Función para renderizar el historial de rechazos en el modal
@@ -961,7 +1064,7 @@ function js_iniciador() {
                 insp.detalles.forEach(function(det) {
                     var estadoDet = '';
                     var estadoColor = '';
-                    if (det.IPD_estado === 'C') {
+                   /*  if (det.IPD_estado === 'C') {
                         estadoDet = 'Cumple';
                         estadoColor = 'text-success';
                     } else if (det.IPD_estado === 'N') {
@@ -970,14 +1073,19 @@ function js_iniciador() {
                     } else {
                         estadoDet = 'No Aplica';
                         estadoColor = 'text-muted';
-                    }
+                    } */
                     
-                    html += '<tr>'+
+                    if (det.IPD_estado === 'N') {
+                        estadoDet = 'No Cumple';
+                        estadoColor = 'text-danger';
+
+                        html += '<tr>'+
                         '<td>'+det.CHK_descripcion+'</td>'+
                         '<td style="text-align: center;"><strong class="'+estadoColor+'">'+estadoDet+'</strong></td>'+
                         '<td>'+(det.empleado_nombre || '-')+'</td>'+
                         '<td>'+(det.IPD_observacion || '-')+'</td>'+
-                    '</tr>';
+                        '</tr>';
+                    }
                 });
                 
                 html += '</tbody>'+
@@ -1031,6 +1139,9 @@ function js_iniciador() {
                     // Actualizar el objeto respuestas
                     respuestas[item.CHK_id] = 'No Aplica';
                 });
+                
+                // Actualizar botones después de marcar todo como "No Aplica"
+                actualizarBotonesInspeccion();
                 
                 // Mostrar mensaje de confirmación
                 swal({

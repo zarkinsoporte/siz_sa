@@ -270,6 +270,9 @@ class Mod_InspeccionProcesoController extends Controller
                 ], 400);
             }
             
+            // NOTA: Validación de rechazos comentada - Se permite rechazar múltiples veces sin restricción
+            // Los rechazos no se contabilizan para limitar la cantidad disponible (puede implementarse en el futuro)
+            /*
             // Si el estado es RECHAZADO, validar que la suma de rechazos no supere la cantidad disponible
             if ($estado === 'RECHAZADO') {
                 // Obtener cantidad planeada de la OP
@@ -323,6 +326,7 @@ class Mod_InspeccionProcesoController extends Controller
                     ], 400);
                 }
             }
+            */
             
             // Crear nueva inspección
             $inspeccion = new Siz_InspeccionProceso();

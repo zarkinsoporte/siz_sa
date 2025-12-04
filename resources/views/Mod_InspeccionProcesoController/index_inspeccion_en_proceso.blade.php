@@ -99,6 +99,68 @@
     .data-summary-item input[type=number] {
     -moz-appearance: textfield;
     }
+    
+    /* Estilos para tabla con scroll y cabecera fija */
+    #checklist_container {
+        position: relative;
+        max-height: 800px;
+        overflow-x: auto;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    
+    #tabla_checklist {
+        width: 100%;
+        min-width: 800px; /* Ancho mínimo para evitar que se comprima demasiado */
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-bottom: 0;
+    }
+    
+    #tabla_checklist thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    
+    #tabla_checklist thead th {
+        background-color: #f5f5f5 !important;
+        border-bottom: 2px solid #ddd;
+        padding: 10px 8px;
+        font-weight: bold;
+        text-align: center;
+        white-space: nowrap;
+        position: sticky;
+        top: 0;
+    }
+    
+    #tabla_checklist tbody td {
+        padding: 8px;
+        vertical-align: middle;
+        white-space: normal;
+        font-size: 14px;
+    }
+    
+    /* Mejorar el scrollbar */
+    #checklist_container::-webkit-scrollbar {
+        width: 12px;
+        height: 12px;
+    }
+    
+    #checklist_container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+    
+    #checklist_container::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+    }
+    
+    #checklist_container::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
 </style>
 
 <div class="container">
@@ -155,12 +217,13 @@
 
             <div id="inspeccion_container" class="mb-3 mt-4" style="overflow-x: auto; display: none;">
                 <div class="row">
-                    <div class="col-md-3" id="resumen_inspeccion">
+                    <div class="col-md-2" id="resumen_inspeccion">
                         <!-- Resumen lateral -->
                     </div>
-                    <div class="col-md-9" id="checklist_container">
-                        <!-- Checklist dinámico -->
-                        <table class="table table-striped table-bordered" id="tabla_checklist">
+                    <div class="col-md-10">
+                        <!-- Checklist dinámico con scroll -->
+                        <div id="checklist_container">
+                            <table class="table table-striped table-bordered" id="tabla_checklist">
                             <thead>
                                 <tr>
                                     <th>Evidencias</th>
@@ -176,6 +239,7 @@
                                 <!-- Las filas se generarán dinámicamente -->
                             </tbody>
                         </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -194,6 +258,28 @@
                 </div>
                 <div class="modal-body" style="max-height: 600px; overflow-y: auto;">
                     <div id="contenido_historial_rechazos">
+                        <!-- Se llenará dinámicamente -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para ver historial de OP -->
+    <div class="modal fade" id="modalHistorialOP" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" style="width: 90%; max-width: 1000px;" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: white;">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"><i class="fa fa-list"></i> Historial de la OP <span id="modal_historial_op_numero"></span></h4>
+                </div>
+                <div class="modal-body" style="max-height: 600px; overflow-y: auto;">
+                    <div id="contenido_historial_op">
                         <!-- Se llenará dinámicamente -->
                     </div>
                 </div>
