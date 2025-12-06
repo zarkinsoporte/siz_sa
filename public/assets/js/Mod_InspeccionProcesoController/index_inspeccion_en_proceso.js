@@ -7,6 +7,7 @@ var idInspeccion = 0;
 var inspeccionesPrevias = [];
 var historial = [];
 var estacionesCalidadAgregadas = []; // Controla qué estaciones de calidad ya se agregaron sus defectivos
+var evidencias = {}; // Almacena las evidencias (archivos) por cada item del checklist: {chkId: [{file, dataUrl, tipo}]}
 
 // Función global para manejar cambios en el checklist
 function manejarChecklist(chkId, valor) {
@@ -14,14 +15,32 @@ function manejarChecklist(chkId, valor) {
     var textareaObservacion = $('textarea[name="obs_' + chkId + '"]');
     var btnEvidencia = $('#imagenes_' + chkId).siblings('.btnEvidencia');
     
+    // Verificar si este item requiere evidencia (empieza con "Foto" o "Video" en centros 169 o 175)
+    var requiereEvidencia = btnEvidencia.attr('data-requiere-foto') === '1';
+    var tipoEvidencia = btnEvidencia.attr('data-tipo-evidencia') || 'imagen';
+    
     if (valor === 'No Cumple') {
         textareaObservacion.prop('required', true);
         textareaObservacion.attr('placeholder', 'OBSERVACIÓN OBLIGATORIA');
-        btnEvidencia.attr('title', 'Adjuntar Evidencia (OBLIGATORIO)');
+        if (tipoEvidencia === 'video') {
+            btnEvidencia.attr('title', 'Adjuntar Video (OBLIGATORIO)');
+        } else {
+            btnEvidencia.attr('title', 'Adjuntar Evidencia (OBLIGATORIO)');
+        }
     } else {
         textareaObservacion.prop('required', false);
         textareaObservacion.attr('placeholder', '');
-        btnEvidencia.attr('title', 'Adjuntar Evidencia');
+        
+        // Si requiere evidencia, siempre mostrar como obligatorio
+        if (requiereEvidencia) {
+            if (tipoEvidencia === 'video') {
+                btnEvidencia.attr('title', 'Adjuntar Video (OBLIGATORIO)');
+            } else {
+                btnEvidencia.attr('title', 'Adjuntar Evidencia (OBLIGATORIO)');
+            }
+        } else {
+            btnEvidencia.attr('title', 'Adjuntar Evidencia');
+        }
     }
     
     // El selectpicker de empleado siempre permanece habilitado y mantiene su valor
@@ -110,6 +129,7 @@ function js_iniciador() {
                 historial = data.historial;
                 inspeccionesPrevias = data.inspecciones_previas;
                 respuestas = {};
+                evidencias = {}; // Resetear evidencias para nueva OP
                 estacionesCalidadAgregadas = []; // Resetear estaciones agregadas para nueva OP
                 
                 // Renderizar información
@@ -158,9 +178,29 @@ function js_iniciador() {
         if(!checklist || checklist.length === 0) {
             tbody = '<tr><td colspan="7" class="text-center"><strong>No hay checklist configurado para este centro de inspección</strong></td></tr>';
         } else {
+            // Verificar si el centro es 169 o 175
+            var centroId = centroInspeccionData ? centroInspeccionData.id : '';
+            var esCentroFoto = (centroId === '169' || centroId === '175');
+            
             checklist.forEach(function(item) {
                 var respuesta = respuestas[item.CHK_id] || '';
                 var observacion = respuestas[item.CHK_id + '_observacion'] || '';
+                
+                // Verificar si la descripción empieza con "Foto" o "Video"
+                var descripcionUpper = item.CHK_descripcion ? item.CHK_descripcion.trim().toUpperCase() : '';
+                var empiezaConFoto = esCentroFoto && descripcionUpper.startsWith('FOTO');
+                var empiezaConVideo = esCentroFoto && descripcionUpper.startsWith('VIDEO');
+                
+                // Aplicar estilo de fondo si empieza con "Foto" o "Video"
+                var rowStyle = '';
+                var rowClass = '';
+                if (empiezaConFoto) {
+                    rowStyle = 'style="background-color: #fff3cd;"'; // Color amarillo claro
+                    rowClass = 'class="foto-requerida"';
+                } else if (empiezaConVideo) {
+                    rowStyle = 'style="background-color: #d1ecf1;"'; // Color azul claro
+                    rowClass = 'class="video-requerido"';
+                }
                 
                 // Construir select de empleados (siempre habilitado)
                 var selectEmpleados = '<select id="empleado_'+item.CHK_id+'" name="empleado_'+item.CHK_id+'" class="form-control boot-select selectEmpleado" data-live-search="true">';
@@ -175,16 +215,41 @@ function js_iniciador() {
                 }
                 selectEmpleados += '</select>';
                 
-                tbody += '<tr>'+
+                // Título del botón de evidencia: obligatorio si empieza con "Foto" o "Video"
+                var tituloEvidencia = '';
+                var iconoBoton = '';
+                var acceptFiles = '';
+                var tipoEvidencia = '';
+                
+                if (empiezaConVideo) {
+                    tituloEvidencia = 'Adjuntar Video (OBLIGATORIO)';
+                    iconoBoton = '<span class="glyphicon glyphicon-facetime-video"></span>';
+                    acceptFiles = '.mp4,.mov,.avi,.wmv';
+                    tipoEvidencia = 'video';
+                } else if (empiezaConFoto) {
+                    tituloEvidencia = 'Adjuntar Evidencia (OBLIGATORIO)';
+                    iconoBoton = '<span class="glyphicon glyphicon-camera"></span>';
+                    acceptFiles = '.jpg,.jpeg,.png';
+                    tipoEvidencia = 'imagen';
+                } else {
+                    tituloEvidencia = 'Adjuntar Evidencia';
+                    iconoBoton = '<span class="glyphicon glyphicon-camera"></span>';
+                    acceptFiles = '.jpg,.jpeg,.png';
+                    tipoEvidencia = 'imagen';
+                }
+                
+                var requiereEvidencia = (empiezaConFoto || empiezaConVideo) ? '1' : '0';
+                
+                tbody += '<tr '+rowClass+' '+rowStyle+'>'+
                     '<td>'+
-                        '<button type="button" class="btn btn-primary btn-sm btnEvidencia" title="Adjuntar Evidencia"><span class="glyphicon glyphicon-camera"></span></button>'+
-                        '<input type="file" name="img_'+item.CHK_id+'" accept=".jpg,.jpeg,.png" style="display:none;" class="inputEvidencia" multiple>'+
+                        '<button type="button" class="btn btn-primary btn-sm btnEvidencia" title="'+tituloEvidencia+'" data-requiere-foto="'+requiereEvidencia+'" data-tipo-evidencia="'+tipoEvidencia+'">'+iconoBoton+'</button>'+
+                        '<input type="file" name="img_'+item.CHK_id+'" accept="'+acceptFiles+'" style="display:none;" class="inputEvidencia" data-requiere-foto="'+requiereEvidencia+'" data-tipo-evidencia="'+tipoEvidencia+'" '+(empiezaConVideo ? '' : 'multiple')+'>'+
                         '<div class="imagenes-previas" id="imagenes_'+item.CHK_id+'" style="margin-top: 5px;"></div>'+
                     '</td>'+
                     '<td>'+item.CHK_descripcion+'</td>'+
-                    '<td><input type="radio" name="checklist_'+item.CHK_id+'" value="Cumple" '+(respuesta === 'Cumple' ? 'checked' : '')+' onchange="manejarChecklist('+item.CHK_id+', this.value)"></td>'+
-                    '<td><input type="radio" name="checklist_'+item.CHK_id+'" value="No Cumple" '+(respuesta === 'No Cumple' ? 'checked' : '')+' onchange="manejarChecklist('+item.CHK_id+', this.value)"></td>'+
-                    '<td><input type="radio" name="checklist_'+item.CHK_id+'" value="No Aplica" '+(respuesta === 'No Aplica' ? 'checked' : '')+' onchange="manejarChecklist('+item.CHK_id+', this.value)"></td>'+
+                    '<td><input type="radio" name="checklist_'+item.CHK_id+'" value="Cumple" '+(respuesta === 'Cumple' ? 'checked' : '')+' onchange="manejarChecklist('+item.CHK_id+', this.value)" data-requiere-foto="'+requiereEvidencia+'"></td>'+
+                    '<td><input type="radio" name="checklist_'+item.CHK_id+'" value="No Cumple" '+(respuesta === 'No Cumple' ? 'checked' : '')+' onchange="manejarChecklist('+item.CHK_id+', this.value)" data-requiere-foto="'+requiereEvidencia+'"></td>'+
+                    '<td><input type="radio" name="checklist_'+item.CHK_id+'" value="No Aplica" '+(respuesta === 'No Aplica' ? 'checked' : '')+' onchange="manejarChecklist('+item.CHK_id+', this.value)" data-requiere-foto="'+requiereEvidencia+'"></td>'+
                     '<td>'+selectEmpleados+'</td>'+
                     '<td><textarea class="form-control textareaObservacion" name="obs_'+item.CHK_id+'" rows="2" style="resize:none; text-transform:uppercase;">'+observacion+'</textarea></td>'+
                 '</tr>';
@@ -206,52 +271,114 @@ function js_iniciador() {
             var files = this.files;
             var chkId = $(this).attr('name').replace('img_', '');
             var contenedorImagenes = $('#imagenes_' + chkId);
+            var tipoEvidencia = $(this).attr('data-tipo-evidencia') || 'imagen';
          
             if(files.length > 0) {
+                // Inicializar array de evidencias para este item
+                evidencias[chkId] = [];
                 contenedorImagenes.empty();
+                
+                var archivosProcesados = 0;
+                var totalArchivos = files.length;
                 
                 for(var i = 0; i < files.length; i++) {
                     var file = files[i];
+                    var fileObj = file; // Guardar referencia del file para usar en el callback
                     
-                    var allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-                    if(allowedTypes.indexOf(file.type) === -1) {
-                        swal({
-                            title: 'Tipo de archivo no válido',
-                            text: 'Solo se permiten archivos JPG y PNG',
-                            type: 'error',
-                            confirmButtonText: 'Aceptar'
-                        });
-                        this.value = '';
-                        return;
-                    }
+                    if (tipoEvidencia === 'video') {
+                        // Validación para videos
+                        var allowedVideoTypes = ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/x-ms-wmv', 'video/avi'];
+                        var allowedExtensions = ['.mp4', '.mov', '.avi', '.wmv'];
+                        var fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+                        
+                        if(allowedVideoTypes.indexOf(file.type) === -1 && allowedExtensions.indexOf(fileExtension) === -1) {
+                            swal({
+                                title: 'Tipo de archivo no válido',
+                                text: 'Solo se permiten archivos de video: MP4, MOV, AVI, WMV',
+                                type: 'error',
+                                confirmButtonText: 'Aceptar'
+                            });
+                            this.value = '';
+                            return;
+                        }
+         
+                        // Tamaño máximo para videos: 50MB
+                        if(file.size > 50 * 1024 * 1024) {
+                            swal({
+                                title: 'Archivo demasiado grande',
+                                text: 'El video no debe superar 50MB',
+                                type: 'error',
+                                confirmButtonText: 'Aceptar'
+                            });
+                            this.value = '';
+                            return;
+                        }
      
-                    if(file.size > 5 * 1024 * 1024) {
-                        swal({
-                            title: 'Archivo demasiado grande',
-                            text: 'El archivo no debe superar 5MB',
-                            type: 'error',
-                            confirmButtonText: 'Aceptar'
+                        // Crear Blob URL para el video (funciona mejor que data URL)
+                        var blobUrl = URL.createObjectURL(file);
+                        evidencias[chkId].push({
+                            file: file,
+                            dataUrl: blobUrl, // Usar Blob URL en lugar de data URL
+                            tipo: 'video',
+                            nombre: file.name
                         });
-                        this.value = '';
-                        return;
-                    }
+                        
+                        archivosProcesados++;
+                        if (archivosProcesados === totalArchivos) {
+                            mostrarBotonEvidencias(chkId, tipoEvidencia);
+                        }
+                    } else {
+                        // Validación para imágenes
+                        var allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+                        if(allowedTypes.indexOf(file.type) === -1) {
+                            swal({
+                                title: 'Tipo de archivo no válido',
+                                text: 'Solo se permiten archivos JPG y PNG',
+                                type: 'error',
+                                confirmButtonText: 'Aceptar'
+                            });
+                            this.value = '';
+                            return;
+                        }
      
-                    var reader = new FileReader();
-                    reader.onload = function(e) {
-                        var imgPreview = '<div style="display: inline-block; margin: 2px; position: relative;">' +
-                            '<img src="' + e.target.result + '" style="width: 50px; height: 50px; object-fit: cover; border: 1px solid #ccc;" title="' + file.name + '">' +
-                            '<div style="font-size: 10px; text-align: center; max-width: 50px; overflow: hidden; text-overflow: ellipsis;">' + file.name + '</div>' +
-                            '</div>';
-                        contenedorImagenes.append(imgPreview);
-                    };
-                    reader.readAsDataURL(file);
+                        if(file.size > 5 * 1024 * 1024) {
+                            swal({
+                                title: 'Archivo demasiado grande',
+                                text: 'El archivo no debe superar 5MB',
+                                type: 'error',
+                                confirmButtonText: 'Aceptar'
+                            });
+                            this.value = '';
+                            return;
+                        }
+     
+                        var reader = new FileReader();
+                        reader.onload = (function(file, chkId, tipoEvidencia) {
+                            return function(e) {
+                                evidencias[chkId].push({
+                                    file: file,
+                                    dataUrl: e.target.result,
+                                    tipo: 'imagen',
+                                    nombre: file.name
+                                });
+                                
+                                archivosProcesados++;
+                                if (archivosProcesados === totalArchivos) {
+                                    mostrarBotonEvidencias(chkId, tipoEvidencia);
+                                }
+                            };
+                        })(fileObj, chkId, tipoEvidencia);
+                        reader.readAsDataURL(file);
+                    }
                 }
                 
-                $(this).siblings('.btnEvidencia').html('<span class="glyphicon glyphicon-ok text-white"></span>');
+                var iconoOk = tipoEvidencia === 'video' ? '<span class="glyphicon glyphicon-ok text-white"></span>' : '<span class="glyphicon glyphicon-ok text-white"></span>';
+                $(this).siblings('.btnEvidencia').html(iconoOk);
                 
+                var tipoTexto = tipoEvidencia === 'video' ? 'video(s)' : 'archivo(s)';
                 swal({
                     title: 'Archivos adjuntados',
-                    text: 'Se han cargado ' + files.length + ' archivo(s) correctamente',
+                    text: 'Se han cargado ' + files.length + ' ' + tipoTexto + ' correctamente',
                     type: 'success',
                     timer: 2000,
                     showConfirmButton: false
@@ -268,9 +395,283 @@ function js_iniciador() {
             actualizarBotonesInspeccion();
         });
         
+        // Inicializar items que empiezan con "Foto" o "Video" (centros 169 y 175)
+        // Estos items siempre requieren evidencia, independientemente del radio button
+        $('.btnEvidencia[data-requiere-foto="1"]').each(function() {
+            var chkId = $(this).siblings('.inputEvidencia').attr('name').replace('img_', '');
+            var radioSeleccionado = $('input[name="checklist_' + chkId + '"]:checked').val();
+            var tipoEvidencia = $(this).attr('data-tipo-evidencia') || 'imagen';
+            
+            // Los items que empiezan con "Foto" o "Video" SIEMPRE requieren evidencia, sin importar el radio button
+            // Por lo tanto, siempre mostrar como obligatorio
+            if (tipoEvidencia === 'video') {
+                $(this).attr('title', 'Adjuntar Video (OBLIGATORIO)');
+            } else {
+                $(this).attr('title', 'Adjuntar Evidencia (OBLIGATORIO)');
+            }
+            
+            // Si hay un radio seleccionado, llamar a manejarChecklist para asegurar el estado correcto
+            if (radioSeleccionado) {
+                manejarChecklist(chkId, radioSeleccionado);
+            }
+        });
+        
         // Actualizar botones inicialmente
         actualizarBotonesInspeccion();
     }
+    
+    // Función para mostrar botón de evidencias en lugar de vistas previas
+    function mostrarBotonEvidencias(chkId, tipoEvidencia) {
+        var contenedor = $('#imagenes_' + chkId);
+        var cantidad = evidencias[chkId] ? evidencias[chkId].length : 0;
+        var tipoTexto = tipoEvidencia === 'video' ? 'video' : 'imagen';
+        var tipoTextoPlural = tipoEvidencia === 'video' ? 'videos' : 'imágenes';
+        
+        if (cantidad > 0) {
+            var botonHtml = '<button type="button" class="btn btn-info btn-xs btnVerEvidencias" data-chk-id="' + chkId + '" style="margin-top: 5px;">' +
+                '<i class="fa fa-eye"></i> Ver ' + (cantidad === 1 ? tipoTexto : tipoTextoPlural) + ' (' + cantidad + ')' +
+                '</button>';
+            contenedor.html(botonHtml);
+        }
+    }
+    
+    // Función para abrir modal de evidencias
+    function abrirModalEvidencias(chkId) {
+        if (!evidencias[chkId] || evidencias[chkId].length === 0) {
+            swal({
+                title: 'Sin evidencias',
+                text: 'No hay evidencias para mostrar',
+                type: 'info',
+                confirmButtonText: 'Aceptar'
+            });
+            return;
+        }
+        
+        // Separar videos e imágenes
+        var videos = [];
+        var imagenes = [];
+        
+        evidencias[chkId].forEach(function(evidencia) {
+            if (evidencia.tipo === 'video') {
+                videos.push(evidencia);
+            } else {
+                imagenes.push(evidencia);
+            }
+        });
+        
+        // Abrir videos en nuevas pestañas
+        videos.forEach(function(video, index) {
+            // Verificar y recrear Blob URL si es necesario
+            var videoUrl = video.dataUrl;
+            if (!videoUrl || (!videoUrl.startsWith('blob:') && !videoUrl.startsWith('data:'))) {
+                if (video.file) {
+                    videoUrl = URL.createObjectURL(video.file);
+                    video.dataUrl = videoUrl;
+                }
+            }
+            
+            // Abrir video en nueva pestaña
+            var nuevaVentana = window.open(videoUrl, '_blank');
+            if (!nuevaVentana) {
+                // Si el popup fue bloqueado, mostrar mensaje
+                swal({
+                    title: 'Popup bloqueado',
+                    text: 'Por favor, permite ventanas emergentes para este sitio y vuelve a intentar, o descarga el video directamente.',
+                    type: 'warning',
+                    confirmButtonText: 'Aceptar'
+                });
+            }
+        });
+        
+        // Si solo hay videos, no mostrar el modal
+        if (imagenes.length === 0) {
+            return;
+        }
+        
+        // Mostrar imágenes en el modal
+        // Obtener el nombre del item del checklist
+        var checklistItem = checklist.find(function(item) {
+            return item.CHK_id == chkId;
+        });
+        var tituloItem = checklistItem ? checklistItem.CHK_descripcion : 'Item ' + chkId;
+        
+        $('#modal_evidencia_titulo').text(tituloItem);
+        
+        var html = '<div class="row">';
+        imagenes.forEach(function(evidencia, index) {
+            html += '<div class="col-md-6" style="margin-bottom: 20px;">' +
+                '<h5><i class="fa fa-image"></i> Imagen ' + (index + 1) + ': ' + evidencia.nombre + '</h5>' +
+                '<img src="' + evidencia.dataUrl + '" style="width: 100%; max-height: 400px; object-fit: contain; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;" onclick="window.open(this.src, \'_blank\')" title="Click para ver en tamaño completo">' +
+                '</div>';
+        });
+        html += '</div>';
+        
+        $('#contenido_evidencias').html(html);
+        
+        // Limpiar el contenido del modal cuando se cierra
+        $('#modalEvidencias').off('hidden.bs.modal').on('hidden.bs.modal', function() {
+            $('#contenido_evidencias').html('');
+        });
+        
+        // Asegurar que los videos se carguen correctamente después de que el modal se muestre
+        $('#modalEvidencias').off('shown.bs.modal').on('shown.bs.modal', function() {
+            setTimeout(function() {
+                $('#modalEvidencias video').each(function() {
+                    var video = this;
+                    
+                    // Verificar que el src esté establecido
+                    if (!video.src || video.src === '') {
+                        console.error('Video sin src:', video.id);
+                        return;
+                    }
+                    
+                    // Establecer estilos explícitos para asegurar visibilidad
+                    $(video).css({
+                        'display': 'block',
+                        'width': '100%',
+                        'max-width': '800px',
+                        'height': 'auto',
+                        'min-height': '400px',
+                        'max-height': '600px',
+                        'background-color': '#000',
+                        'margin': '0 auto',
+                        'border': '2px solid #333',
+                        'object-fit': 'contain'
+                    });
+                    
+                    // Remover atributos que puedan interferir
+                    video.removeAttribute('width');
+                    video.removeAttribute('height');
+                    
+                    // Forzar carga
+                    if (video.load) {
+                        video.load();
+                    }
+                    
+                    // Event listeners para debugging y ajuste de dimensiones
+                    video.addEventListener('loadedmetadata', function() {
+                        console.log('Metadatos del video cargados:', {
+                            id: video.id,
+                            videoWidth: video.videoWidth,
+                            videoHeight: video.videoHeight,
+                            duration: video.duration
+                        });
+                        
+                        // Mostrar información del video
+                        var infoDiv = $('#video_info_' + video.id);
+                        if (infoDiv.length) {
+                            infoDiv.html('Dimensiones: ' + video.videoWidth + 'x' + video.videoHeight + ' | Duración: ' + (video.duration ? video.duration.toFixed(2) + 's' : 'N/A'));
+                        }
+                        
+                        // Si el video tiene dimensiones válidas, ajustar el contenedor
+                        if (video.videoWidth > 0 && video.videoHeight > 0) {
+                            var aspectRatio = video.videoHeight / video.videoWidth;
+                            var containerWidth = Math.min(800, $(video).parent().width() - 40);
+                            var calculatedHeight = containerWidth * aspectRatio;
+                            
+                            // Asegurar que el video tenga altura visible
+                            if (calculatedHeight < 300) {
+                                calculatedHeight = 300;
+                            } else if (calculatedHeight > 600) {
+                                calculatedHeight = 600;
+                            }
+                            
+                            $(video).css({
+                                'width': containerWidth + 'px',
+                                'height': calculatedHeight + 'px',
+                                'min-height': calculatedHeight + 'px'
+                            });
+                            
+                            console.log('Dimensiones del video ajustadas:', {
+                                width: containerWidth,
+                                height: calculatedHeight,
+                                aspectRatio: aspectRatio
+                            });
+                        }
+                        
+                        // Intentar cargar y mostrar el primer frame
+                        video.muted = true;
+                        video.currentTime = 0.01;
+                        
+                        // Esperar a que los metadatos se carguen antes de intentar reproducir
+                        setTimeout(function() {
+                            var playPromise = video.play();
+                            if (playPromise !== undefined) {
+                                playPromise.then(function() {
+                                    // Video se está reproduciendo, esperar un poco más para que se renderice el frame
+                                    setTimeout(function() {
+                                        video.pause();
+                                        video.muted = false;
+                                        video.currentTime = 0;
+                                        // Forzar actualización visual
+                                        video.style.visibility = 'visible';
+                                        video.style.opacity = '1';
+                                    }, 500);
+                                }).catch(function(err) {
+                                    console.log('No se pudo reproducir automáticamente:', err);
+                                    video.muted = false;
+                                    // Intentar cargar el frame de otra manera
+                                    video.currentTime = 0;
+                                    if (video.load) {
+                                        video.load();
+                                    }
+                                });
+                            }
+                        }, 200);
+                    }, { once: true });
+                    
+                    video.addEventListener('loadeddata', function() {
+                        console.log('Datos del video cargados:', video.id);
+                        // Forzar repintado
+                        video.style.display = 'none';
+                        video.offsetHeight; // Trigger reflow
+                        video.style.display = 'block';
+                    }, { once: true });
+                    
+                    video.addEventListener('canplay', function() {
+                        console.log('Video puede reproducirse:', video.id);
+                        // Asegurar que el video sea visible
+                        $(video).css('visibility', 'visible');
+                        $(video).css('opacity', '1');
+                    }, { once: true });
+                    
+                    video.addEventListener('playing', function() {
+                        console.log('Video reproduciéndose:', video.id);
+                        // Asegurar visibilidad cuando se reproduce
+                        $(video).css('visibility', 'visible');
+                        $(video).css('opacity', '1');
+                    });
+                    
+                    video.addEventListener('error', function(e) {
+                        console.error('Error al cargar video:', {
+                            id: video.id,
+                            error: e,
+                            errorCode: video.error ? video.error.code : 'unknown'
+                        });
+                        var videoNombre = $(video).closest('.col-md-12').find('h5').text().replace(/Video \d+: /, '') || 'video';
+                        var errorMsg = '<div class="alert alert-danger" style="margin-top: 10px;">' +
+                            '<strong>Error al cargar el video.</strong><br>' +
+                            '<a href="' + video.src + '" download="' + videoNombre + '" class="btn btn-sm btn-danger">' +
+                            '<i class="fa fa-download"></i> Descargar Video' +
+                            '</a>' +
+                            '</div>';
+                        $(video).parent().append(errorMsg);
+                    }, { once: true });
+                    
+                    // Intentar cargar el primer frame
+                    video.currentTime = 0.1;
+                });
+            }, 300);
+        });
+        
+        $('#modalEvidencias').modal('show');
+    }
+    
+    // Evento para abrir modal de evidencias
+    $(document).on('click', '.btnVerEvidencias', function() {
+        var chkId = $(this).attr('data-chk-id');
+        abrirModalEvidencias(chkId);
+    });
     
     // Renderizar resumen lateral
     function renderResumen() {
@@ -581,8 +982,10 @@ function js_iniciador() {
         
         // Validar observaciones e imágenes cuando hay "No Cumple"
         var rubrosSinObservacion = [];
-        var rubrosSinImagen = [];
+        var rubrosSinImagenNoCumple = [];
+        var rubrosSinImagenFoto = [];
         
+        // Validar "No Cumple"
         $('input[type="radio"][value="No Cumple"]').each(function() {
             var chkId = $(this).attr('name').replace('checklist_', '');
             
@@ -595,12 +998,36 @@ function js_iniciador() {
                     rubrosSinObservacion.push(checklistItem ? checklistItem.CHK_descripcion : 'Rubro ' + chkId);
                 }
                 
+                // Solo validar imagen si NO es un item que empieza con "Foto" (esos se validan por separado)
                 var inputEvidencia = $('input[name="img_' + chkId + '"]')[0];
-                if (!inputEvidencia.files || inputEvidencia.files.length === 0) {
+                var requiereFoto = $(inputEvidencia).attr('data-requiere-foto') === '1';
+                
+                if (!requiereFoto && (!inputEvidencia.files || inputEvidencia.files.length === 0)) {
                     var checklistItem = checklist.find(function(item) {
                         return item.CHK_id == chkId;
                     });
-                    rubrosSinImagen.push(checklistItem ? checklistItem.CHK_descripcion : 'Rubro ' + chkId);
+                    rubrosSinImagenNoCumple.push(checklistItem ? checklistItem.CHK_descripcion : 'Rubro ' + chkId);
+                }
+            }
+        });
+        
+        // Validar evidencias obligatorias (Fotos y Videos) para items que empiezan con "Foto" o "Video" (centros 169 y 175)
+        // Estos items siempre requieren evidencia, independientemente del radio button
+        var rubrosSinVideo = [];
+        $('input[type="file"].inputEvidencia[data-requiere-foto="1"]').each(function() {
+            var chkId = $(this).attr('name').replace('img_', '');
+            var tipoEvidencia = $(this).attr('data-tipo-evidencia') || 'imagen';
+            
+            if (!this.files || this.files.length === 0) {
+                var checklistItem = checklist.find(function(item) {
+                    return item.CHK_id == chkId;
+                });
+                var descripcion = checklistItem ? checklistItem.CHK_descripcion : 'Rubro ' + chkId;
+                
+                if (tipoEvidencia === 'video') {
+                    rubrosSinVideo.push(descripcion);
+                } else {
+                    rubrosSinImagenFoto.push(descripcion);
                 }
             }
         });
@@ -609,8 +1036,14 @@ function js_iniciador() {
         if (rubrosSinObservacion.length > 0) {
             errores.push('Debe agregar observaciones para rubros "No Cumple":\n' + rubrosSinObservacion.join(', '));
         }
-        if (rubrosSinImagen.length > 0) {
-            errores.push('Debe adjuntar imágenes para rubros "No Cumple":\n' + rubrosSinImagen.join(', '));
+        if (rubrosSinImagenNoCumple.length > 0) {
+            errores.push('Debe adjuntar imágenes para rubros "No Cumple":\n' + rubrosSinImagenNoCumple.join(', '));
+        }
+        if (rubrosSinImagenFoto.length > 0) {
+            errores.push('Debe adjuntar imágenes obligatorias (items que empiezan con "Foto"):\n' + rubrosSinImagenFoto.join(', '));
+        }
+        if (rubrosSinVideo.length > 0) {
+            errores.push('Debe adjuntar videos obligatorios (items que empiezan con "Video"):\n' + rubrosSinVideo.join(', '));
         }
         
         if (errores.length > 0) {
