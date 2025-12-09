@@ -835,3 +835,10 @@ Route::get('pruebaDirectorio', function () {
 	}
 	dd($directorioBase, $so);
 });
+
+//EVIDENCIAS DE CLIENTES sobre el proceso de inspeccion
+
+Route::get('home/EVIDENCIA-CLIENTE', 'Mod_InspeccionProcesoController@index_evidencia_cliente')->middleware('routelog');
+Route::get('home/evidencia-cliente/buscar', 'Mod_InspeccionProcesoController@buscarEvidenciasCliente');
+Route::get('home/evidencia-cliente/pdf/{op}', 'Mod_InspeccionProcesoController@generarPdfEvidenciaCliente');
+

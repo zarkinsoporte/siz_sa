@@ -501,7 +501,7 @@ class Mod_InspeccionProcesoController extends Controller
                                 
                                 // Verificar tipos de cambio en SAP
                                 $rates = DB::table('ORTT')->where('RateDate', date('Y-m-d'))->get();
-                                
+                               
                                 if (count($rates) < 3) {
                                     throw new \Exception('No están capturados todos los "Tipos de Cambio" en SAP. Se requieren al menos 3 tipos de cambio para el día de hoy.');
                                 }
@@ -1108,5 +1108,211 @@ class Mod_InspeccionProcesoController extends Controller
             return $apellido[0];
         }
     }
+    
+    /**
+     * Muestra la vista principal de Evidencia de Clientes
+     */
+    public function index_evidencia_cliente()
+    {
+        $actividades = session('userActividades');
+        $ultimo = count($actividades);
+        
+        return view('Mod_InspeccionProcesoController.index_evidencia_cliente', compact('actividades', 'ultimo'));
+    }
+    
+    /**
+     * AJAX: Buscar órdenes de producción finalizadas con inspecciones de estaciones 169 y 175
+     */
+    public function buscarEvidenciasCliente(Request $request)
+    {
+        try {
+            $fechaDesde = $request->input('fecha_desde', '');
+            $fechaHasta = $request->input('fecha_hasta', '');
+            
+            // Si no se envían fechas, usar los últimos 3 meses
+            if (empty($fechaDesde)) {
+                $fechaDesde = date('Y-m-d', strtotime('-3 months'));
+            }
+            
+            if (empty($fechaHasta)) {
+                $fechaHasta = date('Y-m-d');
+            }
+            
+            // Buscar OPs finalizadas (Status = 'C' o CmpltQty >= PlannedQty) con inspecciones en estaciones 169 o 175
+            $evidencias = DB::select("
+                SELECT DISTINCT
+                    OWOR.DocNum AS OP,
+                    OWOR.ItemCode AS CodigoArticulo,
+                    OITM.ItemName AS NombreArticulo,
+                    OWOR.OriginNum AS Pedido,
+                    ORDR.CardName AS Cliente,
+                    OWOR.DueDate AS FechaFinalizacion,
+                    OWOR.PlannedQty AS Cantidad
+                FROM OWOR
+                INNER JOIN OITM ON OWOR.ItemCode = OITM.ItemCode
+                LEFT JOIN ORDR ON OWOR.OriginNum = ORDR.DocNum
+                INNER JOIN Siz_InspeccionProceso ON Siz_InspeccionProceso.IPR_op = OWOR.DocNum AND Siz_InspeccionProceso.IPR_centroInspeccion = '175'
+                WHERE 
+                     OWOR.DueDate BETWEEN ? AND ?
+                    AND Siz_InspeccionProceso.IPR_estado = 'ACEPTADO'
+                GROUP BY 
+                    OWOR.DocNum, OWOR.ItemCode, OITM.ItemName, OWOR.OriginNum, 
+                    ORDR.CardName, OWOR.DueDate, OWOR.PlannedQty, OWOR.Status, OWOR.CmpltQty
+                ORDER BY OWOR.DueDate DESC, OWOR.DocNum DESC
+            ", [$fechaDesde, $fechaHasta]);
+            
+            return response()->json($evidencias);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error al obtener las evidencias: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    /**
+     * Generar PDF de evidencia de cliente para una OP
+     */
+    public function generarPdfEvidenciaCliente($op)
+    {
+        ini_set('max_execution_time', -1);
+        ini_set('memory_limit', '512M');
+        try {
+            // Obtener información de la OP
+            $ordenProduccion = DB::table('OWOR')
+                ->select(
+                    'OWOR.DocNum as OP',
+                    'OWOR.ItemCode',
+                    'OITM.ItemName as NombreArticulo',
+                    'OWOR.OriginNum as Pedido',
+                    'ORDR.CardName as Cliente',
+                    'OWOR.DueDate as FechaFinalizacion',
+                    'OWOR.PlannedQty as Cantidad',
+                    'OWOR.CmpltQty as CantidadCompletada'
+                )
+                ->leftJoin('OITM', 'OWOR.ItemCode', '=', 'OITM.ItemCode')
+                ->leftJoin('ORDR', 'OWOR.OriginNum', '=', 'ORDR.DocNum')
+                ->where('OWOR.DocNum', $op)
+                ->first();
+            
+            if (!$ordenProduccion) {
+                abort(404, 'Orden de Producción no encontrada');
+            }
+            
+            // Obtener inspecciones de las estaciones 169 y 175
+            $inspecciones = Siz_InspeccionProceso::on('siz')
+                ->where('IPR_op', $op)
+                ->whereIn('IPR_centroInspeccion', ['169', '175'])
+                ->where('IPR_borrado', 'N')
+                ->where('IPR_estado', 'ACEPTADO')
+                ->orderBy('IPR_centroInspeccion')
+                ->orderBy('IPR_fechaInspeccion')
+                ->get();
+            
+            if ($inspecciones->isEmpty()) {
+                abort(404, 'No se encontraron inspecciones para las estaciones 169 y 175');
+            }
+            
+            // Para cada inspección, obtener detalles del checklist e imágenes
+            foreach ($inspecciones as $inspeccion) {
+                // Obtener detalles del checklist
+                $detalles = Siz_InspeccionProcesoDetalle::on('siz')
+                    ->join('Siz_Checklist', 'Siz_InspeccionProcesoDetalle.IPD_chkId', '=', 'Siz_Checklist.CHK_id')
+                    ->select(
+                        'Siz_InspeccionProcesoDetalle.*',
+                        'Siz_Checklist.CHK_descripcion',
+                        'Siz_Checklist.CHK_orden'
+                    )
+                    ->where('Siz_InspeccionProcesoDetalle.IPD_iprId', $inspeccion->IPR_id)
+                    ->where('Siz_InspeccionProcesoDetalle.IPD_borrado', 'N')
+                    ->where('Siz_Checklist.CHK_descripcion', 'LIKE', '%Foto%')
+                    ->orderBy('Siz_Checklist.CHK_orden')
+                    ->get();
+                
+                $inspeccion->detalles = $detalles;
+                
+                // Obtener imágenes agrupadas por CHK_id y convertir a base64
+                $imagenes = Siz_InspeccionProcesoImagen::on('siz')
+                    ->where('IPI_iprId', $inspeccion->IPR_id)
+                    ->where('IPI_borrado', 'N')
+                    ->get();
+                
+                // Crear un mapa de chkId a descripción para acceso rápido
+                $chkDescripciones = [];
+                foreach ($detalles as $detalle) {
+                    $chkDescripciones[$detalle->IPD_chkId] = $detalle->CHK_descripcion;
+                }
+                
+                $imagenesPorChk = [];
+                foreach ($imagenes as $img) {
+                    $chkId = $img->IPI_descripcion;
+                    if (!isset($imagenesPorChk[$chkId])) {
+                        $imagenesPorChk[$chkId] = [];
+                    }
+                    
+                    // Convertir imagen a base64
+                    $imagenBase64 = '';
+                    if (file_exists($img->IPI_ruta)) {
+                        $imagenData = file_get_contents($img->IPI_ruta);
+                        $mimeType = mime_content_type($img->IPI_ruta);
+                        $imagenBase64 = 'data:' . $mimeType . ';base64,' . base64_encode($imagenData);
+                    }
+                    
+                    // Obtener descripción del checklist
+                    $chkDescripcion = isset($chkDescripciones[$chkId]) 
+                        ? $chkDescripciones[$chkId] 
+                        : 'Item ' . $chkId;
+                    
+                    $imagenesPorChk[$chkId][] = [
+                        'ruta' => $img->IPI_ruta,
+                        'id' => $img->IPI_id,
+                        'archivo' => basename($img->IPI_ruta),
+                        'base64' => $imagenBase64,
+                        'chk_descripcion' => $chkDescripcion
+                    ];
+                }
+                $inspeccion->imagenes = $imagenesPorChk;
+            }
+            
+            // Obtener información de la empresa
+            $empresa = DB::table('OADM')
+                ->select('CompnyName as RazonSocial')
+                ->first();
+            
+            // Crear header HTML similar al de rechazos
+            $fechaImpresion = date("d-m-Y H:i:s");
+            $headerHtml = view()->make(
+                'Mod_RechazosController.pdfheader',
+                [
+                    'titulo' => 'Evidencia de Cliente - Inspección en Proceso',
+                    'fechaImpresion' => 'Fecha de Impresión: ' . $fechaImpresion,
+                    'item' => 'OP: ' . $op
+                ]
+            )->render();
+            
+            $data = [
+                'orden' => $ordenProduccion,
+                'inspecciones' => $inspecciones,
+                'empresa' => $empresa,
+                'fechaImpresion' => date('d/m/Y H:i:s'),
+                'imageCount' => 0,
+                'chkDesc' => ''
+            ];
+            
+            $pdf = \SPDF::loadView('Mod_InspeccionProcesoController.pdf_evidencia_cliente', $data);
+            $pdf->setOption('header-html', $headerHtml);
+            $pdf->setOption('footer-center', 'Pagina [page] de [toPage]');
+            $pdf->setOption('footer-left', 'SIZ');
+            $pdf->setOption('margin-top', '33mm');
+            $pdf->setOption('margin-left', '5mm');
+            $pdf->setOption('margin-right', '5mm');
+            $pdf->setOption('page-size', 'Letter');
+            
+            return $pdf->inline('Evidencia_Cliente_OP_' . $op . '_' . date('Y-m-d') . '.pdf');
+            
+        } catch (\Exception $e) {
+            abort(500, 'Error al generar el PDF: ' . $e->getMessage());
+        }
+    }
 }
+
 
