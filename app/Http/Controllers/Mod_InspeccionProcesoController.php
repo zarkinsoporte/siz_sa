@@ -1161,6 +1161,25 @@ class Mod_InspeccionProcesoController extends Controller
                 ORDER BY OWOR.DueDate DESC, OWOR.DocNum DESC
             ", [$fechaDesde, $fechaHasta]);
             
+            // Para cada OP, verificar si tiene videos
+            foreach ($evidencias as $evidencia) {
+                // Verificar si hay videos para esta OP en estaciones 169 o 175
+                $tieneVideo = DB::select("
+                    SELECT TOP 1 1 as tiene_video
+                    FROM Siz_InspeccionProcesoImagen IPI
+                    INNER JOIN Siz_InspeccionProceso IPR ON IPI.IPI_iprId = IPR.IPR_id
+                    INNER JOIN Siz_Checklist CHK ON IPI.IPI_descripcion = CHK.CHK_id
+                    WHERE IPR.IPR_op = ?
+                        AND IPR.IPR_centroInspeccion IN ('169', '175')
+                        AND IPR.IPR_estado = 'ACEPTADO'
+                        AND IPR.IPR_borrado = 'N'
+                        AND IPI.IPI_borrado = 'N'
+                        AND CHK.CHK_descripcion LIKE 'Video%'
+                ", [$evidencia->OP]);
+                
+                $evidencia->tiene_video = !empty($tieneVideo);
+            }
+            
             return response()->json($evidencias);
         } catch (\Exception $e) {
             return response()->json([
@@ -1311,6 +1330,106 @@ class Mod_InspeccionProcesoController extends Controller
             
         } catch (\Exception $e) {
             abort(500, 'Error al generar el PDF: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * AJAX: Obtener videos de evidencia para una OP
+     */
+    public function obtenerVideosEvidenciaCliente($op)
+    {
+        try {
+            // Obtener inspecciones de las estaciones 169 y 175
+            $inspecciones = Siz_InspeccionProceso::on('siz')
+                ->where('IPR_op', $op)
+                ->whereIn('IPR_centroInspeccion', ['169', '175'])
+                ->where('IPR_borrado', 'N')
+                ->where('IPR_estado', 'ACEPTADO')
+                ->orderBy('IPR_centroInspeccion')
+                ->orderBy('IPR_fechaInspeccion')
+                ->get();
+            
+            if ($inspecciones->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'msg' => 'No se encontraron inspecciones para las estaciones 169 y 175'
+                ], 404);
+            }
+            
+            $videosPorInspeccion = [];
+            
+            // Para cada inspección, obtener videos (rubros que empiezan con "Video")
+            foreach ($inspecciones as $inspeccion) {
+                // Obtener detalles del checklist que son videos
+                $detallesVideo = Siz_InspeccionProcesoDetalle::on('siz')
+                    ->join('Siz_Checklist', 'Siz_InspeccionProcesoDetalle.IPD_chkId', '=', 'Siz_Checklist.CHK_id')
+                    ->select(
+                        'Siz_InspeccionProcesoDetalle.*',
+                        'Siz_Checklist.CHK_descripcion',
+                        'Siz_Checklist.CHK_orden'
+                    )
+                    ->where('Siz_InspeccionProcesoDetalle.IPD_iprId', $inspeccion->IPR_id)
+                    ->where('Siz_InspeccionProcesoDetalle.IPD_borrado', 'N')
+                    ->where('Siz_Checklist.CHK_descripcion', 'LIKE', 'Video%')
+                    ->orderBy('Siz_Checklist.CHK_orden')
+                    ->get();
+                
+                // Obtener videos agrupados por CHK_id
+                $videos = Siz_InspeccionProcesoImagen::on('siz')
+                    ->where('IPI_iprId', $inspeccion->IPR_id)
+                    ->where('IPI_borrado', 'N')
+                    ->get();
+                
+                $videosPorChk = [];
+                foreach ($videos as $video) {
+                    $chkId = $video->IPI_descripcion;
+                    
+                    // Verificar si este chkId corresponde a un rubro de video
+                    $esVideo = false;
+                    $chkDescripcion = '';
+                    foreach ($detallesVideo as $detalle) {
+                        if ($detalle->IPD_chkId == $chkId) {
+                            $esVideo = true;
+                            $chkDescripcion = $detalle->CHK_descripcion;
+                            break;
+                        }
+                    }
+                    
+                    if ($esVideo) {
+                        if (!isset($videosPorChk[$chkId])) {
+                            $videosPorChk[$chkId] = [];
+                        }
+                        
+                        $videosPorChk[$chkId][] = [
+                            'ruta' => $video->IPI_ruta,
+                            'id' => $video->IPI_id,
+                            'archivo' => basename($video->IPI_ruta),
+                            'chk_descripcion' => $chkDescripcion
+                        ];
+                    }
+                }
+                
+                if (!empty($videosPorChk)) {
+                    $videosPorInspeccion[] = [
+                        'inspeccion_id' => $inspeccion->IPR_id,
+                        'estacion' => $inspeccion->IPR_nombreCentro,
+                        'estacion_id' => $inspeccion->IPR_centroInspeccion,
+                        'fecha' => $inspeccion->IPR_fechaInspeccion,
+                        'videos' => $videosPorChk
+                    ];
+                }
+            }
+            
+            return response()->json([
+                'success' => true,
+                'videos' => $videosPorInspeccion
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'msg' => 'Error al obtener los videos: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

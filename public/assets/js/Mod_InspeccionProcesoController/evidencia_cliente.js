@@ -102,7 +102,12 @@ function js_iniciador() {
         var tbody = "";
         
         evidencias.forEach(function(evidencia) {
-            var acciones = "<button class=\"btn btn-primary btn-sm btn-ver-pdf\" data-op=\"" + evidencia.OP + "\" title=\"Ver Reporte PDF\"><i class=\"fa fa-file-pdf-o\"></i> Ver PDF</button>";
+            var acciones = "<button class=\"btn btn-danger btn-sm btn-ver-pdf\" data-op=\"" + evidencia.OP + "\" title=\"Ver Reporte PDF\"><i class=\"fa fa-file-pdf-o\"></i> Cliente</button>";
+            
+            // Solo mostrar botón de video si hay videos disponibles
+            if (evidencia.tiene_video) {
+                acciones += " <button class=\"btn btn-info btn-sm btn-ver-video\" data-op=\"" + evidencia.OP + "\" title=\"Ver Video de Evidencia\"><i class=\"fa fa-video-camera\"></i> Video</button>";
+            }
             
             // Formatear fecha
             var fechaFinalizacion = "";
@@ -155,6 +160,74 @@ function js_iniciador() {
             window.open(routeapp + "/home/evidencia-cliente/pdf/" + op, "_blank");
         }
     });
+    
+    // Evento para el botón ver video (abre en nueva pestaña)
+    $(document).on("click", ".btn-ver-video", function() {
+        var op = $(this).data("op");
+        if (op) {
+            abrirVideoEnNuevaPestaña(op);
+        }
+    });
+    
+    // Función para obtener el primer video y abrirlo en una nueva pestaña
+    function abrirVideoEnNuevaPestaña(op) {
+        $.blockUI({
+            message: "<h1>Cargando video...</h1><h3>por favor espere un momento...<i class=\"fa fa-spin fa-spinner\"></i></h3>",
+            css: {
+                border: "none",
+                padding: "16px",
+                width: "50%",
+                top: "40%",
+                left: "30%",
+                backgroundColor: "#fefefe",
+                "-webkit-border-radius": "10px",
+                "-moz-border-radius": "10px",
+                opacity: .7,
+                color: "#000000",
+                baseZ: 2000
+            }
+        });
+        
+        $.ajax({
+            url: routeapp + "/home/evidencia-cliente/videos/" + op,
+            type: "GET",
+            success: function(response) {
+                $.unblockUI();
+                if (response.success && response.videos && response.videos.length > 0) {
+                    // Obtener el primer video de la primera inspección
+                    var primeraInspeccion = response.videos[0];
+                    var primerChkId = Object.keys(primeraInspeccion.videos)[0];
+                    var primerVideo = primeraInspeccion.videos[primerChkId][0];
+                    
+                    // Construir URL del video
+                    var videoUrl = routeapp + "/home/inspeccion-proceso/imagen/" + primerVideo.id;
+                    
+                    // Abrir en nueva pestaña
+                    window.open(videoUrl, '_blank');
+                } else {
+                    swal({
+                        title: "Información",
+                        text: "No se encontraron videos de evidencia para esta OP",
+                        type: "info",
+                        confirmButtonText: "Aceptar"
+                    });
+                }
+            },
+            error: function(xhr) {
+                $.unblockUI();
+                var mensaje = "Error al cargar el video. Intente nuevamente.";
+                if (xhr.responseJSON && xhr.responseJSON.msg) {
+                    mensaje = xhr.responseJSON.msg;
+                }
+                swal({
+                    title: "Error",
+                    text: mensaje,
+                    type: "error",
+                    confirmButtonText: "Aceptar"
+                });
+            }
+        });
+    }
     
     // Cargar datos al iniciar
     cargarEvidencias();
