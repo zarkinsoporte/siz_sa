@@ -734,8 +734,22 @@ public function buscarRechazos(Request $request)
                 }
             }
             
-            // Usar solo el correo del usuario autenticado
-            $correos = [$inspector_correo];
+            // Obtener destinatarios del email (todos los usuarios con Rechazos = 1)
+            $correos_db = DB::select("
+                SELECT 
+                CASE WHEN email like '%@%' THEN email ELSE email + cast('@zarkin.com' as varchar) END AS correo
+                FROM OHEM
+                INNER JOIN Siz_Email AS se ON se.No_Nomina = OHEM.U_EmpGiro
+                WHERE se.Rechazos = 1 AND OHEM.status = 1 AND email IS NOT NULL
+                GROUP BY email
+            ");
+            $correos = array_pluck($correos_db, "correo");
+            
+            // Si no hay destinatarios, usar el correo del inspector
+            if (count($correos) == 0 && !empty($inspector_correo)) {
+                $correos = [$inspector_correo];
+            }
+            
             $destinatarios = $correos;
             
             // Crear PDF
@@ -817,7 +831,7 @@ public function buscarRechazos(Request $request)
             
             return response()->json([
                 "success" => true,
-                "msg" => "Correo enviado exitosamente a " . $inspector_correo
+                "msg" => "Correo enviado exitosamente a " . count($correos) . " destinatario(s)"
             ]);
             
         } catch (\Exception $e) {
