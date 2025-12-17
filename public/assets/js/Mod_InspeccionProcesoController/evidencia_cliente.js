@@ -64,6 +64,9 @@ function js_iniciador() {
         $.ajax({
             url: routeapp + "/home/evidencia-cliente/buscar",
             type: "GET",
+            headers: {
+                'X-CSRF-TOKEN': $("meta[name=\"csrf-token\"]").attr("content")
+            },
             data: {
                 fecha_desde: fechaDesde,
                 fecha_hasta: fechaHasta
@@ -102,7 +105,8 @@ function js_iniciador() {
         var tbody = "";
         
         evidencias.forEach(function(evidencia) {
-            var acciones = "<button class=\"btn btn-danger btn-sm btn-ver-pdf\" data-op=\"" + evidencia.OP + "\" title=\"Ver Reporte PDF\"><i class=\"fa fa-file-pdf-o\"></i> Cliente</button>";
+            var acciones = "<button class=\"btn btn-danger btn-sm btn-ver-pdf\" data-op=\"" + evidencia.OP + "\" title=\"Ver Reporte PDF Cliente\"><i class=\"fa fa-file-pdf-o\"></i> Cliente</button> " +
+                          "<button class=\"btn btn-danger btn-sm btn-ver-pdf-interno\" data-op=\"" + evidencia.OP + "\" title=\"Ver Reporte PDF Interno\"><i class=\"fa fa-file-pdf-o\"></i> Interno</button>";
             
             // Solo mostrar botón de video si hay videos disponibles
             if (evidencia.tiene_video) {
@@ -152,12 +156,21 @@ function js_iniciador() {
         cargarEvidencias();
     });
     
-    // Evento para el botón ver PDF
+    // Evento para el botón ver PDF Cliente
     $(document).on("click", ".btn-ver-pdf", function() {
         var op = $(this).data("op");
         if (op) {
             // Abrir PDF en nueva pestaña
             window.open(routeapp + "/home/evidencia-cliente/pdf/" + op, "_blank");
+        }
+    });
+    
+    // Evento para el botón ver PDF Interno
+    $(document).on("click", ".btn-ver-pdf-interno", function() {
+        var op = $(this).data("op");
+        if (op) {
+            // Abrir PDF interno en nueva pestaña
+            window.open(routeapp + "/home/evidencia-cliente/pdf-interno/" + op, "_blank");
         }
     });
     
