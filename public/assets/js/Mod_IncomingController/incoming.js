@@ -75,6 +75,9 @@ function js_iniciador() {
         $.ajax({
             url: routeapp + "/home/INCOMING/buscar-inspecciones",
             type: "GET",
+            headers: {
+                'X-CSRF-TOKEN': $("meta[name=\"csrf-token\"]").attr("content")
+            },
             data: {
                 fecha_desde: fechaDesde,
                 fecha_hasta: fechaHasta
@@ -184,6 +187,9 @@ function js_iniciador() {
         $.ajax({
             url: routeapp + "/home/INCOMING/detalle-inspecciones",
             type: "GET",
+            headers: {
+                'X-CSRF-TOKEN': $("meta[name=\"csrf-token\"]").attr("content")
+            },
             data: { 
                 doc_num: docNum,
                 line_num: lineNum,
@@ -231,6 +237,9 @@ function js_iniciador() {
         $.ajax({
             url: routeapp + "/home/INCOMING/resumen-piel",
             type: "GET",
+            headers: {
+                'X-CSRF-TOKEN': $("meta[name=\"csrf-token\"]").attr("content")
+            },
             data: { 
                 doc_num: docNum,
                 line_num: lineNum,
@@ -574,9 +583,11 @@ function js_iniciador() {
             $.ajax({
                 url: routeapp + "/home/INCOMING/eliminar-inspeccion",
                 type: "POST",
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
                 data: { 
-                    inc_id: incId,
-                    _token: $('meta[name="csrf-token"]').attr('content')
+                    inc_id: incId
                 },
                 success: function(resp) {
                     if (resp.success) {
@@ -590,6 +601,9 @@ function js_iniciador() {
                             $.ajax({
                                 url: routeapp + "/home/INCOMING/detalle-inspecciones",
                                 type: "GET",
+                                headers: {
+                                    'X-CSRF-TOKEN': $("meta[name=\"csrf-token\"]").attr("content")
+                                },
                                 data: { 
                                     doc_num: docNum,
                                     line_num: lineNum,

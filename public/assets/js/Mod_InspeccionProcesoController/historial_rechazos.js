@@ -32,6 +32,9 @@ function renderHistorialRechazos() {
     $.ajax({
         url: routeapp + '/home/inspeccion-proceso/historial-completo',
         type: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
         data: {
             op: opData.OP,
             centro: centroInspeccionData.id

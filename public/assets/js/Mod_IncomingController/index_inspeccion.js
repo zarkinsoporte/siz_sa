@@ -98,7 +98,15 @@ function js_iniciador() {
             }
         });
         
-        $.getJSON(routeapp+'/home/INSPECCION/buscar', {numero_entrada: numero}, function(data){
+        $.ajax({
+            url: routeapp+'/home/INSPECCION/buscar',
+            type: 'GET',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            data: {numero_entrada: numero},
+            dataType: 'json',
+            success: function(data){
             materiales = data;
             if(materiales.length > 0) {
                 renderCabecera(materiales[0]);
@@ -116,15 +124,17 @@ function js_iniciador() {
             }
             // Ocultar blockUI
             $.unblockUI();
-        }).fail(function() {
-            // Ocultar blockUI en caso de error
-            $.unblockUI();
-            swal({
-                title: 'Error',
-                text: 'Error en la búsqueda. Intente nuevamente.',
-                type: 'error',
-                confirmButtonText: 'Aceptar'
-            });
+            },
+            error: function() {
+                // Ocultar blockUI en caso de error
+                $.unblockUI();
+                swal({
+                    title: 'Error',
+                    text: 'Error en la búsqueda. Intente nuevamente.',
+                    type: 'error',
+                    confirmButtonText: 'Aceptar'
+                });
+            }
         });
     }
     
@@ -379,9 +389,17 @@ function js_iniciador() {
         });
         
         // Cargar datos de la inspección existente
-        $.getJSON(routeapp+'/home/INSPECCION/ver-inspeccion', {
-            inc_id: inspeccionId
-        }, function(data){
+        $.ajax({
+            url: routeapp+'/home/INSPECCION/ver-inspeccion',
+            type: 'GET',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            data: {
+                inc_id: inspeccionId
+            },
+            dataType: 'json',
+            success: function(data){
             console.log('Datos recibidos:', data);
             
             checklist = data.checklist;
@@ -401,15 +419,17 @@ function js_iniciador() {
             $('#inspeccion_container').show();
             // Ocultar blockUI
             $.unblockUI();
-        }).fail(function() {
-            // Ocultar blockUI en caso de error
-            $.unblockUI();
-            swal({
-                title: 'Error',
-                text: 'Error al cargar la inspección',
-                type: 'error',
-                confirmButtonText: 'Aceptar'
-            });
+            },
+            error: function() {
+                // Ocultar blockUI en caso de error
+                $.unblockUI();
+                swal({
+                    title: 'Error',
+                    text: 'Error al cargar la inspección',
+                    type: 'error',
+                    confirmButtonText: 'Aceptar'
+                });
+            }
         });
     });
     
@@ -625,6 +645,9 @@ function js_iniciador() {
         $.ajax({
             url: routeapp + '/home/INSPECCION/ver-piel',
             type: 'GET',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
             data: { inc_id: incId },
             success: function(response) {
                 $.unblockUI();
@@ -1162,6 +1185,9 @@ function js_iniciador() {
         $.ajax({
             url: '/incoming/verInspeccion',
             type: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
             data: { inc_id: incId },
             success: function(response) {
                 if (response.success) {

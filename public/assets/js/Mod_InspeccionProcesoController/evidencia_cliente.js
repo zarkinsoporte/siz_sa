@@ -204,6 +204,9 @@ function js_iniciador() {
         $.ajax({
             url: routeapp + "/home/evidencia-cliente/videos/" + op,
             type: "GET",
+            headers: {
+                'X-CSRF-TOKEN': $("meta[name=\"csrf-token\"]").attr("content")
+            },
             success: function(response) {
                 $.unblockUI();
                 if (response.success && response.videos && response.videos.length > 0) {

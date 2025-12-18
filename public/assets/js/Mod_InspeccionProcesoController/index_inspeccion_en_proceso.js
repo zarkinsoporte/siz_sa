@@ -119,39 +119,49 @@ function js_iniciador() {
             }
         });
         
-        $.getJSON(routeapp+'/home/inspeccion-proceso/buscar', {
-            op: numeroOP
-        }, function(data){
-            if(data.success) {
-                opData = data.op;
-                centroInspeccionData = data.centro_inspeccion;
-                checklist = data.checklist;
-                historial = data.historial;
-                inspeccionesPrevias = data.inspecciones_previas;
-                respuestas = {};
-                evidencias = {}; // Resetear evidencias para nueva OP
-                estacionesCalidadAgregadas = []; // Resetear estaciones agregadas para nueva OP
-                
-                // Renderizar información
-                renderCabeceraOP();
-                renderChecklist();
-                renderResumen();
-                $('#inspeccion_container').show();
-                $('#cabecera_nota').show();
+        $.ajax({
+            url: routeapp+'/home/inspeccion-proceso/buscar',
+            type: 'GET',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            data: {
+                op: numeroOP
+            },
+            dataType: 'json',
+            success: function(data){
+                if(data.success) {
+                    opData = data.op;
+                    centroInspeccionData = data.centro_inspeccion;
+                    checklist = data.checklist;
+                    historial = data.historial;
+                    inspeccionesPrevias = data.inspecciones_previas;
+                    respuestas = {};
+                    evidencias = {}; // Resetear evidencias para nueva OP
+                    estacionesCalidadAgregadas = []; // Resetear estaciones agregadas para nueva OP
+                    
+                    // Renderizar información
+                    renderCabeceraOP();
+                    renderChecklist();
+                    renderResumen();
+                    $('#inspeccion_container').show();
+                    $('#cabecera_nota').show();
+                }
+                $.unblockUI();
+            },
+            error: function(jqXHR) {
+                $.unblockUI();
+                var mensaje = 'Error en la búsqueda. Intente nuevamente.';
+                if(jqXHR.responseJSON && jqXHR.responseJSON.msg) {
+                    mensaje = jqXHR.responseJSON.msg;
+                }
+                swal({
+                    title: 'Error',
+                    text: mensaje,
+                    type: 'error',
+                    confirmButtonText: 'Aceptar'
+                });
             }
-            $.unblockUI();
-        }).fail(function(jqXHR) {
-            $.unblockUI();
-            var mensaje = 'Error en la búsqueda. Intente nuevamente.';
-            if(jqXHR.responseJSON && jqXHR.responseJSON.msg) {
-                mensaje = jqXHR.responseJSON.msg;
-            }
-            swal({
-                title: 'Error',
-                text: mensaje,
-                type: 'error',
-                confirmButtonText: 'Aceptar'
-            });
         });
     }
     
@@ -899,6 +909,9 @@ function js_iniciador() {
             $.ajax({
                 url: routeapp + '/home/inspeccion-proceso/defectivos-estacion',
                 type: 'GET',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
                 data: { 
                     area: estacionSeleccionada,
                     op: opData.OP
@@ -1330,6 +1343,9 @@ function js_iniciador() {
         $.ajax({
             url: routeapp + '/home/inspeccion-proceso/historial-completo',
             type: 'GET',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
             data: { 
                 op: opData.OP,
                 centro: centroInspeccionData.id
