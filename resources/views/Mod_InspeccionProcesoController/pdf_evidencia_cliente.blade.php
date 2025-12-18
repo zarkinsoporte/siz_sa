@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evidencia de Cliente - OP {{ $orden->OP }}</title>
+    <title>{{ $titulo_pdf ?? 'Evidencia' }} - OP {{ $orden->OP }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -107,6 +107,16 @@
         }
         
         .estado-no-cumple {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .estado-aceptado {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .estado-rechazado {
             color: #dc3545;
             font-weight: bold;
         }
@@ -215,8 +225,20 @@
                         Fecha: {{ date('d/m/Y H:i', strtotime($inspeccion->IPR_fechaInspeccion)) }}
                     </h3>
                     <p style="margin: 5px 0 0 0; font-size: 10px;">
-
-                        Cantidad Inspeccionada: {{ number_format($inspeccion->IPR_cantInspeccionada, 2) }}
+                        Estado:
+                        @if(($inspeccion->IPR_estado ?? '') === 'RECHAZADO')
+                            <span class="estado-rechazado">RECHAZADO</span>
+                        @else
+                            <span class="estado-aceptado">ACEPTADO</span>
+                        @endif
+                        &nbsp;|&nbsp;
+                        Inspector: {{ $inspeccion->IPR_nomInspector ?? 'N/A' }}
+                        &nbsp;|&nbsp;
+                        Cantidad Inspeccionada: {{ number_format($inspeccion->IPR_cantInspeccionada ?? 0, 2) }}
+                        @if(isset($inspeccion->IPR_cantRechazada) && floatval($inspeccion->IPR_cantRechazada) > 0)
+                            &nbsp;|&nbsp;
+                            Cantidad Rechazada: {{ number_format($inspeccion->IPR_cantRechazada, 2) }}
+                        @endif
                     </p>
                 </div>
                 
@@ -267,18 +289,16 @@
                         <div class="images-grid">
                             @foreach($inspeccion->imagenes as $chkId => $imagenesChk)
                                 @foreach($imagenesChk as $imagen)
+                                    @if(!empty($imagen['base64']))
                                     <div class="image-item">
                                         <div class="image-container">
-                                            @if(!empty($imagen['base64']))
-                                                <img src="{{ $imagen['base64'] }}" alt="Evidencia">
-                                            @else
-                                                <p style="color: #dc3545;">Imagen no disponible</p>
-                                            @endif
+                                            <img src="{{ $imagen['base64'] }}" alt="Evidencia">
                                             <div class="image-label">
                                                 {{ $imagen['chk_descripcion'] ?? 'Item ' . $chkId }}
                                             </div>
                                         </div>
                                     </div>
+                                    @endif
                                 @endforeach
                             @endforeach
                         </div>

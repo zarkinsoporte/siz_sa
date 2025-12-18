@@ -1271,7 +1271,10 @@ class Mod_InspeccionProcesoController extends Controller
                     if (file_exists($img->IPI_ruta)) {
                         $imagenData = file_get_contents($img->IPI_ruta);
                         $mimeType = mime_content_type($img->IPI_ruta);
-                        $imagenBase64 = 'data:' . $mimeType . ';base64,' . base64_encode($imagenData);
+                        // Solo embebemos imágenes en el PDF (ignorar videos u otros archivos)
+                        if ($mimeType && strpos($mimeType, 'image/') === 0) {
+                            $imagenBase64 = 'data:' . $mimeType . ';base64,' . base64_encode($imagenData);
+                        }
                     }
                     
                     // Obtener descripción del checklist
@@ -1312,7 +1315,8 @@ class Mod_InspeccionProcesoController extends Controller
                 'empresa' => $empresa,
                 'fechaImpresion' => date('d/m/Y H:i:s'),
                 'imageCount' => 0,
-                'chkDesc' => ''
+                'chkDesc' => '',
+                'titulo_pdf' => 'Evidencia de Cliente'
             ];
             
             $pdf = \SPDF::loadView('Mod_InspeccionProcesoController.pdf_evidencia_cliente', $data);
@@ -1360,11 +1364,11 @@ class Mod_InspeccionProcesoController extends Controller
                 abort(404, 'Orden de Producción no encontrada');
             }
             
-            // Obtener TODAS las inspecciones (no solo 169 y 175)
+            // Obtener TODAS las inspecciones (todas las estaciones) incluyendo ACEPTADO y RECHAZADO
             $inspecciones = Siz_InspeccionProceso::on('siz')
                 ->where('IPR_op', $op)
                 ->where('IPR_borrado', 'N')
-                ->where('IPR_estado', 'ACEPTADO')
+                ->whereIn('IPR_estado', ['ACEPTADO', 'RECHAZADO'])
                 ->orderBy('IPR_centroInspeccion')
                 ->orderBy('IPR_fechaInspeccion')
                 ->get();
@@ -1414,7 +1418,10 @@ class Mod_InspeccionProcesoController extends Controller
                     if (file_exists($img->IPI_ruta)) {
                         $imagenData = file_get_contents($img->IPI_ruta);
                         $mimeType = mime_content_type($img->IPI_ruta);
-                        $imagenBase64 = 'data:' . $mimeType . ';base64,' . base64_encode($imagenData);
+                        // Solo embebemos imágenes en el PDF (ignorar videos u otros archivos)
+                        if ($mimeType && strpos($mimeType, 'image/') === 0) {
+                            $imagenBase64 = 'data:' . $mimeType . ';base64,' . base64_encode($imagenData);
+                        }
                     }
                     
                     // Obtener descripción del checklist
@@ -1455,7 +1462,8 @@ class Mod_InspeccionProcesoController extends Controller
                 'empresa' => $empresa,
                 'fechaImpresion' => date('d/m/Y H:i:s'),
                 'imageCount' => 0,
-                'chkDesc' => ''
+                'chkDesc' => '',
+                'titulo_pdf' => 'Evidencia Interna'
             ];
             
             $pdf = \SPDF::loadView('Mod_InspeccionProcesoController.pdf_evidencia_cliente', $data);
