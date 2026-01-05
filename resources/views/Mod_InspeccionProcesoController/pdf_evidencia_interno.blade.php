@@ -133,25 +133,24 @@
         
         .image-item {
             display: inline-block;
-            width: 76%;
-            padding: 8px;
+            width: 48%;
+            padding: 5px;
             vertical-align: top;
             page-break-inside: avoid;
             box-sizing: border-box;
-            margin-bottom: 15px;
         }
         
         .image-container {
             border: 1px solid #dee2e6;
             border-radius: 5px;
-            padding: 8px;
+            padding: 5px;
             text-align: center;
             background-color: #f8f9fa;
         }
         
         .image-container img {
             max-width: 100%;
-            max-height: 450px;
+            max-height: 200px;
             height: auto;
             border-radius: 3px;
             display: block;
@@ -222,7 +221,7 @@
             <div class="inspeccion-section {{ ($index > 0 && $index < count($inspecciones) - 1) ? 'page-break' : '' }}">
                 <div class="inspeccion-header">
                     <h3>
-                        Estación: {{ substr($inspeccion->IPR_nombreCentro, 3) }} - 
+                        Estación: {{ $inspeccion->IPR_nombreCentro }} - 
                         Fecha: {{ date('d/m/Y H:i', strtotime($inspeccion->IPR_fechaInspeccion)) }}
                     </h3>
                     <p style="margin: 5px 0 0 0; font-size: 10px;">

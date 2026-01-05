@@ -19,6 +19,9 @@ function manejarChecklist(chkId, valor) {
     var requiereEvidencia = btnEvidencia.attr('data-requiere-foto') === '1';
     var tipoEvidencia = btnEvidencia.attr('data-tipo-evidencia') || 'imagen';
     
+    // Verificar si hay al menos un "No Cumple" en el checklist
+    var hayNoCumple = $('input[type="radio"][value="No Cumple"]:checked').length > 0;
+    
     if (valor === 'No Cumple') {
         textareaObservacion.prop('required', true);
         textareaObservacion.attr('placeholder', 'OBSERVACIÓN OBLIGATORIA');
@@ -31,8 +34,9 @@ function manejarChecklist(chkId, valor) {
         textareaObservacion.prop('required', false);
         textareaObservacion.attr('placeholder', '');
         
-        // Si requiere evidencia, siempre mostrar como obligatorio
-        if (requiereEvidencia) {
+        // Si requiere evidencia (Foto/Video), solo es obligatorio si NO hay ningún "No Cumple"
+        // Si hay al menos un "No Cumple", las evidencias de Foto/Video ya no son obligatorias
+        if (requiereEvidencia && !hayNoCumple) {
             if (tipoEvidencia === 'video') {
                 btnEvidencia.attr('title', 'Adjuntar Video (OBLIGATORIO)');
             } else {
@@ -48,7 +52,7 @@ function manejarChecklist(chkId, valor) {
     // Actualizar respuestas
     respuestas[chkId] = valor;
     
-    // Actualizar visibilidad de botones según si hay "No Cumple"
+    // Actualizar visibilidad de botones y estado de evidencias obligatorias según si hay "No Cumple"
     actualizarBotonesInspeccion();
 }
 
@@ -61,10 +65,43 @@ function actualizarBotonesInspeccion() {
         // Si hay al menos un "No Cumple", mostrar solo el botón RECHAZADO
         $('#guardar_inspeccion').hide();
         $('#guardar_rechazo').show();
+        
+        // Actualizar títulos de evidencias de "Foto" y "Video" para que NO sean obligatorias
+        $('.btnEvidencia[data-requiere-foto="1"]').each(function() {
+            var chkId = $(this).siblings('.inputEvidencia').attr('name').replace('img_', '');
+            var tipoEvidencia = $(this).attr('data-tipo-evidencia') || 'imagen';
+            var radioSeleccionado = $('input[name="checklist_' + chkId + '"]:checked').val();
+            
+            // Solo cambiar el título si NO está marcado como "No Cumple"
+            // Si está marcado como "No Cumple", ya se maneja en manejarChecklist
+            if (radioSeleccionado !== 'No Cumple') {
+                if (tipoEvidencia === 'video') {
+                    $(this).attr('title', 'Adjuntar Video');
+                } else {
+                    $(this).attr('title', 'Adjuntar Evidencia');
+                }
+            }
+        });
     } else {
         // Si no hay "No Cumple", mostrar solo el botón ACEPTADO
         $('#guardar_inspeccion').show();
         $('#guardar_rechazo').hide();
+        
+        // Restaurar títulos de evidencias de "Foto" y "Video" como obligatorias
+        $('.btnEvidencia[data-requiere-foto="1"]').each(function() {
+            var chkId = $(this).siblings('.inputEvidencia').attr('name').replace('img_', '');
+            var tipoEvidencia = $(this).attr('data-tipo-evidencia') || 'imagen';
+            var radioSeleccionado = $('input[name="checklist_' + chkId + '"]:checked').val();
+            
+            // Solo cambiar el título si NO está marcado como "No Cumple"
+            if (radioSeleccionado !== 'No Cumple') {
+                if (tipoEvidencia === 'video') {
+                    $(this).attr('title', 'Adjuntar Video (OBLIGATORIO)');
+                } else {
+                    $(this).attr('title', 'Adjuntar Evidencia (OBLIGATORIO)');
+                }
+            }
+        });
     }
 }
 
@@ -406,18 +443,28 @@ function js_iniciador() {
         });
         
         // Inicializar items que empiezan con "Foto" o "Video" (centros 169 y 175)
-        // Estos items siempre requieren evidencia, independientemente del radio button
+        // Estos items requieren evidencia SOLO si NO hay ningún "No Cumple" en el checklist
+        var hayNoCumple = $('input[type="radio"][value="No Cumple"]:checked').length > 0;
+        
         $('.btnEvidencia[data-requiere-foto="1"]').each(function() {
             var chkId = $(this).siblings('.inputEvidencia').attr('name').replace('img_', '');
             var radioSeleccionado = $('input[name="checklist_' + chkId + '"]:checked').val();
             var tipoEvidencia = $(this).attr('data-tipo-evidencia') || 'imagen';
             
-            // Los items que empiezan con "Foto" o "Video" SIEMPRE requieren evidencia, sin importar el radio button
-            // Por lo tanto, siempre mostrar como obligatorio
-            if (tipoEvidencia === 'video') {
-                $(this).attr('title', 'Adjuntar Video (OBLIGATORIO)');
+            // Si hay al menos un "No Cumple", las evidencias de "Foto" y "Video" ya NO son obligatorias
+            // Solo son obligatorias si NO hay ningún "No Cumple" y el item no está marcado como "No Cumple"
+            if (!hayNoCumple && radioSeleccionado !== 'No Cumple') {
+                if (tipoEvidencia === 'video') {
+                    $(this).attr('title', 'Adjuntar Video (OBLIGATORIO)');
+                } else {
+                    $(this).attr('title', 'Adjuntar Evidencia (OBLIGATORIO)');
+                }
             } else {
-                $(this).attr('title', 'Adjuntar Evidencia (OBLIGATORIO)');
+                if (tipoEvidencia === 'video') {
+                    $(this).attr('title', 'Adjuntar Video');
+                } else {
+                    $(this).attr('title', 'Adjuntar Evidencia');
+                }
             }
             
             // Si hay un radio seleccionado, llamar a manejarChecklist para asegurar el estado correcto
@@ -1025,25 +1072,30 @@ function js_iniciador() {
         });
         
         // Validar evidencias obligatorias (Fotos y Videos) para items que empiezan con "Foto" o "Video" (centros 169 y 175)
-        // Estos items siempre requieren evidencia, independientemente del radio button
+        // IMPORTANTE: Si hay al menos un "No Cumple", estas evidencias ya NO son obligatorias
+        var hayNoCumple = $('input[type="radio"][value="No Cumple"]:checked').length > 0;
         var rubrosSinVideo = [];
-        $('input[type="file"].inputEvidencia[data-requiere-foto="1"]').each(function() {
-            var chkId = $(this).attr('name').replace('img_', '');
-            var tipoEvidencia = $(this).attr('data-tipo-evidencia') || 'imagen';
-            
-            if (!this.files || this.files.length === 0) {
-                var checklistItem = checklist.find(function(item) {
-                    return item.CHK_id == chkId;
-                });
-                var descripcion = checklistItem ? checklistItem.CHK_descripcion : 'Rubro ' + chkId;
+        
+        // Solo validar evidencias de "Foto" y "Video" si NO hay ningún "No Cumple"
+        if (!hayNoCumple) {
+            $('input[type="file"].inputEvidencia[data-requiere-foto="1"]').each(function() {
+                var chkId = $(this).attr('name').replace('img_', '');
+                var tipoEvidencia = $(this).attr('data-tipo-evidencia') || 'imagen';
                 
-                if (tipoEvidencia === 'video') {
-                    rubrosSinVideo.push(descripcion);
-                } else {
-                    rubrosSinImagenFoto.push(descripcion);
+                if (!this.files || this.files.length === 0) {
+                    var checklistItem = checklist.find(function(item) {
+                        return item.CHK_id == chkId;
+                    });
+                    var descripcion = checklistItem ? checklistItem.CHK_descripcion : 'Rubro ' + chkId;
+                    
+                    if (tipoEvidencia === 'video') {
+                        rubrosSinVideo.push(descripcion);
+                    } else {
+                        rubrosSinImagenFoto.push(descripcion);
+                    }
                 }
-            }
-        });
+            });
+        }
         
         var errores = [];
         if (rubrosSinObservacion.length > 0) {

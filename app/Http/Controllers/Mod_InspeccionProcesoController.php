@@ -1126,38 +1126,65 @@ class Mod_InspeccionProcesoController extends Controller
     public function buscarEvidenciasCliente(Request $request)
     {
         try {
+            $op = $request->input('op', '');
             $fechaDesde = $request->input('fecha_desde', '');
             $fechaHasta = $request->input('fecha_hasta', '');
             
-            // Si no se envían fechas, usar los últimos 3 meses
-            if (empty($fechaDesde)) {
-                $fechaDesde = date('Y-m-d', strtotime('-3 months'));
+            // Si se busca por OP específica, ignorar filtros de fecha
+            if (!empty($op)) {
+                // Buscar inspecciones de estación 175 aceptadas para la OP específica
+                $evidencias = DB::select("
+                    SELECT DISTINCT
+                        IPR.IPR_op AS OP,
+                        OWOR.ItemCode AS CodigoArticulo,
+                        OITM.ItemName AS NombreArticulo,
+                        OWOR.OriginNum AS Pedido,
+                        ORDR.CardName AS Cliente,
+                        OWOR.DueDate AS FechaFinalizacion,
+                        OWOR.PlannedQty AS Cantidad
+                    FROM Siz_InspeccionProceso IPR
+                    INNER JOIN OWOR ON IPR.IPR_op = OWOR.DocNum
+                    INNER JOIN OITM ON OWOR.ItemCode = OITM.ItemCode
+                    LEFT JOIN ORDR ON OWOR.OriginNum = ORDR.DocNum
+                    WHERE IPR.IPR_centroInspeccion = '175'
+                        AND IPR.IPR_estado = 'ACEPTADO'
+                        AND IPR.IPR_borrado = 'N'
+                        AND IPR.IPR_op = ?
+                        AND (OWOR.Status = 'C' OR OWOR.Status = 'L' OR OWOR.CmpltQty >= OWOR.PlannedQty)
+                    ORDER BY OWOR.DueDate DESC, IPR.IPR_op DESC
+                ", [$op]);
+            } else {
+                // Si no se envían fechas, usar los últimos 3 meses
+                if (empty($fechaDesde)) {
+                    $fechaDesde = date('Y-m-d', strtotime('-3 months'));
+                }
+                
+                if (empty($fechaHasta)) {
+                    $fechaHasta = date('Y-m-d');
+                }
+                
+                // Buscar inspecciones de estación 175 aceptadas y luego complementar con información de SAP
+                $evidencias = DB::select("
+                    SELECT DISTINCT
+                        IPR.IPR_op AS OP,
+                        OWOR.ItemCode AS CodigoArticulo,
+                        OITM.ItemName AS NombreArticulo,
+                        OWOR.OriginNum AS Pedido,
+                        ORDR.CardName AS Cliente,
+                        OWOR.DueDate AS FechaFinalizacion,
+                        OWOR.PlannedQty AS Cantidad
+                    FROM Siz_InspeccionProceso IPR
+                    INNER JOIN OWOR ON IPR.IPR_op = OWOR.DocNum
+                    INNER JOIN OITM ON OWOR.ItemCode = OITM.ItemCode
+                    LEFT JOIN ORDR ON OWOR.OriginNum = ORDR.DocNum
+                    WHERE IPR.IPR_centroInspeccion = '175'
+                        AND IPR.IPR_estado = 'ACEPTADO'
+                        AND IPR.IPR_borrado = 'N'
+                        AND OWOR.DueDate BETWEEN ? AND ?
+                        AND (OWOR.Status = 'C' OR OWOR.Status = 'L' OR OWOR.CmpltQty >= OWOR.PlannedQty)
+                    ORDER BY OWOR.DueDate DESC, IPR.IPR_op DESC
+                ", [$fechaDesde, $fechaHasta]);
             }
-            
-            if (empty($fechaHasta)) {
-                $fechaHasta = date('Y-m-d');
-            }
-            // Buscar inspecciones de estación 175 aceptadas y luego complementar con información de SAP
-            $evidencias = DB::select("
-                SELECT DISTINCT
-                    IPR.IPR_op AS OP,
-                    OWOR.ItemCode AS CodigoArticulo,
-                    OITM.ItemName AS NombreArticulo,
-                    OWOR.OriginNum AS Pedido,
-                    ORDR.CardName AS Cliente,
-                    OWOR.DueDate AS FechaFinalizacion,
-                    OWOR.PlannedQty AS Cantidad
-                FROM Siz_InspeccionProceso IPR
-                INNER JOIN OWOR ON IPR.IPR_op = OWOR.DocNum
-                INNER JOIN OITM ON OWOR.ItemCode = OITM.ItemCode
-                LEFT JOIN ORDR ON OWOR.OriginNum = ORDR.DocNum
-                WHERE IPR.IPR_centroInspeccion = '175'
-                    AND IPR.IPR_estado = 'ACEPTADO'
-                    AND IPR.IPR_borrado = 'N'
-                    AND OWOR.DueDate BETWEEN ? AND ?
-                    AND (OWOR.Status = 'C' OR OWOR.Status = 'L' OR OWOR.CmpltQty >= OWOR.PlannedQty)
-                ORDER BY OWOR.DueDate DESC, IPR.IPR_op DESC
-            ", [$fechaDesde, $fechaHasta]);
             
             // Para cada OP, verificar si tiene videos
             foreach ($evidencias as $evidencia) {
@@ -1466,7 +1493,7 @@ class Mod_InspeccionProcesoController extends Controller
                 'titulo_pdf' => 'Evidencia Interna'
             ];
             
-            $pdf = \SPDF::loadView('Mod_InspeccionProcesoController.pdf_evidencia_cliente', $data);
+            $pdf = \SPDF::loadView('Mod_InspeccionProcesoController.pdf_evidencia_interno', $data);
             $pdf->setOption('header-html', $headerHtml);
             $pdf->setOption('footer-center', 'Pagina [page] de [toPage]');
             $pdf->setOption('footer-left', 'SIZ');

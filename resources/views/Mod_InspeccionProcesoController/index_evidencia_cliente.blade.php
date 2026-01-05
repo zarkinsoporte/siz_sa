@@ -53,21 +53,29 @@
                     </div>
                     <div class="panel-body">
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="filtro_op">Buscar por OP:</label>
+                                    <input type="text" id="filtro_op" class="form-control" placeholder="Ingrese OP y presione Enter">
+                                </div>
+                            </div>
+                            <!-- ó Filtrar por fecha -->
+                            
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="filtro_fecha_desde">Fecha Desde:</label>
                                     <input type="date" id="filtro_fecha_desde" class="form-control">
                                 </div>
                             </div>
                             
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="filtro_fecha_hasta">Fecha Hasta:</label>
                                     <input type="date" id="filtro_fecha_hasta" class="form-control">
                                 </div>
                             </div>
                             
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label>&nbsp;</label>
                                     <button type="button" id="btn_buscar_evidencias" class="btn btn-primary btn-block">

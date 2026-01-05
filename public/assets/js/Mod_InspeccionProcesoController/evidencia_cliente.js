@@ -31,16 +31,20 @@ function js_iniciador() {
     function cargarEvidencias() {
         var fechaDesde = $("#filtro_fecha_desde").val();
         var fechaHasta = $("#filtro_fecha_hasta").val();
+        var op = $("#filtro_op").val().trim();
         
-        // Validar fechas
-        if (fechaDesde && fechaHasta && new Date(fechaDesde) > new Date(fechaHasta)) {
-            swal({
-                title: "Error",
-                text: "La fecha desde no puede ser mayor a la fecha hasta",
-                type: "error",
-                confirmButtonText: "Aceptar"
-            });
-            return;
+        // Si se busca por OP, no validar fechas
+        if (!op) {
+            // Validar fechas solo si no se está buscando por OP
+            if (fechaDesde && fechaHasta && new Date(fechaDesde) > new Date(fechaHasta)) {
+                swal({
+                    title: "Error",
+                    text: "La fecha desde no puede ser mayor a la fecha hasta",
+                    type: "error",
+                    confirmButtonText: "Aceptar"
+                });
+                return;
+            }
         }
         
         // Mostrar blockUI
@@ -68,6 +72,7 @@ function js_iniciador() {
                 'X-CSRF-TOKEN': $("meta[name=\"csrf-token\"]").attr("content")
             },
             data: {
+                op: op || null,
                 fecha_desde: fechaDesde,
                 fecha_hasta: fechaHasta
             },
@@ -149,11 +154,28 @@ function js_iniciador() {
                 responsive: true
             });
         }
+    if (evidencias.length === 0) {
+        //$("#tabla_evidencias tbody").html("<tr><td colspan='6' class='text-center'>No se encontraron evidencias</td></tr>");
+        swal({
+            title: "Información",
+            text: "No se encontraron evidencias para la OP.",
+            type: "info",
+            confirmButtonText: "Aceptar"
+        });
+    }
     }
     
     // Evento para el botón buscar
     $("#btn_buscar_evidencias").off("click").on("click", function() {
         cargarEvidencias();
+    });
+    
+    // Evento para buscar por OP al presionar Enter
+    $("#filtro_op").off("keypress").on("keypress", function(e) {
+        if (e.which === 13) { // Enter key
+            e.preventDefault();
+            cargarEvidencias();
+        }
     });
     
     // Evento para el botón ver PDF Cliente
