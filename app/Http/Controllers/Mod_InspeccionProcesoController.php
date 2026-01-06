@@ -1479,8 +1479,6 @@ class Mod_InspeccionProcesoController extends Controller
             $pdf->setOption('margin-left', '5mm');
             $pdf->setOption('margin-right', '5mm');
             $pdf->setOption('page-size', 'Letter');
-            // Aumentar timeout para wkhtmltopdf
-            $pdf->setOption('timeout', 300);
             
             \Log::info("INSPECCION_PROCESO_PDF: PDF generado exitosamente para OP: {$op}");
             
