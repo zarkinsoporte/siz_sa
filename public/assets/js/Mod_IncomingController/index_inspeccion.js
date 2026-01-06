@@ -489,11 +489,11 @@ function js_iniciador() {
                         return;
                     }
      
-                    // Validar tamaño (máximo 5MB por archivo)
-                    if(file.size > 5 * 1024 * 1024) {
+                    // Validar tamaño (máximo 10MB por archivo)
+                    if(file.size > 10 * 1024 * 1024) {
                         swal({
                             title: 'Archivo demasiado grande',
-                            text: 'El archivo no debe superar 5MB',
+                            text: 'El archivo no debe superar 10MB',
                             type: 'error',
                             confirmButtonText: 'Aceptar'
                         });

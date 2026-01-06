@@ -349,11 +349,11 @@ function js_iniciador() {
                             return;
                         }
          
-                        // Tamaño máximo para videos: 50MB
-                        if(file.size > 50 * 1024 * 1024) {
+                        // Tamaño máximo para videos: 60MB
+                        if(file.size > 60 * 1024 * 1024) {
                             swal({
                                 title: 'Archivo demasiado grande',
-                                text: 'El video no debe superar 50MB',
+                                text: 'El video no debe superar 60MB',
                                 type: 'error',
                                 confirmButtonText: 'Aceptar'
                             });
@@ -388,10 +388,10 @@ function js_iniciador() {
                             return;
                         }
      
-                        if(file.size > 5 * 1024 * 1024) {
+                        if(file.size > 10 * 1024 * 1024) {
                             swal({
                                 title: 'Archivo demasiado grande',
-                                text: 'El archivo no debe superar 5MB',
+                                text: 'El archivo no debe superar 10MB',
                                 type: 'error',
                                 confirmButtonText: 'Aceptar'
                             });
