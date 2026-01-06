@@ -36,7 +36,7 @@ return [
     'pdf' => [
         'enabled' => true,
         'binary'  => '"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"', 
-        'timeout' => false,
+        'timeout' => 300, // 5 minutos para PDFs grandes con muchas imágenes
         'options' => array(
            
             'footer-center' => 'Page [page] of [toPage]',
