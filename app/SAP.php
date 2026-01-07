@@ -58,7 +58,18 @@ class SAP extends Model
     }
     public static function updateImpresoOrden($orden, $impreso)
     {
-        
+        self::$vCmp = new COM('SAPbobsCOM.company') or die("Sin conexión");
+        self::$vCmp->DbServerType = "10";
+        self::$vCmp->server = "".env('SAP_server');
+        self::$vCmp->LicenseServer = "".env('SAP_LicenseServer');
+        self::$vCmp->CompanyDB = "".env('SAP_CompanyDB');
+        self::$vCmp->username = "".env('SAP_username');
+        self::$vCmp->password = "".env('SAP_password');
+        self::$vCmp->DbUserName = "".env('SAP_DbUserName');
+        self::$vCmp->DbPassword = "".env('SAP_DbPassword');
+        self::$vCmp->UseTrusted = false;
+        //self::$vCmp->language = "6";
+        $lRetCode = self::$vCmp->Connect;
         (self::$vCmp == false) ? self::Connect() : '';
         $vItem = self::$vCmp->GetBusinessObject("202");
         $RetVal = $vItem->GetByKey($orden."");
