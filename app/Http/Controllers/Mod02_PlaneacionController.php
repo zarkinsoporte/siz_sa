@@ -245,8 +245,18 @@ public function liberacion_op(Request $request){
                            $mensajeErrr = 'Error No se logro cambiar(liberar) el estado en SAP. OP#'.$op;
                         }else {
                             //quitar de CP
-                            $code = OP::where('U_DocEntry', $op)->first();                            
-                            $code->delete();
+                            $code = OP::where('U_DocEntry', $op)->first();
+                            if($code){
+                                $code->delete();
+                            } else {
+                                // Si no existe el registro en CP_OF, solo registramos un mensaje informativo
+                                // ya que el cambio de estado en SAP fue exitoso
+                                if(empty($mensajeErrr)){
+                                    $mensajeErrr = 'Advertencia: La OP#'.$op.' no se encontró en Control de Piso, pero el estado en SAP fue actualizado correctamente.';
+                                } else {
+                                    $mensajeErrr .= ' Advertencia: La OP#'.$op.' no se encontró en Control de Piso.';
+                                }
+                            }
                         }
                        
                     }
