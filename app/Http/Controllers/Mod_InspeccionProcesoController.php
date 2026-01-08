@@ -217,7 +217,7 @@ class Mod_InspeccionProcesoController extends Controller
             
             // La cantidad disponible es: (Recibido - Procesado) - Inspecciones Aceptadas
             // $cantidadEnCentro ya tiene el cálculo de (U_Recibido - U_Procesado)
-            $cantidadDisponible = $cantidadEnCentro - $cantidadAceptada;
+            //$cantidadDisponible = $cantidadEnCentro - $cantidadAceptada;
             
             return response()->json([
                 'success' => true,
