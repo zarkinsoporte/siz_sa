@@ -1271,25 +1271,110 @@ function js_iniciador() {
                 // Rehabilitar botones en caso de error
                 $('#guardar_inspeccion, #guardar_rechazo').prop('disabled', false).removeClass('disabled');
                 
-                // Intentar obtener el mensaje de error del servidor
+                // Determinar el tipo de error y mensaje específico
                 var mensajeError = 'Error al guardar la inspección';
+                var tituloError = 'Error al guardar inspección';
                 
-                if (xhr.responseJSON && xhr.responseJSON.msg) {
-                    mensajeError = xhr.responseJSON.msg;
-                } else if (xhr.responseText) {
-                    try {
-                        var respuesta = JSON.parse(xhr.responseText);
-                        if (respuesta.msg) {
-                            mensajeError = respuesta.msg;
+                // Manejar diferentes tipos de errores HTTP
+                if (xhr.status === 0) {
+                    // Error de red o timeout
+                    mensajeError = 'Error de conexión: No se pudo conectar con el servidor. Verifique su conexión a internet e intente nuevamente.';
+                    tituloError = 'Error de conexión';
+                } else if (xhr.status === 419) {
+                    // Token CSRF expirado
+                    mensajeError = 'Su sesión ha expirado. Por favor, recargue la página e intente nuevamente.';
+                    tituloError = 'Sesión expirada';
+                } else if (xhr.status === 422) {
+                    // Error de validación
+                    tituloError = 'Error de validación';
+                    if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        var errores = [];
+                        $.each(xhr.responseJSON.errors, function(key, value) {
+                            if (Array.isArray(value)) {
+                                errores.push(value.join('<br>'));
+                            } else {
+                                errores.push(value);
+                            }
+                        });
+                        mensajeError = errores.join('<br>');
+                    } else if (xhr.responseJSON && xhr.responseJSON.msg) {
+                        mensajeError = xhr.responseJSON.msg;
+                    } else {
+                        mensajeError = 'Los datos enviados no son válidos. Por favor, verifique la información e intente nuevamente.';
+                    }
+                } else if (xhr.status === 403) {
+                    // Sin permisos
+                    mensajeError = 'No tiene permisos para realizar esta acción.';
+                    tituloError = 'Acceso denegado';
+                } else if (xhr.status === 404) {
+                    // Recurso no encontrado
+                    mensajeError = 'El recurso solicitado no fue encontrado. Por favor, verifique la información e intente nuevamente.';
+                    tituloError = 'Recurso no encontrado';
+                } else if (xhr.status === 500) {
+                    // Error del servidor
+                    tituloError = 'Error del servidor';
+                    if (xhr.responseJSON && xhr.responseJSON.msg) {
+                        mensajeError = xhr.responseJSON.msg;
+                    } else if (xhr.responseText) {
+                        try {
+                            var respuesta = JSON.parse(xhr.responseText);
+                            if (respuesta.msg) {
+                                mensajeError = respuesta.msg;
+                            } else {
+                                mensajeError = 'Ocurrió un error en el servidor. Por favor, contacte al administrador del sistema.';
+                            }
+                        } catch(e) {
+                            mensajeError = 'Ocurrió un error en el servidor. Por favor, contacte al administrador del sistema.';
                         }
-                    } catch(e) {
-                        // Si no se puede parsear, usar el texto de respuesta
-                        mensajeError = xhr.responseText || mensajeError;
+                    } else {
+                        mensajeError = 'Ocurrió un error en el servidor. Por favor, contacte al administrador del sistema.';
+                    }
+                } else if (xhr.status >= 400 && xhr.status < 500) {
+                    // Otros errores del cliente
+                    if (xhr.responseJSON && xhr.responseJSON.msg) {
+                        mensajeError = xhr.responseJSON.msg;
+                    } else {
+                        mensajeError = 'Error en la solicitud. Por favor, verifique la información e intente nuevamente.';
+                    }
+                } else if (status === 'timeout') {
+                    // Timeout
+                    mensajeError = 'La solicitud tardó demasiado tiempo. Por favor, intente nuevamente.';
+                    tituloError = 'Tiempo de espera agotado';
+                } else if (status === 'parsererror') {
+                    // Error al parsear la respuesta
+                    tituloError = 'Error de respuesta';
+                    if (xhr.responseJSON && xhr.responseJSON.msg) {
+                        mensajeError = xhr.responseJSON.msg;
+                    } else {
+                        mensajeError = 'El servidor devolvió una respuesta inválida. Por favor, intente nuevamente.';
+                    }
+                } else {
+                    // Intentar obtener el mensaje de error del servidor
+                    if (xhr.responseJSON && xhr.responseJSON.msg) {
+                        mensajeError = xhr.responseJSON.msg;
+                    } else if (xhr.responseText) {
+                        try {
+                            var respuesta = JSON.parse(xhr.responseText);
+                            if (respuesta.msg) {
+                                mensajeError = respuesta.msg;
+                            }
+                        } catch(e) {
+                            // Si no se puede parsear, usar el texto de respuesta si es corto
+                            if (xhr.responseText.length < 200) {
+                                mensajeError = xhr.responseText;
+                            }
+                        }
                     }
                 }
                 
+                // Agregar información adicional para debugging (solo en desarrollo)
+                if (xhr.status && xhr.status !== 200) {
+                    console.error('Error HTTP:', xhr.status, '- Status:', status, '- Error:', error);
+                    console.error('Respuesta del servidor:', xhr.responseText);
+                }
+                
                 swal({
-                    title: 'Error al guardar inspección',
+                    title: tituloError,
                     text: mensajeError,
                     type: 'error',
                     confirmButtonText: 'Aceptar',

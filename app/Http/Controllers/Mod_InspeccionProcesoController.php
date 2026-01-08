@@ -263,19 +263,49 @@ class Mod_InspeccionProcesoController extends Controller
             $fechaInspeccion = $request->input('fecha_inspeccion');
             $estado = $request->input('estado'); // 'ACEPTADO' o 'RECHAZADO'
             
-            // Validar estado
-            if (!in_array($estado, ['ACEPTADO', 'RECHAZADO'])) {
+            // Validaciones básicas de campos requeridos
+            if (empty($op)) {
                 return response()->json([
                     'success' => false,
-                    'msg' => 'Estado de inspección inválido'
+                    'msg' => 'El número de OP es requerido'
+                ], 400);
+            }
+            
+            if (empty($docEntry)) {
+                return response()->json([
+                    'success' => false,
+                    'msg' => 'El DocEntry de la OP es requerido'
+                ], 400);
+            }
+            
+            if (empty($centroInspeccion)) {
+                return response()->json([
+                    'success' => false,
+                    'msg' => 'El centro de inspección es requerido'
+                ], 400);
+            }
+            
+            // Validar estado
+            if (empty($estado) || !in_array($estado, ['ACEPTADO', 'RECHAZADO'])) {
+                return response()->json([
+                    'success' => false,
+                    'msg' => 'El estado de inspección es requerido y debe ser ACEPTADO o RECHAZADO'
                 ], 400);
             }
             
             // Validar cantidad inspeccionada
-            if ($cantInspeccionada <= 0) {
+            if (empty($cantInspeccionada) || $cantInspeccionada <= 0) {
                 return response()->json([
                     'success' => false,
                     'msg' => 'La cantidad a inspeccionar debe ser mayor a cero'
+                ], 400);
+            }
+            
+            // Validar que la cantidad sea numérica
+            if (!is_numeric($cantInspeccionada)) {
+                return response()->json([
+                    'success' => false,
+                    'msg' => 'La cantidad a inspeccionar debe ser un número válido'
                 ], 400);
             }
             
@@ -899,11 +929,77 @@ class Mod_InspeccionProcesoController extends Controller
                 'id_inspeccion' => $inspeccion->IPR_id
             ]);
             
-        } catch (\Exception $e) {
+        } catch (\Illuminate\Database\QueryException $e) {
             DB::connection('siz')->rollBack();
+            \Log::error('INSPECCION_PROCESO: Error de base de datos al guardar inspección: ' . $e->getMessage());
+            \Log::error('INSPECCION_PROCESO: Query: ' . $e->getSql());
+            \Log::error('INSPECCION_PROCESO: Bindings: ' . json_encode($e->getBindings()));
+            
+            // Determinar mensaje más específico según el código de error
+            $errorCode = $e->getCode();
+            $errorMessage = $e->getMessage();
+            
+            if (strpos($errorMessage, 'timeout') !== false || strpos($errorMessage, 'timed out') !== false) {
+                $mensaje = 'La operación tardó demasiado tiempo. Por favor, intente nuevamente.';
+            } elseif (strpos($errorMessage, 'connection') !== false || strpos($errorMessage, 'connect') !== false) {
+                $mensaje = 'Error de conexión con la base de datos. Por favor, contacte al administrador del sistema.';
+            } elseif (strpos($errorMessage, 'foreign key') !== false || strpos($errorMessage, 'FOREIGN KEY') !== false) {
+                $mensaje = 'Error de integridad de datos: Existe una referencia a otro registro. Por favor, verifique la información.';
+            } elseif (strpos($errorMessage, 'duplicate') !== false || strpos($errorMessage, 'UNIQUE') !== false) {
+                $mensaje = 'Error: Ya existe un registro con esta información. Por favor, verifique los datos.';
+            } else {
+                $mensaje = 'Error de base de datos al guardar la inspección. Por favor, contacte al administrador del sistema.';
+            }
+            
             return response()->json([
                 'success' => false,
-                'msg' => 'Error al guardar: ' . $e->getMessage()
+                'msg' => $mensaje
+            ], 500);
+        } catch (\PDOException $e) {
+            DB::connection('siz')->rollBack();
+            \Log::error('INSPECCION_PROCESO: Error PDO al guardar inspección: ' . $e->getMessage());
+            
+            $mensaje = 'Error de conexión con la base de datos. Por favor, intente nuevamente o contacte al administrador del sistema.';
+            
+            return response()->json([
+                'success' => false,
+                'msg' => $mensaje
+            ], 500);
+        } catch (\Exception $e) {
+            DB::connection('siz')->rollBack();
+            \Log::error('INSPECCION_PROCESO: Error al guardar inspección: ' . $e->getMessage());
+            \Log::error('INSPECCION_PROCESO: Stack trace: ' . $e->getTraceAsString());
+            \Log::error('INSPECCION_PROCESO: Archivo: ' . $e->getFile() . ' - Línea: ' . $e->getLine());
+            
+            // Determinar mensaje más específico según el tipo de excepción
+            $errorMessage = $e->getMessage();
+            $mensaje = 'Error al guardar la inspección';
+            
+            // Mensajes específicos para errores comunes
+            if (strpos($errorMessage, 'No se encontró') !== false || strpos($errorMessage, 'not found') !== false) {
+                $mensaje = $errorMessage;
+            } elseif (strpos($errorMessage, 'permisos') !== false || strpos($errorMessage, 'permission') !== false) {
+                $mensaje = 'No tiene permisos para realizar esta acción.';
+            } elseif (strpos($errorMessage, 'SAP') !== false) {
+                $mensaje = 'Error al comunicarse con SAP: ' . $errorMessage;
+            } elseif (strpos($errorMessage, 'avanzar') !== false || strpos($errorMessage, 'avance') !== false) {
+                $mensaje = $errorMessage;
+            } elseif (strpos($errorMessage, 'ruta') !== false) {
+                $mensaje = $errorMessage;
+            } elseif (strpos($errorMessage, 'cantidad') !== false) {
+                $mensaje = $errorMessage;
+            } else {
+                // Si el mensaje es descriptivo, usarlo; si no, usar uno genérico
+                if (strlen($errorMessage) > 20 && strpos($errorMessage, 'SQLSTATE') === false) {
+                    $mensaje = $errorMessage;
+                } else {
+                    $mensaje = 'Error al guardar la inspección. Por favor, verifique la información e intente nuevamente. Si el problema persiste, contacte al administrador del sistema.';
+                }
+            }
+            
+            return response()->json([
+                'success' => false,
+                'msg' => $mensaje
             ], 500);
         }
     }
