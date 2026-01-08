@@ -350,10 +350,10 @@ function js_iniciador() {
                         }
          
                         // Tamaño máximo para videos: 60MB
-                        if(file.size > 60 * 1024 * 1024) {
+                        if(file.size > 100 * 1024 * 1024) {
                             swal({
                                 title: 'Archivo demasiado grande',
-                                text: 'El video no debe superar 60MB',
+                                text: 'El video no debe superar 100MB',
                                 type: 'error',
                                 confirmButtonText: 'Aceptar'
                             });
