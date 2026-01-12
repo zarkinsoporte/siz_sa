@@ -1415,9 +1415,9 @@ class Mod_InspeccionProcesoController extends Controller
     public function generarPdfEvidenciaCliente($op)
     {
         // Aumentar límites de tiempo y memoria para PDFs grandes
-        set_time_limit(300); // 5 minutos
-        ini_set('max_execution_time', 300);
-        ini_set('memory_limit', '1024M');
+        set_time_limit(600); // 10 minutos
+        ini_set('max_execution_time', 600);
+        ini_set('memory_limit', '-1');
         
         //\Log::info("INSPECCION_PROCESO_PDF: Iniciando generación de PDF para OP: {$op}");
         
@@ -1592,8 +1592,9 @@ class Mod_InspeccionProcesoController extends Controller
      */
     public function generarPdfEvidenciaInterno($op)
     {
-        ini_set('max_execution_time', -1);
-        ini_set('memory_limit', '512M');
+        set_time_limit(600); // 10 minutos
+        ini_set('max_execution_time', 600);
+        ini_set('memory_limit', '-1');
         try {
             // Obtener información de la OP
             $ordenProduccion = DB::table('OWOR')
