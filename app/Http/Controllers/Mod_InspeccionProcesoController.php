@@ -384,14 +384,15 @@ class Mod_InspeccionProcesoController extends Controller
             \Log::info("INSPECCION_PROCESO: Estado del checklist - OP: {$op}, Estado inspección: {$estado}, Todos 'No Aplica': " . ($todosNoAplica ? 'Sí' : 'No') . ", Tiene 'No Cumple': " . ($tieneNoCumple ? 'Sí' : 'No') . ", Items checklist: " . count($checklistData));
             
             // ============================================================
-            // PAUSA TEMPORAL: Traslado comentado para permitir capturar solo la inspección
-            // TODO: Descomentar cuando se haya capturado la inspección faltante
+            // IMPORTANTE: La inspección se guarda PRIMERO, luego se intenta el traslado
+            // Si el traslado falla, se elimina la inspección guardada
             // ============================================================
             
-            // IMPORTANTE: Si la inspección es ACEPTADA, PRIMERO intentar avanzar la OP
-            // Si el avance falla, NO se guardará la inspección (rollback completo)
+            // NOTA: El traslado ahora se hace DESPUÉS de guardar la inspección (ver línea 827+)
+            // Este bloque ya no se ejecuta, pero se mantiene como referencia
             $avanceExitoso = false;
-            /* COMENTADO TEMPORALMENTE - INICIO
+            // El traslado se ejecuta después del commit de la inspección (ver nueva lógica línea 827+)
+            /*
             if ($estado === 'ACEPTADO') {
                 \Log::info("INSPECCION_PROCESO: Iniciando avance de OP antes de guardar inspección. OP: {$op}, Estado: {$estado}, Centro: {$centroInspeccion}, Cantidad: {$cantInspeccionada}, Todos 'No Aplica': " . ($todosNoAplica ? 'Sí' : 'No'));
                 
@@ -677,15 +678,9 @@ class Mod_InspeccionProcesoController extends Controller
                 
                 \Log::info("INSPECCION_PROCESO: Avance de OP completado exitosamente. OP: {$op}");
             }
-            */ // COMENTADO TEMPORALMENTE - FIN
+            */ // Bloque antiguo - Ya no se usa, el traslado se hace después del commit (línea 827+)
             
-            // Para la pausa temporal, marcamos el avance como exitoso para permitir guardar la inspección
-            if ($estado === 'ACEPTADO') {
-                $avanceExitoso = true;
-                \Log::info("INSPECCION_PROCESO: Modo pausa - Se omite el traslado, solo se guardará la inspección. OP: {$op}");
-            }
-            
-            // Crear nueva inspección (solo si el avance fue exitoso o si es RECHAZADO)
+            // Crear nueva inspección (siempre se guarda primero, independientemente del traslado)
             $inspeccion = new Siz_InspeccionProceso();
             $inspeccion->setConnection('siz');
             $inspeccion->IPR_op = $op;
@@ -828,6 +823,8 @@ class Mod_InspeccionProcesoController extends Controller
             // NUEVA LÓGICA: Intentar traslado DESPUÉS de guardar la inspección
             // Si el traslado falla, eliminar la inspección guardada
             // ============================================================
+            // IMPORTANTE: La inspección ya está guardada en este punto
+            // Si el traslado falla, se eliminará la inspección para mantener consistencia
             if ($estado === 'ACEPTADO' && !$avanceExitoso) {
                 \Log::info("INSPECCION_PROCESO: Iniciando traslado después de guardar inspección. OP: {$op}, Inspección ID: {$inspeccion->IPR_id}");
                 
