@@ -383,9 +383,15 @@ class Mod_InspeccionProcesoController extends Controller
             }
             \Log::info("INSPECCION_PROCESO: Estado del checklist - OP: {$op}, Estado inspección: {$estado}, Todos 'No Aplica': " . ($todosNoAplica ? 'Sí' : 'No') . ", Tiene 'No Cumple': " . ($tieneNoCumple ? 'Sí' : 'No') . ", Items checklist: " . count($checklistData));
             
+            // ============================================================
+            // PAUSA TEMPORAL: Traslado comentado para permitir capturar solo la inspección
+            // TODO: Descomentar cuando se haya capturado la inspección faltante
+            // ============================================================
+            
             // IMPORTANTE: Si la inspección es ACEPTADA, PRIMERO intentar avanzar la OP
             // Si el avance falla, NO se guardará la inspección (rollback completo)
             $avanceExitoso = false;
+            /* COMENTADO TEMPORALMENTE - INICIO
             if ($estado === 'ACEPTADO') {
                 \Log::info("INSPECCION_PROCESO: Iniciando avance de OP antes de guardar inspección. OP: {$op}, Estado: {$estado}, Centro: {$centroInspeccion}, Cantidad: {$cantInspeccionada}, Todos 'No Aplica': " . ($todosNoAplica ? 'Sí' : 'No'));
                 
@@ -671,6 +677,13 @@ class Mod_InspeccionProcesoController extends Controller
                 
                 \Log::info("INSPECCION_PROCESO: Avance de OP completado exitosamente. OP: {$op}");
             }
+            */ // COMENTADO TEMPORALMENTE - FIN
+            
+            // Para la pausa temporal, marcamos el avance como exitoso para permitir guardar la inspección
+            if ($estado === 'ACEPTADO') {
+                $avanceExitoso = true;
+                \Log::info("INSPECCION_PROCESO: Modo pausa - Se omite el traslado, solo se guardará la inspección. OP: {$op}");
+            }
             
             // Crear nueva inspección (solo si el avance fue exitoso o si es RECHAZADO)
             $inspeccion = new Siz_InspeccionProceso();
@@ -810,6 +823,252 @@ class Mod_InspeccionProcesoController extends Controller
             
             // Commit de la transacción de inspección (solo si todo salió bien)
             DB::connection('siz')->commit();
+            
+            // ============================================================
+            // NUEVA LÓGICA: Intentar traslado DESPUÉS de guardar la inspección
+            // Si el traslado falla, eliminar la inspección guardada
+            // ============================================================
+            if ($estado === 'ACEPTADO' && !$avanceExitoso) {
+                \Log::info("INSPECCION_PROCESO: Iniciando traslado después de guardar inspección. OP: {$op}, Inspección ID: {$inspeccion->IPR_id}");
+                
+                try {
+                    // Obtener el registro de @CP_OF para la estación actual
+                    $cp_of_actual = DB::table('@CP_OF')
+                        ->where('U_DocEntry', $docEntry)
+                        ->where('U_CT', $centroInspeccion)
+                        ->first();
+                    
+                    \Log::info("INSPECCION_PROCESO: Búsqueda de @CP_OF para traslado - DocEntry: {$docEntry}, Centro: {$centroInspeccion}, Encontrado: " . ($cp_of_actual ? "Sí (Code: {$cp_of_actual->Code})" : "No"));
+                    
+                    if (!$cp_of_actual) {
+                        // Si no se encuentra el registro, lanzar excepción para eliminar la inspección
+                        \Log::error("INSPECCION_PROCESO: No se encontró el registro de @CP_OF para la OP {$op} en la estación {$centroInspeccion} después de guardar inspección");
+                        throw new \Exception('No se encontró el registro de control de piso (@CP_OF) para la OP ' . $op . ' en la estación ' . $centroInspeccion . '. Se eliminará la inspección guardada.');
+                    }
+                    
+                    $Code_actual = OP::find($cp_of_actual->Code);
+                    
+                    if (!$Code_actual) {
+                        \Log::error("INSPECCION_PROCESO: No se encontró el registro OP con Code: {$cp_of_actual->Code} después de guardar inspección");
+                        throw new \Exception('No se encontró el registro de control de piso (Code: ' . $cp_of_actual->Code . ') para avanzar la OP ' . $op . '. Se eliminará la inspección guardada.');
+                    }
+                    
+                    // Obtener la estación siguiente
+                    $U_CT_siguiente = OP::getEstacionSiguiente($Code_actual->Code, 2);
+                    $U_CT_siguiente_clean = str_replace("'", "", $U_CT_siguiente);
+                    
+                    if ($U_CT_siguiente == "'Error en ruta'") {
+                        \Log::error("INSPECCION_PROCESO: Error en ruta para OP: {$op} después de guardar inspección");
+                        throw new \Exception('Error en ruta: La OP no tiene una estación siguiente válida. OP: ' . $op . '. Se eliminará la inspección guardada.');
+                    }
+                    
+                    // Si la siguiente estación es "Terminar OP", generar recibo de producción
+                    if ($U_CT_siguiente == "'Terminar OP'") {
+                        \Log::info("INSPECCION_PROCESO: La siguiente estación es 'Terminar OP' para OP: {$op} (después de guardar inspección)");
+                        
+                        $orden_owor = DB::table('OWOR')
+                            ->where('DocNum', $op)
+                            ->first();
+                        
+                        if (!$orden_owor) {
+                            throw new \Exception('No se encontró la OP ' . $op . ' para terminar. Se eliminará la inspección guardada.');
+                        }
+                        
+                        $rates = DB::table('ORTT')->where('RateDate', date('Y-m-d'))->get();
+                        if (count($rates) < 3) {
+                            throw new \Exception('No están capturados todos los "Tipos de Cambio" en SAP. Se requieren al menos 3 tipos de cambio para el día de hoy. Se eliminará la inspección guardada.');
+                        }
+                        
+                        $apellido = $this->getApellidoPaternoUsuario(explode(' ', Auth::user()->lastName));
+                        $usuario_reporta = explode(' ', Auth::user()->firstName)[0] . ' ' . $apellido;
+                        
+                        if (($orden_owor->PlannedQty) >= (floatval($orden_owor->CmpltQty) + floatval($cantInspeccionada))) {
+                            \Log::info("INSPECCION_PROCESO: Generando recibo de producción en SAP para OP: {$op}, Cantidad: {$cantInspeccionada} (después de guardar inspección)");
+                            $result = SAPi::ReciboProduccion($op, $orden_owor->Warehouse, $cantInspeccionada, "Reportado por: " . $usuario_reporta, "Recibo de producción - Inspección en Proceso");
+                            \Log::info("INSPECCION_PROCESO: Resultado de recibo de producción: {$result}");
+                        } else if (($orden_owor->PlannedQty) == floatval($orden_owor->CmpltQty)) {
+                            $result = 'Recibo creado SIZ';
+                        } else {
+                            throw new \Exception('La cantidad Completada no puede ser mayor a la Planeada. OP: ' . $op . '. Se eliminará la inspección guardada.');
+                        }
+                        
+                        if (strpos($result, 'Recibo') !== false) {
+                            $dt = date('Ymd H:i:s');
+                            $consecutivologof = DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOF]');
+                            $log = new LOGOF();
+                            $log->Code = ((int) $consecutivologof[0]->Code) + 1;
+                            $log->Name = ((int) $consecutivologof[0]->Code) + 1;
+                            $log->U_idEmpleado = Auth::user()->empID;
+                            $log->U_CT = $Code_actual->U_CT;
+                            $log->U_Status = "T";
+                            $log->U_FechaHora = $dt;
+                            $log->U_DocEntry = $docEntry;
+                            $log->U_Cantidad = $cantInspeccionada;
+                            $log->U_Reproceso = 'N';
+                            $log->save();
+                            
+                            $orden_owor = DB::table('OWOR')->where('DocNum', $op)->first();
+                            
+                            // IMPORTANTE: NO eliminar CP_OF aquí si es la estación final
+                            // Solo actualizar si aún hay cantidad pendiente
+                            if ($orden_owor->PlannedQty == floatval($orden_owor->CmpltQty)) {
+                                \Log::info("INSPECCION_PROCESO: OP {$op} completada, pero NO se elimina CP_OF aquí para evitar problemas");
+                                // NO eliminar aquí: $Code_actual->delete();
+                                
+                                $cerrar = DB::select("
+                                    SELECT T0.[DocNum] as Orden, T0.[ItemCode] as Codigo, T0.[PlannedQty] as Planeado, T0.[CmpltQty] as Terminado ,T0.UpdateDate as Actualizado 
+                                    FROM OWOR T0 
+                                    LEFT JOIN (
+                                        SELECT OWOR.DocNum as OP, sum(WOR1.PlannedQty) as Cantidad 
+                                        FROM OWOR 
+                                        inner join WOR1 on WOR1.DocEntry = OWOR.DocEntry 
+                                        inner join OITM A1 on WOR1.ItemCode = A1.ItemCode 
+                                        WHERE OWOR.[PlannedQty] <= OWOR.[CmpltQty] 
+                                        and OWOR.[status] <> 'L' 
+                                        and WOR1.IssueType = 'M' 
+                                        and WOR1.IssuedQty < WOR1.PlannedQty 
+                                        and A1.ItmsGrpCod <> 113 
+                                        group by OWOR.DocNum
+                                    ) VAL on T0.DocNum = VAL.OP 
+                                    WHERE T0.DocNum = ? 
+                                    and T0.[PlannedQty] <= T0.[CmpltQty] 
+                                    and T0.[status] <> 'L' 
+                                    and VAL.Cantidad is null
+                                ", [$op]);
+                                
+                                if (count($cerrar) > 0) {
+                                    \Log::info("INSPECCION_PROCESO: Cerrando OP {$op} en SAP");
+                                    SAP::ProductionOrderStatus($op, 2);
+                                }
+                            } else if ($orden_owor->PlannedQty > floatval($orden_owor->CmpltQty)) {
+                                $Code_actual->U_Entregado += floatval($cantInspeccionada);
+                                $Code_actual->U_Procesado += floatval($cantInspeccionada);
+                                $Code_actual->save();
+                            }
+                            
+                            \Log::info('INSPECCION_PROCESO: OP terminada desde inspección: ' . $op . ' - Resultado: ' . $result);
+                        } else {
+                            throw new \Exception('Error al generar recibo de producción en SAP: ' . $result . '. Se eliminará la inspección guardada.');
+                        }
+                    }
+                    // Si hay estación siguiente normal, avanzar la OP
+                    else if ($U_CT_siguiente != $Code_actual->U_CT) {
+                        \Log::info("INSPECCION_PROCESO: Avanzando a estación siguiente - Estación actual: {$Code_actual->U_CT}, Estación siguiente: {$U_CT_siguiente_clean} (después de guardar inspección)");
+                        
+                        $CantOrden = DB::table('OWOR')
+                            ->where('DocEntry', $docEntry)
+                            ->first();
+                        
+                        if (!$CantOrden) {
+                            throw new \Exception('No se encontró la OP con DocEntry ' . $docEntry . '. Se eliminará la inspección guardada.');
+                        }
+                        
+                        $cantO = (int) $CantOrden->PlannedQty;
+                        $Code_siguiente = OP::where('U_CT', $U_CT_siguiente_clean)
+                            ->where('U_DocEntry', $docEntry)
+                            ->get();
+                        
+                        $dt = date('Ymd H:i');
+                        
+                        if (count($Code_siguiente) == 1) {
+                            $Code_siguiente = OP::where('U_CT', $U_CT_siguiente_clean)
+                                ->where('U_DocEntry', $docEntry)
+                                ->first();
+                            
+                            if (($cantInspeccionada + $Code_siguiente->U_Recibido) <= $cantO) {
+                                $Code_siguiente->U_Recibido = $Code_siguiente->U_Recibido + $cantInspeccionada;
+                                $Code_siguiente->save();
+                            } else {
+                                throw new \Exception('La cantidad total recibida no debe ser mayor a la cantidad de la Orden. OP: ' . $op . '. Se eliminará la inspección guardada.');
+                            }
+                        } else if (count($Code_siguiente) == 0) {
+                            $consecutivo = DB::select('select max (CONVERT(INT,Code)) as Code from [@CP_Of]');
+                            $newCode = new OP();
+                            $newCode->Code = ((int) $consecutivo[0]->Code) + 1;
+                            $newCode->Name = ((int) $consecutivo[0]->Code) + 1;
+                            $newCode->U_DocEntry = $docEntry;
+                            $newCode->U_CT = $U_CT_siguiente_clean;
+                            $newCode->U_Entregado = 0;
+                            $newCode->U_Orden = $U_CT_siguiente_clean;
+                            $newCode->U_Procesado = 0;
+                            $newCode->U_Recibido = $cantInspeccionada;
+                            $newCode->U_Reproceso = "N";
+                            $newCode->U_Defectuoso = 0;
+                            $newCode->U_Comentarios = "";
+                            $newCode->U_CTCalidad = 0;
+                            $newCode->save();
+                            
+                            $consecutivologot = DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOT]');
+                            $lot = new LOGOT();
+                            $lot->Code = ((int) $consecutivologot[0]->Code) + 1;
+                            $lot->Name = ((int) $consecutivologot[0]->Code) + 1;
+                            $lot->U_idEmpleado = Auth::user()->empID;
+                            $lot->U_CT = $Code_actual->U_CT;
+                            $lot->U_Status = "O";
+                            $lot->U_FechaHora = $dt;
+                            $lot->U_OP = $docEntry;
+                            $lot->save();
+                        } else {
+                            throw new \Exception('Existen registros duplicados en la siguiente estación. OP: ' . $op . '. Se eliminará la inspección guardada.');
+                        }
+                        
+                        $Code_actual->U_Procesado = $Code_actual->U_Procesado + $cantInspeccionada;
+                        $Code_actual->U_Entregado = $Code_actual->U_Entregado + $cantInspeccionada;
+                        $Code_actual->save();
+                        
+                        $consecutivologof = DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOF]');
+                        $log = new LOGOF();
+                        $log->Code = ((int) $consecutivologof[0]->Code) + 1;
+                        $log->Name = ((int) $consecutivologof[0]->Code) + 1;
+                        $log->U_idEmpleado = Auth::user()->empID;
+                        $log->U_CT = $Code_actual->U_CT;
+                        $log->U_Status = "T";
+                        $log->U_FechaHora = $dt;
+                        $log->U_DocEntry = $docEntry;
+                        $log->U_Cantidad = $cantInspeccionada;
+                        $log->U_Reproceso = 'N';
+                        $log->save();
+                        
+                        // IMPORTANTE: NO eliminar CP_OF aquí si procesó todo
+                        // Solo marcar como procesado, pero mantener el registro
+                        if (($Code_actual->U_Recibido > 0 && $cantO == $Code_actual->U_Procesado) ||
+                            ($Code_actual->U_Recibido == $Code_actual->U_Procesado && $Code_actual->U_Recibido == $Code_actual->U_Entregado)) {
+                            \Log::info("INSPECCION_PROCESO: Estación actual procesó todo, pero NO se elimina CP_OF para evitar problemas. Code: {$Code_actual->Code}");
+                            // NO eliminar aquí: $Code_actual->delete();
+                        }
+                    }
+                    
+                    \Log::info("INSPECCION_PROCESO: Traslado completado exitosamente después de guardar inspección. OP: {$op}");
+                    
+                } catch (\Exception $e) {
+                    // Si el traslado falla, eliminar la inspección guardada
+                    \Log::error("INSPECCION_PROCESO: Error en traslado después de guardar inspección. OP: {$op}, Error: " . $e->getMessage());
+                    \Log::error("INSPECCION_PROCESO: Eliminando inspección guardada debido a error en traslado. Inspección ID: {$inspeccion->IPR_id}");
+                    
+                    try {
+                        // Marcar la inspección como borrada
+                        $inspeccion->IPR_borrado = 'S';
+                        $inspeccion->IPR_actualizadoEn = date("Y-m-d H:i:s");
+                        $inspeccion->save();
+                        
+                        // También marcar detalles e imágenes como borrados
+                        Siz_InspeccionProcesoDetalle::on('siz')
+                            ->where('IPD_iprId', $inspeccion->IPR_id)
+                            ->update(['IPD_borrado' => 'S', 'IPD_actualizadoEn' => date("Y-m-d H:i:s")]);
+                        
+                        Siz_InspeccionProcesoImagen::on('siz')
+                            ->where('IPI_iprId', $inspeccion->IPR_id)
+                            ->update(['IPI_borrado' => 'S']);
+                        
+                        \Log::info("INSPECCION_PROCESO: Inspección marcada como borrada debido a error en traslado. Inspección ID: {$inspeccion->IPR_id}");
+                    } catch (\Exception $deleteException) {
+                        \Log::error("INSPECCION_PROCESO: Error al eliminar inspección después de fallo en traslado: " . $deleteException->getMessage());
+                    }
+                    
+                    // Re-lanzar la excepción original para que el usuario vea el error
+                    throw $e;
+                }
+            }
             
             // Si la inspección fue rechazada, enviar correo de notificación (fuera de la transacción)
             if ($estado === 'RECHAZADO') {
