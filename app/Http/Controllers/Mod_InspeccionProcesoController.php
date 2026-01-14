@@ -77,17 +77,50 @@ class Mod_InspeccionProcesoController extends Controller
                 ->where('@PL_RUTAS.U_Calidad', 'S')
                 ->select('@CP_OF.*')
                 ->first();
-            //dd($cp_of, DB::getQueryLog());
-            if (!$cp_of) {
-                return response()->json([
-                    'success' => false,
-                    'msg' => 'No se encontró la Orden en control de piso en una estación de calidad'
-                ], 404);
+            
+            $estacionActual = null;
+            $cantidadEnCentro = 0;
+            $opEnControlPiso = false;
+            
+            // Si hay registro en @CP_OF, la OP está en control de piso
+            if ($cp_of) {
+                $estacionActual = $cp_of->U_CT;
+                // La cantidad disponible es lo recibido menos lo procesado (para traslados parciales)
+                $cantidadEnCentro = $cp_of->U_Recibido - ($cp_of->U_Procesado ?? 0);
+                $opEnControlPiso = true;
+            } else {
+                // Si no hay registro en @CP_OF, buscar en @CP_LOGOF la última estación de calidad
+                // Esto permite inspeccionar OPs que ya pasaron por estaciones de calidad
+                // NOTA: @CP_LOGOF.U_DocEntry es el DocNum (número de OP), no el DocEntry
+                $ultimaEstacionCalidad = DB::select("
+                    SELECT TOP 1
+                        [@CP_LOGOF].U_CT,
+                        [@PL_RUTAS].Name AS NombreEstacion,
+                        [@PL_RUTAS].U_Calidad AS EsCalidad,
+                        SUM([@CP_LOGOF].U_Cantidad) AS CantidadProcesada
+                    FROM [@CP_LOGOF]
+                    INNER JOIN [@PL_RUTAS] ON [@CP_LOGOF].U_CT = [@PL_RUTAS].Code
+                    WHERE [@CP_LOGOF].U_DocEntry = ?
+                        AND [@PL_RUTAS].U_Calidad = 'S'
+                        
+                    GROUP BY [@CP_LOGOF].U_CT, [@PL_RUTAS].Name, [@PL_RUTAS].U_Calidad
+                    ORDER BY MAX([@CP_LOGOF].U_FechaHora) DESC
+                ", [$op]);
+                
+                if (empty($ultimaEstacionCalidad)) {
+                    return response()->json([
+                        'success' => false,
+                        'msg' => 'No se encontró la Orden en control de piso ni en el historial de estaciones de calidad. La OP debe pasar por una estación de calidad antes de poder inspeccionarla.'
+                    ], 404);
+                }
+                
+                $estacionActual = $ultimaEstacionCalidad[0]->U_CT;
+                // La cantidad disponible es la cantidad procesada en esa estación (ya pasó por ahí)
+                // Se calculará después restando las inspecciones aceptadas
+                $cantidadEnCentro = $ultimaEstacionCalidad[0]->CantidadProcesada;
+                $opEnControlPiso = false;
             }
-            // 2. Obtener la estación actual de la OP
-            $estacionActual = $cp_of->U_CT;
-            // La cantidad disponible es lo recibido menos lo procesado (para traslados parciales)
-            $cantidadEnCentro = $cp_of->U_Recibido - ($cp_of->U_Procesado ?? 0);
+            
             if (!$estacionActual) {
                 return response()->json([
                     'success' => false,
@@ -203,8 +236,9 @@ class Mod_InspeccionProcesoController extends Controller
                 ->get();
             
             // 9. Calcular cantidad disponible para inspeccionar
-            // La cantidad disponible es: (U_Recibido - U_Procesado) - Suma de inspecciones ACEPTADAS
-            // Esto considera traslados parciales: si ya se procesó parte de lo recibido, solo queda disponible lo no procesado
+            // La cantidad disponible es: Recibido - Procesado (NO se restan inspecciones aceptadas)
+            // Si la OP está en control de piso: U_Recibido - U_Procesado
+            // Si la OP ya pasó por la estación: Cantidad procesada en LOGOF
             $cantidadAceptada = Siz_InspeccionProceso::on('siz')
                 ->where('IPR_op', $op)
                 ->where('IPR_centroInspeccion', $estacionActual)
@@ -215,9 +249,14 @@ class Mod_InspeccionProcesoController extends Controller
             // sum() retorna null si no hay registros, convertir a 0
             $cantidadAceptada = $cantidadAceptada ?? 0;
             
-            // La cantidad disponible es: (Recibido - Procesado) - Inspecciones Aceptadas
-            // $cantidadEnCentro ya tiene el cálculo de (U_Recibido - U_Procesado)
-            $cantidadDisponible = $cantidadEnCentro;//- $cantidadAceptada;
+            // La cantidad disponible es simplemente: Recibido - Procesado (sin restar inspecciones)
+            // $cantidadEnCentro ya tiene el cálculo correcto según el caso
+            $cantidadDisponible = $cantidadEnCentro;
+            
+            // Asegurar que la cantidad disponible no sea negativa
+            if ($cantidadDisponible < 0) {
+                $cantidadDisponible = 0;
+            }
             
             return response()->json([
                 'success' => true,
@@ -227,7 +266,8 @@ class Mod_InspeccionProcesoController extends Controller
                     'nombre' => $estacionActualInfo->Name,
                     'cantidad_disponible' => $cantidadDisponible,
                     'cantidad_en_centro' => $cantidadEnCentro,
-                    'cantidad_aceptada' => $cantidadAceptada
+                    'cantidad_aceptada' => $cantidadAceptada,
+                    'op_en_control_piso' => $opEnControlPiso
                 ],
                 'checklist' => $checklist,
                 'historial' => $historial,
@@ -492,7 +532,7 @@ class Mod_InspeccionProcesoController extends Controller
                                 $log->U_CT = $Code_actual->U_CT;
                                 $log->U_Status = "T";
                                 $log->U_FechaHora = $dt;
-                                $log->U_DocEntry = $docEntry;
+                                $log->U_DocEntry = $op; // U_DocEntry en LOGOF es el DocNum (número de OP)
                                 $log->U_Cantidad = $cantInspeccionada;
                                 $log->U_Reproceso = 'N';
                                 $log->save();
@@ -619,7 +659,7 @@ class Mod_InspeccionProcesoController extends Controller
                                 $lot->U_CT = $Code_actual->U_CT;
                                 $lot->U_Status = "O";
                                 $lot->U_FechaHora = $dt;
-                                $lot->U_OP = $docEntry; // U_OP en LOGOT es el DocEntry de OWOR
+                                $lot->U_OP = $op; // U_OP en LOGOT es el DocNum (número de OP), igual que U_DocEntry en LOGOF
                                 $lot->save();
                                 \Log::info("INSPECCION_PROCESO: Registro LOGOT creado - Code: {$lot->Code}, U_CT: {$lot->U_CT}");
                             } else {
@@ -643,7 +683,7 @@ class Mod_InspeccionProcesoController extends Controller
                             $log->U_CT = $Code_actual->U_CT;
                             $log->U_Status = "T";
                             $log->U_FechaHora = $dt;
-                            $log->U_DocEntry = $docEntry;
+                            $log->U_DocEntry = $op; // U_DocEntry en LOGOF es el DocNum (número de OP)
                             $log->U_Cantidad = $cantInspeccionada;
                             $log->U_Reproceso = 'N';
                             $log->save();
@@ -822,6 +862,7 @@ class Mod_InspeccionProcesoController extends Controller
             // ============================================================
             // NUEVA LÓGICA: Intentar traslado DESPUÉS de guardar la inspección
             // Si el traslado falla, eliminar la inspección guardada
+            // IMPORTANTE: SIEMPRE se intenta trasladar, incluso si no hay @CP_OF
             // ============================================================
             // IMPORTANTE: La inspección ya está guardada en este punto
             // Si el traslado falla, se eliminará la inspección para mantener consistencia
@@ -837,27 +878,101 @@ class Mod_InspeccionProcesoController extends Controller
                     
                     \Log::info("INSPECCION_PROCESO: Búsqueda de @CP_OF para traslado - DocEntry: {$docEntry}, Centro: {$centroInspeccion}, Encontrado: " . ($cp_of_actual ? "Sí (Code: {$cp_of_actual->Code})" : "No"));
                     
-                    if (!$cp_of_actual) {
-                        // Si no se encuentra el registro, lanzar excepción para eliminar la inspección
-                        \Log::error("INSPECCION_PROCESO: No se encontró el registro de @CP_OF para la OP {$op} en la estación {$centroInspeccion} después de guardar inspección");
-                        throw new \Exception('No se encontró el registro de control de piso (@CP_OF) para la OP ' . $op . ' en la estación ' . $centroInspeccion . '. Se eliminará la inspección guardada.');
+                    $Code_actual = null;
+                    
+                    if ($cp_of_actual) {
+                        // Si existe registro en @CP_OF, usar ese
+                        $Code_actual = OP::find($cp_of_actual->Code);
+                        
+                        if (!$Code_actual) {
+                            \Log::error("INSPECCION_PROCESO: No se encontró el registro OP con Code: {$cp_of_actual->Code} después de guardar inspección");
+                            throw new \Exception('No se encontró el registro de control de piso (Code: ' . $cp_of_actual->Code . ') para avanzar la OP ' . $op . '. Se eliminará la inspección guardada.');
+                        }
+                    } else {
+                        // Si no existe @CP_OF, necesitamos determinar la estación siguiente basándonos en la ruta
+                        // Buscar la última estación por la que pasó la OP en LOGOF para determinar la estación siguiente
+                        \Log::info("INSPECCION_PROCESO: OP {$op} no está en control de piso. Buscando estación siguiente basándonos en la ruta.");
+                        
+                        // Obtener el DocEntry y la ruta de la OP desde OWOR
+                        $ordenOWOR = DB::table('OWOR')
+                            ->where('DocNum', $op)
+                            ->first();
+                        
+                        if (!$ordenOWOR) {
+                            throw new \Exception('No se encontró la OP ' . $op . ' en OWOR. Se eliminará la inspección guardada.');
+                        }
+                        
+                        // Obtener la ruta de la OP (u_Ruta contiene los números de estaciones separados por coma)
+                        $rutaOP = $ordenOWOR->u_Ruta;
+                        
+                        if (!$rutaOP) {
+                            throw new \Exception('La OP ' . $op . ' no tiene ruta asignada. No se puede determinar la estación siguiente. Se eliminará la inspección guardada.');
+                        }
+                        
+                        // Parsear la ruta: u_Ruta contiene estaciones separadas por coma (ej: "100,106,109,112")
+                        $estacionesRuta = explode(",", str_replace(" ", "", $rutaOP));
+                        
+                        // Convertir a enteros para comparación
+                        $estacionesRuta = array_map('intval', $estacionesRuta);
+                        $centroInspeccionInt = intval($centroInspeccion);
+                        
+                        // Buscar la posición de la estación actual en la ruta
+                        $posicionActual = array_search($centroInspeccionInt, $estacionesRuta);
+                        
+                        if ($posicionActual === false) {
+                            throw new \Exception('La estación ' . $centroInspeccion . ' no se encuentra en la ruta de la OP ' . $op . '. Se eliminará la inspección guardada.');
+                        }
+                        
+                        // Determinar la estación siguiente
+                        if (($posicionActual + 1) < count($estacionesRuta)) {
+                            $estacionSiguiente = $estacionesRuta[$posicionActual + 1];
+                        } else {
+                            // Es la última estación, verificar si es de calidad para poder terminar
+                            $calidadUltimaEstacion = DB::table('@PL_RUTAS')
+                                ->where('U_Orden', $estacionesRuta[$posicionActual])
+                                ->value('U_Calidad');
+                            
+                            if ($calidadUltimaEstacion == 'S') {
+                                // Puede generar recibo de producción
+                                $estacionSiguiente = "'Terminar OP'";
+                            } else {
+                                throw new \Exception('Error en ruta: La última estación de la ruta no es de calidad. OP: ' . $op . '. Se eliminará la inspección guardada.');
+                            }
+                        }
+                        
+                        // Crear un objeto temporal con la información necesaria
+                        $Code_actual = (object) [
+                            'Code' => null, // No tiene Code porque no está en @CP_OF
+                            'U_CT' => $centroInspeccion,
+                            'U_DocEntry' => $ordenOWOR->DocEntry,
+                            'U_Recibido' => $cantidadEnCentro,
+                            'U_Procesado' => 0,
+                            'U_Entregado' => 0
+                        ];
+                        
+                        // Guardar la estación siguiente en una variable para usar después
+                        $U_CT_siguiente = is_numeric($estacionSiguiente) ? $estacionSiguiente : "'Terminar OP'";
+                        $U_CT_siguiente_clean = str_replace("'", "", $U_CT_siguiente);
+                        
+                        \Log::info("INSPECCION_PROCESO: Estación siguiente determinada desde ruta: {$U_CT_siguiente_clean}");
                     }
                     
-                    $Code_actual = OP::find($cp_of_actual->Code);
-                    
-                    if (!$Code_actual) {
-                        \Log::error("INSPECCION_PROCESO: No se encontró el registro OP con Code: {$cp_of_actual->Code} después de guardar inspección");
-                        throw new \Exception('No se encontró el registro de control de piso (Code: ' . $cp_of_actual->Code . ') para avanzar la OP ' . $op . '. Se eliminará la inspección guardada.');
-                    }
-                    
-                    // Obtener la estación siguiente
-                    $U_CT_siguiente = OP::getEstacionSiguiente($Code_actual->Code, 2);
-                    $U_CT_siguiente_clean = str_replace("'", "", $U_CT_siguiente);
-                    
-                    if ($U_CT_siguiente == "'Error en ruta'") {
-                        \Log::error("INSPECCION_PROCESO: Error en ruta para OP: {$op} después de guardar inspección");
-                        throw new \Exception('Error en ruta: La OP no tiene una estación siguiente válida. OP: ' . $op . '. Se eliminará la inspección guardada.');
-                    }
+                    if ($Code_actual) {
+                        // Si no se obtuvo la estación siguiente anteriormente (caso con @CP_OF), obtenerla ahora
+                        if (!isset($U_CT_siguiente)) {
+                            // Obtener la estación siguiente usando el método OP::getEstacionSiguiente
+                            if ($Code_actual->Code) {
+                                $U_CT_siguiente = OP::getEstacionSiguiente($Code_actual->Code, 2);
+                                $U_CT_siguiente_clean = str_replace("'", "", $U_CT_siguiente);
+                                
+                                if ($U_CT_siguiente == "'Error en ruta'") {
+                                    \Log::error("INSPECCION_PROCESO: Error en ruta para OP: {$op} después de guardar inspección");
+                                    throw new \Exception('Error en ruta: La OP no tiene una estación siguiente válida. OP: ' . $op . '. Se eliminará la inspección guardada.');
+                                }
+                            } else {
+                                throw new \Exception('No se puede determinar la estación siguiente para la OP ' . $op . '. Se eliminará la inspección guardada.');
+                            }
+                        }
                     
                     // Si la siguiente estación es "Terminar OP", generar recibo de producción
                     if ($U_CT_siguiente == "'Terminar OP'") {
@@ -899,7 +1014,7 @@ class Mod_InspeccionProcesoController extends Controller
                             $log->U_CT = $Code_actual->U_CT;
                             $log->U_Status = "T";
                             $log->U_FechaHora = $dt;
-                            $log->U_DocEntry = $docEntry;
+                            $log->U_DocEntry = $op; // U_DocEntry en LOGOF es el DocNum (número de OP)
                             $log->U_Cantidad = $cantInspeccionada;
                             $log->U_Reproceso = 'N';
                             $log->save();
@@ -909,7 +1024,10 @@ class Mod_InspeccionProcesoController extends Controller
                             // Si la OP quedó completa, eliminar de control de piso y cerrar en SAP
                             if ($orden_owor->PlannedQty == floatval($orden_owor->CmpltQty)) {
                                 \Log::info("INSPECCION_PROCESO: OP {$op} completada, eliminando de control de piso");
-                                $Code_actual->delete();
+                                // Solo eliminar si es un registro real en @CP_OF
+                                if ($Code_actual->Code) {
+                                    $Code_actual->delete();
+                                }
                                 
                                 $cerrar = DB::select("
                                     SELECT T0.[DocNum] as Orden, T0.[ItemCode] as Codigo, T0.[PlannedQty] as Planeado, T0.[CmpltQty] as Terminado ,T0.UpdateDate as Actualizado 
@@ -937,9 +1055,12 @@ class Mod_InspeccionProcesoController extends Controller
                                     SAP::ProductionOrderStatus($op, 2);
                                 }
                             } else if ($orden_owor->PlannedQty > floatval($orden_owor->CmpltQty)) {
-                                $Code_actual->U_Entregado += floatval($cantInspeccionada);
-                                $Code_actual->U_Procesado += floatval($cantInspeccionada);
-                                $Code_actual->save();
+                                // Solo actualizar si es un registro real en @CP_OF
+                                if ($Code_actual->Code) {
+                                    $Code_actual->U_Entregado += floatval($cantInspeccionada);
+                                    $Code_actual->U_Procesado += floatval($cantInspeccionada);
+                                    $Code_actual->save();
+                                }
                             }
                             
                             \Log::info('INSPECCION_PROCESO: OP terminada desde inspección: ' . $op . ' - Resultado: ' . $result);
@@ -1002,15 +1123,25 @@ class Mod_InspeccionProcesoController extends Controller
                             $lot->U_CT = $Code_actual->U_CT;
                             $lot->U_Status = "O";
                             $lot->U_FechaHora = $dt;
-                            $lot->U_OP = $docEntry;
+                            $lot->U_OP = $op; // U_OP en LOGOT es el DocNum (número de OP), igual que U_DocEntry en LOGOF
                             $lot->save();
                         } else {
                             throw new \Exception('Existen registros duplicados en la siguiente estación. OP: ' . $op . '. Se eliminará la inspección guardada.');
                         }
                         
-                        $Code_actual->U_Procesado = $Code_actual->U_Procesado + $cantInspeccionada;
-                        $Code_actual->U_Entregado = $Code_actual->U_Entregado + $cantInspeccionada;
-                        $Code_actual->save();
+                        // Solo actualizar si es un registro real en @CP_OF
+                        if ($Code_actual->Code) {
+                            $Code_actual->U_Procesado = $Code_actual->U_Procesado + $cantInspeccionada;
+                            $Code_actual->U_Entregado = $Code_actual->U_Entregado + $cantInspeccionada;
+                            $Code_actual->save();
+                            
+                            // Si la estación actual ya procesó todo, eliminarla
+                            if (($Code_actual->U_Recibido > 0 && $cantO == $Code_actual->U_Procesado) ||
+                                ($Code_actual->U_Recibido == $Code_actual->U_Procesado )) {
+                                \Log::info("INSPECCION_PROCESO: Estación actual procesó todo, eliminando - Code: {$Code_actual->Code}");
+                                $Code_actual->delete();
+                            }
+                        }
                         
                         $consecutivologof = DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOF]');
                         $log = new LOGOF();
@@ -1020,20 +1151,14 @@ class Mod_InspeccionProcesoController extends Controller
                         $log->U_CT = $Code_actual->U_CT;
                         $log->U_Status = "T";
                         $log->U_FechaHora = $dt;
-                        $log->U_DocEntry = $docEntry;
+                        $log->U_DocEntry = $op; // U_DocEntry en LOGOF es el DocNum (número de OP)
                         $log->U_Cantidad = $cantInspeccionada;
                         $log->U_Reproceso = 'N';
                         $log->save();
-                        
-                        // Si la estación actual ya procesó todo, eliminarla
-                        if (($Code_actual->U_Recibido > 0 && $cantO == $Code_actual->U_Procesado) ||
-                            ($Code_actual->U_Recibido == $Code_actual->U_Procesado && $Code_actual->U_Recibido == $Code_actual->U_Entregado)) {
-                            \Log::info("INSPECCION_PROCESO: Estación actual procesó todo, eliminando - Code: {$Code_actual->Code}");
-                            $Code_actual->delete();
-                        }
                     }
                     
                     \Log::info("INSPECCION_PROCESO: Traslado completado exitosamente después de guardar inspección. OP: {$op}");
+                    } // Cierre del else cuando existe @CP_OF
                     
                 } catch (\Exception $e) {
                     // Si el traslado falla, eliminar la inspección guardada

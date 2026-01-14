@@ -391,6 +391,17 @@ class Mod01_ProduccionController extends Controller
 
                     $est_Av = $t_user->U_CP_CT;
                     $Fil_Est = explode(",", $est_Av); //ARRAY SIMPLE
+                    //usar solo las estaciones (Code) del usuario, que no sean U_Calidad = 'N'
+                    //select [@PL_RUTAS].U_Calidad from [@PL_RUTAS] where [@PL_RUTAS].Code in ($Fil_Est) and [@PL_RUTAS].U_Calidad = 'N'
+
+                    $estacionesCalidad = DB::table('@PL_RUTAS')
+                        ->whereIn('Code', $Fil_Est)
+                        ->where('U_Calidad', 'N')
+                        ->pluck('Code')
+                        ->toArray();
+
+                    $Fil_Est = array_intersect($Fil_Est, $estacionesCalidad);
+
                     $rutasConNombres = self::getNombresRutas($Fil_Est); //ARRAY LLAVE VALOR
                     
                     return view('Mod01_Produccion.traslados', ['rutasConNombres' => $rutasConNombres, 't_user' => $t_user, 'est_Av' => $est_Av, 'Fil_Est' => $Fil_Est, 'actividades' => $actividades, 'ultimo' => count($actividades), 't_user' => $t_user]);
@@ -512,7 +523,9 @@ class Mod01_ProduccionController extends Controller
                                         DB::raw(OP::avanzarEstacion($code->Code, $t_user->U_CP_CT) . ' AS avanzar'),
                                         'OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden', 'OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
                                         'OWOR.PlannedQty', '@CP_OF.U_Recibido', '@CP_OF.U_Procesado')
-                                    ->where('@CP_OF.Code', $code->Code)->get();
+                                    ->where('@CP_OF.Code', $code->Code)
+                                    ->where('@CP_OF.U_Recibido', '>', '@CP_OF.U_Procesado')
+                                    ->get();
                                 foreach ($one as $o) {
                                     $pedido = $o->OriginNum;
                                 }
