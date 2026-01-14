@@ -906,11 +906,10 @@ class Mod_InspeccionProcesoController extends Controller
                             
                             $orden_owor = DB::table('OWOR')->where('DocNum', $op)->first();
                             
-                            // IMPORTANTE: NO eliminar CP_OF aquí si es la estación final
-                            // Solo actualizar si aún hay cantidad pendiente
+                            // Si la OP quedó completa, eliminar de control de piso y cerrar en SAP
                             if ($orden_owor->PlannedQty == floatval($orden_owor->CmpltQty)) {
-                                \Log::info("INSPECCION_PROCESO: OP {$op} completada, pero NO se elimina CP_OF aquí para evitar problemas");
-                                // NO eliminar aquí: $Code_actual->delete();
+                                \Log::info("INSPECCION_PROCESO: OP {$op} completada, eliminando de control de piso");
+                                $Code_actual->delete();
                                 
                                 $cerrar = DB::select("
                                     SELECT T0.[DocNum] as Orden, T0.[ItemCode] as Codigo, T0.[PlannedQty] as Planeado, T0.[CmpltQty] as Terminado ,T0.UpdateDate as Actualizado 
@@ -1026,12 +1025,11 @@ class Mod_InspeccionProcesoController extends Controller
                         $log->U_Reproceso = 'N';
                         $log->save();
                         
-                        // IMPORTANTE: NO eliminar CP_OF aquí si procesó todo
-                        // Solo marcar como procesado, pero mantener el registro
+                        // Si la estación actual ya procesó todo, eliminarla
                         if (($Code_actual->U_Recibido > 0 && $cantO == $Code_actual->U_Procesado) ||
                             ($Code_actual->U_Recibido == $Code_actual->U_Procesado && $Code_actual->U_Recibido == $Code_actual->U_Entregado)) {
-                            \Log::info("INSPECCION_PROCESO: Estación actual procesó todo, pero NO se elimina CP_OF para evitar problemas. Code: {$Code_actual->Code}");
-                            // NO eliminar aquí: $Code_actual->delete();
+                            \Log::info("INSPECCION_PROCESO: Estación actual procesó todo, eliminando - Code: {$Code_actual->Code}");
+                            $Code_actual->delete();
                         }
                     }
                     
