@@ -53,6 +53,7 @@ class Mod_InspeccionProcesoController extends Controller
                     'OWOR.ItemCode',
                     'OITM.ItemName',
                     'OWOR.PlannedQty as CantidadPlaneada',
+                    'OWOR.CmpltQty as CantidadCompletada',
                     'OWOR.Status',
                     'OWOR.PostDate as FechaCreacion',
                     'OWOR.DueDate as FechaEntrega',
@@ -89,37 +90,74 @@ class Mod_InspeccionProcesoController extends Controller
                 $cantidadEnCentro = $cp_of->U_Recibido - ($cp_of->U_Procesado ?? 0);
                 $opEnControlPiso = true;
             } else {
-                // Si no hay registro en @CP_OF, buscar en @CP_LOGOF la última estación de calidad
-                // Esto permite inspeccionar OPs que ya pasaron por estaciones de calidad
+                // Si no hay registro en @CP_OF, verificar si la OP ya terminó
+                // Si la OP ya terminó (PlannedQty <= CmpltQty o Status = 'L'), no permitir inspección
+                $cantidadCompletada = floatval($ordenProduccion->CantidadCompletada ?? 0);
+                if ($ordenProduccion->Status == 'L' || floatval($ordenProduccion->CantidadPlaneada) <= $cantidadCompletada) {
+                    return response()->json([
+                        'success' => false,
+                        'msg' => 'La Orden de Producción ya ha sido completada y cerrada. No se puede realizar inspección en una OP finalizada.'
+                    ], 400);
+                }
+                
+                // Si la OP no ha terminado pero no está en @CP_OF, verificar la ÚLTIMA estación en @CP_LOGOF
+                // Solo se puede inspeccionar si la última estación es de calidad
                 // NOTA: @CP_LOGOF.U_DocEntry es el DocNum (número de OP), no el DocEntry
-                $ultimaEstacionCalidad = DB::select("
+                $ultimaEstacion = DB::select("
                     SELECT TOP 1
                         [@CP_LOGOF].U_CT,
                         [@PL_RUTAS].Name AS NombreEstacion,
                         [@PL_RUTAS].U_Calidad AS EsCalidad,
-                        SUM([@CP_LOGOF].U_Cantidad) AS CantidadProcesada
+                        SUM([@CP_LOGOF].U_Cantidad) AS CantidadProcesada,
+                        MAX([@CP_LOGOF].U_FechaHora) AS FechaHora
                     FROM [@CP_LOGOF]
                     INNER JOIN [@PL_RUTAS] ON [@CP_LOGOF].U_CT = [@PL_RUTAS].Code
                     WHERE [@CP_LOGOF].U_DocEntry = ?
-                        AND [@PL_RUTAS].U_Calidad = 'S'
-                        
                     GROUP BY [@CP_LOGOF].U_CT, [@PL_RUTAS].Name, [@PL_RUTAS].U_Calidad
-                    ORDER BY MAX([@CP_LOGOF].U_CT) DESC
+                    ORDER BY MAX([@CP_LOGOF].U_FechaHora) DESC, MAX([@CP_LOGOF].U_CT) DESC
                 ", [$op]);
                 
-                if (empty($ultimaEstacionCalidad)) {
+                if (empty($ultimaEstacion)) {
                     return response()->json([
                         'success' => false,
-                        'msg' => 'No se encontró la Orden en control de piso ni en el historial de estaciones de calidad. La OP debe pasar por una estación de calidad antes de poder inspeccionarla.'
+                        'msg' => 'No se encontró la Orden en control de piso ni en el historial de estaciones. La OP debe estar actualmente en una estación de calidad para poder inspeccionarla.'
                     ], 404);
                 }
                 
-                $estacionActual = $ultimaEstacionCalidad[0]->U_CT;
+                // Verificar si la última estación es de calidad
+                if ($ultimaEstacion[0]->EsCalidad !== 'S') {
+                    return response()->json([
+                        'success' => false,
+                        'msg' => 'La OP no está actualmente en una estación de calidad. La última estación registrada es ' . $ultimaEstacion[0]->U_CT . ' (' . $ultimaEstacion[0]->NombreEstacion . '), que no es una estación de calidad. Solo se pueden inspeccionar OPs que estén en estaciones de Calidad.'
+                    ], 400);
+                }
+                
+                // Si la última estación ES de calidad, permitir inspección
+                $estacionActual = $ultimaEstacion[0]->U_CT;
                 // La cantidad disponible es la cantidad procesada en esa estación (ya pasó por ahí)
                 // Se calculará después restando las inspecciones aceptadas
-                $cantidadEnCentro = $ultimaEstacionCalidad[0]->CantidadProcesada;
+                $cantidadEnCentro = $ultimaEstacion[0]->CantidadProcesada;
                 
                 $opEnControlPiso = false;
+                
+                // Advertencia: La OP ya pasó por esta estación, verificar si todavía hay cantidad disponible
+                // Calcular cantidad ya inspeccionada en esta estación
+                $cantidadYaInspeccionada = Siz_InspeccionProceso::on('siz')
+                    ->where('IPR_op', $op)
+                    ->where('IPR_centroInspeccion', $estacionActual)
+                    ->where('IPR_borrado', 'N')
+                    ->where('IPR_estado', 'ACEPTADO')
+                    ->sum('IPR_cantInspeccionada');
+                
+                $cantidadYaInspeccionada = $cantidadYaInspeccionada ?? 0;
+                
+                // Si ya se inspeccionó toda la cantidad procesada, no permitir más inspecciones
+                if ($cantidadYaInspeccionada >= $cantidadEnCentro) {
+                    return response()->json([
+                        'success' => false,
+                        'msg' => 'La OP ya pasó por la estación ' . $estacionActual . ' (' . $ultimaEstacion[0]->NombreEstacion . ') y toda la cantidad ya fue inspeccionada. La OP debe estar actualmente en una estación de calidad para poder realizar nuevas inspecciones.'
+                    ], 400);
+                }
             }
             
             if (!$estacionActual) {
