@@ -69,16 +69,15 @@ class Mod_InspeccionProcesoController extends Controller
                     'msg' => 'No se encontró la Orden de Producción'
                 ], 404);
             }
-            // Buscar el registro de @CP_OF que corresponde a una estación de calidad
+            // Buscar el registro de @CP_OF donde está actualmente la OP (sin filtrar por calidad primero)
             // Puede haber múltiples registros para la misma OP en diferentes estaciones
+            // Buscamos el que tenga cantidad disponible (U_Recibido > U_Procesado)
             $cp_of = DB::table('@CP_OF')
-                ->join('@PL_RUTAS', '@CP_OF.U_CT', '=', '@PL_RUTAS.Code')
                 ->where('@CP_OF.U_DocEntry', $ordenProduccion->DocEntry)
-                ->where('@PL_RUTAS.U_Calidad', 'S')
                 ->whereRaw('[@CP_OF].U_Recibido > [@CP_OF].U_Procesado')
                 ->select('@CP_OF.*')
                 ->first();
-            //dd($cp_of);
+            
             $estacionActual = null;
             $cantidadEnCentro = 0;
             $opEnControlPiso = false;
@@ -145,7 +144,7 @@ class Mod_InspeccionProcesoController extends Controller
             if ($estacionActualInfo->U_Calidad !== 'S') {
                 return response()->json([
                     'success' => false,
-                    'msg' => 'La OP no está actualmente en un centro de inspección (Calidad). Actualmente se encuentra en: ' . $estacionActualInfo->Name
+                    'msg' => 'La OP no está actualmente en un centro de inspección (Calidad). Actualmente se encuentra en la estación ' . $estacionActual . ' (' . $estacionActualInfo->Name . '). Solo se pueden inspeccionar OPs que estén en estaciones de Calidad.'
                 ], 400);
             }
             
@@ -870,6 +869,23 @@ class Mod_InspeccionProcesoController extends Controller
             // Si el traslado falla, se eliminará la inspección para mantener consistencia
             if ($estado === 'ACEPTADO' && !$avanceExitoso) {
                 \Log::info("INSPECCION_PROCESO: Iniciando traslado después de guardar inspección. OP: {$op}, Inspección ID: {$inspeccion->IPR_id}");
+                
+                // VALIDACIÓN CRÍTICA: Verificar que la estación actual sea de Calidad antes de permitir el avance
+                $estacionCalidadInfo = DB::table('@PL_RUTAS')
+                    ->where('Code', $centroInspeccion)
+                    ->first();
+                
+                if (!$estacionCalidadInfo) {
+                    \Log::error("INSPECCION_PROCESO: No se encontró información de la estación {$centroInspeccion} para OP {$op}");
+                    throw new \Exception('No se encontró información de la estación de inspección. Se eliminará la inspección guardada.');
+                }
+                
+                if ($estacionCalidadInfo->U_Calidad !== 'S') {
+                    \Log::error("INSPECCION_PROCESO: Intento de avanzar OP {$op} desde estación que NO es de Calidad. Estación: {$centroInspeccion} ({$estacionCalidadInfo->Name}), U_Calidad: {$estacionCalidadInfo->U_Calidad}");
+                    throw new \Exception('Solo se pueden avanzar o trasladar las Órdenes de Producción que estén en una estación de Calidad. La estación actual (' . $estacionCalidadInfo->Name . ') no es de Calidad. Se eliminará la inspección guardada.');
+                }
+                
+                \Log::info("INSPECCION_PROCESO: Validación de estación de Calidad exitosa - Estación: {$centroInspeccion} ({$estacionCalidadInfo->Name})");
                 
                 try {
                     // Obtener el registro de @CP_OF para la estación actual
