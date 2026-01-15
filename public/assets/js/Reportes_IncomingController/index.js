@@ -22,7 +22,7 @@ function js_iniciador() {
     // Establecer fechas por defecto (desde ayer hasta hoy)
     var fechaHasta = new Date();
     var fechaDesde = new Date();
-    fechaDesde.setDate(fechaDesde.getDate() - 1);
+    fechaDesde.setDate(fechaDesde.getDate() - 1);// Restar un día
 
     $("#filtro_fecha_hasta").val(fechaHasta.toISOString().split('T')[0]);
     $("#filtro_fecha_desde").val(fechaDesde.toISOString().split('T')[0]);

@@ -27,16 +27,8 @@ class Reportes_IncomingController extends Controller
         try {
             $fechaDesde = $request->input('fecha_desde', '');
             $fechaHasta = $request->input('fecha_hasta', '');
-            
-            // Si no se envían fechas, usar los últimos 3 meses
-            if (empty($fechaDesde)) {
-                $fechaDesde = date('Y-m-d', strtotime('-3 months'));
-            }
-            
-            if (empty($fechaHasta)) {
-                $fechaHasta = date('Y-m-d');
-            }
-            
+           
+           
             // Ejecutar la consulta SQL del archivo R140
             $inspecciones = DB::select("
                 Select SIC.INC_docNum AS ID
