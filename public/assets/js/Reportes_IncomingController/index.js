@@ -105,14 +105,7 @@ function js_iniciador() {
         var tbody = "";
         
         inspecciones.forEach(function(inspeccion) {
-            // Formatear fecha
-            var fechaRevision = "";
-            if (inspeccion.FE_REV) {
-                var fecha = new Date(inspeccion.FE_REV);
-                fechaRevision = fecha.getFullYear() + "/" + 
-                    (fecha.getMonth() + 1).toString().padStart(2, '0') + "/" + 
-                    fecha.getDate().toString().padStart(2, '0');
-            }
+            
             
             // Formatear porcentaje
             var porcentaje = "";
@@ -124,7 +117,7 @@ function js_iniciador() {
             
             tbody += "<tr>" +
                 "<td>" + (inspeccion.ID || "") + "</td>" +
-                "<td>" + fechaRevision + "</td>" +
+                "<td>" + inspeccion.FE_REV + "</td>" +
                 "<td style=\"text-align: left;\">" + (inspeccion.PROVEEDOR || "N/A") + "</td>" +
                 "<td>" + (inspeccion.CODIGO || "") + "</td>" +
                 "<td style=\"text-align: left;\">" + (inspeccion.MATERIAL || "") + "</td>" +
