@@ -19,11 +19,11 @@ function js_iniciador() {
     var inspecciones = [];
     var dataTable = null;
     
-    // Establecer fechas por defecto (3 meses atrás hasta hoy)
+    // Establecer fechas por defecto (desde ayer hasta hoy)
     var fechaHasta = new Date();
     var fechaDesde = new Date();
-    fechaDesde.setMonth(fechaDesde.getMonth() - 3);
-    
+    fechaDesde.setDate(fechaDesde.getDate() - 1);
+
     $("#filtro_fecha_hasta").val(fechaHasta.toISOString().split('T')[0]);
     $("#filtro_fecha_desde").val(fechaDesde.toISOString().split('T')[0]);
     
