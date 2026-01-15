@@ -75,9 +75,10 @@ class Mod_InspeccionProcesoController extends Controller
                 ->join('@PL_RUTAS', '@CP_OF.U_CT', '=', '@PL_RUTAS.Code')
                 ->where('@CP_OF.U_DocEntry', $ordenProduccion->DocEntry)
                 ->where('@PL_RUTAS.U_Calidad', 'S')
+                ->whereRaw('[@CP_OF].U_Recibido > [@CP_OF].U_Procesado')
                 ->select('@CP_OF.*')
                 ->first();
-            
+            //dd($cp_of);
             $estacionActual = null;
             $cantidadEnCentro = 0;
             $opEnControlPiso = false;
@@ -104,7 +105,7 @@ class Mod_InspeccionProcesoController extends Controller
                         AND [@PL_RUTAS].U_Calidad = 'S'
                         
                     GROUP BY [@CP_LOGOF].U_CT, [@PL_RUTAS].Name, [@PL_RUTAS].U_Calidad
-                    ORDER BY MAX([@CP_LOGOF].U_FechaHora) DESC
+                    ORDER BY MAX([@CP_LOGOF].U_CT) DESC
                 ", [$op]);
                 
                 if (empty($ultimaEstacionCalidad)) {
@@ -118,6 +119,7 @@ class Mod_InspeccionProcesoController extends Controller
                 // La cantidad disponible es la cantidad procesada en esa estación (ya pasó por ahí)
                 // Se calculará después restando las inspecciones aceptadas
                 $cantidadEnCentro = $ultimaEstacionCalidad[0]->CantidadProcesada;
+                
                 $opEnControlPiso = false;
             }
             
