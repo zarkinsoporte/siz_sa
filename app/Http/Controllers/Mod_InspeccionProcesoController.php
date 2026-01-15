@@ -37,6 +37,7 @@ class Mod_InspeccionProcesoController extends Controller
     {
         //try {
             $op = $request->input('op');
+            $centroSeleccionado = $request->input('centro'); // Parámetro para cuando el usuario selecciona una estación desde el modal
             
             if (!$op) {
                 return response()->json([
@@ -70,26 +71,117 @@ class Mod_InspeccionProcesoController extends Controller
                     'msg' => 'No se encontró la Orden de Producción'
                 ], 404);
             }
-            // Buscar el registro de @CP_OF donde está actualmente la OP (sin filtrar por calidad primero)
-            // Puede haber múltiples registros para la misma OP en diferentes estaciones
-            // Buscamos el que tenga cantidad disponible (U_Recibido > U_Procesado)
-            $cp_of = DB::table('@CP_OF')
+            // Buscar TODAS las estaciones de calidad con cantidad disponible en @CP_OF
+            // Esto permite detectar traslados parciales donde la OP está en múltiples estaciones de calidad
+            $estacionesCalidadDisponibles = DB::table('@CP_OF')
+                ->join('@PL_RUTAS', '@CP_OF.U_CT', '=', '@PL_RUTAS.Code')
                 ->where('@CP_OF.U_DocEntry', $ordenProduccion->DocEntry)
                 ->whereRaw('[@CP_OF].U_Recibido > [@CP_OF].U_Procesado')
-                ->select('@CP_OF.*')
-                ->first();
+                ->where('@PL_RUTAS.U_Calidad', 'S')
+                ->select(
+                    '@CP_OF.*',
+                    '@PL_RUTAS.Name as NombreEstacion',
+                    DB::raw('([@CP_OF].U_Recibido - [@CP_OF].U_Procesado) as CantidadDisponible')
+                )
+                ->orderBy('@PL_RUTAS.Name')
+                ->get();
             
             $estacionActual = null;
             $cantidadEnCentro = 0;
             $opEnControlPiso = false;
             
-            // Si hay registro en @CP_OF, la OP está en control de piso
-            if ($cp_of) {
-                $estacionActual = $cp_of->U_CT;
-                // La cantidad disponible es lo recibido menos lo procesado (para traslados parciales)
-                $cantidadEnCentro = $cp_of->U_Recibido - ($cp_of->U_Procesado ?? 0);
+            // Si el usuario seleccionó una estación específica desde el modal, validarla y usarla
+            if ($centroSeleccionado) {
+                $cp_of_seleccionado = DB::table('@CP_OF')
+                    ->join('@PL_RUTAS', '@CP_OF.U_CT', '=', '@PL_RUTAS.Code')
+                    ->where('@CP_OF.U_DocEntry', $ordenProduccion->DocEntry)
+                    ->where('@CP_OF.U_CT', $centroSeleccionado)
+                    ->whereRaw('[@CP_OF].U_Recibido > [@CP_OF].U_Procesado')
+                    ->where('@PL_RUTAS.U_Calidad', 'S')
+                    ->select(
+                        '@CP_OF.*',
+                        '@PL_RUTAS.Name as NombreEstacion',
+                        DB::raw('([@CP_OF].U_Recibido - [@CP_OF].U_Procesado) as CantidadDisponible')
+                    )
+                    ->first();
+                
+                if (!$cp_of_seleccionado) {
+                    return response()->json([
+                        'success' => false,
+                        'msg' => 'La estación seleccionada no tiene cantidad disponible o no es una estación de calidad válida.'
+                    ], 400);
+                }
+                
+                // Validar permisos del inspector para esta estación
+                $inspector_centros = Auth::user()->U_CP_CT;
+                $centros_permitidos = $inspector_centros ? explode(",", str_replace(' ', '', $inspector_centros)) : [];
+                
+                if (!in_array($centroSeleccionado, $centros_permitidos)) {
+                    return response()->json([
+                        'success' => false,
+                        'msg' => 'No tiene permisos para inspeccionar en esta estación de calidad: ' . $cp_of_seleccionado->NombreEstacion
+                    ], 403);
+                }
+                
+                $estacionActual = $centroSeleccionado;
+                $cantidadEnCentro = $cp_of_seleccionado->CantidadDisponible;
                 $opEnControlPiso = true;
             } else {
+                // Si hay múltiples estaciones de calidad disponibles, permitir al usuario elegir
+                if (count($estacionesCalidadDisponibles) > 1) {
+                    $estaciones = [];
+                    foreach ($estacionesCalidadDisponibles as $estacion) {
+                        $estaciones[] = [
+                            'id' => $estacion->U_CT,
+                            'nombre' => $estacion->NombreEstacion,
+                            'cantidad_disponible' => $estacion->CantidadDisponible,
+                            'recibido' => $estacion->U_Recibido,
+                            'procesado' => $estacion->U_Procesado
+                        ];
+                    }
+                    
+                    return response()->json([
+                        'success' => true,
+                        'multiple_stations' => true,
+                        'op' => $ordenProduccion,
+                        'estaciones_disponibles' => $estaciones,
+                        'msg' => 'La OP tiene cantidad disponible en múltiples estaciones de calidad. Por favor, seleccione la estación donde desea realizar la inspección.'
+                    ]);
+                }
+                
+                // Si hay solo una estación de calidad disponible, usarla automáticamente
+                if (count($estacionesCalidadDisponibles) == 1) {
+                    $cp_of = $estacionesCalidadDisponibles[0];
+                    $estacionActual = $cp_of->U_CT;
+                    $cantidadEnCentro = $cp_of->CantidadDisponible;
+                    $opEnControlPiso = true;
+                } else {
+                    // Si no hay estaciones de calidad con cantidad disponible, buscar cualquier estación con cantidad disponible
+                    // (para mostrar mensaje de error apropiado)
+                    $cp_of = DB::table('@CP_OF')
+                        ->where('@CP_OF.U_DocEntry', $ordenProduccion->DocEntry)
+                        ->whereRaw('[@CP_OF].U_Recibido > [@CP_OF].U_Procesado')
+                        ->select('@CP_OF.*')
+                        ->first();
+                    
+                    if ($cp_of) {
+                        // Verificar si la estación encontrada es de calidad
+                        $estacionInfo = DB::table('@PL_RUTAS')
+                            ->where('Code', $cp_of->U_CT)
+                            ->first();
+                        
+                        // Validar que la estación sea de calidad
+                        if (!$estacionInfo || $estacionInfo->U_Calidad !== 'S') {
+                            return response()->json([
+                                'success' => false,
+                                'msg' => 'La OP no está actualmente en un centro de inspección (Calidad). Actualmente se encuentra en la estación ' . $cp_of->U_CT . ' (' . ($estacionInfo ? $estacionInfo->Name : 'N/A') . '). Solo se pueden inspeccionar OPs que estén en estaciones de Calidad.'
+                            ], 400);
+                        }
+                        
+                        $estacionActual = $cp_of->U_CT;
+                        $cantidadEnCentro = $cp_of->U_Recibido - ($cp_of->U_Procesado ?? 0);
+                        $opEnControlPiso = true;
+                    } else {
                 // Si no hay registro en @CP_OF, verificar si la OP ya terminó
                 // Si la OP ya terminó (PlannedQty <= CmpltQty o Status = 'L'), no permitir inspección
                 $cantidadCompletada = floatval($ordenProduccion->CantidadCompletada ?? 0);
@@ -158,6 +250,8 @@ class Mod_InspeccionProcesoController extends Controller
                         'msg' => 'La OP ya pasó por la estación ' . $estacionActual . ' (' . $ultimaEstacion[0]->NombreEstacion . ') y toda la cantidad ya fue inspeccionada. La OP debe estar actualmente en una estación de calidad para poder realizar nuevas inspecciones.'
                     ], 400);
                 }
+                    }
+                }
             }
             
             if (!$estacionActual) {
@@ -167,7 +261,8 @@ class Mod_InspeccionProcesoController extends Controller
                 ], 404);
             }
             
-            // 3. Verificar que la estación actual sea de calidad
+            // 3. Verificación final de seguridad: Verificar que la estación actual sea de calidad
+            // (En teoría ya está validado arriba, pero mantenemos esta validación por seguridad)
             $estacionActualInfo = DB::table('@PL_RUTAS')
                 ->where('Code', $estacionActual)
                 ->first();
