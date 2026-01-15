@@ -844,3 +844,7 @@ Route::get('home/evidencia-cliente/pdf/{op}', 'Mod_InspeccionProcesoController@g
 Route::get('home/evidencia-cliente/pdf-interno/{op}', 'Mod_InspeccionProcesoController@generarPdfEvidenciaInterno');
 Route::get('home/evidencia-cliente/videos/{op}', 'Mod_InspeccionProcesoController@obtenerVideosEvidenciaCliente');
 
+//reporte REP-01-INSPECCION-MATERIAL
+Route::get('home/REP-01-INSPECCION-MATERIAL', 'Reportes_IncomingController@index')->middleware('routelog');
+Route::get('home/rep-01-inspeccion-material/buscar', 'Reportes_IncomingController@buscarInspecciones');
+Route::get('home/rep-01-inspeccion-material/pdf', 'Reportes_IncomingController@generarPdf');
