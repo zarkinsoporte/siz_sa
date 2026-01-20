@@ -2074,6 +2074,16 @@ class Mod_InspeccionProcesoController extends Controller
                 ->select('CompnyName as RazonSocial')
                 ->first();
             
+            // Obtener datos de SIZ_Labels para el checklist de liberación final
+            $labelsChecklist = collect(DB::table('SIZ_Labels')
+                ->where('LAB_eliminado', 0)
+                ->orderBy('LAB_numOrden')
+                ->get());
+            
+            // Separar el encabezado y las filas
+            $encabezadoChecklist = $labelsChecklist->where('LAB_tipo', 'Encabezado')->first();
+            $filasChecklist = $labelsChecklist->where('LAB_tipo', 'fila')->sortBy('LAB_numOrden');
+            
             // Crear header HTML similar al de rechazos
             $fechaImpresion = date("d-m-Y H:i:s");
             $headerHtml = view()->make(
@@ -2092,7 +2102,9 @@ class Mod_InspeccionProcesoController extends Controller
                 'fechaImpresion' => date('d/m/Y H:i:s'),
                 'imageCount' => 0,
                 'chkDesc' => '',
-                'titulo_pdf' => 'Evidencia de Cliente'
+                'titulo_pdf' => 'Evidencia de Cliente',
+                'encabezadoChecklist' => $encabezadoChecklist,
+                'filasChecklist' => $filasChecklist
             ];
             
             \Log::info("INSPECCION_PROCESO_PDF: Iniciando generación de PDF con Snappy para OP: {$op}");
