@@ -392,6 +392,30 @@ class Mod_InspeccionProcesoController extends Controller
                 $cantidadDisponible = 0;
             }
             
+            // 10. Verificar si es modo RECOVERY (U_Comentarios = 'RECOVERY' en @CP_OF)
+            $modoRecovery = false;
+            if ($opEnControlPiso) {
+                // Si se seleccionó una estación desde el modal, verificar en esa estación
+                if ($centroSeleccionado && isset($cp_of_seleccionado)) {
+                    if (isset($cp_of_seleccionado->U_Comentarios) && $cp_of_seleccionado->U_Comentarios === 'RECOVERY') {
+                        $modoRecovery = true;
+                        //\Log::info("INSPECCION_PROCESO: Modo RECOVERY detectado para OP: {$op}, Estación seleccionada: {$estacionActual}");
+                    }
+                } else {
+                    // Buscar en la estación actual
+                    $cp_of_recovery = DB::table('@CP_OF')
+                        ->where('U_DocEntry', $ordenProduccion->DocEntry)
+                        ->where('U_CT', $estacionActual)
+                        ->where('U_Comentarios', 'RECOVERY')
+                        ->first();
+                    
+                    if ($cp_of_recovery) {
+                        $modoRecovery = true;
+                        //\Log::info("INSPECCION_PROCESO: Modo RECOVERY detectado para OP: {$op}, Estación: {$estacionActual}");
+                    }
+                }
+            }
+            
             return response()->json([
                 'success' => true,
                 'op' => $ordenProduccion,
@@ -406,7 +430,8 @@ class Mod_InspeccionProcesoController extends Controller
                 'checklist' => $checklist,
                 'historial' => $historial,
                 'inspecciones_previas' => $inspeccionesPrevias,
-                'id_inspeccion' => 0
+                'id_inspeccion' => 0,
+                'modo_recovery' => $modoRecovery
             ]);
             
         // } catch (\Exception $e) {
@@ -997,11 +1022,28 @@ class Mod_InspeccionProcesoController extends Controller
             // NUEVA LÓGICA: Intentar traslado DESPUÉS de guardar la inspección
             // Si el traslado falla, eliminar la inspección guardada
             // IMPORTANTE: SIEMPRE se intenta trasladar, incluso si no hay @CP_OF
+            // EXCEPCIÓN: Modo RECOVERY - Solo guarda inspección, no modifica SAP ni hace traslado completo
             // ============================================================
             // IMPORTANTE: La inspección ya está guardada en este punto
             // Si el traslado falla, se eliminará la inspección para mantener consistencia
+            
+            // Verificar si es modo RECOVERY
+            $modoRecovery = false;
+            $cp_of_recovery = DB::table('@CP_OF')
+                ->where('U_DocEntry', $docEntry)
+                ->where('U_CT', $centroInspeccion)
+                ->where('U_Comentarios', 'RECOVERY')
+                ->first();
+            
+            if ($cp_of_recovery) {
+                $modoRecovery = true;
+                //\Log::info("INSPECCION_PROCESO: Modo RECOVERY detectado para OP: {$op}, Estación: {$centroInspeccion}. Solo se guardará la inspección sin modificar SAP ni hacer traslado completo.");
+            }
+            
             if ($estado === 'ACEPTADO' && !$avanceExitoso) {
-                \Log::info("INSPECCION_PROCESO: Iniciando traslado después de guardar inspección. OP: {$op}, Inspección ID: {$inspeccion->IPR_id}");
+                // Modo RECOVERY: Hacer traslado completo en CP_OF, pero NO crear LOGOF/LOGOT ni modificar SAP
+                // Modo normal: Hacer traslado completo incluyendo LOGOF/LOGOT y SAP
+                \Log::info("INSPECCION_PROCESO: Iniciando traslado después de guardar inspección. OP: {$op}, Inspección ID: {$inspeccion->IPR_id}, Modo RECOVERY: " . ($modoRecovery ? 'Sí' : 'No'));
                 
                 // VALIDACIÓN CRÍTICA: Verificar que la estación actual sea de Calidad antes de permitir el avance
                 $estacionCalidadInfo = DB::table('@PL_RUTAS')
@@ -1145,17 +1187,29 @@ class Mod_InspeccionProcesoController extends Controller
                         $apellido = $this->getApellidoPaternoUsuario(explode(' ', Auth::user()->lastName));
                         $usuario_reporta = explode(' ', Auth::user()->firstName)[0] . ' ' . $apellido;
                         
-                        if (($orden_owor->PlannedQty) >= (floatval($orden_owor->CmpltQty) + floatval($cantInspeccionada))) {
-                            \Log::info("INSPECCION_PROCESO: Generando recibo de producción en SAP para OP: {$op}, Cantidad: {$cantInspeccionada} (después de guardar inspección)");
-                            $result = SAPi::ReciboProduccion($op, $orden_owor->Warehouse, $cantInspeccionada, "Reportado por: " . $usuario_reporta, "Recibo de producción - Inspección en Proceso");
-                            \Log::info("INSPECCION_PROCESO: Resultado de recibo de producción: {$result}");
-                        } else if (($orden_owor->PlannedQty) == floatval($orden_owor->CmpltQty)) {
-                            $result = 'Recibo creado SIZ';
+                        // En modo RECOVERY, NO modificar SAP
+                        if (!$modoRecovery) {
+                            if (($orden_owor->PlannedQty) >= (floatval($orden_owor->CmpltQty) + floatval($cantInspeccionada))) {
+                                \Log::info("INSPECCION_PROCESO: Generando recibo de producción en SAP para OP: {$op}, Cantidad: {$cantInspeccionada} (después de guardar inspección)");
+                                $result = SAPi::ReciboProduccion($op, $orden_owor->Warehouse, $cantInspeccionada, "Reportado por: " . $usuario_reporta, "Recibo de producción - Inspección en Proceso");
+                                \Log::info("INSPECCION_PROCESO: Resultado de recibo de producción: {$result}");
+                            } else if (($orden_owor->PlannedQty) == floatval($orden_owor->CmpltQty)) {
+                                $result = 'Recibo creado SIZ';
+                            } else {
+                                throw new \Exception('La cantidad Completada no puede ser mayor a la Planeada. OP: ' . $op . '. Se eliminará la inspección guardada.');
+                            }
+                            
+                            if (strpos($result, 'Recibo') === false) {
+                                throw new \Exception('Error al generar recibo de producción en SAP: ' . $result . '. Se eliminará la inspección guardada.');
+                            }
                         } else {
-                            throw new \Exception('La cantidad Completada no puede ser mayor a la Planeada. OP: ' . $op . '. Se eliminará la inspección guardada.');
+                            // Modo RECOVERY: Simular resultado exitoso sin llamar a SAP
+                            $result = 'Recibo creado SIZ (RECOVERY - sin modificar SAP)';
+                            \Log::info("INSPECCION_PROCESO: Modo RECOVERY - Omitiendo llamada a SAP para OP: {$op}");
                         }
                         
-                        if (strpos($result, 'Recibo') !== false) {
+                        // En modo RECOVERY, NO crear registro en @CP_LOGOF
+                        if (!$modoRecovery) {
                             $dt = date('Ymd H:i:s');
                             $consecutivologof = DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOF]');
                             $log = new LOGOF();
@@ -1169,6 +1223,11 @@ class Mod_InspeccionProcesoController extends Controller
                             $log->U_Cantidad = $cantInspeccionada;
                             $log->U_Reproceso = 'N';
                             $log->save();
+                        } else {
+                            \Log::info("INSPECCION_PROCESO: Modo RECOVERY - Omitiendo creación de registro en @CP_LOGOF para OP: {$op}");
+                        }
+                        
+                        if (strpos($result, 'Recibo') !== false) {
                             
                             $orden_owor = DB::table('OWOR')->where('DocNum', $op)->first();
                             
@@ -1201,9 +1260,12 @@ class Mod_InspeccionProcesoController extends Controller
                                     and VAL.Cantidad is null
                                 ", [$op]);
                                 
-                                if (count($cerrar) > 0) {
+                                // En modo RECOVERY, NO cerrar OP en SAP
+                                if (!$modoRecovery && count($cerrar) > 0) {
                                     \Log::info("INSPECCION_PROCESO: Cerrando OP {$op} en SAP");
                                     SAP::ProductionOrderStatus($op, 2);
+                                } else if ($modoRecovery) {
+                                    \Log::info("INSPECCION_PROCESO: Modo RECOVERY - Omitiendo cierre de OP en SAP para OP: {$op}");
                                 }
                             } else if ($orden_owor->PlannedQty > floatval($orden_owor->CmpltQty)) {
                                 // Solo actualizar si es un registro real en @CP_OF
@@ -1215,8 +1277,6 @@ class Mod_InspeccionProcesoController extends Controller
                             }
                             
                             \Log::info('INSPECCION_PROCESO: OP terminada desde inspección: ' . $op . ' - Resultado: ' . $result);
-                        } else {
-                            throw new \Exception('Error al generar recibo de producción en SAP: ' . $result . '. Se eliminará la inspección guardada.');
                         }
                     }
                     // Si hay estación siguiente normal, avanzar la OP
@@ -1266,16 +1326,21 @@ class Mod_InspeccionProcesoController extends Controller
                             $newCode->U_CTCalidad = 0;
                             $newCode->save();
                             
-                            $consecutivologot = DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOT]');
-                            $lot = new LOGOT();
-                            $lot->Code = ((int) $consecutivologot[0]->Code) + 1;
-                            $lot->Name = ((int) $consecutivologot[0]->Code) + 1;
-                            $lot->U_idEmpleado = Auth::user()->empID;
-                            $lot->U_CT = $Code_actual->U_CT;
-                            $lot->U_Status = "O";
-                            $lot->U_FechaHora = $dt;
-                            $lot->U_OP = $op; // U_OP en LOGOT es el DocNum (número de OP), igual que U_DocEntry en LOGOF
-                            $lot->save();
+                            // En modo RECOVERY, NO crear registro en @CP_LOGOT
+                            if (!$modoRecovery) {
+                                $consecutivologot = DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOT]');
+                                $lot = new LOGOT();
+                                $lot->Code = ((int) $consecutivologot[0]->Code) + 1;
+                                $lot->Name = ((int) $consecutivologot[0]->Code) + 1;
+                                $lot->U_idEmpleado = Auth::user()->empID;
+                                $lot->U_CT = $Code_actual->U_CT;
+                                $lot->U_Status = "O";
+                                $lot->U_FechaHora = $dt;
+                                $lot->U_OP = $op; // U_OP en LOGOT es el DocNum (número de OP), igual que U_DocEntry en LOGOF
+                                $lot->save();
+                            } else {
+                                \Log::info("INSPECCION_PROCESO: Modo RECOVERY - Omitiendo creación de registro en @CP_LOGOT para OP: {$op}");
+                            }
                         } else {
                             throw new \Exception('Existen registros duplicados en la siguiente estación. OP: ' . $op . '. Se eliminará la inspección guardada.');
                         }
@@ -1294,22 +1359,27 @@ class Mod_InspeccionProcesoController extends Controller
                             }
                         }
                         
-                        $consecutivologof = DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOF]');
-                        $log = new LOGOF();
-                        $log->Code = ((int) $consecutivologof[0]->Code) + 1;
-                        $log->Name = ((int) $consecutivologof[0]->Code) + 1;
-                        $log->U_idEmpleado = Auth::user()->empID;
-                        $log->U_CT = $Code_actual->U_CT;
-                        $log->U_Status = "T";
-                        $log->U_FechaHora = $dt;
-                        $log->U_DocEntry = $op; // U_DocEntry en LOGOF es el DocNum (número de OP)
-                        $log->U_Cantidad = $cantInspeccionada;
-                        $log->U_Reproceso = 'N';
-                        $log->save();
+                        // En modo RECOVERY, NO crear registro en @CP_LOGOF
+                        if (!$modoRecovery) {
+                            $consecutivologof = DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOF]');
+                            $log = new LOGOF();
+                            $log->Code = ((int) $consecutivologof[0]->Code) + 1;
+                            $log->Name = ((int) $consecutivologof[0]->Code) + 1;
+                            $log->U_idEmpleado = Auth::user()->empID;
+                            $log->U_CT = $Code_actual->U_CT;
+                            $log->U_Status = "T";
+                            $log->U_FechaHora = $dt;
+                            $log->U_DocEntry = $op; // U_DocEntry en LOGOF es el DocNum (número de OP)
+                            $log->U_Cantidad = $cantInspeccionada;
+                            $log->U_Reproceso = 'N';
+                            $log->save();
+                        } else {
+                            \Log::info("INSPECCION_PROCESO: Modo RECOVERY - Omitiendo creación de registro en @CP_LOGOF para OP: {$op}");
+                        }
                     }
                     
                     \Log::info("INSPECCION_PROCESO: Traslado completado exitosamente después de guardar inspección. OP: {$op}");
-                    } // Cierre del else cuando existe @CP_OF
+                    } // Cierre del if ($Code_actual)
                     
                 } catch (\Exception $e) {
                     // Si el traslado falla, eliminar la inspección guardada
