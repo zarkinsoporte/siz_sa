@@ -820,7 +820,7 @@ Route::get('home/INCOMING/resumen-piel', 'Mod_IncomingController@resumenClasesPi
 //REPORTE R-143 CONFIABILIDAD DE PROVEEDORES
 Route::get('home/REP-03-SEM-CALIFICACION-PROV', 'Reportes_IncomingController@index_rep03')->middleware('routelog');
 Route::post('home/rep-03-sem-calificacion-prov/buscar', 'Reportes_IncomingController@buscarConfiabilidadProveedores');
-Route::get('home/rep-03-sem-calificacion-prov/pdf', 'Reportes_IncomingController@generarPdf');
+Route::get('home/rep-03-sem-calificacion-prov/pdf', 'Reportes_IncomingController@generarPdfRep03');
 
 //CALIDAD INSPECCION EN PROCESO
 Route::get('home/inspeccion-proceso', 'Mod_InspeccionProcesoController@index_inspeccion_en_proceso')->middleware('routelog');
@@ -849,3 +849,7 @@ Route::get('home/evidencia-cliente/pdf/{op}', 'Mod_InspeccionProcesoController@g
 Route::get('home/evidencia-cliente/pdf-interno/{op}', 'Mod_InspeccionProcesoController@generarPdfEvidenciaInterno');
 Route::get('home/evidencia-cliente/videos/{op}', 'Mod_InspeccionProcesoController@obtenerVideosEvidenciaCliente');
 
+//reporte REP-01-INSPECCION-MATERIAL
+Route::get('home/REP-01-INSPECCION-MATERIAL', 'Reportes_IncomingController@index')->middleware('routelog');
+Route::get('home/rep-01-inspeccion-material/buscar', 'Reportes_IncomingController@buscarInspecciones');
+Route::get('home/rep-01-inspeccion-material/pdf', 'Reportes_IncomingController@generarPdf');

@@ -394,14 +394,14 @@ class Mod01_ProduccionController extends Controller
                     //usar solo las estaciones (Code) del usuario, que no sean U_Calidad = 'N'
                     //select [@PL_RUTAS].U_Calidad from [@PL_RUTAS] where [@PL_RUTAS].Code in ($Fil_Est) and [@PL_RUTAS].U_Calidad = 'N'
 
-                    $estacionesCalidad = DB::table('@PL_RUTAS')
+                    /* $estacionesCalidad = DB::table('@PL_RUTAS')
                         ->whereIn('Code', $Fil_Est)
                         ->where('U_Calidad', 'N')
                         ->pluck('Code')
                         ->toArray();
 
                     $Fil_Est = array_intersect($Fil_Est, $estacionesCalidad);
-
+*/
                     $rutasConNombres = self::getNombresRutas($Fil_Est); //ARRAY LLAVE VALOR
                     
                     return view('Mod01_Produccion.traslados', ['rutasConNombres' => $rutasConNombres, 't_user' => $t_user, 'est_Av' => $est_Av, 'Fil_Est' => $Fil_Est, 'actividades' => $actividades, 'ultimo' => count($actividades), 't_user' => $t_user]);
@@ -514,7 +514,9 @@ class Mod01_ProduccionController extends Controller
                                 ->select(DB::raw($EstacionA . ' AS U_CT_ACT'), DB::raw($EstacionS . ' AS U_CT_SIG'), DB::raw(OP::avanzarEstacion($code->Code, $t_user->U_CP_CT) . ' AS avanzar'),
                                     'OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden', 'OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
                                     'OWOR.PlannedQty', '@CP_OF.U_Recibido', '@CP_OF.U_Procesado')
-                                ->where('@CP_OF.Code', $code->Code)->get();
+                                ->where('@CP_OF.Code', $code->Code)
+                                ->whereRaw('[@CP_OF].U_Recibido > [@CP_OF].U_Procesado')
+                                ->get();
                             if ($index == 1) {
                                 $one = DB::table('OWOR')
                                     ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
@@ -524,7 +526,7 @@ class Mod01_ProduccionController extends Controller
                                         'OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden', 'OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
                                         'OWOR.PlannedQty', '@CP_OF.U_Recibido', '@CP_OF.U_Procesado')
                                     ->where('@CP_OF.Code', $code->Code)
-                                    ->where('@CP_OF.U_Recibido', '>', '@CP_OF.U_Procesado')
+                                    ->whereRaw('[@CP_OF].U_Recibido > [@CP_OF].U_Procesado')
                                     ->get();
                                 foreach ($one as $o) {
                                     $pedido = $o->OriginNum;
@@ -879,7 +881,9 @@ class Mod01_ProduccionController extends Controller
                     ->select(DB::raw(OP::getEstacionActual($code->Code) . ' AS U_CT_ACT'), DB::raw(OP::getEstacionSiguiente($code->Code, 1) . ' AS U_CT_SIG'), DB::raw(OP::avanzarEstacion($code->Code, $t_user->U_CP_CT) . ' AS avanzar'),
                         'OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden', 'OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
                         'OWOR.PlannedQty', '@CP_OF.U_Recibido', '@CP_OF.U_Procesado')
-                    ->where('@CP_OF.Code', $code->Code)->get();
+                    ->where('@CP_OF.Code', $code->Code)
+                    ->whereRaw('[@CP_OF].U_Recibido > [@CP_OF].U_Procesado')
+                    ->get();
                 if ($index == 1) {
                     $one = DB::table('OWOR')
                         ->leftJoin('OITM', 'OITM.ItemCode', '=', 'OWOR.ItemCode')
@@ -888,7 +892,9 @@ class Mod01_ProduccionController extends Controller
                             DB::raw(OP::avanzarEstacion($code->Code, $t_user->U_CP_CT) . ' AS avanzar'),
                             'OWOR.DocEntry', '@CP_OF.Code', '@CP_OF.U_Orden', 'OWOR.Status', 'OWOR.OriginNum', 'OITM.ItemName', '@CP_OF.U_Reproceso',
                             'OWOR.PlannedQty', '@CP_OF.U_Recibido', '@CP_OF.U_Procesado')
-                        ->where('@CP_OF.Code', $code->Code)->get();
+                        ->where('@CP_OF.Code', $code->Code)
+                        ->whereRaw('[@CP_OF].U_Recibido > [@CP_OF].U_Procesado')
+                        ->get();
                     foreach ($one as $o) {
                         $pedido = $o->OriginNum;
                     }
@@ -1227,6 +1233,7 @@ public function repCortePiel()
     $detPegado = DB::select(DB::raw("select  OWOR.DocNum, sum(WOR1.IssuedQty) as Usado ,OWOR.ItemCode , OHEM.firstName AS LOGISTICA,OHEM.middleName AS APELLIDO  , (a.u_vs * OWOR.PlannedQty )
                 as u_vs ,OITM.ItmsGrpCod, OWOR.closedate  , a.itemname ,  sum(WOR1.IssuedQty*OITM.AvgPrice) 
                 as mUsado  , (vwsof_pieles1.cantidad * OWOR.PlannedQty) as Teorico , (vwsof_pieles1.monto * OWOR.PlannedQty) as mTeorico, 
+                
                 SUBSTRING(owor.itemcode,9,5) as piel, (select TOP 1 OH.firstName from [@CP_LOGOF] LF INNER JOIN OHEM OH ON LF.U_idEmpleado = OH.empID 
                 WHERE (LF.U_CT =1 or LF.U_CT =112) AND LF.U_DocEntry = OWOR.DocNum   ) AS firstName, LOF.FECHA,(select TOP 1 OH.middleName from [@CP_LOGOF] LF INNER JOIN OHEM OH 
                 ON LF.U_idEmpleado = OH.empID WHERE (LF.U_CT =1 or LF.U_CT =112) AND LF.U_DocEntry = OWOR.DocNum   ) AS middleName  from WOR1 inner join OWOR 

@@ -37,6 +37,7 @@ class Mod_InspeccionProcesoController extends Controller
     {
         //try {
             $op = $request->input('op');
+            $centroSeleccionado = $request->input('centro'); // Parámetro para cuando el usuario selecciona una estación desde el modal
             
             if (!$op) {
                 return response()->json([
@@ -53,6 +54,7 @@ class Mod_InspeccionProcesoController extends Controller
                     'OWOR.ItemCode',
                     'OITM.ItemName',
                     'OWOR.PlannedQty as CantidadPlaneada',
+                    'OWOR.CmpltQty as CantidadCompletada',
                     'OWOR.Status',
                     'OWOR.PostDate as FechaCreacion',
                     'OWOR.DueDate as FechaEntrega',
@@ -69,56 +71,187 @@ class Mod_InspeccionProcesoController extends Controller
                     'msg' => 'No se encontró la Orden de Producción'
                 ], 404);
             }
-            // Buscar el registro de @CP_OF que corresponde a una estación de calidad
-            // Puede haber múltiples registros para la misma OP en diferentes estaciones
-            $cp_of = DB::table('@CP_OF')
+            // Buscar TODAS las estaciones de calidad con cantidad disponible en @CP_OF
+            // Esto permite detectar traslados parciales donde la OP está en múltiples estaciones de calidad
+            $estacionesCalidadDisponibles = DB::table('@CP_OF')
                 ->join('@PL_RUTAS', '@CP_OF.U_CT', '=', '@PL_RUTAS.Code')
                 ->where('@CP_OF.U_DocEntry', $ordenProduccion->DocEntry)
+                ->whereRaw('[@CP_OF].U_Recibido > [@CP_OF].U_Procesado')
                 ->where('@PL_RUTAS.U_Calidad', 'S')
-                ->select('@CP_OF.*')
-                ->first();
+                ->select(
+                    '@CP_OF.*',
+                    '@PL_RUTAS.Name as NombreEstacion',
+                    DB::raw('([@CP_OF].U_Recibido - [@CP_OF].U_Procesado) as CantidadDisponible')
+                )
+                ->orderBy('@PL_RUTAS.Name')
+                ->get();
             
             $estacionActual = null;
             $cantidadEnCentro = 0;
             $opEnControlPiso = false;
             
-            // Si hay registro en @CP_OF, la OP está en control de piso
-            if ($cp_of) {
-                $estacionActual = $cp_of->U_CT;
-                // La cantidad disponible es lo recibido menos lo procesado (para traslados parciales)
-                $cantidadEnCentro = $cp_of->U_Recibido - ($cp_of->U_Procesado ?? 0);
+            // Si el usuario seleccionó una estación específica desde el modal, validarla y usarla
+            if ($centroSeleccionado) {
+                $cp_of_seleccionado = DB::table('@CP_OF')
+                    ->join('@PL_RUTAS', '@CP_OF.U_CT', '=', '@PL_RUTAS.Code')
+                    ->where('@CP_OF.U_DocEntry', $ordenProduccion->DocEntry)
+                    ->where('@CP_OF.U_CT', $centroSeleccionado)
+                    ->whereRaw('[@CP_OF].U_Recibido > [@CP_OF].U_Procesado')
+                    ->where('@PL_RUTAS.U_Calidad', 'S')
+                    ->select(
+                        '@CP_OF.*',
+                        '@PL_RUTAS.Name as NombreEstacion',
+                        DB::raw('([@CP_OF].U_Recibido - [@CP_OF].U_Procesado) as CantidadDisponible')
+                    )
+                    ->first();
+                
+                if (!$cp_of_seleccionado) {
+                    return response()->json([
+                        'success' => false,
+                        'msg' => 'La estación seleccionada no tiene cantidad disponible o no es una estación de calidad válida.'
+                    ], 400);
+                }
+                
+                // Validar permisos del inspector para esta estación
+                $inspector_centros = Auth::user()->U_CP_CT;
+                $centros_permitidos = $inspector_centros ? explode(",", str_replace(' ', '', $inspector_centros)) : [];
+                
+                if (!in_array($centroSeleccionado, $centros_permitidos)) {
+                    return response()->json([
+                        'success' => false,
+                        'msg' => 'No tiene permisos para inspeccionar en esta estación de calidad: ' . $cp_of_seleccionado->NombreEstacion
+                    ], 403);
+                }
+                
+                $estacionActual = $centroSeleccionado;
+                $cantidadEnCentro = $cp_of_seleccionado->CantidadDisponible;
                 $opEnControlPiso = true;
             } else {
-                // Si no hay registro en @CP_OF, buscar en @CP_LOGOF la última estación de calidad
-                // Esto permite inspeccionar OPs que ya pasaron por estaciones de calidad
+                // Si hay múltiples estaciones de calidad disponibles, permitir al usuario elegir
+                if (count($estacionesCalidadDisponibles) > 1) {
+                    $estaciones = [];
+                    foreach ($estacionesCalidadDisponibles as $estacion) {
+                        $estaciones[] = [
+                            'id' => $estacion->U_CT,
+                            'nombre' => $estacion->NombreEstacion,
+                            'cantidad_disponible' => $estacion->CantidadDisponible,
+                            'recibido' => $estacion->U_Recibido,
+                            'procesado' => $estacion->U_Procesado
+                        ];
+                    }
+                    
+                    return response()->json([
+                        'success' => true,
+                        'multiple_stations' => true,
+                        'op' => $ordenProduccion,
+                        'estaciones_disponibles' => $estaciones,
+                        'msg' => 'La OP tiene cantidad disponible en múltiples estaciones de calidad. Por favor, seleccione la estación donde desea realizar la inspección.'
+                    ]);
+                }
+                
+                // Si hay solo una estación de calidad disponible, usarla automáticamente
+                if (count($estacionesCalidadDisponibles) == 1) {
+                    $cp_of = $estacionesCalidadDisponibles[0];
+                    $estacionActual = $cp_of->U_CT;
+                    $cantidadEnCentro = $cp_of->CantidadDisponible;
+                    $opEnControlPiso = true;
+                } else {
+                    // Si no hay estaciones de calidad con cantidad disponible, buscar cualquier estación con cantidad disponible
+                    // (para mostrar mensaje de error apropiado)
+                    $cp_of = DB::table('@CP_OF')
+                        ->where('@CP_OF.U_DocEntry', $ordenProduccion->DocEntry)
+                        ->whereRaw('[@CP_OF].U_Recibido > [@CP_OF].U_Procesado')
+                        ->select('@CP_OF.*')
+                        ->first();
+                    
+                    if ($cp_of) {
+                        // Verificar si la estación encontrada es de calidad
+                        $estacionInfo = DB::table('@PL_RUTAS')
+                            ->where('Code', $cp_of->U_CT)
+                            ->first();
+                        
+                        // Validar que la estación sea de calidad
+                        if (!$estacionInfo || $estacionInfo->U_Calidad !== 'S') {
+                            return response()->json([
+                                'success' => false,
+                                'msg' => 'La OP no está actualmente en un centro de inspección (Calidad). Actualmente se encuentra en la estación ' . $cp_of->U_CT . ' (' . ($estacionInfo ? $estacionInfo->Name : 'N/A') . '). Solo se pueden inspeccionar OPs que estén en estaciones de Calidad.'
+                            ], 400);
+                        }
+                        
+                        $estacionActual = $cp_of->U_CT;
+                        $cantidadEnCentro = $cp_of->U_Recibido - ($cp_of->U_Procesado ?? 0);
+                        $opEnControlPiso = true;
+                    } else {
+                // Si no hay registro en @CP_OF, verificar si la OP ya terminó
+                // Si la OP ya terminó (PlannedQty <= CmpltQty o Status = 'L'), no permitir inspección
+                $cantidadCompletada = floatval($ordenProduccion->CantidadCompletada ?? 0);
+                if ($ordenProduccion->Status == 'L' || floatval($ordenProduccion->CantidadPlaneada) <= $cantidadCompletada) {
+                    return response()->json([
+                        'success' => false,
+                        'msg' => 'La Orden de Producción ya ha sido completada y cerrada. No se puede realizar inspección en una OP finalizada.'
+                    ], 400);
+                }
+                
+                // Si la OP no ha terminado pero no está en @CP_OF, verificar la ÚLTIMA estación en @CP_LOGOF
+                // Solo se puede inspeccionar si la última estación es de calidad
                 // NOTA: @CP_LOGOF.U_DocEntry es el DocNum (número de OP), no el DocEntry
-                $ultimaEstacionCalidad = DB::select("
+                $ultimaEstacion = DB::select("
                     SELECT TOP 1
                         [@CP_LOGOF].U_CT,
                         [@PL_RUTAS].Name AS NombreEstacion,
                         [@PL_RUTAS].U_Calidad AS EsCalidad,
-                        SUM([@CP_LOGOF].U_Cantidad) AS CantidadProcesada
+                        SUM([@CP_LOGOF].U_Cantidad) AS CantidadProcesada,
+                        MAX([@CP_LOGOF].U_FechaHora) AS FechaHora
                     FROM [@CP_LOGOF]
                     INNER JOIN [@PL_RUTAS] ON [@CP_LOGOF].U_CT = [@PL_RUTAS].Code
                     WHERE [@CP_LOGOF].U_DocEntry = ?
-                        AND [@PL_RUTAS].U_Calidad = 'S'
-                        
                     GROUP BY [@CP_LOGOF].U_CT, [@PL_RUTAS].Name, [@PL_RUTAS].U_Calidad
-                    ORDER BY MAX([@CP_LOGOF].U_FechaHora) DESC
+                    ORDER BY MAX([@CP_LOGOF].U_FechaHora) DESC, MAX([@CP_LOGOF].U_CT) DESC
                 ", [$op]);
                 
-                if (empty($ultimaEstacionCalidad)) {
+                if (empty($ultimaEstacion)) {
                     return response()->json([
                         'success' => false,
-                        'msg' => 'No se encontró la Orden en control de piso ni en el historial de estaciones de calidad. La OP debe pasar por una estación de calidad antes de poder inspeccionarla.'
+                        'msg' => 'No se encontró la Orden en control de piso ni en el historial de estaciones. La OP debe estar actualmente en una estación de calidad para poder inspeccionarla.'
                     ], 404);
                 }
                 
-                $estacionActual = $ultimaEstacionCalidad[0]->U_CT;
+                // Verificar si la última estación es de calidad
+                if ($ultimaEstacion[0]->EsCalidad !== 'S') {
+                    return response()->json([
+                        'success' => false,
+                        'msg' => 'La OP no está actualmente en una estación de calidad. La última estación registrada es ' . $ultimaEstacion[0]->U_CT . ' (' . $ultimaEstacion[0]->NombreEstacion . '), que no es una estación de calidad. Solo se pueden inspeccionar OPs que estén en estaciones de Calidad.'
+                    ], 400);
+                }
+                
+                // Si la última estación ES de calidad, permitir inspección
+                $estacionActual = $ultimaEstacion[0]->U_CT;
                 // La cantidad disponible es la cantidad procesada en esa estación (ya pasó por ahí)
                 // Se calculará después restando las inspecciones aceptadas
-                $cantidadEnCentro = $ultimaEstacionCalidad[0]->CantidadProcesada;
+                $cantidadEnCentro = $ultimaEstacion[0]->CantidadProcesada;
+                
                 $opEnControlPiso = false;
+                
+                // Advertencia: La OP ya pasó por esta estación, verificar si todavía hay cantidad disponible
+                // Calcular cantidad ya inspeccionada en esta estación
+                $cantidadYaInspeccionada = Siz_InspeccionProceso::on('siz')
+                    ->where('IPR_op', $op)
+                    ->where('IPR_centroInspeccion', $estacionActual)
+                    ->where('IPR_borrado', 'N')
+                    ->where('IPR_estado', 'ACEPTADO')
+                    ->sum('IPR_cantInspeccionada');
+                
+                $cantidadYaInspeccionada = $cantidadYaInspeccionada ?? 0;
+                
+                // Si ya se inspeccionó toda la cantidad procesada, no permitir más inspecciones
+                if ($cantidadYaInspeccionada >= $cantidadEnCentro) {
+                    return response()->json([
+                        'success' => false,
+                        'msg' => 'La OP ya pasó por la estación ' . $estacionActual . ' (' . $ultimaEstacion[0]->NombreEstacion . ') y toda la cantidad ya fue inspeccionada. La OP debe estar actualmente en una estación de calidad para poder realizar nuevas inspecciones.'
+                    ], 400);
+                }
+                    }
+                }
             }
             
             if (!$estacionActual) {
@@ -128,7 +261,8 @@ class Mod_InspeccionProcesoController extends Controller
                 ], 404);
             }
             
-            // 3. Verificar que la estación actual sea de calidad
+            // 3. Verificación final de seguridad: Verificar que la estación actual sea de calidad
+            // (En teoría ya está validado arriba, pero mantenemos esta validación por seguridad)
             $estacionActualInfo = DB::table('@PL_RUTAS')
                 ->where('Code', $estacionActual)
                 ->first();
@@ -143,7 +277,7 @@ class Mod_InspeccionProcesoController extends Controller
             if ($estacionActualInfo->U_Calidad !== 'S') {
                 return response()->json([
                     'success' => false,
-                    'msg' => 'La OP no está actualmente en un centro de inspección (Calidad). Actualmente se encuentra en: ' . $estacionActualInfo->Name
+                    'msg' => 'La OP no está actualmente en un centro de inspección (Calidad). Actualmente se encuentra en la estación ' . $estacionActual . ' (' . $estacionActualInfo->Name . '). Solo se pueden inspeccionar OPs que estén en estaciones de Calidad.'
                 ], 400);
             }
             
@@ -258,6 +392,30 @@ class Mod_InspeccionProcesoController extends Controller
                 $cantidadDisponible = 0;
             }
             
+            // 10. Verificar si es modo RECOVERY (U_Comentarios = 'RECOVERY' en @CP_OF)
+            $modoRecovery = false;
+            if ($opEnControlPiso) {
+                // Si se seleccionó una estación desde el modal, verificar en esa estación
+                if ($centroSeleccionado && isset($cp_of_seleccionado)) {
+                    if (isset($cp_of_seleccionado->U_Comentarios) && $cp_of_seleccionado->U_Comentarios === 'RECOVERY') {
+                        $modoRecovery = true;
+                        //\Log::info("INSPECCION_PROCESO: Modo RECOVERY detectado para OP: {$op}, Estación seleccionada: {$estacionActual}");
+                    }
+                } else {
+                    // Buscar en la estación actual
+                    $cp_of_recovery = DB::table('@CP_OF')
+                        ->where('U_DocEntry', $ordenProduccion->DocEntry)
+                        ->where('U_CT', $estacionActual)
+                        ->where('U_Comentarios', 'RECOVERY')
+                        ->first();
+                    
+                    if ($cp_of_recovery) {
+                        $modoRecovery = true;
+                        //\Log::info("INSPECCION_PROCESO: Modo RECOVERY detectado para OP: {$op}, Estación: {$estacionActual}");
+                    }
+                }
+            }
+            
             return response()->json([
                 'success' => true,
                 'op' => $ordenProduccion,
@@ -272,7 +430,8 @@ class Mod_InspeccionProcesoController extends Controller
                 'checklist' => $checklist,
                 'historial' => $historial,
                 'inspecciones_previas' => $inspeccionesPrevias,
-                'id_inspeccion' => 0
+                'id_inspeccion' => 0,
+                'modo_recovery' => $modoRecovery
             ]);
             
         // } catch (\Exception $e) {
@@ -863,11 +1022,45 @@ class Mod_InspeccionProcesoController extends Controller
             // NUEVA LÓGICA: Intentar traslado DESPUÉS de guardar la inspección
             // Si el traslado falla, eliminar la inspección guardada
             // IMPORTANTE: SIEMPRE se intenta trasladar, incluso si no hay @CP_OF
+            // EXCEPCIÓN: Modo RECOVERY - Solo guarda inspección, no modifica SAP ni hace traslado completo
             // ============================================================
             // IMPORTANTE: La inspección ya está guardada en este punto
             // Si el traslado falla, se eliminará la inspección para mantener consistencia
+            
+            // Verificar si es modo RECOVERY
+            $modoRecovery = false;
+            $cp_of_recovery = DB::table('@CP_OF')
+                ->where('U_DocEntry', $docEntry)
+                ->where('U_CT', $centroInspeccion)
+                ->where('U_Comentarios', 'RECOVERY')
+                ->first();
+            
+            if ($cp_of_recovery) {
+                $modoRecovery = true;
+                //\Log::info("INSPECCION_PROCESO: Modo RECOVERY detectado para OP: {$op}, Estación: {$centroInspeccion}. Solo se guardará la inspección sin modificar SAP ni hacer traslado completo.");
+            }
+            
             if ($estado === 'ACEPTADO' && !$avanceExitoso) {
-                \Log::info("INSPECCION_PROCESO: Iniciando traslado después de guardar inspección. OP: {$op}, Inspección ID: {$inspeccion->IPR_id}");
+                // Modo RECOVERY: Hacer traslado completo en CP_OF, pero NO crear LOGOF/LOGOT ni modificar SAP
+                // Modo normal: Hacer traslado completo incluyendo LOGOF/LOGOT y SAP
+                \Log::info("INSPECCION_PROCESO: Iniciando traslado después de guardar inspección. OP: {$op}, Inspección ID: {$inspeccion->IPR_id}, Modo RECOVERY: " . ($modoRecovery ? 'Sí' : 'No'));
+                
+                // VALIDACIÓN CRÍTICA: Verificar que la estación actual sea de Calidad antes de permitir el avance
+                $estacionCalidadInfo = DB::table('@PL_RUTAS')
+                    ->where('Code', $centroInspeccion)
+                    ->first();
+                
+                if (!$estacionCalidadInfo) {
+                    \Log::error("INSPECCION_PROCESO: No se encontró información de la estación {$centroInspeccion} para OP {$op}");
+                    throw new \Exception('No se encontró información de la estación de inspección. Se eliminará la inspección guardada.');
+                }
+                
+                if ($estacionCalidadInfo->U_Calidad !== 'S') {
+                    \Log::error("INSPECCION_PROCESO: Intento de avanzar OP {$op} desde estación que NO es de Calidad. Estación: {$centroInspeccion} ({$estacionCalidadInfo->Name}), U_Calidad: {$estacionCalidadInfo->U_Calidad}");
+                    throw new \Exception('Solo se pueden avanzar o trasladar las Órdenes de Producción que estén en una estación de Calidad. La estación actual (' . $estacionCalidadInfo->Name . ') no es de Calidad. Se eliminará la inspección guardada.');
+                }
+                
+                \Log::info("INSPECCION_PROCESO: Validación de estación de Calidad exitosa - Estación: {$centroInspeccion} ({$estacionCalidadInfo->Name})");
                 
                 try {
                     // Obtener el registro de @CP_OF para la estación actual
@@ -994,17 +1187,29 @@ class Mod_InspeccionProcesoController extends Controller
                         $apellido = $this->getApellidoPaternoUsuario(explode(' ', Auth::user()->lastName));
                         $usuario_reporta = explode(' ', Auth::user()->firstName)[0] . ' ' . $apellido;
                         
-                        if (($orden_owor->PlannedQty) >= (floatval($orden_owor->CmpltQty) + floatval($cantInspeccionada))) {
-                            \Log::info("INSPECCION_PROCESO: Generando recibo de producción en SAP para OP: {$op}, Cantidad: {$cantInspeccionada} (después de guardar inspección)");
-                            $result = SAPi::ReciboProduccion($op, $orden_owor->Warehouse, $cantInspeccionada, "Reportado por: " . $usuario_reporta, "Recibo de producción - Inspección en Proceso");
-                            \Log::info("INSPECCION_PROCESO: Resultado de recibo de producción: {$result}");
-                        } else if (($orden_owor->PlannedQty) == floatval($orden_owor->CmpltQty)) {
-                            $result = 'Recibo creado SIZ';
+                        // En modo RECOVERY, NO modificar SAP
+                        if (!$modoRecovery) {
+                            if (($orden_owor->PlannedQty) >= (floatval($orden_owor->CmpltQty) + floatval($cantInspeccionada))) {
+                                \Log::info("INSPECCION_PROCESO: Generando recibo de producción en SAP para OP: {$op}, Cantidad: {$cantInspeccionada} (después de guardar inspección)");
+                                $result = SAPi::ReciboProduccion($op, $orden_owor->Warehouse, $cantInspeccionada, "Reportado por: " . $usuario_reporta, "Recibo de producción - Inspección en Proceso");
+                                \Log::info("INSPECCION_PROCESO: Resultado de recibo de producción: {$result}");
+                            } else if (($orden_owor->PlannedQty) == floatval($orden_owor->CmpltQty)) {
+                                $result = 'Recibo creado SIZ';
+                            } else {
+                                throw new \Exception('La cantidad Completada no puede ser mayor a la Planeada. OP: ' . $op . '. Se eliminará la inspección guardada.');
+                            }
+                            
+                            if (strpos($result, 'Recibo') === false) {
+                                throw new \Exception('Error al generar recibo de producción en SAP: ' . $result . '. Se eliminará la inspección guardada.');
+                            }
                         } else {
-                            throw new \Exception('La cantidad Completada no puede ser mayor a la Planeada. OP: ' . $op . '. Se eliminará la inspección guardada.');
+                            // Modo RECOVERY: Simular resultado exitoso sin llamar a SAP
+                            $result = 'Recibo creado SIZ (RECOVERY - sin modificar SAP)';
+                            \Log::info("INSPECCION_PROCESO: Modo RECOVERY - Omitiendo llamada a SAP para OP: {$op}");
                         }
                         
-                        if (strpos($result, 'Recibo') !== false) {
+                        // En modo RECOVERY, NO crear registro en @CP_LOGOF
+                        if (!$modoRecovery) {
                             $dt = date('Ymd H:i:s');
                             $consecutivologof = DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOF]');
                             $log = new LOGOF();
@@ -1018,6 +1223,11 @@ class Mod_InspeccionProcesoController extends Controller
                             $log->U_Cantidad = $cantInspeccionada;
                             $log->U_Reproceso = 'N';
                             $log->save();
+                        } else {
+                            \Log::info("INSPECCION_PROCESO: Modo RECOVERY - Omitiendo creación de registro en @CP_LOGOF para OP: {$op}");
+                        }
+                        
+                        if (strpos($result, 'Recibo') !== false) {
                             
                             $orden_owor = DB::table('OWOR')->where('DocNum', $op)->first();
                             
@@ -1050,9 +1260,12 @@ class Mod_InspeccionProcesoController extends Controller
                                     and VAL.Cantidad is null
                                 ", [$op]);
                                 
-                                if (count($cerrar) > 0) {
+                                // En modo RECOVERY, NO cerrar OP en SAP
+                                if (!$modoRecovery && count($cerrar) > 0) {
                                     \Log::info("INSPECCION_PROCESO: Cerrando OP {$op} en SAP");
                                     SAP::ProductionOrderStatus($op, 2);
+                                } else if ($modoRecovery) {
+                                    \Log::info("INSPECCION_PROCESO: Modo RECOVERY - Omitiendo cierre de OP en SAP para OP: {$op}");
                                 }
                             } else if ($orden_owor->PlannedQty > floatval($orden_owor->CmpltQty)) {
                                 // Solo actualizar si es un registro real en @CP_OF
@@ -1064,8 +1277,6 @@ class Mod_InspeccionProcesoController extends Controller
                             }
                             
                             \Log::info('INSPECCION_PROCESO: OP terminada desde inspección: ' . $op . ' - Resultado: ' . $result);
-                        } else {
-                            throw new \Exception('Error al generar recibo de producción en SAP: ' . $result . '. Se eliminará la inspección guardada.');
                         }
                     }
                     // Si hay estación siguiente normal, avanzar la OP
@@ -1115,16 +1326,21 @@ class Mod_InspeccionProcesoController extends Controller
                             $newCode->U_CTCalidad = 0;
                             $newCode->save();
                             
-                            $consecutivologot = DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOT]');
-                            $lot = new LOGOT();
-                            $lot->Code = ((int) $consecutivologot[0]->Code) + 1;
-                            $lot->Name = ((int) $consecutivologot[0]->Code) + 1;
-                            $lot->U_idEmpleado = Auth::user()->empID;
-                            $lot->U_CT = $Code_actual->U_CT;
-                            $lot->U_Status = "O";
-                            $lot->U_FechaHora = $dt;
-                            $lot->U_OP = $op; // U_OP en LOGOT es el DocNum (número de OP), igual que U_DocEntry en LOGOF
-                            $lot->save();
+                            // En modo RECOVERY, NO crear registro en @CP_LOGOT
+                            if (!$modoRecovery) {
+                                $consecutivologot = DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOT]');
+                                $lot = new LOGOT();
+                                $lot->Code = ((int) $consecutivologot[0]->Code) + 1;
+                                $lot->Name = ((int) $consecutivologot[0]->Code) + 1;
+                                $lot->U_idEmpleado = Auth::user()->empID;
+                                $lot->U_CT = $Code_actual->U_CT;
+                                $lot->U_Status = "O";
+                                $lot->U_FechaHora = $dt;
+                                $lot->U_OP = $op; // U_OP en LOGOT es el DocNum (número de OP), igual que U_DocEntry en LOGOF
+                                $lot->save();
+                            } else {
+                                \Log::info("INSPECCION_PROCESO: Modo RECOVERY - Omitiendo creación de registro en @CP_LOGOT para OP: {$op}");
+                            }
                         } else {
                             throw new \Exception('Existen registros duplicados en la siguiente estación. OP: ' . $op . '. Se eliminará la inspección guardada.');
                         }
@@ -1143,22 +1359,27 @@ class Mod_InspeccionProcesoController extends Controller
                             }
                         }
                         
-                        $consecutivologof = DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOF]');
-                        $log = new LOGOF();
-                        $log->Code = ((int) $consecutivologof[0]->Code) + 1;
-                        $log->Name = ((int) $consecutivologof[0]->Code) + 1;
-                        $log->U_idEmpleado = Auth::user()->empID;
-                        $log->U_CT = $Code_actual->U_CT;
-                        $log->U_Status = "T";
-                        $log->U_FechaHora = $dt;
-                        $log->U_DocEntry = $op; // U_DocEntry en LOGOF es el DocNum (número de OP)
-                        $log->U_Cantidad = $cantInspeccionada;
-                        $log->U_Reproceso = 'N';
-                        $log->save();
+                        // En modo RECOVERY, NO crear registro en @CP_LOGOF
+                        if (!$modoRecovery) {
+                            $consecutivologof = DB::select('select max (CONVERT(INT,Code)) as Code FROM  [@CP_LOGOF]');
+                            $log = new LOGOF();
+                            $log->Code = ((int) $consecutivologof[0]->Code) + 1;
+                            $log->Name = ((int) $consecutivologof[0]->Code) + 1;
+                            $log->U_idEmpleado = Auth::user()->empID;
+                            $log->U_CT = $Code_actual->U_CT;
+                            $log->U_Status = "T";
+                            $log->U_FechaHora = $dt;
+                            $log->U_DocEntry = $op; // U_DocEntry en LOGOF es el DocNum (número de OP)
+                            $log->U_Cantidad = $cantInspeccionada;
+                            $log->U_Reproceso = 'N';
+                            $log->save();
+                        } else {
+                            \Log::info("INSPECCION_PROCESO: Modo RECOVERY - Omitiendo creación de registro en @CP_LOGOF para OP: {$op}");
+                        }
                     }
                     
                     \Log::info("INSPECCION_PROCESO: Traslado completado exitosamente después de guardar inspección. OP: {$op}");
-                    } // Cierre del else cuando existe @CP_OF
+                    } // Cierre del if ($Code_actual)
                     
                 } catch (\Exception $e) {
                     // Si el traslado falla, eliminar la inspección guardada
@@ -1923,6 +2144,16 @@ class Mod_InspeccionProcesoController extends Controller
                 ->select('CompnyName as RazonSocial')
                 ->first();
             
+            // Obtener datos de SIZ_Labels para el checklist de liberación final
+            $labelsChecklist = collect(DB::table('SIZ_Labels')
+                ->where('LAB_eliminado', 0)
+                ->orderBy('LAB_numOrden')
+                ->get());
+            
+            // Separar el encabezado y las filas
+            $encabezadoChecklist = $labelsChecklist->where('LAB_tipo', 'Encabezado')->first();
+            $filasChecklist = $labelsChecklist->where('LAB_tipo', 'fila')->sortBy('LAB_numOrden');
+            
             // Crear header HTML similar al de rechazos
             $fechaImpresion = date("d-m-Y H:i:s");
             $headerHtml = view()->make(
@@ -1941,7 +2172,9 @@ class Mod_InspeccionProcesoController extends Controller
                 'fechaImpresion' => date('d/m/Y H:i:s'),
                 'imageCount' => 0,
                 'chkDesc' => '',
-                'titulo_pdf' => 'Evidencia de Cliente'
+                'titulo_pdf' => 'Evidencia de Cliente',
+                'encabezadoChecklist' => $encabezadoChecklist,
+                'filasChecklist' => $filasChecklist
             ];
             
             \Log::info("INSPECCION_PROCESO_PDF: Iniciando generación de PDF con Snappy para OP: {$op}");

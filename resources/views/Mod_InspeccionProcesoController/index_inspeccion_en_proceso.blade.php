@@ -311,6 +311,38 @@
             </div>
         </div>
     </div>
+    
+    <!-- Modal para seleccionar estación cuando hay múltiples estaciones de calidad disponibles -->
+    <div class="modal fade" id="modalSeleccionarEstacion" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: #337ab7; color: white;">
+                    <h4 class="modal-title"><i class="fa fa-list"></i> Seleccionar Estación de Calidad</h4>
+                </div>
+                <div class="modal-body">
+                    <p id="modal_seleccionar_estacion_mensaje"></p>
+                    <div class="form-group">
+                        <label for="select_estacion_calidad">Estación de Calidad:</label>
+                        <select id="select_estacion_calidad" class="form-control" size="8">
+                            <!-- Se llenará dinámicamente -->
+                        </select>
+                    </div>
+                    <div id="info_estacion_seleccionada" style="margin-top: 15px; padding: 10px; background-color: #f5f5f5; border-radius: 4px; display: none;">
+                        <strong>Información de la estación seleccionada:</strong>
+                        <ul id="detalles_estacion" style="margin-top: 10px; margin-bottom: 0;">
+                            <!-- Se llenará dinámicamente -->
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" id="btn_cancelar_seleccion" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btn_confirmar_seleccion" disabled>Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
+
+
 

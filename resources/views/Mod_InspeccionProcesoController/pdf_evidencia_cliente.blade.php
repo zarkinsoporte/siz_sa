@@ -217,6 +217,43 @@
             </div>
         </div>
         
+        <!-- Checklist de Liberación Final -->
+        @if(isset($encabezadoChecklist) && isset($filasChecklist) && $filasChecklist->count() > 0)
+            <div class="inspeccion-section" style="margin-bottom: 30px;">
+                <div class="inspeccion-header">
+                    <h3 style="margin: 0; font-size: 14px; color: #495057;">
+                        {{ $encabezadoChecklist->LAB_descripcion ?? 'CHECK LIST DE LIBERACION FINAL' }}
+                    </h3>
+                </div>
+                <table class="checklist-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 5%;">#</th>
+                            <th style="width: 70%;">Descripcion</th>
+                            <th style="width: 25%;">Estatus</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($filasChecklist as $fila)
+                            <tr>
+                                <td>{{ $fila->LAB_numOrden }}</td>
+                                <td>{{ $fila->LAB_descripcion }}</td>
+                                <td>
+                                    @if($fila->LAB_estatus == 'CUMPLE')
+                                        <span class="estado-cumple">{{ $fila->LAB_estatus }}</span>
+                                    @elseif($fila->LAB_estatus == 'NO CUMPLE')
+                                        <span class="estado-no-cumple">{{ $fila->LAB_estatus }}</span>
+                                    @else
+                                        {{ $fila->LAB_estatus ?? '-' }}
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+        
         <!-- Inspecciones -->
         @foreach($inspecciones as $index => $inspeccion)
             <div class="inspeccion-section {{ ($index > 0 && $index < count($inspecciones) - 1) ? 'page-break' : '' }}">

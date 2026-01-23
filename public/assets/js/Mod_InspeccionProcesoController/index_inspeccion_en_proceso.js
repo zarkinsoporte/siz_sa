@@ -185,6 +185,14 @@ function js_iniciador() {
             dataType: 'json',
             success: function(data){
                 if(data.success) {
+                    // Si hay múltiples estaciones de calidad disponibles, mostrar modal para seleccionar
+                    if(data.multiple_stations && data.estaciones_disponibles && data.estaciones_disponibles.length > 1) {
+                        $.unblockUI();
+                        mostrarModalSeleccionEstacion(data.op, data.estaciones_disponibles, data.msg);
+                        return;
+                    }
+                    
+                    // Si solo hay una estación o ya se seleccionó una, continuar normalmente
                     opData = data.op;
                     centroInspeccionData = data.centro_inspeccion;
                     checklist = data.checklist;
@@ -226,6 +234,142 @@ function js_iniciador() {
             buscarOP();
         }
     });
+    
+    // Función para mostrar el modal de selección de estación cuando hay múltiples estaciones de calidad
+    function mostrarModalSeleccionEstacion(opData, estacionesDisponibles, mensaje) {
+        $('#modal_seleccionar_estacion_mensaje').html(mensaje || 'La OP tiene cantidad disponible en múltiples estaciones de calidad. Por favor, seleccione la estación donde desea realizar la inspección.');
+        
+        // Limpiar y llenar el select con las estaciones disponibles
+        var select = $('#select_estacion_calidad');
+        select.empty();
+        
+        estacionesDisponibles.forEach(function(estacion) {
+            var option = $('<option></option>')
+                .attr('value', estacion.id)
+                .data('estacion', estacion)
+                .text(estacion.id + ' - ' + estacion.nombre + ' (Cantidad disponible: ' + parseFloat(estacion.cantidad_disponible).toFixed(2) + ')');
+            select.append(option);
+        });
+        
+        // Limpiar información de estación seleccionada
+        $('#info_estacion_seleccionada').hide();
+        $('#btn_confirmar_seleccion').prop('disabled', true);
+        
+        // Evento para cuando se selecciona una estación
+        select.off('change').on('change', function() {
+            var selectedOption = $(this).find('option:selected');
+            if (selectedOption.length > 0) {
+                var estacion = selectedOption.data('estacion');
+                mostrarDetallesEstacion(estacion);
+                $('#btn_confirmar_seleccion').prop('disabled', false);
+            } else {
+                $('#info_estacion_seleccionada').hide();
+                $('#btn_confirmar_seleccion').prop('disabled', true);
+            }
+        });
+        
+        // Evento para confirmar la selección
+        $('#btn_confirmar_seleccion').off('click').on('click', function() {
+            var estacionId = select.val();
+            if (estacionId) {
+                $('#modalSeleccionarEstacion').modal('hide');
+                buscarOPConEstacion(estacionId);
+            }
+        });
+        
+        // Evento para cancelar
+        $('#btn_cancelar_seleccion').off('click').on('click', function() {
+            $('#modalSeleccionarEstacion').modal('hide');
+            $('#numero_op').val('').focus();
+        });
+        
+        // Mostrar el modal
+        $('#modalSeleccionarEstacion').modal('show');
+        
+        // Seleccionar la primera opción automáticamente si hay opciones
+        if (estacionesDisponibles.length > 0) {
+            select.val(estacionesDisponibles[0].id).trigger('change');
+        }
+    }
+    
+    // Función para mostrar detalles de la estación seleccionada
+    function mostrarDetallesEstacion(estacion) {
+        var html = '<li><strong>Estación:</strong> ' + estacion.id + ' - ' + estacion.nombre + '</li>' +
+                   '<li><strong>Cantidad Recibida:</strong> ' + parseFloat(estacion.recibido || 0).toFixed(2) + '</li>' +
+                   '<li><strong>Cantidad Procesada:</strong> ' + parseFloat(estacion.procesado || 0).toFixed(2) + '</li>' +
+                   '<li><strong>Cantidad Disponible:</strong> <strong style="color: #337ab7;">' + parseFloat(estacion.cantidad_disponible || 0).toFixed(2) + '</strong></li>';
+        
+        $('#detalles_estacion').html(html);
+        $('#info_estacion_seleccionada').show();
+    }
+    
+    // Función para buscar OP con una estación específica seleccionada
+    function buscarOPConEstacion(estacionId) {
+        var numeroOP = $('#numero_op').val();
+        
+        $.blockUI({
+            message: '<h1>Su petición está siendo procesada...</h1><h3>por favor espere un momento...<i class="fa fa-spin fa-spinner"></i></h3>',
+            css: {
+                border: 'none',
+                padding: '16px',
+                width: '50%',
+                top: '40%',
+                left: '30%',
+                backgroundColor: '#fefefe',
+                '-webkit-border-radius': '10px',
+                '-moz-border-radius': '10px',
+                opacity: .7,
+                color: '#000000',
+                baseZ: 2000
+            }
+        });
+        
+        $.ajax({
+            url: routeapp+'/home/inspeccion-proceso/buscar',
+            type: 'GET',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            data: {
+                op: numeroOP,
+                centro: estacionId
+            },
+            dataType: 'json',
+            success: function(data){
+                if(data.success) {
+                    opData = data.op;
+                    centroInspeccionData = data.centro_inspeccion;
+                    checklist = data.checklist;
+                    historial = data.historial;
+                    inspeccionesPrevias = data.inspecciones_previas;
+                    respuestas = {};
+                    evidencias = {}; // Resetear evidencias para nueva OP
+                    estacionesCalidadAgregadas = []; // Resetear estaciones agregadas para nueva OP
+                    
+                    // Renderizar información
+                    renderCabeceraOP();
+                    renderChecklist();
+                    renderResumen();
+                    $('#inspeccion_container').show();
+                    $('#cabecera_nota').show();
+                }
+                $.unblockUI();
+            },
+            error: function(jqXHR) {
+                $.unblockUI();
+                var mensaje = 'Error en la búsqueda. Intente nuevamente.';
+                if(jqXHR.responseJSON && jqXHR.responseJSON.msg) {
+                    mensaje = jqXHR.responseJSON.msg;
+                }
+                swal({
+                    title: 'Error',
+                    text: mensaje,
+                    type: 'error',
+                    confirmButtonText: 'Aceptar'
+                });
+            }
+        });
+    }
     
     // Renderizar cabecera de OP
     function renderCabeceraOP() {
