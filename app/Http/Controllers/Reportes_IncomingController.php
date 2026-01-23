@@ -22,7 +22,7 @@ class Reportes_IncomingController extends Controller
     /**
      * Muestra la vista principal del reporte R-143 Confiabilidad de Proveedores
      */
-    public function index_rep03()
+    public function index_rep04()
     {
         if (Auth::check()) {
             $user = Auth::user();
@@ -32,7 +32,7 @@ class Reportes_IncomingController extends Controller
             // Obtener año actual por defecto
             $anoActual = date('Y');
             
-            return view('Reportes_IncomingController.index_rep03', compact('user', 'actividades', 'ultimo', 'anoActual'));
+            return view('Reportes_IncomingController.index_rep04', compact('user', 'actividades', 'ultimo', 'anoActual'));
         } else {
             return redirect()->route('auth/login');
         }
@@ -308,7 +308,7 @@ class Reportes_IncomingController extends Controller
     /**
      * Generar PDF del reporte R-143
      */
-    public function generarPdfRep03(Request $request)
+    public function generarPdfRep04(Request $request)
     {
         try {
             $nCiclo = $request->input('ano', date('Y'));
@@ -583,7 +583,7 @@ class Reportes_IncomingController extends Controller
                 ]
             )->render();
             
-            $pdf = \SPDF::loadView('Reportes_IncomingController.pdf_rep03', compact(
+            $pdf = \SPDF::loadView('Reportes_IncomingController.pdf_rep04', compact(
                 'promedioAnualObj', 
                 'familias', 
                 'proveedores', 
