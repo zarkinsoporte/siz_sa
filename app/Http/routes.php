@@ -817,6 +817,11 @@ Route::get('home/INCOMING/detalle-inspecciones', 'Mod_IncomingController@detalle
 Route::post('home/INCOMING/eliminar-inspeccion', 'Mod_IncomingController@eliminarInspeccion');
 Route::get('home/INCOMING/resumen-piel', 'Mod_IncomingController@resumenClasesPiel');
 
+//REPORTE R-143 CONFIABILIDAD DE PROVEEDORES
+Route::get('home/REP-03-SEM-CALIFICACION-PROV', 'Reportes_IncomingController@index_rep03')->middleware('routelog');
+Route::post('home/rep-03-sem-calificacion-prov/buscar', 'Reportes_IncomingController@buscarConfiabilidadProveedores');
+Route::get('home/rep-03-sem-calificacion-prov/pdf', 'Reportes_IncomingController@generarPdf');
+
 //CALIDAD INSPECCION EN PROCESO
 Route::get('home/inspeccion-proceso', 'Mod_InspeccionProcesoController@index_inspeccion_en_proceso')->middleware('routelog');
 Route::get('home/inspeccion-proceso/buscar', 'Mod_InspeccionProcesoController@buscarInspeccionesEnProceso');
