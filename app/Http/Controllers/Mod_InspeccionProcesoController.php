@@ -1062,6 +1062,12 @@ class Mod_InspeccionProcesoController extends Controller
                 
                 \Log::info("INSPECCION_PROCESO: Validación de estación de Calidad exitosa - Estación: {$centroInspeccion} ({$estacionCalidadInfo->Name})");
                 
+                // Variable para rastrear si estamos en el caso de "Terminar OP" (traslado final)
+                $esTrasladoFinal = false;
+                // Variable para capturar el valor inicial de U_Procesado antes del traslado
+                $uProcesadoInicial = null;
+                $codeActualInicial = null;
+                
                 try {
                     // Obtener el registro de @CP_OF para la estación actual
                     $cp_of_actual = DB::table('@CP_OF')
@@ -1081,6 +1087,11 @@ class Mod_InspeccionProcesoController extends Controller
                             \Log::error("INSPECCION_PROCESO: No se encontró el registro OP con Code: {$cp_of_actual->Code} después de guardar inspección");
                             throw new \Exception('No se encontró el registro de control de piso (Code: ' . $cp_of_actual->Code . ') para avanzar la OP ' . $op . '. Se eliminará la inspección guardada.');
                         }
+                        
+                        // Capturar valores iniciales antes de cualquier modificación
+                        $uProcesadoInicial = $Code_actual->U_Procesado;
+                        $codeActualInicial = $Code_actual->Code;
+                        \Log::info("INSPECCION_PROCESO: Valores iniciales capturados - Code: {$codeActualInicial}, U_Procesado: {$uProcesadoInicial}");
                     } else {
                         // Si no existe @CP_OF, necesitamos determinar la estación siguiente basándonos en la ruta
                         // Buscar la última estación por la que pasó la OP en LOGOF para determinar la estación siguiente
@@ -1169,6 +1180,7 @@ class Mod_InspeccionProcesoController extends Controller
                     
                     // Si la siguiente estación es "Terminar OP", generar recibo de producción
                     if ($U_CT_siguiente == "'Terminar OP'") {
+                        $esTrasladoFinal = true; // Marcar que estamos en traslado final
                         \Log::info("INSPECCION_PROCESO: La siguiente estación es 'Terminar OP' para OP: {$op} (después de guardar inspección)");
                         
                         $orden_owor = DB::table('OWOR')
@@ -1382,28 +1394,81 @@ class Mod_InspeccionProcesoController extends Controller
                     } // Cierre del if ($Code_actual)
                     
                 } catch (\Exception $e) {
-                    // Si el traslado falla, eliminar la inspección guardada
+                    // Si el traslado falla, verificar si debemos eliminar la inspección
                     \Log::error("INSPECCION_PROCESO: Error en traslado después de guardar inspección. OP: {$op}, Error: " . $e->getMessage());
-                    \Log::error("INSPECCION_PROCESO: Eliminando inspección guardada debido a error en traslado. Inspección ID: {$inspeccion->IPR_id}");
                     
-                    try {
-                        // Marcar la inspección como borrada
-                        $inspeccion->IPR_borrado = 'S';
-                        $inspeccion->IPR_actualizadoEn = date("Y-m-d H:i:s");
-                        $inspeccion->save();
+                    // VALIDACIÓN CRÍTICA: Si estamos en traslado final y la OP ya no está en CP_OF,
+                    // significa que el traslado se completó aunque hubo error en SAP
+                    // En este caso, NO eliminar la inspección
+                    $debeEliminarInspeccion = true;
+                    
+                    if ($esTrasladoFinal) {
+                        \Log::info("INSPECCION_PROCESO: Error en traslado final. Verificando si la OP aún está en CP_OF. OP: {$op}");
                         
-                        // También marcar detalles e imágenes como borrados
-                        Siz_InspeccionProcesoDetalle::on('siz')
-                            ->where('IPD_iprId', $inspeccion->IPR_id)
-                            ->update(['IPD_borrado' => 'S', 'IPD_actualizadoEn' => date("Y-m-d H:i:s")]);
+                        // Verificar si la OP aún está en CP_OF
+                        $opEnCP_OF = DB::table('@CP_OF')
+                            ->where('U_DocEntry', $docEntry)
+                            ->exists();
                         
-                        Siz_InspeccionProcesoImagen::on('siz')
-                            ->where('IPI_iprId', $inspeccion->IPR_id)
-                            ->update(['IPI_borrado' => 'S']);
+                        if (!$opEnCP_OF) {
+                            // La OP ya no está en CP_OF, significa que el traslado se completó
+                            // aunque hubo error en SAP. NO eliminar la inspección.
+                            $debeEliminarInspeccion = false;
+                            \Log::warning("INSPECCION_PROCESO: OP {$op} ya no está en CP_OF después del error. El traslado se completó aunque hubo error en SAP. NO se eliminará la inspección ID: {$inspeccion->IPR_id}");
+                        } else {
+                            // La OP aún está en CP_OF, verificar si U_Procesado cambió
+                            // Si cambió, significa que el traslado se completó aunque hubo error en SAP
+                            if ($codeActualInicial && $uProcesadoInicial !== null) {
+                                $cp_of_actual_ahora = DB::table('@CP_OF')
+                                    ->where('Code', $codeActualInicial)
+                                    ->first();
+                                
+                                if ($cp_of_actual_ahora) {
+                                    $uProcesadoActual = $cp_of_actual_ahora->U_Procesado;
+                                    
+                                    if ($uProcesadoActual != $uProcesadoInicial) {
+                                        // U_Procesado cambió, significa que el traslado se completó
+                                        $debeEliminarInspeccion = false;
+                                        \Log::warning("INSPECCION_PROCESO: OP {$op} aún está en CP_OF pero U_Procesado cambió (Inicial: {$uProcesadoInicial}, Actual: {$uProcesadoActual}). El traslado se completó aunque hubo error en SAP. NO se eliminará la inspección ID: {$inspeccion->IPR_id}");
+                                    } else {
+                                        // U_Procesado no cambió, el traslado no se completó
+                                        \Log::info("INSPECCION_PROCESO: OP {$op} aún está en CP_OF y U_Procesado no cambió (Inicial: {$uProcesadoInicial}, Actual: {$uProcesadoActual}). Se eliminará la inspección debido al error en traslado.");
+                                    }
+                                } else {
+                                    // No se encontró el registro, asumir que el traslado no se completó
+                                    \Log::info("INSPECCION_PROCESO: OP {$op} aún está en CP_OF pero no se encontró el registro con Code {$codeActualInicial}. Se eliminará la inspección debido al error en traslado.");
+                                }
+                            } else {
+                                // No se capturaron valores iniciales, asumir que el traslado no se completó
+                                \Log::info("INSPECCION_PROCESO: OP {$op} aún está en CP_OF pero no se capturaron valores iniciales. Se eliminará la inspección debido al error en traslado.");
+                            }
+                        }
+                    }
+                    
+                    if ($debeEliminarInspeccion) {
+                        \Log::error("INSPECCION_PROCESO: Eliminando inspección guardada debido a error en traslado. Inspección ID: {$inspeccion->IPR_id}");
                         
-                        \Log::info("INSPECCION_PROCESO: Inspección marcada como borrada debido a error en traslado. Inspección ID: {$inspeccion->IPR_id}");
-                    } catch (\Exception $deleteException) {
-                        \Log::error("INSPECCION_PROCESO: Error al eliminar inspección después de fallo en traslado: " . $deleteException->getMessage());
+                        try {
+                            // Marcar la inspección como borrada
+                            $inspeccion->IPR_borrado = 'S';
+                            $inspeccion->IPR_actualizadoEn = date("Y-m-d H:i:s");
+                            $inspeccion->save();
+                            
+                            // También marcar detalles e imágenes como borrados
+                            Siz_InspeccionProcesoDetalle::on('siz')
+                                ->where('IPD_iprId', $inspeccion->IPR_id)
+                                ->update(['IPD_borrado' => 'S', 'IPD_actualizadoEn' => date("Y-m-d H:i:s")]);
+                            
+                            Siz_InspeccionProcesoImagen::on('siz')
+                                ->where('IPI_iprId', $inspeccion->IPR_id)
+                                ->update(['IPI_borrado' => 'S']);
+                            
+                            \Log::info("INSPECCION_PROCESO: Inspección marcada como borrada debido a error en traslado. Inspección ID: {$inspeccion->IPR_id}");
+                        } catch (\Exception $deleteException) {
+                            \Log::error("INSPECCION_PROCESO: Error al eliminar inspección después de fallo en traslado: " . $deleteException->getMessage());
+                        }
+                    } else {
+                        \Log::info("INSPECCION_PROCESO: Inspección NO eliminada. El traslado se completó aunque hubo error en SAP. Inspección ID: {$inspeccion->IPR_id}");
                     }
                     
                     // Re-lanzar la excepción original para que el usuario vea el error
