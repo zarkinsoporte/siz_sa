@@ -54,17 +54,36 @@
         margin-top: 20px;
     }
     
+    #tablaProveedores {
+        width: 100% !important;
+        table-layout: fixed;
+    }
+    
     #tablaProveedores th {
         background-color: #ff69b4;
         color: white;
         font-weight: bold;
         text-align: center;
         vertical-align: middle;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     
     #tablaProveedores td {
         text-align: center;
         vertical-align: middle;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    #tablaProveedores_wrapper .dataTables_scrollHead {
+        overflow: visible !important;
+    }
+    
+    #tablaProveedores_wrapper .dataTables_scrollBody {
+        overflow-x: auto !important;
     }
     
     .porcentaje-cell {
@@ -93,32 +112,58 @@
 
 <div class="container-fluid">
     <div class="row">
-        <div class="col-md-12">
-            <div class="titulo-reporte">
+        <div class="col-md-11">
+            <h3 class="page-header" id="titulo">
                 R-143 CONFIABILIDAD DE PROVEEDOR
-            </div>
-            
-            <!-- Filtro de Año -->
-            <div class="filtro-ano">
-                <div class="row">
-                    <div class="col-md-3">
-                        <label for="anoReporte">Año del Reporte:</label>
-                        <select id="anoReporte" class="form-control">
-                            @for($i = date('Y'); $i >= date('Y') - 5; $i--)
-                                <option value="{{ $i }}" {{ $i == $anoActual ? 'selected' : '' }}>{{ $i }}</option>
-                            @endfor
-                        </select>
+            </h3>
+        </div>
+    </div>
+    
+    <div class="panel panel-default">
+    <div class="panel-body">
+        
+        <!-- Sección de Filtros -->
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading" style="background-color: #f8f9fa; border-bottom: 1px solid #dee2e6;">
+                        <h4 class="panel-title" style="color: #495057; font-size: 14px; font-weight: 600;">
+                            <i class="fa fa-filter"></i> Filtros de Búsqueda
+                        </h4>
                     </div>
-                    <div class="col-md-3">
-                        <button type="button" class="btn btn-primary btn-actualizar" id="btnBuscar">
-                            <i class="fa fa-search"></i> Buscar
-                        </button>
-                        <button type="button" class="btn btn-success btn-pdf" id="btnImprimirPDF">
-                            <i class="fa fa-file-pdf-o"></i> Imprimir PDF
-                        </button>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="yearPicker">Año del Reporte:</label>
+                                    <input type="text" id="yearPicker" class="form-control" readonly value="{{ date('Y') }}">
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button type="button" id="btnBuscar" class="btn btn-primary btn-block">
+                                        <i class="fa fa-search"></i> Buscar
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button type="button" id="btnImprimirPDF" class="btn btn-danger btn-block">
+                                        <i class="fa fa-file-pdf-o"></i> Imprimir PDF
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
             
             <!-- Tabla Promedio del Año -->
             <div class="row">
@@ -245,6 +290,8 @@
                 </div>
             </div>
         </div>
+    </div>
+    </div>
     </div>
 </div>
 
