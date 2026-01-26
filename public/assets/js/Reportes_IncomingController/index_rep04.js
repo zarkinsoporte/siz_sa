@@ -7,6 +7,15 @@ function js_iniciador() {
         $("#infoMessage").fadeOut("fast");
     }, 5000);
     
+    // Inicializar yearPicker
+    $("#yearPicker").datepicker({
+        format: "yyyy",
+        viewMode: "years",
+        minViewMode: "years",
+        autoclose: true,
+        language: "es"
+    });
+    
     $("#sidebarCollapse").on("click", function() {
         $("#sidebar").toggleClass("active"); 
         $("#page-wrapper").toggleClass("content"); 
@@ -20,10 +29,16 @@ function js_iniciador() {
     
     // Función para formatear porcentaje
     function formatearPorcentaje(valor) {
-        if (valor === null || valor === undefined || valor === 0 || valor === '') {
+        if (valor === null || valor === undefined || valor === '' || valor === 0) {
             return '-';
         }
-        return (parseFloat(valor) * 100).toFixed(2) + '%';
+        var num = parseFloat(valor);
+        if (isNaN(num) || num === 0) {
+            return '-';
+        }
+        // Los valores vienen como decimales (0.9871 = 98.71%), multiplicar por 100
+        // Permitir valores mayores a 1.0 (100%) ya que pueden existir promedios superiores
+        return (num * 100).toFixed(2) + '%';
     }
     
     // Función para formatear número
@@ -36,8 +51,12 @@ function js_iniciador() {
     
     // Función para calcular promedio de meses con datos
     function calcularPromedio(meses) {
-        var mesesConDatos = meses.filter(function(valor) {
-            return valor !== null && valor !== undefined && valor !== '' && valor > 0;
+        var mesesConDatos = meses.map(function(valor) {
+            // Convertir a número y manejar null/undefined
+            var num = parseFloat(valor);
+            return isNaN(num) ? null : num;
+        }).filter(function(valor) {
+            return valor !== null && valor !== undefined && !isNaN(valor) && valor > 0;
         });
         
         if (mesesConDatos.length === 0) {
@@ -50,7 +69,7 @@ function js_iniciador() {
     
     // Función para cargar datos
     function cargarDatos() {
-        var ano = $("#anoReporte").val();
+        var ano = $("#yearPicker").val();
         
         if (!ano) {
             swal({
@@ -72,7 +91,7 @@ function js_iniciador() {
         });
         
         $.ajax({
-            url: '/home/rep-04-confiabilidad-prov/buscar',
+            url: routeapp + "/home/rep-04-confiabilidad-prov/buscar",
             type: 'POST',
             data: {
                 _token: csrfToken,
@@ -133,29 +152,59 @@ function js_iniciador() {
         
         $("#promedioEntradas").text(formatearNumero(promedioAnual.ENTRADAS));
         
-        // Calcular promedio anual
-        var meses = [
-            promedioAnual.ENERO, promedioAnual.FEBRERO, promedioAnual.MARZO,
-            promedioAnual.ABRIL, promedioAnual.MAYO, promedioAnual.JUNIO,
-            promedioAnual.JULIO, promedioAnual.AGOSTO, promedioAnual.SEPTIEMBRE,
-            promedioAnual.OCTUBRE, promedioAnual.NOVIEMBRE, promedioAnual.DICIEMBRE
-        ];
+        // Usar el promedio calculado en el servidor si está disponible
+        if (promedioAnual.PROMEDIO !== undefined && promedioAnual.PROMEDIO !== null) {
+            $("#promedioAnual").text(formatearPorcentaje(promedioAnual.PROMEDIO));
+        } else {
+            // Calcular promedio anual si no viene del servidor
+            var meses = [
+                parseFloat(promedioAnual.ENERO) || 0,
+                parseFloat(promedioAnual.FEBRERO) || 0,
+                parseFloat(promedioAnual.MARZO) || 0,
+                parseFloat(promedioAnual.ABRIL) || 0,
+                parseFloat(promedioAnual.MAYO) || 0,
+                parseFloat(promedioAnual.JUNIO) || 0,
+                parseFloat(promedioAnual.JULIO) || 0,
+                parseFloat(promedioAnual.AGOSTO) || 0,
+                parseFloat(promedioAnual.SEPTIEMBRE) || 0,
+                parseFloat(promedioAnual.OCTUBRE) || 0,
+                parseFloat(promedioAnual.NOVIEMBRE) || 0,
+                parseFloat(promedioAnual.DICIEMBRE) || 0
+            ];
+            
+            var promedio = calcularPromedio(meses);
+            if (isNaN(promedio) || promedio === 0) {
+                $("#promedioAnual").text('-');
+            } else {
+                $("#promedioAnual").text(formatearPorcentaje(promedio));
+            }
+        }
         
-        var promedio = calcularPromedio(meses);
-        $("#promedioAnual").text(formatearPorcentaje(promedio));
+        var ene = parseFloat(promedioAnual.ENERO) || 0;
+        var feb = parseFloat(promedioAnual.FEBRERO) || 0;
+        var mar = parseFloat(promedioAnual.MARZO) || 0;
+        var abr = parseFloat(promedioAnual.ABRIL) || 0;
+        var may = parseFloat(promedioAnual.MAYO) || 0;
+        var jun = parseFloat(promedioAnual.JUNIO) || 0;
+        var jul = parseFloat(promedioAnual.JULIO) || 0;
+        var ago = parseFloat(promedioAnual.AGOSTO) || 0;
+        var sep = parseFloat(promedioAnual.SEPTIEMBRE) || 0;
+        var oct = parseFloat(promedioAnual.OCTUBRE) || 0;
+        var nov = parseFloat(promedioAnual.NOVIEMBRE) || 0;
+        var dic = parseFloat(promedioAnual.DICIEMBRE) || 0;
         
-        $("#promedioEnero").text(promedioAnual.ENERO > 0 ? formatearPorcentaje(promedioAnual.ENERO) : '-');
-        $("#promedioFebrero").text(promedioAnual.FEBRERO > 0 ? formatearPorcentaje(promedioAnual.FEBRERO) : '-');
-        $("#promedioMarzo").text(promedioAnual.MARZO > 0 ? formatearPorcentaje(promedioAnual.MARZO) : '-');
-        $("#promedioAbril").text(promedioAnual.ABRIL > 0 ? formatearPorcentaje(promedioAnual.ABRIL) : '-');
-        $("#promedioMayo").text(promedioAnual.MAYO > 0 ? formatearPorcentaje(promedioAnual.MAYO) : '-');
-        $("#promedioJunio").text(promedioAnual.JUNIO > 0 ? formatearPorcentaje(promedioAnual.JUNIO) : '-');
-        $("#promedioJulio").text(promedioAnual.JULIO > 0 ? formatearPorcentaje(promedioAnual.JULIO) : '-');
-        $("#promedioAgosto").text(promedioAnual.AGOSTO > 0 ? formatearPorcentaje(promedioAnual.AGOSTO) : '-');
-        $("#promedioSeptiembre").text(promedioAnual.SEPTIEMBRE > 0 ? formatearPorcentaje(promedioAnual.SEPTIEMBRE) : '-');
-        $("#promedioOctubre").text(promedioAnual.OCTUBRE > 0 ? formatearPorcentaje(promedioAnual.OCTUBRE) : '-');
-        $("#promedioNoviembre").text(promedioAnual.NOVIEMBRE > 0 ? formatearPorcentaje(promedioAnual.NOVIEMBRE) : '-');
-        $("#promedioDiciembre").text(promedioAnual.DICIEMBRE > 0 ? formatearPorcentaje(promedioAnual.DICIEMBRE) : '-');
+        $("#promedioEnero").text(ene > 0 ? formatearPorcentaje(ene) : '-');
+        $("#promedioFebrero").text(feb > 0 ? formatearPorcentaje(feb) : '-');
+        $("#promedioMarzo").text(mar > 0 ? formatearPorcentaje(mar) : '-');
+        $("#promedioAbril").text(abr > 0 ? formatearPorcentaje(abr) : '-');
+        $("#promedioMayo").text(may > 0 ? formatearPorcentaje(may) : '-');
+        $("#promedioJunio").text(jun > 0 ? formatearPorcentaje(jun) : '-');
+        $("#promedioJulio").text(jul > 0 ? formatearPorcentaje(jul) : '-');
+        $("#promedioAgosto").text(ago > 0 ? formatearPorcentaje(ago) : '-');
+        $("#promedioSeptiembre").text(sep > 0 ? formatearPorcentaje(sep) : '-');
+        $("#promedioOctubre").text(oct > 0 ? formatearPorcentaje(oct) : '-');
+        $("#promedioNoviembre").text(nov > 0 ? formatearPorcentaje(nov) : '-');
+        $("#promedioDiciembre").text(dic > 0 ? formatearPorcentaje(dic) : '-');
     }
     
     // Función para actualizar tabla de familias
@@ -170,30 +219,54 @@ function js_iniciador() {
         
         familias.forEach(function(familia) {
             var meses = [
-                familia.ENERO, familia.FEBRERO, familia.MARZO,
-                familia.ABRIL, familia.MAYO, familia.JUNIO,
-                familia.JULIO, familia.AGOSTO, familia.SEPTIEMBRE,
-                familia.OCTUBRE, familia.NOVIEMBRE, familia.DICIEMBRE
+                parseFloat(familia.ENERO) || 0,
+                parseFloat(familia.FEBRERO) || 0,
+                parseFloat(familia.MARZO) || 0,
+                parseFloat(familia.ABRIL) || 0,
+                parseFloat(familia.MAYO) || 0,
+                parseFloat(familia.JUNIO) || 0,
+                parseFloat(familia.JULIO) || 0,
+                parseFloat(familia.AGOSTO) || 0,
+                parseFloat(familia.SEPTIEMBRE) || 0,
+                parseFloat(familia.OCTUBRE) || 0,
+                parseFloat(familia.NOVIEMBRE) || 0,
+                parseFloat(familia.DICIEMBRE) || 0
             ];
             
             var promedio = calcularPromedio(meses);
+            if (isNaN(promedio) || promedio === 0) {
+                promedio = 0;
+            }
+            
+            var ene = parseFloat(familia.ENERO) || 0;
+            var feb = parseFloat(familia.FEBRERO) || 0;
+            var mar = parseFloat(familia.MARZO) || 0;
+            var abr = parseFloat(familia.ABRIL) || 0;
+            var may = parseFloat(familia.MAYO) || 0;
+            var jun = parseFloat(familia.JUNIO) || 0;
+            var jul = parseFloat(familia.JULIO) || 0;
+            var ago = parseFloat(familia.AGOSTO) || 0;
+            var sep = parseFloat(familia.SEPTIEMBRE) || 0;
+            var oct = parseFloat(familia.OCTUBRE) || 0;
+            var nov = parseFloat(familia.NOVIEMBRE) || 0;
+            var dic = parseFloat(familia.DICIEMBRE) || 0;
             
             var row = '<tr>' +
                 '<td>' + formatearNumero(familia.ENTRADAS) + '</td>' +
                 '<td>' + (familia.GRUPO || 'SIN GRUPO') + '</td>' +
                 '<td class="promedio-cell">' + formatearPorcentaje(promedio) + '</td>' +
-                '<td>' + (familia.ENERO > 0 ? formatearPorcentaje(familia.ENERO) : '-') + '</td>' +
-                '<td>' + (familia.FEBRERO > 0 ? formatearPorcentaje(familia.FEBRERO) : '-') + '</td>' +
-                '<td>' + (familia.MARZO > 0 ? formatearPorcentaje(familia.MARZO) : '-') + '</td>' +
-                '<td>' + (familia.ABRIL > 0 ? formatearPorcentaje(familia.ABRIL) : '-') + '</td>' +
-                '<td>' + (familia.MAYO > 0 ? formatearPorcentaje(familia.MAYO) : '-') + '</td>' +
-                '<td>' + (familia.JUNIO > 0 ? formatearPorcentaje(familia.JUNIO) : '-') + '</td>' +
-                '<td>' + (familia.JULIO > 0 ? formatearPorcentaje(familia.JULIO) : '-') + '</td>' +
-                '<td>' + (familia.AGOSTO > 0 ? formatearPorcentaje(familia.AGOSTO) : '-') + '</td>' +
-                '<td>' + (familia.SEPTIEMBRE > 0 ? formatearPorcentaje(familia.SEPTIEMBRE) : '-') + '</td>' +
-                '<td>' + (familia.OCTUBRE > 0 ? formatearPorcentaje(familia.OCTUBRE) : '-') + '</td>' +
-                '<td>' + (familia.NOVIEMBRE > 0 ? formatearPorcentaje(familia.NOVIEMBRE) : '-') + '</td>' +
-                '<td>' + (familia.DICIEMBRE > 0 ? formatearPorcentaje(familia.DICIEMBRE) : '-') + '</td>' +
+                '<td>' + (ene > 0 ? formatearPorcentaje(ene) : '-') + '</td>' +
+                '<td>' + (feb > 0 ? formatearPorcentaje(feb) : '-') + '</td>' +
+                '<td>' + (mar > 0 ? formatearPorcentaje(mar) : '-') + '</td>' +
+                '<td>' + (abr > 0 ? formatearPorcentaje(abr) : '-') + '</td>' +
+                '<td>' + (may > 0 ? formatearPorcentaje(may) : '-') + '</td>' +
+                '<td>' + (jun > 0 ? formatearPorcentaje(jun) : '-') + '</td>' +
+                '<td>' + (jul > 0 ? formatearPorcentaje(jul) : '-') + '</td>' +
+                '<td>' + (ago > 0 ? formatearPorcentaje(ago) : '-') + '</td>' +
+                '<td>' + (sep > 0 ? formatearPorcentaje(sep) : '-') + '</td>' +
+                '<td>' + (oct > 0 ? formatearPorcentaje(oct) : '-') + '</td>' +
+                '<td>' + (nov > 0 ? formatearPorcentaje(nov) : '-') + '</td>' +
+                '<td>' + (dic > 0 ? formatearPorcentaje(dic) : '-') + '</td>' +
                 '</tr>';
             
             tbody.append(row);
@@ -233,8 +306,19 @@ function js_iniciador() {
         
         dataTable = $("#tablaProveedores").DataTable({
             data: datos,
-            pageLength: 25,
+            //pageLength: 25,
+            //sin length menu
+            pageLength: -1,
             order: [[2, 'asc']], // Ordenar por nombre de proveedor
+            columnDefs: [
+                { orderable: false, targets: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] }, // Deshabilitar ordenamiento desde la columna 4 (% Confiabilidad) en adelante
+                { width: "80px", targets: [0] }, // Entradas
+                { width: "100px", targets: [1] }, // Código del Prov.
+                { width: "200px", targets: [2] }, // Nombre del Proveedor
+                { width: "120px", targets: [3] }, // % Confiabilidad Proveedor
+                { width: "80px", targets: [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] } // Meses
+            ],
+            autoWidth: false,
             language: {
                 "sProcessing": "Procesando...",
                 "sLengthMenu": "Mostrar _MENU_ registros",
@@ -260,10 +344,7 @@ function js_iniciador() {
                 }
             },
             scrollX: true,
-            scrollCollapse: true,
-            fixedColumns: {
-                leftColumns: 3
-            }
+            scrollCollapse: true
         });
     }
     
@@ -274,7 +355,7 @@ function js_iniciador() {
     
     // Evento para botón imprimir PDF
     $("#btnImprimirPDF").on('click', function() {
-        var ano = $("#anoReporte").val();
+        var ano = $("#yearPicker").val();
         
         if (!ano) {
             swal({
@@ -287,7 +368,7 @@ function js_iniciador() {
         }
         
         // Abrir PDF en nueva pestaña
-        var url = '/home/rep-04-confiabilidad-prov/pdf?ano=' + ano;
+        var url = routeapp + "/home/rep-04-confiabilidad-prov/pdf?ano=" + ano;
         window.open(url, '_blank');
     });
     

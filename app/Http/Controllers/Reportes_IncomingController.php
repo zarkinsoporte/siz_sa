@@ -269,6 +269,25 @@ class Reportes_IncomingController extends Controller
                 Order By RCP2.IDG, RCP2.PROVEEDOR
             ", [$fechaIS, $fechaFS]);
             
+            // Calcular promedio anual para cada familia
+            foreach ($familias as $familia) {
+                $meses = [
+                    $familia->ENERO, $familia->FEBRERO, $familia->MARZO,
+                    $familia->ABRIL, $familia->MAYO, $familia->JUNIO,
+                    $familia->JULIO, $familia->AGOSTO, $familia->SEPTIEMBRE,
+                    $familia->OCTUBRE, $familia->NOVIEMBRE, $familia->DICIEMBRE
+                ];
+                
+                // Filtrar valores mayores a 0 para calcular promedio
+                $mesesConDatos = array_filter($meses, function($valor) {
+                    return $valor > 0;
+                });
+                
+                $familia->PROMEDIO = count($mesesConDatos) > 0 
+                    ? (array_sum($mesesConDatos) / count($mesesConDatos)) 
+                    : 0;
+            }
+            
             // Calcular promedio anual para cada proveedor
             foreach ($proveedores as $proveedor) {
                 $meses = [
@@ -288,9 +307,28 @@ class Reportes_IncomingController extends Controller
                     : 0;
             }
             
+            // Calcular promedio anual general
+            $promedioAnualObj = $promedioAnual[0] ?? null;
+            if ($promedioAnualObj) {
+                $mesesPromedio = [
+                    $promedioAnualObj->ENERO, $promedioAnualObj->FEBRERO, $promedioAnualObj->MARZO,
+                    $promedioAnualObj->ABRIL, $promedioAnualObj->MAYO, $promedioAnualObj->JUNIO,
+                    $promedioAnualObj->JULIO, $promedioAnualObj->AGOSTO, $promedioAnualObj->SEPTIEMBRE,
+                    $promedioAnualObj->OCTUBRE, $promedioAnualObj->NOVIEMBRE, $promedioAnualObj->DICIEMBRE
+                ];
+                
+                $mesesConDatosPromedio = array_filter($mesesPromedio, function($valor) {
+                    return $valor > 0;
+                });
+                
+                $promedioAnualObj->PROMEDIO = count($mesesConDatosPromedio) > 0 
+                    ? (array_sum($mesesConDatosPromedio) / count($mesesConDatosPromedio)) 
+                    : 0;
+            }
+            
             return response()->json([
                 'success' => true,
-                'promedioAnual' => $promedioAnual[0] ?? null,
+                'promedioAnual' => $promedioAnualObj,
                 'familias' => $familias,
                 'proveedores' => $proveedores,
                 'fechaIS' => $fechaIS,
@@ -533,6 +571,24 @@ class Reportes_IncomingController extends Controller
                 Group By RCP2.IDG, RCP2.GRUPO, RCP2.COD_PRO, RCP2.PROVEEDOR
                 Order By RCP2.IDG, RCP2.PROVEEDOR
             ", [$fechaIS, $fechaFS]);
+            
+            // Calcular promedio anual para cada familia
+            foreach ($familias as $familia) {
+                $meses = [
+                    $familia->ENERO, $familia->FEBRERO, $familia->MARZO,
+                    $familia->ABRIL, $familia->MAYO, $familia->JUNIO,
+                    $familia->JULIO, $familia->AGOSTO, $familia->SEPTIEMBRE,
+                    $familia->OCTUBRE, $familia->NOVIEMBRE, $familia->DICIEMBRE
+                ];
+                
+                $mesesConDatos = array_filter($meses, function($valor) {
+                    return $valor > 0;
+                });
+                
+                $familia->PROMEDIO = count($mesesConDatos) > 0 
+                    ? (array_sum($mesesConDatos) / count($mesesConDatos)) 
+                    : 0;
+            }
             
             // Calcular promedio anual para cada proveedor
             foreach ($proveedores as $proveedor) {

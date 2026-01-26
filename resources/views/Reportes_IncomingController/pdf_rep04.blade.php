@@ -151,20 +151,16 @@
         <tbody>
             @if($familias && count($familias) > 0)
                 @foreach($familias as $familia)
-                    @php
-                        $meses = [
-                            $familia->ENERO, $familia->FEBRERO, $familia->MARZO,
-                            $familia->ABRIL, $familia->MAYO, $familia->JUNIO,
-                            $familia->JULIO, $familia->AGOSTO, $familia->SEPTIEMBRE,
-                            $familia->OCTUBRE, $familia->NOVIEMBRE, $familia->DICIEMBRE
-                        ];
-                        $mesesConDatos = array_filter($meses, function($v) { return $v > 0; });
-                        $promedio = count($mesesConDatos) > 0 ? (array_sum($mesesConDatos) / count($mesesConDatos)) : 0;
-                    @endphp
                     <tr>
                         <td>{{ number_format($familia->ENTRADAS, 0) }}</td>
                         <td class="text-left">{{ $familia->GRUPO ?? 'SIN GRUPO' }}</td>
-                        <td class="promedio-cell">{{ number_format($promedio * 100, 2) }}%</td>
+                        <td class="promedio-cell">
+                            @if(isset($familia->PROMEDIO) && $familia->PROMEDIO > 0)
+                                {{ number_format($familia->PROMEDIO * 100, 2) }}%
+                            @else
+                                -
+                            @endif
+                        </td>
                         <td>{{ $familia->ENERO > 0 ? number_format($familia->ENERO * 100, 2) . '%' : '-' }}</td>
                         <td>{{ $familia->FEBRERO > 0 ? number_format($familia->FEBRERO * 100, 2) . '%' : '-' }}</td>
                         <td>{{ $familia->MARZO > 0 ? number_format($familia->MARZO * 100, 2) . '%' : '-' }}</td>
@@ -212,18 +208,15 @@
         </thead>
         <tbody>
             @if($proveedores && count($proveedores) > 0)
-                @php
-                    $grupoActual = '';
-                @endphp
+                <?php $grupoActual = ''; ?>
                 @foreach($proveedores as $proveedor)
-                    @if($proveedor->GRUPO != $grupoActual)
-                        @php
-                            $grupoActual = $proveedor->GRUPO;
-                        @endphp
-                        <tr class="grupo-header">
-                            <td colspan="16" class="text-left"><strong>{{ $proveedor->GRUPO ?? 'SIN GRUPO' }}</strong></td>
-                        </tr>
-                    @endif
+                    <?php 
+                        $grupoProveedor = isset($proveedor->GRUPO) ? $proveedor->GRUPO : 'SIN GRUPO';
+                        if ($grupoProveedor != $grupoActual) {
+                            $grupoActual = $grupoProveedor;
+                            echo '<tr class="grupo-header"><td colspan="16" class="text-left"><strong>' . htmlspecialchars($grupoActual) . '</strong></td></tr>';
+                        }
+                    ?>
                     <tr>
                         <td>{{ number_format($proveedor->ENTRADAS, 0) }}</td>
                         <td>{{ $proveedor->COD_PRO ?? '-' }}</td>
