@@ -39,6 +39,314 @@ class Reportes_IncomingController extends Controller
     }
 
     /**
+     * Muestra la vista principal del reporte REP-05 Historial por Proveedor
+     */
+    public function index_rep05()
+    {
+        if (Auth::check()) {
+            $user = Auth::user();
+            $actividades = $user->getTareas();
+            $ultimo = count($actividades);
+
+            $anoActual = date('Y');
+
+            return view('Reportes_IncomingController.index_rep05', compact('user', 'actividades', 'ultimo', 'anoActual'));
+        } else {
+            return redirect()->route('auth/login');
+        }
+    }
+
+    /**
+     * AJAX: Historial por proveedor (REP-05)
+     * - Detalle: rechazos/entradas por proveedor (agrupado)
+     * - Resumen: calificación por mes del proveedor (AVG CALF_U)
+     */
+    public function buscarHistorialProveedor(Request $request)
+    {
+        try {
+            $nCiclo = $request->input('ano', date('Y'));
+            $codProv = trim((string)$request->input('cod_prov', ''));
+
+            if ($codProv === '') {
+                return response()->json([
+                    'success' => false,
+                    'msg' => 'El código de proveedor es requerido'
+                ]);
+            }
+
+            // Fechas del año (calendario de cierre)
+            $fechasIni = DB::connection('siz')->select("
+                SELECT Cast(SCC.FEC_INI as date) as FEC_INI
+                FROM Siz_Calendario_Cierre SCC
+                WHERE SCC.PERIODO = ? + '-01'
+            ", [$nCiclo]);
+
+            $fechasFin = DB::connection('siz')->select("
+                SELECT Cast(SCC.FEC_FIN as date) as FEC_FIN
+                FROM Siz_Calendario_Cierre SCC
+                WHERE SCC.PERIODO = ? + '-12'
+            ", [$nCiclo]);
+
+            if (empty($fechasIni) || empty($fechasFin)) {
+                return response()->json([
+                    'success' => false,
+                    'msg' => 'No se encontró calendario de cierre para el año ' . $nCiclo
+                ]);
+            }
+
+            $fechaIS = $fechasIni[0]->FEC_INI;
+            $fechaFS = $fechasFin[0]->FEC_FIN;
+
+            // Detalle (macro VMA_R143_D)
+            $detalle = DB::connection('siz')->select("
+                Select
+                    ISNULL(SIR.IR_id, 0) AS RECHAZO,
+                    OCRD.CardName AS PROVEEDOR,
+                    SIC.INC_docNum AS NE,
+                    SIC.INC_codMaterial AS COD_MAT,
+                    SIC.INC_nomMaterial AS MATERIAL,
+                    SIC.INC_unidadMedida AS UDM,
+                    SUM(SIC.INC_cantRecibida) AS RECIBIDO,
+                    SUM(SIC.INC_cantRechazada) AS RECHAZADA
+                From Siz_Incoming SIC
+                Inner Join OCRD on SIC.INC_codProveedor = OCRD.CardCode
+                Inner Join OITM on OITM.ItemCode = SIC.INC_codMaterial
+                Left Join Siz_IncomRechazos SIR on SIR.IR_INC_incomld = SIC.INC_id
+                Where Cast(SIC.INC_fechaInspeccion as date) between ? and ?
+                    and SIC.INC_codProveedor = ?
+                    and SIC.INC_borrado = 'N'
+                Group By
+                    SIC.INC_docNum,
+                    OCRD.CardName,
+                    SIC.INC_codMaterial,
+                    SIC.INC_nomMaterial,
+                    SIC.INC_unidadMedida,
+                    SIR.IR_id
+                Order By SIC.INC_docNum, SIC.INC_nomMaterial
+            ", [$fechaIS, $fechaFS, $codProv]);
+
+            $proveedorNombre = '';
+            if (!empty($detalle)) {
+                $proveedorNombre = (string)$detalle[0]->PROVEEDOR;
+            } else {
+                // Si no hay detalle, intentar traer nombre del proveedor
+                $prov = DB::select("SELECT TOP 1 CardName FROM OCRD WHERE CardCode = ?", [$codProv]);
+                if (!empty($prov)) {
+                    $proveedorNombre = (string)$prov[0]->CardName;
+                }
+            }
+
+            // Resumen por mes (macro VMA_R143_D)
+            $resumenMes = DB::connection('siz')->select("
+                Select RCP.NUM_MES AS MES, AVG(RCP.CALF_U) AS CALIFA
+                From (
+                    Select
+                        SCC.MES AS NUM_MES,
+                        Case When SIC.INC_esPiel = 'N' then
+                            (Case When (SUM(SIC.INC_cantAceptada) / SUM(SIC.INC_cantRecibida)) = 0 Then
+                                0.00001
+                             else
+                                (SUM(SIC.INC_cantAceptada) / SUM(SIC.INC_cantRecibida))
+                             end)
+                        else
+                            (ISNULL((SUM(SPC.PLC_claseA)/SUM(SIC.INC_cantRecibida))/.3 +
+                            (SUM(SPC.PLC_claseB)/SUM(SIC.INC_cantRecibida))/.5 +
+                            (1-((SUM(SPC.PLC_claseC)/SUM(SIC.INC_cantRecibida))-.2)) +
+                            (Case When SUM(SPC.PLC_claseD) = 0 Then 1 else
+                                ((SUM(SPC.PLC_claseD)/SUM(SIC.INC_cantRecibida))*-1)
+                             end), 0)/4)
+                        end AS CALF_U
+                    From Siz_Incoming SIC
+                    Inner Join OCRD on SIC.INC_codProveedor = OCRD.CardCode
+                    Inner Join Siz_Calendario_Cierre SCC
+                        on CAST(SIC.INC_fechaInspeccion as Date) between Cast(SCC.FEC_INI as date) and Cast(SCC.FEC_FIN as date)
+                    Left Join OOND on OCRD.IndustryC = OOND.IndCode
+                    Left Join Siz_PielClases SPC on SIC.INC_id = SPC.PLC_incId
+                    Where Cast(SIC.INC_fechaInspeccion as date) between ? and ?
+                        and SIC.INC_codProveedor = ?
+                        and SIC.INC_borrado = 'N'
+                    Group By
+                        SIC.INC_codProveedor,
+                        OCRD.CardName,
+                        OOND.IndDesc,
+                        SIC.INC_docNum,
+                        SIC.INC_fechaInspeccion,
+                        SIC.INC_esPiel,
+                        OOND.IndName,
+                        SCC.MES
+                ) RCP
+                Group By RCP.NUM_MES
+                Order By MES
+            ", [$fechaIS, $fechaFS, $codProv]);
+
+            return response()->json([
+                'success' => true,
+                'ano' => $nCiclo,
+                'fechaIS' => $fechaIS,
+                'fechaFS' => $fechaFS,
+                'codProv' => $codProv,
+                'proveedorNombre' => $proveedorNombre,
+                'detalle' => $detalle,
+                'resumenMes' => $resumenMes,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'msg' => 'Error al obtener el historial: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * PDF REP-05 Historial por Proveedor (horizontal)
+     */
+    public function generarPdfRep05(Request $request)
+    {
+        try {
+            $nCiclo = $request->input('ano', date('Y'));
+            $codProv = trim((string)$request->input('cod_prov', ''));
+
+            if ($codProv === '') {
+                abort(400, 'El código de proveedor es requerido');
+            }
+
+            // Fechas del año
+            $fechasIni = DB::connection('siz')->select("
+                SELECT Cast(SCC.FEC_INI as date) as FEC_INI
+                FROM Siz_Calendario_Cierre SCC
+                WHERE SCC.PERIODO = ? + '-01'
+            ", [$nCiclo]);
+
+            $fechasFin = DB::connection('siz')->select("
+                SELECT Cast(SCC.FEC_FIN as date) as FEC_FIN
+                FROM Siz_Calendario_Cierre SCC
+                WHERE SCC.PERIODO = ? + '-12'
+            ", [$nCiclo]);
+
+            if (empty($fechasIni) || empty($fechasFin)) {
+                abort(404, 'No se encontró calendario de cierre para el año ' . $nCiclo);
+            }
+
+            $fechaIS = $fechasIni[0]->FEC_INI;
+            $fechaFS = $fechasFin[0]->FEC_FIN;
+
+            $detalle = DB::connection('siz')->select("
+                Select
+                    ISNULL(SIR.IR_id, 0) AS RECHAZO,
+                    OCRD.CardName AS PROVEEDOR,
+                    SIC.INC_docNum AS NE,
+                    SIC.INC_codMaterial AS COD_MAT,
+                    SIC.INC_nomMaterial AS MATERIAL,
+                    SIC.INC_unidadMedida AS UDM,
+                    SUM(SIC.INC_cantRecibida) AS RECIBIDO,
+                    SUM(SIC.INC_cantRechazada) AS RECHAZADA
+                From Siz_Incoming SIC
+                Inner Join OCRD on SIC.INC_codProveedor = OCRD.CardCode
+                Inner Join OITM on OITM.ItemCode = SIC.INC_codMaterial
+                Left Join Siz_IncomRechazos SIR on SIR.IR_INC_incomld = SIC.INC_id
+                Where Cast(SIC.INC_fechaInspeccion as date) between ? and ?
+                    and SIC.INC_codProveedor = ?
+                    and SIC.INC_borrado = 'N'
+                Group By
+                    SIC.INC_docNum,
+                    OCRD.CardName,
+                    SIC.INC_codMaterial,
+                    SIC.INC_nomMaterial,
+                    SIC.INC_unidadMedida,
+                    SIR.IR_id
+                Order By SIC.INC_docNum, SIC.INC_nomMaterial
+            ", [$fechaIS, $fechaFS, $codProv]);
+
+            $proveedorNombre = '';
+            if (!empty($detalle)) {
+                $proveedorNombre = (string)$detalle[0]->PROVEEDOR;
+            } else {
+                $prov = DB::select("SELECT TOP 1 CardName FROM OCRD WHERE CardCode = ?", [$codProv]);
+                $proveedorNombre = !empty($prov) ? (string)$prov[0]->CardName : '';
+            }
+
+            $resumenMes = DB::connection('siz')->select("
+                Select RCP.NUM_MES AS MES, AVG(RCP.CALF_U) AS CALIFA
+                From (
+                    Select
+                        SCC.MES AS NUM_MES,
+                        Case When SIC.INC_esPiel = 'N' then
+                            (Case When (SUM(SIC.INC_cantAceptada) / SUM(SIC.INC_cantRecibida)) = 0 Then
+                                0.00001
+                             else
+                                (SUM(SIC.INC_cantAceptada) / SUM(SIC.INC_cantRecibida))
+                             end)
+                        else
+                            (ISNULL((SUM(SPC.PLC_claseA)/SUM(SIC.INC_cantRecibida))/.3 +
+                            (SUM(SPC.PLC_claseB)/SUM(SIC.INC_cantRecibida))/.5 +
+                            (1-((SUM(SPC.PLC_claseC)/SUM(SIC.INC_cantRecibida))-.2)) +
+                            (Case When SUM(SPC.PLC_claseD) = 0 Then 1 else
+                                ((SUM(SPC.PLC_claseD)/SUM(SIC.INC_cantRecibida))*-1)
+                             end), 0)/4)
+                        end AS CALF_U
+                    From Siz_Incoming SIC
+                    Inner Join OCRD on SIC.INC_codProveedor = OCRD.CardCode
+                    Inner Join Siz_Calendario_Cierre SCC
+                        on CAST(SIC.INC_fechaInspeccion as Date) between Cast(SCC.FEC_INI as date) and Cast(SCC.FEC_FIN as date)
+                    Left Join OOND on OCRD.IndustryC = OOND.IndCode
+                    Left Join Siz_PielClases SPC on SIC.INC_id = SPC.PLC_incId
+                    Where Cast(SIC.INC_fechaInspeccion as date) between ? and ?
+                        and SIC.INC_codProveedor = ?
+                        and SIC.INC_borrado = 'N'
+                    Group By
+                        SIC.INC_codProveedor,
+                        OCRD.CardName,
+                        OOND.IndDesc,
+                        SIC.INC_docNum,
+                        SIC.INC_fechaInspeccion,
+                        SIC.INC_esPiel,
+                        OOND.IndName,
+                        SCC.MES
+                ) RCP
+                Group By RCP.NUM_MES
+                Order By MES
+            ", [$fechaIS, $fechaFS, $codProv]);
+
+            $fechaImpresion = date("d-m-Y H:i:s");
+            $headerHtml = view()->make(
+                'Reportes_IncomingController.pdfheader_rep05',
+                [
+                    'titulo' => 'REP-05 HISTORIAL POR PROVEEDOR',
+                    'fechaImpresion' => 'Fecha de Impresión: ' . $fechaImpresion,
+                    'ano' => $nCiclo,
+                    'fechaIS' => $fechaIS,
+                    'fechaFS' => $fechaFS,
+                    'codProv' => $codProv,
+                    'proveedorNombre' => $proveedorNombre,
+                ]
+            )->render();
+
+            $pdf = \SPDF::loadView('Reportes_IncomingController.pdf_rep05', compact(
+                'nCiclo',
+                'fechaIS',
+                'fechaFS',
+                'codProv',
+                'proveedorNombre',
+                'detalle',
+                'resumenMes'
+            ));
+
+            $pdf->setOption('header-html', $headerHtml);
+            $pdf->setOption('footer-center', 'Pagina [page] de [toPage]');
+            $pdf->setOption('footer-left', 'SIZ');
+            $pdf->setOption('orientation', 'Landscape');
+            $pdf->setOption('margin-top', '40mm');
+            $pdf->setOption('margin-left', '5mm');
+            $pdf->setOption('margin-right', '5mm');
+            $pdf->setOption('page-size', 'Letter');
+
+            return $pdf->inline('REP-05_Historial_Proveedor_' . $codProv . '_' . $nCiclo . '_' . date("Y-m-d") . '.pdf');
+        } catch (\Exception $e) {
+            abort(500, 'Error al generar el PDF: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * AJAX: Buscar datos de confiabilidad de proveedores
      */
     public function buscarConfiabilidadProveedores(Request $request)
