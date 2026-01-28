@@ -822,6 +822,11 @@ Route::get('home/REP-04-CONFIABILIDAD-PROV', 'Reportes_IncomingController@index_
 Route::post('home/rep-04-confiabilidad-prov/buscar', 'Reportes_IncomingController@buscarConfiabilidadProveedores');
 Route::get('home/rep-04-confiabilidad-prov/pdf', 'Reportes_IncomingController@generarPdfRep04');
 
+//REPORTE REP-05 HISTORIAL POR PROVEEDOR
+Route::get('home/REP-05-HISTORIAL-PROVEEDOR', 'Reportes_IncomingController@index_rep05')->middleware('routelog');
+Route::post('home/rep-05-historial-proveedor/buscar', 'Reportes_IncomingController@buscarHistorialProveedor');
+Route::get('home/rep-05-historial-proveedor/pdf', 'Reportes_IncomingController@generarPdfRep05');
+
 //CALIDAD INSPECCION EN PROCESO
 Route::get('home/inspeccion-proceso', 'Mod_InspeccionProcesoController@index_inspeccion_en_proceso')->middleware('routelog');
 Route::get('home/inspeccion-proceso/buscar', 'Mod_InspeccionProcesoController@buscarInspeccionesEnProceso');
