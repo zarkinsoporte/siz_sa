@@ -2,19 +2,11 @@
 @section('homecontent')
 
 {!! Html::style('assets/css/customdt2.css') !!}
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-<script type="text/javascript">
-    // Cargar Google Charts antes de cargar el script principal
-    google.charts.load('current', {'packages':['corechart']});
-</script>
-{!! Html::script('assets/js/Reportes_IncomingController/index_rep05.js?v='.time()) !!}
+{!! Html::script('assets/js/Reportes_IncomingController/index_rep06.js?v='.time()) !!}
 
 <style>
     .titulo-reporte { font-size: 18px; font-weight: bold; margin-bottom: 15px; }
-    .table-resumen { width: 100%; margin-bottom: 15px; border-collapse: collapse; }
-    .table-resumen th, .table-resumen td { border: 1px solid #dee2e6; padding: 8px; text-align: center; vertical-align: middle; }
-    .table-resumen th { background-color: #f8f9fa; font-weight: bold; }
-    .box-proveedor { background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin-bottom: 15px; }
+    .box-material { background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin-bottom: 15px; }
     #tablaDetalle {
         width: 100% !important;
         table-layout: fixed;
@@ -52,7 +44,7 @@
     <div class="row">
         <div class="col-md-11">
             <h3 class="page-header" id="titulo">
-                REP-05 HISTORIAL POR PROVEEDOR
+                REP-06 HISTORIAL POR MATERIAL
             </h3>
         </div>
     </div>
@@ -87,8 +79,8 @@
                             
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="codProv">Código de Proveedor:</label>
-                                    <input id="codProv" type="text" class="form-control" placeholder="Ej: P2221">
+                                    <label for="codMaterial">Código de Material:</label>
+                                    <input id="codMaterial" type="text" class="form-control" placeholder="">
                                 </div>
                             </div>
                             
@@ -109,75 +101,26 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row">
-                            
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-            <div class="box-proveedor" style="font-size: 16px;">
-                <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px;"><strong>Proveedor:</strong> <span id="txtProveedor">-</span></div>
+            <div class="box-material" style="font-size: 16px;">
+                <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px;"><strong>Material:</strong> <span id="txtMaterial">-</span></div>
+                <div style="font-size: 16px;"><strong>UDM:</strong> <span id="txtUDM">-</span></div>
                 <div style="font-size: 16px;"><strong>Periodo:</strong> <span id="txtPeriodo">-</span></div>
             </div>
 
-            <div class="row" style="margin-bottom: 20px;">
-                <div class="col-md-6">
-                    <h5>Distribución Aceptado / Rechazado</h5>
-                    <div id="graficaAceptadoRechazado" style="min-height: 400px;">
-                        <p class="text-center text-muted">Seleccione filtros y haga clic en "Buscar"</p>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <h5>Resumen</h5>
-                    <table class="table table-bordered" style="font-size: 16px;">
-                        <tbody>
-                            <tr>
-                                <td style="font-size: 16px;"><strong>Total Recibido:</strong></td>
-                                <td id="totalRecibido" style="font-size: 16px; font-weight: bold;">-</td>
-                            </tr>
-                            <tr>
-                                <td style="font-size: 16px;"><strong>Total Aceptado:</strong></td>
-                                <td id="totalAceptado" style="font-size: 16px; font-weight: bold;">-</td>
-                            </tr>
-                            <tr>
-                                <td style="font-size: 16px;"><strong>Total Rechazado:</strong></td>
-                                <td id="totalRechazado" style="font-size: 16px; font-weight: bold;">-</td>
-                            </tr>
-                            <tr>
-                                <td style="font-size: 16px;"><strong>Por Revisar:</strong></td>
-                                <td id="totalPorRevisar" style="font-size: 16px; font-weight: bold;">-</td>
-                            </tr>
-                            <tr>
-                                <td style="font-size: 16px;"><strong>% Aceptado:</strong></td>
-                                <td id="porcAceptado" style="font-size: 16px; font-weight: bold;">-</td>
-                            </tr>
-                            <tr>
-                                <td style="font-size: 16px;"><strong>% Rechazado:</strong></td>
-                                <td id="porcRechazado" style="font-size: 16px; font-weight: bold;">-</td>
-                            </tr>
-                            
-                            <tr>
-                                <td style="font-size: 16px;"><strong>% Por Revisar:</strong></td>
-                                <td id="porcPorRevisar" style="font-size: 16px; font-weight: bold;">-</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <h5>Detalle</h5>
+            <h5>Detalle por Proveedor</h5>
             <table class="table table-bordered table-striped" id="tablaDetalle">
                 <thead>
                     <tr>
-                        <th>Rechazo</th>
-                        <th>NE</th>
-                        <th>Código Material</th>
-                        <th>Material</th>
-                        <th>UDM</th>
-                        <th>Recibido</th>
-                        <th>Rechazada</th>
+                        <th>#</th>
+                        <th>Código Proveedor</th>
+                        <th>Proveedor</th>
+                        <th>Aceptado</th>
+                        <th>Calificación</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -196,4 +139,3 @@
 </script>
 
 @endsection
-

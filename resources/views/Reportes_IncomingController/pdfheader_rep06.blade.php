@@ -38,11 +38,13 @@
                     Del {{date('d/m/Y', strtotime($fechaIS))}} al {{date('d/m/Y', strtotime($fechaFS))}}
                 </h5>
                 <h5 style="font-size: 14px;">
-                    Proveedor: {{$codProv}} @if($proveedorNombre) - {{$proveedorNombre}} @endif
+                    Material: {{$codMaterial}} @if($materialNombre) - {{$materialNombre}} @endif
+                </h5>
+                <h5 style="font-size: 14px;">
+                    UDM: {{$udm}}
                 </h5>
             </td>
         </tr>
     </table>
     <br>
 </div>
-

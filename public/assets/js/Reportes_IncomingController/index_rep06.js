@@ -39,7 +39,6 @@ function js_iniciador() {
         var num = parseFloat(v);
         if (isNaN(num) || num === 0) return '-';
         // Los valores vienen como decimales (0.9871 = 98.71%), multiplicar por 100
-        // Permitir valores mayores a 1.0 (100%) ya que pueden existir promedios superiores
         return (num * 100).toFixed(2) + '%';
     }
 
@@ -48,60 +47,7 @@ function js_iniciador() {
         return Number(v).toLocaleString('es-MX', { maximumFractionDigits: 2 });
     }
 
-    // Variable global para la gráfica
-    var graficaAceptadoRechazado = null;
-    
-    // Función para renderizar gráfica de pastel
-    function renderGraficaAceptadoRechazado(totalAceptado, totalRechazado, porcAceptado, porcRechazado) {
-        var container = $("#graficaAceptadoRechazado");
-        container.empty();
-        
-        if (totalAceptado === 0 && totalRechazado === 0) {
-            container.html('<p class="text-center text-muted">No hay datos disponibles</p>');
-            return;
-        }
-        
-        function drawChart() {
-            var data = google.visualization.arrayToDataTable([
-                ['Estado', 'Cantidad'],
-                ['Aceptado', totalAceptado],
-                ['Rechazado', totalRechazado]
-            ]);
-
-            var options = {
-                title: 'Distribución Aceptado / Rechazado',
-                pieHole: 0.4,
-                colors: ['#28a745', '#dc3545'],
-                legend: {
-                    position: 'bottom'
-                },
-                pieSliceText: 'percentage',
-                tooltip: {
-                    text: 'value'
-                }
-            };
-
-            graficaAceptadoRechazado = new google.visualization.PieChart(container[0]);
-            graficaAceptadoRechazado.draw(data, options);
-        }
-        
-        // Verificar si Google Charts está disponible y cargado
-        if (typeof google === 'undefined' || typeof google.charts === 'undefined') {
-            container.html('<p class="text-center text-muted">Cargando gráfica...</p>');
-            return;
-        }
-        
-        // Verificar si visualization está disponible
-        if (typeof google.visualization === 'undefined') {
-            // Esperar a que se cargue
-            google.charts.setOnLoadCallback(drawChart);
-        } else {
-            // Ya está cargado, dibujar directamente
-            drawChart();
-        }
-    }
-
-    function renderDetalle(detalle) {
+    function renderDetalle(datos) {
         if (dtDetalle) {
             dtDetalle.destroy();
             dtDetalle = null;
@@ -113,16 +59,14 @@ function js_iniciador() {
         $("#tablaDetalle tbody").empty();
 
         var rows = [];
-        if (detalle && detalle.length > 0) {
-            detalle.forEach(function (d) {
+        if (datos && datos.length > 0) {
+            datos.forEach(function (d, index) {
                 rows.push([
-                    d.RECHAZO,
-                    d.NE,
-                    d.COD_MAT,
-                    d.MATERIAL,
-                    d.UDM,
-                    fmtNum(d.RECIBIDO),
-                    fmtNum(d.RECHAZADA)
+                    index + 1,
+                    d.COD_PROV || '-',
+                    d.PROVEEDOR || '-',
+                    fmtNum(d.ACEPTADO),
+                    fmtPct(d.CALIFA)
                 ]);
             });
         }
@@ -130,16 +74,14 @@ function js_iniciador() {
         dtDetalle = $("#tablaDetalle").DataTable({
             data: rows,
             pageLength: 25,
-            order: [[1, 'desc']],
+            order: [[2, 'asc']], // Ordenar por nombre de proveedor
             autoWidth: false,
             columnDefs: [
-                { width: "80px", targets: [0] }, // Rechazo
-                { width: "100px", targets: [1] }, // NE
-                { width: "120px", targets: [2] }, // Código Material
-                { width: "250px", targets: [3] }, // Material
-                { width: "80px", targets: [4] }, // UDM
-                { width: "100px", targets: [5] }, // Recibido
-                { width: "100px", targets: [6] }  // Rechazada
+                { width: "50px", targets: [0] }, // #
+                { width: "120px", targets: [1] }, // Código Proveedor
+                { width: "300px", targets: [2] }, // Proveedor
+                { width: "120px", targets: [3] }, // Aceptado
+                { width: "120px", targets: [4] }  // Calificación
             ],
             language: {
                 "sProcessing": "Procesando...",
@@ -160,10 +102,10 @@ function js_iniciador() {
     function cargar() {
         var fechaDesde = $("#fechaDesde").val();
         var fechaHasta = $("#fechaHasta").val();
-        var codProv = ($("#codProv").val() || '').trim();
+        var codMaterial = ($("#codMaterial").val() || '').trim();
 
-        if (!codProv) {
-            swal({ title: "Error", text: "Capture el código de proveedor", type: "error", confirmButtonText: "Aceptar" });
+        if (!codMaterial) {
+            swal({ title: "Error", text: "Capture el código de material", type: "error", confirmButtonText: "Aceptar" });
             return;
         }
 
@@ -181,13 +123,13 @@ function js_iniciador() {
         swal({ title: "Cargando...", text: "Por favor espere", type: "info", showConfirmButton: false, allowOutsideClick: false });
 
         $.ajax({
-            url: routeapp + "/home/rep-05-historial-proveedor/buscar",
+            url: routeapp + "/home/rep-06-historial-material/buscar",
             type: 'POST',
             data: { 
                 _token: csrfToken, 
                 fecha_desde: fechaDesde, 
                 fecha_hasta: fechaHasta, 
-                cod_prov: codProv 
+                cod_material: codMaterial 
             },
             success: function (resp) {
                 swal.close();
@@ -196,27 +138,11 @@ function js_iniciador() {
                     return;
                 }
 
-                $("#txtProveedor").text((resp.codProv || codProv) + (resp.proveedorNombre ? (' - ' + resp.proveedorNombre) : ''));
+                $("#txtMaterial").text((resp.codMaterial || codMaterial) + (resp.materialNombre ? (' - ' + resp.materialNombre) : ''));
+                $("#txtUDM").text(resp.udm || '-');
                 $("#txtPeriodo").text('Del ' + resp.fechaIS + ' al ' + resp.fechaFS);
-
-                // Actualizar resumen
-                $("#totalRecibido").text(fmtNum(resp.totalRecibido || 0));
-                $("#totalAceptado").text(fmtNum(resp.totalAceptado || 0));
-                $("#totalRechazado").text(fmtNum(resp.totalRechazado || 0));
-                $("#totalPorRevisar").text(fmtNum(resp.totalPorRevisar || 0));
-                $("#porcAceptado").text((resp.porcAceptado || 0).toFixed(2) + '%');
-                $("#porcRechazado").text((resp.porcRechazado || 0).toFixed(2) + '%');
-                $("#porcPorRevisar").text((resp.porcPorRevisar || 0).toFixed(2) + '%');
                 
-                // Renderizar gráfica
-                renderGraficaAceptadoRechazado(
-                    parseFloat(resp.totalAceptado || 0),
-                    parseFloat(resp.totalRechazado || 0),
-                    parseFloat(resp.porcAceptado || 0),
-                    parseFloat(resp.porcRechazado || 0)
-                );
-                
-                renderDetalle(resp.detalle);
+                renderDetalle(resp.datos);
             },
             error: function (xhr) {
                 swal.close();
@@ -230,10 +156,10 @@ function js_iniciador() {
     $("#btnImprimirPDF").on('click', function () {
         var fechaDesde = $("#fechaDesde").val();
         var fechaHasta = $("#fechaHasta").val();
-        var codProv = ($("#codProv").val() || '').trim();
+        var codMaterial = ($("#codMaterial").val() || '').trim();
         
-        if (!codProv) {
-            swal({ title: "Error", text: "Capture el código de proveedor", type: "error", confirmButtonText: "Aceptar" });
+        if (!codMaterial) {
+            swal({ title: "Error", text: "Capture el código de material", type: "error", confirmButtonText: "Aceptar" });
             return;
         }
 
@@ -248,8 +174,7 @@ function js_iniciador() {
             return;
         }
         
-        var url = routeapp + "/home/rep-05-historial-proveedor/pdf?fecha_desde=" + encodeURIComponent(fechaDesde) + "&fecha_hasta=" + encodeURIComponent(fechaHasta) + "&cod_prov=" + encodeURIComponent(codProv);
+        var url = routeapp + "/home/rep-06-historial-material/pdf?fecha_desde=" + encodeURIComponent(fechaDesde) + "&fecha_hasta=" + encodeURIComponent(fechaHasta) + "&cod_material=" + encodeURIComponent(codMaterial);
         window.open(url, '_blank');
     });
 }
-

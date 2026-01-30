@@ -37,6 +37,7 @@
         vertical-align: middle;
         border: 1px solid #dee2e6;
         padding: 8px;
+        font-size: 12px;
     }
     
     .table-resumen .promedio-cell {
@@ -76,6 +77,7 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        font-size: 12px;
     }
     
     #tablaProveedores_wrapper .dataTables_scrollHead {

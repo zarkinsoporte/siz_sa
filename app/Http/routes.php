@@ -827,6 +827,11 @@ Route::get('home/REP-05-HISTORIAL-PROVEEDOR', 'Reportes_IncomingController@index
 Route::post('home/rep-05-historial-proveedor/buscar', 'Reportes_IncomingController@buscarHistorialProveedor');
 Route::get('home/rep-05-historial-proveedor/pdf', 'Reportes_IncomingController@generarPdfRep05');
 
+//REPORTE REP-06 HISTORIAL POR MATERIAL
+Route::get('home/REP-06-HISTORIAL-MATERIAL', 'Reportes_IncomingController@index_rep06')->middleware('routelog');
+Route::post('home/rep-06-historial-material/buscar', 'Reportes_IncomingController@buscarHistorialMaterial');
+Route::get('home/rep-06-historial-material/pdf', 'Reportes_IncomingController@generarPdfRep06');
+
 //CALIDAD INSPECCION EN PROCESO
 Route::get('home/inspeccion-proceso', 'Mod_InspeccionProcesoController@index_inspeccion_en_proceso')->middleware('routelog');
 Route::get('home/inspeccion-proceso/buscar', 'Mod_InspeccionProcesoController@buscarInspeccionesEnProceso');
