@@ -843,7 +843,7 @@ Route::get('home/inspeccion-proceso/imagen/{id}', 'Mod_InspeccionProcesoControll
 
 Route::get('pruebaDirectorio', function () {
 	$so = env('DB_DATABASE');
-	if($so == 'SBO_Pruebas') {
+	if($so == 'SBO_Prueba') {
 		$directorioBase = 'D:\\QAS\\INSPECCION_PROCESO\\OP_';
 	} else {
 		$directorioBase = 'D:\\INSPECCION_PROCESO\\OP_';

@@ -617,7 +617,7 @@ class Mod_IncomingController extends Controller
             
             if ($archivosEncontrados) {
                 $so = env('DB_DATABASE');
-                if($so == 'SBO_Pruebas') {
+                if($so == 'SBO_Prueba') {
                     $directorioBase = 'D:\\QAS\\INCOMING\\' . $material['NOTA_ENTRADA'];
                 } else {
                     $directorioBase = 'D:\\INCOMING\\' . $material['NOTA_ENTRADA'];
