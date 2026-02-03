@@ -104,6 +104,7 @@ class Reportes_IncomingController extends Controller
             $detalle = DB::connection('siz')->select("
                 Select
                     ISNULL(SIR.IR_id, 0) AS RECHAZO,
+                    SIC.INC_id AS INC_ID,
                     OCRD.CardName AS PROVEEDOR,
                     SIC.INC_docNum AS NE,
                     SIC.INC_codMaterial AS COD_MAT,
@@ -124,7 +125,8 @@ class Reportes_IncomingController extends Controller
                     SIC.INC_codMaterial,
                     SIC.INC_nomMaterial,
                     SIC.INC_unidadMedida,
-                    SIR.IR_id
+                    SIR.IR_id,
+                    SIC.INC_id
                 Order By SIC.INC_docNum, SIC.INC_nomMaterial
             ", [$fechaIS, $fechaFS, $codProv]);
 
@@ -220,6 +222,7 @@ class Reportes_IncomingController extends Controller
             $detalle = DB::connection('siz')->select("
                 Select
                     ISNULL(SIR.IR_id, 0) AS RECHAZO,
+                    SIC.INC_id AS INC_ID,
                     OCRD.CardName AS PROVEEDOR,
                     SIC.INC_docNum AS NE,
                     SIC.INC_codMaterial AS COD_MAT,
@@ -240,7 +243,8 @@ class Reportes_IncomingController extends Controller
                     SIC.INC_codMaterial,
                     SIC.INC_nomMaterial,
                     SIC.INC_unidadMedida,
-                    SIR.IR_id
+                    SIR.IR_id,
+                    SIC.INC_id
                 Order By SIC.INC_docNum, SIC.INC_nomMaterial
             ", [$fechaIS, $fechaFS, $codProv]);
 

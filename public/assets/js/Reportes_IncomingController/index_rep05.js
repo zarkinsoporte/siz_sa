@@ -115,8 +115,20 @@ function js_iniciador() {
         var rows = [];
         if (detalle && detalle.length > 0) {
             detalle.forEach(function (d) {
+                // Generar el contenido de la columna Rechazo
+                var rechazoCell = '';
+                if (d.RECHAZO && d.RECHAZO > 0 && d.INC_ID) {
+                    // Si hay rechazo, mostrar botón con icono PDF
+                    var urlPdf = routeapp + '/home/RECHAZOS/pdf/' + d.INC_ID;
+                    rechazoCell = '<a href="' + urlPdf + '" target="_blank" class="btn btn-danger btn-sm" title="Ver PDF del Rechazo">' +
+                                 '<i class="fa fa-file-pdf-o"></i></a>';
+                } else {
+                    // Si no hay rechazo, mostrar guión
+                    rechazoCell = '-';
+                }
+                
                 rows.push([
-                    d.RECHAZO,
+                    rechazoCell,  // Rechazo (botón o guión)
                     d.NE,
                     d.COD_MAT,
                     d.MATERIAL,
@@ -133,7 +145,11 @@ function js_iniciador() {
             order: [[1, 'desc']],
             autoWidth: false,
             columnDefs: [
-                { width: "80px", targets: [0] }, // Rechazo
+                { 
+                    width: "80px", 
+                    targets: [0],
+                    className: "text-center"  // Centrar el botón
+                }, // Rechazo
                 { width: "100px", targets: [1] }, // NE
                 { width: "120px", targets: [2] }, // Código Material
                 { width: "250px", targets: [3] }, // Material
