@@ -832,6 +832,21 @@ Route::get('home/REP-06-HISTORIAL-MATERIAL', 'Reportes_IncomingController@index_
 Route::post('home/rep-06-historial-material/buscar', 'Reportes_IncomingController@buscarHistorialMaterial');
 Route::get('home/rep-06-historial-material/pdf', 'Reportes_IncomingController@generarPdfRep06');
 
+//REPORTE REP-07 INDICADORES DE CALIDAD POR MES
+Route::get('home/REP-07-INDICADORES', 'Reportes_IncomingController@index_rep07')->middleware('routelog');
+Route::post('home/rep-07-indicadores/buscar', 'Reportes_IncomingController@buscarIndicadoresCalidad');
+Route::get('home/rep-07-indicadores/pdf', 'Reportes_IncomingController@generarPdfRep07');
+
+//REPORTE REP-08 TOP 3 DEFECTIVOS
+Route::get('home/REP-08-TOP-DEFECTIVOS', 'Reportes_IncomingController@index_rep08')->middleware('routelog');
+Route::post('home/rep-08-top-defectivos/buscar', 'Reportes_IncomingController@buscarTopDefectivos');
+Route::get('home/rep-08-top-defectivos/pdf', 'Reportes_IncomingController@generarPdfRep08');
+
+//REPORTE REP-09 RESUMEN DE INCENTIVOS
+Route::get('home/REP-09-RESUMEN-INCENTIVOS', 'Reportes_IncomingController@index_rep09')->middleware('routelog');
+Route::post('home/rep-09-resumen-incentivos/buscar', 'Reportes_IncomingController@buscarResumenIncentivos');
+Route::get('home/rep-09-resumen-incentivos/pdf', 'Reportes_IncomingController@generarPdfRep09');
+
 //CALIDAD INSPECCION EN PROCESO
 Route::get('home/inspeccion-proceso', 'Mod_InspeccionProcesoController@index_inspeccion_en_proceso')->middleware('routelog');
 Route::get('home/inspeccion-proceso/buscar', 'Mod_InspeccionProcesoController@buscarInspeccionesEnProceso');

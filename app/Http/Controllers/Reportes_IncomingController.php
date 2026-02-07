@@ -571,6 +571,652 @@ class Reportes_IncomingController extends Controller
     }
 
     /**
+     * Muestra la vista principal del reporte REP-07 Indicadores de Calidad por Mes
+     */
+    public function index_rep07()
+    {
+        if (Auth::check()) {
+            $user = Auth::user();
+            $actividades = $user->getTareas();
+            $ultimo = count($actividades);
+
+            // Año por defecto: año actual
+            $anoActual = date('Y');
+
+            return view('Reportes_IncomingController.index_rep07', compact('user', 'actividades', 'ultimo', 'anoActual'));
+        } else {
+            return redirect()->route('auth/login');
+        }
+    }
+
+    /**
+     * AJAX: Buscar indicadores de calidad por mes (REP-07)
+     * Basado en macro VMA_R147_D
+     */
+    public function buscarIndicadoresCalidad(Request $request)
+    {
+        try {
+            $nCiclo = $request->input('ano', date('Y'));
+
+            // Obtener fechas del calendario de cierre para el año
+            $fechas = DB::connection('siz')->select("
+                SELECT Cast(SCC.FEC_INI as date) as FEC_INI
+                FROM Siz_Calendario_Cierre SCC 
+                WHERE SCC.PERIODO = ? + '-01'
+            ", [$nCiclo]);
+            
+            if (empty($fechas)) {
+                return response()->json([
+                    'success' => false,
+                    'msg' => 'No se encontró calendario de cierre para el año ' . $nCiclo
+                ]);
+            }
+            
+            $fechaIS = $fechas[0]->FEC_INI;
+            
+            $fechasFin = DB::connection('siz')->select("
+                SELECT Cast(SCC.FEC_FIN as date) as FEC_FIN
+                FROM Siz_Calendario_Cierre SCC 
+                WHERE SCC.PERIODO = ? + '-12'
+            ", [$nCiclo]);
+            
+            $fechaFS = $fechasFin[0]->FEC_FIN ?? $fechaIS;
+
+            // Obtener nombres de los meses del calendario
+            $meses = DB::connection('siz')->select("
+                SELECT SCC.MES, SCC.NOM_MES AS NOMBMES
+                FROM Siz_Calendario_Cierre SCC 
+                WHERE SCC.CICLO = ? 
+                ORDER BY SCC.MES
+            ", [$nCiclo]);
+
+            // Consulta basada en VMA_R147_D - Obtener datos por área y mes
+            $datos = DB::connection('siz')->select("
+                Select 
+                    BAS.MES, 
+                    BAS.AREA, 
+                    SUM(BAS.PRO_UNID) AS PRO_TCANT, 
+                    SUM(BAS.PRO_VS) AS PRO_TVS, 
+                    SUM(BAS.REC_UNID) AS REC_TCANT, 
+                    SUM(BAS.REC_VS) AS REC_TVS 
+                From (
+                    Select 
+                        SCC.MES AS MES, 
+                        Case 
+                            WHEN SCL.CHK_area_inspeccionada between 109 and 118 then '1 CORTE' 
+                            WHEN SCL.CHK_area_inspeccionada between 121 and 139 then '2 COSTURA' 
+                            WHEN SCL.CHK_area_inspeccionada between 140 and 146 then '3 COJINERIA' 
+                            WHEN SCL.CHK_area_inspeccionada between 148 and 175 then '4 TAPICERIA' 
+                            WHEN SCL.CHK_area_inspeccionada between 403 and 418 then '6 CARPINTERIA' 
+                            else '7 NO DEFINIDA' 
+                        End As AREA, 
+                        SIP.IPR_op AS OP, 
+                        0 AS PRO_UNID, 
+                        0 AS PRO_VS, 
+                        SIP.IPR_cantInspeccionada AS REC_UNID, 
+                        A3.U_VS * SIP.IPR_cantInspeccionada AS REC_VS 
+                    From Siz_InspeccionProceso SIP 
+                    Inner Join Siz_InspeccionProcesoDetalle IPD on SIP.IPR_id = IPD.IPD_iprId 
+                    Inner Join Siz_Calendario_Cierre SCC on CAST(SIP.IPR_fechaInspeccion as Date) between Cast(SCC.FEC_INI as date) and Cast(SCC.FEC_FIN as date)
+                    Inner Join Siz_Checklist SCL on SCL.CHK_id = IPD.IPD_chkId 
+                    Inner Join OITM A3 on A3.ItemCode = SIP.IPR_codArticulo 
+                    Where Cast(SIP.IPR_fechaInspeccion as date) between ? and ? 
+                        and IPD.IPD_estado = 'N' and IPD.IPD_borrado = 'N' 
+                    
+                    Union All 
+                    
+                    Select 
+                        SCC.MES AS MES, 
+                        Case 
+                            WHEN CP.U_CT = 118 then '1 CORTE' 
+                            WHEN CP.U_CT = 139 then '2 COSTURA' 
+                            WHEN CP.U_CT = 146 then '3 COJINERIA' 
+                            WHEN CP.U_CT = 175 then '4 TAPICERIA' 
+                            WHEN CP.U_CT = 418 then '6 CARPINTERIA' 
+                            else '7 NO DEFINIDA' 
+                        End As AREA, 
+                        CP.U_DocEntry AS OP, 
+                        CP.U_Cantidad AS PRO_UNID, 
+                        A3.U_VS * CP.U_Cantidad AS PRO_VS, 
+                        0 AS REC_UNID, 
+                        0 AS REC_VS 
+                    from [@CP_LOGOF] CP 
+                    inner join OWOR on OWOR.DocEntry = CP.U_DocEntry 
+                    Inner Join Siz_Calendario_Cierre SCC on CAST(CP.U_FechaHora as Date) between Cast(SCC.FEC_INI as date) and Cast(SCC.FEC_FIN as date)
+                    Inner Join OITM A3 on A3.ItemCode = OWOR.ItemCode 
+                    Where Cast(CP.U_FechaHora as date) between ? and ?
+                ) BAS 
+                Where BAS.AREA <> '7 NO DEFINIDA'
+                Group By BAS.MES, BAS.AREA 
+                Order By BAS.AREA, BAS.MES
+            ", [$fechaIS, $fechaFS, $fechaIS, $fechaFS]);
+
+            // Estructurar datos por área
+            $areas = [
+                '1 CORTE' => ['nombre' => 'CORTE', 'objetivo' => 0.07, 'meses' => []],
+                '2 COSTURA' => ['nombre' => 'COSTURA', 'objetivo' => 0.07, 'meses' => []],
+                '3 COJINERIA' => ['nombre' => 'COJINERIA', 'objetivo' => 0.06, 'meses' => []],
+                '4 TAPICERIA' => ['nombre' => 'TAPICERIA', 'objetivo' => 0.08, 'meses' => []],
+                '6 CARPINTERIA' => ['nombre' => 'CARPINTERIA', 'objetivo' => 0.07, 'meses' => []],
+            ];
+
+            // Inicializar meses vacíos
+            foreach ($areas as $key => &$area) {
+                for ($i = 1; $i <= 12; $i++) {
+                    $mes = str_pad($i, 2, '0', STR_PAD_LEFT);
+                    $area['meses'][$mes] = [
+                        'PRO_TCANT' => 0,
+                        'REC_TCANT' => 0,
+                        'PRO_TVS' => 0,
+                        'REC_TVS' => 0,
+                    ];
+                }
+            }
+            unset($area);
+
+            // Llenar datos
+            foreach ($datos as $d) {
+                $areaKey = $d->AREA;
+                $mes = $d->MES;
+                if (isset($areas[$areaKey])) {
+                    $areas[$areaKey]['meses'][$mes] = [
+                        'PRO_TCANT' => (float)$d->PRO_TCANT,
+                        'REC_TCANT' => (float)$d->REC_TCANT,
+                        'PRO_TVS' => (float)$d->PRO_TVS,
+                        'REC_TVS' => (float)$d->REC_TVS,
+                    ];
+                }
+            }
+
+            // Calcular totales por mes (suma de todas las áreas)
+            $totales = [];
+            for ($i = 1; $i <= 12; $i++) {
+                $mes = str_pad($i, 2, '0', STR_PAD_LEFT);
+                $totales[$mes] = [
+                    'PRO_TCANT' => 0,
+                    'REC_TCANT' => 0,
+                    'PRO_TVS' => 0,
+                    'REC_TVS' => 0,
+                ];
+                foreach ($areas as $area) {
+                    $totales[$mes]['PRO_TCANT'] += $area['meses'][$mes]['PRO_TCANT'];
+                    $totales[$mes]['REC_TCANT'] += $area['meses'][$mes]['REC_TCANT'];
+                    $totales[$mes]['PRO_TVS'] += $area['meses'][$mes]['PRO_TVS'];
+                    $totales[$mes]['REC_TVS'] += $area['meses'][$mes]['REC_TVS'];
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'ano' => $nCiclo,
+                'fechaIS' => $fechaIS,
+                'fechaFS' => $fechaFS,
+                'meses' => $meses,
+                'areas' => $areas,
+                'totales' => $totales
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'msg' => 'Error al obtener los datos: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * PDF REP-07 Indicadores de Calidad por Mes
+     */
+    public function generarPdfRep07(Request $request)
+    {
+        try {
+            $nCiclo = $request->input('ano', date('Y'));
+
+            // Obtener fechas del calendario de cierre
+            $fechas = DB::connection('siz')->select("
+                SELECT Cast(SCC.FEC_INI as date) as FEC_INI
+                FROM Siz_Calendario_Cierre SCC 
+                WHERE SCC.PERIODO = ? + '-01'
+            ", [$nCiclo]);
+            
+            if (empty($fechas)) {
+                abort(404, 'No se encontró calendario de cierre para el año ' . $nCiclo);
+            }
+            
+            $fechaIS = $fechas[0]->FEC_INI;
+            
+            $fechasFin = DB::connection('siz')->select("
+                SELECT Cast(SCC.FEC_FIN as date) as FEC_FIN
+                FROM Siz_Calendario_Cierre SCC 
+                WHERE SCC.PERIODO = ? + '-12'
+            ", [$nCiclo]);
+            
+            $fechaFS = $fechasFin[0]->FEC_FIN ?? $fechaIS;
+
+            // Obtener nombres de los meses
+            $meses = DB::connection('siz')->select("
+                SELECT SCC.MES, SCC.NOM_MES AS NOMBMES
+                FROM Siz_Calendario_Cierre SCC 
+                WHERE SCC.CICLO = ? 
+                ORDER BY SCC.MES
+            ", [$nCiclo]);
+
+            // Misma consulta que buscarIndicadoresCalidad
+            $datos = DB::connection('siz')->select("
+                Select 
+                    BAS.MES, 
+                    BAS.AREA, 
+                    SUM(BAS.PRO_UNID) AS PRO_TCANT, 
+                    SUM(BAS.PRO_VS) AS PRO_TVS, 
+                    SUM(BAS.REC_UNID) AS REC_TCANT, 
+                    SUM(BAS.REC_VS) AS REC_TVS 
+                From (
+                    Select 
+                        SCC.MES AS MES, 
+                        Case 
+                            WHEN SCL.CHK_area_inspeccionada between 109 and 118 then '1 CORTE' 
+                            WHEN SCL.CHK_area_inspeccionada between 121 and 139 then '2 COSTURA' 
+                            WHEN SCL.CHK_area_inspeccionada between 140 and 146 then '3 COJINERIA' 
+                            WHEN SCL.CHK_area_inspeccionada between 148 and 175 then '4 TAPICERIA' 
+                            WHEN SCL.CHK_area_inspeccionada between 403 and 418 then '6 CARPINTERIA' 
+                            else '7 NO DEFINIDA' 
+                        End As AREA, 
+                        SIP.IPR_op AS OP, 
+                        0 AS PRO_UNID, 
+                        0 AS PRO_VS, 
+                        SIP.IPR_cantInspeccionada AS REC_UNID, 
+                        A3.U_VS * SIP.IPR_cantInspeccionada AS REC_VS 
+                    From Siz_InspeccionProceso SIP 
+                    Inner Join Siz_InspeccionProcesoDetalle IPD on SIP.IPR_id = IPD.IPD_iprId 
+                    Inner Join Siz_Calendario_Cierre SCC on CAST(SIP.IPR_fechaInspeccion as Date) between Cast(SCC.FEC_INI as date) and Cast(SCC.FEC_FIN as date)
+                    Inner Join Siz_Checklist SCL on SCL.CHK_id = IPD.IPD_chkId 
+                    Inner Join OITM A3 on A3.ItemCode = SIP.IPR_codArticulo 
+                    Where Cast(SIP.IPR_fechaInspeccion as date) between ? and ? 
+                        and IPD.IPD_estado = 'N' and IPD.IPD_borrado = 'N' 
+                    
+                    Union All 
+                    
+                    Select 
+                        SCC.MES AS MES, 
+                        Case 
+                            WHEN CP.U_CT = 118 then '1 CORTE' 
+                            WHEN CP.U_CT = 139 then '2 COSTURA' 
+                            WHEN CP.U_CT = 146 then '3 COJINERIA' 
+                            WHEN CP.U_CT = 175 then '4 TAPICERIA' 
+                            WHEN CP.U_CT = 418 then '6 CARPINTERIA' 
+                            else '7 NO DEFINIDA' 
+                        End As AREA, 
+                        CP.U_DocEntry AS OP, 
+                        CP.U_Cantidad AS PRO_UNID, 
+                        A3.U_VS * CP.U_Cantidad AS PRO_VS, 
+                        0 AS REC_UNID, 
+                        0 AS REC_VS 
+                    from [@CP_LOGOF] CP 
+                    inner join OWOR on OWOR.DocEntry = CP.U_DocEntry 
+                    Inner Join Siz_Calendario_Cierre SCC on CAST(CP.U_FechaHora as Date) between Cast(SCC.FEC_INI as date) and Cast(SCC.FEC_FIN as date)
+                    Inner Join OITM A3 on A3.ItemCode = OWOR.ItemCode 
+                    Where Cast(CP.U_FechaHora as date) between ? and ?
+                ) BAS 
+                Where BAS.AREA <> '7 NO DEFINIDA'
+                Group By BAS.MES, BAS.AREA 
+                Order By BAS.AREA, BAS.MES
+            ", [$fechaIS, $fechaFS, $fechaIS, $fechaFS]);
+
+            // Estructurar datos igual que en buscarIndicadoresCalidad
+            $areas = [
+                '1 CORTE' => ['nombre' => 'CORTE', 'objetivo' => 0.07, 'meses' => []],
+                '2 COSTURA' => ['nombre' => 'COSTURA', 'objetivo' => 0.07, 'meses' => []],
+                '3 COJINERIA' => ['nombre' => 'COJINERIA', 'objetivo' => 0.06, 'meses' => []],
+                '4 TAPICERIA' => ['nombre' => 'TAPICERIA', 'objetivo' => 0.08, 'meses' => []],
+                '6 CARPINTERIA' => ['nombre' => 'CARPINTERIA', 'objetivo' => 0.07, 'meses' => []],
+            ];
+
+            foreach ($areas as $key => &$area) {
+                for ($i = 1; $i <= 12; $i++) {
+                    $mes = str_pad($i, 2, '0', STR_PAD_LEFT);
+                    $area['meses'][$mes] = [
+                        'PRO_TCANT' => 0,
+                        'REC_TCANT' => 0,
+                        'PRO_TVS' => 0,
+                        'REC_TVS' => 0,
+                    ];
+                }
+            }
+            unset($area);
+
+            foreach ($datos as $d) {
+                $areaKey = $d->AREA;
+                $mes = $d->MES;
+                if (isset($areas[$areaKey])) {
+                    $areas[$areaKey]['meses'][$mes] = [
+                        'PRO_TCANT' => (float)$d->PRO_TCANT,
+                        'REC_TCANT' => (float)$d->REC_TCANT,
+                        'PRO_TVS' => (float)$d->PRO_TVS,
+                        'REC_TVS' => (float)$d->REC_TVS,
+                    ];
+                }
+            }
+
+            $totales = [];
+            for ($i = 1; $i <= 12; $i++) {
+                $mes = str_pad($i, 2, '0', STR_PAD_LEFT);
+                $totales[$mes] = [
+                    'PRO_TCANT' => 0,
+                    'REC_TCANT' => 0,
+                    'PRO_TVS' => 0,
+                    'REC_TVS' => 0,
+                ];
+                foreach ($areas as $area) {
+                    $totales[$mes]['PRO_TCANT'] += $area['meses'][$mes]['PRO_TCANT'];
+                    $totales[$mes]['REC_TCANT'] += $area['meses'][$mes]['REC_TCANT'];
+                    $totales[$mes]['PRO_TVS'] += $area['meses'][$mes]['PRO_TVS'];
+                    $totales[$mes]['REC_TVS'] += $area['meses'][$mes]['REC_TVS'];
+                }
+            }
+
+            $fechaImpresion = date("d-m-Y H:i:s");
+            $headerHtml = view()->make(
+                'Reportes_IncomingController.pdfheader_rep07',
+                [
+                    'titulo' => 'REP-07 INDICADORES DE CALIDAD POR MES',
+                    'fechaImpresion' => 'Fecha de Impresión: ' . $fechaImpresion,
+                    'ano' => $nCiclo,
+                    'fechaIS' => $fechaIS,
+                    'fechaFS' => $fechaFS,
+                ]
+            )->render();
+
+            $ano = $nCiclo;
+            $pdf = \SPDF::loadView('Reportes_IncomingController.pdf_rep07', compact(
+                'ano',
+                'fechaIS',
+                'fechaFS',
+                'meses',
+                'areas',
+                'totales'
+            ));
+
+            $pdf->setOption('header-html', $headerHtml);
+            $pdf->setOption('footer-center', 'Pagina [page] de [toPage]');
+            $pdf->setOption('footer-left', 'SIZ');
+            $pdf->setOption('orientation', 'Landscape');
+            $pdf->setOption('margin-top', '40mm');
+            $pdf->setOption('margin-left', '5mm');
+            $pdf->setOption('margin-right', '5mm');
+            $pdf->setOption('page-size', 'Letter');
+
+            return $pdf->inline('REP-07_Indicadores_Calidad_' . $nCiclo . '.pdf');
+        } catch (\Exception $e) {
+            abort(500, 'Error al generar el PDF: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Muestra la vista principal del reporte REP-08 Top 3 Defectivos
+     */
+    public function index_rep08()
+    {
+        if (Auth::check()) {
+            $user = Auth::user();
+            $actividades = $user->getTareas();
+            $ultimo = count($actividades);
+
+            $anoActual = date('Y');
+
+            return view('Reportes_IncomingController.index_rep08', compact('user', 'actividades', 'ultimo', 'anoActual'));
+        } else {
+            return redirect()->route('auth/login');
+        }
+    }
+
+    /**
+     * AJAX: Buscar Top 3 Defectivos por área y mes (REP-08)
+     * Basado en macro VMA_R147_B
+     */
+    public function buscarTopDefectivos(Request $request)
+    {
+        try {
+            $nCiclo = $request->input('ano', date('Y'));
+
+            // Obtener fechas del calendario de cierre para el año
+            $fechas = DB::connection('siz')->select("
+                SELECT Cast(SCC.FEC_INI as date) as FEC_INI
+                FROM Siz_Calendario_Cierre SCC 
+                WHERE SCC.PERIODO = ? + '-01'
+            ", [$nCiclo]);
+            
+            if (empty($fechas)) {
+                return response()->json([
+                    'success' => false,
+                    'msg' => 'No se encontró calendario de cierre para el año ' . $nCiclo
+                ]);
+            }
+            
+            $fechaIS = $fechas[0]->FEC_INI;
+            
+            $fechasFin = DB::connection('siz')->select("
+                SELECT Cast(SCC.FEC_FIN as date) as FEC_FIN
+                FROM Siz_Calendario_Cierre SCC 
+                WHERE SCC.PERIODO = ? + '-12'
+            ", [$nCiclo]);
+            
+            $fechaFS = $fechasFin[0]->FEC_FIN ?? $fechaIS;
+
+            // Obtener meses del calendario
+            $mesesCal = DB::connection('siz')->select("
+                SELECT SCC.MES, SCC.NOM_CTO AS NOMBMES, Cast(SCC.FEC_INI as date) as FEC_INI, Cast(SCC.FEC_FIN as date) as FEC_FIN
+                FROM Siz_Calendario_Cierre SCC 
+                WHERE SCC.CICLO = ? 
+                ORDER BY SCC.MES
+            ", [$nCiclo]);
+
+            // Definir áreas con sus rangos de código
+            $areasConfig = [
+                'CORTE' => ['ini' => 109, 'fin' => 118],
+                'COSTURA' => ['ini' => 121, 'fin' => 139],
+                'COJINERIA' => ['ini' => 140, 'fin' => 146],
+                'TAPICERIA' => ['ini' => 148, 'fin' => 175],
+                'CARPINTERIA' => ['ini' => 403, 'fin' => 418],
+            ];
+
+            $resultado = [];
+
+            // Para cada mes
+            foreach ($mesesCal as $mesCal) {
+                $mesKey = $mesCal->MES;
+                $mesNombre = $mesCal->NOMBMES;
+                $fechaIniMes = $mesCal->FEC_INI;
+                $fechaFinMes = $mesCal->FEC_FIN;
+
+                $resultado[$mesKey] = [
+                    'nombre' => $mesNombre,
+                    'areas' => []
+                ];
+
+                // Para cada área
+                foreach ($areasConfig as $areaNombre => $areaRango) {
+                    // Consulta Top 3 defectivos por área y mes
+                    $top3 = DB::connection('siz')->select("
+                        Select TOP(3) 
+                            TP3.AREA AS AREA, 
+                            TP3.DEFECTIVO AS DEFECTIVO, 
+                            SUM(TP3.RECHAZOS) AS CONTEO 
+                        From (
+                            Select 
+                                ? AS AREA, 
+                                SIP.IPR_docEntry AS OP, 
+                                Cast(IPD.IPD_chkId as varchar) + ' ' + SCL.CHK_descripcion AS DEFECTIVO, 
+                                SUM(IPR_cantInspeccionada) AS RECHAZOS 
+                            From Siz_InspeccionProcesoDetalle IPD 
+                            Inner Join Siz_InspeccionProceso SIP on SIP.IPR_id = IPD.IPD_iprId 
+                            Inner Join Siz_Checklist SCL on SCL.CHK_id = IPD.IPD_chkId 
+                            Inner Join [@PL_RUTAS] PROCES on SCL.CHK_area_inspeccionada = PROCES.Code 
+                            Where Cast(SIP.IPR_fechaInspeccion as date) between ? and ? 
+                                and IPD.IPD_estado = 'N' 
+                                and IPD.IPD_borrado = 'N' 
+                                and PROCES.Code between ? and ? 
+                            Group By SIP.IPR_docEntry, IPD.IPD_chkId, SCL.CHK_descripcion
+                        ) TP3 
+                        Group By TP3.AREA, TP3.DEFECTIVO 
+                        Order By CONTEO DESC
+                    ", [$areaNombre, $fechaIniMes, $fechaFinMes, $areaRango['ini'], $areaRango['fin']]);
+
+                    $resultado[$mesKey]['areas'][$areaNombre] = [];
+                    foreach ($top3 as $defecto) {
+                        $resultado[$mesKey]['areas'][$areaNombre][] = [
+                            'defectivo' => $defecto->DEFECTIVO,
+                            'conteo' => (int)$defecto->CONTEO
+                        ];
+                    }
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'ano' => $nCiclo,
+                'fechaIS' => $fechaIS,
+                'fechaFS' => $fechaFS,
+                'datos' => $resultado
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'msg' => 'Error al obtener los datos: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * PDF REP-08 Top 3 Defectivos
+     */
+    public function generarPdfRep08(Request $request)
+    {
+        try {
+            $nCiclo = $request->input('ano', date('Y'));
+
+            // Obtener fechas del calendario de cierre
+            $fechas = DB::connection('siz')->select("
+                SELECT Cast(SCC.FEC_INI as date) as FEC_INI
+                FROM Siz_Calendario_Cierre SCC 
+                WHERE SCC.PERIODO = ? + '-01'
+            ", [$nCiclo]);
+            
+            if (empty($fechas)) {
+                abort(404, 'No se encontró calendario de cierre para el año ' . $nCiclo);
+            }
+            
+            $fechaIS = $fechas[0]->FEC_INI;
+            
+            $fechasFin = DB::connection('siz')->select("
+                SELECT Cast(SCC.FEC_FIN as date) as FEC_FIN
+                FROM Siz_Calendario_Cierre SCC 
+                WHERE SCC.PERIODO = ? + '-12'
+            ", [$nCiclo]);
+            
+            $fechaFS = $fechasFin[0]->FEC_FIN ?? $fechaIS;
+
+            // Obtener meses del calendario
+            $mesesCal = DB::connection('siz')->select("
+                SELECT SCC.MES, SCC.NOM_CTO AS NOMBMES, Cast(SCC.FEC_INI as date) as FEC_INI, Cast(SCC.FEC_FIN as date) as FEC_FIN
+                FROM Siz_Calendario_Cierre SCC 
+                WHERE SCC.CICLO = ? 
+                ORDER BY SCC.MES
+            ", [$nCiclo]);
+
+            $areasConfig = [
+                'CORTE' => ['ini' => 109, 'fin' => 118],
+                'COSTURA' => ['ini' => 121, 'fin' => 139],
+                'COJINERIA' => ['ini' => 140, 'fin' => 146],
+                'TAPICERIA' => ['ini' => 148, 'fin' => 175],
+                'CARPINTERIA' => ['ini' => 403, 'fin' => 418],
+            ];
+
+            $resultado = [];
+
+            foreach ($mesesCal as $mesCal) {
+                $mesKey = $mesCal->MES;
+                $mesNombre = $mesCal->NOMBMES;
+                $fechaIniMes = $mesCal->FEC_INI;
+                $fechaFinMes = $mesCal->FEC_FIN;
+
+                $resultado[$mesKey] = [
+                    'nombre' => $mesNombre,
+                    'areas' => []
+                ];
+
+                foreach ($areasConfig as $areaNombre => $areaRango) {
+                    $top3 = DB::connection('siz')->select("
+                        Select TOP(3) 
+                            TP3.AREA AS AREA, 
+                            TP3.DEFECTIVO AS DEFECTIVO, 
+                            SUM(TP3.RECHAZOS) AS CONTEO 
+                        From (
+                            Select 
+                                ? AS AREA, 
+                                SIP.IPR_docEntry AS OP, 
+                                Cast(IPD.IPD_chkId as varchar) + ' ' + SCL.CHK_descripcion AS DEFECTIVO, 
+                                SUM(IPR_cantInspeccionada) AS RECHAZOS 
+                            From Siz_InspeccionProcesoDetalle IPD 
+                            Inner Join Siz_InspeccionProceso SIP on SIP.IPR_id = IPD.IPD_iprId 
+                            Inner Join Siz_Checklist SCL on SCL.CHK_id = IPD.IPD_chkId 
+                            Inner Join [@PL_RUTAS] PROCES on SCL.CHK_area_inspeccionada = PROCES.Code 
+                            Where Cast(SIP.IPR_fechaInspeccion as date) between ? and ? 
+                                and IPD.IPD_estado = 'N' 
+                                and IPD.IPD_borrado = 'N' 
+                                and PROCES.Code between ? and ? 
+                            Group By SIP.IPR_docEntry, IPD.IPD_chkId, SCL.CHK_descripcion
+                        ) TP3 
+                        Group By TP3.AREA, TP3.DEFECTIVO 
+                        Order By CONTEO DESC
+                    ", [$areaNombre, $fechaIniMes, $fechaFinMes, $areaRango['ini'], $areaRango['fin']]);
+
+                    $resultado[$mesKey]['areas'][$areaNombre] = [];
+                    foreach ($top3 as $defecto) {
+                        $resultado[$mesKey]['areas'][$areaNombre][] = [
+                            'defectivo' => $defecto->DEFECTIVO,
+                            'conteo' => (int)$defecto->CONTEO
+                        ];
+                    }
+                }
+            }
+
+            $ano = $nCiclo;
+            $datos = $resultado;
+
+            $fechaImpresion = date("d-m-Y H:i:s");
+            $headerHtml = view()->make(
+                'Reportes_IncomingController.pdfheader_rep08',
+                [
+                    'titulo' => 'REP-08 INSPECCIÓN TOP 3 DEFECTOS',
+                    'fechaImpresion' => 'Fecha de Impresión: ' . $fechaImpresion,
+                    'ano' => $ano,
+                    'fechaIS' => $fechaIS,
+                    'fechaFS' => $fechaFS,
+                ]
+            )->render();
+
+            $pdf = \SPDF::loadView('Reportes_IncomingController.pdf_rep08', compact(
+                'ano',
+                'fechaIS',
+                'fechaFS',
+                'datos'
+            ));
+
+            $pdf->setOption('header-html', $headerHtml);
+            $pdf->setOption('footer-center', 'Pagina [page] de [toPage]');
+            $pdf->setOption('footer-left', 'SIZ');
+            $pdf->setOption('orientation', 'Landscape');
+            $pdf->setOption('margin-top', '40mm');
+            $pdf->setOption('margin-left', '5mm');
+            $pdf->setOption('margin-right', '5mm');
+            $pdf->setOption('page-size', 'Letter');
+
+            return $pdf->inline('REP-08_Top3_Defectivos_' . $nCiclo . '.pdf');
+        } catch (\Exception $e) {
+            abort(500, 'Error al generar el PDF: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * AJAX: Buscar datos de confiabilidad de proveedores
      */
     public function buscarConfiabilidadProveedores(Request $request)
@@ -1253,6 +1899,539 @@ class Reportes_IncomingController extends Controller
         }
     }
     
+    // ============================================================
+    // REP-09 RESUMEN DE INCENTIVOS
+    // ============================================================
+    
+    /**
+     * Vista principal del reporte REP-09
+     */
+    public function index_rep09()
+    {
+        if (Auth::check()) {
+            $user = Auth::user();
+            $actividades = $user->getTareas();
+            $ultimo = count($actividades);
+
+            $mesActual = date('m');
+            $anoActual = date('Y');
+
+            return view('Reportes_IncomingController.index_rep09', compact('user', 'actividades', 'ultimo', 'mesActual', 'anoActual'));
+        } else {
+            return redirect('/');
+        }
+    }
+
+    /**
+     * AJAX: Buscar datos de resumen de incentivos por mes
+     */
+    public function buscarResumenIncentivos(Request $request)
+    {
+        try {
+            $ano = $request->input('ano', date('Y'));
+            $mes = intval($request->input('mes', date('m')));
+
+            $periodo = $ano . '-' . str_pad($mes, 2, '0', STR_PAD_LEFT);
+
+            // Obtener info del calendario de cierre para el mes
+            $calInfo = DB::connection('siz')->select("
+                SELECT FEC_INI, FEC_FIN, NOM_MES, SEMXMES
+                FROM Siz_Calendario_Cierre 
+                WHERE PERIODO = ?
+            ", [$periodo]);
+
+            if (empty($calInfo)) {
+                return response()->json([
+                    'success' => false,
+                    'msg' => 'No se encontró información del calendario para el período ' . $periodo
+                ]);
+            }
+
+            $cal = $calInfo[0];
+            $fechaIS = date('Y-m-d', strtotime($cal->FEC_INI));
+            $fechaFS = date('Y-m-d', strtotime($cal->FEC_FIN));
+            $mesNombre = $cal->NOM_MES;
+
+            // Calcular las semanas ISO reales que abarca el mes
+            $semIniISO = intval(date('W', strtotime($fechaIS)));
+            $semFinISO = intval(date('W', strtotime($fechaFS)));
+            // Manejar caso de fin de año donde semana 1 puede ser menor que semana 52
+            if ($semFinISO < $semIniISO) {
+                // Ej: del 29 dic (sem 52) al 31 ene (sem 5) → generar array [52,1,2,3,4,5]
+                $semanasISO = [];
+                for ($w = $semIniISO; $w <= 53; $w++) { $semanasISO[] = $w; }
+                for ($w = 1; $w <= $semFinISO; $w++) { $semanasISO[] = $w; }
+            } else {
+                $semanasISO = range($semIniISO, $semFinISO);
+            }
+            $nSemanas = count($semanasISO);
+
+            // Obtener u_cuota (meta) por área desde PL_RUTAS
+            // u_cuota es varchar con valores enteros (ej: 6, 7, 8) que representan el % máximo de defectivos
+            $metasDefault = [
+                'CORTE' => 7,
+                'COSTURA' => 7,
+                'COJINERIA' => 6,
+                'TAPICERIA' => 8
+            ];
+
+            try {
+                $metasDB = DB::connection('siz')->select("
+                    SELECT 
+                        CASE 
+                            WHEN Code between 109 and 118 then 'CORTE'
+                            WHEN Code between 121 and 139 then 'COSTURA'
+                            WHEN Code between 140 and 146 then 'COJINERIA'
+                            WHEN Code between 148 and 169 then 'TAPICERIA'
+                        END AS AREA,
+                        MAX(CAST(ISNULL(U_Cuota, '0') as int)) AS META
+                    FROM [@PL_RUTAS]
+                    WHERE (Code between 109 and 169)
+                    GROUP BY 
+                        CASE 
+                            WHEN Code between 109 and 118 then 'CORTE'
+                            WHEN Code between 121 and 139 then 'COSTURA'
+                            WHEN Code between 140 and 146 then 'COJINERIA'
+                            WHEN Code between 148 and 169 then 'TAPICERIA'
+                        END
+                    HAVING 
+                        CASE 
+                            WHEN Code between 109 and 118 then 'CORTE'
+                            WHEN Code between 121 and 139 then 'COSTURA'
+                            WHEN Code between 140 and 146 then 'COJINERIA'
+                            WHEN Code between 148 and 169 then 'TAPICERIA'
+                        END IS NOT NULL
+                ");
+                foreach ($metasDB as $m) {
+                    if (isset($m->AREA) && $m->META > 0) {
+                        $metasDefault[$m->AREA] = intval($m->META);
+                    }
+                }
+            } catch (\Exception $e) {
+                // Usar defaults si falla la consulta de u_cuota
+            }
+
+            // Consulta principal basada en VMA_R147_E
+            // SEMANA = número ISO real del año, se filtra empleados con código NULL
+            $datos = DB::connection('siz')->select("
+                SELECT 
+                    BAS.AREA,
+                    BAS.NUM_NOM,
+                    BAS.NOMBRE,
+                    BAS.OPERA,
+                    BAS.BONO,
+                    BAS.SEMANA,
+                    SUM(BAS.PRO_UNID) AS PRO_UNID,
+                    SUM(BAS.REC_UNID) AS REC_UNID
+                FROM (
+                    SELECT 
+                        CASE 
+                            WHEN SCL.CHK_area_inspeccionada between 109 and 118 then 'CORTE'
+                            WHEN SCL.CHK_area_inspeccionada between 121 and 139 then 'COSTURA'
+                            WHEN SCL.CHK_area_inspeccionada between 140 and 146 then 'COJINERIA'
+                            WHEN SCL.CHK_area_inspeccionada between 148 and 169 then 'TAPICERIA'
+                            else 'NO DEFINIDA'
+                        END AS AREA,
+                        OHEM.U_EmpGiro AS NUM_NOM,
+                        OHEM.firstName + ' ' + OHEM.lastName AS NOMBRE,
+                        OHEM.jobTitle AS OPERA,
+                        ISNULL(OHEM.Pager, '') AS BONO,
+                        DATEPART(ISO_WEEK, SIP.IPR_fechaInspeccion) AS SEMANA,
+                        0 AS PRO_UNID,
+                        SIP.IPR_cantInspeccionada AS REC_UNID
+                    FROM Siz_InspeccionProceso SIP
+                    INNER JOIN Siz_InspeccionProcesoDetalle IPD on SIP.IPR_id = IPD.IPD_iprId
+                    INNER JOIN Siz_Checklist SCL on SCL.CHK_id = IPD.IPD_chkId
+                    INNER JOIN OHEM on IPD.IPD_empID = OHEM.empID
+                    WHERE CAST(SIP.IPR_fechaInspeccion as date) between ? and ?
+                        and IPD.IPD_estado = 'N' and IPD.IPD_borrado = 'N'
+                        and OHEM.U_EmpGiro IS NOT NULL
+
+                    UNION ALL
+
+                    SELECT 
+                        CASE 
+                            WHEN CP.U_CT between 109 and 118 then 'CORTE'
+                            WHEN CP.U_CT between 121 and 139 then 'COSTURA'
+                            WHEN CP.U_CT between 140 and 146 then 'COJINERIA'
+                            WHEN CP.U_CT between 148 and 169 then 'TAPICERIA'
+                            else 'NO DEFINIDA'
+                        END AS AREA,
+                        OHEM.U_EmpGiro AS NUM_NOM,
+                        OHEM.firstName + ' ' + OHEM.lastName AS NOMBRE,
+                        OHEM.jobTitle AS OPERA,
+                        ISNULL(OHEM.Pager, '') AS BONO,
+                        DATEPART(ISO_WEEK, CP.U_FechaHora) AS SEMANA,
+                        CP.U_Cantidad AS PRO_UNID,
+                        0 AS REC_UNID
+                    FROM [@CP_LOGOF] CP
+                    INNER JOIN OWOR on OWOR.DocEntry = CP.U_DocEntry
+                    INNER JOIN OHEM on CP.U_idEmpleado = OHEM.empID
+                    WHERE CAST(CP.U_FechaHora as date) between ? and ?
+                        and OHEM.U_EmpGiro IS NOT NULL
+                ) BAS
+                WHERE BAS.AREA <> 'NO DEFINIDA'
+                GROUP BY BAS.AREA, BAS.NUM_NOM, BAS.NOMBRE, BAS.OPERA, BAS.BONO, BAS.SEMANA
+                ORDER BY BAS.AREA, BAS.NOMBRE, BAS.SEMANA
+            ", [$fechaIS, $fechaFS, $fechaIS, $fechaFS]);
+
+            // Estructurar datos por estación (área)
+            $areasOrden = ['CORTE', 'COSTURA', 'COJINERIA', 'TAPICERIA'];
+            $estaciones = [];
+
+            foreach ($areasOrden as $areaNombre) {
+                $meta = isset($metasDefault[$areaNombre]) ? $metasDefault[$areaNombre] : 7;
+                $estaciones[$areaNombre] = [
+                    'nombre' => $areaNombre,
+                    'meta' => $meta,
+                    'metaPct' => $meta . '%',
+                    'empleados' => []
+                ];
+            }
+
+            // Procesar resultados — usar semanas ISO reales
+            foreach ($datos as $row) {
+                $areaNombre = $row->AREA;
+                if (!isset($estaciones[$areaNombre])) continue;
+
+                $empKey = $row->NUM_NOM . '_' . $row->NOMBRE;
+
+                if (!isset($estaciones[$areaNombre]['empleados'][$empKey])) {
+                    $estaciones[$areaNombre]['empleados'][$empKey] = [
+                        'num_nom' => $row->NUM_NOM,
+                        'nombre' => $row->NOMBRE ?: 'SIN NOMBRE',
+                        'opera' => $row->OPERA ?: '-',
+                        'bono' => $row->BONO ?: '',
+                        'semanas_data' => []
+                    ];
+                }
+
+                // Usar la semana ISO directa como clave
+                $semISO = intval($row->SEMANA);
+                if (in_array($semISO, $semanasISO)) {
+                    if (!isset($estaciones[$areaNombre]['empleados'][$empKey]['semanas_data'][$semISO])) {
+                        $estaciones[$areaNombre]['empleados'][$empKey]['semanas_data'][$semISO] = [
+                            'producido' => 0,
+                            'rechazado' => 0
+                        ];
+                    }
+                    $estaciones[$areaNombre]['empleados'][$empKey]['semanas_data'][$semISO]['producido'] += floatval($row->PRO_UNID);
+                    $estaciones[$areaNombre]['empleados'][$empKey]['semanas_data'][$semISO]['rechazado'] += floatval($row->REC_UNID);
+                }
+            }
+
+            // Calcular porcentajes y convertir a arrays indexados por semana ISO
+            foreach ($estaciones as &$estacion) {
+                $empArray = [];
+                foreach ($estacion['empleados'] as $emp) {
+                    $semanasResult = [];
+                    foreach ($semanasISO as $semISO) {
+                        if (isset($emp['semanas_data'][$semISO])) {
+                            $prod = $emp['semanas_data'][$semISO]['producido'];
+                            $rech = $emp['semanas_data'][$semISO]['rechazado'];
+                            if ($prod > 0 && $rech > 0) {
+                                $pct = round(($rech / $prod) * 100, 2);
+                            } elseif ($rech > 0 && $prod == 0) {
+                                $pct = 100;
+                            } else {
+                                $pct = 0;
+                            }
+                            $semanasResult[] = $pct;
+                        } else {
+                            $semanasResult[] = null;
+                        }
+                    }
+                    unset($emp['semanas_data']);
+                    $emp['semanas'] = $semanasResult;
+                    $empArray[] = $emp;
+                }
+
+                // Ordenar por nombre del empleado
+                usort($empArray, function ($a, $b) {
+                    return strcmp($a['nombre'], $b['nombre']);
+                });
+
+                $estacion['empleados'] = $empArray;
+            }
+
+            return response()->json([
+                'success' => true,
+                'estaciones' => $estaciones,
+                'mesNombre' => $mesNombre,
+                'nSemanas' => $nSemanas,
+                'semanasISO' => $semanasISO,
+                'fechaIS' => date('d/m/Y', strtotime($fechaIS)),
+                'fechaFS' => date('d/m/Y', strtotime($fechaFS)),
+                'ano' => $ano,
+                'mes' => $mes
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'msg' => 'Error al buscar datos: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Generar PDF del reporte REP-09
+     */
+    public function generarPdfRep09(Request $request)
+    {
+        set_time_limit(300);
+        ini_set('max_execution_time', 300);
+        ini_set('memory_limit', '1024M');
+
+        try {
+            $ano = $request->input('ano', date('Y'));
+            $mes = intval($request->input('mes', date('m')));
+
+            $periodo = $ano . '-' . str_pad($mes, 2, '0', STR_PAD_LEFT);
+
+            $calInfo = DB::connection('siz')->select("
+                SELECT FEC_INI, FEC_FIN, NOM_MES, SEMXMES
+                FROM Siz_Calendario_Cierre 
+                WHERE PERIODO = ?
+            ", [$periodo]);
+
+            if (empty($calInfo)) {
+                abort(404, 'No se encontró calendario para el período ' . $periodo);
+            }
+
+            $cal = $calInfo[0];
+            $fechaIS = date('Y-m-d', strtotime($cal->FEC_INI));
+            $fechaFS = date('Y-m-d', strtotime($cal->FEC_FIN));
+            $mesNombre = $cal->NOM_MES;
+
+            // Calcular semanas ISO reales
+            $semIniISO = intval(date('W', strtotime($fechaIS)));
+            $semFinISO = intval(date('W', strtotime($fechaFS)));
+            if ($semFinISO < $semIniISO) {
+                $semanasISO = [];
+                for ($w = $semIniISO; $w <= 53; $w++) { $semanasISO[] = $w; }
+                for ($w = 1; $w <= $semFinISO; $w++) { $semanasISO[] = $w; }
+            } else {
+                $semanasISO = range($semIniISO, $semFinISO);
+            }
+            $nSemanas = count($semanasISO);
+
+            // Obtener metas - u_cuota es varchar con enteros (ej: 6, 7, 8) = % máximo
+            $metasDefault = [
+                'CORTE' => 7,
+                'COSTURA' => 7,
+                'COJINERIA' => 6,
+                'TAPICERIA' => 8
+            ];
+
+            try {
+                $metasDB = DB::connection('siz')->select("
+                    SELECT 
+                        CASE 
+                            WHEN Code between 109 and 118 then 'CORTE'
+                            WHEN Code between 121 and 139 then 'COSTURA'
+                            WHEN Code between 140 and 146 then 'COJINERIA'
+                            WHEN Code between 148 and 169 then 'TAPICERIA'
+                        END AS AREA,
+                        MAX(CAST(ISNULL(U_Cuota, '0') as int)) AS META
+                    FROM [@PL_RUTAS]
+                    WHERE (Code between 109 and 169)
+                    GROUP BY 
+                        CASE 
+                            WHEN Code between 109 and 118 then 'CORTE'
+                            WHEN Code between 121 and 139 then 'COSTURA'
+                            WHEN Code between 140 and 146 then 'COJINERIA'
+                            WHEN Code between 148 and 169 then 'TAPICERIA'
+                        END
+                    HAVING 
+                        CASE 
+                            WHEN Code between 109 and 118 then 'CORTE'
+                            WHEN Code between 121 and 139 then 'COSTURA'
+                            WHEN Code between 140 and 146 then 'COJINERIA'
+                            WHEN Code between 148 and 169 then 'TAPICERIA'
+                        END IS NOT NULL
+                ");
+                foreach ($metasDB as $m) {
+                    if (isset($m->AREA) && $m->META > 0) {
+                        $metasDefault[$m->AREA] = intval($m->META);
+                    }
+                }
+            } catch (\Exception $e) {
+                // Usar defaults
+            }
+
+            // Misma consulta que buscarResumenIncentivos — semana ISO real, sin empleados con código NULL
+            $datos = DB::connection('siz')->select("
+                SELECT 
+                    BAS.AREA,
+                    BAS.NUM_NOM,
+                    BAS.NOMBRE,
+                    BAS.OPERA,
+                    BAS.BONO,
+                    BAS.SEMANA,
+                    SUM(BAS.PRO_UNID) AS PRO_UNID,
+                    SUM(BAS.REC_UNID) AS REC_UNID
+                FROM (
+                    SELECT 
+                        CASE 
+                            WHEN SCL.CHK_area_inspeccionada between 109 and 118 then 'CORTE'
+                            WHEN SCL.CHK_area_inspeccionada between 121 and 139 then 'COSTURA'
+                            WHEN SCL.CHK_area_inspeccionada between 140 and 146 then 'COJINERIA'
+                            WHEN SCL.CHK_area_inspeccionada between 148 and 169 then 'TAPICERIA'
+                            else 'NO DEFINIDA'
+                        END AS AREA,
+                        OHEM.U_EmpGiro AS NUM_NOM,
+                        OHEM.firstName + ' ' + OHEM.lastName AS NOMBRE,
+                        OHEM.jobTitle AS OPERA,
+                        ISNULL(OHEM.Pager, '') AS BONO,
+                        DATEPART(ISO_WEEK, SIP.IPR_fechaInspeccion) AS SEMANA,
+                        0 AS PRO_UNID,
+                        SIP.IPR_cantInspeccionada AS REC_UNID
+                    FROM Siz_InspeccionProceso SIP
+                    INNER JOIN Siz_InspeccionProcesoDetalle IPD on SIP.IPR_id = IPD.IPD_iprId
+                    INNER JOIN Siz_Checklist SCL on SCL.CHK_id = IPD.IPD_chkId
+                    INNER JOIN OHEM on IPD.IPD_empID = OHEM.empID
+                    WHERE CAST(SIP.IPR_fechaInspeccion as date) between ? and ?
+                        and IPD.IPD_estado = 'N' and IPD.IPD_borrado = 'N'
+                        and OHEM.U_EmpGiro IS NOT NULL
+
+                    UNION ALL
+
+                    SELECT 
+                        CASE 
+                            WHEN CP.U_CT between 109 and 118 then 'CORTE'
+                            WHEN CP.U_CT between 121 and 139 then 'COSTURA'
+                            WHEN CP.U_CT between 140 and 146 then 'COJINERIA'
+                            WHEN CP.U_CT between 148 and 169 then 'TAPICERIA'
+                            else 'NO DEFINIDA'
+                        END AS AREA,
+                        OHEM.U_EmpGiro AS NUM_NOM,
+                        OHEM.firstName + ' ' + OHEM.lastName AS NOMBRE,
+                        OHEM.jobTitle AS OPERA,
+                        ISNULL(OHEM.Pager, '') AS BONO,
+                        DATEPART(ISO_WEEK, CP.U_FechaHora) AS SEMANA,
+                        CP.U_Cantidad AS PRO_UNID,
+                        0 AS REC_UNID
+                    FROM [@CP_LOGOF] CP
+                    INNER JOIN OWOR on OWOR.DocEntry = CP.U_DocEntry
+                    INNER JOIN OHEM on CP.U_idEmpleado = OHEM.empID
+                    WHERE CAST(CP.U_FechaHora as date) between ? and ?
+                        and OHEM.U_EmpGiro IS NOT NULL
+                ) BAS
+                WHERE BAS.AREA <> 'NO DEFINIDA'
+                GROUP BY BAS.AREA, BAS.NUM_NOM, BAS.NOMBRE, BAS.OPERA, BAS.BONO, BAS.SEMANA
+                ORDER BY BAS.AREA, BAS.NOMBRE, BAS.SEMANA
+            ", [$fechaIS, $fechaFS, $fechaIS, $fechaFS]);
+
+            // Procesar datos (misma lógica que buscarResumenIncentivos)
+            $areasOrden = ['CORTE', 'COSTURA', 'COJINERIA', 'TAPICERIA'];
+            $estaciones = [];
+
+            foreach ($areasOrden as $areaNombre) {
+                $meta = isset($metasDefault[$areaNombre]) ? $metasDefault[$areaNombre] : 7;
+                $estaciones[$areaNombre] = [
+                    'nombre' => $areaNombre,
+                    'meta' => $meta,
+                    'metaPct' => $meta,
+                    'empleados' => []
+                ];
+            }
+
+            foreach ($datos as $row) {
+                $areaNombre = $row->AREA;
+                if (!isset($estaciones[$areaNombre])) continue;
+
+                $empKey = $row->NUM_NOM . '_' . $row->NOMBRE;
+
+                if (!isset($estaciones[$areaNombre]['empleados'][$empKey])) {
+                    $estaciones[$areaNombre]['empleados'][$empKey] = [
+                        'num_nom' => $row->NUM_NOM,
+                        'nombre' => $row->NOMBRE ?: 'SIN NOMBRE',
+                        'opera' => $row->OPERA ?: '-',
+                        'bono' => $row->BONO ?: '',
+                        'semanas_data' => []
+                    ];
+                }
+
+                $semISO = intval($row->SEMANA);
+                if (in_array($semISO, $semanasISO)) {
+                    if (!isset($estaciones[$areaNombre]['empleados'][$empKey]['semanas_data'][$semISO])) {
+                        $estaciones[$areaNombre]['empleados'][$empKey]['semanas_data'][$semISO] = [
+                            'producido' => 0,
+                            'rechazado' => 0
+                        ];
+                    }
+                    $estaciones[$areaNombre]['empleados'][$empKey]['semanas_data'][$semISO]['producido'] += floatval($row->PRO_UNID);
+                    $estaciones[$areaNombre]['empleados'][$empKey]['semanas_data'][$semISO]['rechazado'] += floatval($row->REC_UNID);
+                }
+            }
+
+            foreach ($estaciones as &$estacion) {
+                $empArray = [];
+                foreach ($estacion['empleados'] as $emp) {
+                    $semanasResult = [];
+                    foreach ($semanasISO as $semISO) {
+                        if (isset($emp['semanas_data'][$semISO])) {
+                            $prod = $emp['semanas_data'][$semISO]['producido'];
+                            $rech = $emp['semanas_data'][$semISO]['rechazado'];
+                            if ($prod > 0 && $rech > 0) {
+                                $pct = round(($rech / $prod) * 100, 2);
+                            } elseif ($rech > 0 && $prod == 0) {
+                                $pct = 100;
+                            } else {
+                                $pct = 0;
+                            }
+                            $semanasResult[$semISO] = $pct;
+                        } else {
+                            $semanasResult[$semISO] = null;
+                        }
+                    }
+                    unset($emp['semanas_data']);
+                    $emp['semanas'] = $semanasResult;
+                    $empArray[] = $emp;
+                }
+
+                usort($empArray, function ($a, $b) {
+                    return strcmp($a['nombre'], $b['nombre']);
+                });
+
+                $estacion['empleados'] = $empArray;
+            }
+
+            $headerHtml = view()->make('Reportes_IncomingController.pdfheader_rep09', [
+                'mesNombre' => $mesNombre,
+                'ano' => $ano,
+                'fechaIS' => date('d/m/Y', strtotime($fechaIS)),
+                'fechaFS' => date('d/m/Y', strtotime($fechaFS)),
+            ])->render();
+
+            $data = [
+                'estaciones' => $estaciones,
+                'mesNombre' => $mesNombre,
+                'ano' => $ano,
+                'nSemanas' => $nSemanas,
+                'semanasISO' => $semanasISO,
+                'fechaIS' => date('d/m/Y', strtotime($fechaIS)),
+                'fechaFS' => date('d/m/Y', strtotime($fechaFS)),
+            ];
+
+            $pdf = \SPDF::loadView('Reportes_IncomingController.pdf_rep09', $data);
+            $pdf->setOption('header-html', $headerHtml);
+            $pdf->setOption('footer-center', 'Pagina [page] de [toPage]');
+            $pdf->setOption('footer-left', 'SIZ');
+            $pdf->setOption('margin-top', '40mm');
+            $pdf->setOption('margin-left', '5mm');
+            $pdf->setOption('margin-right', '5mm');
+            $pdf->setOption('page-size', 'Letter');
+            $pdf->setOption('orientation', 'Landscape');
+
+            return $pdf->inline('REP09_Resumen_Incentivos_' . $mesNombre . '_' . $ano . '.pdf');
+
+        } catch (\Exception $e) {
+            abort(500, 'Error al generar el PDF: ' . $e->getMessage());
+        }
+    }
+
     /**
      * Generar PDF del reporte R-140 en orientación horizontal
      */
