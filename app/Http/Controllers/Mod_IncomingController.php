@@ -10,6 +10,7 @@ use App\Modelos\Siz_IncomDetalle;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\User;
 
 class Mod_IncomingController extends Controller
 {
@@ -1049,6 +1050,38 @@ class Mod_IncomingController extends Controller
             }
         } else {
             return response()->json(['status' => 'error', 'message' => "El archivo '$name' no existe."], 404);
+        }
+    }
+
+    /**
+     * API móvil: materiales de una nota de entrada (misma lógica que buscarMateriales)
+     */
+    public function apiEntradaMaterial($id)
+    {
+        $request = new Request(['numero_entrada' => $id]);
+        return $this->buscarMateriales($request);
+    }
+
+    /**
+     * API móvil: guardar inspección autenticando por emp_id
+     */
+    public function apiGuardarInspeccion(Request $request)
+    {
+        $empId = $request->input('emp_id');
+        if (empty($empId)) {
+            return response()->json(['success' => false, 'msg' => 'emp_id requerido'], 401);
+        }
+
+        $usuario = User::where('U_EmpGiro', $empId)->first();
+        if (!$usuario) {
+            return response()->json(['success' => false, 'msg' => 'Usuario no encontrado'], 401);
+        }
+
+        Auth::login($usuario);
+        try {
+            return $this->guardarInspeccion($request);
+        } finally {
+            Auth::logout();
         }
     }
     

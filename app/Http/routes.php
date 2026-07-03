@@ -23,27 +23,10 @@ use Illuminate\Support\Facades\Mail;
 use App\Modelos\MOD01\MODULOS_GRUPO_SIZ;
 use App\Http\Controllers\ImageController;
 
-Route::get('api/entrada_material_inspeccion/{id}', function () {
-	return response()->json([
-		[
-			"PROVEEDOR" => "P2204 AIRDO OPERADORA DE PRODUCTOS",
-			"DESCRIPCION" => "10250 CONTACTEL DE  50 MM. FELPA  COLOR NEGRO.",
-			"UDM" => "MTS",
-			"CANTIDAD" => number_format(800.000000, 2),
-			"X_PAQ" => number_format(1.000000, 2),
-			"FECHA_OC" => "2025-07-01T00:00:00"
-		],
-		[
-			"PROVEEDOR" => "P2204 AIRDO OPERADORA DE PRODUCTOS",
-			"DESCRIPCION" => "10251 CONTACTEL DE  50 MM. GANCHO COLOR NEGRO.",
-			"UDM" => "MTS",
-			"CANTIDAD" => number_format(500.000000, 2),
-			"X_PAQ" => number_format(1.000000, 2),
-			"FECHA_OC" => "2025-07-01T00:00:00"
-		]
-	]);
-	
-})->name('entrada_material_inspeccion')->middleware('guest');;
+Route::get('api/entrada_material_inspeccion/{id}', 'Mod_IncomingController@apiEntradaMaterial')
+	->name('entrada_material_inspeccion')->middleware('guest');
+Route::get('api/incoming/checklist', 'Mod_IncomingController@getChecklist')->middleware('guest');
+Route::post('api/incoming/guardar', 'Mod_IncomingController@apiGuardarInspeccion')->middleware('guest');
 Route::any('api/auth-login', function () {
 	$empID = Input::get('empID');
 	$pass = Input::get('password');
