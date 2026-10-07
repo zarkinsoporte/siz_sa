@@ -1206,9 +1206,7 @@ public function actualizaMRP(){
         sort($numerickeys);
         //agregar columnas...  hasta 2099 usar 20, para 2100 a 2199 usar 21...
         $string_comienzo_anio = '20';
-
-			
-// Obtenemos solo las columnas numericas Agregado 01/10/2026 por Erika Silva
+        // Obtenemos solo las columnas numericas Agregado 01/10/2026 por Erika Silv
             $numerickeys = array_where(array_keys((array)$consulta[0]), function ($key, $value) {
                 return is_numeric($value);
             });
