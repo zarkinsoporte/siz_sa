@@ -1206,17 +1206,78 @@ public function actualizaMRP(){
         sort($numerickeys);
         //agregar columnas...  hasta 2099 usar 20, para 2100 a 2199 usar 21...
         $string_comienzo_anio = '20';
-        foreach ($numerickeys as $value) {
-            //averiguamos cuando inicia la semana
-            $num_semana = substr($value, 2, 2);
-            $year = $string_comienzo_anio. substr($value, 0, 2);
-            $StartAndEnd=\AppHelper::instance()->getStartAndEndWeek($num_semana, $year);
-            
-            //preparamos el nombre
-            $name = 'Sem-'.$num_semana.' '.$StartAndEnd['week_start'];
-            array_push($columns,["data" => $value, "name" => $name, "defaultContent"=> ".00"]);
-            array_push($columns_xls,["data" => $value, "name" => $name, "defaultContent"=> ".00"]);
-        }
+
+			
+// Obtenemos solo las columnas numericas Agregado 01/10/2026 por Erika Silva
+            $numerickeys = array_where(array_keys((array)$consulta[0]), function ($key, $value) {
+                return is_numeric($value);
+            });
+
+            // Ordenamos las columnas numericas
+            sort($numerickeys);
+
+            // ==========================================================
+            // CALENDARIO ZRK
+            // ==========================================================
+
+            // Cargamos el calendario una sola vez
+            $calendarioZRK = DB::table('Reportes_Pruebas.dbo.SIZCalendarioZRK')
+                ->where('AñoReal', '>=', 2026)
+                ->get();
+
+            // Lo convertimos en un arreglo para buscar rapidamente
+            $semanasZRK = array();
+
+            foreach ($calendarioZRK as $semanaZRK) {
+
+                $clave = $semanaZRK->AñoReal . '-' . $semanaZRK->Semana;
+
+                $semanasZRK[$clave] = $semanaZRK;
+            }
+
+            // ==========================================================
+            // AGREGAR COLUMNAS
+            // ==========================================================
+
+            // Hasta 2099 usar 20, para 2100 a 2199 usar 21...
+            $string_comienzo_anio = '20';
+
+            foreach ($numerickeys as $value) {
+
+                // Obtenemos semana y año de la columna original
+                $num_semana = substr($value, 2, 2);
+                $year = $string_comienzo_anio . substr($value, 0, 2);
+
+                // Fecha de inicio de la semana desde calendario ZRK
+                $week_start = '';
+
+                $clave = $year . '-' . intval($num_semana);
+
+                if (isset($semanasZRK[$clave])) {
+
+                    $semanaZRK = $semanasZRK[$clave];
+
+                    $week_start = date(
+                        'd/m/y',
+                        strtotime($semanaZRK->FechaIni)
+                    );
+                }
+
+                // Nombre de la columna
+                $name = 'Sem-' . $num_semana . ' ' . $week_start;
+
+                array_push($columns, [
+                    "data" => $value,
+                    "name" => $name,
+                    "defaultContent" => ".00"
+                ]);
+
+                array_push($columns_xls, [
+                    "data" => $value,
+                    "name" => $name,
+                    "defaultContent" => ".00"
+                ]);
+            }
        
         //agregamos las ultimas columnas pendientes
         array_push($columns,["data" => "necesidadTotal", "name" => "Necesidad"]);
