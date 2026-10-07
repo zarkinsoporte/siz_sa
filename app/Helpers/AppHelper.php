@@ -66,16 +66,32 @@ class AppHelper
       );     
       return $pila;      
     }
-  public function getStartAndEndWeek($week, $year)
-      {
-          //esta funcion devuelve inicio y fin de la semana
-          $dto = new DateTime();
-          $dto->setISODate($year, $week);
-          $ret['week_start'] = $dto->format('d/m/y');
-          $dto->modify('+6 days');
-          $ret['week_end'] = $dto->format('d/m/y');
-          return $ret;
-      }
+        public function getStartAndEndWeek($week, $year)
+        {
+            // Obtener la fecha de inicio y fin desde el calendario ZRK
+            $calendario = DB::table('Reportes_Pruebas.dbo.SIZCalendarioZRK')
+                ->where('AñoReal', $year)
+                ->where('AñoZRK', substr($year, 2, 2))
+                ->where('Semana', intval($week))
+                ->first();
+        
+            if ($calendario) {
+                $ret['week_start'] = date('d/m/y', strtotime($calendario->FechaIni));
+                $ret['week_end']   = date('d/m/y', strtotime($calendario->FechaFin));
+        
+                return $ret;
+            }
+        
+            // Respaldo si no existe la semana en el calendario ZRK
+            $dto = new DateTime();
+            $dto->setISODate($year, $week);
+        
+            $ret['week_start'] = $dto->format('d/m/y');
+            $dto->modify('+6 days');
+            $ret['week_end'] = $dto->format('d/m/y');
+        
+            return $ret;
+        }
      public static function instance()
      {
          return new AppHelper();
