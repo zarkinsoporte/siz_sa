@@ -1262,7 +1262,7 @@ public function actualizaMRP(){
                 }
 
                 // Nombre de la columna
-                $name = 'Sem-' . $num_semana . ' ' . $week_start;
+                $name = 'Sem11-' . $num_semana . ' ' . $week_start;
 
                 array_push($columns, [
                     "data" => $value,
