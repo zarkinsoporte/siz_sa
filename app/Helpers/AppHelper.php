@@ -66,7 +66,9 @@ class AppHelper
       );     
       return $pila;      
     }
-        public function getStartAndEndWeek($week, $year)
+  
+
+   public function getStartAndEndWeek($week, $year)
       {
           //esta funcion devuelve inicio y fin de la semana
           $dto = new DateTime();
@@ -76,6 +78,7 @@ class AppHelper
           $ret['week_end'] = $dto->format('d/m/y');
           return $ret;
       }
+
      public static function instance()
      {
          return new AppHelper();
