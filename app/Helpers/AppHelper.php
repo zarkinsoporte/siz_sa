@@ -70,13 +70,21 @@ class AppHelper
 
    public function getStartAndEndWeek($week, $year)
       {
-          //esta funcion devuelve inicio y fin de la semana
-          $dto = new DateTime();
-          $dto->setISODate($year, $week);
-          $ret['week_start'] = $dto->format('d/m/y');
-          $dto->modify('+6 days');
-          $ret['week_end'] = $dto->format('d/m/y');
-          return $ret;
+          
+            $calendario = DB::table('Reporte_Pruebas.dbo.SIZCalendarioZRK')
+                ->where('AñoReal', $year)
+                ->where('AñoZRK', substr($year, 2, 2))
+                ->where('Semana', intval($week))
+                ->first();
+        
+            if (!$calendario) {
+                die('NO ENCONTRO CALENDARIO: semana=' . $week . ' año=' . $year);
+            }
+        
+            return [
+                'week_start' => date('d/m/y', strtotime($calendario->FechaIni)),
+                'week_end'   => date('d/m/y', strtotime($calendario->FechaFin))
+            ];
       }
 
      public static function instance()
