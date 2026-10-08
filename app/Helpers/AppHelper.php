@@ -71,7 +71,7 @@ class AppHelper
    public function getStartAndEndWeek($week, $year)
       {
           
-            $calendario = DB::table('Reporte_Pruebas.dbo.SIZCalendarioZRK')
+            $calendario = DB::table('Reportes_Pruebas.dbo.SIZCalendarioZRK')
                 ->where('AñoReal', $year)
                 ->where('AñoZRK', substr($year, 2, 2))
                 ->where('Semana', intval($week))
