@@ -145,6 +145,7 @@
                             <thead class="table-condensed">
                                 <tr>
                                     <th style="width:100px" class="zrk-gris" scope="col">Entrada</th>
+                                    <th style="width:100px" class="zrk-gris" scope="col">OC</th>
                                     <th style="width:120px" class="zrk-gris" scope="col">Fecha</th>
                                     <th style="width:110px" class="zrk-gris" scope="col">Cliente</th>
                                     <th style="width:457px" class="zrk-gris" scope="col" colspan="4">Razón Social</th>
@@ -152,6 +153,7 @@
                                 </tr>
                                 <tr>
                                     <th style="width:60px" class="zrk-gris-claro">Código</th>
+                                    <th style="width:60px" class="zrk-gris-claro"># OC</th>
                                     <th style="width:450px" class="zrk-gris-claro" colspan="2">Descripción</th>
                                     <th class="zrk-gris-claro">Cantidad</th>
                                     <th style="width:70px" class="zrk-gris-claro">Precio</th>
@@ -176,6 +178,9 @@
                                     <td style="width:100px" class="zrk-silver-w" scope="row">
                                         {{$rep->DocNum}}
                                     </td>
+                                    <td style="width:100px" class="zrk-silver-w" scope="row">
+                                        {{$rep->DocNumOC}}
+                                    </td>
                                     <td style="width:120px" class="zrk-silver-w" scope="row">
                                         {{date_format(date_create($rep->DocDate), 'd-m-Y')}}
                                     </td>
@@ -193,7 +198,8 @@
                                     <td style="width:60px" class="zrk-gris-claro" scope="row">
                                         {{$rep->ItemCode}}
                                     </td>
-                                    <td style="width:450px" class="zrk-gris-claro" scope="row" colspan="2">
+                                   
+                                    <td style="width:450px" class="zrk-gris-claro" scope="row" colspan="3">
                                         {{$rep->Dscription}}
                                     </td>
                                     <td style="width:57px" class="zrk-gris-claro" scope="row">
@@ -223,7 +229,7 @@
                                         <td style="width:60px" class="zrk-gris-claro" scope="row">
                                             {{$rep->ItemCode}}
                                         </td>
-                                        <td style="width:450px" class="zrk-gris-claro" scope="row" colspan="2">
+                                        <td style="width:450px" class="zrk-gris-claro" scope="row" colspan="3">
                                             {{$rep->Dscription}}
                                         </td>
                                         <td style="width:57px" class="zrk-gris-claro" scope="row">
@@ -245,7 +251,7 @@
                                     @else
                                     <tr>
 
-                                        <td colspan="7" class="total zrk-gris-claro">Total:</td>
+                                        <td colspan="8" class="total zrk-gris-claro">Total:</td>
                                         <td class="zrk-gris-claro">${{number_format($totalEntrada,'2', '.',',')}} {{$moneda}}</td>
                                     </tr>
                                     <?php
@@ -257,6 +263,9 @@
                                         <tr>
                                             <td style="width:100px" class="zrk-silver-w" scope="row">
                                                 {{$rep->DocNum}}
+                                            </td>
+                                            <td style="width:100px" class="zrk-silver-w" scope="row">
+                                                {{$rep->DocNumOC}}
                                             </td>
                                             <td style="width:120px" class="zrk-silver-w" scope="row">
                                                 {{date_format(date_create($rep->DocDate), 'd-m-Y')}}
@@ -297,7 +306,7 @@
                                         @endif @if($index == count($entradasL)-1)
                                         <tr>
 
-                                            <td colspan="7" class="total">Total:</td>
+                                            <td colspan="8" class="total">Total:</td>
                                             <td>${{number_format($totalEntrada,'2', '.',',')}} {{$moneda}}</td>
                                         </tr>
 
@@ -334,6 +343,8 @@
                     <thead class="table-condensed">
                         <tr>
                             <th style="width:100px" class="zrk-gris" scope="col">Entrada</th>
+                            <th style="width:100px" class="zrk-gris" scope="col">OC</th>
+                            <th style="width:120px" class="zrk-gris" scope="col">Fecha</th>
                             <th style="width:120px" class="zrk-gris" scope="col">Fecha</th>
                             <th style="width:110px" class="zrk-gris" scope="col">Cliente</th>
                             <th style="width:457px" class="zrk-gris" scope="col" colspan="4">Razón Social</th>
@@ -341,6 +352,7 @@
                         </tr>
                         <tr>
                             <th style="width:60px" class="zrk-gris-claro">Código</th>
+                            <th style="width:60px" class="zrk-gris-claro"># OC</th>
                             <th style="width:450px" class="zrk-gris-claro" colspan="2">Descripción</th>
                             <th class="zrk-gris-claro">Cantidad</th>
                             <th style="width:70px" class="zrk-gris-claro">Precio</th>
@@ -365,6 +377,9 @@
                             <td style="width:100px" class="zrk-silver-w" scope="row">
                                 {{$rep->DocNum}}
                             </td>
+                            <td style="width:100px" class="zrk-silver-w" scope="row">
+                                {{$rep->DocNumOC}}
+                            </td>
                             <td style="width:120px" class="zrk-silver-w" scope="row">
                                 {{date_format(date_create($rep->DocDate), 'd-m-Y')}}
                             </td>
@@ -382,7 +397,7 @@
                             <td style="width:60px" class="zrk-gris-claro" scope="row">
                                 {{$rep->ItemCode}}
                             </td>
-                            <td style="width:450px" class="zrk-gris-claro" scope="row" colspan="2">
+                            <td style="width:450px" class="zrk-gris-claro" scope="row" colspan="3">
                                 {{$rep->Dscription}}
                             </td>
                             <td style="width:57px" class="zrk-gris-claro" scope="row">
@@ -412,7 +427,7 @@
                                 <td style="width:60px" class="zrk-gris-claro" scope="row">
                                     {{$rep->ItemCode}}
                                 </td>
-                                <td style="width:450px" class="zrk-gris-claro" scope="row" colspan="2">
+                                <td style="width:450px" class="zrk-gris-claro" scope="row" colspan="3">
                                     {{$rep->Dscription}}
                                 </td>
                                 <td style="width:57px" class="zrk-gris-claro" scope="row">
@@ -434,7 +449,7 @@
                             @else
                             <tr>
 
-                                <td colspan="7" class="total zrk-gris-claro">Total:</td>
+                                <td colspan="8" class="total zrk-gris-claro">Total:</td>
                                 <td class="zrk-gris-claro">${{number_format($totalEntrada,'2', '.',',')}} {{$moneda}}</td>
                             </tr>
                             <?php
@@ -445,6 +460,9 @@
                                 <tr>
                                     <td style="width:100px" class="zrk-silver-w" scope="row">
                                         {{$rep->DocNum}}
+                                    </td>
+                                    <td style="width:100px" class="zrk-silver-w" scope="row">
+                                        {{$rep->DocNumOC}}
                                     </td>
                                     <td style="width:120px" class="zrk-silver-w" scope="row">
                                         {{date_format(date_create($rep->DocDate), 'd-m-Y')}}
@@ -463,7 +481,7 @@
                                     <td style="width:60px" class="zrk-gris-claro" scope="row">
                                         {{$rep->ItemCode}}
                                     </td>
-                                    <td style="width:450px" class="zrk-gris-claro" scope="row" colspan="2">
+                                    <td style="width:450px" class="zrk-gris-claro" scope="row" colspan="3">
                                         {{$rep->Dscription}}
                                     </td>
                                     <td style="width:57px" class="zrk-gris-claro" scope="row">
@@ -485,7 +503,7 @@
                                 @endif @if($index == count($entradasG)-1)
                                 <tr>
 
-                                    <td colspan="7" class="total">Total:</td>
+                                    <td colspan="8" class="total">Total:</td>
                                     <td>${{number_format($totalEntrada,'2', '.',',')}} {{$moneda}}</td>
                                 </tr>
 
@@ -553,6 +571,9 @@
                             <td style="width:100px" class="zrk-silver-w" scope="row">
                                 {{$rep->DocNum}}
                             </td>
+                            <td style="width:100px" class="zrk-silver-w" scope="row">
+                                 {{$rep->DocNumOC}}
+                            </td>
                             <td style="width:120px" class="zrk-silver-w" scope="row">
                                 {{date_format(date_create($rep->DocDate), 'd-m-Y')}}
                             </td>
@@ -622,7 +643,7 @@
                             @else
                             <tr>
 
-                                <td colspan="7" class="total zrk-gris-claro">Total:</td>
+                                <td colspan="8" class="total zrk-gris-claro">Total:</td>
                                 <td class="zrk-gris-claro">${{number_format($totalEntrada,'2', '.',',')}} {{$moneda}}</td>
                             </tr>
                             <?php
@@ -633,6 +654,9 @@
                                 <tr>
                                     <td style="width:100px" class="zrk-silver-w" scope="row">
                                         {{$rep->DocNum}}
+                                    </td>
+                                    <td style="width:100px" class="zrk-silver-w" scope="row">
+                                        {{$rep->DocNumOC}}
                                     </td>
                                     <td style="width:120px" class="zrk-silver-w" scope="row">
                                         {{date_format(date_create($rep->DocDate), 'd-m-Y')}}
@@ -673,7 +697,7 @@
                                 @endif @if($index == count($devoluciones)-1)
                                 <tr>
 
-                                    <td colspan="7" class="total">Total:</td>
+                                    <td colspan="8" class="total">Total:</td>
                                     <td>${{number_format($totalEntrada,'2', '.',',')}} {{$moneda}}</td>
                                 </tr>
 
@@ -740,6 +764,9 @@
                                 <td style="width:100px" class="zrk-silver-w" scope="row">
                                     {{$rep->DocNum}}
                                 </td>
+                                <td style="width:100px" class="zrk-silver-w" scope="row">
+                                    {{$rep->DocNumOC}}
+                                </td>
                                 <td style="width:120px" class="zrk-silver-w" scope="row">
                                     {{date_format(date_create($rep->DocDate), 'd-m-Y')}}
                                 </td>
@@ -787,6 +814,8 @@
                                     <td style="width:60px" class="zrk-gris-claro" scope="row">
                                         {{$rep->ItemCode}}
                                     </td>
+                                    <td style="width:60px" class="zrk-gris-claro" scope="row">
+                                    </td>
                                     <td style="width:450px" class="zrk-gris-claro" scope="row" colspan="2">
                                         {{$rep->Dscription}}
                                     </td>
@@ -809,7 +838,7 @@
                                 @else
                                 <tr>
     
-                                    <td colspan="7" class="total zrk-gris-claro">Total:</td>
+                                    <td colspan="8" class="total zrk-gris-claro">Total:</td>
                                     <td class="zrk-gris-claro">${{number_format($totalEntrada,'2', '.',',')}} {{$moneda}}</td>
                                 </tr>
                                 <?php
@@ -820,6 +849,9 @@
                                     <tr>
                                         <td style="width:100px" class="zrk-silver-w" scope="row">
                                             {{$rep->DocNum}}
+                                        </td>
+                                        <td style="width:100px" class="zrk-silver-w" scope="row">
+                                            {{$rep->DocNumOC}}
                                         </td>
                                         <td style="width:120px" class="zrk-silver-w" scope="row">
                                             {{date_format(date_create($rep->DocDate), 'd-m-Y')}}
@@ -860,7 +892,7 @@
                                     @endif @if($index == count($notascredito)-1)
                                     <tr>
     
-                                        <td colspan="7" class="total">Total:</td>
+                                        <td colspan="8" class="total">Total:</td>
                                         <td>${{number_format($totalEntrada,'2', '.',',')}} {{$moneda}}</td>
                                     </tr>
     
