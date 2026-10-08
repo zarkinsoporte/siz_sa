@@ -68,12 +68,12 @@
                         <thead class="table-condensed">
                             <tr>
                                 <th># Documento</th>
+                                <th># OC</th>
                                 <th>Documento</th>
                                 <th>Fecha</th>
                                 <th>Cliente</th>
                                 <th>Razón Social</th>
                                 <th>Num. Factura</th>
-
                                 <th>Código Art.</th>
                                 <th>Descripción</th>
                                 <th>Cantidad</th>
@@ -85,6 +85,7 @@
                             </tr> 
                             <tfoot>
                                 <tr>
+                                    <th></th>
                                     <th></th>
                                     <th></th>
                                     <th></th>
@@ -165,7 +166,7 @@ var table = $('#tentradas').DataTable({
     scrollX:        true,
     scrollCollapse: true,
     paging:         true,
-    fixedColumns:   true,
+    fixedColumns:   false,
     processing: true,
     deferRender:    true,
     ajax: {
@@ -178,6 +179,7 @@ var table = $('#tentradas').DataTable({
     columns: [        
         // { data: 'action', name: 'action', orderable: false, searchable: false}
         { data: 'DocNum', name:  'DocNum', orderable: true, searchable: true},
+        { data: 'DocNumOC', name:  'DocNumOC', orderable: true, searchable: true},
         { data: 'TIPO'},
         { data: 'DocDate', name: 'DocDate'},
         { data: 'CardCode', name:  'CardCode'},
@@ -312,7 +314,7 @@ var table = $('#tentradas').DataTable({
 
         // Total over this page for VS
         pageTotal = api
-            .column( 12, { page: 'current'} )
+            .column( 13, { page: 'current'} )
             .data()
             .reduce( function (a, b) {
                 return intVal(a) + intVal(b);
@@ -325,7 +327,7 @@ var table = $('#tentradas').DataTable({
 
         var pageT = pageTotal.toLocaleString("es-MX", {minimumFractionDigits:2})
         
-        $( api.column( 12 ).footer() ).html(
+        $( api.column( 13 ).footer() ).html(
             '$ '+pageT
         );
 
