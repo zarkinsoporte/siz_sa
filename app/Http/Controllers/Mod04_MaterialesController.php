@@ -53,87 +53,245 @@ class Mod04_MaterialesController extends Controller
         }
     }
     public function DataShowEntradasMP(Request $request)
-    {
-        if (Auth::check()) {
-            $consulta = DB::select(DB::raw( "
-          SELECT * FROM(
-            SELECT 'ENTRADA G' as TIPO, PDN1.ItemCode, OPDN.DocNum, FORMAT (Cast (OPDN.DocDate AS DATE), 'dd-MM-yyyy') DocDate, OPDN.CardCode, OPDN.CardName, PDN1.Price, PDN1.LineTotal, PDN1.VatSum, OPDN.DocCur, PDN1.Dscription, OPDN.DocRate, PDN1.WhsCode, PDN1.Quantity, PDN1.NumPerMsr, OPDN.NumAtCard
-            ,PDN1.TotalFrgn, PDN1.VatSumFrgn 
-            FROM   OPDN OPDN INNER JOIN dbo.PDN1 PDN1 ON OPDN.DocEntry=PDN1.DocEntry
-            WHERE  OPDN.DocDate 
-            BETWEEN '" . date('Y-m-d', strtotime($request->get('fi'))) . ' 00:00:00' . "' and '" . date('Y-m-d', strtotime($request->get('ff'))) . ' 23:59:59' . "'
-            
-            AND (PDN1.WhsCode=N'AMG-CC' OR PDN1.WhsCode=N'AMG-ST' OR PDN1.WhsCode=N'AMG-FE' OR PDN1.WhsCode=N'AGG-RE' OR PDN1.WhsCode=N'AMG-KU' OR PDN1.WhsCode=N'AMP-BL' OR PDN1.WhsCode=N'APG-ST' OR PDN1.WhsCode=N'APG-PA' OR PDN1.WhsCode=N'ATG-ST' OR PDN1.WhsCode=N'ATG-FX' OR PDN1.WhsCode=N'AMP-TR' OR PDN1.WhsCode=N'ARG-ST')
-UNION ALL
-            SELECT 'ENTRADA L' as TIPO, PDN1.ItemCode, OPDN.DocNum, FORMAT (Cast (OPDN.DocDate AS DATE), 'dd-MM-yyyy') DocDate, OPDN.CardCode, OPDN.CardName, PDN1.Price, PDN1.LineTotal, PDN1.VatSum, OPDN.DocCur, PDN1.Dscription, OPDN.DocRate, PDN1.WhsCode, PDN1.Quantity, PDN1.NumPerMsr, OPDN.NumAtCard
-            ,PDN1.TotalFrgn, PDN1.VatSumFrgn 
-            FROM   OPDN OPDN INNER JOIN PDN1 PDN1 ON OPDN.DocEntry=PDN1.DocEntry
-            WHERE  OPDN.DocDate 
-            BETWEEN '" . date('Y-m-d', strtotime($request->get('fi'))) . ' 00:00:00' . "' and '" . date('Y-m-d', strtotime($request->get('ff'))) . ' 23:59:59' . "'
-            
-            AND (PDN1.WhsCode IS  NULL  OR  NOT (PDN1.WhsCode=N'AGG-RE' OR PDN1.WhsCode=N'AMG-CC' OR PDN1.WhsCode=N'AMG-FE' OR PDN1.WhsCode=N'AMG-KU' OR PDN1.WhsCode=N'AMG-ST' OR PDN1.WhsCode=N'AMP-BL' OR PDN1.WhsCode=N'AMP-TR' OR PDN1.WhsCode=N'APG-PA' OR PDN1.WhsCode=N'APG-ST' OR PDN1.WhsCode=N'ARG-ST' OR PDN1.WhsCode=N'ATG-FX' OR PDN1.WhsCode=N'ATG-ST'))
-UNION ALL
-            SELECT 'NOTA CREDITO' as TIPO, RPC1.ItemCode, ORPC.DocNum, FORMAT (Cast (ORPC.DocDate AS DATE), 'dd-MM-yyyy') DocDate, ORPC.CardCode, ORPC.CardName, RPC1.Price, RPC1.LineTotal, RPC1.VatSum, ORPC.DocCur, RPC1.Dscription, ORPC.DocRate, RPC1.WhsCode, RPC1.Quantity, RPC1.NumPerMsr, ORPC.NumAtCard
-            ,RPC1.TotalFrgn, RPC1.VatSumFrgn 
-            FROM   ORPC ORPC INNER JOIN RPC1 RPC1 ON ORPC.DocEntry=RPC1.DocEntry
-            WHERE  ORPC.DocDate 
-            BETWEEN '" . date('Y-m-d', strtotime($request->get('fi'))) . ' 00:00:00' . "' and '" . date('Y-m-d', strtotime($request->get('ff'))) . ' 23:59:59' . "'
-             
-            AND (RPC1.WhsCode IS  NULL  OR  NOT (RPC1.WhsCode=N'AGG-RE' OR RPC1.WhsCode=N'AMG-CC' OR RPC1.WhsCode=N'AMG-FE' OR RPC1.WhsCode=N'AMG-KU' OR RPC1.WhsCode=N'AMG-ST' OR RPC1.WhsCode=N'AMP-BL' OR RPC1.WhsCode=N'AMP-TR' OR RPC1.WhsCode=N'APG-PA' OR RPC1.WhsCode=N'APG-ST' OR RPC1.WhsCode=N'ARG-ST' OR RPC1.WhsCode=N'ATG-FX' OR RPC1.WhsCode=N'ATG-ST'))
-UNION ALL
-            SELECT 'DEVOLUCION' AS TIPO, RPD1.ItemCode, ORPD.DocNum, FORMAT (Cast (ORPD.DocDate AS DATE), 'dd-MM-yyyy') DocDate, ORPD.CardCode, ORPD.CardName, RPD1.Price, RPD1.LineTotal, RPD1.VatSum, ORPD.DocCur, RPD1.Dscription, ORPD.DocRate, RPD1.WhsCode, RPD1.Quantity, RPD1.NumPerMsr, ORPD.NumAtCard
-            ,RPD1.TotalFrgn, RPD1.VatSumFrgn 
-            FROM   ORPD ORPD INNER JOIN RPD1 RPD1 ON ORPD.DocEntry=RPD1.DocEntry
-            WHERE  ORPD.DocDate
-            BETWEEN '" . date('Y-m-d', strtotime($request->get('fi'))) . ' 00:00:00' . "' and '" . date('Y-m-d', strtotime($request->get('ff'))) . ' 23:59:59' . "'
-             
-            AND (RPD1.WhsCode IS  NULL  OR  NOT (RPD1.WhsCode=N'AGG-RE' OR RPD1.WhsCode=N'AMG-CC' OR RPD1.WhsCode=N'AMG-FE' OR RPD1.WhsCode=N'AMG-KU' OR RPD1.WhsCode=N'AMG-ST' OR RPD1.WhsCode=N'AMP-BL' OR RPD1.WhsCode=N'AMP-TR' OR RPD1.WhsCode=N'APG-PA' OR RPD1.WhsCode=N'APG-ST' OR RPD1.WhsCode=N'ARG-ST' OR RPD1.WhsCode=N'ATG-FX' OR RPD1.WhsCode=N'ATG-ST'))
-            
-            ) T
-            ORDER BY T.TIPO, T.DocNum, T.DocDate
-        "));
-        
-        $request->session()->put( 'fechas_entradas', array(
-                'fi' => $request->get('fi'),
-                'ff' => $request->get('ff')
-            ));
-        
-        $consulta = collect($consulta);
-            return Datatables::of($consulta)
-                ->addColumn('Cant', function ($consulta) {
-                    return ($consulta->Quantity * $consulta->NumPerMsr);
-                })
-                ->addColumn('LineaTotal', function ($consulta) {
-                    if ($consulta->DocCur == 'MXP') {
-                        return $consulta->LineTotal;
-                    } 
-                    elseif ($consulta->DocCur == 'USD') {
-                        return $consulta->TotalFrgn;
-                    }
-                })
-                ->addColumn('Iva', function ($consulta) {
-                    if ($consulta->DocCur == 'MXP') {
-                        return $consulta->VatSum;
-                    } 
-                    elseif ($consulta->DocCur == 'USD') {
-                        return $consulta->VatSumFrgn;
-                    }
-                })
-                ->addColumn('TotalConIva', function ($consulta) {
-                    if ($consulta->DocCur == 'MXP') {
-                        return ($consulta->LineTotal + $consulta->VatSum);
-                    } 
-                    elseif ($consulta->DocCur == 'USD') {
-                        return ($consulta->TotalFrgn + $consulta->VatSumFrgn);
-                    }
-                })
-                
-                ->make(true);
-        } else {
-            return redirect()->route('auth/login');
+        {
+            if (Auth::check()) {
+                $consulta = DB::select(DB::raw("
+                    SELECT * FROM(
+                        
+                        SELECT 
+                            'ENTRADA G' as TIPO, 
+                            PDN1.ItemCode, 
+                            OPDN.DocNum, 
+                            OPOR.DocNum AS DocNumOC,
+                            FORMAT(Cast(OPDN.DocDate AS DATE), 'dd-MM-yyyy') DocDate, 
+                            OPDN.CardCode, 
+                            OPDN.CardName, 
+                            PDN1.Price, 
+                            PDN1.LineTotal, 
+                            PDN1.VatSum, 
+                            OPDN.DocCur, 
+                            PDN1.Dscription, 
+                            OPDN.DocRate, 
+                            PDN1.WhsCode, 
+                            PDN1.Quantity, 
+                            PDN1.NumPerMsr, 
+                            OPDN.NumAtCard,
+                            PDN1.TotalFrgn, 
+                            PDN1.VatSumFrgn 
+                        FROM OPDN OPDN 
+                        INNER JOIN dbo.PDN1 PDN1 
+                            ON OPDN.DocEntry = PDN1.DocEntry
+                        LEFT JOIN OPOR OPOR 
+                            ON OPOR.DocEntry = PDN1.BaseEntry 
+                            AND PDN1.BaseType = 22
+                        WHERE OPDN.DocDate 
+                        BETWEEN '" . date('Y-m-d', strtotime($request->get('fi'))) . " 00:00:00'
+                        AND '" . date('Y-m-d', strtotime($request->get('ff'))) . " 23:59:59'
+                        
+                        AND (
+                            PDN1.WhsCode=N'AMG-CC' 
+                            OR PDN1.WhsCode=N'AMG-ST' 
+                            OR PDN1.WhsCode=N'AMG-FE' 
+                            OR PDN1.WhsCode=N'AGG-RE' 
+                            OR PDN1.WhsCode=N'AMG-KU' 
+                            OR PDN1.WhsCode=N'AMP-BL' 
+                            OR PDN1.WhsCode=N'APG-ST' 
+                            OR PDN1.WhsCode=N'APG-PA' 
+                            OR PDN1.WhsCode=N'ATG-ST' 
+                            OR PDN1.WhsCode=N'ATG-FX' 
+                            OR PDN1.WhsCode=N'AMP-TR' 
+                            OR PDN1.WhsCode=N'ARG-ST'
+                        )
+
+        UNION ALL
+
+                        SELECT 
+                            'ENTRADA L' as TIPO, 
+                            PDN1.ItemCode, 
+                            OPDN.DocNum, 
+                            OPOR.DocNum AS DocNumOC,
+                            FORMAT(Cast(OPDN.DocDate AS DATE), 'dd-MM-yyyy') DocDate, 
+                            OPDN.CardCode, 
+                            OPDN.CardName, 
+                            PDN1.Price, 
+                            PDN1.LineTotal, 
+                            PDN1.VatSum, 
+                            OPDN.DocCur, 
+                            PDN1.Dscription, 
+                            OPDN.DocRate, 
+                            PDN1.WhsCode, 
+                            PDN1.Quantity, 
+                            PDN1.NumPerMsr, 
+                            OPDN.NumAtCard,
+                            PDN1.TotalFrgn, 
+                            PDN1.VatSumFrgn 
+                        FROM OPDN OPDN 
+                        INNER JOIN PDN1 PDN1 
+                            ON OPDN.DocEntry = PDN1.DocEntry
+                        LEFT JOIN OPOR OPOR 
+                            ON OPOR.DocEntry = PDN1.BaseEntry 
+                            AND PDN1.BaseType = 22
+                        WHERE OPDN.DocDate 
+                        BETWEEN '" . date('Y-m-d', strtotime($request->get('fi'))) . " 00:00:00'
+                        AND '" . date('Y-m-d', strtotime($request->get('ff'))) . " 23:59:59'
+                        
+                        AND (
+                            PDN1.WhsCode IS NULL 
+                            OR NOT (
+                                PDN1.WhsCode=N'AGG-RE' 
+                                OR PDN1.WhsCode=N'AMG-CC' 
+                                OR PDN1.WhsCode=N'AMG-FE' 
+                                OR PDN1.WhsCode=N'AMG-KU' 
+                                OR PDN1.WhsCode=N'AMG-ST' 
+                                OR PDN1.WhsCode=N'AMP-BL' 
+                                OR PDN1.WhsCode=N'AMP-TR' 
+                                OR PDN1.WhsCode=N'APG-PA' 
+                                OR PDN1.WhsCode=N'APG-ST' 
+                                OR PDN1.WhsCode=N'ARG-ST' 
+                                OR PDN1.WhsCode=N'ATG-FX' 
+                                OR PDN1.WhsCode=N'ATG-ST'
+                            )
+                        )
+
+        UNION ALL
+
+                        SELECT 
+                            'NOTA CREDITO' as TIPO, 
+                            RPC1.ItemCode, 
+                            ORPC.DocNum, 
+                            NULL AS DocNumOC,
+                            FORMAT(Cast(ORPC.DocDate AS DATE), 'dd-MM-yyyy') DocDate, 
+                            ORPC.CardCode, 
+                            ORPC.CardName, 
+                            RPC1.Price, 
+                            RPC1.LineTotal, 
+                            RPC1.VatSum, 
+                            ORPC.DocCur, 
+                            RPC1.Dscription, 
+                            ORPC.DocRate, 
+                            RPC1.WhsCode, 
+                            RPC1.Quantity, 
+                            RPC1.NumPerMsr, 
+                            ORPC.NumAtCard,
+                            RPC1.TotalFrgn, 
+                            RPC1.VatSumFrgn 
+                        FROM ORPC ORPC 
+                        INNER JOIN RPC1 RPC1 
+                            ON ORPC.DocEntry = RPC1.DocEntry
+                        WHERE ORPC.DocDate 
+                        BETWEEN '" . date('Y-m-d', strtotime($request->get('fi'))) . " 00:00:00'
+                        AND '" . date('Y-m-d', strtotime($request->get('ff'))) . " 23:59:59'
+                        
+                        AND (
+                            RPC1.WhsCode IS NULL 
+                            OR NOT (
+                                RPC1.WhsCode=N'AGG-RE' 
+                                OR RPC1.WhsCode=N'AMG-CC' 
+                                OR RPC1.WhsCode=N'AMG-FE' 
+                                OR RPC1.WhsCode=N'AMG-KU' 
+                                OR RPC1.WhsCode=N'AMG-ST' 
+                                OR RPC1.WhsCode=N'AMP-BL' 
+                                OR RPC1.WhsCode=N'AMP-TR' 
+                                OR RPC1.WhsCode=N'APG-PA' 
+                                OR RPC1.WhsCode=N'APG-ST' 
+                                OR RPC1.WhsCode=N'ARG-ST' 
+                                OR RPC1.WhsCode=N'ATG-FX' 
+                                OR RPC1.WhsCode=N'ATG-ST'
+                            )
+                        )
+
+        UNION ALL
+
+                        SELECT 
+                            'DEVOLUCION' AS TIPO, 
+                            RPD1.ItemCode, 
+                            ORPD.DocNum, 
+                            NULL AS DocNumOC,
+                            FORMAT(Cast(ORPD.DocDate AS DATE), 'dd-MM-yyyy') DocDate, 
+                            ORPD.CardCode, 
+                            ORPD.CardName, 
+                            RPD1.Price, 
+                            RPD1.LineTotal, 
+                            RPD1.VatSum, 
+                            ORPD.DocCur, 
+                            RPD1.Dscription, 
+                            ORPD.DocRate, 
+                            RPD1.WhsCode, 
+                            RPD1.Quantity, 
+                            RPD1.NumPerMsr, 
+                            ORPD.NumAtCard,
+                            RPD1.TotalFrgn, 
+                            RPD1.VatSumFrgn 
+                        FROM ORPD ORPD 
+                        INNER JOIN RPD1 RPD1 
+                            ON ORPD.DocEntry = RPD1.DocEntry
+                        WHERE ORPD.DocDate
+                        BETWEEN '" . date('Y-m-d', strtotime($request->get('fi'))) . " 00:00:00'
+                        AND '" . date('Y-m-d', strtotime($request->get('ff'))) . " 23:59:59'
+                        
+                        AND (
+                            RPD1.WhsCode IS NULL 
+                            OR NOT (
+                                RPD1.WhsCode=N'AGG-RE' 
+                                OR RPD1.WhsCode=N'AMG-CC' 
+                                OR RPD1.WhsCode=N'AMG-FE' 
+                                OR RPD1.WhsCode=N'AMG-KU' 
+                                OR RPD1.WhsCode=N'AMG-ST' 
+                                OR RPD1.WhsCode=N'AMP-BL' 
+                                OR RPD1.WhsCode=N'AMP-TR' 
+                                OR RPD1.WhsCode=N'APG-PA' 
+                                OR RPD1.WhsCode=N'APG-ST' 
+                                OR RPD1.WhsCode=N'ARG-ST' 
+                                OR RPD1.WhsCode=N'ATG-FX' 
+                                OR RPD1.WhsCode=N'ATG-ST'
+                            )
+                        )
+                    
+                    ) T
+                    ORDER BY T.TIPO, T.DocNum, T.DocDate
+                "));
+
+                $request->session()->put('fechas_entradas', array(
+                    'fi' => $request->get('fi'),
+                    'ff' => $request->get('ff')
+                ));
+
+                $consulta = collect($consulta);
+
+                return Datatables::of($consulta)
+                    ->addColumn('Cant', function ($consulta) {
+                        return ($consulta->Quantity * $consulta->NumPerMsr);
+                    })
+                    ->addColumn('LineaTotal', function ($consulta) {
+                        if ($consulta->DocCur == 'MXP') {
+                            return $consulta->LineTotal;
+                        } 
+                        elseif ($consulta->DocCur == 'USD') {
+                            return $consulta->TotalFrgn;
+                        }
+                    })
+                    ->addColumn('Iva', function ($consulta) {
+                        if ($consulta->DocCur == 'MXP') {
+                            return $consulta->VatSum;
+                        } 
+                        elseif ($consulta->DocCur == 'USD') {
+                            return $consulta->VatSumFrgn;
+                        }
+                    })
+                    ->addColumn('TotalConIva', function ($consulta) {
+                        if ($consulta->DocCur == 'MXP') {
+                            return ($consulta->LineTotal + $consulta->VatSum);
+                        } 
+                        elseif ($consulta->DocCur == 'USD') {
+                            return ($consulta->TotalFrgn + $consulta->VatSumFrgn);
+                        }
+                    })
+                    ->make(true);
+
+            } else {
+                return redirect()->route('auth/login');
+            }
         }
-    }
-   
 public function entradasPDF()
 {
     $a = json_decode(Session::get('entradas'));
