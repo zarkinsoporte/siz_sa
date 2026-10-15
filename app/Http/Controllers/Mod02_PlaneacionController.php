@@ -824,21 +824,26 @@ public function registros_tabla_liberacion(Request $request){
             //dd([$estado, $tipo]);
 
             $sel = "SELECT
-					CASE OWOR.Status
-                    WHEN 'R' THEN 'LIBERADA'
-                    WHEN 'P' THEN 'PLANIFICADA' END Estado,
-				dbo.ORDR.DocNum AS Pedido,
-				dbo.OWOR.DocNum AS OP, 
-                dbo.OWOR.ItemCode AS Codigo, 
-                SUBSTRING(dbo.OITM.ItemName, 0, 50) AS Descripcion,
-				dbo.ORDR.CardCode +' - '+ dbo.ORDR.CardName AS Cliente, 
-                OWOR.U_Starus 
-                FROM      dbo.ORDR INNER JOIN
-                                dbo.OWOR ON dbo.ORDR.DocNum = dbo.OWOR.OriginNum INNER JOIN
-                                dbo.OITM ON dbo.OWOR.ItemCode = dbo.OITM.ItemCode
-                WHERE   (Status = '". $estado ."') AND (". $tipo .")
-                ".$criterio."
-                ORDER BY Pedido";
+                    CASE OWOR.Status
+                        WHEN 'R' THEN 'LIBERADA'
+                        WHEN 'P' THEN 'PLANIFICADA'
+                    END Estado,
+                    dbo.ORDR.DocNum AS Pedido,
+                    dbo.OWOR.DocNum AS OP,
+                    dbo.OWOR.ItemCode AS Codigo,
+                    SUBSTRING(dbo.OITM.ItemName, 0, 50) AS Descripcion,
+                    dbo.ORDR.CardCode +' - '+ dbo.ORDR.CardName AS Cliente,
+                    OWOR.U_Starus,
+                    dbo.OWOR.U_GRUPO AS PROG_CORTE
+                    FROM dbo.ORDR
+                    INNER JOIN dbo.OWOR
+                        ON dbo.ORDR.DocNum = dbo.OWOR.OriginNum
+                    INNER JOIN dbo.OITM
+                        ON dbo.OWOR.ItemCode = dbo.OITM.ItemCode
+                    WHERE (Status = '". $estado ."')
+                        AND (". $tipo .")
+                        ".$criterio."
+                    ORDER BY Pedido";";
             $sel =  preg_replace('/[ ]{2,}|[\t]|[\n]|[\r]/', ' ', ($sel));
             $consulta = DB::select($sel);
             //dd($sel);
