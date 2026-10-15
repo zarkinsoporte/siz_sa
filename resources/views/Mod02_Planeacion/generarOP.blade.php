@@ -1191,7 +1191,8 @@ var tabla_liberacion = $("#tabla_liberacion").DataTable({
                     {data: "U_Starus"},
                     {data: "Codigo"},
                     {data: "Descripcion"},
-                    {data: "Cliente"}
+                    {data: "Cliente"},
+                    {data: "PROG_CORTE", defaultContent: ""}
                     ],
                     'columnDefs': [
                         
