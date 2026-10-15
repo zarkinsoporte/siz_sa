@@ -154,7 +154,8 @@ var fecha = 'ACTUALIZADO: '+ diasSemana[f.getDay()] + ', ' + f.getDate() + ' de 
 var f = fecha.toUpperCase();
 
 var table = $('#tentradas').DataTable({
-    "order": [[ 1, "desc" ],[0, "asc"],[2, "asc"]],
+    //"order": [[ 1, "desc" ],[0, "asc"],[2, "asc"]],
+    "order": [[0, "asc"]],
     lengthMenu: [
         [ 10, 25, 50, -1 ],
         [ '10', '25', '50', 'Todo' ]
