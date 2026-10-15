@@ -52,6 +52,7 @@
                                             <th>Codigo</th>
                                             <th>Descripción</th>
                                             <th>Cliente</th>
+                                            <th>Prog. Fundas</th>
 
                                         </tr>
                                     </thead>
