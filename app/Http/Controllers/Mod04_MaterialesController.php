@@ -308,6 +308,12 @@ public function entradasPDF()
         $notascredito = array_filter($a, function ($value) {
             return $value->TIPO == 'NOTA CREDITO';
         });
+
+        //ORdenba de menor a mayo el campo de #Entradas
+        $entradasL = collect($entradasL)->sortBy('DocNum')->values()->all();  
+        $entradasG = collect($entradasG)->sortBy('DocNum')->values()->all();
+        $devoluciones = collect($devoluciones)->sortBy('DocNum')->values()->all();
+        $notascredito = collect($notascredito)->sortBy('DocNum')->values()->all();
         
     // dd(\AppHelper::instance()->getHumanDate(array_get( Session::get('fechas_entradas'), 'ff')));
     $data = array('notascredito' => $notascredito, 'entradasL' => $entradasL, 'entradasG' => $entradasG, 'devoluciones' => $devoluciones, 'fechas_entradas' => Session::get('fechas_entradas'));
