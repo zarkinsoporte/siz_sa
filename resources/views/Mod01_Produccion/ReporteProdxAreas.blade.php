@@ -94,6 +94,7 @@
 
                             <th class="zrk-olivo" scope="col">Tapizar</th>
                             <th class="zrk-olivo" scope="col">Armado de Tapiz</th>
+                            <th class="zrk-olivo" scope="col">Inspección tapiceria</th>
                             <th class="zrk-tejelet" scope="col">Empaque</th>
                             <th class="zrk-tejelet" scope="col">Inspeción Final</th>
                         </tr>
@@ -177,12 +178,16 @@
                             <td id="f21" scope="row">
                                 {{number_format($rep->VST175,2)}}
                             </td>
+                            <td id="f22" scope="row">
+                                {{number_format($rep->VST169,2)}}
+                            </td>
                         </tr>
                         @endforeach @endif
                     </tbody>
                     <tfoot>
                         <tr class="total1">
                             <th scope="row" class="table-condensed zrk-dimgray">SUMA DE FUNDAS:</th>
+                            <td>0</td>
                             <td>0</td>
                             <td>0</td>
                             <td>0</td>
